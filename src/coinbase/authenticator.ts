@@ -10,7 +10,7 @@ export class CoinbaseAuthenticator {
   private apiKey: string;
   private privateKey: string;
 
-  /*
+  /**
    * Initializes the Authenticator.
    * @constructor
    * @param {string} apiKey - The API key name.
@@ -21,7 +21,7 @@ export class CoinbaseAuthenticator {
     this.privateKey = privateKey;
   }
 
-  /*
+  /**
    * Middleware to intercept requests and add JWT to the Authorization header for AxiosInterceptor
    * @param {MiddlewareRequestType} config - The request configuration.
    * @returns {MiddlewareRequestType} The request configuration with the Authorization header added.
@@ -38,7 +38,7 @@ export class CoinbaseAuthenticator {
     return config;
   }
 
-  /*
+  /**
    * Builds the JWT for the given API endpoint URI. The JWT is signed with the API key's private key.
    * @param {string} url - The URI of the API endpoint.
    * @param {string} method - The HTTP method of the request.
@@ -87,7 +87,7 @@ export class CoinbaseAuthenticator {
     }
   }
 
-  /*
+  /**
    * Extracts the PEM key from the given private key string.
    * @param {string} privateKeyString - The private key string.
    * @returns {string} The PEM key.
@@ -104,7 +104,7 @@ export class CoinbaseAuthenticator {
     throw InvalidAPIKeyFormat;
   }
 
-  /*
+  /**
    * Generates a random nonce for the JWT.
    * @returns {string}
    */
