@@ -2,8 +2,6 @@ import { JWK, JWS } from "node-jose";
 import { InternalError, InvalidAPIKeyFormat } from "./errors";
 import { InternalAxiosRequestConfig } from "axios";
 
-const legacyPemHeader = "-----BEGIN ECDSA Private Key-----";
-const legacyPemFooter = "-----END ECDSA Private Key-----";
 const pemHeader = "-----BEGIN EC PRIVATE KEY-----";
 const pemFooter = "-----END EC PRIVATE KEY-----";
 
@@ -27,8 +25,11 @@ export class CoinbaseAuthenticator {
     Middleware to intercept requests and add JWT to the Authorization header for AxiosInterceptor
     @param {MiddlewareRequestType} config - The request configuration.
     @returns {MiddlewareRequestType} The request configuration with the Authorization header added.
+    @throws {InternalError} If there is an issue with the private key.
   */
-  async authenticateRequest(config: InternalAxiosRequestConfig) {
+  async authenticateRequest(
+    config: InternalAxiosRequestConfig,
+  ): Promise<InternalAxiosRequestConfig> {
     const method = config.method?.toString().toUpperCase();
     const token = await this.buildJWT(config.url || "", method);
 
@@ -41,7 +42,8 @@ export class CoinbaseAuthenticator {
     Builds the JWT for the given API endpoint URI. The JWT is signed with the API key's private key.
     @param {string} url - The URI of the API endpoint.
     @param {string} method - The HTTP method of the request.
-    @returns {string} The signed JWT.
+    @returns {string} The JWT if successful or throws an error.
+    @throws {InternalError} If there is an issue with the private key.  
   */
   async buildJWT(url: string, method = "GET"): Promise<string> {
     const pemPrivateKey = this.extractPemKey(this.privateKey);
@@ -89,31 +91,24 @@ export class CoinbaseAuthenticator {
     Extracts the PEM key from the given private key string.
     @param {string} privateKeyString - The private key string.
     @returns {string} The PEM key.
+    @throws {InvalidAPIKeyFormat} If the private key string is not in the correct format.
   */
-  extractPemKey(privateKeyString: string): string {
+  private extractPemKey(privateKeyString: string): string {
     // Remove all newline characters
     privateKeyString = privateKeyString.replace(/\n/g, "");
 
-    // If the string starts with the standard PEM header and footer, return as is.
     if (privateKeyString.startsWith(pemHeader) && privateKeyString.endsWith(pemFooter)) {
       return privateKeyString;
     }
 
-    // If the string starts with the legacy header and footer, replace them.
-    const regex = new RegExp(`^${legacyPemHeader}([\\s\\S]+?)${legacyPemFooter}$`);
-
-    const match = privateKeyString.match(regex);
-
-    if (match && match[1]) {
-      return pemHeader + match[1].trim() + pemFooter;
-    }
-
-    // The string does not match any of the expected formats.
     throw InvalidAPIKeyFormat;
   }
 
-  // Generates a random nonce for the JWT.
-  nonce(): string {
+  /* 
+    Generates a random nonce for the JWT.
+    @returns {string}
+  */
+  private nonce(): string {
     const range = "0123456789";
     let result = "";
 
