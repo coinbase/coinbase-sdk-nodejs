@@ -15,7 +15,8 @@
     "test": "NODE_OPTIONS=--experimental-vm-modules npx jest --no-cache",
     "clean": "rm -rf dist/*",
     "build": "tsc",
-    "prepack": "tsc"
+    "prepack": "tsc",
+    "docs": "typedoc"
   },
   "files": [
     "dist"
@@ -42,6 +43,7 @@
     "prettier": "^3.2.5",
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
+    "typedoc": "^0.25.13",
     "typescript": "^5.4.5"
   },
   "jest": {
