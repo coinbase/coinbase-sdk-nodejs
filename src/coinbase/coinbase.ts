@@ -53,7 +53,7 @@ export class Coinbase {
       const config = JSON.parse(data);
 
       // return a new instance of Coinbase
-      if (!config.apiKeyName || !config.privateKey) {
+      if (!config.name || !config.privateKey) {
         throw InvalidConfiguration;
       }
       return new Coinbase(config.apiKeyName, config.privateKey);
