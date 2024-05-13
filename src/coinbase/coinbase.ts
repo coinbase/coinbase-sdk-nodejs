@@ -56,7 +56,7 @@ export class Coinbase {
       if (!config.name || !config.privateKey) {
         throw InvalidConfiguration;
       }
-      return new Coinbase(config.apiKeyName, config.privateKey);
+      return new Coinbase(config.name, config.privateKey);
     } catch (e) {
       throw InvalidConfiguration;
     }
