@@ -15,6 +15,7 @@
     "sourceType": "module"
   },
   "rules": {
+    "multiline-comment-style": ["error", "starred-block"],
     "prettier/prettier": "error"
   },
   "ignorePatterns": ["src/**/__tests__/**", "src/**/*.test.ts"]

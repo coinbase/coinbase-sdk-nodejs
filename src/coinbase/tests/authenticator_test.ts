@@ -14,6 +14,7 @@ const VALID_CONFIG = {
 
 describe("Authenticator tests", () => {
   const authenticator = new CoinbaseAuthenticator(VALID_KEY, VALID_PRIVATE_KEY);
+
   it("should raise InvalidConfiguration error", async () => {
     const invalidConfig = {
       method: "GET",
