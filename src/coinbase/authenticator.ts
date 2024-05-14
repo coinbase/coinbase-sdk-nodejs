@@ -29,9 +29,13 @@ export class CoinbaseAuthenticator {
    */
   async authenticateRequest(
     config: InternalAxiosRequestConfig,
+    debug = false,
   ): Promise<InternalAxiosRequestConfig> {
     const method = config.method?.toString().toUpperCase();
     const token = await this.buildJWT(config.url || "", method);
+    if (debug) {
+      console.log(`API REQUEST: ${method} ${config.url}`);
+    }
 
     config.headers["Authorization"] = `Bearer ${token}`;
     config.headers["Content-Type"] = "application/json";
@@ -43,7 +47,7 @@ export class CoinbaseAuthenticator {
    * @param {string} url - The URI of the API endpoint.
    * @param {string} method - The HTTP method of the request.
    * @returns {string} The JWT if successful or throws an error.
-   * @throws {InternalError} If there is an issue with the private key.
+   * @throws {InvalidAPIKeyFormat} If there is an issue with the private key.
    */
   async buildJWT(url: string, method = "GET"): Promise<string> {
     const pemPrivateKey = this.extractPemKey(this.privateKey);
@@ -52,10 +56,10 @@ export class CoinbaseAuthenticator {
     try {
       privateKey = await JWK.asKey(pemPrivateKey, "pem");
       if (privateKey.kty !== "EC") {
-        throw InternalError;
+        throw new InvalidAPIKeyFormat("Invalid key type");
       }
     } catch (error) {
-      throw InternalError;
+      throw new InvalidAPIKeyFormat("Could not parse the private key");
     }
 
     const header = {
@@ -83,7 +87,7 @@ export class CoinbaseAuthenticator {
 
       return result as unknown as string;
     } catch (err) {
-      throw InternalError;
+      throw new InternalError("Could not sign the JWT");
     }
   }
 
@@ -94,14 +98,13 @@ export class CoinbaseAuthenticator {
    * @throws {InvalidAPIKeyFormat} If the private key string is not in the correct format.
    */
   private extractPemKey(privateKeyString: string): string {
-    // Remove all newline characters
     privateKeyString = privateKeyString.replace(/\n/g, "");
 
     if (privateKeyString.startsWith(pemHeader) && privateKeyString.endsWith(pemFooter)) {
       return privateKeyString;
     }
 
-    throw InvalidAPIKeyFormat;
+    throw new InvalidAPIKeyFormat("Invalid private key format");
   }
 
   /**

@@ -1,11 +1,6 @@
 import { AxiosHeaders } from "axios";
 import { CoinbaseAuthenticator } from "../authenticator";
 
-const VALID_KEY =
-  "organizations/0c3bbe72-ac81-46ec-946a-7cd019d6d86b/apiKeys/db813705-bf33-4e33-816c-4c3f1f54672b";
-const VALID_PRIVATE_KEY =
-  "-----BEGIN EC PRIVATE KEY-----\nMHcCAQEEIBPl8LBKrDw2Is+bxQEXa2eHhDmvIgArOhSAdmYpYQrCoAoGCCqGSM49\nAwEHoUQDQgAEQSoVSr8ImpS18thpGe3KuL9efy+L+AFdFFfCVwGgCsKvTYVDKaGo\nVmN5Bl6EJkeIQjyarEtWbmY6komwEOdnHA==\n-----END EC PRIVATE KEY-----\n";
-
 const VALID_CONFIG = {
   method: "GET",
   url: "https://api.cdp.coinbase.com/platform/v1/users/me",
@@ -13,7 +8,10 @@ const VALID_CONFIG = {
 };
 
 describe("Authenticator tests", () => {
-  const authenticator = new CoinbaseAuthenticator(VALID_KEY, VALID_PRIVATE_KEY);
+  const filePath = "./config/coinbase_cloud_api_key.json";
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const keys = require(filePath);
+  const authenticator = new CoinbaseAuthenticator(keys.name, keys.privateKey);
 
   it("should raise InvalidConfiguration error", async () => {
     const invalidConfig = {

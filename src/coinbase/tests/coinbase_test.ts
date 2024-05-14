@@ -23,13 +23,13 @@ describe("Coinbase tests", () => {
 
   it("should throw an error if there is an issue reading the file or parsing the JSON data", () => {
     expect(() => Coinbase.fromJsonConfig(`${PATH_PREFIX}/invalid.json`)).toThrow(
-      "Invalid configuration",
+      "Not able to parse the configuration file",
     );
   });
 
   it("should throw an error if the JSON file is not parseable", () => {
     expect(() => Coinbase.fromJsonConfig(`${PATH_PREFIX}/not_parseable.json`)).toThrow(
-      "Invalid configuration",
+      "Not able to parse the configuration file",
     );
   });
 
@@ -37,7 +37,7 @@ describe("Coinbase tests", () => {
     axiosMock.onGet().reply(200, {
       id: 123,
     });
-    const cbInstance = Coinbase.fromJsonConfig(`${PATH_PREFIX}/coinbase_cloud_api_key.json`);
+    const cbInstance = Coinbase.fromJsonConfig(`${PATH_PREFIX}/coinbase_cloud_api_key.json`, true);
     const user = await cbInstance.defaultUser();
     expect(user.getUserId()).toBe(123);
     expect(user.toString()).toBe("Coinbase:User{userId: 123}");
