@@ -14,13 +14,13 @@ describe("User Class", () => {
     mockApiClients = {} as ApiClients;
   });
 
-  it("should correctly initialize with given user model and api clients with a valid user id", () => {
+  it("should initialize User instance with a valid user model and API clients, and set the user ID correctly", () => {
     const user = new User(mockUserModel, mockApiClients);
     expect(user).toBeInstanceOf(User);
     expect(user.getUserId()).toBe(mockUserModel.id);
   });
 
-  it("should return the correct string representation", () => {
+  it("should return a correctly formatted string representation of the User instance", () => {
     const user = new User(mockUserModel, mockApiClients);
     expect(user.toString()).toBe(`Coinbase:User{userId: ${mockUserModel.id}}`);
   });
