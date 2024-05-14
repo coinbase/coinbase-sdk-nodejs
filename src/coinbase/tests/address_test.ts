@@ -48,7 +48,8 @@ describe("Address", () => {
     expect(faucetTransaction).toBeInstanceOf(FaucetTransaction);
     expect(faucetTransaction.getTransactionHash()).toBe("mocked_transaction_hash");
   });
-  it("should request faucet funds and return a FaucetTransactionaaa", async () => {
+  
+  it("should request faucet funds and throw an InternalError if the request does not return a transaction hash", async () => {
     axiosMock.onPost().reply(200, {});
     const address = new Address(VALID_ADDRESS_MODEL, client);
     await expect(address.faucet()).rejects.toThrow("Failed to complete faucet request");

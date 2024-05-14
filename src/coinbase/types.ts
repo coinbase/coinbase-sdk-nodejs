@@ -10,7 +10,7 @@ export type AddressAPIClient = {
    * @param {string} walletId - The wallet ID.
    * @param {string} addressId - The address ID.
    * @returns {Promise<{ data: { transaction_hash: string } }>} - The transaction hash
-   * @throws {Error} If the request fails.
+   * @throws {AxiosError} If the request fails.
    */
   requestFaucetFunds(
     walletId: string,
@@ -26,7 +26,7 @@ export type UserAPIClient = {
    * Retrieves the current user.
    * @param {AxiosRequestConfig} [options] - Axios request options.
    * @returns {AxiosPromise<UserModel>} - A promise resolving to the User model.
-   * @throws {Error} If the request fails.
+   * @throws {AxiosError} If the request fails.
    */
   getCurrentUser(options?: AxiosRequestConfig): AxiosPromise<UserModel>;
 };
