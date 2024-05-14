@@ -16,6 +16,6 @@ describe("FaucetTransaction tests", () => {
   });
 
   it("should throw an InternalError if model is not provided", () => {
-    expect(() => new FaucetTransaction(null!)).toThrow(InternalError);
+    expect(() => new FaucetTransaction(null!)).toThrow(`FaucetTransaction model cannot be empty`);
   });
 });
