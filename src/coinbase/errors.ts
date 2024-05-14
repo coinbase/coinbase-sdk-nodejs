@@ -77,3 +77,22 @@ export class InvalidConfiguration extends Error {
     }
   }
 }
+
+/**
+ * InvalidUnsignedPayload error is thrown when the unsigned payload is invalid.
+ */
+export class InvalidUnsignedPayload extends Error {
+  static DEFAULT_MESSAGE = "Invalid unsigned payload";
+
+  /**
+   * Initializes a new InvalidUnsignedPayload instance.
+   * @param message - The error message.
+   */
+  constructor(message: string = InvalidUnsignedPayload.DEFAULT_MESSAGE) {
+    super(message);
+    this.name = "InvalidUnsignedPayload";
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, InvalidUnsignedPayload);
+    }
+  }
+}

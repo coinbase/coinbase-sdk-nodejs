@@ -1,4 +1,5 @@
 import { AxiosPromise, AxiosRequestConfig, RawAxiosRequestConfig } from "axios";
+import { ethers } from "ethers";
 import {
   CreateWalletRequest,
   BroadcastTransferRequest,
@@ -160,4 +161,15 @@ export type ApiClients = {
   wallet?: WalletAPIClient;
   address?: AddressAPIClient;
   transfer?: TransferAPIClient;
+  baseSepoliaProvider?: ethers.Provider;
 };
+
+/**
+ * Transfer status type definition.
+ */
+export enum TransferStatus {
+  PENDING = "PENDING",
+  BROADCAST = "BROADCAST",
+  COMPLETE = "COMPLETE",
+  FAILED = "FAILED",
+}

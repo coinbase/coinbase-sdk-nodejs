@@ -1,6 +1,7 @@
 import globalAxios from "axios";
 import fs from "fs";
 import { User as UserModel, UsersApiFactory, TransfersApiFactory } from "../client";
+import { ethers } from "ethers";
 import { BASE_PATH } from "./../client/base";
 import { Configuration } from "./../client/configuration";
 import { CoinbaseAuthenticator } from "./authenticator";
@@ -23,6 +24,11 @@ export class Coinbase {
   };
 
   apiClients: ApiClients = {};
+
+  /**
+   * Represents the number of Wei per Ether.
+   */
+  static readonly WEI_PER_ETHER: bigint = BigInt("1000000000000000000");
 
   /**
    * Initializes the Coinbase SDK.
@@ -60,6 +66,7 @@ export class Coinbase {
 
     this.apiClients.user = UsersApiFactory(config, BASE_PATH, axiosInstance);
     this.apiClients.transfer = TransfersApiFactory(config, BASE_PATH, axiosInstance);
+    this.apiClients.baseSepoliaProvider = new ethers.JsonRpcProvider("https://sepolia.base.org");
   }
 
   /**
