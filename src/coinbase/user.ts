@@ -1,31 +1,24 @@
-import { InternalError } from "./errors";
 import { ApiClients } from "./types";
-
+import { User as UserModel } from "./../client/api";
 /**
  * A representation of a User.
  * Users have Wallets, which can hold balances of Assets.
  * Access the default User through Coinbase.defaultUser().
  */
 export class User {
-  private userId: string = "";
+  private model: UserModel;
   private client: ApiClients;
 
-  constructor(userId: string, client: ApiClients) {
-    if (!userId) {
-      throw new InternalError("UserID cannot be empty");
-    }
-    if (!client) {
-      throw new InternalError("Client cannot be empty");
-    }
-    this.userId = userId;
+  constructor(user: UserModel, client: ApiClients) {
     this.client = client;
+    this.model = user;
   }
 
   public getUserId(): string {
-    return this.userId;
+    return this.model.id;
   }
 
   toString(): string {
-    return `Coinbase:User{userId: ${this.userId}}`;
+    return `Coinbase:User{userId: ${this.model.id}}`;
   }
 }

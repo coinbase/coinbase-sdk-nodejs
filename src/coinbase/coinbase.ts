@@ -1,6 +1,6 @@
 import globalAxios from "axios";
 import fs from "fs";
-import { UsersApiFactory } from "../client";
+import { UsersApiFactory, User as UserModel } from "../client";
 import { BASE_PATH } from "./../client/base";
 import { Configuration } from "./../client/configuration";
 import { CoinbaseAuthenticator } from "./authenticator";
@@ -79,6 +79,6 @@ export class Coinbase {
    */
   async defaultUser(): Promise<User> {
     const user = await this.apiClients.user?.getCurrentUser();
-    return new User(user?.data?.id as string, this.apiClients);
+    return new User(user?.data as UserModel, this.apiClients);
   }
 }
