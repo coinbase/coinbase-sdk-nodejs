@@ -2,6 +2,23 @@ import { AxiosPromise, AxiosRequestConfig } from "axios";
 import { User as UserModel } from "./../client/api";
 
 /**
+ * AddressAPI client type definition.
+ */
+export type AddressClient = {
+  /**
+   * Requests faucet funds for the address.
+   * @param {string} walletId - The wallet ID.
+   * @param {string} addressId - The address ID.
+   * @returns {Promise<{ data: { transaction_hash: string } }>} - The transaction hash
+   * @throws {Error} If the request fails.
+   */
+  requestFaucetFunds(
+    walletId: string,
+    addressId: string,
+  ): Promise<{ data: { transaction_hash: string } }>;
+};
+
+/**
  * UserAPI client type definition.
  */
 export type UserAPIClient = {
