@@ -29,8 +29,11 @@ export class Coinbase {
     debugging = false,
     basePath: string = BASE_PATH,
   ) {
-    if (apiKeyName === "" || privateKey === "") {
-      throw new InternalError("Invalid configuration: privateKey or apiKeyName is empty");
+    if (apiKeyName === "") {
+      throw new InternalError("Invalid configuration: apiKeyName is empty");
+    }
+    if (privateKey === "") {
+      throw new InternalError("Invalid configuration: privateKey is empty");
     }
     const coinbaseAuthenticator = new CoinbaseAuthenticator(apiKeyName, privateKey);
     const config = new Configuration({
@@ -84,7 +87,7 @@ export class Coinbase {
    * @returns {User} The default user.
    * @throws {InternalError} If the request fails.
    */
-  async defaultUser(): Promise<User> {
+  async getDefaultUser(): Promise<User> {
     try {
       const userResponse = await this.apiClients.user!.getCurrentUser();
       return new User(userResponse.data as UserModel, this.apiClients);

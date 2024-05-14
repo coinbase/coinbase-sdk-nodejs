@@ -11,9 +11,8 @@ describe("Coinbase tests", () => {
   });
 
   it("should throw an error if the API key name or private key is empty", () => {
-    expect(() => new Coinbase("", "")).toThrow(
-      "Invalid configuration: privateKey or apiKeyName is empty",
-    );
+    expect(() => new Coinbase("", "test")).toThrow("Invalid configuration: apiKeyName is empty");
+    expect(() => new Coinbase("test", "")).toThrow("Invalid configuration: privateKey is empty");
   });
 
   it("should throw an error if the file does not exist", () => {
@@ -47,15 +46,15 @@ describe("Coinbase tests", () => {
       `${PATH_PREFIX}/coinbase_cloud_api_key.json`,
       true,
     );
-    const user = await cbInstance.defaultUser();
-    expect(user.getUserId()).toBe(123);
+    const user = await cbInstance.getDefaultUser();
+    expect(user.getId()).toBe(123);
     expect(user.toString()).toBe("Coinbase:User{userId: 123}");
   });
 
   it("should raise an error if the user is not found", async () => {
     axiosMock.onGet().reply(404);
     const cbInstance = Coinbase.configureFromJson(`${PATH_PREFIX}/coinbase_cloud_api_key.json`);
-    await expect(cbInstance.defaultUser()).rejects.toThrow(
+    await expect(cbInstance.getDefaultUser()).rejects.toThrow(
       "Failed to retrieve user: Request failed with status code 404",
     );
   });

@@ -1,3 +1,7 @@
+/**
+ * InvalidaAPIKeyFormat error is thrown when the API key format is invalid.
+ * @extends {Error}
+ */
 export class InvalidAPIKeyFormat extends Error {
   static DEFAULT_MESSAGE = "Invalid API key format";
 
@@ -10,6 +14,9 @@ export class InvalidAPIKeyFormat extends Error {
   }
 }
 
+/**
+ * InternalError is thrown when there is an internal error in the SDK.
+ */
 export class InternalError extends Error {
   static DEFAULT_MESSAGE = "Internal Error";
 
@@ -22,6 +29,9 @@ export class InternalError extends Error {
   }
 }
 
+/**
+ * InvalidConfiguration error is thrown when apikey/privateKey configuration is invalid.
+ */
 export class InvalidConfiguration extends Error {
   static DEFAULT_MESSAGE = "Invalid configuration";
 
