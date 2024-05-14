@@ -55,6 +55,8 @@ describe("Coinbase tests", () => {
   it("should raise an error if the user is not found", async () => {
     axiosMock.onGet().reply(404);
     const cbInstance = Coinbase.configureFromJson(`${PATH_PREFIX}/coinbase_cloud_api_key.json`);
-    await expect(cbInstance.defaultUser()).rejects.toThrow("Request failed with status code 404");
+    await expect(cbInstance.defaultUser()).rejects.toThrow(
+      "Failed to retrieve user: Request failed with status code 404",
+    );
   });
 });
