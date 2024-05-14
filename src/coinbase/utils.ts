@@ -2,7 +2,7 @@ import { AxiosResponse } from "axios";
 
 /**
  * Prints Axios response to the console for debugging purposes.
- * @param response
+ * @param response - The Axios response object.
  */
 export const logApiResponse = (response: AxiosResponse, debugging = false): AxiosResponse => {
   if (debugging) {

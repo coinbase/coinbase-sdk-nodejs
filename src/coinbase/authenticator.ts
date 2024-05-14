@@ -1,6 +1,6 @@
-import { JWK, JWS } from "node-jose";
-import { InternalError, InvalidAPIKeyFormat } from "./errors";
 import { InternalAxiosRequestConfig } from "axios";
+import { JWK, JWS } from "node-jose";
+import { InvalidAPIKeyFormat } from "./errors";
 
 const pemHeader = "-----BEGIN EC PRIVATE KEY-----";
 const pemFooter = "-----END EC PRIVATE KEY-----";
@@ -22,32 +22,31 @@ export class CoinbaseAuthenticator {
   }
 
   /**
-   * Middleware to intercept requests and add JWT to the Authorization header for AxiosInterceptor
+   * Middleware to intercept requests and add JWT to Authorization header.
    * @param {MiddlewareRequestType} config - The request configuration.
    * @returns {MiddlewareRequestType} The request configuration with the Authorization header added.
-   * @throws {InternalError} If there is an issue with the private key.
+   * @throws {InvalidAPIKeyFormat} If JWT could not be built.
    */
   async authenticateRequest(
     config: InternalAxiosRequestConfig,
-    debug = false,
+    debugging = false,
   ): Promise<InternalAxiosRequestConfig> {
     const method = config.method?.toString().toUpperCase();
     const token = await this.buildJWT(config.url || "", method);
-    if (debug) {
+    if (debugging) {
       console.log(`API REQUEST: ${method} ${config.url}`);
     }
-
     config.headers["Authorization"] = `Bearer ${token}`;
     config.headers["Content-Type"] = "application/json";
     return config;
   }
 
   /**
-   * Builds the JWT for the given API endpoint URI. The JWT is signed with the API key's private key.
-   * @param {string} url - The URI of the API endpoint.
-   * @param {string} method - The HTTP method of the request.
-   * @returns {string} The JWT if successful or throws an error.
-   * @throws {InvalidAPIKeyFormat} If there is an issue with the private key.
+   * Builds the JWT for the given API endpoint URL.
+   * @param {string} url - URL of the API endpoint.
+   * @param {string} method - HTTP method of the request.
+   * @returns {string} JWT token.
+   * @throws {InvalidAPIKeyFormat} If the private key is not in the correct format.
    */
   async buildJWT(url: string, method = "GET"): Promise<string> {
     const pemPrivateKey = this.extractPemKey(this.privateKey);
@@ -87,7 +86,7 @@ export class CoinbaseAuthenticator {
 
       return result as unknown as string;
     } catch (err) {
-      throw new InternalError("Could not sign the JWT");
+      throw new InvalidAPIKeyFormat("Could not sign the JWT");
     }
   }
 

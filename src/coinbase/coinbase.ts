@@ -7,7 +7,7 @@ import { CoinbaseAuthenticator } from "./authenticator";
 import { ApiClients } from "./types";
 import { User } from "./user";
 import { logApiResponse } from "./utils";
-import { InternalError, InvalidConfiguration } from "./errors";
+import { InvalidAPIKeyFormat, InvalidConfiguration } from "./errors";
 
 // The Coinbase SDK.
 export class Coinbase {
@@ -18,6 +18,10 @@ export class Coinbase {
    * @constructor
    * @param {string} apiKeyName - The API key name.
    * @param {string} privateKey - The private key associated with the API key.
+   * @param {boolean} debugging - If true, logs API requests and responses to the console.
+   * @param {string} basePath - The base path for the API.
+   * @throws {InvalidConfiguration} If the configuration is invalid.
+   * @throws {InvalidAPIKeyFormat} If not able to create JWT token.
    */
   constructor(
     apiKeyName: string,
@@ -41,10 +45,10 @@ export class Coinbase {
   }
 
   /**
-   * Reads the API key and private key from a JSON file and returns a new instance of Coinbase.
+   * Reads the API key and private key from a JSON file and initializes the Coinbase SDK.
    * @param {string} filePath - The path to the JSON file containing the API key and private key.
    * @returns {Coinbase} A new instance of the Coinbase SDK.
-   * @throws {InternalError} If the file does not exist or the configuration values are missing.
+   * @throws {InvalidAPIKeyFormat} If the file does not exist or the configuration values are missing/invalid.
    */
   static fromJsonConfig(
     filePath: string = "coinbase_cloud_api_key.json",
@@ -52,24 +56,24 @@ export class Coinbase {
     basePath: string = BASE_PATH,
   ): Coinbase {
     if (!fs.existsSync(filePath)) {
-      throw new InternalError(`Invalid configuration: file not found at ${filePath}`);
+      throw new InvalidAPIKeyFormat(`Invalid configuration: file not found at ${filePath}`);
     }
     try {
       const data = fs.readFileSync(filePath, "utf8");
       const config = JSON.parse(data);
       if (!config.name || !config.privateKey) {
-        throw new InternalError("Invalid configuration: missing configuration values");
+        throw new InvalidAPIKeyFormat("Invalid configuration: missing configuration values");
       }
 
       // Return a new instance of Coinbase
       return new Coinbase(config.name, config.privateKey, debugging, basePath);
     } catch (e) {
-      throw new InternalError(`Not able to parse the configuration file`);
+      throw new InvalidAPIKeyFormat(`Not able to parse the configuration file`);
     }
   }
 
   /**
-   * Returns the default user.
+   * Returns User model for the default user.
    * @returns {User} The default user.
    * @throws {Error} If the user is not found or HTTP request fails.
    */
