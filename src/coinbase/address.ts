@@ -5,10 +5,7 @@ import { FaucetTransaction } from "./faucet_transaction";
 import { AddressAPIClient } from "./types";
 
 /**
- * Class representing an Address in the Coinbase SDK.
- * A representation of a blockchain Address, which is a user-controlled account on a Network. Addresses are used to
- * send and receive Assets, and should be created using Wallet#create_address. Addresses require an
- * Eth::Key to sign transaction data.
+ * A representation of a blockchain address, which is a user-controlled account on a network.
  */
 export class Address {
   private model: AddressModel;
