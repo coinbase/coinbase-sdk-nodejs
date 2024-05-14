@@ -13,7 +13,7 @@ describe("Authenticator tests", () => {
   const keys = require(filePath);
   const authenticator = new CoinbaseAuthenticator(keys.name, keys.privateKey);
 
-  it("should raise InvalidConfiguration error", async () => {
+  it("should raise InvalidConfiguration error for invalid config", async () => {
     const invalidConfig = {
       method: "GET",
       url: "https://api.cdp.coinbase.com/platform/v1/users/me",
@@ -27,15 +27,11 @@ describe("Authenticator tests", () => {
     const config = await authenticator.authenticateRequest(VALID_CONFIG);
     const token = config.headers?.Authorization as string;
     expect(token).toContain("Bearer ");
-    // length of the token should be greater than 100
     expect(token?.length).toBeGreaterThan(100);
   });
 
-  it("invalid pem key should raise an error", () => {
-    const invalidAuthenticator = new CoinbaseAuthenticator(
-      "test-key",
-      "-----BEGIN EC PRIVATE KEY-----+L+==\n-----END EC PRIVATE KEY-----\n",
-    );
+  it("invalid pem key should raise an InvalidAPIKeyFormat error", async () => {
+    const invalidAuthenticator = new CoinbaseAuthenticator("test-key", "-----BEGIN EC KEY-----\n");
     expect(invalidAuthenticator.authenticateRequest(VALID_CONFIG)).rejects.toThrow();
   });
 });

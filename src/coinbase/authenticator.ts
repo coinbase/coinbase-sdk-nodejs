@@ -23,8 +23,9 @@ export class CoinbaseAuthenticator {
 
   /**
    * Middleware to intercept requests and add JWT to Authorization header.
-   * @param {MiddlewareRequestType} config - The request configuration.
-   * @returns {MiddlewareRequestType} The request configuration with the Authorization header added.
+   * @param {InternalAxiosRequestConfig} config - The request configuration.
+   * @param {boolean} debugging - Flag to enable debugging.
+   * @returns {Promise<InternalAxiosRequestConfig>} The request configuration with the Authorization header added.
    * @throws {InvalidAPIKeyFormat} If JWT could not be built.
    */
   async authenticateRequest(
@@ -45,7 +46,7 @@ export class CoinbaseAuthenticator {
    * Builds the JWT for the given API endpoint URL.
    * @param {string} url - URL of the API endpoint.
    * @param {string} method - HTTP method of the request.
-   * @returns {string} JWT token.
+   * @returns {Promise<string>} JWT token.
    * @throws {InvalidAPIKeyFormat} If the private key is not in the correct format.
    */
   async buildJWT(url: string, method = "GET"): Promise<string> {
@@ -108,7 +109,7 @@ export class CoinbaseAuthenticator {
 
   /**
    * Generates a random nonce for the JWT.
-   * @returns {string}
+   * @returns {string} The generated nonce.
    */
   private nonce(): string {
     const range = "0123456789";

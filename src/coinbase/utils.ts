@@ -3,6 +3,7 @@ import { AxiosResponse } from "axios";
 /**
  * Prints Axios response to the console for debugging purposes.
  * @param response - The Axios response object.
+ * @param debugging - Flag to enable or disable logging.
  */
 export const logApiResponse = (response: AxiosResponse, debugging = false): AxiosResponse => {
   if (debugging) {
@@ -11,7 +12,11 @@ export const logApiResponse = (response: AxiosResponse, debugging = false): Axio
     if (typeof response.data === "object") {
       output = JSON.stringify(response.data, null, 4);
     }
-    console.log(`API RESPONSE: ${response.status} ${response.config.url} ${output}`);
+
+    console.log(`API RESPONSE: 
+      Status: ${response.status} 
+      URL: ${response.config.url} 
+      Data: ${output}`);
   }
   return response;
 };

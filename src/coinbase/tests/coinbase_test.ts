@@ -3,16 +3,22 @@ import MockAdapter from "axios-mock-adapter";
 import axios from "axios";
 
 const axiosMock = new MockAdapter(axios);
+const PATH_PREFIX = "./src/coinbase/tests/config";
 
 describe("Coinbase tests", () => {
-  const PATH_PREFIX = "./src/coinbase/tests/config";
+  beforeEach(() => {
+    axiosMock.reset();
+  });
+
   it("should throw an error if the API key name or private key is empty", () => {
-    expect(() => new Coinbase("", "")).toThrow("Invalid configuration");
+    expect(() => new Coinbase("", "")).toThrow(
+      "Invalid configuration: privateKey or apiKeyName is empty",
+    );
   });
 
   it("should throw an error if the file does not exist", () => {
     expect(() => Coinbase.fromJsonConfig(`${PATH_PREFIX}/does-not-exist.json`)).toThrow(
-      "Invalid configuration",
+      "Invalid configuration: file not found at ./src/coinbase/tests/config/does-not-exist.json",
     );
   });
 
@@ -23,7 +29,7 @@ describe("Coinbase tests", () => {
 
   it("should throw an error if there is an issue reading the file or parsing the JSON data", () => {
     expect(() => Coinbase.fromJsonConfig(`${PATH_PREFIX}/invalid.json`)).toThrow(
-      "Not able to parse the configuration file",
+      "Invalid configuration: missing configuration values",
     );
   });
 
@@ -33,7 +39,7 @@ describe("Coinbase tests", () => {
     );
   });
 
-  it("should able to get the default user", async () => {
+  it("should be able to get the default user", async () => {
     axiosMock.onGet().reply(200, {
       id: 123,
     });
@@ -44,10 +50,8 @@ describe("Coinbase tests", () => {
   });
 
   it("should raise an error if the user is not found", async () => {
-    axiosMock.onGet().reply(404, {
-      id: 123,
-    });
+    axiosMock.onGet().reply(404);
     const cbInstance = Coinbase.fromJsonConfig(`${PATH_PREFIX}/coinbase_cloud_api_key.json`);
-    expect(cbInstance.defaultUser()).rejects.toThrow("Request failed with status code 404");
+    await expect(cbInstance.defaultUser()).rejects.toThrow("Request failed with status code 404");
   });
 });
