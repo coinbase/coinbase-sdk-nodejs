@@ -1,11 +1,6 @@
 import { AxiosHeaders } from "axios";
 import { CoinbaseAuthenticator } from "../authenticator";
 
-const VALID_KEY =
-  "organizations/0c3bbe72-ac81-46ec-946a-7cd019d6d86b/apiKeys/db813705-bf33-4e33-816c-4c3f1f54672b";
-const VALID_PRIVATE_KEY =
-  "-----BEGIN EC PRIVATE KEY-----\nMHcCAQEEIBPl8LBKrDw2Is+bxQEXa2eHhDmvIgArOhSAdmYpYQrCoAoGCCqGSM49\nAwEHoUQDQgAEQSoVSr8ImpS18thpGe3KuL9efy+L+AFdFFfCVwGgCsKvTYVDKaGo\nVmN5Bl6EJkeIQjyarEtWbmY6komwEOdnHA==\n-----END EC PRIVATE KEY-----\n";
-
 const VALID_CONFIG = {
   method: "GET",
   url: "https://api.cdp.coinbase.com/platform/v1/users/me",
@@ -13,9 +8,12 @@ const VALID_CONFIG = {
 };
 
 describe("Authenticator tests", () => {
-  const authenticator = new CoinbaseAuthenticator(VALID_KEY, VALID_PRIVATE_KEY);
+  const filePath = "./config/coinbase_cloud_api_key.json";
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const keys = require(filePath);
+  const authenticator = new CoinbaseAuthenticator(keys.name, keys.privateKey);
 
-  it("should raise InvalidConfiguration error", async () => {
+  it("should raise InvalidConfiguration error for invalid config", async () => {
     const invalidConfig = {
       method: "GET",
       url: "https://api.cdp.coinbase.com/platform/v1/users/me",
@@ -29,15 +27,11 @@ describe("Authenticator tests", () => {
     const config = await authenticator.authenticateRequest(VALID_CONFIG);
     const token = config.headers?.Authorization as string;
     expect(token).toContain("Bearer ");
-    // length of the token should be greater than 100
     expect(token?.length).toBeGreaterThan(100);
   });
 
-  it("invalid pem key should raise an error", () => {
-    const invalidAuthenticator = new CoinbaseAuthenticator(
-      "test-key",
-      "-----BEGIN EC PRIVATE KEY-----+L+==\n-----END EC PRIVATE KEY-----\n",
-    );
+  it("invalid pem key should raise an InvalidAPIKeyFormat error", async () => {
+    const invalidAuthenticator = new CoinbaseAuthenticator("test-key", "-----BEGIN EC KEY-----\n");
     expect(invalidAuthenticator.authenticateRequest(VALID_CONFIG)).rejects.toThrow();
   });
 });
