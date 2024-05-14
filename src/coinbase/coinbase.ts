@@ -52,7 +52,7 @@ export class Coinbase {
    * @throws {InvalidConfiguration} If the configuration is invalid.
    * @throws {InvalidAPIKeyFormat} If not able to create JWT token.
    */
-  static fromJsonConfig(
+  static configureFromJson(
     filePath: string = "coinbase_cloud_api_key.json",
     debugging: boolean = false,
     basePath: string = BASE_PATH,

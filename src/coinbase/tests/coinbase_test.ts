@@ -17,24 +17,24 @@ describe("Coinbase tests", () => {
   });
 
   it("should throw an error if the file does not exist", () => {
-    expect(() => Coinbase.fromJsonConfig(`${PATH_PREFIX}/does-not-exist.json`)).toThrow(
+    expect(() => Coinbase.configureFromJson(`${PATH_PREFIX}/does-not-exist.json`)).toThrow(
       "Invalid configuration: file not found at ./src/coinbase/tests/config/does-not-exist.json",
     );
   });
 
   it("should initialize the Coinbase SDK from a JSON file", () => {
-    const cbInstance = Coinbase.fromJsonConfig(`${PATH_PREFIX}/coinbase_cloud_api_key.json`);
+    const cbInstance = Coinbase.configureFromJson(`${PATH_PREFIX}/coinbase_cloud_api_key.json`);
     expect(cbInstance).toBeInstanceOf(Coinbase);
   });
 
   it("should throw an error if there is an issue reading the file or parsing the JSON data", () => {
-    expect(() => Coinbase.fromJsonConfig(`${PATH_PREFIX}/invalid.json`)).toThrow(
+    expect(() => Coinbase.configureFromJson(`${PATH_PREFIX}/invalid.json`)).toThrow(
       "Invalid configuration: missing configuration values",
     );
   });
 
   it("should throw an error if the JSON file is not parseable", () => {
-    expect(() => Coinbase.fromJsonConfig(`${PATH_PREFIX}/not_parseable.json`)).toThrow(
+    expect(() => Coinbase.configureFromJson(`${PATH_PREFIX}/not_parseable.json`)).toThrow(
       "Not able to parse the configuration file",
     );
   });
@@ -43,7 +43,10 @@ describe("Coinbase tests", () => {
     axiosMock.onGet().reply(200, {
       id: 123,
     });
-    const cbInstance = Coinbase.fromJsonConfig(`${PATH_PREFIX}/coinbase_cloud_api_key.json`, true);
+    const cbInstance = Coinbase.configureFromJson(
+      `${PATH_PREFIX}/coinbase_cloud_api_key.json`,
+      true,
+    );
     const user = await cbInstance.defaultUser();
     expect(user.getUserId()).toBe(123);
     expect(user.toString()).toBe("Coinbase:User{userId: 123}");
@@ -51,7 +54,7 @@ describe("Coinbase tests", () => {
 
   it("should raise an error if the user is not found", async () => {
     axiosMock.onGet().reply(404);
-    const cbInstance = Coinbase.fromJsonConfig(`${PATH_PREFIX}/coinbase_cloud_api_key.json`);
+    const cbInstance = Coinbase.configureFromJson(`${PATH_PREFIX}/coinbase_cloud_api_key.json`);
     await expect(cbInstance.defaultUser()).rejects.toThrow("Request failed with status code 404");
   });
 });
