@@ -83,7 +83,7 @@ export class Coinbase {
   }
 
   /**
-   * Returns User model for the default user.
+   * Returns User object for the default user.
    * @returns {User} The default user.
    * @throws {InternalError} If the request fails.
    */

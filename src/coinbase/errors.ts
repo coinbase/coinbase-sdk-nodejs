@@ -5,6 +5,10 @@
 export class InvalidAPIKeyFormat extends Error {
   static DEFAULT_MESSAGE = "Invalid API key format";
 
+  /**
+   * Initializes a new InvalidAPIKeyFormat instance.
+   * @param message - The error message.
+   */
   constructor(message: string = InvalidAPIKeyFormat.DEFAULT_MESSAGE) {
     super(message);
     this.name = "InvalidAPIKeyFormat";
@@ -20,6 +24,10 @@ export class InvalidAPIKeyFormat extends Error {
 export class InternalError extends Error {
   static DEFAULT_MESSAGE = "Internal Error";
 
+  /**
+   * Initializes a new InternalError instance.
+   * @param message - The error message.
+   */
   constructor(message: string = InternalError.DEFAULT_MESSAGE) {
     super(message);
     this.name = "InternalError";
@@ -35,6 +43,10 @@ export class InternalError extends Error {
 export class InvalidConfiguration extends Error {
   static DEFAULT_MESSAGE = "Invalid configuration";
 
+  /**
+   * Initializes a new InvalidConfiguration instance.
+   * @param message - The error message.
+   */
   constructor(message: string = InvalidConfiguration.DEFAULT_MESSAGE) {
     super(message);
     this.name = "InvalidConfiguration";
