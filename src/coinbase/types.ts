@@ -1,5 +1,6 @@
-import { AxiosPromise, AxiosRequestConfig } from "axios";
-import { User as UserModel } from "./../client/api";
+import { AxiosPromise, AxiosRequestConfig, RawAxiosRequestConfig } from "axios";
+import { Address, User as UserModel } from "./../client/api";
+import { RequestArgs } from "../client/base";
 
 /**
  * AddressAPI client type definition.
@@ -16,6 +17,20 @@ export type AddressClient = {
     walletId: string,
     addressId: string,
   ): Promise<{ data: { transaction_hash: string } }>;
+
+  /**
+   * Get address
+   * @summary Get address by onchain address
+   * @param {string} walletId The ID of the wallet the address belongs to.
+   * @param {string} addressId The onchain address of the address that is being fetched.
+   * @param {AxiosRequestConfig} [options] - Axios request options.
+   * @throws {RequiredError}
+   */
+  getAddress(
+    walletId: string,
+    addressId: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<Address>;
 };
 
 /**
@@ -41,4 +56,5 @@ export type ApiClients = {
    * @type {UserAPIClient}
    */
   user?: UserAPIClient;
+  address?: AddressClient;
 };
