@@ -18,6 +18,10 @@ const VALID_ADDRESS_MODEL: AddressModel = {
 describe("Address", () => {
   const client = AddressesApiFactory();
 
+  afterEach(() => {
+    axiosMock.reset();
+  });
+
   it("should create an Address instance", () => {
     const address = new Address(VALID_ADDRESS_MODEL, client);
     expect(address).toBeInstanceOf(Address);
@@ -44,11 +48,16 @@ describe("Address", () => {
     expect(faucetTransaction).toBeInstanceOf(FaucetTransaction);
     expect(faucetTransaction.getTransactionHash()).toBe("mocked_transaction_hash");
   });
+  it("should request faucet funds and return a FaucetTransactionaaa", async () => {
+    axiosMock.onPost().reply(200, {});
+    const address = new Address(VALID_ADDRESS_MODEL, client);
+    await expect(address.faucet()).rejects.toThrow("Failed to complete faucet request");
+  });
 
-  it("should throw an error if faucet request fails", async () => {
+  it("should throw an AxiosError if faucet request fails", async () => {
     axiosMock.onPost().reply(400);
     const address = new Address(VALID_ADDRESS_MODEL, client);
-    await expect(address.faucet()).rejects.toThrow("Failed to request faucet funds");
+    await expect(address.faucet()).rejects.toThrow("Request failed with status code 400");
   });
 
   it("should return the correct string representation", () => {

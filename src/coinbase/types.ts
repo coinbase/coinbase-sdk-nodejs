@@ -4,7 +4,7 @@ import { User as UserModel } from "./../client/api";
 /**
  * AddressAPI client type definition.
  */
-export type AddressClient = {
+export type AddressAPIClient = {
   /**
    * Requests faucet funds for the address.
    * @param {string} walletId - The wallet ID.

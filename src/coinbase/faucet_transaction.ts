@@ -15,7 +15,7 @@ export class FaucetTransaction {
    * @throws {InternalError} If the model does not exist.
    */
   constructor(model: FaucetTransactionModel) {
-    if (!model) {
+    if (!model?.transaction_hash) {
       throw new InternalError("FaucetTransaction model cannot be empty");
     }
     this.model = model;
