@@ -1,13 +1,13 @@
 import globalAxios from "axios";
 import fs from "fs";
-import { UsersApiFactory, User as UserModel } from "../client";
+import { User as UserModel, UsersApiFactory } from "../client";
 import { BASE_PATH } from "./../client/base";
 import { Configuration } from "./../client/configuration";
 import { CoinbaseAuthenticator } from "./authenticator";
+import { InternalError, InvalidAPIKeyFormat, InvalidConfiguration } from "./errors";
 import { ApiClients } from "./types";
 import { User } from "./user";
-import { logApiResponse } from "./utils";
-import { InvalidAPIKeyFormat, InternalError, InvalidConfiguration } from "./errors";
+import { logApiResponse, registerAxiosInterceptors } from "./utils";
 
 // The Coinbase SDK.
 export class Coinbase {
@@ -40,10 +40,12 @@ export class Coinbase {
       basePath: basePath,
     });
     const axiosInstance = globalAxios.create();
-    axiosInstance.interceptors.request.use(config =>
-      coinbaseAuthenticator.authenticateRequest(config, debugging),
+    registerAxiosInterceptors(
+      axiosInstance,
+      config => coinbaseAuthenticator.authenticateRequest(config, debugging),
+      response => logApiResponse(response, debugging),
     );
-    axiosInstance.interceptors.response.use(response => logApiResponse(response, debugging));
+
     this.apiClients.user = UsersApiFactory(config, BASE_PATH, axiosInstance);
   }
 
@@ -85,14 +87,10 @@ export class Coinbase {
   /**
    * Returns User object for the default user.
    * @returns {User} The default user.
-   * @throws {InternalError} If the request fails.
+   * @throws {APIError} If the request fails.
    */
   async getDefaultUser(): Promise<User> {
-    try {
-      const userResponse = await this.apiClients.user!.getCurrentUser();
-      return new User(userResponse.data as UserModel, this.apiClients);
-    } catch (error) {
-      throw new InternalError(`Failed to retrieve user: ${(error as Error).message}`);
-    }
+    const userResponse = await this.apiClients.user!.getCurrentUser();
+    return new User(userResponse.data as UserModel, this.apiClients);
   }
 }

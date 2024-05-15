@@ -1,4 +1,3 @@
-import { AxiosError } from "axios";
 import { Address as AddressModel } from "../client";
 import { InternalError } from "./errors";
 import { FaucetTransaction } from "./faucet_transaction";
@@ -36,18 +35,11 @@ export class Address {
    * @throws {Error} If the request fails.
    */
   async faucet(): Promise<FaucetTransaction> {
-    try {
-      const response = await this.client.requestFaucetFunds(
-        this.model.wallet_id,
-        this.model.address_id,
-      );
-      return new FaucetTransaction(response.data);
-    } catch (e) {
-      if (e instanceof AxiosError) {
-        throw e;
-      }
-      throw new Error(`Failed to complete faucet request`);
-    }
+    const response = await this.client.requestFaucetFunds(
+      this.model.wallet_id,
+      this.model.address_id,
+    );
+    return new FaucetTransaction(response.data);
   }
 
   /**
