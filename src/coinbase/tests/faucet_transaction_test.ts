@@ -1,4 +1,3 @@
-import { InternalError } from "./../errors";
 import { FaucetTransaction } from "../faucet_transaction";
 
 describe("FaucetTransaction tests", () => {

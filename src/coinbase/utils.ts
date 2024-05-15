@@ -1,4 +1,6 @@
-import { AxiosResponse } from "axios";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Axios, AxiosResponse, InternalAxiosRequestConfig } from "axios";
+import { APIError } from "./api_error";
 
 /**
  * Prints Axios response to the console for debugging purposes.
@@ -19,4 +21,37 @@ export const logApiResponse = (response: AxiosResponse, debugging = false): Axio
       Data: ${output}`);
   }
   return response;
+};
+
+/**
+ * Axios Request interceptor function type.
+ * @param {InternalAxiosRequestConfig} value - The Axios request configuration.
+ * @returns {InternalAxiosRequestConfig} The modified Axios request configuration.
+ */
+type RequestFunctionType = (
+  value: InternalAxiosRequestConfig<any>,
+) => Promise<InternalAxiosRequestConfig> | InternalAxiosRequestConfig;
+
+/**
+ * Axios Response interceptor function type.
+ * @param {AxiosResponse} value - The Axios response object.
+ * @returns {AxiosResponse} The modified Axios response object.
+ */
+type ResponseFunctionType = (value: AxiosResponse<any, any>) => AxiosResponse<any, any>;
+
+/**
+ *
+ * @param {Axios} axiosInstance - The Axios instance to register the interceptors.
+ * @param {RequestFunctionType} requestFn - The request interceptor function.
+ * @param {ResponseFunctionType} responseFn - The response interceptor function.
+ */
+export const registerAxiosInterceptors = (
+  axiosInstance: Axios,
+  requestFn: RequestFunctionType,
+  responseFn: ResponseFunctionType,
+) => {
+  axiosInstance.interceptors.request.use(requestFn);
+  axiosInstance.interceptors.response.use(responseFn, error => {
+    return Promise.reject(APIError.fromError(error));
+  });
 };
