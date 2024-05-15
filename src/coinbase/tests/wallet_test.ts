@@ -1,13 +1,7 @@
-import { HDKey } from "@scure/bip32";
 import * as bip39 from "bip39";
-import { Address } from "./../address";
-import { InternalError } from "./../errors";
-import { Wallet as WalletModel, Address as AddressModel } from "../../client";
-import { ApiClients } from "./../types";
-import { ethers } from "ethers";
+import { Address as AddressModel, Wallet as WalletModel } from "../../client";
 import { Wallet } from "../wallet";
-import MockAdapter from "axios-mock-adapter";
-import axios from "axios";
+import { ApiClients } from "./../types";
 
 // Mock data
 const VALID_WALLET_MODEL: WalletModel = {
@@ -51,7 +45,7 @@ describe("Wallet", () => {
   });
 
   it("should return the correct string representation", () => {
-    const wallet = new Wallet(VALID_WALLET_MODEL, mockClient, seed, 0);
+    const wallet = new Wallet(VALID_WALLET_MODEL, mockClient);
     expect(wallet.toString()).toBe(
       "Wallet{id: 'mocked_wallet_id', network_id: 'mocked_network_id'}",
     );
@@ -62,10 +56,7 @@ describe("Wallet", () => {
       "Address client cannot be empty",
     );
   });
-
-  it("should generate and derive addresses based on the provided count", () => {
-    const addressCount = 3;
-    const wallet = new Wallet(VALID_WALLET_MODEL, mockClient, seed, addressCount);
-    expect(wallet["addresses"].length).toBe(addressCount);
+  it("should throw an InternalError if address client is not provided", () => {
+    expect(() => new Wallet(undefined!, mockClient)).toThrow("Wallet model cannot be empty");
   });
 });

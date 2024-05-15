@@ -1,13 +1,16 @@
 import { HDKey } from "@scure/bip32";
 import * as bip39 from "bip39";
+import { ethers } from "ethers";
+import { Address as AddressModel, Wallet as WalletModel } from "../client";
 import { Address } from "./address";
 import { InternalError } from "./errors";
-import { Wallet as WalletModel, Address as AddressModel } from "../client";
 import { ApiClients } from "./types";
-import { ethers } from "ethers";
 
 /**
- * Wallet class represents a wallet with address management.
+ * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
+ * each of which can hold a balance of one or more Assets. Wallets can create new Addresses, list their addresses,
+ * list their balances, and transfer Assets to other Addresses. Wallets should be created through User.createWallet or
+ * User.importWallet.
  */
 export class Wallet {
   private model: WalletModel;
@@ -19,10 +22,10 @@ export class Wallet {
   private addressIndex = 0;
 
   /**
-   * Creates an instance of Wallet.
+   * Returns a new Wallet object. Do not use this method directly. Instead, use User.createWallet or User.importWallet.
    * @param {WalletModel} model - The wallet model data.
-   * @param {ApiClients} client - The API client to interact with address-related endpoints.
-   * @param {string} seed - The seed to generate the wallet.
+   * @param {ApiClients} client - The API client to interact with the server.
+   * @param {string} seed - The seed to use for the Wallet. Expects a 32-byte hexadecimal with no 0x prefix. If not provided, a new seed will be generated.
    * @param {number} addressCount - The number of addresses to generate.
    * @throws {InternalError} If the model or client is empty.
    */
@@ -60,16 +63,8 @@ export class Wallet {
    * @throws {InternalError} If address derivation or caching fails.
    */
   private deriveAddress() {
-    try {
-      const key = this.deriveKey();
-      const address = new ethers.Wallet(Buffer.from(key?.privateKey || "").toString("hex")).address;
-      if (!this.model.id) {
-        throw new InternalError("Wallet ID could not found");
-      }
-    } catch (e) {
-      console.error("Error deriving address:", e);
-      throw new InternalError("Failed to derive address");
-    }
+    const key = this.deriveKey();
+    const address = new ethers.Wallet(Buffer.from(key?.privateKey || "").toString("hex")).address;
   }
 
   /**
@@ -104,13 +99,9 @@ export class Wallet {
    * @returns The default address.
    */
   public defaultAddress(): Address | undefined {
-    if (!this.model.default_address) {
-      return undefined;
-    }
-    if (!this.client.address) {
-      throw new InternalError("Address client cannot be empty");
-    }
-    return new Address(this.model.default_address, this.client.address);
+    return this.model.default_address
+      ? new Address(this.model.default_address, this.client.address!)
+      : undefined;
   }
 
   /**
