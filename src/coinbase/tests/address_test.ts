@@ -13,7 +13,7 @@ const newEthAddress = ethers.Wallet.createRandom();
 
 const VALID_ADDRESS_MODEL: AddressModel = {
   address_id: newEthAddress.address,
-  network_id: "SEPOLIA",
+  network_id: "base-sepolia",
   public_key: newEthAddress.publicKey,
   wallet_id: randomUUID(),
 };
