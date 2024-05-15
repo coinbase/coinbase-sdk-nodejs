@@ -1,17 +1,21 @@
+import { ethers } from "ethers";
 import { AddressesApiFactory, Address as AddressModel } from "../../client";
 import { Address } from "./../address";
 import { FaucetTransaction } from "./../faucet_transaction";
 
 import axios from "axios";
 import MockAdapter from "axios-mock-adapter";
+import { randomUUID } from "crypto";
 
 const axiosMock = new MockAdapter(axios);
 
+const newEthAddress = ethers.Wallet.createRandom();
+
 const VALID_ADDRESS_MODEL: AddressModel = {
-  address_id: "mocked_address_id",
-  network_id: "mocked_network_id",
-  public_key: "mocked_public_key",
-  wallet_id: "mocked_wallet_id",
+  address_id: newEthAddress.address,
+  network_id: "SEPOLIA",
+  public_key: newEthAddress.publicKey,
+  wallet_id: randomUUID(),
 };
 
 // Test suite for Address class
@@ -25,10 +29,10 @@ describe("Address", () => {
   it("should create an Address instance", () => {
     const address = new Address(VALID_ADDRESS_MODEL, client);
     expect(address).toBeInstanceOf(Address);
-    expect(address.getId()).toBe("mocked_address_id");
-    expect(address.getNetworkId()).toBe("mocked_network_id");
-    expect(address.getPublicKey()).toBe("mocked_public_key");
-    expect(address.getWalletId()).toBe("mocked_wallet_id");
+    expect(address.getId()).toBe(newEthAddress.address);
+    expect(address.getPublicKey()).toBe(newEthAddress.publicKey);
+    expect(address.getNetworkId()).toBe(VALID_ADDRESS_MODEL.network_id);
+    expect(address.getWalletId()).toBe(VALID_ADDRESS_MODEL.wallet_id);
   });
 
   it("should throw an InternalError if model is not provided", () => {
@@ -48,7 +52,7 @@ describe("Address", () => {
     expect(faucetTransaction).toBeInstanceOf(FaucetTransaction);
     expect(faucetTransaction.getTransactionHash()).toBe("mocked_transaction_hash");
   });
-  
+
   it("should request faucet funds and throw an InternalError if the request does not return a transaction hash", async () => {
     axiosMock.onPost().reply(200, {});
     const address = new Address(VALID_ADDRESS_MODEL, client);
@@ -64,7 +68,7 @@ describe("Address", () => {
   it("should return the correct string representation", () => {
     const address = new Address(VALID_ADDRESS_MODEL, client);
     expect(address.toString()).toBe(
-      "Coinbase:Address{addressId: 'mocked_address_id', networkId: 'mocked_network_id', walletId: 'mocked_wallet_id'}",
+      `Coinbase:Address{addressId: '${VALID_ADDRESS_MODEL.address_id}', networkId: '${VALID_ADDRESS_MODEL.network_id}', walletId: '${VALID_ADDRESS_MODEL.wallet_id}'}`,
     );
   });
 });
