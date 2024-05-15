@@ -1,22 +1,22 @@
 import { Address as AddressModel } from "../client";
 import { InternalError } from "./errors";
 import { FaucetTransaction } from "./faucet_transaction";
-import { AddressClient } from "./types";
+import { AddressAPIClient } from "./types";
 
 /**
- * Class representing an Address in the Coinbase SDK.
+ * A representation of a blockchain address, which is a user-controlled account on a network.
  */
 export class Address {
   private model: AddressModel;
-  private client: AddressClient;
+  private client: AddressAPIClient;
 
   /**
-   * Creates an instance of Address.
+   * Initializes a new Address instance.
    * @param {AddressModel} model - The address model data.
-   * @param {AddressClient} client - The API client to interact with address-related endpoints.
+   * @param {AddressAPIClient} client - The API client to interact with address-related endpoints.
    * @throws {InternalError} If the model or client is empty.
    */
-  constructor(model: AddressModel, client: AddressClient) {
+  constructor(model: AddressModel, client: AddressAPIClient) {
     if (!model) {
       throw new InternalError("Address model cannot be empty");
     }
@@ -29,24 +29,21 @@ export class Address {
 
   /**
    * Requests faucet funds for the address.
+   * Only supported on testnet networks.
    * @returns {Promise<FaucetTransaction>} The faucet transaction object.
    * @throws {InternalError} If the request does not return a transaction hash.
    * @throws {Error} If the request fails.
    */
   async faucet(): Promise<FaucetTransaction> {
-    try {
-      const response = await this.client.requestFaucetFunds(
-        this.model.wallet_id,
-        this.model.address_id,
-      );
-      return new FaucetTransaction(response.data);
-    } catch (e) {
-      throw new Error(`Failed to request faucet funds`);
-    }
+    const response = await this.client.requestFaucetFunds(
+      this.model.wallet_id,
+      this.model.address_id,
+    );
+    return new FaucetTransaction(response.data);
   }
 
   /**
-   * Gets the address ID.
+   * Returns the address ID.
    * @returns {string} The address ID.
    */
   public getId(): string {
@@ -54,7 +51,7 @@ export class Address {
   }
 
   /**
-   * Gets the network ID.
+   * Returns the network ID.
    * @returns {string} The network ID.
    */
   public getNetworkId(): string {
@@ -62,7 +59,7 @@ export class Address {
   }
 
   /**
-   * Gets the public key.
+   * Returns the public key.
    * @returns {string} The public key.
    */
   public getPublicKey(): string {
@@ -70,7 +67,7 @@ export class Address {
   }
 
   /**
-   * Gets the wallet ID.
+   * Returns the wallet ID.
    * @returns {string} The wallet ID.
    */
   public getWalletId(): string {
