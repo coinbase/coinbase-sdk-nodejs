@@ -1,5 +1,6 @@
 import { Address as AddressModel } from "../client";
 import { Balance } from "./balance";
+import { BalanceMap } from "./balance_map";
 import { InternalError } from "./errors";
 import { FaucetTransaction } from "./faucet_transaction";
 import { AddressAPIClient } from "./types";
@@ -67,21 +68,15 @@ export class Address {
   /**
    * Returns the list of balances for the address.
    *
-   * @returns {Map<string, Decimal>} The map from asset ID to balance.
+   * @returns {BalanceMap} The map from asset ID to balance.
    */
-  async listBalances(): Promise<Map<string, Decimal>> {
+  async listBalances(): Promise<BalanceMap> {
     const response = await this.client.listAddressBalances(
       this.model.wallet_id,
       this.model.address_id,
     );
 
-    const balances = new Map<string, Decimal>();
-
-    for (const balance of response.data.data) {
-      balances.set(balance.asset.asset_id, new Decimal(balance.amount));
-    }
-
-    return balances;
+    return BalanceMap.fromBalances(response.data.data);
   }
 
   /**

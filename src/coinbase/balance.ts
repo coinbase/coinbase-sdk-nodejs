@@ -21,6 +21,16 @@ export class Balance {
   }
 
   /**
+   * Converts a BalanceModel into a Balance object.
+   *
+   * @param model - The balance model object.
+   * @returns The Balance object.
+   */
+  public static fromModel(model: BalanceModel): Balance {
+    return this.fromModelAndAssetId(model, model.asset.asset_id);
+  }
+
+  /**
    * Converts a BalanceModel and asset ID into a Balance object.
    *
    * @param model - The balance model object.
