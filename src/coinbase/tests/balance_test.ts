@@ -33,11 +33,11 @@ describe("Balance", () => {
 
     const balance = Balance.fromModelAndAssetId(balanceModel, "ETH");
 
-    test("returns a new Balance object with the correct amount", () => {
+    it("returns a new Balance object with the correct amount", () => {
       expect(balance.amount.equals(amount)).toBeTruthy();
     });
 
-    test("returns a new Balance object with the correct asset_id", () => {
+    it("returns a new Balance object with the correct asset_id", () => {
       expect(balance.assetId).toBe("ETH");
     });
   });
