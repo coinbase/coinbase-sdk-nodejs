@@ -1,9 +1,14 @@
 import { AxiosPromise, AxiosRequestConfig, RawAxiosRequestConfig } from "axios";
+import { ethers } from "ethers";
 import {
-  Address,
   CreateWalletRequest,
+  BroadcastTransferRequest,
+  CreateTransferRequest,
+  TransferList,
   User as UserModel,
   Wallet as WalletModel,
+  Address as AddressModel,
+  Transfer as TransferModel,
 } from "./../client/api";
 
 /**
@@ -53,7 +58,7 @@ export type AddressAPIClient = {
     walletId: string,
     addressId: string,
     options?: AxiosRequestConfig,
-  ): AxiosPromise<Address>;
+  ): AxiosPromise<AddressModel>;
 };
 
 /**
@@ -71,11 +76,100 @@ export type UserAPIClient = {
 };
 
 /**
+ * TransferAPI client type definition.
+ */
+export type TransferAPIClient = {
+  /**
+   * Broadcasts a transfer.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address the transfer belongs to.
+   * @param transferId - The ID of the transfer to broadcast.
+   * @param broadcastTransferRequest - The request body.
+   * @param options - Axios request options.
+   * @returns - A promise resolving to the Transfer model.
+   * @throws {APIError} If the request fails.
+   */
+  broadcastTransfer(
+    walletId: string,
+    addressId: string,
+    transferId: string,
+    broadcastTransferRequest: BroadcastTransferRequest,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<TransferModel>;
+
+  /**
+   * Creates a Transfer.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address the transfer belongs to.
+   * @param createTransferRequest - The request body.
+   * @param options - Axios request options.
+   * @returns - A promise resolving to the Transfer model.
+   * @throws {APIError} If the request fails.
+   */
+  createTransfer(
+    walletId: string,
+    addressId: string,
+    createTransferRequest: CreateTransferRequest,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<TransferModel>;
+
+  /**
+   * Retrieves a Transfer.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address the transfer belongs to.
+   * @param transferId - The ID of the transfer to retrieve.
+   * @param options - Axios request options.
+   * @returns - A promise resolving to the Transfer model.
+   * @throws {APIError} If the request fails.
+   */
+  getTransfer(
+    walletId: string,
+    addressId: string,
+    transferId: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<TransferModel>;
+
+  /**
+   * Lists Transfers.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address the transfers belong to.
+   * @param limit - The maximum number of transfers to return.
+   * @param page - The cursor for pagination across multiple pages of Transfers.
+   * @param options - Axios request options.
+   * @returns - A promise resolving to the Transfer list.
+   * @throws {APIError} If the request fails.
+   */
+  listTransfers(
+    walletId: string,
+    addressId: string,
+    limit?: number,
+    page?: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<TransferList>;
+};
+
+/**
  * API clients type definition for the Coinbase SDK.
  * Represents the set of API clients available in the SDK.
  */
 export type ApiClients = {
   user?: UserAPIClient;
-  address?: AddressAPIClient;
   wallet?: WalletAPIClient;
+  address?: AddressAPIClient;
+  transfer?: TransferAPIClient;
+  baseSepoliaProvider?: ethers.Provider;
 };
+
+/**
+ * Transfer status type definition.
+ */
+export enum TransferStatus {
+  PENDING = "PENDING",
+  BROADCAST = "BROADCAST",
+  COMPLETE = "COMPLETE",
+  FAILED = "FAILED",
+}
