@@ -11,6 +11,7 @@ export class User {
 
   /**
    * Initializes a new User instance.
+   *
    * @param {UserModel} user - The user model.
    * @param {ApiClients} client - The API clients.
    */
@@ -21,6 +22,7 @@ export class User {
 
   /**
    * Returns the user's ID.
+   *
    * @returns {string} The user's ID.
    */
   public getId(): string {
@@ -29,6 +31,7 @@ export class User {
 
   /**
    * Returns a string representation of the User.
+   *
    * @returns {string} The string representation of the User.
    */
   toString(): string {

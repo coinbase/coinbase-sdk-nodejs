@@ -12,6 +12,7 @@ export class Address {
 
   /**
    * Initializes a new Address instance.
+   *
    * @param {AddressModel} model - The address model data.
    * @param {AddressAPIClient} client - The API client to interact with address-related endpoints.
    * @throws {InternalError} If the model or client is empty.
@@ -30,6 +31,7 @@ export class Address {
   /**
    * Requests faucet funds for the address.
    * Only supported on testnet networks.
+   *
    * @returns {Promise<FaucetTransaction>} The faucet transaction object.
    * @throws {InternalError} If the request does not return a transaction hash.
    * @throws {Error} If the request fails.
@@ -44,6 +46,7 @@ export class Address {
 
   /**
    * Returns the address ID.
+   *
    * @returns {string} The address ID.
    */
   public getId(): string {
@@ -52,6 +55,7 @@ export class Address {
 
   /**
    * Returns the network ID.
+   *
    * @returns {string} The network ID.
    */
   public getNetworkId(): string {
@@ -60,6 +64,7 @@ export class Address {
 
   /**
    * Returns the public key.
+   *
    * @returns {string} The public key.
    */
   public getPublicKey(): string {
@@ -68,6 +73,7 @@ export class Address {
 
   /**
    * Returns the wallet ID.
+   *
    * @returns {string} The wallet ID.
    */
   public getWalletId(): string {
@@ -76,6 +82,7 @@ export class Address {
 
   /**
    * Returns a string representation of the address.
+   *
    * @returns {string} A string representing the address.
    */
   public toString(): string {

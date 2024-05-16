@@ -5,14 +5,16 @@ import { InvalidAPIKeyFormat } from "./errors";
 const pemHeader = "-----BEGIN EC PRIVATE KEY-----";
 const pemFooter = "-----END EC PRIVATE KEY-----";
 
-/* A class that builds JWTs for authenticating with the Coinbase Platform APIs. */
+/**
+ * A class that builds JWTs for authenticating with the Coinbase Platform APIs.
+ */
 export class CoinbaseAuthenticator {
   private apiKey: string;
   private privateKey: string;
 
   /**
    * Initializes the Authenticator.
-   * @constructor
+   *
    * @param {string} apiKey - The API key name.
    * @param {string} privateKey - The private key associated with the API key.
    */
@@ -23,6 +25,7 @@ export class CoinbaseAuthenticator {
 
   /**
    * Middleware to intercept requests and add JWT to Authorization header.
+   *
    * @param {InternalAxiosRequestConfig} config - The request configuration.
    * @param {boolean} debugging - Flag to enable debugging.
    * @returns {Promise<InternalAxiosRequestConfig>} The request configuration with the Authorization header added.
@@ -44,6 +47,7 @@ export class CoinbaseAuthenticator {
 
   /**
    * Builds the JWT for the given API endpoint URL.
+   *
    * @param {string} url - URL of the API endpoint.
    * @param {string} method - HTTP method of the request.
    * @returns {Promise<string>} JWT token.
@@ -93,6 +97,7 @@ export class CoinbaseAuthenticator {
 
   /**
    * Extracts the PEM key from the given private key string.
+   *
    * @param {string} privateKeyString - The private key string.
    * @returns {string} The PEM key.
    * @throws {InvalidAPIKeyFormat} If the private key string is not in the correct format.
@@ -109,6 +114,7 @@ export class CoinbaseAuthenticator {
 
   /**
    * Generates a random nonce for the JWT.
+   *
    * @returns {string} The generated nonce.
    */
   private nonce(): string {
