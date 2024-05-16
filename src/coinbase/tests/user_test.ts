@@ -22,6 +22,6 @@ describe("User Class", () => {
 
   it("should return a correctly formatted string representation of the User instance", () => {
     const user = new User(mockUserModel, mockApiClients);
-    expect(user.toString()).toBe(`Coinbase:User{userId: ${mockUserModel.id}}`);
+    expect(user.toString()).toBe(`User{ userId: ${mockUserModel.id} }`);
   });
 });

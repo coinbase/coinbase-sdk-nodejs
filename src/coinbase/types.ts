@@ -1,6 +1,7 @@
 import { AxiosPromise, AxiosRequestConfig, RawAxiosRequestConfig } from "axios";
 import {
   Address,
+  CreateAddressRequest,
   CreateWalletRequest,
   User as UserModel,
   Wallet as WalletModel,
@@ -22,6 +23,15 @@ export type WalletAPIClient = {
     createWalletRequest?: CreateWalletRequest,
     options?: RawAxiosRequestConfig,
   ) => AxiosPromise<WalletModel>;
+
+  /**
+   * Returns the wallet model with the given ID.
+   *
+   * @param walletId - The ID of the wallet to fetch
+   * @param options - Override http request option.
+   * @throws {APIError}
+   */
+  getWallet: (walletId: string, options?: RawAxiosRequestConfig) => AxiosPromise<WalletModel>;
 };
 
 /**
@@ -52,6 +62,20 @@ export type AddressAPIClient = {
   getAddress(
     walletId: string,
     addressId: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<Address>;
+
+  /**
+   * Create a new address scoped to the wallet.
+   *
+   * @param walletId - The ID of the wallet to create the address in.
+   * @param createAddressRequest - The address creation request.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+  createAddress(
+    walletId: string,
+    createAddressRequest?: CreateAddressRequest,
     options?: AxiosRequestConfig,
   ): AxiosPromise<Address>;
 };

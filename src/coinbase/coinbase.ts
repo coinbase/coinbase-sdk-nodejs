@@ -1,6 +1,6 @@
 import globalAxios from "axios";
 import fs from "fs";
-import { User as UserModel, UsersApiFactory } from "../client";
+import { AddressesApiFactory, User as UserModel, UsersApiFactory, WalletsApiFactory } from "../client";
 import { BASE_PATH } from "./../client/base";
 import { Configuration } from "./../client/configuration";
 import { CoinbaseAuthenticator } from "./authenticator";
@@ -59,6 +59,8 @@ export class Coinbase {
     );
 
     this.apiClients.user = UsersApiFactory(config, BASE_PATH, axiosInstance);
+    this.apiClients.wallet = WalletsApiFactory(config, BASE_PATH, axiosInstance);
+    this.apiClients.address = AddressesApiFactory(config, BASE_PATH, axiosInstance);
   }
 
   /**
