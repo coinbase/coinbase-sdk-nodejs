@@ -1,31 +1,14 @@
 import { ethers } from "ethers";
-import { Transfer as TransferModel, TransferStatusEnum } from "../../client/api";
-import { TransferAPIClient, TransferStatus } from "../types";
-import { Transfer, TransferClients } from "../transfer";
+import { Decimal } from "decimal.js";
+import { Transfer as TransferModel } from "../../client/api";
+import { TransferStatus } from "../types";
+import { Transfer } from "../transfer";
 import { Coinbase } from "../coinbase";
+import { WEI_PER_ETHER } from "../constants";
+import { VALID_TRANSFER_MODEL } from "./utils";
 
-const fromKey = ethers.Wallet.createRandom();
-
-const networkId = "base_sepolia";
-const walletId = "12345";
-const fromAddressId = fromKey.address;
-const amount = ethers.parseUnits("100", 18);
-const ethAmount = amount / BigInt(Coinbase.WEI_PER_ETHER);
-const toAddressId = "0x4D9E4F3f4D1A8B5F4f7b1F5b5C7b8d6b2B3b1b0b";
-const transferId = "67890";
-
-const unsignedPayload =
-  "7b2274797065223a22307832222c22636861696e4964223a2230783134613334222c226e6f6e63" +
-  "65223a22307830222c22746f223a22307834643965346633663464316138623566346637623166" +
-  "356235633762386436623262336231623062222c22676173223a22307835323038222c22676173" +
-  "5072696365223a6e756c6c2c226d61785072696f72697479466565506572476173223a223078" +
-  "3539363832663030222c226d6178466565506572476173223a2230783539363832663030222c22" +
-  "76616c7565223a2230783536626337356532643633313030303030222c22696e707574223a22" +
-  "3078222c226163636573734c697374223a5b5d2c2276223a22307830222c2272223a2230783022" +
-  "2c2273223a22307830222c2279506172697479223a22307830222c2268617368223a2230783664" +
-  "633334306534643663323633653363396561396135656438646561346332383966613861363966" +
-  "3031653635393462333732386230386138323335333433227d";
-
+const amount = new Decimal(ethers.parseUnits("100", 18).toString());
+const ethAmount = amount.div(WEI_PER_ETHER);
 const signedPayload =
   "02f86b83014a3401830f4240830f4350825208946cd01c0f55ce9e0bf78f5e90f72b4345b" +
   "16d515d0280c001a0566afb8ab09129b3f5b666c3a1e4a7e92ae12bbee8c75b4c6e0c46f6" +
@@ -38,31 +21,16 @@ const mockProvider = new ethers.JsonRpcProvider(
 ) as jest.Mocked<ethers.JsonRpcProvider>;
 mockProvider.getTransaction = jest.fn();
 mockProvider.getTransactionReceipt = jest.fn();
+Coinbase.apiClients.baseSepoliaProvider = mockProvider;
 
 describe("Transfer Class", () => {
   let transferModel: TransferModel;
-  let mockApiClients: TransferClients;
   let transfer: Transfer;
 
   beforeEach(() => {
-    transferModel = {
-      transfer_id: transferId,
-      network_id: networkId,
-      wallet_id: walletId,
-      address_id: fromAddressId,
-      destination: toAddressId,
-      asset_id: "eth",
-      amount: amount.toString(),
-      unsigned_payload: unsignedPayload,
-      status: TransferStatusEnum.Pending,
-    } as TransferModel;
+    transferModel = VALID_TRANSFER_MODEL;
 
-    mockApiClients = {
-      transfer: {} as TransferAPIClient,
-      baseSepoliaProvider: mockProvider,
-    } as TransferClients;
-
-    transfer = new Transfer(transferModel, mockApiClients);
+    transfer = Transfer.fromModel(transferModel);
   });
 
   afterEach(() => {
@@ -77,55 +45,55 @@ describe("Transfer Class", () => {
 
   describe("getId", () => {
     it("should return the transfer ID", () => {
-      expect(transfer.getId()).toEqual(transferId);
+      expect(transfer.getId()).toEqual(VALID_TRANSFER_MODEL.transfer_id);
     });
   });
 
   describe("getNetworkId", () => {
     it("should return the network ID", () => {
-      expect(transfer.getNetworkId()).toEqual(networkId);
+      expect(transfer.getNetworkId()).toEqual(VALID_TRANSFER_MODEL.network_id);
     });
   });
 
   describe("getWalletId", () => {
     it("should return the wallet ID", () => {
-      expect(transfer.getWalletId()).toEqual(walletId);
+      expect(transfer.getWalletId()).toEqual(VALID_TRANSFER_MODEL.wallet_id);
     });
   });
 
   describe("getFromAddressId", () => {
     it("should return the source address ID", () => {
-      expect(transfer.getFromAddressId()).toEqual(fromAddressId);
+      expect(transfer.getFromAddressId()).toEqual(VALID_TRANSFER_MODEL.address_id);
     });
   });
 
   describe("getDestinationAddressId", () => {
     it("should return the destination address ID", () => {
-      expect(transfer.getDestinationAddressId()).toEqual(toAddressId);
+      expect(transfer.getDestinationAddressId()).toEqual(VALID_TRANSFER_MODEL.destination);
     });
   });
 
   describe("getAssetId", () => {
     it("should return the asset ID", () => {
-      expect(transfer.getAssetId()).toEqual("eth");
+      expect(transfer.getAssetId()).toEqual(VALID_TRANSFER_MODEL.asset_id);
     });
   });
 
   describe("getAmount", () => {
-    it("should return the amount", () => {
-      transferModel.asset_id = "usdc";
-      transfer = new Transfer(transferModel, mockApiClients);
-      expect(transfer.getAmount()).toEqual(amount);
+    it("should return the ETH amount when the asset ID is eth", () => {
+      expect(transfer.getAmount()).toEqual(ethAmount);
     });
 
-    it("should return the ETH amount when the asset ID is eth", () => {
-      expect(transfer.getAmount()).toEqual(BigInt(ethAmount));
+    it("should return the amoun when the asset ID is not eth", () => {
+      transferModel.asset_id = "usdc";
+      transfer = Transfer.fromModel(transferModel);
+      expect(transfer.getAmount()).toEqual(amount);
     });
   });
 
   describe("getUnsignedPayload", () => {
     it("should return the unsigned payload", () => {
-      expect(transfer.getUnsignedPayload()).toEqual(unsignedPayload);
+      expect(transfer.getUnsignedPayload()).toEqual(VALID_TRANSFER_MODEL.unsigned_payload);
     });
   });
 
@@ -136,7 +104,7 @@ describe("Transfer Class", () => {
 
     it("should return the signed payload when the transfer has been broadcast on chain", () => {
       transferModel.signed_payload = signedPayload;
-      transfer = new Transfer(transferModel, mockApiClients);
+      transfer = Transfer.fromModel(transferModel);
       expect(transfer.getSignedPayload()).toEqual(signedPayload);
     });
   });
@@ -148,7 +116,7 @@ describe("Transfer Class", () => {
 
     it("should return the transaction hash when the transfer has been broadcast on chain", () => {
       transferModel.transaction_hash = transactionHash;
-      transfer = new Transfer(transferModel, mockApiClients);
+      transfer = Transfer.fromModel(transferModel);
       expect(transfer.getTransactionHash()).toEqual(transactionHash);
     });
   });
@@ -162,8 +130,8 @@ describe("Transfer Class", () => {
       expect(transaction.maxPriorityFeePerGas).toEqual(BigInt("0x59682f00"));
       expect(transaction.maxFeePerGas).toEqual(BigInt("0x59682f00"));
       expect(transaction.gasLimit).toEqual(BigInt("0x5208"));
-      expect(transaction.to).toEqual(toAddressId);
-      expect(transaction.value).toEqual(amount);
+      expect(transaction.to).toEqual(VALID_TRANSFER_MODEL.destination);
+      expect(transaction.value).toEqual(BigInt(amount.toFixed(0)));
       expect(transaction.data).toEqual("0x");
     });
   });
@@ -176,7 +144,7 @@ describe("Transfer Class", () => {
 
     it("should return PENDING when the transaction has been created but not broadcast", async () => {
       transferModel.transaction_hash = transactionHash;
-      transfer = new Transfer(transferModel, mockApiClients);
+      transfer = Transfer.fromModel(transferModel);
       mockProvider.getTransaction.mockResolvedValueOnce(null);
       const status = await transfer.getStatus();
       expect(status).toEqual(TransferStatus.PENDING);
@@ -184,7 +152,7 @@ describe("Transfer Class", () => {
 
     it("should return BROADCAST when the transaction has been broadcast but not included in a block", async () => {
       transferModel.transaction_hash = transactionHash;
-      transfer = new Transfer(transferModel, mockApiClients);
+      transfer = Transfer.fromModel(transferModel);
       mockProvider.getTransaction.mockResolvedValueOnce({
         blockHash: null,
       } as ethers.TransactionResponse);
@@ -194,7 +162,7 @@ describe("Transfer Class", () => {
 
     it("should return COMPLETE when the transaction has confirmed", async () => {
       transferModel.transaction_hash = transactionHash;
-      transfer = new Transfer(transferModel, mockApiClients);
+      transfer = Transfer.fromModel(transferModel);
       mockProvider.getTransaction.mockResolvedValueOnce({
         blockHash: "0xdeadbeef",
       } as ethers.TransactionResponse);
@@ -207,7 +175,7 @@ describe("Transfer Class", () => {
 
     it("should return FAILED when the transaction has failed", async () => {
       transferModel.transaction_hash = transactionHash;
-      transfer = new Transfer(transferModel, mockApiClients);
+      transfer = Transfer.fromModel(transferModel);
       mockProvider.getTransaction.mockResolvedValueOnce({
         blockHash: "0xdeadbeef",
       } as ethers.TransactionResponse);
@@ -216,62 +184,6 @@ describe("Transfer Class", () => {
       } as ethers.TransactionReceipt);
       const status = await transfer.getStatus();
       expect(status).toEqual(TransferStatus.FAILED);
-    });
-  });
-
-  describe("wait", () => {
-    it("should return the completed Transfer when the transfer is completed", async () => {
-      transferModel.transaction_hash = transactionHash;
-      transfer = new Transfer(transferModel, mockApiClients);
-      mockProvider.getTransaction.mockResolvedValueOnce({
-        blockHash: "0xdeadbeef",
-      } as ethers.TransactionResponse);
-      mockProvider.getTransactionReceipt.mockResolvedValueOnce({
-        status: 1,
-      } as ethers.TransactionReceipt);
-      mockProvider.getTransaction.mockResolvedValueOnce({
-        blockHash: "0xdeadbeef",
-      } as ethers.TransactionResponse);
-      mockProvider.getTransactionReceipt.mockResolvedValueOnce({
-        status: 1,
-      } as ethers.TransactionReceipt);
-
-      const promise = transfer.wait(0.2, 10);
-
-      const result = await promise;
-      expect(result).toBe(transfer);
-      const status = await transfer.getStatus();
-      expect(status).toEqual(TransferStatus.COMPLETE);
-    });
-
-    it("should return the failed Transfer when the transfer is failed", async () => {
-      transferModel.transaction_hash = transactionHash;
-      transfer = new Transfer(transferModel, mockApiClients);
-      mockProvider.getTransaction.mockResolvedValueOnce({
-        blockHash: "0xdeadbeef",
-      } as ethers.TransactionResponse);
-      mockProvider.getTransactionReceipt.mockResolvedValueOnce({
-        status: 0,
-      } as ethers.TransactionReceipt);
-      mockProvider.getTransaction.mockResolvedValueOnce({
-        blockHash: "0xdeadbeef",
-      } as ethers.TransactionResponse);
-      mockProvider.getTransactionReceipt.mockResolvedValueOnce({
-        status: 0,
-      } as ethers.TransactionReceipt);
-
-      const promise = transfer.wait(0.2, 10);
-
-      const result = await promise;
-      expect(result).toBe(transfer);
-      const status = await transfer.getStatus();
-      expect(status).toEqual(TransferStatus.FAILED);
-    });
-
-    it("should throw an error when the transfer times out", async () => {
-      const promise = transfer.wait(0.2, 0.00001);
-
-      await expect(promise).rejects.toThrow("Transfer timed out");
     });
   });
 });

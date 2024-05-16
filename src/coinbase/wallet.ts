@@ -6,9 +6,10 @@ import * as secp256k1 from "secp256k1";
 import { Address as AddressModel, Wallet as WalletModel } from "../client";
 import { Address } from "./address";
 import { Coinbase } from "./coinbase";
+import { Transfer } from "./transfer";
 import { ArgumentError, InternalError } from "./errors";
 import { FaucetTransaction } from "./faucet_transaction";
-import { WalletData } from "./types";
+import { Amount, Destination, WalletData } from "./types";
 import { convertStringToHex } from "./utils";
 import { BalanceMap } from "./balance_map";
 import Decimal from "decimal.js";
@@ -138,17 +139,19 @@ export class Wallet {
    * @throws {APIError} - If the address creation fails.
    */
   public async createAddress(): Promise<Address> {
-    const key = this.deriveKey();
-    const attestation = this.createAttestation(key);
-    const publicKey = convertStringToHex(key.publicKey!);
+    const hdKey = this.deriveKey();
+    const attestation = this.createAttestation(hdKey);
+    const publicKey = convertStringToHex(hdKey.publicKey!);
+    const key = new ethers.Wallet(convertStringToHex(hdKey.privateKey!));
 
     const payload = {
       public_key: publicKey,
       attestation: attestation,
     };
     const response = await Coinbase.apiClients.address!.createAddress(this.model.id!, payload);
-    this.cacheAddress(response!.data);
-    return new Address(response!.data);
+
+    this.cacheAddress(response!.data, key);
+    return new Address(response!.data, key);
   }
 
   /**
@@ -203,14 +206,13 @@ export class Wallet {
     addressMap: { [key: string]: boolean },
     addressModel: AddressModel,
   ): Promise<void> {
-    const key = this.master.publicKey ? this.deriveKey() : null;
-    if (key) {
-      const wallet = new ethers.Wallet(convertStringToHex(key.privateKey!));
-      if (addressMap[wallet.address]) {
-        throw new InternalError("Invalid address");
-      }
+    const hdKey = this.deriveKey();
+    const key = new ethers.Wallet(convertStringToHex(hdKey.privateKey!));
+    if (addressMap[key.address]) {
+      throw new InternalError("Invalid address");
     }
-    this.cacheAddress(addressModel);
+
+    this.cacheAddress(addressModel, key);
   }
 
   /**
@@ -245,11 +247,12 @@ export class Wallet {
    * Caches an Address on the client-side and increments the address index.
    *
    * @param address - The AddressModel to cache.
+   * @param key - The ethers.js Wallet object the address uses for signing data.
    * @throws {InternalError} If the address is not provided.
    * @returns {void}
    */
-  private cacheAddress(address: AddressModel): void {
-    this.addresses.push(new Address(address));
+  private cacheAddress(address: AddressModel, key: ethers.Wallet): void {
+    this.addresses.push(new Address(address, key));
     this.addressIndex++;
   }
 
@@ -322,8 +325,10 @@ export class Wallet {
    *
    * @returns The default address
    */
-  public defaultAddress(): Address | undefined {
-    return this.model.default_address ? new Address(this.model.default_address) : undefined;
+  public getDefaultAddress(): Address | undefined {
+    return this.addresses.find(
+      address => address.getId() === this.model.default_address?.address_id,
+    );
   }
 
   /**
@@ -347,9 +352,42 @@ export class Wallet {
     if (!this.model.default_address) {
       throw new InternalError("Default address not found");
     }
-    const transaction = await this.defaultAddress()?.faucet();
+    const transaction = await this.getDefaultAddress()!.faucet();
     return transaction!;
   }
+
+  /**
+   * Sends an amount of an asset to a destination.
+   *
+   * @param amount - The amount to send.
+   * @param assetId - The asset ID to send.
+   * @param destination - The destination address.
+   * @param intervalSeconds - The interval at which to poll the Network for Transfer status, in seconds.
+   * @param timeoutSeconds - The maximum amount of time to wait for the Transfer to complete, in seconds.
+   * @returns The transfer object.
+   * @throws {APIError} if the API request to create a Transfer fails.
+   * @throws {APIError} if the API request to broadcast a Transfer fails.
+   * @throws {Error} if the Transfer times out.
+   */
+  public async createTransfer(
+    amount: Amount,
+    assetId: string,
+    destination: Destination,
+    intervalSeconds = 0.2,
+    timeoutSeconds = 10,
+  ): Promise<Transfer> {
+    if (!this.getDefaultAddress()) {
+      throw new InternalError("Default address not found");
+    }
+    return await this.getDefaultAddress()!.createTransfer(
+      amount,
+      assetId,
+      destination,
+      intervalSeconds,
+      timeoutSeconds,
+    );
+  }
+
   /**
    * Returns a String representation of the Wallet.
    *

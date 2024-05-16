@@ -1,10 +1,10 @@
 import globalAxios from "axios";
 import * as fs from "fs";
 import {
-  AddressesApiFactory,
   User as UserModel,
   UsersApiFactory,
   TransfersApiFactory,
+  AddressesApiFactory,
   WalletsApiFactory,
 } from "../client";
 import { ethers } from "ethers";
@@ -43,20 +43,6 @@ export class Coinbase {
   };
 
   static apiClients: ApiClients = {};
-
-  /**
-   * Represents the number of Wei per Ether.
-   *
-   * @constant
-   */
-  static readonly WEI_PER_ETHER: bigint = BigInt("1000000000000000000");
-
-  /**
-   * Represents the number of Gwei per Ether.
-   *
-   * @constant
-   */
-  static readonly GWEI_PER_ETHER: bigint = BigInt("1000000000");
 
   /**
    * The backup file path for Wallet seeds.

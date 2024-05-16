@@ -82,7 +82,7 @@ describe("User Class", () => {
     });
 
     it("should load the wallet addresses", async () => {
-      expect(importedWallet.defaultAddress()!.getId()).toBe(mockAddressModel.address_id);
+      expect(importedWallet.getDefaultAddress()!.getId()).toBe(mockAddressModel.address_id);
     });
 
     it("should contain the same seed when re-exported", async () => {
@@ -253,7 +253,7 @@ describe("User Class", () => {
       const wallet = wallets[walletId];
       expect(wallet).not.toBeNull();
       expect(wallet.getId()).toBe(walletId);
-      expect(wallet.defaultAddress()?.getId()).toBe(addressModel.address_id);
+      expect(wallet.getDefaultAddress()?.getId()).toBe(addressModel.address_id);
     });
 
     it("throws an error when the backup file is absent", async () => {

@@ -1,3 +1,4 @@
+import { Decimal } from "decimal.js";
 import { AxiosPromise, AxiosRequestConfig, RawAxiosRequestConfig } from "axios";
 import { ethers } from "ethers";
 import {
@@ -15,6 +16,8 @@ import {
   Transfer as TransferModel,
   WalletList,
 } from "./../client/api";
+import { Address } from "./address";
+import { Wallet } from "./wallet";
 
 /**
  * WalletAPI client type definition.
@@ -326,3 +329,13 @@ export type SeedData = {
   authTag: string;
   iv: string;
 };
+
+/**
+ * Amount type definition.
+ */
+export type Amount = number | bigint | Decimal;
+
+/**
+ * Destination type definition.
+ */
+export type Destination = string | Address | Wallet;
