@@ -9,17 +9,29 @@ import { ApiClients } from "./types";
 import { User } from "./user";
 import { logApiResponse, registerAxiosInterceptors } from "./utils";
 
-// The Coinbase SDK.
+/**
+ * The Coinbase SDK.
+ */
 export class Coinbase {
+  /**
+   * The list of supported networks.
+   *
+   * @constant
+   */
+  static networkList = {
+    BaseSepolia: "base_sepolia",
+  };
+
   apiClients: ApiClients = {};
 
   /**
    * Initializes the Coinbase SDK.
-   * @constructor
-   * @param {string} apiKeyName - The API key name.
-   * @param {string} privateKey - The private key associated with the API key.
-   * @param {boolean} debugging - If true, logs API requests and responses to the console.
-   * @param {string} basePath - The base path for the API.
+   *
+   * @class
+   * @param apiKeyName - The API key name.
+   * @param privateKey - The private key associated with the API key.
+   * @param debugging - If true, logs API requests and responses to the console.
+   * @param basePath - The base path for the API.
    * @throws {InternalError} If the configuration is invalid.
    * @throws {InvalidAPIKeyFormat} If not able to create JWT token.
    */
@@ -51,7 +63,10 @@ export class Coinbase {
 
   /**
    * Reads the API key and private key from a JSON file and initializes the Coinbase SDK.
-   * @param {string} filePath - The path to the JSON file containing the API key and private key.
+   *
+   * @param filePath - The path to the JSON file containing the API key and private key.
+   * @param debugging - If true, logs API requests and responses to the console.
+   * @param basePath - The base path for the API.
    * @returns {Coinbase} A new instance of the Coinbase SDK.
    * @throws {InvalidAPIKeyFormat} If the file does not exist or the configuration values are missing/invalid.
    * @throws {InvalidConfiguration} If the configuration is invalid.
@@ -86,6 +101,7 @@ export class Coinbase {
 
   /**
    * Returns User object for the default user.
+   *
    * @returns {User} The default user.
    * @throws {APIError} If the request fails.
    */

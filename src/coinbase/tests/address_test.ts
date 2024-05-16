@@ -6,14 +6,15 @@ import { FaucetTransaction } from "./../faucet_transaction";
 import MockAdapter from "axios-mock-adapter";
 import { randomUUID } from "crypto";
 import { APIError, FaucetLimitReachedError } from "../api_error";
-import { createAxiosMock } from "./utils";
+import { Coinbase } from "../coinbase";
 import { InternalError } from "../errors";
+import { createAxiosMock } from "./utils";
 
 const newEthAddress = ethers.Wallet.createRandom();
 
 const VALID_ADDRESS_MODEL: AddressModel = {
   address_id: newEthAddress.address,
-  network_id: "base-sepolia",
+  network_id: Coinbase.networkList.BaseSepolia,
   public_key: newEthAddress.publicKey,
   wallet_id: randomUUID(),
 };

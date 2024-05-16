@@ -10,7 +10,8 @@ export class FaucetTransaction {
   /**
    * Creates a new FaucetTransaction instance.
    * Do not use this method directly - instead, use Address.faucet().
-   * @constructor
+   *
+   * @class
    * @param {FaucetTransactionModel} model - The FaucetTransaction model.
    * @throws {InternalError} If the model does not exist.
    */
@@ -23,6 +24,7 @@ export class FaucetTransaction {
 
   /**
    * Returns the transaction hash.
+   *
    * @returns {string} The transaction hash.
    */
   public getTransactionHash(): string {
@@ -31,6 +33,7 @@ export class FaucetTransaction {
 
   /**
    * Returns the link to the transaction on the blockchain explorer.
+   *
    * @returns {string} The link to the transaction on the blockchain explorer
    */
   public getTransactionLink(): string {
@@ -40,6 +43,7 @@ export class FaucetTransaction {
 
   /**
    * Returns a string representation of the FaucetTransaction.
+   *
    * @returns {string} A string representation of the FaucetTransaction.
    */
   public toString(): string {

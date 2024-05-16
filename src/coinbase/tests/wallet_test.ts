@@ -1,62 +1,75 @@
+import MockAdapter from "axios-mock-adapter";
 import * as bip39 from "bip39";
-import { Address as AddressModel, Wallet as WalletModel } from "../../client";
+import { randomUUID } from "crypto";
+import { AddressesApiFactory, WalletsApiFactory } from "../../client";
+import { Coinbase } from "../coinbase";
+import { ArgumentError } from "../errors";
 import { Wallet } from "../wallet";
-import { ApiClients } from "./../types";
+import { createAxiosMock } from "./utils";
 
-// Mock data
-const VALID_WALLET_MODEL: WalletModel = {
-  id: "mocked_wallet_id",
-  network_id: "mocked_network_id",
+const walletId = randomUUID();
+const VALID_WALLET_MODEL = {
+  id: randomUUID(),
+  network_id: Coinbase.networkList.BaseSepolia,
   default_address: {
-    address_id: "mocked_address_id",
-    network_id: "mocked_network_id",
-    public_key: "mocked_public_key",
-    wallet_id: "mocked_wallet_id",
+    wallet_id: walletId,
+    address_id: "0xdeadbeef",
+    public_key: "0x1234567890",
+    network_id: Coinbase.networkList.BaseSepolia,
   },
 };
 
-const VALID_ADDRESS_MODEL: AddressModel = {
-  address_id: "mocked_address_id",
-  network_id: "mocked_network_id",
-  public_key: "mocked_public_key",
-  wallet_id: "mocked_wallet_id",
-};
-
-// Mock ApiClients
-const mockClient: ApiClients = {
-  address: {
-    getAddress: jest.fn().mockResolvedValue({ data: VALID_ADDRESS_MODEL }),
-    requestFaucetFunds: jest.fn(),
-  },
-  user: {
-    getCurrentUser: jest.fn(),
-  },
-};
-
-// Test suite for Wallet class
-describe("Wallet", () => {
+describe("Wallet Class", () => {
+  let wallet, axiosMock;
   const seed = bip39.generateMnemonic();
-  it("should create a Wallet instance", () => {
-    const wallet = new Wallet(VALID_WALLET_MODEL, mockClient, seed, 1);
-    expect(wallet).toBeInstanceOf(Wallet);
-    expect(wallet.getId()).toBe("mocked_wallet_id");
-    expect(wallet.getNetworkId()).toBe("mocked_network_id");
-    expect(wallet.defaultAddress()?.getId()).toBe("mocked_address_id");
+
+  const [axiosInstance, configuration, BASE_PATH] = createAxiosMock();
+  const client = {
+    wallet: WalletsApiFactory(configuration, BASE_PATH, axiosInstance),
+    address: AddressesApiFactory(configuration, BASE_PATH, axiosInstance),
+  };
+
+  beforeAll(async () => {
+    axiosMock = new MockAdapter(axiosInstance);
+    axiosMock.onPost().reply(200, VALID_WALLET_MODEL).onGet().reply(200, VALID_WALLET_MODEL);
+    wallet = await Wallet.init(VALID_WALLET_MODEL, client, seed, 2);
   });
 
-  it("should return the correct string representation", () => {
-    const wallet = new Wallet(VALID_WALLET_MODEL, mockClient);
+  afterEach(() => {
+    axiosMock.reset();
+  });
+
+  describe("should initializes a new Wallet", () => {
+    it("should return a Wallet instance", async () => {
+      expect(wallet).toBeInstanceOf(Wallet);
+    });
+    it("should return the correct wallet ID", async () => {
+      expect(wallet.getId()).toBe(VALID_WALLET_MODEL.id);
+    });
+    it("should return the correct network ID", async () => {
+      expect(wallet.getNetworkId()).toBe(Coinbase.networkList.BaseSepolia);
+    });
+    it("should return the correct default address", async () => {
+      expect(wallet.defaultAddress()?.getId()).toBe(VALID_WALLET_MODEL.default_address.address_id);
+    });
+
+    it("should derive the correct number of addresses", async () => {
+      expect(wallet.addresses.length).toBe(2);
+    });
+  });
+
+  it("should return the correct string representation", async () => {
+    const wallet = await Wallet.init(VALID_WALLET_MODEL, client);
     expect(wallet.toString()).toBe(
-      "Wallet{id: 'mocked_wallet_id', network_id: 'mocked_network_id'}",
+      `Wallet{id: '${VALID_WALLET_MODEL.id}', network_id: 'base_sepolia'}`,
     );
   });
 
-  it("should throw an InternalError if address client is not provided", () => {
-    expect(() => new Wallet(VALID_WALLET_MODEL, undefined!)).toThrow(
-      "Address client cannot be empty",
-    );
+  it("should throw an ArgumentError when the API client is not provided", async () => {
+    await expect(Wallet.init(VALID_WALLET_MODEL, undefined!)).rejects.toThrow(ArgumentError);
   });
-  it("should throw an InternalError if address client is not provided", () => {
-    expect(() => new Wallet(undefined!, mockClient)).toThrow("Wallet model cannot be empty");
+
+  it("should throw an ArgumentError when the wallet model is not provided", async () => {
+    await expect(Wallet.init(undefined!, client)).rejects.toThrow(ArgumentError);
   });
 });

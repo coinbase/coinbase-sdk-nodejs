@@ -1,3 +1,4 @@
+/* eslint-disable jsdoc/require-jsdoc */
 import { AxiosError } from "axios";
 import { InternalError } from "./errors";
 
@@ -19,7 +20,8 @@ export class APIError extends AxiosError {
 
   /**
    * Initializes a new APIError object.
-   * @constructor
+   *
+   * @class
    * @param {AxiosError} error - The Axios error.
    */
   constructor(error) {
@@ -38,6 +40,7 @@ export class APIError extends AxiosError {
 
   /**
    * Creates a specific APIError based on the API error code.
+   *
    * @param {AxiosError} error - The underlying error object.
    * @returns {APIError} A specific APIError instance.
    */
@@ -100,6 +103,7 @@ export class APIError extends AxiosError {
 
   /**
    * Returns a String representation of the APIError.
+   *
    * @returns {string} a String representation of the APIError
    */
   toString() {
