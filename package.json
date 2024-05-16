@@ -7,8 +7,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "lint": "eslint -c .eslintrc.json src/coinbase/*.ts",
-    "lint-fix": "eslint -c .eslintrc.json src/coinbase/*.ts --fix",
+    "lint": "eslint -c .eslintrc.json src/**/*.ts",
+    "lint-fix": "eslint -c .eslintrc.json src/**/*.ts --fix",
     "format": "prettier -c .prettierrc --write \"**/*.{ts,js,cjs,json,md}\"",
     "format-check": "prettier -c .prettierrc --check \"**/*.{ts,js,cjs,json,md}\"",
     "check": "tsc --noEmit",
