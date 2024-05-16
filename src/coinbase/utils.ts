@@ -70,3 +70,13 @@ export const registerAxiosInterceptors = (
 export const convertStringToHex = (key: Uint8Array): string => {
   return Buffer.from(key).toString("hex");
 };
+
+/**
+ * Delays the execution of the function by the specified number of seconds.
+ *
+ * @param seconds - The number of seconds to delay the execution.
+ * @returns A promise that resolves after the specified number of seconds.
+ */
+export async function delay(seconds: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, seconds * 1000));
+}

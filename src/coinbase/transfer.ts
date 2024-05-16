@@ -3,6 +3,7 @@ import { Coinbase } from "./coinbase";
 import { Transfer as TransferModel } from "../client/api";
 import { ethers } from "ethers";
 import { InternalError, InvalidUnsignedPayload } from "./errors";
+import { delay } from "./utils";
 
 /**
  * The Transfer API client types.
@@ -218,7 +219,7 @@ export class Transfer {
       if (status === TransferStatus.COMPLETE || status === TransferStatus.FAILED) {
         return this;
       }
-      await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
+      await delay(intervalSeconds);
     }
     throw new Error("Transfer timed out");
   }
