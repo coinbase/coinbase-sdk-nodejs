@@ -156,6 +156,6 @@ export class Wallet {
    * @returns a String representation of the Wallet
    */
   public toString(): string {
-    return `Wallet{id: '${this.model.id}', network_id: '${this.model.network_id}'}`;
+    return `Wallet{id: '${this.model.id}', networkId: '${this.model.network_id}'}`;
   }
 }

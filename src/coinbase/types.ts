@@ -16,7 +16,7 @@ export type WalletAPIClient = {
    * @class
    * @param {CreateWalletRequest} [createWalletRequest] - The wallet creation request.
    * @param {RawAxiosRequestConfig} [options] - Axios request options.
-   * @throws {RequiredError}
+   * @throws {APIError} If the request fails.
    */
   createWallet: (
     createWalletRequest?: CreateWalletRequest,
@@ -34,7 +34,7 @@ export type AddressAPIClient = {
    * @param {string} walletId - The wallet ID.
    * @param {string} addressId - The address ID.
    * @returns {Promise<{ data: { transaction_hash: string } }>} - The transaction hash
-   * @throws {Error} If the request fails.
+   * @throws {APIError} If the request fails.
    */
   requestFaucetFunds(
     walletId: string,
@@ -48,7 +48,7 @@ export type AddressAPIClient = {
    * @param {string} walletId - The ID of the wallet the address belongs to.
    * @param {string} addressId - The onchain address of the address that is being fetched.
    * @param {AxiosRequestConfig} [options] - Axios request options.
-   * @throws {RequiredError}
+   * @throws {APIError} If the request fails.
    */
   getAddress(
     walletId: string,
@@ -65,8 +65,8 @@ export type UserAPIClient = {
    * Retrieves the current user.
    *
    * @param {AxiosRequestConfig} [options] - Axios request options.
-   * @returns {AxiosPromise<UserModel>} - A promise resolving to the User model.
-   * @throws {AxiosError} If the request fails.
+   * @returns {AxiosPromise<UserModel>} - A promise resolvindg to the User model.
+   * @throws {APIError} If the request fails.
    */
   getCurrentUser(options?: AxiosRequestConfig): AxiosPromise<UserModel>;
 };

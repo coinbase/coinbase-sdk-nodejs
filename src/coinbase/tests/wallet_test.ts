@@ -61,7 +61,7 @@ describe("Wallet Class", () => {
   it("should return the correct string representation", async () => {
     const wallet = await Wallet.init(VALID_WALLET_MODEL, client);
     expect(wallet.toString()).toBe(
-      `Wallet{id: '${VALID_WALLET_MODEL.id}', network_id: 'base_sepolia'}`,
+      `Wallet{id: '${VALID_WALLET_MODEL.id}', networkId: 'base_sepolia'}`,
     );
   });
 
