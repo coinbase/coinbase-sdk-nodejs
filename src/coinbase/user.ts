@@ -2,6 +2,7 @@ import { ApiClients } from "./types";
 import { User as UserModel } from "./../client/api";
 import { Coinbase } from "./coinbase";
 import { Wallet } from "./wallet";
+
 /**
  * A representation of a User.
  * Users have Wallets, which can hold balances of Assets.

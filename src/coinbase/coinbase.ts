@@ -1,6 +1,13 @@
 import globalAxios from "axios";
 import fs from "fs";
-import { AddressesApiFactory, User as UserModel, UsersApiFactory, WalletsApiFactory } from "../client";
+import {
+  AddressesApiFactory,
+  User as UserModel,
+  UsersApiFactory,
+  TransfersApiFactory,
+  WalletsApiFactory,
+} from "../client";
+import { ethers } from "ethers";
 import { BASE_PATH } from "./../client/base";
 import { Configuration } from "./../client/configuration";
 import { CoinbaseAuthenticator } from "./authenticator";
@@ -22,7 +29,27 @@ export class Coinbase {
     BaseSepolia: "base-sepolia",
   };
 
+  /**
+   * The list of supported assets.
+   *
+   * @constant
+   */
+  static assetList = {
+    Eth: "eth",
+    Wei: "wei",
+    Gwei: "gwei",
+    Usdc: "usdc",
+    Weth: "weth",
+  };
+
   apiClients: ApiClients = {};
+
+  /**
+   * Represents the number of Wei per Ether.
+   *
+   * @constant
+   */
+  static readonly WEI_PER_ETHER: bigint = BigInt("1000000000000000000");
 
   /**
    * Initializes the Coinbase SDK.
@@ -61,6 +88,8 @@ export class Coinbase {
     this.apiClients.user = UsersApiFactory(config, BASE_PATH, axiosInstance);
     this.apiClients.wallet = WalletsApiFactory(config, BASE_PATH, axiosInstance);
     this.apiClients.address = AddressesApiFactory(config, BASE_PATH, axiosInstance);
+    this.apiClients.transfer = TransfersApiFactory(config, BASE_PATH, axiosInstance);
+    this.apiClients.baseSepoliaProvider = new ethers.JsonRpcProvider("https://sepolia.base.org");
   }
 
   /**
@@ -69,7 +98,7 @@ export class Coinbase {
    * @param filePath - The path to the JSON file containing the API key and private key.
    * @param debugging - If true, logs API requests and responses to the console.
    * @param basePath - The base path for the API.
-   * @returns {Coinbase} A new instance of the Coinbase SDK.
+   * @returns A new instance of the Coinbase SDK.
    * @throws {InvalidAPIKeyFormat} If the file does not exist or the configuration values are missing/invalid.
    * @throws {InvalidConfiguration} If the configuration is invalid.
    * @throws {InvalidAPIKeyFormat} If not able to create JWT token.
@@ -104,7 +133,7 @@ export class Coinbase {
   /**
    * Returns User object for the default user.
    *
-   * @returns {User} The default user.
+   * @returns The default user.
    * @throws {APIError} If the request fails.
    */
   async getDefaultUser(): Promise<User> {
