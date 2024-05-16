@@ -5,16 +5,7 @@ import { Decimal } from "decimal.js";
 /**
  * A convenience class for storing and manipulating Asset balances in a human-readable format.
  */
-export class BalanceMap {
-  private map: Map<string, Decimal>;
-
-  /**
-   * Constructor to initialize the BalanceMap.
-   */
-  constructor() {
-    this.map = new Map<string, Decimal>();
-  }
-
+export class BalanceMap extends Map<string, Decimal> {
   /**
    * Converts a list of Balance models to a BalanceMap.
    *
@@ -39,7 +30,7 @@ export class BalanceMap {
     if (!(balance instanceof Balance)) {
       throw new Error("balance must be a Balance");
     }
-    this.map.set(balance.assetId, balance.amount);
+    this.set(balance.assetId, balance.amount);
   }
 
   /**
@@ -49,7 +40,7 @@ export class BalanceMap {
    */
   public toString(): string {
     const result: Record<string, string> = {};
-    this.map.forEach((value, key) => {
+    this.forEach((value, key) => {
       let str = value.toString();
       if (value.isInteger()) {
         str = value.toNumber().toString();

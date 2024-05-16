@@ -1,5 +1,6 @@
 import { ethers } from "ethers";
 import {
+  AddressBalanceList,
   AddressesApiFactory,
   Address as AddressModel,
   Balance as BalanceModel,
@@ -32,6 +33,38 @@ const VALID_BALANCE_MODEL: BalanceModel = {
   },
 };
 
+const VALID_ADDRESS_BALANCE_LIST: AddressBalanceList = {
+  data: [
+    {
+      amount: "1000000000000000000",
+      asset: {
+        asset_id: "eth",
+        network_id: "base-sepolia",
+        decimals: 18,
+      },
+    },
+    {
+      amount: "5000000000",
+      asset: {
+        asset_id: "usdc",
+        network_id: "base-sepolia",
+        decimals: 6,
+      },
+    },
+    {
+      amount: "3000000000000000000",
+      asset: {
+        asset_id: "weth",
+        network_id: "base-sepolia",
+        decimals: 6,
+      },
+    },
+  ],
+  has_more: false,
+  next_page: "",
+  total_count: 3,
+};
+
 // Test suite for Address class
 describe("Address", () => {
   const [axiosInstance, configuration, BASE_PATH] = createAxiosMock();
@@ -60,6 +93,14 @@ describe("Address", () => {
 
   it("should return the address ID", () => {
     expect(address.getNetworkId()).toBe(VALID_ADDRESS_MODEL.network_id);
+  });
+
+  it("should return the correct list of balances", async () => {
+    axiosMock.onGet().reply(200, VALID_ADDRESS_BALANCE_LIST);
+    const balances = await address.listBalances();
+    expect(balances.get("eth")).toEqual(new Decimal(1));
+    expect(balances.get("usdc")).toEqual(new Decimal(5000));
+    expect(balances.get("weth")).toEqual(new Decimal(3));
   });
 
   it("should return the correct ETH balance", async () => {
