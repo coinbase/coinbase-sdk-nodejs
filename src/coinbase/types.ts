@@ -1,6 +1,7 @@
 import { AxiosPromise, AxiosRequestConfig, RawAxiosRequestConfig } from "axios";
 import {
   Address,
+  AddressBalanceList,
   Balance,
   CreateWalletRequest,
   User as UserModel,
@@ -59,19 +60,35 @@ export type AddressAPIClient = {
   /**
    * Get address balance
    *
-   * @summary Get address balance for asset
-   * @param walletId - The ID of the wallet to fetch the balance for
+   * @param walletId - The ID of the wallet to fetch the balance for.
    * @param addressId - The onchain address of the address that is being fetched.
-   * @param assetId - The symbol of the asset to fetch the balance for
-   * @param [options] - Override http request option.
+   * @param assetId - The symbol of the asset to fetch the balance for.
+   * @param options - Axios request options.
    * @throws {APIError}
    */
   getAddressBalance(
     walletId: string,
     addressId: string,
     assetId: string,
-    options?: RawAxiosRequestConfig,
+    options?: AxiosRequestConfig,
   ): AxiosPromise<Balance>;
+
+  /**
+   * Lists address balances
+   *
+   * @param walletId - The ID of the wallet to fetch the balances for.
+   * @param addressId - The onchain address of the address that is being fetched.
+   * @param page - A cursor for pagination across multiple pages of results. Do not include this parameter on the first call.
+   *  Use the next_page value returned in a previous response to request subsequent results.
+   * @param options - Override http request option.
+   * @throws {APIError}
+   */
+  listAddressBalances(
+    walletId: string,
+    addressId: string,
+    page?: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<AddressBalanceList>;
 };
 
 /**

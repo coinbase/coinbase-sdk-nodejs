@@ -64,6 +64,26 @@ export class Address {
   }
 
   /**
+   * Returns the list of balances for the address.
+   *
+   * @returns {Map<string, Decimal>} The list of balances for the address.
+   */
+  async listBalances(): Promise<Map<string, Decimal>> {
+    const response = await this.client.listAddressBalances(
+      this.model.wallet_id,
+      this.model.address_id,
+    );
+
+    const balances = new Map<string, Decimal>();
+
+    for (const balance of response.data.data) {
+      balances.set(balance.asset.asset_id, new Decimal(balance.amount));
+    }
+
+    return balances;
+  }
+
+  /**
    * Returns the balance of the provided asset.
    *
    * @param {string} assetId - The asset ID.
