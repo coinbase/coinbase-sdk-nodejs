@@ -1,5 +1,9 @@
 import { ethers } from "ethers";
-import { AddressesApiFactory, Address as AddressModel } from "../../client";
+import {
+  AddressesApiFactory,
+  Address as AddressModel,
+  Balance as BalanceModel,
+} from "../../client";
 import { Address } from "./../address";
 import { FaucetTransaction } from "./../faucet_transaction";
 
@@ -9,6 +13,7 @@ import { APIError, FaucetLimitReachedError } from "../api_error";
 import { Coinbase } from "../coinbase";
 import { InternalError } from "../errors";
 import { createAxiosMock } from "./utils";
+import Decimal from "decimal.js";
 
 const newEthAddress = ethers.Wallet.createRandom();
 
@@ -19,11 +24,19 @@ const VALID_ADDRESS_MODEL: AddressModel = {
   wallet_id: randomUUID(),
 };
 
+const VALID_BALANCE_MODEL: BalanceModel = {
+  amount: "1000000000000000000",
+  asset: {
+    asset_id: "eth",
+    network_id: "base-sepolia",
+  },
+};
+
 // Test suite for Address class
 describe("Address", () => {
   const [axiosInstance, configuration, BASE_PATH] = createAxiosMock();
   const client = AddressesApiFactory(configuration, BASE_PATH, axiosInstance);
-  let address, axiosMock;
+  let address: Address, axiosMock;
 
   beforeAll(() => {
     axiosMock = new MockAdapter(axiosInstance);
@@ -47,6 +60,37 @@ describe("Address", () => {
 
   it("should return the address ID", () => {
     expect(address.getNetworkId()).toBe(VALID_ADDRESS_MODEL.network_id);
+  });
+
+  it("should return the correct ETH balance", async () => {
+    axiosMock.onGet().reply(200, VALID_BALANCE_MODEL);
+    const ethBalance = await address.getBalance("eth");
+    expect(ethBalance).toBeInstanceOf(Decimal);
+    expect(ethBalance).toEqual(new Decimal(1));
+  });
+
+  it("should return the correct Gwei balance", async () => {
+    axiosMock.onGet().reply(200, VALID_BALANCE_MODEL);
+    const ethBalance = await address.getBalance("gwei");
+    expect(ethBalance).toBeInstanceOf(Decimal);
+    expect(ethBalance).toEqual(new Decimal(1000000000));
+  });
+
+  it("should return the correct Wei balance", async () => {
+    axiosMock.onGet().reply(200, VALID_BALANCE_MODEL);
+    const ethBalance = await address.getBalance("wei");
+    expect(ethBalance).toBeInstanceOf(Decimal);
+    expect(ethBalance).toEqual(new Decimal(1000000000000000000));
+  });
+
+  it("should return an error for an unsupported asset", async () => {
+    axiosMock.onGet().reply(404, null);
+    try {
+      await address.getBalance("unsupported-asset");
+      fail("Expect 404 to be thrown");
+    } catch (error) {
+      expect(error).toBeInstanceOf(APIError);
+    }
   });
 
   it("should return the public key", () => {
