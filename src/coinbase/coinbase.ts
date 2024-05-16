@@ -19,7 +19,7 @@ export class Coinbase {
    * @constant
    */
   static networkList = {
-    BaseSepolia: "base_sepolia",
+    BaseSepolia: "base-sepolia",
   };
 
   apiClients: ApiClients = {};
