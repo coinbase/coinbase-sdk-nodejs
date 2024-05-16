@@ -1,5 +1,6 @@
 import { ApiClients } from "./types";
 import { User as UserModel } from "./../client/api";
+
 /**
  * A representation of a User.
  * Users have Wallets, which can hold balances of Assets.

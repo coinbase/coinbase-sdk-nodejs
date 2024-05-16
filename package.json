@@ -68,6 +68,7 @@
       "text"
     ],
     "verbose": true,
-    "testRegex": ".test.ts$"
+    "testRegex": ".test.ts$",
+    "maxWorkers": 1
   }
 }
