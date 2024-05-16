@@ -10,7 +10,6 @@ import {
   TransferList,
   User as UserModel,
   Wallet as WalletModel,
-  Address as AddressModel,
   Transfer as TransferModel,
 } from "./../client/api";
 
