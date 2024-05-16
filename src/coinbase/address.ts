@@ -1,4 +1,5 @@
 import { Address as AddressModel } from "../client";
+import { Balance } from "./balance";
 import { InternalError } from "./errors";
 import { FaucetTransaction } from "./faucet_transaction";
 import { AddressAPIClient } from "./types";
@@ -96,7 +97,11 @@ export class Address {
       assetId,
     );
 
-    return new Decimal(response.data.amount);
+    if (!response.data) {
+      return new Decimal(0);
+    }
+
+    return Balance.fromModelAndAssetId(response.data, assetId).amount;
   }
 
   /**
