@@ -1,17 +1,28 @@
 import { HDKey } from "@scure/bip32";
 import * as bip39 from "bip39";
+import { ethers, Wallet as ETHWallet } from "ethers";
+import { Address as AddressModel, Wallet as WalletModel } from "../client";
 import { Address } from "./address";
-import { InternalError } from "./errors";
-import { Wallet as WalletModel, Address as AddressModel } from "../client";
-import { ApiClients } from "./types";
-import { ethers } from "ethers";
+import { ArgumentError, InternalError } from "./errors";
+import { AddressAPIClient, WalletAPIClient } from "./types";
+import { convertStringToHex } from "./utils";
 
 /**
- * Wallet class represents a wallet with address management.
+ * The Wallet API client types.
+ */
+type WalletClients = {
+  wallet: WalletAPIClient;
+  address: AddressAPIClient;
+};
+
+/**
+ * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
+ * each of which can hold a balance of one or more Assets. Wallets can create new Addresses, list their addresses,
+ * list their balances, and transfer Assets to other Addresses. Wallets should be created through User.createWallet or User.importWallet.
  */
 export class Wallet {
   private model: WalletModel;
-  private client: ApiClients;
+  private client: WalletClients;
 
   private master: HDKey;
   private addresses: Address[] = [];
@@ -19,71 +30,89 @@ export class Wallet {
   private addressIndex = 0;
 
   /**
-   * Creates an instance of Wallet.
-   * @param {WalletModel} model - The wallet model data.
-   * @param {ApiClients} client - The API client to interact with address-related endpoints.
-   * @param {string} seed - The seed to generate the wallet.
-   * @param {number} addressCount - The number of addresses to generate.
-   * @throws {InternalError} If the model or client is empty.
+   * Private constructor to prevent direct instantiation outside of factory method. Use Wallet.init instead.
+   *
+   * @ignore
+   * @param model - The wallet model object.
+   * @param client - The API client to interact with the server.
+   * @param master - The HD master key.
+   * @hideconstructor
    */
-  constructor(model: WalletModel, client: ApiClients, seed: string = "", addressCount: number = 0) {
-    if (!model) {
-      throw new InternalError("Wallet model cannot be empty");
-    }
-    if (!client?.address || !client?.user) {
-      throw new InternalError("Address client cannot be empty");
-    }
+  private constructor(model: WalletModel, client: WalletClients, master: HDKey) {
     this.model = model;
     this.client = client;
+    this.master = master;
+  }
+
+  /**
+   * Returns a new Wallet object. Do not use this method directly. Instead, use User.createWallet or User.importWallet.
+   *
+   * @constructs Wallet
+   * @param model - The underlying Wallet model object
+   * @param client - The API client to interact with the server.
+   * @param seed - The seed to use for the Wallet. Expects a 32-byte hexadecimal with no 0x prefix. If not provided, a new seed will be generated.
+   * @param addressCount - The number of addresses already registered for the Wallet.
+   * @throws {ArgumentError} If the model or client is not provided.
+   * @throws {InternalError} - If address derivation or caching fails.
+   * @throws {APIError} - If the request fails.
+   * @returns A promise that resolves with the new Wallet object.
+   */
+  public static async init(
+    model: WalletModel,
+    client: WalletClients,
+    seed: string = "",
+    addressCount: number = 0,
+  ): Promise<Wallet> {
+    if (!model) {
+      throw new ArgumentError("Wallet model cannot be empty");
+    }
+    if (!client?.address || !client?.wallet) {
+      throw new ArgumentError("Address client cannot be empty");
+    }
 
     if (!seed) {
       seed = bip39.generateMnemonic();
     }
+    const master = HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(seed));
+    const wallet = new Wallet(model, client, master);
 
-    this.master = HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(seed));
     for (let i = 0; i < addressCount; i++) {
-      this.deriveAddress();
+      await wallet.deriveAddress();
     }
+
+    return wallet;
   }
 
   /**
-   * Derives a new HDKey for the next address.
-   * @returns The derived HDKey.
+   * Derives a key for an already registered Address in the Wallet.
+   *
+   * @returns The derived key.
    */
-  private deriveKey(): HDKey {
-    return this.master.deriveChild(this.addressIndex++);
+  private deriveKey(): ETHWallet {
+    const derivedKey = this.master.derive(`${this.addressPathPrefix}/${this.addressIndex++}`);
+    if (!derivedKey?.privateKey) {
+      throw new InternalError("Failed to derive key");
+    }
+    return new ethers.Wallet(convertStringToHex(derivedKey.privateKey));
   }
 
   /**
-   * Derives a new address and caches it.
-   * @returns {Promise<void>}
-   * @throws {InternalError} If address derivation or caching fails.
+   * Derives an already registered Address in the Wallet.
+   *
+   * @throws {InternalError} - If address derivation or caching fails.
+   * @throws {APIError} - If the request fails.
+   * @returns {Promise<void>} A promise that resolves when the address is derived.
    */
-  private deriveAddress() {
-    try {
-      const key = this.deriveKey();
-      const address = new ethers.Wallet(Buffer.from(key?.privateKey || "").toString("hex")).address;
-      if (!this.model.id) {
-        throw new InternalError("Wallet ID could not found");
-      }
-      if (!key.publicKey) {
-        throw new InternalError("Public key could not found");
-      }
-      this.cacheAddress({
-        address_id: address,
-        network_id: this.model.network_id,
-        public_key: Buffer.from(key?.publicKey || "").toString("hex"),
-        wallet_id: this.model.id,
-      });
-    } catch (e) {
-      console.error("Error deriving address:", e);
-      throw new InternalError("Failed to derive address");
-    }
+  private async deriveAddress(): Promise<void> {
+    const key = this.deriveKey();
+    const response = await this.client.address.getAddress(this.model.id!, key.address);
+    this.cacheAddress(response.data);
   }
 
   /**
    * Caches an Address on the client-side and increments the address index.
-   * @param {AddressModel} address - The address to cache.
+   *
+   * @param address - The AddressModel to cache.
    * @throws {InternalError} If the address is not provided.
    * @returns {void}
    */
@@ -93,38 +122,38 @@ export class Wallet {
   }
 
   /**
-   * Gets the network identifier.
-   * @returns The network identifier.
+   * Returns the Network ID of the Wallet.
+   *
+   * @returns The network ID.
    */
   public getNetworkId(): string {
     return this.model.network_id;
   }
 
   /**
-   * Gets the wallet identifier.
-   * @returns The wallet identifier.
+   * Returns the wallet ID.
+   *
+   * @returns The wallet ID.
    */
   public getId(): string | undefined {
     return this.model.id;
   }
 
   /**
-   * Gets the default address of the wallet.
-   * @returns The default address.
+   * Returns the default address of the Wallet.
+   *
+   * @returns The default address
    */
   public defaultAddress(): Address | undefined {
-    if (!this.model.default_address) {
-      return undefined;
-    }
-    if (!this.client.address) {
-      throw new InternalError("Address client cannot be empty");
-    }
-    return new Address(this.model.default_address, this.client.address);
+    return this.model.default_address
+      ? new Address(this.model.default_address, this.client.address!)
+      : undefined;
   }
 
   /**
-   * Converts the wallet instance to a string representation.
-   * @returns The string representation of the wallet.
+   * Returns a String representation of the Wallet.
+   *
+   * @returns a String representation of the Wallet
    */
   public toString(): string {
     return `Wallet{id: '${this.model.id}', network_id: '${this.model.network_id}'}`;
