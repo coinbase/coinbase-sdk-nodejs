@@ -14,8 +14,8 @@ export type WalletAPIClient = {
    * Create a new wallet scoped to the user.
    *
    * @class
-   * @param {CreateWalletRequest} [createWalletRequest] - The wallet creation request.
-   * @param {RawAxiosRequestConfig} [options] - Axios request options.
+   * @param createdWalletRequest - The wallet creation request.
+   * @param options - Axios request options.
    * @throws {APIError} If the request fails.
    */
   createWallet: (
@@ -31,9 +31,9 @@ export type AddressAPIClient = {
   /**
    * Requests faucet funds for the address.
    *
-   * @param {string} walletId - The wallet ID.
-   * @param {string} addressId - The address ID.
-   * @returns {Promise<{ data: { transaction_hash: string } }>} - The transaction hash
+   * @param walletId - The wallet ID.
+   * @param addressId - The address ID.
+   * @returns The transaction hash
    * @throws {APIError} If the request fails.
    */
   requestFaucetFunds(
@@ -42,12 +42,11 @@ export type AddressAPIClient = {
   ): Promise<{ data: { transaction_hash: string } }>;
 
   /**
-   * Get address
+   * Get address by onchain address
    *
-   * @summary Get address by onchain address
-   * @param {string} walletId - The ID of the wallet the address belongs to.
-   * @param {string} addressId - The onchain address of the address that is being fetched.
-   * @param {AxiosRequestConfig} [options] - Axios request options.
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The onchain address of the address that is being fetched.
+   * @param options - Axios request options.
    * @throws {APIError} If the request fails.
    */
   getAddress(
@@ -64,8 +63,8 @@ export type UserAPIClient = {
   /**
    * Retrieves the current user.
    *
-   * @param {AxiosRequestConfig} [options] - Axios request options.
-   * @returns {AxiosPromise<UserModel>} - A promise resolvindg to the User model.
+   * @param options - Axios request options.
+   * @returns - A promise resolvindg to the User model.
    * @throws {APIError} If the request fails.
    */
   getCurrentUser(options?: AxiosRequestConfig): AxiosPromise<UserModel>;
