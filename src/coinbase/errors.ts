@@ -86,6 +86,7 @@ export class InvalidUnsignedPayload extends Error {
 
   /**
    * Initializes a new InvalidUnsignedPayload instance.
+   *
    * @param message - The error message.
    */
   constructor(message: string = InvalidUnsignedPayload.DEFAULT_MESSAGE) {

@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import { Transfer as TransferModel, TransferStatusEnum } from "../../client/api";
-import { ApiClients, TransferStatus } from "../types";
-import { Transfer } from "../transfer";
+import { TransferAPIClient, TransferStatus } from "../types";
+import { Transfer, TransferClients } from "../transfer";
 import { Coinbase } from "../coinbase";
 
 const fromKey = ethers.Wallet.createRandom();
@@ -41,7 +41,7 @@ mockProvider.getTransactionReceipt = jest.fn();
 
 describe("Transfer Class", () => {
   let transferModel: TransferModel;
-  let mockApiClients: ApiClients;
+  let mockApiClients: TransferClients;
   let transfer: Transfer;
 
   beforeEach(() => {
@@ -57,7 +57,10 @@ describe("Transfer Class", () => {
       status: TransferStatusEnum.Pending,
     } as TransferModel;
 
-    mockApiClients = { baseSepoliaProvider: mockProvider } as ApiClients;
+    mockApiClients = {
+      transfer: {} as TransferAPIClient,
+      baseSepoliaProvider: mockProvider,
+    } as TransferClients;
 
     transfer = new Transfer(transferModel, mockApiClients);
   });
