@@ -1,9 +1,10 @@
 import { AxiosPromise, AxiosRequestConfig, RawAxiosRequestConfig } from "axios";
 import { ethers } from "ethers";
 import {
-  Address,
+  Address as AddressModel,
   AddressBalanceList,
   Balance,
+  CreateAddressRequest,
   CreateWalletRequest,
   BroadcastTransferRequest,
   CreateTransferRequest,
@@ -29,6 +30,15 @@ export type WalletAPIClient = {
     createWalletRequest?: CreateWalletRequest,
     options?: RawAxiosRequestConfig,
   ) => AxiosPromise<WalletModel>;
+
+  /**
+   * Returns the wallet model with the given ID.
+   *
+   * @param walletId - The ID of the wallet to fetch.
+   * @param options - Override http request option.
+   * @throws {APIError} If the request fails.
+   */
+  getWallet: (walletId: string, options?: RawAxiosRequestConfig) => AxiosPromise<WalletModel>;
 };
 
 /**
@@ -40,7 +50,7 @@ export type AddressAPIClient = {
    *
    * @param walletId - The wallet ID.
    * @param addressId - The address ID.
-   * @returns The transaction hash
+   * @returns The transaction hash.
    * @throws {APIError} If the request fails.
    */
   requestFaucetFunds(
@@ -49,7 +59,7 @@ export type AddressAPIClient = {
   ): Promise<{ data: { transaction_hash: string } }>;
 
   /**
-   * Get address by onchain address
+   * Get address by onchain address.
    *
    * @param walletId - The ID of the wallet the address belongs to.
    * @param addressId - The onchain address of the address that is being fetched.
@@ -60,7 +70,7 @@ export type AddressAPIClient = {
     walletId: string,
     addressId: string,
     options?: AxiosRequestConfig,
-  ): AxiosPromise<Address>;
+  ): AxiosPromise<AddressModel>;
 
   /**
    * Get address balance
@@ -94,6 +104,20 @@ export type AddressAPIClient = {
     page?: string,
     options?: AxiosRequestConfig,
   ): AxiosPromise<AddressBalanceList>;
+
+  /*
+   * Create a new address scoped to the wallet.
+   *
+   * @param walletId - The ID of the wallet to create the address in.
+   * @param createAddressRequest - The address creation request.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+  createAddress(
+    walletId: string,
+    createAddressRequest?: CreateAddressRequest,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<AddressModel>;
 };
 
 /**

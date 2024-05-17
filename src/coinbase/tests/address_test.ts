@@ -134,10 +134,6 @@ describe("Address", () => {
     }
   });
 
-  it("should return the public key", () => {
-    expect(address.getPublicKey()).toBe(newEthAddress.publicKey);
-  });
-
   it("should return the wallet ID", () => {
     expect(address.getWalletId()).toBe(VALID_ADDRESS_MODEL.wallet_id);
   });

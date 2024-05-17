@@ -8,7 +8,7 @@ import { Wallet } from "../wallet";
 import { createAxiosMock } from "./utils";
 
 const walletId = randomUUID();
-const VALID_WALLET_MODEL = {
+export const VALID_WALLET_MODEL = {
   id: randomUUID(),
   network_id: Coinbase.networkList.BaseSepolia,
   default_address: {
@@ -56,13 +56,12 @@ describe("Wallet Class", () => {
     it("should derive the correct number of addresses", async () => {
       expect(wallet.addresses.length).toBe(2);
     });
-  });
 
-  it("should return the correct string representation", async () => {
-    const wallet = await Wallet.init(VALID_WALLET_MODEL, client);
-    expect(wallet.toString()).toBe(
-      `Wallet{id: '${VALID_WALLET_MODEL.id}', networkId: 'base-sepolia'}`,
-    );
+    it("should return the correct string representation", async () => {
+      expect(wallet.toString()).toBe(
+        `Wallet{id: '${VALID_WALLET_MODEL.id}', networkId: '${Coinbase.networkList.BaseSepolia}'}`,
+      );
+    });
   });
 
   it("should throw an ArgumentError when the API client is not provided", async () => {

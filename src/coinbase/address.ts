@@ -100,15 +100,6 @@ export class Address {
   }
 
   /**
-   * Returns the public key.
-   *
-   * @returns {string} The public key.
-   */
-  public getPublicKey(): string {
-    return this.model.public_key;
-  }
-
-  /**
    * Returns the wallet ID.
    *
    * @returns {string} The wallet ID.
