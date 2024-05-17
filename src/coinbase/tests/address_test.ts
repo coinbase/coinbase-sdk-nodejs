@@ -96,7 +96,7 @@ describe("Address", () => {
   });
 
   it("should return the correct list of balances", async () => {
-    axiosMock.onGet().reply(200, VALID_ADDRESS_BALANCE_LIST);
+    axiosMock.onGet(/\/v1\/wallets\/.*\/addresses/).reply(200, VALID_ADDRESS_BALANCE_LIST);
     const balances = await address.listBalances();
     expect(balances.get(Coinbase.assetList.Eth)).toEqual(new Decimal(1));
     expect(balances.get("usdc")).toEqual(new Decimal(5000));
@@ -104,28 +104,28 @@ describe("Address", () => {
   });
 
   it("should return the correct ETH balance", async () => {
-    axiosMock.onGet().reply(200, VALID_BALANCE_MODEL);
+    axiosMock.onGet(/\/v1\/wallets\/.*\/addresses/).reply(200, VALID_BALANCE_MODEL);
     const ethBalance = await address.getBalance(Coinbase.assetList.Eth);
     expect(ethBalance).toBeInstanceOf(Decimal);
     expect(ethBalance).toEqual(new Decimal(1));
   });
 
   it("should return the correct Gwei balance", async () => {
-    axiosMock.onGet().reply(200, VALID_BALANCE_MODEL);
+    axiosMock.onGet(/\/v1\/wallets\/.*\/addresses/).reply(200, VALID_BALANCE_MODEL);
     const ethBalance = await address.getBalance("gwei");
     expect(ethBalance).toBeInstanceOf(Decimal);
     expect(ethBalance).toEqual(new Decimal(1000000000));
   });
 
   it("should return the correct Wei balance", async () => {
-    axiosMock.onGet().reply(200, VALID_BALANCE_MODEL);
+    axiosMock.onGet(/\/v1\/wallets\/.*\/addresses/).reply(200, VALID_BALANCE_MODEL);
     const ethBalance = await address.getBalance("wei");
     expect(ethBalance).toBeInstanceOf(Decimal);
     expect(ethBalance).toEqual(new Decimal(1000000000000000000));
   });
 
   it("should return an error for an unsupported asset", async () => {
-    axiosMock.onGet().reply(404, null);
+    axiosMock.onGet(/\/v1\/wallets\/.*\/addresses/).reply(404, null);
     try {
       await address.getBalance("unsupported-asset");
       fail("Expect 404 to be thrown");
@@ -148,7 +148,7 @@ describe("Address", () => {
 
   it("should request funds from the faucet and returns the faucet transaction", async () => {
     const transactionHash = "0xdeadbeef";
-    axiosMock.onPost().reply(200, {
+    axiosMock.onPost(/\/v1\/wallets\/.*\/addresses/).reply(200, {
       transaction_hash: transactionHash,
     });
     const faucetTransaction = await address.faucet();
@@ -157,12 +157,12 @@ describe("Address", () => {
   });
 
   it("should throw an APIError when the request is unsuccesful", async () => {
-    axiosMock.onPost().reply(400);
+    axiosMock.onPost(/\/v1\/wallets\/.*\/addresses/).reply(400);
     await expect(address.faucet()).rejects.toThrow(APIError);
   });
 
   it("should throw a FaucetLimitReachedError when the faucet limit is reached", async () => {
-    axiosMock.onPost().reply(429, {
+    axiosMock.onPost(/\/v1\/wallets\/.*\/addresses/).reply(429, {
       code: "faucet_limit_reached",
       message: "Faucet limit reached",
     });
@@ -170,7 +170,7 @@ describe("Address", () => {
   });
 
   it("should throw an InternalError when the request fails unexpectedly", async () => {
-    axiosMock.onPost().reply(500, {
+    axiosMock.onPost(/\/v1\/wallets\/.*\/addresses/).reply(500, {
       code: "internal",
       message: "unexpected error occurred while requesting faucet funds",
     });

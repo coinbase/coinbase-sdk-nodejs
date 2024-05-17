@@ -31,7 +31,11 @@ describe("Wallet Class", () => {
 
   beforeAll(async () => {
     axiosMock = new MockAdapter(axiosInstance);
-    axiosMock.onPost().reply(200, VALID_WALLET_MODEL).onGet().reply(200, VALID_WALLET_MODEL);
+    axiosMock
+      .onGet(/\/v1\/wallets\/.*/)
+      .reply(200, VALID_WALLET_MODEL)
+      .onGet(/\/v1\/wallets\/.*/)
+      .reply(200, VALID_WALLET_MODEL);
     wallet = await Wallet.init(VALID_WALLET_MODEL, client, seed, 2);
   });
 
