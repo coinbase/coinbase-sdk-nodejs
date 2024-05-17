@@ -1,7 +1,10 @@
 import { Address as AddressModel } from "../client";
+import { Balance } from "./balance";
+import { BalanceMap } from "./balance_map";
 import { InternalError } from "./errors";
 import { FaucetTransaction } from "./faucet_transaction";
 import { AddressAPIClient } from "./types";
+import { Decimal } from "decimal.js";
 
 /**
  * A representation of a blockchain address, which is a user-controlled account on a network.
@@ -60,6 +63,40 @@ export class Address {
    */
   public getNetworkId(): string {
     return this.model.network_id;
+  }
+
+  /**
+   * Returns the list of balances for the address.
+   *
+   * @returns {BalanceMap} - The map from asset ID to balance.
+   */
+  async listBalances(): Promise<BalanceMap> {
+    const response = await this.client.listAddressBalances(
+      this.model.wallet_id,
+      this.model.address_id,
+    );
+
+    return BalanceMap.fromBalances(response.data.data);
+  }
+
+  /**
+   * Returns the balance of the provided asset.
+   *
+   * @param {string} assetId - The asset ID.
+   * @returns {Decimal} The balance of the asset.
+   */
+  async getBalance(assetId: string): Promise<Decimal> {
+    const response = await this.client.getAddressBalance(
+      this.model.wallet_id,
+      this.model.address_id,
+      assetId,
+    );
+
+    if (!response.data) {
+      return new Decimal(0);
+    }
+
+    return Balance.fromModelAndAssetId(response.data, assetId).amount;
   }
 
   /**
