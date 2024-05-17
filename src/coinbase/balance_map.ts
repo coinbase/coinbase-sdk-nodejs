@@ -47,6 +47,6 @@ export class BalanceMap extends Map<string, Decimal> {
       }
       result[key] = str;
     });
-    return JSON.stringify(result);
+    return `BalanceMap${JSON.stringify(result)}`;
   }
 }

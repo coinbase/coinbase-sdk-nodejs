@@ -80,7 +80,7 @@ describe("BalanceMap", () => {
     balanceMap.add(balance);
 
     it("returns a string representation of asset_id to floating-point number", () => {
-      expect(balanceMap.toString()).toBe(`{"${assetId}":"${ethAmount}"}`);
+      expect(balanceMap.toString()).toBe(`BalanceMap{"${assetId}":"${ethAmount}"}`);
     });
   });
 });
