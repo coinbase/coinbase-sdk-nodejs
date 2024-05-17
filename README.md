@@ -27,6 +27,12 @@ hackathons, code academies, and other development settings.
 npm install @coinbase/coinbase-sdk
 ```
 
+or
+
+```bash
+yarn install @coinbase/coinbase-sdk
+```
+
 ### In the ts-node REPL
 
 After running `npx ts-node` to start the REPL, you can import the SDK as follows:
