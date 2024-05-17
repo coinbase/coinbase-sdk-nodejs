@@ -32,7 +32,7 @@ npm install @coinbase/coinbase-sdk
 After running `npx ts-node` to start the REPL, you can import the SDK as follows:
 
 ```typescript
-import { CoinbaseSDK } from '@coinbase/coinbase-sdk';
+import { Coinbase } from '@coinbase/coinbase-sdk';
 ```
 ### Requirements
 
