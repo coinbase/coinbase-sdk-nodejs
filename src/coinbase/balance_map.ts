@@ -9,8 +9,8 @@ export class BalanceMap extends Map<string, Decimal> {
   /**
    * Converts a list of Balance models to a BalanceMap.
    *
-   * @param balances - The list of balances fetched from the API.
-   * @returns The converted BalanceMap object.
+   * @param {BalanceModel[]} balances - The list of balances fetched from the API.
+   * @returns {BalanceMap} The converted BalanceMap object.
    */
   public static fromBalances(balances: BalanceModel[]): BalanceMap {
     const balanceMap = new BalanceMap();
@@ -24,7 +24,7 @@ export class BalanceMap extends Map<string, Decimal> {
   /**
    * Adds a balance to the map.
    *
-   * @param balance - The balance to add to the map.
+   * @param {Balance} balance - The balance to add to the map.
    */
   public add(balance: Balance): void {
     if (!(balance instanceof Balance)) {

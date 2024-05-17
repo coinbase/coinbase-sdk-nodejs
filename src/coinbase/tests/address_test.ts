@@ -28,8 +28,8 @@ const VALID_ADDRESS_MODEL: AddressModel = {
 const VALID_BALANCE_MODEL: BalanceModel = {
   amount: "1000000000000000000",
   asset: {
-    asset_id: "eth",
-    network_id: "base-sepolia",
+    asset_id: Coinbase.assetList.Eth,
+    network_id: Coinbase.networkList.BaseSepolia,
   },
 };
 
@@ -38,8 +38,8 @@ const VALID_ADDRESS_BALANCE_LIST: AddressBalanceList = {
     {
       amount: "1000000000000000000",
       asset: {
-        asset_id: "eth",
-        network_id: "base-sepolia",
+        asset_id: Coinbase.assetList.Eth,
+        network_id: Coinbase.networkList.BaseSepolia,
         decimals: 18,
       },
     },
@@ -47,7 +47,7 @@ const VALID_ADDRESS_BALANCE_LIST: AddressBalanceList = {
       amount: "5000000000",
       asset: {
         asset_id: "usdc",
-        network_id: "base-sepolia",
+        network_id: Coinbase.networkList.BaseSepolia,
         decimals: 6,
       },
     },
@@ -55,7 +55,7 @@ const VALID_ADDRESS_BALANCE_LIST: AddressBalanceList = {
       amount: "3000000000000000000",
       asset: {
         asset_id: "weth",
-        network_id: "base-sepolia",
+        network_id: Coinbase.networkList.BaseSepolia,
         decimals: 6,
       },
     },
@@ -98,14 +98,14 @@ describe("Address", () => {
   it("should return the correct list of balances", async () => {
     axiosMock.onGet().reply(200, VALID_ADDRESS_BALANCE_LIST);
     const balances = await address.listBalances();
-    expect(balances.get("eth")).toEqual(new Decimal(1));
+    expect(balances.get(Coinbase.assetList.Eth)).toEqual(new Decimal(1));
     expect(balances.get("usdc")).toEqual(new Decimal(5000));
     expect(balances.get("weth")).toEqual(new Decimal(3));
   });
 
   it("should return the correct ETH balance", async () => {
     axiosMock.onGet().reply(200, VALID_BALANCE_MODEL);
-    const ethBalance = await address.getBalance("eth");
+    const ethBalance = await address.getBalance(Coinbase.assetList.Eth);
     expect(ethBalance).toBeInstanceOf(Decimal);
     expect(ethBalance).toEqual(new Decimal(1));
   });

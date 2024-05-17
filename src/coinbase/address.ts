@@ -68,7 +68,7 @@ export class Address {
   /**
    * Returns the list of balances for the address.
    *
-   * @returns {BalanceMap} The map from asset ID to balance.
+   * @returns {BalanceMap} - The map from asset ID to balance.
    */
   async listBalances(): Promise<BalanceMap> {
     const response = await this.client.listAddressBalances(

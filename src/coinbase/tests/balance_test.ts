@@ -1,6 +1,7 @@
 import { Balance } from "../balance";
 import { Balance as BalanceModel } from "../../client";
 import { Decimal } from "decimal.js";
+import { Coinbase } from "../coinbase";
 
 describe("Balance", () => {
   describe(".fromModel", () => {
@@ -8,8 +9,8 @@ describe("Balance", () => {
     const balanceModel: BalanceModel = {
       amount: "1000000000000000000",
       asset: {
-        asset_id: "eth",
-        network_id: "base-sepolia",
+        asset_id: Coinbase.assetList.Eth,
+        network_id: Coinbase.networkList.BaseSepolia,
       },
     };
 
@@ -20,25 +21,25 @@ describe("Balance", () => {
     });
 
     it("returns a new Balance object with the correct asset_id", () => {
-      expect(balance.assetId).toBe("eth");
+      expect(balance.assetId).toBe(Coinbase.assetList.Eth);
     });
   });
 
   describe(".fromModelAndAssetId", () => {
-    const amount = new Decimal(123);
+    const amount = new Decimal(1);
     const balanceModel: BalanceModel = {
-      asset: { asset_id: "eth", network_id: "base-sepolia" },
-      amount: amount.toString(),
+      asset: { asset_id: Coinbase.assetList.Eth, network_id: Coinbase.networkList.BaseSepolia },
+      amount: "1000000000000000000",
     };
 
-    const balance = Balance.fromModelAndAssetId(balanceModel, "ETH");
+    const balance = Balance.fromModelAndAssetId(balanceModel, Coinbase.assetList.Eth);
 
     it("returns a new Balance object with the correct amount", () => {
-      expect(balance.amount.equals(amount)).toBeTruthy();
+      expect(balance.amount).toEqual(amount);
     });
 
     it("returns a new Balance object with the correct asset_id", () => {
-      expect(balance.assetId).toBe("ETH");
+      expect(balance.assetId).toBe(Coinbase.assetList.Eth);
     });
   });
 });

@@ -2,6 +2,7 @@ import { BalanceMap } from "../balance_map";
 import { Balance as BalanceModel } from "../../client";
 import { Balance } from "../balance";
 import { Decimal } from "decimal.js";
+import { Coinbase } from "../coinbase";
 
 describe("BalanceMap", () => {
   const ethAmount = new Decimal(1);
@@ -14,8 +15,8 @@ describe("BalanceMap", () => {
   describe(".fromBalances", () => {
     const ethBalanceModel: BalanceModel = {
       asset: {
-        asset_id: "eth",
-        network_id: "base-sepolia",
+        asset_id: Coinbase.assetList.Eth,
+        network_id: Coinbase.networkList.BaseSepolia,
       },
       amount: ethAtomicAmount,
     };
@@ -23,7 +24,7 @@ describe("BalanceMap", () => {
     const usdcBalanceModel: BalanceModel = {
       asset: {
         asset_id: "usdc",
-        network_id: "base-sepolia",
+        network_id: Coinbase.networkList.BaseSepolia,
       },
       amount: usdcAtomicAmount,
     };
@@ -31,7 +32,7 @@ describe("BalanceMap", () => {
     const wethBalanceModel: BalanceModel = {
       asset: {
         asset_id: "weth",
-        network_id: "base-sepolia",
+        network_id: Coinbase.networkList.BaseSepolia,
       },
       amount: wethAtomicAmount,
     };
@@ -41,16 +42,19 @@ describe("BalanceMap", () => {
     const balanceMap = BalanceMap.fromBalances(balances);
 
     it("returns a new BalanceMap object with the correct balances", () => {
-      expect(balanceMap.get("eth")).toEqual(ethAmount);
+      expect(balanceMap.get(Coinbase.assetList.Eth)).toEqual(ethAmount);
       expect(balanceMap.get("usdc")).toEqual(usdcAmount);
       expect(balanceMap.get("weth")).toEqual(wethAmount);
     });
   });
 
   describe("#add", () => {
-    const assetId = "eth";
+    const assetId = Coinbase.assetList.Eth;
     const balance = Balance.fromModelAndAssetId(
-      { amount: ethAtomicAmount, asset: { asset_id: assetId, network_id: "base-sepolia" } },
+      {
+        amount: ethAtomicAmount,
+        asset: { asset_id: assetId, network_id: Coinbase.networkList.BaseSepolia },
+      },
       assetId,
     );
 
@@ -63,9 +67,12 @@ describe("BalanceMap", () => {
   });
 
   describe("#toString", () => {
-    const assetId = "eth";
+    const assetId = Coinbase.assetList.Eth;
     const balance = Balance.fromModelAndAssetId(
-      { amount: ethAtomicAmount, asset: { asset_id: assetId, network_id: "base-sepolia" } },
+      {
+        amount: ethAtomicAmount,
+        asset: { asset_id: assetId, network_id: Coinbase.networkList.BaseSepolia },
+      },
       assetId,
     );
 
@@ -73,7 +80,7 @@ describe("BalanceMap", () => {
     balanceMap.add(balance);
 
     it("returns a string representation of asset_id to floating-point number", () => {
-      expect(balanceMap.toString()).toBe(`{\"${assetId}\":\"${ethAmount}\"}`);
+      expect(balanceMap.toString()).toBe(`{"${assetId}":"${ethAmount}"}`);
     });
   });
 });

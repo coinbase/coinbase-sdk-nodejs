@@ -11,8 +11,8 @@ export class Balance {
    * Private constructor to prevent direct instantiation outside of the factory methods.
    *
    * @ignore
-   * @param amount - The amount of the balance.
-   * @param assetId - The asset ID.
+   * @param {Decimal} amount - The amount of the balance.
+   * @param {string} assetId - The asset ID.
    * @hideconstructor
    */
   private constructor(amount: Decimal, assetId: string) {
@@ -23,8 +23,8 @@ export class Balance {
   /**
    * Converts a BalanceModel into a Balance object.
    *
-   * @param model - The balance model object.
-   * @returns The Balance object.
+   * @param {BalanceModel} model - The balance model object.
+   * @returns {Balance} The Balance object.
    */
   public static fromModel(model: BalanceModel): Balance {
     return this.fromModelAndAssetId(model, model.asset.asset_id);
@@ -33,9 +33,9 @@ export class Balance {
   /**
    * Converts a BalanceModel and asset ID into a Balance object.
    *
-   * @param model - The balance model object.
-   * @param assetId - The asset ID.
-   * @returns The Balance object.
+   * @param {BalanceModel} model - The balance model object.
+   * @param {string} assetId - The asset ID.
+   * @returns {Balance} The Balance object.
    */
   public static fromModelAndAssetId(model: BalanceModel, assetId: string): Balance {
     return new Balance(Asset.fromAtomicAmount(new Decimal(model.amount), assetId), assetId);
