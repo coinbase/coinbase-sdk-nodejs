@@ -1,6 +1,12 @@
 import globalAxios from "axios";
 import fs from "fs";
-import { User as UserModel, UsersApiFactory, TransfersApiFactory } from "../client";
+import {
+  AddressesApiFactory,
+  User as UserModel,
+  UsersApiFactory,
+  TransfersApiFactory,
+  WalletsApiFactory,
+} from "../client";
 import { ethers } from "ethers";
 import { BASE_PATH } from "./../client/base";
 import { Configuration } from "./../client/configuration";
@@ -80,6 +86,8 @@ export class Coinbase {
     );
 
     this.apiClients.user = UsersApiFactory(config, BASE_PATH, axiosInstance);
+    this.apiClients.wallet = WalletsApiFactory(config, BASE_PATH, axiosInstance);
+    this.apiClients.address = AddressesApiFactory(config, BASE_PATH, axiosInstance);
     this.apiClients.transfer = TransfersApiFactory(config, BASE_PATH, axiosInstance);
     this.apiClients.baseSepoliaProvider = new ethers.JsonRpcProvider("https://sepolia.base.org");
   }

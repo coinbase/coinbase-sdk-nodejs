@@ -1,9 +1,12 @@
 import { HDKey } from "@scure/bip32";
 import * as bip39 from "bip39";
-import { ethers, Wallet as ETHWallet } from "ethers";
+import * as crypto from "crypto";
+import { ethers } from "ethers";
+import * as secp256k1 from "secp256k1";
 import { Address as AddressModel, Wallet as WalletModel } from "../client";
 import { Address } from "./address";
 import { ArgumentError, InternalError } from "./errors";
+import { FaucetTransaction } from "./faucet_transaction";
 import { AddressAPIClient, WalletAPIClient } from "./types";
 import { convertStringToHex } from "./utils";
 
@@ -76,8 +79,13 @@ export class Wallet {
     const master = HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(seed));
     const wallet = new Wallet(model, client, master);
 
-    for (let i = 0; i < addressCount; i++) {
-      await wallet.deriveAddress();
+    if (addressCount > 0) {
+      for (let i = 0; i < addressCount; i++) {
+        await wallet.deriveAddress();
+      }
+    } else {
+      await wallet.createAddress();
+      await wallet.updateModel();
     }
 
     return wallet;
@@ -86,26 +94,85 @@ export class Wallet {
   /**
    * Derives a key for an already registered Address in the Wallet.
    *
+   * @throws {InternalError} - If the key derivation fails.
    * @returns The derived key.
    */
-  private deriveKey(): ETHWallet {
+  private deriveKey(): HDKey {
     const derivedKey = this.master.derive(`${this.addressPathPrefix}/${this.addressIndex++}`);
     if (!derivedKey?.privateKey) {
       throw new InternalError("Failed to derive key");
     }
-    return new ethers.Wallet(convertStringToHex(derivedKey.privateKey));
+    return derivedKey;
+  }
+
+  /**
+   * Creates a new Address in the Wallet.
+   *
+   * @throws {APIError} - If the address creation fails.
+   */
+  private async createAddress(): Promise<void> {
+    const key = this.deriveKey();
+    const attestation = this.createAttestation(key);
+    const publicKey = convertStringToHex(key.publicKey!);
+
+    const payload = {
+      public_key: publicKey,
+      attestation: attestation,
+    };
+    const response = await this.client.address.createAddress(this.model.id!, payload);
+    this.cacheAddress(response!.data);
+  }
+
+  /**
+   * Creates an attestation for the Address currently being created.
+   *
+   * @param key - The key of the Wallet.
+   * @returns The attestation.
+   */
+  private createAttestation(key: HDKey): string {
+    if (!key.publicKey || !key.privateKey) {
+      throw InternalError;
+    }
+
+    const publicKey = convertStringToHex(key.publicKey);
+
+    const payload = JSON.stringify({
+      wallet_id: this.model.id,
+      public_key: publicKey,
+    });
+
+    const hashedPayload = crypto.createHash("sha256").update(payload).digest();
+    const signature = secp256k1.ecdsaSign(hashedPayload, key.privateKey);
+
+    const r = signature.signature.slice(0, 32);
+    const s = signature.signature.slice(32, 64);
+    const v = signature.recid + 27 + 4;
+
+    const newSignatureBuffer = Buffer.concat([Buffer.from([v]), r, s]);
+    const newSignatureHex = newSignatureBuffer.toString("hex");
+
+    return newSignatureHex;
+  }
+
+  /**
+   * Updates the Wallet model with the latest data from the server.
+   */
+  private async updateModel(): Promise<void> {
+    const result = await this.client.wallet.getWallet(this.model.id!);
+    this.model = result?.data;
   }
 
   /**
    * Derives an already registered Address in the Wallet.
    *
-   * @throws {InternalError} - If address derivation or caching fails.
+   * @throws {InternalError} - If address derivation fails.
    * @throws {APIError} - If the request fails.
-   * @returns {Promise<void>} A promise that resolves when the address is derived.
+   * @returns A promise that resolves when the address is derived.
    */
   private async deriveAddress(): Promise<void> {
     const key = this.deriveKey();
-    const response = await this.client.address.getAddress(this.model.id!, key.address);
+    const wallet = new ethers.Wallet(convertStringToHex(key.privateKey!));
+    const response = await this.client.address.getAddress(this.model.id!, wallet.address);
     this.cacheAddress(response.data);
   }
 
@@ -150,6 +217,21 @@ export class Wallet {
       : undefined;
   }
 
+  /**
+   * Requests funds from the faucet for the Wallet's default address and returns the faucet transaction.
+   * This is only supported on testnet networks.
+   *
+   * @throws {InternalError} If the default address is not found.
+   * @throws {APIError} If the request fails.
+   * @returns The successful faucet transaction
+   */
+  public async faucet(): Promise<FaucetTransaction> {
+    if (!this.model.default_address) {
+      throw new InternalError("Default address not found");
+    }
+    const transaction = await this.defaultAddress()?.faucet();
+    return transaction!;
+  }
   /**
    * Returns a String representation of the Wallet.
    *
