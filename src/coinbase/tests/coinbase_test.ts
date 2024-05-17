@@ -67,7 +67,7 @@ describe("Coinbase tests", () => {
       expect(user.toString()).toBe("User{ userId: 123 }");
     });
 
-    it("should able to get faucet funds", async () => {
+    it("should be able to get faucet funds", async () => {
       const wallet = await user.createWallet();
       expect(wallet.getId()).toBe(VALID_WALLET_MODEL.id);
 

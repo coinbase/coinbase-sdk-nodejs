@@ -33,9 +33,9 @@ export type WalletAPIClient = {
   /**
    * Returns the wallet model with the given ID.
    *
-   * @param walletId - The ID of the wallet to fetch
+   * @param walletId - The ID of the wallet to fetch.
    * @param options - Override http request option.
-   * @throws {APIError}
+   * @throws {APIError} If the request fails.
    */
   getWallet: (walletId: string, options?: RawAxiosRequestConfig) => AxiosPromise<WalletModel>;
 };
@@ -49,7 +49,7 @@ export type AddressAPIClient = {
    *
    * @param walletId - The wallet ID.
    * @param addressId - The address ID.
-   * @returns The transaction hash
+   * @returns The transaction hash.
    * @throws {APIError} If the request fails.
    */
   requestFaucetFunds(
@@ -58,7 +58,7 @@ export type AddressAPIClient = {
   ): Promise<{ data: { transaction_hash: string } }>;
 
   /**
-   * Get address by onchain address
+   * Get address by onchain address.
    *
    * @param walletId - The ID of the wallet the address belongs to.
    * @param addressId - The onchain address of the address that is being fetched.

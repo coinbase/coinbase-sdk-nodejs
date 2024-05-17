@@ -15,8 +15,8 @@ export class User {
   /**
    * Initializes a new User instance.
    *
-   * @param {UserModel} user - The user model.
-   * @param {ApiClients} client - The API clients.
+   * @param user - The user model.
+   * @param client - The API clients.
    */
   constructor(user: UserModel, client: ApiClients) {
     this.client = client;
@@ -26,8 +26,8 @@ export class User {
   /**
    * Creates a new Wallet belonging to the User.
    *
-   * @throws {APIError} If the request fails.
-   * @throws {ArgumentError} If the model or client is not provided.
+   * @throws {APIError} - If the request fails.
+   * @throws {ArgumentError} - If the model or client is not provided.
    * @throws {InternalError} - If address derivation or caching fails.
    * @returns the new Wallet
    */
@@ -47,7 +47,7 @@ export class User {
   /**
    * Returns the user's ID.
    *
-   * @returns {string} The user's ID.
+   * @returns The user's ID.
    */
   public getId(): string {
     return this.model.id;
@@ -56,7 +56,7 @@ export class User {
   /**
    * Returns a string representation of the User.
    *
-   * @returns {string} The string representation of the User.
+   * @returns The string representation of the User.
    */
   toString(): string {
     return `User{ userId: ${this.model.id} }`;
