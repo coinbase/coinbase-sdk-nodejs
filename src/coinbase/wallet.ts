@@ -9,6 +9,8 @@ import { ArgumentError, InternalError } from "./errors";
 import { FaucetTransaction } from "./faucet_transaction";
 import { AddressAPIClient, WalletAPIClient } from "./types";
 import { convertStringToHex } from "./utils";
+import Decimal from "decimal.js";
+import { Balance } from "./balance";
 
 /**
  * The Wallet API client types.
@@ -232,6 +234,23 @@ export class Wallet {
     const transaction = await this.defaultAddress()?.faucet();
     return transaction!;
   }
+
+  /**
+   * Returns the balance of the provided Asset. Balances are aggregated across all Addresses in the Wallet.
+   *
+   * @param {string} assetId - The ID of the asset to fetch the balance for.
+   * @returns {Promise<Decimal>} The balance of the asset.
+   */
+  async getBalance(assetId: string): Promise<Decimal> {
+    const response = await this.client.wallet.getWalletBalance(this.model.id!, assetId);
+
+    if (!response?.data) {
+      return new Decimal(0);
+    }
+
+    return Balance.fromModelAndAssetId(response.data, assetId).amount;
+  }
+
   /**
    * Returns a String representation of the Wallet.
    *
