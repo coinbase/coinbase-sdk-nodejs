@@ -18,14 +18,14 @@ import Decimal from "decimal.js";
 
 const newEthAddress = ethers.Wallet.createRandom();
 
-const VALID_ADDRESS_MODEL: AddressModel = {
+export const VALID_ADDRESS_MODEL: AddressModel = {
   address_id: newEthAddress.address,
   network_id: Coinbase.networkList.BaseSepolia,
   public_key: newEthAddress.publicKey,
   wallet_id: randomUUID(),
 };
 
-const VALID_BALANCE_MODEL: BalanceModel = {
+export const ETH_BALANCE_MODEL: BalanceModel = {
   amount: "1000000000000000000",
   asset: {
     asset_id: Coinbase.assetList.Eth,
@@ -33,33 +33,26 @@ const VALID_BALANCE_MODEL: BalanceModel = {
   },
 };
 
-const VALID_ADDRESS_BALANCE_LIST: AddressBalanceList = {
-  data: [
-    {
-      amount: "1000000000000000000",
-      asset: {
-        asset_id: Coinbase.assetList.Eth,
-        network_id: Coinbase.networkList.BaseSepolia,
-        decimals: 18,
-      },
-    },
-    {
-      amount: "5000000000",
-      asset: {
-        asset_id: "usdc",
-        network_id: Coinbase.networkList.BaseSepolia,
-        decimals: 6,
-      },
-    },
-    {
-      amount: "3000000000000000000",
-      asset: {
-        asset_id: "weth",
-        network_id: Coinbase.networkList.BaseSepolia,
-        decimals: 6,
-      },
-    },
-  ],
+export const USDC_BALANCE_MODEL: BalanceModel = {
+  amount: "5000000000",
+  asset: {
+    asset_id: "usdc",
+    network_id: Coinbase.networkList.BaseSepolia,
+    decimals: 6,
+  },
+};
+
+export const WETH_BALANCE_MODEL: BalanceModel = {
+  amount: "3000000000000000000",
+  asset: {
+    asset_id: "weth",
+    network_id: Coinbase.networkList.BaseSepolia,
+    decimals: 6,
+  },
+};
+
+export const VALID_ADDRESS_BALANCE_LIST: AddressBalanceList = {
+  data: [ETH_BALANCE_MODEL, USDC_BALANCE_MODEL, WETH_BALANCE_MODEL],
   has_more: false,
   next_page: "",
   total_count: 3,
@@ -104,21 +97,21 @@ describe("Address", () => {
   });
 
   it("should return the correct ETH balance", async () => {
-    axiosMock.onGet().reply(200, VALID_BALANCE_MODEL);
+    axiosMock.onGet().reply(200, ETH_BALANCE_MODEL);
     const ethBalance = await address.getBalance(Coinbase.assetList.Eth);
     expect(ethBalance).toBeInstanceOf(Decimal);
     expect(ethBalance).toEqual(new Decimal(1));
   });
 
   it("should return the correct Gwei balance", async () => {
-    axiosMock.onGet().reply(200, VALID_BALANCE_MODEL);
+    axiosMock.onGet().reply(200, ETH_BALANCE_MODEL);
     const ethBalance = await address.getBalance("gwei");
     expect(ethBalance).toBeInstanceOf(Decimal);
     expect(ethBalance).toEqual(new Decimal(1000000000));
   });
 
   it("should return the correct Wei balance", async () => {
-    axiosMock.onGet().reply(200, VALID_BALANCE_MODEL);
+    axiosMock.onGet().reply(200, ETH_BALANCE_MODEL);
     const ethBalance = await address.getBalance("wei");
     expect(ethBalance).toBeInstanceOf(Decimal);
     expect(ethBalance).toEqual(new Decimal(1000000000000000000));

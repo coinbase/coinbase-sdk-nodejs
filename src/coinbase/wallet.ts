@@ -215,9 +215,28 @@ export class Wallet {
    * @returns The default address
    */
   public defaultAddress(): Address | undefined {
-    return this.model.default_address
-      ? new Address(this.model.default_address, this.client.address!)
-      : undefined;
+    if (this.model.default_address?.address_id !== undefined) {
+      return this.getAddress(this.model.default_address?.address_id);
+    }
+  }
+
+  /**
+   * Lists the addresses in the Wallet.
+   *
+   * @returns {Address[]} The list of addresses in the wallet
+   */
+  public listAddresses(): Address[] {
+    return this.addresses;
+  }
+
+  /**
+   * Gets the address with the specified ID in the Wallet.
+   *
+   * @param {string} addressId - The ID of the address to fetch.
+   * @returns {Address} The address with the specified ID.
+   */
+  public getAddress(addressId: string): Address | undefined {
+    return this.addresses.find(address => address.getId() === addressId);
   }
 
   /**
