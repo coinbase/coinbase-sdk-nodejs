@@ -11,6 +11,7 @@ import { AddressAPIClient, WalletAPIClient } from "./types";
 import { convertStringToHex } from "./utils";
 import Decimal from "decimal.js";
 import { Balance } from "./balance";
+import { BalanceMap } from "./balance_map";
 
 /**
  * The Wallet API client types.
@@ -233,6 +234,17 @@ export class Wallet {
     }
     const transaction = await this.defaultAddress()?.faucet();
     return transaction!;
+  }
+
+  /**
+   * Returns the list of balances of this Wallet. Balances are aggregated across all Addresses in the Wallet.
+   *
+   * @returns {Promise<BalanceMap>} The map of balances. The key is the Asset ID, and the value is the balance.
+   */
+  async listBalances(): Promise<BalanceMap> {
+    const response = await this.client.wallet.listWalletBalances(this.model.id!);
+
+    return BalanceMap.fromBalances(response.data.data);
   }
 
   /**
