@@ -5,18 +5,10 @@ import { ethers } from "ethers";
 import * as secp256k1 from "secp256k1";
 import { Address as AddressModel, Wallet as WalletModel } from "../client";
 import { Address } from "./address";
+import { Coinbase } from "./coinbase";
 import { ArgumentError, InternalError } from "./errors";
 import { FaucetTransaction } from "./faucet_transaction";
-import { AddressAPIClient, WalletAPIClient } from "./types";
 import { convertStringToHex } from "./utils";
-
-/**
- * The Wallet API client types.
- */
-type WalletClients = {
-  wallet: WalletAPIClient;
-  address: AddressAPIClient;
-};
 
 /**
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
@@ -25,7 +17,6 @@ type WalletClients = {
  */
 export class Wallet {
   private model: WalletModel;
-  private client: WalletClients;
 
   private master: HDKey;
   private addresses: Address[] = [];
@@ -37,14 +28,36 @@ export class Wallet {
    *
    * @ignore
    * @param model - The wallet model object.
-   * @param client - The API client to interact with the server.
    * @param master - The HD master key.
    * @hideconstructor
    */
-  private constructor(model: WalletModel, client: WalletClients, master: HDKey) {
+  private constructor(model: WalletModel, master: HDKey) {
     this.model = model;
-    this.client = client;
     this.master = master;
+  }
+
+  /**
+   * Returns a newly created Wallet object. Do not use this method directly.
+   * Instead, use User.createWallet.
+   *
+   * @constructs Wallet
+   * @throws {InternalError} - If address derivation or caching fails.
+   * @throws {APIError} - If the request fails.
+   * @returns A promise that resolves with the new Wallet object.
+   */
+  public static async create(): Promise<Wallet> {
+    const walletData = await Coinbase.apiClients.wallet!.createWallet({
+      wallet: {
+        network_id: Coinbase.networkList.BaseSepolia,
+      },
+    });
+
+    const wallet = await Wallet.init(walletData.data!);
+
+    await wallet.createAddress();
+    await wallet.reload();
+
+    return wallet;
   }
 
   /**
@@ -52,7 +65,6 @@ export class Wallet {
    *
    * @constructs Wallet
    * @param model - The underlying Wallet model object
-   * @param client - The API client to interact with the server.
    * @param seed - The seed to use for the Wallet. Expects a 32-byte hexadecimal with no 0x prefix. If not provided, a new seed will be generated.
    * @param addressCount - The number of addresses already registered for the Wallet.
    * @throws {ArgumentError} If the model or client is not provided.
@@ -62,30 +74,23 @@ export class Wallet {
    */
   public static async init(
     model: WalletModel,
-    client: WalletClients,
     seed: string = "",
     addressCount: number = 0,
   ): Promise<Wallet> {
     if (!model) {
       throw new ArgumentError("Wallet model cannot be empty");
     }
-    if (!client?.address || !client?.wallet) {
-      throw new ArgumentError("Address client cannot be empty");
-    }
 
     if (!seed) {
       seed = bip39.generateMnemonic();
     }
     const master = HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(seed));
-    const wallet = new Wallet(model, client, master);
+    const wallet = new Wallet(model, master);
 
     if (addressCount > 0) {
       for (let i = 0; i < addressCount; i++) {
         await wallet.deriveAddress();
       }
-    } else {
-      await wallet.createAddress();
-      await wallet.updateModel();
     }
 
     return wallet;
@@ -119,7 +124,7 @@ export class Wallet {
       public_key: publicKey,
       attestation: attestation,
     };
-    const response = await this.client.address.createAddress(this.model.id!, payload);
+    const response = await Coinbase.apiClients.address!.createAddress(this.model.id!, payload);
     this.cacheAddress(response!.data);
   }
 
@@ -155,10 +160,10 @@ export class Wallet {
   }
 
   /**
-   * Updates the Wallet model with the latest data from the server.
+   * Reloads the Wallet model with the latest data from the server.
    */
-  private async updateModel(): Promise<void> {
-    const result = await this.client.wallet.getWallet(this.model.id!);
+  private async reload(): Promise<void> {
+    const result = await Coinbase.apiClients.wallet!.getWallet(this.model.id!);
     this.model = result?.data;
   }
 
@@ -172,7 +177,7 @@ export class Wallet {
   private async deriveAddress(): Promise<void> {
     const key = this.deriveKey();
     const wallet = new ethers.Wallet(convertStringToHex(key.privateKey!));
-    const response = await this.client.address.getAddress(this.model.id!, wallet.address);
+    const response = await Coinbase.apiClients.address!.getAddress(this.model.id!, wallet.address);
     this.cacheAddress(response.data);
   }
 

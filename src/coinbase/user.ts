@@ -28,16 +28,7 @@ export class User {
    * @returns the new Wallet
    */
   async createWallet(): Promise<Wallet> {
-    const payload = {
-      wallet: {
-        network_id: Coinbase.networkList.BaseSepolia,
-      },
-    };
-    const walletData = await Coinbase.apiClients.wallet!.createWallet(payload);
-    return Wallet.init(walletData.data!, {
-      wallet: Coinbase.apiClients.wallet!,
-      address: Coinbase.apiClients.address!,
-    });
+    return Wallet.create();
   }
 
   /**

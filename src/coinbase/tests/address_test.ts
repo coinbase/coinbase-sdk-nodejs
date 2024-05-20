@@ -1,23 +1,16 @@
-import { ethers } from "ethers";
-import { Address as AddressModel } from "../../client";
 import { Address } from "./../address";
 import { FaucetTransaction } from "./../faucet_transaction";
 
-import { randomUUID } from "crypto";
 import Decimal from "decimal.js";
 import { APIError, FaucetLimitReachedError } from "../api_error";
 import { Coinbase } from "../coinbase";
 import { InternalError } from "../errors";
-import { VALID_BALANCE_MODEL, VALID_ADDRESS_BALANCE_LIST, addressesApiMock } from "./utils";
-
-const newEthAddress = ethers.Wallet.createRandom();
-
-const VALID_ADDRESS_MODEL: AddressModel = {
-  address_id: newEthAddress.address,
-  network_id: Coinbase.networkList.BaseSepolia,
-  public_key: newEthAddress.publicKey,
-  wallet_id: randomUUID(),
-};
+import {
+  VALID_ADDRESS_BALANCE_LIST,
+  VALID_ADDRESS_MODEL,
+  VALID_BALANCE_MODEL,
+  addressesApiMock,
+} from "./utils";
 
 // Test suite for Address class
 describe("Address", () => {
@@ -38,11 +31,11 @@ describe("Address", () => {
     expect(address).toBeInstanceOf(Address);
   });
 
-  it("should return the network ID", () => {
-    expect(address.getId()).toBe(newEthAddress.address);
+  it("should return the address ID", () => {
+    expect(address.getId()).toBe(VALID_ADDRESS_MODEL.address_id);
   });
 
-  it("should return the address ID", () => {
+  it("should return the network ID", () => {
     expect(address.getNetworkId()).toBe(VALID_ADDRESS_MODEL.network_id);
   });
 

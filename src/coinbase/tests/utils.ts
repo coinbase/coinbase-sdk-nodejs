@@ -1,16 +1,33 @@
 import axios, { AxiosInstance } from "axios";
+import { ethers } from "ethers";
 import { randomUUID } from "crypto";
 import {
   Configuration,
   Wallet as WalletModel,
   Balance as BalanceModel,
   AddressBalanceList,
+  Address as AddressModel,
 } from "../../client";
 import { BASE_PATH } from "../../client/base";
 import { Coinbase } from "../coinbase";
 import { registerAxiosInterceptors } from "../utils";
 
 export const walletId = randomUUID();
+
+// newAddressModel creates a new AddressModel with a random wallet ID and a random Ethereum address.
+export const newAddressModel = (walletId: string): AddressModel => {
+  const ethAddress = ethers.Wallet.createRandom();
+
+  return {
+    address_id: ethAddress.address,
+    network_id: Coinbase.networkList.BaseSepolia,
+    public_key: ethAddress.publicKey,
+    wallet_id: walletId,
+  };
+};
+
+export const VALID_ADDRESS_MODEL = newAddressModel(randomUUID());
+
 export const VALID_WALLET_MODEL: WalletModel = {
   id: randomUUID(),
   network_id: Coinbase.networkList.BaseSepolia,
@@ -18,14 +35,6 @@ export const VALID_WALLET_MODEL: WalletModel = {
     wallet_id: walletId,
     address_id: "0xdeadbeef",
     public_key: "0x1234567890",
-    network_id: Coinbase.networkList.BaseSepolia,
-  },
-};
-
-export const VALID_BALANCE_MODEL: BalanceModel = {
-  amount: "1000000000000000000",
-  asset: {
-    asset_id: Coinbase.assetList.Eth,
     network_id: Coinbase.networkList.BaseSepolia,
   },
 };
@@ -60,6 +69,14 @@ export const VALID_ADDRESS_BALANCE_LIST: AddressBalanceList = {
   has_more: false,
   next_page: "",
   total_count: 3,
+};
+
+export const VALID_BALANCE_MODEL: BalanceModel = {
+  amount: "1000000000000000000",
+  asset: {
+    asset_id: Coinbase.assetList.Eth,
+    network_id: Coinbase.networkList.BaseSepolia,
+  },
 };
 
 /**
