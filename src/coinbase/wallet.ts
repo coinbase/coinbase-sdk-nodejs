@@ -41,6 +41,7 @@ export class Wallet {
    * Instead, use User.createWallet.
    *
    * @constructs Wallet
+   * @throws {ArgumentError} If the model or client is not provided.
    * @throws {InternalError} - If address derivation or caching fails.
    * @throws {APIError} - If the request fails.
    * @returns A promise that resolves with the new Wallet object.
@@ -52,7 +53,7 @@ export class Wallet {
       },
     });
 
-    const wallet = await Wallet.init(walletData.data!);
+    const wallet = await Wallet.init(walletData.data);
 
     await wallet.createAddress();
     await wallet.reload();
@@ -80,7 +81,6 @@ export class Wallet {
     if (!model) {
       throw new ArgumentError("Wallet model cannot be empty");
     }
-
     if (!seed) {
       seed = bip39.generateMnemonic();
     }

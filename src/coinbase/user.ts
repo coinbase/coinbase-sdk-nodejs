@@ -1,5 +1,4 @@
 import { User as UserModel } from "./../client/api";
-import { Coinbase } from "./coinbase";
 import { Wallet } from "./wallet";
 
 /**
