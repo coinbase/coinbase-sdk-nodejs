@@ -67,20 +67,21 @@ describe("Coinbase tests", () => {
       const faucetTransaction = await wallet?.faucet();
       expect(faucetTransaction.getTransactionHash()).toBe("0xdeadbeef");
       expect(addressesApiMock.requestFaucetFunds).toHaveBeenCalledWith(
-        wallet.getId(),
-        wallet.defaultAddress()?.getId(),
+        defaultAddress.getWalletId(),
+        defaultAddress?.getId(),
       );
       expect(addressesApiMock.requestFaucetFunds).toHaveBeenCalledTimes(1);
     });
   });
 
   it("should raise an error if the user is not found", async () => {
-    jest.mock("../../client/api", () => ({
-      UsersApiFactory: jest.fn().mockReturnValue({
-        me: jest.fn().mockRejectedValue(new APIError("")),
-      }),
-    }));
+    Coinbase.apiClients.user = {
+      ...usersApiMock,
+      getCurrentUser: jest.fn().mockRejectedValue(new APIError("User not found")),
+    };
     const cbInstance = Coinbase.configureFromJson(`${PATH_PREFIX}/coinbase_cloud_api_key.json`);
     await expect(cbInstance.getDefaultUser()).rejects.toThrow(APIError);
+    expect(usersApiMock.getCurrentUser).toHaveBeenCalledWith();
+    expect(usersApiMock.getCurrentUser).toHaveBeenCalledTimes(1);
   });
 });
