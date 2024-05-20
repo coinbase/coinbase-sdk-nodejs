@@ -50,17 +50,27 @@ describe("Coinbase tests", () => {
 
       expect(user.getId()).toBe(123);
       expect(user.toString()).toBe("User{ userId: 123 }");
+      expect(usersApiMock.getCurrentUser).toHaveBeenCalledWith();
+      expect(usersApiMock.getCurrentUser).toHaveBeenCalledTimes(1);
     });
 
     it("should be able to get faucet funds", async () => {
       const wallet = await user.createWallet();
       expect(wallet.getId()).toBe(VALID_WALLET_MODEL.id);
+      const payload = { wallet: { network_id: Coinbase.networkList.BaseSepolia } };
+      expect(walletsApiMock.createWallet).toHaveBeenCalledWith(payload);
+      expect(walletsApiMock.createWallet).toHaveBeenCalledTimes(1);
 
       const defaultAddress = wallet.defaultAddress();
       expect(defaultAddress?.getId()).toBe(VALID_WALLET_MODEL.default_address?.address_id);
 
       const faucetTransaction = await wallet?.faucet();
       expect(faucetTransaction.getTransactionHash()).toBe("0xdeadbeef");
+      expect(addressesApiMock.requestFaucetFunds).toHaveBeenCalledWith(
+        wallet.getId(),
+        wallet.defaultAddress()?.getId(),
+      );
+      expect(addressesApiMock.requestFaucetFunds).toHaveBeenCalledTimes(1);
     });
   });
 
