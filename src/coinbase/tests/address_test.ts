@@ -16,14 +16,19 @@ import { InternalError } from "../errors";
 import { createAxiosMock } from "./utils";
 import Decimal from "decimal.js";
 
-const newEthAddress = ethers.Wallet.createRandom();
+// newAddressModel creates a new AddressModel with a random wallet ID and a random Ethereum address.
+export const newAddressModel = (walletId: string): AddressModel => {
+  const ethAddress = ethers.Wallet.createRandom();
 
-const VALID_ADDRESS_MODEL: AddressModel = {
-  address_id: newEthAddress.address,
-  network_id: Coinbase.networkList.BaseSepolia,
-  public_key: newEthAddress.publicKey,
-  wallet_id: randomUUID(),
+  return {
+    address_id: ethAddress.address,
+    network_id: Coinbase.networkList.BaseSepolia,
+    public_key: ethAddress.publicKey,
+    wallet_id: walletId,
+  };
 };
+
+const VALID_ADDRESS_MODEL = newAddressModel(randomUUID());
 
 const VALID_BALANCE_MODEL: BalanceModel = {
   amount: "1000000000000000000",
@@ -87,11 +92,11 @@ describe("Address", () => {
     expect(address).toBeInstanceOf(Address);
   });
 
-  it("should return the network ID", () => {
-    expect(address.getId()).toBe(newEthAddress.address);
+  it("should return the address ID", () => {
+    expect(address.getId()).toBe(VALID_ADDRESS_MODEL.address_id);
   });
 
-  it("should return the address ID", () => {
+  it("should return the network ID", () => {
     expect(address.getNetworkId()).toBe(VALID_ADDRESS_MODEL.network_id);
   });
 

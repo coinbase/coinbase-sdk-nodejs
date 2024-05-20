@@ -5,6 +5,7 @@ import { ethers } from "ethers";
 import * as secp256k1 from "secp256k1";
 import { Address as AddressModel, Wallet as WalletModel } from "../client";
 import { Address } from "./address";
+import { Coinbase } from "./coinbase";
 import { ArgumentError, InternalError } from "./errors";
 import { FaucetTransaction } from "./faucet_transaction";
 import { AddressAPIClient, WalletAPIClient } from "./types";
@@ -48,6 +49,36 @@ export class Wallet {
   }
 
   /**
+   * Returns a newly created Wallet object. Do not use this method directly.
+   * Instead, use User.createWallet.
+   *
+   * @constructs Wallet
+   * @param client - The API client to interact with the server.
+   * @throws {ArgumentError} If the model or client is not provided.
+   * @throws {InternalError} - If address derivation or caching fails.
+   * @throws {APIError} - If the request fails.
+   * @returns A promise that resolves with the new Wallet object.
+   */
+  public static async create(client: WalletClients): Promise<Wallet> {
+    if (!client?.address || !client?.wallet) {
+      throw new ArgumentError("Wallet and address clients cannot be empty");
+    }
+
+    const walletData = await client.wallet!.createWallet({
+      wallet: {
+        network_id: Coinbase.networkList.BaseSepolia,
+      },
+    });
+
+    const wallet = await Wallet.init(walletData.data!, client);
+
+    await wallet.createAddress();
+    await wallet.reload();
+
+    return wallet;
+  }
+
+  /**
    * Returns a new Wallet object. Do not use this method directly. Instead, use User.createWallet or User.importWallet.
    *
    * @constructs Wallet
@@ -83,9 +114,6 @@ export class Wallet {
       for (let i = 0; i < addressCount; i++) {
         await wallet.deriveAddress();
       }
-    } else {
-      await wallet.createAddress();
-      await wallet.updateModel();
     }
 
     return wallet;
@@ -155,9 +183,9 @@ export class Wallet {
   }
 
   /**
-   * Updates the Wallet model with the latest data from the server.
+   * Reloads the Wallet model with the latest data from the server.
    */
-  private async updateModel(): Promise<void> {
+  private async reload(): Promise<void> {
     const result = await this.client.wallet.getWallet(this.model.id!);
     this.model = result?.data;
   }

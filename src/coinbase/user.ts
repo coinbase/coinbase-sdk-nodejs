@@ -1,6 +1,5 @@
 import { ApiClients } from "./types";
 import { User as UserModel } from "./../client/api";
-import { Coinbase } from "./coinbase";
 import { Wallet } from "./wallet";
 
 /**
@@ -32,13 +31,7 @@ export class User {
    * @returns the new Wallet
    */
   async createWallet(): Promise<Wallet> {
-    const payload = {
-      wallet: {
-        network_id: Coinbase.networkList.BaseSepolia,
-      },
-    };
-    const walletData = await this.client.wallet!.createWallet(payload);
-    return Wallet.init(walletData.data!, {
+    return Wallet.create({
       wallet: this.client.wallet!,
       address: this.client.address!,
     });
