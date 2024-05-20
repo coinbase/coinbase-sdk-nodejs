@@ -1,20 +1,14 @@
 import { ethers } from "ethers";
-import {
-  AddressBalanceList,
-  AddressesApiFactory,
-  Address as AddressModel,
-  Balance as BalanceModel,
-} from "../../client";
+import { Address as AddressModel } from "../../client";
 import { Address } from "./../address";
 import { FaucetTransaction } from "./../faucet_transaction";
 
-import MockAdapter from "axios-mock-adapter";
 import { randomUUID } from "crypto";
+import Decimal from "decimal.js";
 import { APIError, FaucetLimitReachedError } from "../api_error";
 import { Coinbase } from "../coinbase";
 import { InternalError } from "../errors";
-import { createAxiosMock } from "./utils";
-import Decimal from "decimal.js";
+import { VALID_BALANCE_MODEL, VALID_ADDRESS_BALANCE_LIST, addressesApiMock } from "./utils";
 
 const newEthAddress = ethers.Wallet.createRandom();
 
@@ -25,62 +19,12 @@ const VALID_ADDRESS_MODEL: AddressModel = {
   wallet_id: randomUUID(),
 };
 
-const VALID_BALANCE_MODEL: BalanceModel = {
-  amount: "1000000000000000000",
-  asset: {
-    asset_id: Coinbase.assetList.Eth,
-    network_id: Coinbase.networkList.BaseSepolia,
-  },
-};
-
-const VALID_ADDRESS_BALANCE_LIST: AddressBalanceList = {
-  data: [
-    {
-      amount: "1000000000000000000",
-      asset: {
-        asset_id: Coinbase.assetList.Eth,
-        network_id: Coinbase.networkList.BaseSepolia,
-        decimals: 18,
-      },
-    },
-    {
-      amount: "5000000000",
-      asset: {
-        asset_id: "usdc",
-        network_id: Coinbase.networkList.BaseSepolia,
-        decimals: 6,
-      },
-    },
-    {
-      amount: "3000000000000000000",
-      asset: {
-        asset_id: "weth",
-        network_id: Coinbase.networkList.BaseSepolia,
-        decimals: 6,
-      },
-    },
-  ],
-  has_more: false,
-  next_page: "",
-  total_count: 3,
-};
-
 // Test suite for Address class
 describe("Address", () => {
-  const [axiosInstance, configuration, BASE_PATH] = createAxiosMock();
-  const client = AddressesApiFactory(configuration, BASE_PATH, axiosInstance);
-  let address: Address, axiosMock;
-
-  beforeAll(() => {
-    axiosMock = new MockAdapter(axiosInstance);
-  });
+  let address: Address;
 
   beforeEach(() => {
-    address = new Address(VALID_ADDRESS_MODEL, client);
-  });
-
-  afterEach(() => {
-    axiosMock.reset();
+    address = new Address(VALID_ADDRESS_MODEL);
   });
 
   it("should initialize a new Address", () => {
@@ -96,7 +40,10 @@ describe("Address", () => {
   });
 
   it("should return the correct list of balances", async () => {
-    axiosMock.onGet().reply(200, VALID_ADDRESS_BALANCE_LIST);
+    Coinbase.apiClients.address = {
+      ...addressesApiMock,
+      listAddressBalances: jest.fn().mockResolvedValue({ data: VALID_ADDRESS_BALANCE_LIST }),
+    };
     const balances = await address.listBalances();
     expect(balances.get(Coinbase.assetList.Eth)).toEqual(new Decimal(1));
     expect(balances.get("usdc")).toEqual(new Decimal(5000));
@@ -104,28 +51,40 @@ describe("Address", () => {
   });
 
   it("should return the correct ETH balance", async () => {
-    axiosMock.onGet().reply(200, VALID_BALANCE_MODEL);
+    Coinbase.apiClients.address = {
+      ...addressesApiMock,
+      getAddressBalance: jest.fn().mockResolvedValue({ data: VALID_BALANCE_MODEL }),
+    };
     const ethBalance = await address.getBalance(Coinbase.assetList.Eth);
     expect(ethBalance).toBeInstanceOf(Decimal);
     expect(ethBalance).toEqual(new Decimal(1));
   });
 
   it("should return the correct Gwei balance", async () => {
-    axiosMock.onGet().reply(200, VALID_BALANCE_MODEL);
+    Coinbase.apiClients.address = {
+      ...addressesApiMock,
+      getAddressBalance: jest.fn().mockResolvedValue({ data: VALID_BALANCE_MODEL }),
+    };
     const ethBalance = await address.getBalance("gwei");
     expect(ethBalance).toBeInstanceOf(Decimal);
     expect(ethBalance).toEqual(new Decimal(1000000000));
   });
 
   it("should return the correct Wei balance", async () => {
-    axiosMock.onGet().reply(200, VALID_BALANCE_MODEL);
+    Coinbase.apiClients.address = {
+      ...addressesApiMock,
+      getAddressBalance: jest.fn().mockResolvedValue({ data: VALID_BALANCE_MODEL }),
+    };
     const ethBalance = await address.getBalance("wei");
     expect(ethBalance).toBeInstanceOf(Decimal);
     expect(ethBalance).toEqual(new Decimal(1000000000000000000));
   });
 
   it("should return an error for an unsupported asset", async () => {
-    axiosMock.onGet().reply(404, null);
+    Coinbase.apiClients.address = {
+      ...addressesApiMock,
+      getAddressBalance: jest.fn().mockRejectedValue(new APIError("")),
+    };
     try {
       await address.getBalance("unsupported-asset");
       fail("Expect 404 to be thrown");
@@ -139,41 +98,43 @@ describe("Address", () => {
   });
 
   it("should throw an InternalError when model is not provided", () => {
-    expect(() => new Address(null!, client)).toThrow(`Address model cannot be empty`);
-  });
-
-  it("should throw an InternalError when client is not provided", () => {
-    expect(() => new Address(VALID_ADDRESS_MODEL, null!)).toThrow(`Address client cannot be empty`);
+    expect(() => new Address(null!)).toThrow(`Address model cannot be empty`);
   });
 
   it("should request funds from the faucet and returns the faucet transaction", async () => {
     const transactionHash = "0xdeadbeef";
-    axiosMock.onPost().reply(200, {
-      transaction_hash: transactionHash,
-    });
+    Coinbase.apiClients.address = {
+      ...addressesApiMock,
+      requestFaucetFunds: jest
+        .fn()
+        .mockResolvedValue({ data: { transaction_hash: transactionHash } }),
+    };
     const faucetTransaction = await address.faucet();
     expect(faucetTransaction).toBeInstanceOf(FaucetTransaction);
     expect(faucetTransaction.getTransactionHash()).toBe(transactionHash);
   });
 
   it("should throw an APIError when the request is unsuccesful", async () => {
-    axiosMock.onPost().reply(400);
+    Coinbase.apiClients.address = {
+      ...addressesApiMock,
+      requestFaucetFunds: jest.fn().mockRejectedValue(new APIError("")),
+    };
     await expect(address.faucet()).rejects.toThrow(APIError);
   });
 
   it("should throw a FaucetLimitReachedError when the faucet limit is reached", async () => {
-    axiosMock.onPost().reply(429, {
-      code: "faucet_limit_reached",
-      message: "Faucet limit reached",
-    });
+    Coinbase.apiClients.address = {
+      ...addressesApiMock,
+      requestFaucetFunds: jest.fn().mockRejectedValue(new FaucetLimitReachedError("")),
+    };
     await expect(address.faucet()).rejects.toThrow(FaucetLimitReachedError);
   });
 
   it("should throw an InternalError when the request fails unexpectedly", async () => {
-    axiosMock.onPost().reply(500, {
-      code: "internal",
-      message: "unexpected error occurred while requesting faucet funds",
-    });
+    Coinbase.apiClients.address = {
+      ...addressesApiMock,
+      requestFaucetFunds: jest.fn().mockRejectedValue(new InternalError("")),
+    };
     await expect(address.faucet()).rejects.toThrow(InternalError);
   });
 

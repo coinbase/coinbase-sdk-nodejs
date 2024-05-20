@@ -1,4 +1,3 @@
-import { ApiClients } from "./types";
 import { User as UserModel } from "./../client/api";
 import { Coinbase } from "./coinbase";
 import { Wallet } from "./wallet";
@@ -10,16 +9,13 @@ import { Wallet } from "./wallet";
  */
 export class User {
   private model: UserModel;
-  private client: ApiClients;
 
   /**
    * Initializes a new User instance.
    *
    * @param user - The user model.
-   * @param client - The API clients.
    */
-  constructor(user: UserModel, client: ApiClients) {
-    this.client = client;
+  constructor(user: UserModel) {
     this.model = user;
   }
 
@@ -37,10 +33,10 @@ export class User {
         network_id: Coinbase.networkList.BaseSepolia,
       },
     };
-    const walletData = await this.client.wallet!.createWallet(payload);
+    const walletData = await Coinbase.apiClients.wallet!.createWallet(payload);
     return Wallet.init(walletData.data!, {
-      wallet: this.client.wallet!,
-      address: this.client.address!,
+      wallet: Coinbase.apiClients.wallet!,
+      address: Coinbase.apiClients.address!,
     });
   }
 

@@ -42,7 +42,7 @@ export class Coinbase {
     Weth: "weth",
   };
 
-  apiClients: ApiClients = {};
+  static apiClients: ApiClients = {};
 
   /**
    * Represents the number of Wei per Ether.
@@ -85,11 +85,13 @@ export class Coinbase {
       response => logApiResponse(response, debugging),
     );
 
-    this.apiClients.user = UsersApiFactory(config, BASE_PATH, axiosInstance);
-    this.apiClients.wallet = WalletsApiFactory(config, BASE_PATH, axiosInstance);
-    this.apiClients.address = AddressesApiFactory(config, BASE_PATH, axiosInstance);
-    this.apiClients.transfer = TransfersApiFactory(config, BASE_PATH, axiosInstance);
-    this.apiClients.baseSepoliaProvider = new ethers.JsonRpcProvider("https://sepolia.base.org");
+    Coinbase.apiClients.user = UsersApiFactory(config, BASE_PATH, axiosInstance);
+    Coinbase.apiClients.wallet = WalletsApiFactory(config, BASE_PATH, axiosInstance);
+    Coinbase.apiClients.address = AddressesApiFactory(config, BASE_PATH, axiosInstance);
+    Coinbase.apiClients.transfer = TransfersApiFactory(config, BASE_PATH, axiosInstance);
+    Coinbase.apiClients.baseSepoliaProvider = new ethers.JsonRpcProvider(
+      "https://sepolia.base.org",
+    );
   }
 
   /**
@@ -137,7 +139,7 @@ export class Coinbase {
    * @throws {APIError} If the request fails.
    */
   async getDefaultUser(): Promise<User> {
-    const userResponse = await this.apiClients.user!.getCurrentUser();
-    return new User(userResponse.data as UserModel, this.apiClients);
+    const userResponse = await Coinbase.apiClients.user!.getCurrentUser();
+    return new User(userResponse.data as UserModel);
   }
 }

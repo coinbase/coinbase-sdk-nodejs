@@ -1,42 +1,20 @@
-import MockAdapter from "axios-mock-adapter";
 import * as bip39 from "bip39";
-import { randomUUID } from "crypto";
-import { AddressesApiFactory, WalletsApiFactory } from "../../client";
 import { Coinbase } from "../coinbase";
 import { ArgumentError } from "../errors";
 import { Wallet } from "../wallet";
-import { createAxiosMock } from "./utils";
-
-const walletId = randomUUID();
-export const VALID_WALLET_MODEL = {
-  id: randomUUID(),
-  network_id: Coinbase.networkList.BaseSepolia,
-  default_address: {
-    wallet_id: walletId,
-    address_id: "0xdeadbeef",
-    public_key: "0x1234567890",
-    network_id: Coinbase.networkList.BaseSepolia,
-  },
-};
+import { VALID_WALLET_MODEL, addressesApiMock, walletsApiMock } from "./utils";
 
 describe("Wallet Class", () => {
-  let wallet, axiosMock;
+  let wallet;
   const seed = bip39.generateMnemonic();
 
-  const [axiosInstance, configuration, BASE_PATH] = createAxiosMock();
   const client = {
-    wallet: WalletsApiFactory(configuration, BASE_PATH, axiosInstance),
-    address: AddressesApiFactory(configuration, BASE_PATH, axiosInstance),
+    wallet: walletsApiMock,
+    address: addressesApiMock,
   };
 
   beforeAll(async () => {
-    axiosMock = new MockAdapter(axiosInstance);
-    axiosMock.onPost().reply(200, VALID_WALLET_MODEL).onGet().reply(200, VALID_WALLET_MODEL);
     wallet = await Wallet.init(VALID_WALLET_MODEL, client, seed, 2);
-  });
-
-  afterEach(() => {
-    axiosMock.reset();
   });
 
   describe("should initializes a new Wallet", () => {
@@ -50,7 +28,7 @@ describe("Wallet Class", () => {
       expect(wallet.getNetworkId()).toBe(Coinbase.networkList.BaseSepolia);
     });
     it("should return the correct default address", async () => {
-      expect(wallet.defaultAddress()?.getId()).toBe(VALID_WALLET_MODEL.default_address.address_id);
+      expect(wallet.defaultAddress()?.getId()).toBe(VALID_WALLET_MODEL.default_address?.address_id);
     });
 
     it("should derive the correct number of addresses", async () => {

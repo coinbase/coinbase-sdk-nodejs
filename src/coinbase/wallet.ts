@@ -184,7 +184,7 @@ export class Wallet {
    * @returns {void}
    */
   private cacheAddress(address: AddressModel): void {
-    this.addresses.push(new Address(address, this.client.address!));
+    this.addresses.push(new Address(address));
     this.addressIndex++;
   }
 
@@ -212,9 +212,7 @@ export class Wallet {
    * @returns The default address
    */
   public defaultAddress(): Address | undefined {
-    return this.model.default_address
-      ? new Address(this.model.default_address, this.client.address!)
-      : undefined;
+    return this.model.default_address ? new Address(this.model.default_address) : undefined;
   }
 
   /**
