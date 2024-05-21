@@ -6,6 +6,7 @@ import { ArgumentError } from "../errors";
 
 describe("Wallet Class", () => {
   let wallet, walletModel, walletId;
+  const apiResponses = {};
 
   beforeAll(async () => {
     walletId = randomUUID();
@@ -14,14 +15,19 @@ describe("Wallet Class", () => {
     Coinbase.apiClients.address = addressesApiMock;
     Coinbase.apiClients.wallet!.createWallet = mockFn(request => {
       const { network_id } = request.wallet;
-      walletModel = { id: walletId, network_id, default_address: newAddressModel(walletId) };
-      return { data: walletModel };
+      apiResponses[walletId] = {
+        id: walletId,
+        network_id,
+        default_address: newAddressModel(walletId),
+      };
+      return { data: apiResponses[walletId] };
     });
-    Coinbase.apiClients.wallet!.getWallet = mockFn(() => {
-      return { data: walletModel };
+    Coinbase.apiClients.wallet!.getWallet = mockFn(walletId => {
+      walletModel = apiResponses[walletId];
+      return { data: apiResponses[walletId] };
     });
     Coinbase.apiClients.address!.createAddress = mockFn(() => {
-      return { data: walletModel.default_address };
+      return { data: apiResponses[walletId].default_address };
     });
     wallet = await Wallet.create();
   });
