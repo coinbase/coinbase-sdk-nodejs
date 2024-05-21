@@ -108,7 +108,7 @@ describe("Address", () => {
   });
 
   it("should return an error for an unsupported asset", async () => {
-    const getAddressBalance = jest.fn().mockRejectedValue(new APIError(""));
+    const getAddressBalance = mockReturnRejectedValue(new APIError(""));
     const assetId = "unsupported-asset";
     Coinbase.apiClients.address!.getAddressBalance = getAddressBalance;
     await expect(address.getBalance(assetId)).rejects.toThrow(APIError);

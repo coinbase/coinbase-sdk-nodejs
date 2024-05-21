@@ -6,33 +6,33 @@ import { ArgumentError } from "../errors";
 
 describe("Wallet Class", () => {
   let wallet, walletModel, walletId;
-  const apiResponses = {};
-
-  beforeAll(async () => {
-    walletId = randomUUID();
-    // Mock the API calls
-    Coinbase.apiClients.wallet = walletsApiMock;
-    Coinbase.apiClients.address = addressesApiMock;
-    Coinbase.apiClients.wallet!.createWallet = mockFn(request => {
-      const { network_id } = request.wallet;
-      apiResponses[walletId] = {
-        id: walletId,
-        network_id,
-        default_address: newAddressModel(walletId),
-      };
-      return { data: apiResponses[walletId] };
-    });
-    Coinbase.apiClients.wallet!.getWallet = mockFn(walletId => {
-      walletModel = apiResponses[walletId];
-      return { data: apiResponses[walletId] };
-    });
-    Coinbase.apiClients.address!.createAddress = mockFn(walletId => {
-      return { data: apiResponses[walletId].default_address };
-    });
-    wallet = await Wallet.create();
-  });
-
   describe(".create", () => {
+    const apiResponses = {};
+
+    beforeAll(async () => {
+      walletId = randomUUID();
+      // Mock the API calls
+      Coinbase.apiClients.wallet = walletsApiMock;
+      Coinbase.apiClients.address = addressesApiMock;
+      Coinbase.apiClients.wallet!.createWallet = mockFn(request => {
+        const { network_id } = request.wallet;
+        apiResponses[walletId] = {
+          id: walletId,
+          network_id,
+          default_address: newAddressModel(walletId),
+        };
+        return { data: apiResponses[walletId] };
+      });
+      Coinbase.apiClients.wallet!.getWallet = mockFn(walletId => {
+        walletModel = apiResponses[walletId];
+        return { data: apiResponses[walletId] };
+      });
+      Coinbase.apiClients.address!.createAddress = mockFn(walletId => {
+        return { data: apiResponses[walletId].default_address };
+      });
+      wallet = await Wallet.create();
+    });
+
     it("should return a Wallet instance", async () => {
       expect(wallet).toBeInstanceOf(Wallet);
       expect(Coinbase.apiClients.wallet!.createWallet).toHaveBeenCalledTimes(1);
