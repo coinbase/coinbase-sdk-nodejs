@@ -1,4 +1,3 @@
-import { ApiClients } from "./types";
 import { User as UserModel } from "./../client/api";
 import { Wallet } from "./wallet";
 
@@ -9,16 +8,13 @@ import { Wallet } from "./wallet";
  */
 export class User {
   private model: UserModel;
-  private client: ApiClients;
 
   /**
    * Initializes a new User instance.
    *
    * @param user - The user model.
-   * @param client - The API clients.
    */
-  constructor(user: UserModel, client: ApiClients) {
-    this.client = client;
+  constructor(user: UserModel) {
     this.model = user;
   }
 
@@ -31,10 +27,7 @@ export class User {
    * @returns the new Wallet
    */
   async createWallet(): Promise<Wallet> {
-    return Wallet.create({
-      wallet: this.client.wallet!,
-      address: this.client.address!,
-    });
+    return Wallet.create();
   }
 
   /**

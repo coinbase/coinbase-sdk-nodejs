@@ -1,71 +1,51 @@
-import MockAdapter from "axios-mock-adapter";
-import * as bip39 from "bip39";
 import { randomUUID } from "crypto";
-import { Address as AddressModel, AddressesApiFactory, WalletsApiFactory } from "../../client";
 import { Coinbase } from "../coinbase";
-import { BASE_PATH } from "../../client/base";
-import { ArgumentError } from "../errors";
 import { Wallet } from "../wallet";
-import { createAxiosMock } from "./utils";
-import { newAddressModel } from "./address_test";
-
-const walletId = randomUUID();
-
-const DEFAULT_ADDRESS_MODEL = newAddressModel(walletId);
-
-export const VALID_WALLET_MODEL = {
-  id: walletId,
-  network_id: Coinbase.networkList.BaseSepolia,
-  default_address: DEFAULT_ADDRESS_MODEL,
-};
-
-export const VALID_WALLET_MODEL_WITHOUT_DEFAULT_ADDRESS = {
-  id: walletId,
-  network_id: Coinbase.networkList.BaseSepolia,
-};
+import { addressesApiMock, mockFn, newAddressModel, walletsApiMock } from "./utils";
+import { ArgumentError } from "../errors";
 
 describe("Wallet Class", () => {
-  let wallet, axiosMock;
-  const seed = bip39.generateMnemonic();
-
-  const [axiosInstance, configuration, BASE_PATH] = createAxiosMock();
-  const client = {
-    wallet: WalletsApiFactory(configuration, BASE_PATH, axiosInstance),
-    address: AddressesApiFactory(configuration, BASE_PATH, axiosInstance),
-  };
-
-  beforeAll(async () => {
-    axiosMock = new MockAdapter(axiosInstance);
-  });
-
-  afterEach(() => {
-    axiosMock.reset();
-  });
-
+  let wallet, walletModel, walletId;
   describe(".create", () => {
-    beforeEach(async () => {
-      axiosMock
-        .onPost(BASE_PATH + "/v1/wallets")
-        .reply(200, VALID_WALLET_MODEL_WITHOUT_DEFAULT_ADDRESS);
+    const apiResponses = {};
 
-      axiosMock
-        .onPost(BASE_PATH + "/v1/wallets/" + VALID_WALLET_MODEL.id + "/addresses")
-        .reply(200, DEFAULT_ADDRESS_MODEL);
-
-      // Mock reloading the wallet after default address is created.
-      axiosMock
-        .onGet(BASE_PATH + "/v1/wallets/" + VALID_WALLET_MODEL.id)
-        .reply(200, VALID_WALLET_MODEL);
-
-      wallet = await Wallet.create(client);
+    beforeAll(async () => {
+      walletId = randomUUID();
+      // Mock the API calls
+      Coinbase.apiClients.wallet = walletsApiMock;
+      Coinbase.apiClients.address = addressesApiMock;
+      Coinbase.apiClients.wallet!.createWallet = mockFn(request => {
+        const { network_id } = request.wallet;
+        apiResponses[walletId] = {
+          id: walletId,
+          network_id,
+          default_address: newAddressModel(walletId),
+        };
+        return { data: apiResponses[walletId] };
+      });
+      Coinbase.apiClients.wallet!.getWallet = mockFn(walletId => {
+        walletModel = apiResponses[walletId];
+        return { data: apiResponses[walletId] };
+      });
+      Coinbase.apiClients.address!.createAddress = mockFn(walletId => {
+        return { data: apiResponses[walletId].default_address };
+      });
+      wallet = await Wallet.create();
     });
 
     it("should return a Wallet instance", async () => {
       expect(wallet).toBeInstanceOf(Wallet);
+      expect(Coinbase.apiClients.wallet!.createWallet).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.createAddress).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.wallet!.createWallet).toHaveBeenCalledWith({
+        wallet: { network_id: Coinbase.networkList.BaseSepolia },
+      });
+      expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledWith(walletId);
     });
 
     it("should return the correct wallet ID", async () => {
-      expect(wallet.getId()).toBe(VALID_WALLET_MODEL.id);
+      expect(wallet.getId()).toBe(walletModel.id);
     });
 
     it("should return the correct network ID", async () => {
@@ -73,7 +53,7 @@ describe("Wallet Class", () => {
     });
 
     it("should return the correct default address", async () => {
-      expect(wallet.defaultAddress()?.getId()).toBe(DEFAULT_ADDRESS_MODEL.address_id);
+      expect(wallet.defaultAddress()?.getId()).toBe(walletModel.default_address.address_id);
     });
   });
 
@@ -96,15 +76,30 @@ describe("Wallet Class", () => {
     ];
 
     beforeEach(async () => {
-      addressList.forEach(address => {
-        axiosMock
-          .onGet(
-            BASE_PATH + "/v1/wallets/" + VALID_WALLET_MODEL.id + "/addresses/" + address.address_id,
-          )
-          .replyOnce(200, address);
+      jest.clearAllMocks();
+      const getAddress = jest.fn();
+      addressList.forEach(() => {
+        getAddress.mockImplementationOnce((wallet_id, address_id) => {
+          return Promise.resolve({
+            data: {
+              address_id,
+              network_id: Coinbase.networkList.BaseSepolia,
+              public_key: "0x03c3379b488a32a432a4dfe91cc3a28be210eddc98b2005bb59a4cf4ed0646eb56",
+              wallet_id,
+            },
+          });
+        });
       });
-
-      wallet = await Wallet.init(VALID_WALLET_MODEL, client, existingSeed, 2);
+      Coinbase.apiClients.address!.getAddress = getAddress;
+      wallet = await Wallet.init(walletModel, existingSeed, 2);
+      expect(Coinbase.apiClients.address!.getAddress).toHaveBeenCalledTimes(2);
+      addressList.forEach((address, callIndex) => {
+        expect(Coinbase.apiClients.address!.getAddress).toHaveBeenNthCalledWith(
+          callIndex + 1,
+          walletId,
+          address.address_id,
+        );
+      });
     });
 
     it("should return a Wallet instance", async () => {
@@ -112,7 +107,7 @@ describe("Wallet Class", () => {
     });
 
     it("should return the correct wallet ID", async () => {
-      expect(wallet.getId()).toBe(VALID_WALLET_MODEL.id);
+      expect(wallet.getId()).toBe(walletModel.id);
     });
 
     it("should return the correct network ID", async () => {
@@ -120,7 +115,7 @@ describe("Wallet Class", () => {
     });
 
     it("should return the correct default address", async () => {
-      expect(wallet.defaultAddress()?.getId()).toBe(VALID_WALLET_MODEL.default_address.address_id);
+      expect(wallet.defaultAddress()?.getId()).toBe(walletModel.default_address?.address_id);
     });
 
     it("should derive the correct number of addresses", async () => {
@@ -129,16 +124,12 @@ describe("Wallet Class", () => {
 
     it("should return the correct string representation", async () => {
       expect(wallet.toString()).toBe(
-        `Wallet{id: '${VALID_WALLET_MODEL.id}', networkId: '${Coinbase.networkList.BaseSepolia}'}`,
+        `Wallet{id: '${walletModel.id}', networkId: '${Coinbase.networkList.BaseSepolia}'}`,
       );
     });
 
-    it("should throw an ArgumentError when the API client is not provided", async () => {
-      await expect(Wallet.init(VALID_WALLET_MODEL, undefined!)).rejects.toThrow(ArgumentError);
-    });
-
     it("should throw an ArgumentError when the wallet model is not provided", async () => {
-      await expect(Wallet.init(undefined!, client)).rejects.toThrow(ArgumentError);
+      await expect(Wallet.init(undefined!)).rejects.toThrow(ArgumentError);
     });
   });
 });

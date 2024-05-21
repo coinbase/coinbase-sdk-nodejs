@@ -1,9 +1,9 @@
 import { Address as AddressModel } from "../client";
 import { Balance } from "./balance";
 import { BalanceMap } from "./balance_map";
+import { Coinbase } from "./coinbase";
 import { InternalError } from "./errors";
 import { FaucetTransaction } from "./faucet_transaction";
-import { AddressAPIClient } from "./types";
 import { Decimal } from "decimal.js";
 
 /**
@@ -11,24 +11,18 @@ import { Decimal } from "decimal.js";
  */
 export class Address {
   private model: AddressModel;
-  private client: AddressAPIClient;
 
   /**
    * Initializes a new Address instance.
    *
    * @param {AddressModel} model - The address model data.
-   * @param {AddressAPIClient} client - The API client to interact with address-related endpoints.
    * @throws {InternalError} If the model or client is empty.
    */
-  constructor(model: AddressModel, client: AddressAPIClient) {
+  constructor(model: AddressModel) {
     if (!model) {
       throw new InternalError("Address model cannot be empty");
     }
-    if (!client) {
-      throw new InternalError("Address client cannot be empty");
-    }
     this.model = model;
-    this.client = client;
   }
 
   /**
@@ -40,7 +34,7 @@ export class Address {
    * @throws {Error} If the request fails.
    */
   async faucet(): Promise<FaucetTransaction> {
-    const response = await this.client.requestFaucetFunds(
+    const response = await Coinbase.apiClients.address!.requestFaucetFunds(
       this.model.wallet_id,
       this.model.address_id,
     );
@@ -71,7 +65,7 @@ export class Address {
    * @returns {BalanceMap} - The map from asset ID to balance.
    */
   async listBalances(): Promise<BalanceMap> {
-    const response = await this.client.listAddressBalances(
+    const response = await Coinbase.apiClients.address!.listAddressBalances(
       this.model.wallet_id,
       this.model.address_id,
     );
@@ -86,7 +80,7 @@ export class Address {
    * @returns {Decimal} The balance of the asset.
    */
   async getBalance(assetId: string): Promise<Decimal> {
-    const response = await this.client.getAddressBalance(
+    const response = await Coinbase.apiClients.address!.getAddressBalance(
       this.model.wallet_id,
       this.model.address_id,
       assetId,
