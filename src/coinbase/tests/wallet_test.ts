@@ -26,7 +26,7 @@ describe("Wallet Class", () => {
       walletModel = apiResponses[walletId];
       return { data: apiResponses[walletId] };
     });
-    Coinbase.apiClients.address!.createAddress = mockFn(() => {
+    Coinbase.apiClients.address!.createAddress = mockFn(walletId => {
       return { data: apiResponses[walletId].default_address };
     });
     wallet = await Wallet.create();
