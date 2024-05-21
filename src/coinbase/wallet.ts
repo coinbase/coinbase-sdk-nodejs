@@ -8,6 +8,7 @@ import { Address } from "./address";
 import { Coinbase } from "./coinbase";
 import { ArgumentError, InternalError } from "./errors";
 import { FaucetTransaction } from "./faucet_transaction";
+import { WalletData } from "./types";
 import { convertStringToHex } from "./utils";
 
 /**
@@ -19,6 +20,7 @@ export class Wallet {
   private model: WalletModel;
 
   private master: HDKey;
+  private seed: string;
   private addresses: Address[] = [];
   private readonly addressPathPrefix = "m/44'/60'/0'/0";
   private addressIndex = 0;
@@ -29,11 +31,13 @@ export class Wallet {
    * @ignore
    * @param model - The wallet model object.
    * @param master - The HD master key.
+   * @param seed - The seed to use for the Wallet. Expects a 32-byte hexadecimal with no 0x prefix.
    * @hideconstructor
    */
-  private constructor(model: WalletModel, master: HDKey) {
+  private constructor(model: WalletModel, master: HDKey, seed: string) {
     this.model = model;
     this.master = master;
+    this.seed = seed;
   }
 
   /**
@@ -85,7 +89,8 @@ export class Wallet {
       seed = bip39.generateMnemonic();
     }
     const master = HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(seed));
-    const wallet = new Wallet(model, master);
+
+    const wallet = new Wallet(model, master, seed);
 
     if (addressCount > 0) {
       for (let i = 0; i < addressCount; i++) {
@@ -94,6 +99,15 @@ export class Wallet {
     }
 
     return wallet;
+  }
+
+  /**
+   * Exports the Wallet's data to a WalletData object.
+   *
+   * @returns The Wallet's data.
+   */
+  public export(): WalletData {
+    return { walletId: this.getId()!, seed: this.seed };
   }
 
   /**

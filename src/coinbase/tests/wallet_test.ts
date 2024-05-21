@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import { Coinbase } from "../coinbase";
 import { Wallet } from "../wallet";
+import { Address as AddressModel, Wallet as WalletModel } from "./../../client";
 import { addressesApiMock, mockFn, newAddressModel, walletsApiMock } from "./utils";
 import { ArgumentError } from "../errors";
 
@@ -130,6 +131,44 @@ describe("Wallet Class", () => {
 
     it("should throw an ArgumentError when the wallet model is not provided", async () => {
       await expect(Wallet.init(undefined!)).rejects.toThrow(ArgumentError);
+    });
+  });
+
+  describe(".export", () => {
+    let walletId: string;
+    let addressModel: AddressModel;
+    let walletModel: WalletModel;
+    let seedWallet: Wallet;
+    const seed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
+    const addressCount = 1;
+
+    beforeAll(async () => {
+      walletId = randomUUID();
+      addressModel = newAddressModel(walletId);
+      walletModel = {
+        id: walletId,
+        network_id: Coinbase.networkList.BaseSepolia,
+        default_address: addressModel,
+      };
+      Coinbase.apiClients.address = addressesApiMock;
+      Coinbase.apiClients.address!.getAddress = mockFn(() => {
+        return { data: addressModel };
+      });
+      seedWallet = await Wallet.init(walletModel, seed, addressCount);
+    });
+
+    it("exports the Wallet data", () => {
+      const walletData = seedWallet.export();
+      expect(Coinbase.apiClients.address!.getAddress).toHaveBeenCalledTimes(1);
+      expect(walletData.walletId).toBe(seedWallet.getId());
+      expect(walletData.seed).toBe(seed);
+    });
+
+    it("allows for re-creation of a Wallet", async () => {
+      const walletData = seedWallet.export();
+      const newWallet = await Wallet.init(walletModel, walletData.seed, addressCount);
+      expect(Coinbase.apiClients.address!.getAddress).toHaveBeenCalledTimes(2);
+      expect(newWallet).toBeInstanceOf(Wallet);
     });
   });
 });
