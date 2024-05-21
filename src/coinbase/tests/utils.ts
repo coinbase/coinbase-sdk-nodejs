@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosInstance } from "axios";
 import { ethers } from "ethers";
 import { randomUUID } from "crypto";
@@ -12,7 +13,20 @@ import { BASE_PATH } from "../../client/base";
 import { Coinbase } from "../coinbase";
 import { registerAxiosInterceptors } from "../utils";
 
+export const mockFn = (...args) => jest.fn(...args) as any;
+export const mockReturnValue = data => jest.fn().mockResolvedValue({ data });
+export const mockReturnRejectedValue = data => jest.fn().mockRejectedValue(data);
+
 export const walletId = randomUUID();
+
+export const generateRandomHash = (length = 8) => {
+  const characters = "abcdef0123456789";
+  let hash = "0x";
+  for (let i = 0; i < length; i++) {
+    hash += characters[Math.floor(Math.random() * characters.length)];
+  }
+  return hash;
+};
 
 // newAddressModel creates a new AddressModel with a random wallet ID and a random Ethereum address.
 export const newAddressModel = (walletId: string): AddressModel => {
@@ -87,7 +101,7 @@ type AxiosMockType = [AxiosInstance, Configuration, string];
 /**
  * Returns an Axios instance with interceptors and configuration for testing.
  *
- * @returns {AxiosMockType} - The Axios instance, configuration, and base path.
+ * @returns The Axios instance, configuration, and base path.
  */
 export const createAxiosMock = (): AxiosMockType => {
   const axiosInstance = axios.create();
@@ -101,18 +115,18 @@ export const createAxiosMock = (): AxiosMockType => {
 };
 
 export const usersApiMock = {
-  getCurrentUser: jest.fn().mockResolvedValue({ data: { id: 123 } }),
+  getCurrentUser: jest.fn(),
 };
 
 export const walletsApiMock = {
-  getWallet: jest.fn().mockResolvedValue(Promise.resolve({ data: VALID_WALLET_MODEL })),
-  createWallet: jest.fn().mockResolvedValue(Promise.resolve({ data: VALID_WALLET_MODEL })),
+  getWallet: jest.fn(),
+  createWallet: jest.fn(),
 };
 
 export const addressesApiMock = {
-  requestFaucetFunds: jest.fn().mockResolvedValue({ data: { transaction_hash: "0xdeadbeef" } }),
-  getAddress: jest.fn().mockResolvedValue({ data: VALID_ADDRESS_BALANCE_LIST }),
-  getAddressBalance: jest.fn().mockResolvedValue({ data: { VALID_BALANCE_MODEL } }),
-  listAddressBalances: jest.fn().mockResolvedValue({ data: VALID_ADDRESS_BALANCE_LIST }),
-  createAddress: jest.fn().mockResolvedValue({ data: VALID_WALLET_MODEL.default_address }),
+  requestFaucetFunds: jest.fn(),
+  getAddress: jest.fn(),
+  getAddressBalance: jest.fn(),
+  listAddressBalances: jest.fn(),
+  createAddress: jest.fn(),
 };
