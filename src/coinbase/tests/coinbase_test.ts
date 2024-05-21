@@ -10,6 +10,7 @@ import {
   usersApiMock,
   walletsApiMock,
 } from "./utils";
+import { ethers } from "ethers";
 
 const PATH_PREFIX = "./src/coinbase/tests/config";
 
@@ -55,9 +56,10 @@ describe("Coinbase tests", () => {
         wallet: walletsApiMock,
         address: addressesApiMock,
       };
+      const ethAddress = ethers.Wallet.createRandom();
 
       walletId = randomUUID();
-      publicKey = generateRandomHash(8);
+      publicKey = ethAddress.publicKey;
       addressId = randomUUID();
       transactionHash = generateRandomHash(8);
 
