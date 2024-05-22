@@ -1,9 +1,6 @@
 # Coinbase Node.js SDK
 
-The Coinbase Node.js SDK enables the simple integration of crypto into your app.
-By calling Coinbase's Platform APIs, the SDK allows you to provision crypto wallets,
-send crypto into/out of those wallets, track wallet balances, and trade crypto from
-one asset into another.
+The Coinbase Node.js SDK enables the simple integration of crypto into your app. By calling Coinbase's Platform APIs, the SDK allows you to provision crypto wallets, send crypto into/out of those wallets, track wallet balances, and trade crypto from one asset into another.
 
 The SDK currently supports Customer-custodied Wallets on the Base Sepolia test network.
 
@@ -12,8 +9,7 @@ The SDK currently supports Customer-custodied Wallets on the Base Sepolia test n
 - **may make backwards-incompatible changes between releases**
 - **should not be used on Mainnet (i.e. with real funds)**
 
-Currently, the SDK is intended for use on testnet for quick bootstrapping of crypto wallets at
-hackathons, code academies, and other development settings.
+Currently, the SDK is intended for use on testnet for quick bootstrapping of crypto wallets at hackathons, code academies, and other development settings.
 
 ## Documentation
 
@@ -38,8 +34,9 @@ yarn install @coinbase/coinbase-sdk
 After running `npx ts-node` to start the REPL, you can import the SDK as follows:
 
 ```typescript
-import { Coinbase } from '@coinbase/coinbase-sdk';
+import { Coinbase } from "@coinbase/coinbase-sdk";
 ```
+
 ### Requirements
 
 - Node.js 18 or higher
@@ -51,18 +48,17 @@ import { Coinbase } from '@coinbase/coinbase-sdk';
 To start, [create a CDP API Key](https://portal.cdp.coinbase.com/access/api). Then, initialize the Platform SDK by passing your API Key name and API Key's private key via the `Coinbase` constructor:
 
 ```typescript
-const apiKeyName = 'Copy your API Key name here.';
+const apiKeyName = "Copy your API Key name here.";
 
-const apiKeyPrivateKey = 'Copy your API Key\'s private key here.';
+const apiKeyPrivateKey = "Copy your API Key's private key here.";
 
 const coinbase = new Coinbase(apiKeyName, apiKeyPrivateKey);
 ```
 
-Another way to initialize the SDK is by sourcing the API key from the json file that contains your API key, 
-downloaded from CDP portal. 
+Another way to initialize the SDK is by sourcing the API key from the json file that contains your API key, downloaded from CDP portal.
 
 ```typescript
-const coinbase = Coinbase.configureFromJson('path/to/your/api-key.json');
+const coinbase = Coinbase.configureFromJson("path/to/your/api-key.json");
 ```
 
 This will allow you to authenticate with the Platform APIs and get access to the default `User`.
@@ -103,6 +99,50 @@ console.log(`Faucet transaction: ${faucetTransaction}`);
 // Then, we can transfer 0.00001 ETH out of the Wallet to another Wallet.
 const anotherWallet = await user.createWallet();
 const transfer = await wallet.createTransfer(0.00001, Coinbase.assetList.Eth, anotherWallet);
+```
+
+### Re-Instantiating Wallets
+
+The SDK creates Wallets with developer managed keys, which means you are responsible for securely storing the keys required to re-instantiate Wallets. The below code walks you through how to export a Wallet and store it in a secure location.
+
+```typescript
+// Export the data required to re-instantiate the Wallet.
+const data = wallet.export();
+```
+
+In order to persist the data for the Wallet, you will need to implement a store method to store the data export in a secure location. If you do not store the Wallet in a secure location you will lose access to the Wallet and all of the funds on it.
+
+```typescript
+// At this point, you should implement your own "store" method to securely persist
+// the data required to re-instantiate the Wallet at a later time.
+await store(data);
+```
+
+For convenience during testing, we provide a `saveWallet` method that stores the Wallet data in your local file system. This is an insecure method of storing wallet seeds and should only be used for development purposes.
+
+```typescript
+user.saveWallet(wallet);
+```
+
+To encrypt the saved data, set encrypt to true. Note that your CDP API key also serves as the encryption key for the data persisted locally. To re-instantiate wallets with encrypted data, ensure that your SDK is configured with the same API key when invoking `saveWallet` and `loadWallets`.
+
+```typescript
+user.saveWallet(wallet, true);
+```
+
+The below code demonstrates how to re-instantiate a Wallet from the data export.
+
+```typescript
+// The Wallet can be re-instantiated using the exported data.
+const importedWallet = await user.importWallet(data);
+```
+
+To import Wallets that were persisted to your local file system using `saveWallet`, use the below code.
+
+```typescript
+// The Wallet can be re-instantiated using the exported data.
+const wallets = await user.loadWallets();
+const reinitWallet = wallets[wallet.getId()];
 ```
 
 ## Development
@@ -155,8 +195,7 @@ npx jest ./src/coinbase/tests/wallet_test.ts
 
 ### REPL
 
-The repository is equipped with a REPL to allow developers to play with the SDK. To start
-it, run:
+The repository is equipped with a REPL to allow developers to play with the SDK. To start it, run:
 
 ```bash
 npx ts-node

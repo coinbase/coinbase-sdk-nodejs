@@ -2,6 +2,7 @@ import { AxiosPromise, AxiosRequestConfig, RawAxiosRequestConfig } from "axios";
 import { ethers } from "ethers";
 import {
   Address as AddressModel,
+  AddressList,
   AddressBalanceList,
   Balance,
   CreateAddressRequest,
@@ -71,6 +72,23 @@ export type AddressAPIClient = {
     addressId: string,
     options?: AxiosRequestConfig,
   ): AxiosPromise<AddressModel>;
+
+  /**
+   * Lists addresses.
+   *
+   * @param walletId - The ID of the wallet the addresses belong to.
+   * @param limit - The maximum number of addresses to return.
+   * @param page - A cursor for pagination across multiple pages of results. Do not include this parameter on the first call.
+   *  Use the next_page value returned in a previous response to request subsequent results.
+   * @param options - Override http request option.
+   * @throws {APIError} If the request fails.
+   */
+  listAddresses(
+    walletId: string,
+    limit?: number,
+    page?: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<AddressList>;
 
   /**
    * Get address balance
@@ -232,3 +250,22 @@ export enum TransferStatus {
   COMPLETE = "COMPLETE",
   FAILED = "FAILED",
 }
+
+/**
+ * The Wallet Data type definition.
+ * The data required to recreate a Wallet.
+ */
+export type WalletData = {
+  walletId: string;
+  seed: string;
+};
+
+/**
+ * The Seed Data type definition.
+ */
+export type SeedData = {
+  seed: string;
+  encrypted: boolean;
+  authTag: string;
+  iv: string;
+};
