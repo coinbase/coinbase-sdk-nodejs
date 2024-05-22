@@ -121,6 +121,8 @@ export const usersApiMock = {
 export const walletsApiMock = {
   getWallet: jest.fn(),
   createWallet: jest.fn(),
+  listWalletBalances: jest.fn(),
+  getWalletBalance: jest.fn(),
 };
 
 export const addressesApiMock = {

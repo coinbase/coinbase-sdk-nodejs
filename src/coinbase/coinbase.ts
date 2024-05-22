@@ -52,6 +52,13 @@ export class Coinbase {
   static readonly WEI_PER_ETHER: bigint = BigInt("1000000000000000000");
 
   /**
+   * Represents the number of Gwei per Ether.
+   *
+   * @constant
+   */
+  static readonly GWEI_PER_ETHER: bigint = BigInt("1000000000");
+
+  /**
    * The backup file path for Wallet seeds.
    *
    * @constant
