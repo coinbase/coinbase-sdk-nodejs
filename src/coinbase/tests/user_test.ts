@@ -1,24 +1,23 @@
-import * as fs from "fs";
-import * as crypto from "crypto";
 import * as bip39 from "bip39";
+import * as crypto from "crypto";
+import * as fs from "fs";
+import { ArgumentError } from "../errors";
 import {
+  AddressList,
+  Address as AddressModel,
   User as UserModel,
   Wallet as WalletModel,
-  Address as AddressModel,
-  AddressList,
 } from "./../../client/api";
-import { User } from "./../user";
 import { Coinbase } from "./../coinbase";
-import {
-  mockFn,
-  walletsApiMock,
-  addressesApiMock,
-  newAddressModel,
-  mockReturnValue,
-} from "./utils";
 import { SeedData, WalletData } from "./../types";
+import { User } from "./../user";
 import { Wallet } from "./../wallet";
-import { ArgumentError } from "../errors";
+import {
+  addressesApiMock,
+  mockReturnValue,
+  newAddressModel,
+  walletsApiMock
+} from "./utils";
 
 describe("User Class", () => {
   let mockUserModel: UserModel;
