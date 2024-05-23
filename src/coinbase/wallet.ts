@@ -10,6 +10,9 @@ import { ArgumentError, InternalError } from "./errors";
 import { FaucetTransaction } from "./faucet_transaction";
 import { WalletData } from "./types";
 import { convertStringToHex } from "./utils";
+import { BalanceMap } from "./balance_map";
+import Decimal from "decimal.js";
+import { Balance } from "./balance";
 
 /**
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
@@ -208,6 +211,43 @@ export class Wallet {
   }
 
   /**
+   * Returns the Address with the given ID.
+   *
+   * @param addressId - The ID of the Address to retrieve.
+   * @returns The Address.
+   */
+  public getAddress(addressId: string): Address | undefined {
+    return this.addresses.find(address => {
+      return address.getId() === addressId;
+    });
+  }
+
+  /**
+   * Returns the list of balances of this Wallet. Balances are aggregated across all Addresses in the Wallet.
+   *
+   * @returns The list of balances. The key is the Asset ID, and the value is the balance.
+   */
+  public async getBalances(): Promise<BalanceMap> {
+    const response = await Coinbase.apiClients.wallet!.listWalletBalances(this.model.id!);
+    return BalanceMap.fromBalances(response.data.data);
+  }
+
+  /**
+   * Returns the balance of the provided Asset. Balances are aggregated across all Addresses in the Wallet.
+   *
+   * @param assetId - The ID of the Asset to retrieve the balance for.
+   * @returns The balance of the Asset.
+   */
+  public async getBalance(assetId: string): Promise<Decimal> {
+    const response = await Coinbase.apiClients.wallet!.getWalletBalance(this.model.id!, assetId);
+    if (!response.data.amount) {
+      return new Decimal(0);
+    }
+    const balance = Balance.fromModelAndAssetId(response.data, assetId);
+    return balance.amount;
+  }
+
+  /**
    * Returns the Network ID of the Wallet.
    *
    * @returns The network ID.
@@ -232,6 +272,15 @@ export class Wallet {
    */
   public defaultAddress(): Address | undefined {
     return this.model.default_address ? new Address(this.model.default_address) : undefined;
+  }
+
+  /**
+   * Returns whether the Wallet has a seed with which to derive keys and sign transactions.
+   *
+   * @returns Whether the Wallet has a seed with which to derive keys and sign transactions.
+   */
+  public canSign(): boolean {
+    return this.master.publicKey !== undefined;
   }
 
   /**

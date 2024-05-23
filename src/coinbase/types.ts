@@ -40,6 +40,41 @@ export type WalletAPIClient = {
    * @throws {APIError} If the request fails.
    */
   getWallet: (walletId: string, options?: RawAxiosRequestConfig) => AxiosPromise<WalletModel>;
+
+  /**
+   * List the balances of all of the addresses in the wallet aggregated by asset.
+   *
+   * @param walletId - The ID of the wallet to fetch the balances for.
+   * @param options - Override http request option.
+   * @throws {RequiredError} If the required parameter is not provided.
+   * @throws {APIError} If the request fails.
+   */
+  listWalletBalances(walletId: string, options?): AxiosPromise<AddressBalanceList>;
+
+  /**
+   * List the balances of all of the addresses in the wallet aggregated by asset.
+   *
+   * @param walletId - The ID of the wallet to fetch the balances for.
+   * @param options - Override http request option.
+   * @throws {RequiredError} If the required parameter is not provided.
+   * @throws {APIError} If the request fails.
+   */
+  listWalletBalances(walletId: string, options?): AxiosPromise<AddressBalanceList>;
+
+  /**
+   * Get the aggregated balance of an asset across all of the addresses in the wallet.
+   *
+   * @param walletId - The ID of the wallet to fetch the balance for.
+   * @param assetId - The symbol of the asset to fetch the balance for.
+   * @param options - Override http request option.
+   * @throws {RequiredError} If the required parameter is not provided.
+   * @throws {APIError} If the request fails.
+   */
+  getWalletBalance(
+    walletId: string,
+    assetId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<Balance>;
 };
 
 /**
