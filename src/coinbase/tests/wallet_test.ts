@@ -1,17 +1,25 @@
+import { HDKey } from "@scure/bip32";
 import * as bip39 from "bip39";
 import { randomUUID } from "crypto";
+import Decimal from "decimal.js";
+import { Address } from "../address";
 import { Coinbase } from "../coinbase";
+import { ArgumentError } from "../errors";
 import { Wallet } from "../wallet";
-import { Address as AddressModel, Wallet as WalletModel } from "./../../client";
+import {
+  AddressBalanceList,
+  Address as AddressModel,
+  Balance as BalanceModel,
+  Wallet as WalletModel,
+} from "./../../client";
 import {
   addressesApiMock,
   getAddressFromHDKey,
   mockFn,
+  mockReturnValue,
   newAddressModel,
   walletsApiMock,
 } from "./utils";
-import { ArgumentError } from "../errors";
-import { HDKey } from "@scure/bip32";
 
 describe("Wallet Class", () => {
   let wallet, walletModel, walletId;
@@ -130,7 +138,7 @@ describe("Wallet Class", () => {
     });
   });
 
-  describe(".export", () => {
+  describe("#export", () => {
     let walletId: string;
     let addressModel: AddressModel;
     let walletModel: WalletModel;
@@ -162,6 +170,158 @@ describe("Wallet Class", () => {
       const walletData = seedWallet.export();
       const newWallet = await Wallet.init(walletModel, walletData.seed);
       expect(newWallet).toBeInstanceOf(Wallet);
+    });
+  });
+
+  describe("#defaultAddress", () => {
+    let wallet, walletId;
+    beforeEach(async () => {
+      jest.clearAllMocks();
+      walletId = randomUUID();
+      const mockAddressModel: AddressModel = newAddressModel(walletId);
+      const walletMockWithDefaultAddress: WalletModel = {
+        id: walletId,
+        network_id: Coinbase.networkList.BaseSepolia,
+        default_address: mockAddressModel,
+      };
+      Coinbase.apiClients.wallet = walletsApiMock;
+      Coinbase.apiClients.address = addressesApiMock;
+      Coinbase.apiClients.wallet!.createWallet = mockReturnValue(walletMockWithDefaultAddress);
+      Coinbase.apiClients.wallet!.getWallet = mockReturnValue(walletMockWithDefaultAddress);
+      Coinbase.apiClients.address!.createAddress = mockReturnValue(mockAddressModel);
+      wallet = await Wallet.create();
+    });
+
+    it("should return the correct address", async () => {
+      const defaultAddress = wallet.defaultAddress();
+      const address = wallet.getAddress(defaultAddress?.getId());
+      expect(address).toBeInstanceOf(Address);
+      expect(address?.getId()).toBe(address.getId());
+    });
+
+    describe(".walletId", () => {
+      it("should return the correct wallet ID", async () => {
+        expect(wallet.getId()).toBe(walletId);
+      });
+    });
+
+    describe(".networkId", () => {
+      it("should return the correct network ID", async () => {
+        expect(wallet.getNetworkId()).toBe(Coinbase.networkList.BaseSepolia);
+      });
+    });
+  });
+
+  describe("#getBalances", () => {
+    beforeEach(() => {
+      const mockBalanceResponse: AddressBalanceList = {
+        data: [
+          {
+            amount: "1000000000000000000",
+            asset: {
+              asset_id: Coinbase.assetList.Eth,
+              network_id: Coinbase.networkList.BaseSepolia,
+              decimals: 18,
+            },
+          },
+          {
+            amount: "5000000",
+            asset: {
+              asset_id: "usdc",
+              network_id: Coinbase.networkList.BaseSepolia,
+              decimals: 6,
+            },
+          },
+        ],
+        has_more: false,
+        next_page: "",
+        total_count: 2,
+      };
+      Coinbase.apiClients.wallet!.listWalletBalances = mockReturnValue(mockBalanceResponse);
+    });
+
+    it("should return a hash with an ETH and USDC balance", async () => {
+      const balanceMap = await wallet.getBalances();
+      expect(balanceMap.get("eth")).toEqual(new Decimal(1));
+      expect(balanceMap.get("usdc")).toEqual(new Decimal(5));
+      expect(Coinbase.apiClients.wallet!.listWalletBalances).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.wallet!.listWalletBalances).toHaveBeenCalledWith(walletId);
+    });
+  });
+
+  describe("#getBalance", () => {
+    beforeEach(() => {
+      const mockWalletBalance: BalanceModel = {
+        amount: "5000000000000000000",
+        asset: {
+          asset_id: Coinbase.assetList.Eth,
+          network_id: Coinbase.networkList.BaseSepolia,
+          decimals: 18,
+        },
+      };
+      Coinbase.apiClients.wallet!.getWalletBalance = mockReturnValue(mockWalletBalance);
+    });
+
+    it("should return the correct ETH balance", async () => {
+      const balanceMap = await wallet.getBalance(Coinbase.assetList.Eth);
+      expect(balanceMap).toEqual(new Decimal(5));
+      expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledWith(
+        walletId,
+        Coinbase.assetList.Eth,
+      );
+    });
+
+    it("should return the correct GWEI balance", async () => {
+      const balance = await wallet.getBalance(Coinbase.assetList.Gwei);
+      expect(balance).toEqual(new Decimal((BigInt(5) * Coinbase.GWEI_PER_ETHER).toString()));
+      expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledWith(
+        walletId,
+        Coinbase.assetList.Gwei,
+      );
+    });
+
+    it("should return the correct WEI balance", async () => {
+      const balance = await wallet.getBalance(Coinbase.assetList.Wei);
+      expect(balance).toEqual(new Decimal((BigInt(5) * Coinbase.WEI_PER_ETHER).toString()));
+      expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledWith(
+        walletId,
+        Coinbase.assetList.Wei,
+      );
+    });
+
+    it("should return 0 when the balance is not found", async () => {
+      Coinbase.apiClients.wallet!.getWalletBalance = mockReturnValue({});
+      const balance = await wallet.getBalance(Coinbase.assetList.Wei);
+      expect(balance).toEqual(new Decimal(0));
+      expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledWith(
+        walletId,
+        Coinbase.assetList.Wei,
+      );
+    });
+  });
+
+  describe("#canSign", () => {
+    let wallet;
+    beforeAll(async () => {
+      const mockAddressModel = newAddressModel(walletId);
+      const mockWalletModel = {
+        id: walletId,
+        network_id: Coinbase.networkList.BaseSepolia,
+        default_address: mockAddressModel,
+      };
+      Coinbase.apiClients.wallet = walletsApiMock;
+      Coinbase.apiClients.address = addressesApiMock;
+      Coinbase.apiClients.wallet!.createWallet = mockReturnValue(mockWalletModel);
+      Coinbase.apiClients.wallet!.getWallet = mockReturnValue(mockWalletModel);
+      Coinbase.apiClients.address!.createAddress = mockReturnValue(mockAddressModel);
+      wallet = await Wallet.create();
+    });
+    it("should return true when the wallet initialized ", () => {
+      expect(wallet.canSign()).toBe(true);
     });
   });
 });

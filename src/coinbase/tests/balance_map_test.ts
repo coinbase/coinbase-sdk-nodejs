@@ -48,7 +48,7 @@ describe("BalanceMap", () => {
     });
   });
 
-  describe("#add", () => {
+  describe(".add", () => {
     const assetId = Coinbase.assetList.Eth;
     const balance = Balance.fromModelAndAssetId(
       {
@@ -66,7 +66,7 @@ describe("BalanceMap", () => {
     });
   });
 
-  describe("#toString", () => {
+  describe(".toString", () => {
     const assetId = Coinbase.assetList.Eth;
     const balance = Balance.fromModelAndAssetId(
       {
