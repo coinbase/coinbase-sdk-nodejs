@@ -89,7 +89,8 @@ export type WalletAPIClient = {
    * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
    * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
    * @param options - Override http request option.
-   * @throws {RequiredError}
+   * @throws {APIError} If the request fails.
+   * @throws {RequiredError} If the required parameter is not provided.
    */
   listWallets(
     limit?: number,

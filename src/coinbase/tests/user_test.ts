@@ -12,7 +12,13 @@ import { Coinbase } from "./../coinbase";
 import { SeedData, WalletData } from "./../types";
 import { User } from "./../user";
 import { Wallet } from "./../wallet";
-import { addressesApiMock, mockReturnValue, newAddressModel, walletsApiMock } from "./utils";
+import {
+  addressesApiMock,
+  mockReturnRejectedValue,
+  mockReturnValue,
+  newAddressModel,
+  walletsApiMock,
+} from "./utils";
 
 describe("User Class", () => {
   let mockUserModel: UserModel;
@@ -273,6 +279,92 @@ describe("User Class", () => {
     it("throws an error when backup does not contain auth_tag", async () => {
       fs.writeFileSync(Coinbase.backupFilePath, JSON.stringify(seedDataWithoutAuthTag, null, 2));
       await expect(user.loadWallets()).rejects.toThrow(new ArgumentError("Malformed backup data"));
+    });
+  });
+
+  describe(".getWallets", () => {
+    let user: User;
+    let walletId: string;
+    let walletModelWithDefaultAddress: WalletModel;
+    let addressListModel: AddressList;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      walletId = crypto.randomUUID();
+      const addressModel1: AddressModel = newAddressModel(walletId);
+      const addressModel2: AddressModel = newAddressModel(walletId);
+      walletModelWithDefaultAddress = {
+        id: walletId,
+        network_id: Coinbase.networkList.BaseSepolia,
+        default_address: addressModel1,
+      };
+      addressListModel = {
+        data: [addressModel1, addressModel2],
+        has_more: false,
+        next_page: "",
+        total_count: 1,
+      };
+      Coinbase.apiClients.wallet = walletsApiMock;
+      Coinbase.apiClients.address = addressesApiMock;
+      const mockUserModel: UserModel = {
+        id: "12345",
+      } as UserModel;
+      user = new User(mockUserModel);
+    });
+
+    it("should raise an error when the Wallet API call fails", async () => {
+      Coinbase.apiClients.wallet!.listWallets = mockReturnRejectedValue(new Error("API Error"));
+      await expect(user.getWallets()).rejects.toThrow(new Error("API Error"));
+      expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(0);
+      expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledWith(10, "");
+    });
+
+    it("should raise an error when the Address API call fails", async () => {
+      Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
+        data: [walletModelWithDefaultAddress],
+        has_more: false,
+        next_page: "",
+        total_count: 1,
+      });
+      Coinbase.apiClients.address!.listAddresses = mockReturnRejectedValue(new Error("API Error"));
+      await expect(user.getWallets()).rejects.toThrow(new Error("API Error"));
+      expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
+    });
+
+    it("should return an empty list of Wallets when the User has no Wallets", async () => {
+      Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
+        data: [],
+        has_more: false,
+        next_page: "",
+        total_count: 0,
+      });
+      const wallets = await user.getWallets();
+      expect(wallets.length).toBe(0);
+      expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(0);
+    });
+
+    it("should return the list of Wallets", async () => {
+      Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
+        data: [walletModelWithDefaultAddress],
+        has_more: false,
+        next_page: "",
+        total_count: 2,
+      });
+      Coinbase.apiClients.address!.listAddresses = mockReturnValue(addressListModel);
+      const wallets = await user.getWallets();
+      expect(wallets.length).toBe(1);
+      expect(wallets[0].getId()).toBe(walletId);
+      expect(wallets[0].getAddresses().length).toBe(2);
+      expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledWith(
+        walletId,
+        Wallet.MAX_ADDRESSES,
+      );
+      expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledWith(10, "");
     });
   });
 });

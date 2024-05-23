@@ -5,7 +5,6 @@ import { User as UserModel, Address as AddressModel, Wallet as WalletModel } fro
 import { Wallet } from "./wallet";
 import { Coinbase } from "./coinbase";
 import { ArgumentError } from "./errors";
-import { Address } from "./address";
 
 /**
  * A representation of a User.

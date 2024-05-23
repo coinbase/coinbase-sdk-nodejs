@@ -134,9 +134,10 @@ export class Wallet {
   /**
    * Creates a new Address in the Wallet.
    *
+   * @returns The new Address.
    * @throws {APIError} - If the address creation fails.
    */
-  public async createAddress(): Promise<void> {
+  public async createAddress(): Promise<Address> {
     const key = this.deriveKey();
     const attestation = this.createAttestation(key);
     const publicKey = convertStringToHex(key.publicKey!);
@@ -147,6 +148,7 @@ export class Wallet {
     };
     const response = await Coinbase.apiClients.address!.createAddress(this.model.id!, payload);
     this.cacheAddress(response!.data);
+    return new Address(response!.data);
   }
 
   /**

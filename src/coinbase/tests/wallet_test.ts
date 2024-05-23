@@ -76,6 +76,14 @@ describe("Wallet Class", () => {
     it("should return true for canSign when the wallet is initialized without a seed", async () => {
       expect(wallet.canSign()).toBe(true);
     });
+
+    it("should create new address and update the existing address list", async () => {
+      const newAddress = await wallet.createAddress();
+      expect(newAddress).toBeInstanceOf(Address);
+      expect(wallet.getAddresses().length).toBe(2);
+      expect(wallet.getAddress(newAddress.getId()).getId()).toBe(newAddress.getId());
+      expect(Coinbase.apiClients.address!.createAddress).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe(".init", () => {
@@ -129,6 +137,13 @@ describe("Wallet Class", () => {
     it("should derive the correct addresses", async () => {
       expect(wallet.getAddress(address1)).toBe(wallet.addresses[0]);
       expect(wallet.getAddress(address2)).toBe(wallet.addresses[1]);
+    });
+
+    it("should create new address and update the existing address list", async () => {
+      const newAddress = await wallet.createAddress();
+      expect(newAddress).toBeInstanceOf(Address);
+      expect(wallet.getAddresses().length).toBe(3);
+      expect(wallet.getAddress(newAddress.getId()).getId()).toBe(newAddress.getId());
     });
 
     it("should return the correct string representation", async () => {
