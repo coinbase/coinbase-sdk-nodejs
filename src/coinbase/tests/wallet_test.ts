@@ -147,7 +147,7 @@ describe("Wallet Class", () => {
     });
   });
 
-  describe(".export", () => {
+  describe("#export", () => {
     let walletId: string;
     let addressModel: AddressModel;
     let walletModel: WalletModel;
@@ -185,7 +185,7 @@ describe("Wallet Class", () => {
     });
   });
 
-  describe(".defaultAddress", () => {
+  describe("#defaultAddress", () => {
     let wallet, walletId;
     beforeEach(async () => {
       jest.clearAllMocks();
@@ -224,7 +224,7 @@ describe("Wallet Class", () => {
     });
   });
 
-  describe(".listBalances", () => {
+  describe("#getBalances", () => {
     beforeEach(() => {
       const mockBalanceResponse: AddressBalanceList = {
         data: [
@@ -253,7 +253,7 @@ describe("Wallet Class", () => {
     });
 
     it("should return a hash with an ETH and USDC balance", async () => {
-      const balanceMap = await wallet.listBalances();
+      const balanceMap = await wallet.getBalances();
       expect(balanceMap.get("eth")).toEqual(new Decimal(1));
       expect(balanceMap.get("usdc")).toEqual(new Decimal(5));
       expect(Coinbase.apiClients.wallet!.listWalletBalances).toHaveBeenCalledTimes(1);
@@ -261,7 +261,7 @@ describe("Wallet Class", () => {
     });
   });
 
-  describe(".getBalance", () => {
+  describe("#getBalance", () => {
     beforeEach(() => {
       const mockWalletBalance: BalanceModel = {
         amount: "5000000000000000000",
@@ -316,7 +316,7 @@ describe("Wallet Class", () => {
     });
   });
 
-  describe(".canSign", () => {
+  describe("#canSign", () => {
     let wallet;
     beforeAll(async () => {
       const mockAddressModel = newAddressModel(walletId);
