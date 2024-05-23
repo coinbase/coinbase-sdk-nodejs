@@ -224,18 +224,6 @@ export class Wallet {
   }
 
   /**
-   * Returns the Address with the given ID.
-   *
-   * @param addressId - The ID of the Address to retrieve.
-   * @returns The Address.
-   */
-  public getAddress(addressId: string): Address | undefined {
-    return this.addresses.find(address => {
-      return address.getId() === addressId;
-    });
-  }
-
-  /**
    * Builds a Hash of the registered Addresses.
    *
    * @param addressModels - The models of the addresses already registered with the Wallet.
@@ -273,6 +261,15 @@ export class Wallet {
     return this.addresses.find(address => {
       return address.getId() === addressId;
     });
+  }
+
+  /**
+   * Returns the list of Addresses in the Wallet.
+   *
+   * @returns The list of Addresses.
+   */
+  public getAddresses(): Address[] {
+    return this.addresses;
   }
 
   /**

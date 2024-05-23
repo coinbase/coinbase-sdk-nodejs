@@ -12,12 +12,7 @@ import { Coinbase } from "./../coinbase";
 import { SeedData, WalletData } from "./../types";
 import { User } from "./../user";
 import { Wallet } from "./../wallet";
-import {
-  addressesApiMock,
-  mockReturnValue,
-  newAddressModel,
-  walletsApiMock
-} from "./utils";
+import { addressesApiMock, mockReturnValue, newAddressModel, walletsApiMock } from "./utils";
 
 describe("User Class", () => {
   let mockUserModel: UserModel;

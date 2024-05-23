@@ -72,6 +72,10 @@ describe("Wallet Class", () => {
     it("should return the correct default address", async () => {
       expect(wallet.defaultAddress()?.getId()).toBe(walletModel.default_address.address_id);
     });
+
+    it("should return true for canSign when the wallet is initialized without a seed", async () => {
+      expect(wallet.canSign()).toBe(true);
+    });
   });
 
   describe(".init", () => {
@@ -119,7 +123,7 @@ describe("Wallet Class", () => {
     });
 
     it("should derive the correct number of addresses", async () => {
-      expect(wallet.addresses.length).toBe(2);
+      expect(wallet.getAddresses().length).toBe(2);
     });
 
     it("should derive the correct addresses", async () => {
@@ -170,6 +174,10 @@ describe("Wallet Class", () => {
       const walletData = seedWallet.export();
       const newWallet = await Wallet.init(walletModel, walletData.seed);
       expect(newWallet).toBeInstanceOf(Wallet);
+    });
+
+    it("should return true for canSign when the wallet is initialized with a seed", () => {
+      expect(wallet.canSign()).toBe(true);
     });
   });
 
