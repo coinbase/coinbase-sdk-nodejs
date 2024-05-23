@@ -67,7 +67,6 @@ describe("User Class", () => {
       Coinbase.apiClients.wallet!.getWallet = mockReturnValue(mockWalletModel);
       Coinbase.apiClients.address = addressesApiMock;
       Coinbase.apiClients.address!.listAddresses = mockReturnValue(mockAddressList);
-      Coinbase.apiClients.address!.getAddress = mockReturnValue(mockAddressModel);
       user = new User(mockUserModel);
       walletData = { walletId: walletId, seed: bip39.generateMnemonic() };
       importedWallet = await user.importWallet(walletData);
@@ -249,7 +248,6 @@ describe("User Class", () => {
       Coinbase.apiClients.wallet!.getWallet = mockReturnValue(walletModelWithDefaultAddress);
       Coinbase.apiClients.address = addressesApiMock;
       Coinbase.apiClients.address!.listAddresses = mockReturnValue(addressListModel);
-      Coinbase.apiClients.address!.getAddress = mockReturnValue(addressModel);
 
       const wallets = await user.loadWallets();
       const wallet = wallets[walletId];

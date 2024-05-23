@@ -99,7 +99,9 @@ export class Wallet {
     }
     const master = HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(seed));
     const wallet = new Wallet(model, master, seed, addressModels);
-    wallet.deriveAddresses(addressModels);
+    if (addressModels.length > 0) {
+      wallet.deriveAddresses(addressModels);
+    }
     return wallet;
   }
 
