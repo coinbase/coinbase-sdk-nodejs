@@ -76,7 +76,6 @@ describe("User Class", () => {
       expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledWith(walletId);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
-      expect(Coinbase.apiClients.address!.getAddress).toHaveBeenCalledTimes(1);
     });
 
     it("should import an exported wallet", async () => {
@@ -94,7 +93,6 @@ describe("User Class", () => {
 
   describe(".saveWallet", () => {
     let seed: string;
-    let addressCount: number;
     let walletId: string;
     let mockSeedWallet: Wallet;
     let savedWallet: Wallet;
@@ -102,7 +100,6 @@ describe("User Class", () => {
     beforeAll(async () => {
       walletId = crypto.randomUUID();
       seed = "86fc9fba421dcc6ad42747f14132c3cd975bd9fb1454df84ce5ea554f2542fbe";
-      addressCount = 1;
       mockAddressModel = {
         address_id: "0xdeadbeef",
         wallet_id: walletId,
@@ -123,7 +120,7 @@ describe("User Class", () => {
         privateKeyEncoding: { type: "pkcs8", format: "pem" },
         publicKeyEncoding: { type: "spki", format: "pem" },
       }).privateKey;
-      mockSeedWallet = await Wallet.init(mockWalletModel, seed, addressCount);
+      mockSeedWallet = await Wallet.init(mockWalletModel, seed, [mockAddressModel]);
     });
 
     afterEach(async () => {
@@ -133,7 +130,6 @@ describe("User Class", () => {
     it("should save the Wallet data when encryption is false", async () => {
       savedWallet = user.saveWallet(mockSeedWallet);
       expect(savedWallet).toBe(mockSeedWallet);
-      expect(Coinbase.apiClients.address!.getAddress).toHaveBeenCalledTimes(1);
       const storedSeedData = fs.readFileSync(Coinbase.backupFilePath);
       const walletSeedData = JSON.parse(storedSeedData.toString());
       expect(walletSeedData[walletId].encrypted).toBe(false);
@@ -145,7 +141,6 @@ describe("User Class", () => {
     it("should save the Wallet data when encryption is true", async () => {
       savedWallet = user.saveWallet(mockSeedWallet, true);
       expect(savedWallet).toBe(mockSeedWallet);
-      expect(Coinbase.apiClients.address!.getAddress).toHaveBeenCalledTimes(1);
       const storedSeedData = fs.readFileSync(Coinbase.backupFilePath);
       const walletSeedData = JSON.parse(storedSeedData.toString());
       expect(walletSeedData[walletId].encrypted).toBe(true);

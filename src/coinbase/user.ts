@@ -1,10 +1,11 @@
 import * as fs from "fs";
 import * as crypto from "crypto";
 import { WalletData, SeedData } from "./types";
-import { User as UserModel } from "./../client/api";
+import { User as UserModel, Address as AddressModel, Wallet as WalletModel } from "./../client/api";
 import { Wallet } from "./wallet";
 import { Coinbase } from "./coinbase";
 import { ArgumentError } from "./errors";
+import { Address } from "./address";
 
 /**
  * A representation of a User.
@@ -91,6 +92,36 @@ export class User {
   }
 
   /**
+   * Lists the Wallets belonging to the User.
+   *
+   * @param pageSize - The number of Wallets to return per page. Defaults to 10
+   * @param nextPageToken - The token for the next page of Wallets
+   * @returns The list of Wallets.
+   */
+  public async getWallets(pageSize: number = 10, nextPageToken: string = ""): Promise<Wallet[]> {
+    const addressModelMap: { [key: string]: AddressModel[] } = {};
+    const walletList = await Coinbase.apiClients.wallet!.listWallets(pageSize, nextPageToken);
+    const walletsModels: WalletModel[] = [];
+
+    for (const wallet of walletList.data.data) {
+      walletsModels.push(wallet);
+    }
+    for (const wallet of walletsModels) {
+      const addressList = await Coinbase.apiClients.address!.listAddresses(
+        wallet.id!,
+        Wallet.MAX_ADDRESSES,
+      );
+      addressModelMap[wallet.id!] = addressList.data.data;
+    }
+
+    return await Promise.all(
+      walletsModels.map(async wallet => {
+        return await Wallet.init(wallet, "", addressModelMap[wallet.id!]);
+      }),
+    );
+  }
+
+  /**
    * Loads all wallets belonging to the User with backup persisted to the local file system.
    *
    * @returns the map of walletId's to the Wallet objects.
@@ -145,9 +176,8 @@ export class User {
   public async importWallet(data: WalletData): Promise<Wallet> {
     const walletModel = await Coinbase.apiClients.wallet!.getWallet(data.walletId);
     const addressList = await Coinbase.apiClients.address!.listAddresses(data.walletId);
-    const addressCount = addressList.data!.total_count;
 
-    return Wallet.init(walletModel.data, data.seed, addressCount);
+    return Wallet.init(walletModel.data, data.seed, addressList.data.data);
   }
 
   /**

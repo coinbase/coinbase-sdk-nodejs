@@ -1,9 +1,17 @@
+import * as bip39 from "bip39";
 import { randomUUID } from "crypto";
 import { Coinbase } from "../coinbase";
 import { Wallet } from "../wallet";
 import { Address as AddressModel, Wallet as WalletModel } from "./../../client";
-import { addressesApiMock, mockFn, newAddressModel, walletsApiMock } from "./utils";
+import {
+  addressesApiMock,
+  getAddressFromHDKey,
+  mockFn,
+  newAddressModel,
+  walletsApiMock,
+} from "./utils";
 import { ArgumentError } from "../errors";
+import { HDKey } from "@scure/bip32";
 
 describe("Wallet Class", () => {
   let wallet, walletModel, walletId;
@@ -61,15 +69,20 @@ describe("Wallet Class", () => {
   describe(".init", () => {
     const existingSeed =
       "hidden assault maple cheap gentle paper earth surprise trophy guide room tired";
+    const baseWallet = HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(existingSeed));
+    const wallet1 = baseWallet.deriveChild(0);
+    const address1 = getAddressFromHDKey(wallet1);
+    const wallet2 = baseWallet.deriveChild(1);
+    const address2 = getAddressFromHDKey(wallet2);
     const addressList = [
       {
-        address_id: "0x23626702fdC45fc75906E535E38Ee1c7EC0C3213",
+        address_id: address1,
         network_id: Coinbase.networkList.BaseSepolia,
         public_key: "0x032c11a826d153bb8cf17426d03c3ffb74ea445b17362f98e1536f22bcce720772",
         wallet_id: walletId,
       },
       {
-        address_id: "0x770603171A98d1CD07018F7309A1413753cA0018",
+        address_id: address2,
         network_id: Coinbase.networkList.BaseSepolia,
         public_key: "0x03c3379b488a32a432a4dfe91cc3a28be210eddc98b2005bb59a4cf4ed0646eb56",
         wallet_id: walletId,
@@ -78,29 +91,7 @@ describe("Wallet Class", () => {
 
     beforeEach(async () => {
       jest.clearAllMocks();
-      const getAddress = jest.fn();
-      addressList.forEach(() => {
-        getAddress.mockImplementationOnce((wallet_id, address_id) => {
-          return Promise.resolve({
-            data: {
-              address_id,
-              network_id: Coinbase.networkList.BaseSepolia,
-              public_key: "0x03c3379b488a32a432a4dfe91cc3a28be210eddc98b2005bb59a4cf4ed0646eb56",
-              wallet_id,
-            },
-          });
-        });
-      });
-      Coinbase.apiClients.address!.getAddress = getAddress;
-      wallet = await Wallet.init(walletModel, existingSeed, 2);
-      expect(Coinbase.apiClients.address!.getAddress).toHaveBeenCalledTimes(2);
-      addressList.forEach((address, callIndex) => {
-        expect(Coinbase.apiClients.address!.getAddress).toHaveBeenNthCalledWith(
-          callIndex + 1,
-          walletId,
-          address.address_id,
-        );
-      });
+      wallet = await Wallet.init(walletModel, existingSeed, addressList);
     });
 
     it("should return a Wallet instance", async () => {
@@ -123,6 +114,11 @@ describe("Wallet Class", () => {
       expect(wallet.addresses.length).toBe(2);
     });
 
+    it("should derive the correct addresses", async () => {
+      expect(wallet.getAddress(address1)).toBe(wallet.addresses[0]);
+      expect(wallet.getAddress(address2)).toBe(wallet.addresses[1]);
+    });
+
     it("should return the correct string representation", async () => {
       expect(wallet.toString()).toBe(
         `Wallet{id: '${walletModel.id}', networkId: '${Coinbase.networkList.BaseSepolia}'}`,
@@ -140,7 +136,6 @@ describe("Wallet Class", () => {
     let walletModel: WalletModel;
     let seedWallet: Wallet;
     const seed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
-    const addressCount = 1;
 
     beforeAll(async () => {
       walletId = randomUUID();
@@ -154,20 +149,18 @@ describe("Wallet Class", () => {
       Coinbase.apiClients.address!.getAddress = mockFn(() => {
         return { data: addressModel };
       });
-      seedWallet = await Wallet.init(walletModel, seed, addressCount);
+      seedWallet = await Wallet.init(walletModel, seed);
     });
 
     it("exports the Wallet data", () => {
       const walletData = seedWallet.export();
-      expect(Coinbase.apiClients.address!.getAddress).toHaveBeenCalledTimes(1);
       expect(walletData.walletId).toBe(seedWallet.getId());
       expect(walletData.seed).toBe(seed);
     });
 
     it("allows for re-creation of a Wallet", async () => {
       const walletData = seedWallet.export();
-      const newWallet = await Wallet.init(walletModel, walletData.seed, addressCount);
-      expect(Coinbase.apiClients.address!.getAddress).toHaveBeenCalledTimes(2);
+      const newWallet = await Wallet.init(walletModel, walletData.seed);
       expect(newWallet).toBeInstanceOf(Wallet);
     });
   });

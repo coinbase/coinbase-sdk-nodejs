@@ -22,8 +22,10 @@ export class Wallet {
   private master: HDKey;
   private seed: string;
   private addresses: Address[] = [];
+  private addressModels: AddressModel[] = [];
   private readonly addressPathPrefix = "m/44'/60'/0'/0";
   private addressIndex = 0;
+  static MAX_ADDRESSES = 20;
 
   /**
    * Private constructor to prevent direct instantiation outside of factory method. Use Wallet.init instead.
@@ -32,12 +34,19 @@ export class Wallet {
    * @param model - The wallet model object.
    * @param master - The HD master key.
    * @param seed - The seed to use for the Wallet. Expects a 32-byte hexadecimal with no 0x prefix.
+   * @param addressModels - The models of the addresses already registered with the Wallet.
    * @hideconstructor
    */
-  private constructor(model: WalletModel, master: HDKey, seed: string) {
+  private constructor(
+    model: WalletModel,
+    master: HDKey,
+    seed: string,
+    addressModels: AddressModel[] = [],
+  ) {
     this.model = model;
     this.master = master;
     this.seed = seed;
+    this.addressModels = addressModels;
   }
 
   /**
@@ -71,7 +80,7 @@ export class Wallet {
    * @constructs Wallet
    * @param model - The underlying Wallet model object
    * @param seed - The seed to use for the Wallet. Expects a 32-byte hexadecimal with no 0x prefix. If not provided, a new seed will be generated.
-   * @param addressCount - The number of addresses already registered for the Wallet.
+   * @param addressModels - The models of the addresses already registered with the Wallet. If not provided, the Wallet will derive the first default address.
    * @throws {ArgumentError} If the model or client is not provided.
    * @throws {InternalError} - If address derivation or caching fails.
    * @throws {APIError} - If the request fails.
@@ -80,7 +89,7 @@ export class Wallet {
   public static async init(
     model: WalletModel,
     seed: string = "",
-    addressCount: number = 0,
+    addressModels: AddressModel[] = [],
   ): Promise<Wallet> {
     if (!model) {
       throw new ArgumentError("Wallet model cannot be empty");
@@ -89,15 +98,8 @@ export class Wallet {
       seed = bip39.generateMnemonic();
     }
     const master = HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(seed));
-
-    const wallet = new Wallet(model, master, seed);
-
-    if (addressCount > 0) {
-      for (let i = 0; i < addressCount; i++) {
-        await wallet.deriveAddress();
-      }
-    }
-
+    const wallet = new Wallet(model, master, seed, addressModels);
+    wallet.deriveAddresses(addressModels);
     return wallet;
   }
 
@@ -129,7 +131,7 @@ export class Wallet {
    *
    * @throws {APIError} - If the address creation fails.
    */
-  private async createAddress(): Promise<void> {
+  public async createAddress(): Promise<void> {
     const key = this.deriveKey();
     const attestation = this.createAttestation(key);
     const publicKey = convertStringToHex(key.publicKey!);
@@ -184,15 +186,64 @@ export class Wallet {
   /**
    * Derives an already registered Address in the Wallet.
    *
+   * @param addressMap - The map of registered Address IDs
+   * @param addressModel - The Address model
    * @throws {InternalError} - If address derivation fails.
    * @throws {APIError} - If the request fails.
    * @returns A promise that resolves when the address is derived.
    */
-  private async deriveAddress(): Promise<void> {
-    const key = this.deriveKey();
-    const wallet = new ethers.Wallet(convertStringToHex(key.privateKey!));
-    const response = await Coinbase.apiClients.address!.getAddress(this.model.id!, wallet.address);
-    this.cacheAddress(response.data);
+  private async deriveAddress(
+    addressMap: { [key: string]: boolean },
+    addressModel: AddressModel,
+  ): Promise<void> {
+    const key = this.master.publicKey ? this.deriveKey() : null;
+    if (key) {
+      const wallet = new ethers.Wallet(convertStringToHex(key.privateKey!));
+      if (addressMap[wallet.address]) {
+        throw new InternalError("Invalid address");
+      }
+    }
+    this.cacheAddress(addressModel);
+  }
+
+  /**
+   * Derives the registered Addresses in the Wallet.
+   *
+   * @param addresses - The models of the addresses already registered with the
+   */
+  public async deriveAddresses(addresses: AddressModel[]): Promise<void> {
+    const addressMap = this.buildAddressMap(addresses);
+    for (const address of addresses) {
+      this.deriveAddress(addressMap, address);
+    }
+  }
+
+  /**
+   * Returns the Address with the given ID.
+   *
+   * @param addressId - The ID of the Address to retrieve.
+   * @returns The Address.
+   */
+  public getAddress(addressId: string): Address | undefined {
+    return this.addresses.find(address => {
+      return address.getId() === addressId;
+    });
+  }
+
+  /**
+   * Builds a Hash of the registered Addresses.
+   *
+   * @param addressModels - The models of the addresses already registered with the Wallet.
+   * @returns The Hash of registered Addresses
+   */
+  private buildAddressMap(addressModels: AddressModel[]): { [key: string]: boolean } {
+    const addressMap: { [key: string]: boolean } = {};
+
+    addressModels?.forEach(addressModel => {
+      addressMap[addressModel.address_id] = true;
+    });
+
+    return addressMap;
   }
 
   /**
