@@ -1,6 +1,8 @@
 import { Address } from "./../address";
+import * as crypto from "crypto";
+import { ethers } from "ethers";
 import { FaucetTransaction } from "./../faucet_transaction";
-
+import { Balance as BalanceModel } from "../../client";
 import Decimal from "decimal.js";
 import { APIError, FaucetLimitReachedError } from "../api_error";
 import { Coinbase } from "../coinbase";
@@ -8,16 +10,22 @@ import { InternalError } from "../errors";
 import {
   VALID_ADDRESS_BALANCE_LIST,
   VALID_ADDRESS_MODEL,
+  VALID_TRANSFER_MODEL,
   addressesApiMock,
   generateRandomHash,
   mockFn,
   mockReturnRejectedValue,
+  mockReturnValue,
+  transfersApiMock,
 } from "./utils";
+import { ArgumentError } from "../errors";
 
 // Test suite for Address class
 describe("Address", () => {
   const transactionHash = generateRandomHash();
-  let address: Address, balanceModel;
+  let address: Address;
+  let balanceModel: BalanceModel;
+  let key;
 
   beforeAll(() => {
     Coinbase.apiClients.address = addressesApiMock;
@@ -41,7 +49,9 @@ describe("Address", () => {
   });
 
   beforeEach(() => {
-    address = new Address(VALID_ADDRESS_MODEL);
+    key = ethers.Wallet.createRandom();
+    address = new Address(VALID_ADDRESS_MODEL, key as unknown as ethers.Wallet);
+
     jest.clearAllMocks();
   });
 
@@ -85,7 +95,7 @@ describe("Address", () => {
     const assetId = "gwei";
     const ethBalance = await address.getBalance(assetId);
     expect(ethBalance).toBeInstanceOf(Decimal);
-    expect(ethBalance).toEqual(new Decimal(1000000000));
+    expect(ethBalance).toEqual(new Decimal("1000000000"));
     expect(Coinbase.apiClients.address!.getAddressBalance).toHaveBeenCalledWith(
       address.getWalletId(),
       address.getId(),
@@ -98,7 +108,7 @@ describe("Address", () => {
     const assetId = "wei";
     const ethBalance = await address.getBalance(assetId);
     expect(ethBalance).toBeInstanceOf(Decimal);
-    expect(ethBalance).toEqual(new Decimal(1000000000000000000));
+    expect(ethBalance).toEqual(new Decimal("1000000000000000000"));
     expect(Coinbase.apiClients.address!.getAddressBalance).toHaveBeenCalledWith(
       address.getWalletId(),
       address.getId(),
@@ -121,7 +131,9 @@ describe("Address", () => {
   });
 
   it("should throw an InternalError when model is not provided", () => {
-    expect(() => new Address(null!)).toThrow(`Address model cannot be empty`);
+    expect(() => new Address(null!, key as unknown as ethers.Wallet)).toThrow(
+      `Address model cannot be empty`,
+    );
   });
 
   it("should request funds from the faucet and returns the faucet transaction", async () => {
@@ -165,5 +177,132 @@ describe("Address", () => {
     expect(address.toString()).toBe(
       `Coinbase:Address{addressId: '${VALID_ADDRESS_MODEL.address_id}', networkId: '${VALID_ADDRESS_MODEL.network_id}', walletId: '${VALID_ADDRESS_MODEL.wallet_id}'}`,
     );
+  });
+
+  describe(".createTransfer", () => {
+    let weiAmount, destination, intervalSeconds, timeoutSeconds;
+    let walletId, id;
+
+    const mockProvider = new ethers.JsonRpcProvider(
+      "https://sepolia.base.org",
+    ) as jest.Mocked<ethers.JsonRpcProvider>;
+    mockProvider.getTransaction = jest.fn();
+    mockProvider.getTransactionReceipt = jest.fn();
+    Coinbase.apiClients.baseSepoliaProvider = mockProvider;
+
+    beforeEach(() => {
+      weiAmount = new Decimal("500000000000000000");
+      destination = new Address(VALID_ADDRESS_MODEL, key as unknown as ethers.Wallet);
+      intervalSeconds = 0.2;
+      timeoutSeconds = 10;
+      walletId = crypto.randomUUID();
+      id = crypto.randomUUID();
+      Coinbase.apiClients.address!.getAddressBalance = mockFn(request => {
+        const { asset_id } = request;
+        balanceModel = {
+          amount: "1000000000000000000",
+          asset: {
+            asset_id,
+            network_id: Coinbase.networkList.BaseSepolia,
+          },
+        };
+        return { data: balanceModel };
+      });
+
+      Coinbase.apiClients.transfer = transfersApiMock;
+    });
+
+    it("should successfully create and complete a transfer", async () => {
+      Coinbase.apiClients.transfer!.createTransfer = mockReturnValue(VALID_TRANSFER_MODEL);
+      Coinbase.apiClients.transfer!.broadcastTransfer = mockReturnValue({
+        transaction_hash: "0x6c087c1676e8269dd81e0777244584d0cbfd39b6997b3477242a008fa9349e11",
+        ...VALID_TRANSFER_MODEL,
+      });
+      mockProvider.getTransaction.mockResolvedValueOnce({
+        blockHash: "0xdeadbeef",
+      } as ethers.TransactionResponse);
+      mockProvider.getTransactionReceipt.mockResolvedValueOnce({
+        status: 1,
+      } as ethers.TransactionReceipt);
+
+      const transfer = await address.createTransfer(
+        weiAmount,
+        Coinbase.assetList.Wei,
+        destination,
+        intervalSeconds,
+        timeoutSeconds,
+      );
+
+      expect(Coinbase.apiClients.transfer!.createTransfer).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.transfer!.broadcastTransfer).toHaveBeenCalledTimes(1);
+    });
+
+    it("should throw an APIError if the createTransfer API call fails", async () => {
+      Coinbase.apiClients.transfer!.createTransfer = mockReturnRejectedValue(
+        new APIError("Failed to create transfer"),
+      );
+      await expect(
+        address.createTransfer(
+          weiAmount,
+          Coinbase.assetList.Wei,
+          destination,
+          intervalSeconds,
+          timeoutSeconds,
+        ),
+      ).rejects.toThrow(APIError);
+    });
+
+    it("should throw an APIError if the broadcastTransfer API call fails", async () => {
+      Coinbase.apiClients.transfer!.createTransfer = mockReturnValue(VALID_TRANSFER_MODEL);
+      Coinbase.apiClients.transfer!.broadcastTransfer = mockReturnRejectedValue(
+        new APIError("Failed to broadcast transfer"),
+      );
+      await expect(
+        address.createTransfer(
+          weiAmount,
+          Coinbase.assetList.Wei,
+          destination,
+          intervalSeconds,
+          timeoutSeconds,
+        ),
+      ).rejects.toThrow(APIError);
+    });
+
+    it("should throw an Error if the transfer times out", async () => {
+      Coinbase.apiClients.transfer!.createTransfer = mockReturnValue(VALID_TRANSFER_MODEL);
+      Coinbase.apiClients.transfer!.broadcastTransfer = mockReturnValue({
+        transaction_hash: "0x6c087c1676e8269dd81e0777244584d0cbfd39b6997b3477242a008fa9349e11",
+        ...VALID_TRANSFER_MODEL,
+      });
+      intervalSeconds = 0.000002;
+      timeoutSeconds = 0.000002;
+
+      await expect(
+        address.createTransfer(
+          weiAmount,
+          Coinbase.assetList.Wei,
+          destination,
+          intervalSeconds,
+          timeoutSeconds,
+        ),
+      ).rejects.toThrow("Transfer timed out");
+    });
+
+    it("should throw an ArgumentError if there are insufficient funds", async () => {
+      const insufficientAmount = new Decimal("10000000000000000000");
+      await expect(
+        address.createTransfer(
+          insufficientAmount,
+          Coinbase.assetList.Wei,
+          destination,
+          intervalSeconds,
+          timeoutSeconds,
+        ),
+      ).rejects.toThrow(ArgumentError);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
   });
 });

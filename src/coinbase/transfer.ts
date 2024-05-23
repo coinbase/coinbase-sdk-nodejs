@@ -1,17 +1,10 @@
-import { TransferAPIClient, TransferStatus } from "./types";
+import { Decimal } from "decimal.js";
+import { TransferStatus } from "./types";
 import { Coinbase } from "./coinbase";
 import { Transfer as TransferModel } from "../client/api";
 import { ethers } from "ethers";
 import { InternalError, InvalidUnsignedPayload } from "./errors";
-import { delay } from "./utils";
-
-/**
- * The Transfer API client types.
- */
-export type TransferClients = {
-  transfer: TransferAPIClient;
-  baseSepoliaProvider: ethers.Provider;
-};
+import { WEI_PER_ETHER } from "./constants";
 
 /**
  * A representation of a Transfer, which moves an Amount of an Asset from
@@ -20,25 +13,30 @@ export type TransferClients = {
  */
 export class Transfer {
   private model: TransferModel;
-  private client: TransferClients;
   private transaction?: ethers.Transaction;
 
   /**
-   * Initializes a new Transfer instance.
+   * Private constructor to prevent direct instantiation outside of the factory methods.
    *
+   * @ignore
    * @param transferModel - The Transfer model.
-   * @param client - The API clients.
+   * @hideconstructor
    */
-  constructor(transferModel: TransferModel, client: TransferClients) {
+  private constructor(transferModel: TransferModel) {
     if (!transferModel) {
       throw new InternalError("Transfer model cannot be empty");
     }
     this.model = transferModel;
+  }
 
-    if (!client) {
-      throw new InternalError("API clients cannot be empty");
-    }
-    this.client = client;
+  /**
+   * Converts a TransferModel into a Transfer object.
+   *
+   * @param transferModel - The Transfer model object.
+   * @returns The Transfer object.
+   */
+  public static fromModel(transferModel: TransferModel): Transfer {
+    return new Transfer(transferModel);
   }
 
   /**
@@ -100,13 +98,13 @@ export class Transfer {
    *
    * @returns The Amount of the Asset.
    */
-  public getAmount(): bigint {
-    const amount = BigInt(this.model.amount);
+  public getAmount(): Decimal {
+    const amount = new Decimal(this.model.amount);
 
     if (this.getAssetId() === Coinbase.assetList.Eth) {
-      return amount / BigInt(Coinbase.WEI_PER_ETHER);
+      return amount.div(WEI_PER_ETHER);
     }
-    return BigInt(this.model.amount);
+    return amount;
   }
 
   /**
@@ -195,33 +193,13 @@ export class Transfer {
     if (!transactionHash) return TransferStatus.PENDING;
 
     const onchainTransaction =
-      await this.client.baseSepoliaProvider!.getTransaction(transactionHash);
+      await Coinbase.apiClients.baseSepoliaProvider!.getTransaction(transactionHash);
     if (!onchainTransaction) return TransferStatus.PENDING;
     if (!onchainTransaction.blockHash) return TransferStatus.BROADCAST;
 
     const transactionReceipt =
-      await this.client.baseSepoliaProvider!.getTransactionReceipt(transactionHash);
+      await Coinbase.apiClients.baseSepoliaProvider!.getTransactionReceipt(transactionHash);
     return transactionReceipt?.status ? TransferStatus.COMPLETE : TransferStatus.FAILED;
-  }
-
-  /**
-   * Waits until the Transfer is completed or failed by polling the Network at the given interval.
-   *
-   * @param intervalSeconds - The interval at which to poll the Network, in seconds.
-   * @param timeoutSeconds - The maximum amount of time to wait for the Transfer to complete, in seconds.
-   * @returns The completed Transfer object.
-   * @throws {Error} if the Transfer takes longer than the given timeout.
-   */
-  public async wait(intervalSeconds = 0.2, timeoutSeconds = 10): Promise<Transfer> {
-    const startTime = Date.now();
-    while (Date.now() - startTime < timeoutSeconds * 1000) {
-      const status = await this.getStatus();
-      if (status === TransferStatus.COMPLETE || status === TransferStatus.FAILED) {
-        return this;
-      }
-      await delay(intervalSeconds);
-    }
-    throw new Error("Transfer timed out");
   }
 
   /**

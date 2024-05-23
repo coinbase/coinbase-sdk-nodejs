@@ -1,28 +1,40 @@
+import { ethers } from "ethers";
+import { Decimal } from "decimal.js";
 import { Address as AddressModel } from "../client";
 import { Balance } from "./balance";
 import { BalanceMap } from "./balance_map";
 import { Coinbase } from "./coinbase";
-import { InternalError } from "./errors";
+import { ArgumentError, InternalError } from "./errors";
 import { FaucetTransaction } from "./faucet_transaction";
-import { Decimal } from "decimal.js";
+import { Amount, Destination, TransferStatus } from "./types";
+import { Transfer } from "./transfer";
+import { delay, destinationToAddressHexString } from "./utils";
+import { ATOMIC_UNITS_PER_USDC, WEI_PER_ETHER, WEI_PER_GWEI } from "./constants";
 
 /**
  * A representation of a blockchain address, which is a user-controlled account on a network.
  */
 export class Address {
   private model: AddressModel;
+  private key: ethers.Wallet;
 
   /**
    * Initializes a new Address instance.
    *
-   * @param {AddressModel} model - The address model data.
-   * @throws {InternalError} If the model or client is empty.
+   * @param model - The address model data.
+   * @param key - The ethers.js Wallet the Address uses to sign data.
+   * @throws {InternalError} If the model or key is empty.
    */
-  constructor(model: AddressModel) {
+  constructor(model: AddressModel, key: ethers.Wallet) {
     if (!model) {
       throw new InternalError("Address model cannot be empty");
     }
+    if (!key) {
+      throw new InternalError("Key cannot be empty");
+    }
+
     this.model = model;
+    this.key = key;
   }
 
   /**
@@ -100,6 +112,108 @@ export class Address {
    */
   public getWalletId(): string {
     return this.model.wallet_id;
+  }
+
+  /**
+   * Sends an amount of an asset to a destination.
+   *
+   * @param amount - The amount to send.
+   * @param assetId - The asset ID to send.
+   * @param destination - The destination address.
+   * @param intervalSeconds - The interval at which to poll the Network for Transfer status, in seconds.
+   * @param timeoutSeconds - The maximum amount of time to wait for the Transfer to complete, in seconds.
+   * @returns The transfer object.
+   * @throws {APIError} if the API request to create a Transfer fails.
+   * @throws {APIError} if the API request to broadcast a Transfer fails.
+   * @throws {Error} if the Transfer times out.
+   */
+  public async createTransfer(
+    amount: Amount,
+    assetId: string,
+    destination: Destination,
+    intervalSeconds = 0.2,
+    timeoutSeconds = 10,
+  ): Promise<Transfer> {
+    let normalizedAmount = new Decimal(amount.toString());
+
+    const currentBalance = await this.getBalance(assetId);
+    if (currentBalance.lessThan(normalizedAmount)) {
+      throw new ArgumentError(
+        `Insufficient funds: ${normalizedAmount} requested, but only ${currentBalance} available`,
+      );
+    }
+
+    switch (assetId) {
+      case Coinbase.assetList.Eth:
+        normalizedAmount = normalizedAmount.mul(WEI_PER_ETHER);
+        break;
+      case Coinbase.assetList.Gwei:
+        normalizedAmount = normalizedAmount.mul(WEI_PER_GWEI);
+        break;
+      case Coinbase.assetList.Wei:
+        break;
+      case Coinbase.assetList.Weth:
+        normalizedAmount = normalizedAmount.mul(WEI_PER_ETHER);
+        break;
+      case Coinbase.assetList.Usdc:
+        normalizedAmount = normalizedAmount.mul(ATOMIC_UNITS_PER_USDC);
+        break;
+      default:
+        throw new InternalError(`Unsupported asset ID: ${assetId}`);
+    }
+
+    const normalizedDestination = destinationToAddressHexString(destination);
+
+    const normalizedAssetId = ((): string => {
+      switch (assetId) {
+        case Coinbase.assetList.Gwei:
+        case Coinbase.assetList.Wei:
+          return Coinbase.assetList.Eth;
+        default:
+          return assetId;
+      }
+    })();
+
+    const createTransferRequest = {
+      amount: normalizedAmount.toFixed(0),
+      network_id: this.getNetworkId(),
+      asset_id: normalizedAssetId,
+      destination: normalizedDestination,
+    };
+
+    let response = await Coinbase.apiClients.transfer!.createTransfer(
+      this.getWalletId(),
+      this.getId(),
+      createTransferRequest,
+    );
+
+    const transfer = Transfer.fromModel(response.data);
+    const transaction = transfer.getTransaction();
+    let signedPayload = await this.key.signTransaction(transaction);
+    signedPayload = signedPayload.slice(2);
+
+    const broadcastTransferRequest = {
+      signed_payload: signedPayload,
+    };
+
+    response = await Coinbase.apiClients.transfer!.broadcastTransfer(
+      this.getWalletId(),
+      this.getId(),
+      transfer.getId(),
+      broadcastTransferRequest,
+    );
+
+    const updatedTransfer = Transfer.fromModel(response.data);
+
+    const startTime = Date.now();
+    while (Date.now() - startTime < timeoutSeconds * 1000) {
+      const status = await updatedTransfer.getStatus();
+      if (status === TransferStatus.COMPLETE || status === TransferStatus.FAILED) {
+        return updatedTransfer;
+      }
+      await delay(intervalSeconds);
+    }
+    throw new Error("Transfer timed out");
   }
 
   /**
