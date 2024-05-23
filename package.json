@@ -16,7 +16,7 @@
     "clean": "rm -rf dist/*",
     "build": "tsc",
     "prepack": "tsc",
-    "docs": "typedoc"
+    "docs": "typedoc --entryPoints ./src --entryPointStrategy expand"
   },
   "files": [
     "dist"
