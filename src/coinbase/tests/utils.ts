@@ -11,11 +11,16 @@ import {
 } from "../../client";
 import { BASE_PATH } from "../../client/base";
 import { Coinbase } from "../coinbase";
-import { registerAxiosInterceptors } from "../utils";
+import { convertStringToHex, registerAxiosInterceptors } from "../utils";
+import { HDKey } from "@scure/bip32";
 
 export const mockFn = (...args) => jest.fn(...args) as any;
 export const mockReturnValue = data => jest.fn().mockResolvedValue({ data });
 export const mockReturnRejectedValue = data => jest.fn().mockRejectedValue(data);
+
+export const getAddressFromHDKey = (hdKey: HDKey): string => {
+  return new ethers.Wallet(convertStringToHex(hdKey.privateKey!)).address;
+};
 
 export const walletId = randomUUID();
 
@@ -121,6 +126,7 @@ export const usersApiMock = {
 export const walletsApiMock = {
   getWallet: jest.fn(),
   createWallet: jest.fn(),
+  listWallets: jest.fn(),
   listWalletBalances: jest.fn(),
   getWalletBalance: jest.fn(),
 };

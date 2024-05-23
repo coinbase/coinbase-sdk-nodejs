@@ -13,6 +13,7 @@ import {
   User as UserModel,
   Wallet as WalletModel,
   Transfer as TransferModel,
+  WalletList,
 } from "./../client/api";
 
 /**
@@ -49,7 +50,10 @@ export type WalletAPIClient = {
    * @throws {RequiredError} If the required parameter is not provided.
    * @throws {APIError} If the request fails.
    */
-  listWalletBalances(walletId: string, options?): AxiosPromise<AddressBalanceList>;
+  listWalletBalances(
+    walletId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<AddressBalanceList>;
 
   /**
    * List the balances of all of the addresses in the wallet aggregated by asset.
@@ -59,7 +63,10 @@ export type WalletAPIClient = {
    * @throws {RequiredError} If the required parameter is not provided.
    * @throws {APIError} If the request fails.
    */
-  listWalletBalances(walletId: string, options?): AxiosPromise<AddressBalanceList>;
+  listWalletBalances(
+    walletId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<AddressBalanceList>;
 
   /**
    * Get the aggregated balance of an asset across all of the addresses in the wallet.
@@ -75,6 +82,21 @@ export type WalletAPIClient = {
     assetId: string,
     options?: RawAxiosRequestConfig,
   ): AxiosPromise<Balance>;
+
+  /**
+   * List wallets belonging to the user.
+   *
+   * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param options - Override http request option.
+   * @throws {APIError} If the request fails.
+   * @throws {RequiredError} If the required parameter is not provided.
+   */
+  listWallets(
+    limit?: number,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<WalletList>;
 };
 
 /**
