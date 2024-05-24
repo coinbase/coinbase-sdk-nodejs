@@ -104,9 +104,8 @@ export class Address {
       });
 
       if (response.data.has_more) {
-        const nextPage = new URL(response.data.next_page).searchParams.get("starting_after");
-        if (nextPage) {
-          queue.push(nextPage);
+        if (response.data.next_page) {
+          queue.push(response.data.next_page);
         }
       }
     }

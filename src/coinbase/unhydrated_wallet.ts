@@ -23,6 +23,9 @@ export class UnhydratedWallet {
    * @param addressModels - The list of Address models.
    */
   constructor(wallet: WalletModel, addressModels: AddressModel[]) {
+    if (!wallet) {
+      throw new InternalError("Wallet model cannot be empty");
+    }
     this.model = wallet;
     this.addressModels = addressModels;
     this.addresses = this.addressModels.map(addressModel => {

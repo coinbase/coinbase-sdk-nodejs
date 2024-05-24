@@ -44,7 +44,6 @@ export class Wallet extends UnhydratedWallet {
     this.model = model;
     this.master = master;
     this.seed = seed;
-    this.addressModels = addressModels;
   }
 
   /**

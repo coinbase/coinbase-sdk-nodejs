@@ -310,7 +310,7 @@ describe("Address", () => {
   describe(".getTransfers", () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      const pages = ["http://localhost?starting_after=abc", "http://localhost?starting_after=def"];
+      const pages = ["abc", "def"];
       const response = {
         data: [VALID_TRANSFER_MODEL],
         has_more: false,
