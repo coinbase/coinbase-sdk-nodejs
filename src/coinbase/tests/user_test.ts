@@ -1,10 +1,12 @@
 import * as bip39 from "bip39";
 import * as crypto from "crypto";
 import * as fs from "fs";
-import { ArgumentError } from "../errors";
+import { ArgumentError, InternalError } from "../errors";
 import {
+  AddressBalanceList,
   AddressList,
   Address as AddressModel,
+  Balance as BalanceModel,
   User as UserModel,
   Wallet as WalletModel,
 } from "./../../client/api";
@@ -14,6 +16,7 @@ import { User } from "./../user";
 import { Wallet } from "./../wallet";
 import {
   addressesApiMock,
+  generateRandomHash,
   generateWalletFromSeed,
   getAddressFromHDKey,
   mockReturnRejectedValue,
@@ -23,7 +26,8 @@ import {
 } from "./utils";
 import { HDKey } from "@scure/bip32";
 import { convertStringToHex } from "../utils";
-import { UnhydratedWallet } from "../unhydrated_wallet";
+import Decimal from "decimal.js";
+import { FaucetTransaction } from "../faucet_transaction";
 
 describe("User Class", () => {
   let mockUserModel: UserModel;
@@ -252,7 +256,7 @@ describe("User Class", () => {
     });
 
     it("loads the Wallet from backup", async () => {
-      const seed = "86fc9fba421dcc6ad42747f14132c3cd975bd9fb1454df84ce5ea554f2542fbe"
+      const seed = "86fc9fba421dcc6ad42747f14132c3cd975bd9fb1454df84ce5ea554f2542fbe";
       const { address1, address2 } = generateWalletFromSeed(seed);
       const addressModel1: AddressModel = newAddressModel(walletId, address1);
       const addressModel2: AddressModel = newAddressModel(walletId, address2);
@@ -387,7 +391,7 @@ describe("User Class", () => {
       });
       Coinbase.apiClients.address!.listAddresses = mockReturnValue(addressListModel);
       const wallets = await user.getWallets();
-      expect(wallets[0]).toBeInstanceOf(UnhydratedWallet);
+      expect(wallets[0]).toBeInstanceOf(Wallet);
       expect(wallets.length).toBe(1);
       expect(wallets[0].getId()).toBe(walletId);
       expect(wallets[0].getAddresses().length).toBe(2);
@@ -398,6 +402,101 @@ describe("User Class", () => {
         Wallet.MAX_ADDRESSES,
       );
       expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledWith(10, "");
+    });
+
+    it("should create Wallets when seed is provided", async () => {
+      const seed = bip39.generateMnemonic();
+      const { address1 } = generateWalletFromSeed(seed);
+      mockAddressModel = newAddressModel(walletId, address1);
+      Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
+        data: [walletModelWithDefaultAddress],
+        has_more: false,
+        next_page: "",
+        total_count: 1,
+      });
+      Coinbase.apiClients.address!.listAddresses = mockReturnValue(mockAddressModel);
+      const [unhydratedWallet] = await user.getWallets();
+      const wallet = await unhydratedWallet.setSeed(seed);
+      expect(wallet).toBeInstanceOf(Wallet);
+      expect(wallet?.getId()).toBe(walletId);
+    });
+
+    it("should master wallet required methods not be accessible", async () => {
+      const seed = bip39.generateMnemonic();
+      const { address1 } = generateWalletFromSeed(seed);
+      mockAddressModel = newAddressModel(walletId, address1);
+      Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
+        data: [walletModelWithDefaultAddress],
+        has_more: false,
+        next_page: "",
+        total_count: 1,
+      });
+      Coinbase.apiClients.address!.listAddresses = mockReturnValue(mockAddressModel);
+      const [unhydratedWallet] = await user.getWallets();
+      expect(() => unhydratedWallet.export()).toThrow(
+        new InternalError("Cannot export Wallet without loaded seed"),
+      );
+      await expect(unhydratedWallet.createAddress()).rejects.toThrow(InternalError);
+      await expect(
+        unhydratedWallet.createTransfer(
+          new Decimal("500000000000000000"),
+          Coinbase.assetList.Eth,
+          address1,
+        ),
+      ).rejects.toThrow(InternalError);
+      expect(unhydratedWallet.canSign()).toBe(false);
+    });
+
+    it("should access Wallet read-only methods", async () => {
+      const seed = bip39.generateMnemonic();
+      const { address1 } = generateWalletFromSeed(seed);
+      mockAddressModel = newAddressModel(walletId, address1);
+      Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
+        data: [walletModelWithDefaultAddress],
+        has_more: false,
+        next_page: "",
+        total_count: 1,
+      });
+      Coinbase.apiClients.address!.listAddresses = mockReturnValue(addressListModel);
+      const mockWalletBalance: BalanceModel = {
+        amount: "5000000000000000000",
+        asset: {
+          asset_id: Coinbase.assetList.Eth,
+          network_id: Coinbase.networkList.BaseSepolia,
+          decimals: 18,
+        },
+      };
+      const addressBalanceList: AddressBalanceList = {
+        data: [mockWalletBalance],
+        has_more: false,
+        next_page: "",
+        total_count: 2,
+      };
+      Coinbase.apiClients.wallet!.getWalletBalance = mockReturnValue(mockWalletBalance);
+      Coinbase.apiClients.wallet!.listWalletBalances = mockReturnValue(addressBalanceList);
+      Coinbase.apiClients.address!.requestFaucetFunds = mockReturnValue({
+        transaction_hash: generateRandomHash(8),
+      });
+
+      const [wallet] = await user.getWallets();
+      expect(wallet.getId()).toBe(walletId);
+      expect(wallet.canSign()).toBe(false);
+      expect(wallet.getNetworkId()).toBe(Coinbase.networkList.BaseSepolia);
+      expect(wallet.getDefaultAddress()?.getId()).toBe(
+        walletModelWithDefaultAddress.default_address?.address_id,
+      );
+      expect(wallet.getAddresses().length).toBe(2);
+      expect(wallet.getAddress(addressListModel.data[0].address_id)?.getId()).toBe(
+        addressListModel.data[0].address_id,
+      );
+      const balance = await wallet.getBalance(Coinbase.assetList.Eth);
+      expect(balance).toEqual(new Decimal("5"));
+
+      const balanceMap = await wallet.getBalances();
+      expect(balanceMap.get("eth")).toEqual(new Decimal("5"));
+
+      const faucet = await wallet.faucet();
+      expect(faucet).toBeInstanceOf(FaucetTransaction);
     });
   });
 });

@@ -303,7 +303,7 @@ describe("Wallet Class", () => {
     });
 
     it("should throw an ArgumentError when the wallet model is not provided", async () => {
-      await expect(Wallet.init(undefined!)).rejects.toThrow(ArgumentError);
+      await expect(Wallet.init(undefined!, undefined)).rejects.toThrow(ArgumentError);
     });
   });
 
