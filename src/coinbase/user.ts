@@ -97,9 +97,12 @@ export class User {
    * @param nextPageToken - The token for the next page of Wallets
    * @returns The list of Wallets.
    */
-  public async getWallets(pageSize: number = 10, nextPageToken: string = ""): Promise<Wallet[]> {
+  public async getWallets(pageSize: number = 10, nextPageToken?: string): Promise<Wallet[]> {
     const addressModelMap: { [key: string]: AddressModel[] } = {};
-    const walletList = await Coinbase.apiClients.wallet!.listWallets(pageSize, nextPageToken);
+    const walletList = await Coinbase.apiClients.wallet!.listWallets(
+      pageSize,
+      nextPageToken ? nextPageToken : undefined,
+    );
     const walletsModels: WalletModel[] = [];
 
     for (const wallet of walletList.data.data) {
