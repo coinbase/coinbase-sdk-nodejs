@@ -253,6 +253,19 @@ describe("Address", () => {
       ).rejects.toThrow(APIError);
     });
 
+    it("should throw an InternalError if the address key is not provided", async () => {
+      const addressWithoutKey = new Address(VALID_ADDRESS_MODEL, null!);
+      await expect(
+        addressWithoutKey.createTransfer(
+          weiAmount,
+          Coinbase.assetList.Wei,
+          destination,
+          intervalSeconds,
+          timeoutSeconds,
+        ),
+      ).rejects.toThrow(InternalError);
+    });
+
     it("should throw an APIError if the broadcastTransfer API call fails", async () => {
       Coinbase.apiClients.transfer!.createTransfer = mockReturnValue(VALID_TRANSFER_MODEL);
       Coinbase.apiClients.transfer!.broadcastTransfer = mockReturnRejectedValue(
