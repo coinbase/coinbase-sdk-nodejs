@@ -3,6 +3,7 @@ import axios, { AxiosInstance } from "axios";
 import { Decimal } from "decimal.js";
 import { ethers } from "ethers";
 import { randomUUID } from "crypto";
+import * as bip39 from "bip39";
 import {
   Configuration,
   Wallet as WalletModel,
@@ -28,6 +29,18 @@ export const getAddressFromHDKey = (hdKey: HDKey): string => {
 export const walletId = randomUUID();
 export const transferId = randomUUID();
 
+export const generateWalletFromSeed = (seed: string, count = 2) => {
+  const baseWallet = HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(seed));
+  const data: Record<string, string> = {};
+  for (let i = 0; i < count; i++) {
+    const wallet = baseWallet.derive(`m/44'/60'/0'/0/${i}`);
+    data[`wallet${i + 1}`] = getAddressFromHDKey(wallet);
+    data[`wallet${i + 1}PrivateKey`] = convertStringToHex(wallet.privateKey!);
+    data[`address${i + 1}`] = getAddressFromHDKey(wallet);
+  }
+  return data;
+};
+
 export const generateRandomHash = (length = 8) => {
   const characters = "abcdef0123456789";
   let hash = "0x";
@@ -38,11 +51,11 @@ export const generateRandomHash = (length = 8) => {
 };
 
 // newAddressModel creates a new AddressModel with a random wallet ID and a random Ethereum address.
-export const newAddressModel = (walletId: string): AddressModel => {
+export const newAddressModel = (walletId: string, address_id: string = ""): AddressModel => {
   const ethAddress = ethers.Wallet.createRandom();
 
   return {
-    address_id: ethAddress.address,
+    address_id: address_id ? address_id : ethAddress.address,
     network_id: Coinbase.networkList.BaseSepolia,
     public_key: ethAddress.publicKey,
     wallet_id: walletId,

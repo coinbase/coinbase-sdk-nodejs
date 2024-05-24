@@ -2,7 +2,7 @@ import { Address } from "./../address";
 import * as crypto from "crypto";
 import { ethers } from "ethers";
 import { FaucetTransaction } from "./../faucet_transaction";
-import { Balance as BalanceModel } from "../../client";
+import { Balance as BalanceModel, TransferList } from "../../client";
 import Decimal from "decimal.js";
 import { APIError, FaucetLimitReachedError } from "../api_error";
 import { Coinbase } from "../coinbase";
@@ -19,6 +19,7 @@ import {
   transfersApiMock,
 } from "./utils";
 import { ArgumentError } from "../errors";
+import { Transfer } from "../transfer";
 
 // Test suite for Address class
 describe("Address", () => {
@@ -68,7 +69,7 @@ describe("Address", () => {
   });
 
   it("should return the correct list of balances", async () => {
-    const balances = await address.listBalances();
+    const balances = await address.getBalances();
     expect(balances.get(Coinbase.assetList.Eth)).toEqual(new Decimal(1));
     expect(balances.get("usdc")).toEqual(new Decimal(5000));
     expect(balances.get("weth")).toEqual(new Decimal(3));
@@ -252,6 +253,19 @@ describe("Address", () => {
       ).rejects.toThrow(APIError);
     });
 
+    it("should throw an InternalError if the address key is not provided", async () => {
+      const addressWithoutKey = new Address(VALID_ADDRESS_MODEL, null!);
+      await expect(
+        addressWithoutKey.createTransfer(
+          weiAmount,
+          Coinbase.assetList.Wei,
+          destination,
+          intervalSeconds,
+          timeoutSeconds,
+        ),
+      ).rejects.toThrow(InternalError);
+    });
+
     it("should throw an APIError if the broadcastTransfer API call fails", async () => {
       Coinbase.apiClients.transfer!.createTransfer = mockReturnValue(VALID_TRANSFER_MODEL);
       Coinbase.apiClients.transfer!.broadcastTransfer = mockReturnRejectedValue(
@@ -303,6 +317,53 @@ describe("Address", () => {
 
     afterEach(() => {
       jest.restoreAllMocks();
+    });
+  });
+
+  describe(".getTransfers", () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      const pages = ["abc", "def"];
+      const response = {
+        data: [VALID_TRANSFER_MODEL],
+        has_more: false,
+        next_page: "",
+        total_count: 0,
+      } as TransferList;
+      Coinbase.apiClients.transfer!.listTransfers = mockFn((walletId, addressId) => {
+        VALID_TRANSFER_MODEL.wallet_id = walletId;
+        VALID_TRANSFER_MODEL.address_id = addressId;
+        response.next_page = pages.shift() as string;
+        response.data = [VALID_TRANSFER_MODEL];
+        response.has_more = !!response.next_page;
+        return { data: response };
+      });
+    });
+
+    it("should return the list of transfers", async () => {
+      const transfers = await address.getTransfers();
+      expect(transfers).toHaveLength(3);
+      expect(transfers[0]).toBeInstanceOf(Transfer);
+      expect(Coinbase.apiClients.transfer!.listTransfers).toHaveBeenCalledTimes(3);
+      expect(Coinbase.apiClients.transfer!.listTransfers).toHaveBeenCalledWith(
+        address.getWalletId(),
+        address.getId(),
+        100,
+        undefined,
+      );
+      expect(Coinbase.apiClients.transfer!.listTransfers).toHaveBeenCalledWith(
+        address.getWalletId(),
+        address.getId(),
+        100,
+        "abc",
+      );
+    });
+
+    it("should raise an APIError when the API call fails", async () => {
+      jest.clearAllMocks();
+      Coinbase.apiClients.transfer!.listTransfers = mockReturnRejectedValue(new APIError(""));
+      await expect(address.getTransfers()).rejects.toThrow(APIError);
+      expect(Coinbase.apiClients.transfer!.listTransfers).toHaveBeenCalledTimes(1);
     });
   });
 });

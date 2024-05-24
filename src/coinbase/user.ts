@@ -116,9 +116,9 @@ export class User {
       addressModelMap[wallet.id!] = addressList.data.data;
     }
 
-    return await Promise.all(
+    return Promise.all(
       walletsModels.map(async wallet => {
-        return await Wallet.init(wallet, "", addressModelMap[wallet.id!]);
+        return await Wallet.init(wallet, undefined, addressModelMap[wallet.id!]);
       }),
     );
   }

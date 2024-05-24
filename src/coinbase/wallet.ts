@@ -6,11 +6,11 @@ import * as secp256k1 from "secp256k1";
 import { Address as AddressModel, Wallet as WalletModel } from "../client";
 import { Address } from "./address";
 import { Coinbase } from "./coinbase";
-import { Transfer } from "./transfer";
 import { ArgumentError, InternalError } from "./errors";
-import { FaucetTransaction } from "./faucet_transaction";
+import { Transfer } from "./transfer";
 import { Amount, Destination, WalletData } from "./types";
 import { convertStringToHex } from "./utils";
+import { FaucetTransaction } from "./faucet_transaction";
 import { BalanceMap } from "./balance_map";
 import Decimal from "decimal.js";
 import { Balance } from "./balance";
@@ -23,10 +23,11 @@ import { Balance } from "./balance";
 export class Wallet {
   private model: WalletModel;
 
-  private master: HDKey;
-  private seed: string;
+  private master?: HDKey;
+  private seed?: string;
   private addresses: Address[] = [];
   private addressModels: AddressModel[] = [];
+
   private readonly addressPathPrefix = "m/44'/60'/0'/0";
   private addressIndex = 0;
   static MAX_ADDRESSES = 20;
@@ -43,8 +44,8 @@ export class Wallet {
    */
   private constructor(
     model: WalletModel,
-    master: HDKey,
-    seed: string,
+    master: HDKey | undefined,
+    seed: string | undefined,
     addressModels: AddressModel[] = [],
   ) {
     this.model = model;
@@ -70,7 +71,8 @@ export class Wallet {
       },
     });
 
-    const wallet = await Wallet.init(walletData.data);
+    const seed = bip39.generateMnemonic();
+    const wallet = await Wallet.init(walletData.data, seed);
 
     await wallet.createAddress();
     await wallet.reload();
@@ -92,16 +94,14 @@ export class Wallet {
    */
   public static async init(
     model: WalletModel,
-    seed: string = "",
+    seed: string | undefined,
     addressModels: AddressModel[] = [],
   ): Promise<Wallet> {
     if (!model) {
       throw new ArgumentError("Wallet model cannot be empty");
     }
-    if (!seed) {
-      seed = bip39.generateMnemonic();
-    }
-    const master = HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(seed));
+
+    const master = seed ? HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(seed)) : undefined;
     const wallet = new Wallet(model, master, seed, addressModels);
     if (addressModels.length > 0) {
       wallet.deriveAddresses(addressModels);
@@ -115,6 +115,9 @@ export class Wallet {
    * @returns The Wallet's data.
    */
   public export(): WalletData {
+    if (!this.seed) {
+      throw new InternalError("Cannot export Wallet without loaded seed");
+    }
     return { walletId: this.getId()!, seed: this.seed };
   }
 
@@ -125,7 +128,7 @@ export class Wallet {
    * @returns The derived key.
    */
   private deriveKey(): HDKey {
-    const derivedKey = this.master.derive(`${this.addressPathPrefix}/${this.addressIndex++}`);
+    const derivedKey = this.master?.derive(this.addressPathPrefix + "/" + this.addressIndex++);
     if (!derivedKey?.privateKey) {
       throw new InternalError("Failed to derive key");
     }
@@ -200,18 +203,15 @@ export class Wallet {
    * @param addressModel - The Address model
    * @throws {InternalError} - If address derivation fails.
    * @throws {APIError} - If the request fails.
-   * @returns A promise that resolves when the address is derived.
    */
-  private async deriveAddress(
-    addressMap: { [key: string]: boolean },
-    addressModel: AddressModel,
-  ): Promise<void> {
-    const hdKey = this.deriveKey();
-    const key = new ethers.Wallet(convertStringToHex(hdKey.privateKey!));
-    if (!addressMap[key.address]) {
+  private deriveAddress(addressMap: { [key: string]: boolean }, addressModel: AddressModel): void {
+    const doesMasterExist = this.master !== undefined;
+    const key = doesMasterExist
+      ? new ethers.Wallet(convertStringToHex(this.deriveKey().privateKey!))
+      : undefined;
+    if (key && !addressMap[key.address]) {
       throw new InternalError("Invalid address");
     }
-
     this.cacheAddress(addressModel, key);
   }
 
@@ -220,7 +220,7 @@ export class Wallet {
    *
    * @param addresses - The models of the addresses already registered with the
    */
-  public async deriveAddresses(addresses: AddressModel[]): Promise<void> {
+  private deriveAddresses(addresses: AddressModel[]): void {
     const addressMap = this.buildAddressMap(addresses);
     for (const address of addresses) {
       this.deriveAddress(addressMap, address);
@@ -251,9 +251,19 @@ export class Wallet {
    * @throws {InternalError} If the address is not provided.
    * @returns {void}
    */
-  private cacheAddress(address: AddressModel, key: ethers.Wallet): void {
+  private cacheAddress(address: AddressModel, key?: ethers.Wallet): void {
     this.addresses.push(new Address(address, key));
-    this.addressIndex++;
+  }
+
+  /**
+   * Returns the Wallet model.
+   *
+   * @param seed - The seed to use for the Wallet. Expects a 32-byte hexadecimal with no 0x prefix.
+   */
+  public async setSeed(seed: string): Promise<void> {
+    if (this.master === undefined) {
+      this.master = HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(seed));
+    }
   }
 
   /**
@@ -337,7 +347,7 @@ export class Wallet {
    * @returns Whether the Wallet has a seed with which to derive keys and sign transactions.
    */
   public canSign(): boolean {
-    return this.master.publicKey !== undefined;
+    return this.master?.publicKey !== undefined;
   }
 
   /**
@@ -357,14 +367,15 @@ export class Wallet {
   }
 
   /**
-   * Sends an amount of an asset to a destination.
+   * Transfers the given amount of the given Asset to the given address. Only same-Network Transfers are supported.
+   * Currently only the default_address is used to source the Transfer.
    *
-   * @param amount - The amount to send.
-   * @param assetId - The asset ID to send.
-   * @param destination - The destination address.
+   * @param amount - The amount of the Asset to send.
+   * @param assetId - The ID of the Asset to send.
+   * @param destination - The destination of the transfer. If a Wallet, sends to the Wallet's default address. If a String, interprets it as the address ID.
    * @param intervalSeconds - The interval at which to poll the Network for Transfer status, in seconds.
    * @param timeoutSeconds - The maximum amount of time to wait for the Transfer to complete, in seconds.
-   * @returns The transfer object.
+   * @returns The hash of the Transfer transaction.
    * @throws {APIError} if the API request to create a Transfer fails.
    * @throws {APIError} if the API request to broadcast a Transfer fails.
    * @throws {Error} if the Transfer times out.

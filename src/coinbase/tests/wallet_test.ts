@@ -1,10 +1,10 @@
-import { HDKey } from "@scure/bip32";
-import * as bip39 from "bip39";
-import Decimal from "decimal.js";
-import { Address } from "../address";
-import { ethers } from "ethers";
 import crypto from "crypto";
+import Decimal from "decimal.js";
+import { ethers } from "ethers";
+import { Address } from "../address";
+import { APIError } from "../api_error";
 import { Coinbase } from "../coinbase";
+import { GWEI_PER_ETHER, WEI_PER_ETHER } from "../constants";
 import { ArgumentError } from "../errors";
 import { Wallet } from "../wallet";
 import {
@@ -14,19 +14,17 @@ import {
   Wallet as WalletModel,
 } from "./../../client";
 import {
-  VALID_TRANSFER_MODEL,
   VALID_ADDRESS_MODEL,
+  VALID_TRANSFER_MODEL,
   addressesApiMock,
-  getAddressFromHDKey,
+  generateWalletFromSeed,
   mockFn,
-  mockReturnValue,
   mockReturnRejectedValue,
+  mockReturnValue,
   newAddressModel,
-  walletsApiMock,
   transfersApiMock,
+  walletsApiMock
 } from "./utils";
-import { APIError } from "../api_error";
-import { GWEI_PER_ETHER, WEI_PER_ETHER } from "../constants";
 
 describe("Wallet Class", () => {
   let wallet: Wallet;
@@ -221,36 +219,57 @@ describe("Wallet Class", () => {
     });
 
     it("should create new address and update the existing address list", async () => {
+      expect(wallet.getAddresses().length).toBe(1);
+      Coinbase.apiClients.address!.createAddress = mockReturnValue(newAddressModel(walletId));
       const newAddress = await wallet.createAddress();
       expect(newAddress).toBeInstanceOf(Address);
       expect(wallet.getAddresses().length).toBe(2);
       expect(wallet.getAddress(newAddress.getId())!.getId()).toBe(newAddress.getId());
-      expect(Coinbase.apiClients.address!.createAddress).toHaveBeenCalledTimes(2);
+      expect(Coinbase.apiClients.address!.createAddress).toHaveBeenCalledTimes(1);
     });
   });
 
   describe(".init", () => {
-    walletId = crypto.randomUUID();
-    const existingSeed =
-      "hidden assault maple cheap gentle paper earth surprise trophy guide room tired";
-    const addressList = [
-      {
-        address_id: "0x23626702fdC45fc75906E535E38Ee1c7EC0C3213",
-        network_id: Coinbase.networkList.BaseSepolia,
-        public_key: "0x032c11a826d153bb8cf17426d03c3ffb74ea445b17362f98e1536f22bcce720772",
-        wallet_id: walletId,
-      },
-      {
-        address_id: "0x770603171A98d1CD07018F7309A1413753cA0018",
-        network_id: Coinbase.networkList.BaseSepolia,
-        public_key: "0x03c3379b488a32a432a4dfe91cc3a28be210eddc98b2005bb59a4cf4ed0646eb56",
-        wallet_id: walletId,
-      },
-    ];
+    let wallet: Wallet;
+    let walletId = crypto.randomUUID();
+    let addressList: AddressModel[];
+    let walletModel: WalletModel;
 
     beforeEach(async () => {
       jest.clearAllMocks();
+      const existingSeed =
+        "hidden assault maple cheap gentle paper earth surprise trophy guide room tired";
+      const { address1, address2, wallet1PrivateKey, wallet2PrivateKey } =
+        generateWalletFromSeed(existingSeed);
+      addressList = [
+        {
+          address_id: address1,
+          network_id: Coinbase.networkList.BaseSepolia,
+          public_key: wallet1PrivateKey,
+          wallet_id: walletId,
+        },
+        {
+          address_id: address2,
+          network_id: Coinbase.networkList.BaseSepolia,
+          public_key: wallet2PrivateKey,
+          wallet_id: walletId,
+        },
+      ];
+      walletModel = {
+        id: walletId,
+        network_id: Coinbase.networkList.BaseSepolia,
+        default_address: addressList[0],
+      };
       wallet = await Wallet.init(walletModel, existingSeed, addressList);
+      Coinbase.apiClients.address!.createAddress = mockFn(walletId => {
+        return {
+          data: {
+            id: walletId,
+            network_id: Coinbase.networkList.BaseSepolia,
+            default_address: newAddressModel(walletId),
+          },
+        };
+      });
     });
 
     it("should return a Wallet instance", async () => {
@@ -270,6 +289,7 @@ describe("Wallet Class", () => {
     });
 
     it("should create new address and update the existing address list", async () => {
+      expect(wallet.getAddresses().length).toBe(2);
       const newAddress = await wallet.createAddress();
       expect(newAddress).toBeInstanceOf(Address);
       expect(wallet.getAddresses().length).toBe(3);
@@ -283,7 +303,7 @@ describe("Wallet Class", () => {
     });
 
     it("should throw an ArgumentError when the wallet model is not provided", async () => {
-      await expect(Wallet.init(undefined!)).rejects.toThrow(ArgumentError);
+      await expect(Wallet.init(undefined!, undefined)).rejects.toThrow(ArgumentError);
     });
   });
 
