@@ -322,7 +322,7 @@ describe("User Class", () => {
       await expect(user.getWallets()).rejects.toThrow(new Error("API Error"));
       expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(0);
-      expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledWith(10, "");
+      expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledWith(10, undefined);
     });
 
     it("should raise an error when the Address API call fails", async () => {
