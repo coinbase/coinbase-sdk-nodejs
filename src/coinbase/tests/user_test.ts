@@ -421,7 +421,7 @@ describe("User Class", () => {
       expect(wallet?.getId()).toBe(walletId);
     });
 
-    it("should master wallet required methods not be accessible", async () => {
+    it("should prevent access to master wallet required methods", async () => {
       const seed = bip39.generateMnemonic();
       const { address1 } = generateWalletFromSeed(seed);
       mockAddressModel = newAddressModel(walletId, address1);
@@ -447,7 +447,7 @@ describe("User Class", () => {
       expect(unhydratedWallet.canSign()).toBe(false);
     });
 
-    it("should access Wallet read-only methods", async () => {
+    it("should access read-only methods", async () => {
       const seed = bip39.generateMnemonic();
       const { address1 } = generateWalletFromSeed(seed);
       mockAddressModel = newAddressModel(walletId, address1);
