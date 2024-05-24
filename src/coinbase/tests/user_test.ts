@@ -416,9 +416,11 @@ describe("User Class", () => {
       });
       Coinbase.apiClients.address!.listAddresses = mockReturnValue(mockAddressModel);
       const [unhydratedWallet] = await user.getWallets();
-      const wallet = await unhydratedWallet.setSeed(seed);
-      expect(wallet).toBeInstanceOf(Wallet);
-      expect(wallet?.getId()).toBe(walletId);
+      expect(unhydratedWallet.canSign()).toBe(false);
+      await unhydratedWallet.setSeed(seed);
+      expect(unhydratedWallet).toBeInstanceOf(Wallet);
+      expect(unhydratedWallet?.getId()).toBe(walletId);
+      expect(unhydratedWallet.canSign()).toBe(true);
     });
 
     it("should prevent access to master wallet required methods", async () => {

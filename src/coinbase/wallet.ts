@@ -128,7 +128,7 @@ export class Wallet {
    * @returns The derived key.
    */
   private deriveKey(): HDKey {
-    const derivedKey = this.master?.derive(this.addressPathPrefix + "/" + this.addressIndex);
+    const derivedKey = this.master?.derive(this.addressPathPrefix + "/" + this.addressIndex++);
     if (!derivedKey?.privateKey) {
       throw new InternalError("Failed to derive key");
     }
@@ -259,12 +259,11 @@ export class Wallet {
    * Returns the Wallet model.
    *
    * @param seed - The seed to use for the Wallet. Expects a 32-byte hexadecimal with no 0x prefix.
-   * @returns The Wallet object.
    */
-  public async setSeed(seed: string): Promise<Wallet | undefined> {
-    return this.master === undefined
-      ? await Wallet.init(this.model, seed, this.addressModels)
-      : undefined;
+  public async setSeed(seed: string): Promise<void> {
+    if (this.master === undefined) {
+      this.master = HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(seed));
+    }
   }
 
   /**
