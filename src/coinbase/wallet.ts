@@ -208,7 +208,7 @@ export class Wallet {
   ): Promise<void> {
     const hdKey = this.deriveKey();
     const key = new ethers.Wallet(convertStringToHex(hdKey.privateKey!));
-    if (addressMap[key.address]) {
+    if (!addressMap[key.address]) {
       throw new InternalError("Invalid address");
     }
 

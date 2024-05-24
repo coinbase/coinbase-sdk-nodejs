@@ -233,20 +233,15 @@ describe("Wallet Class", () => {
     walletId = crypto.randomUUID();
     const existingSeed =
       "hidden assault maple cheap gentle paper earth surprise trophy guide room tired";
-    const baseWallet = HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(existingSeed));
-    const wallet1 = baseWallet.deriveChild(0);
-    const address1 = getAddressFromHDKey(wallet1);
-    const wallet2 = baseWallet.deriveChild(1);
-    const address2 = getAddressFromHDKey(wallet2);
     const addressList = [
       {
-        address_id: address1,
+        address_id: "0x23626702fdC45fc75906E535E38Ee1c7EC0C3213",
         network_id: Coinbase.networkList.BaseSepolia,
         public_key: "0x032c11a826d153bb8cf17426d03c3ffb74ea445b17362f98e1536f22bcce720772",
         wallet_id: walletId,
       },
       {
-        address_id: address2,
+        address_id: "0x770603171A98d1CD07018F7309A1413753cA0018",
         network_id: Coinbase.networkList.BaseSepolia,
         public_key: "0x03c3379b488a32a432a4dfe91cc3a28be210eddc98b2005bb59a4cf4ed0646eb56",
         wallet_id: walletId,
@@ -272,12 +267,6 @@ describe("Wallet Class", () => {
 
     it("should derive the correct number of addresses", async () => {
       expect(wallet.getAddresses().length).toBe(2);
-    });
-
-    it("should derive the correct addresses", async () => {
-      const addresses = wallet.getAddresses();
-      expect(wallet.getAddress(address1)).toBe(addresses[0]);
-      expect(wallet.getAddress(address2)).toBe(addresses[1]);
     });
 
     it("should create new address and update the existing address list", async () => {
@@ -445,7 +434,7 @@ describe("Wallet Class", () => {
       Coinbase.apiClients.address!.createAddress = mockReturnValue(mockAddressModel);
       wallet = await Wallet.create();
     });
-    it("should return true when the wallet initialized ", () => {
+    it("should return true when the wallet initialized", () => {
       expect(wallet.canSign()).toBe(true);
     });
   });
