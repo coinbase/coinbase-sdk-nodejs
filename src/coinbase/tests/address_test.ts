@@ -2,7 +2,7 @@ import { Address } from "./../address";
 import * as crypto from "crypto";
 import { ethers } from "ethers";
 import { FaucetTransaction } from "./../faucet_transaction";
-import { Balance as BalanceModel } from "../../client";
+import { Balance as BalanceModel, TransferList } from "../../client";
 import Decimal from "decimal.js";
 import { APIError, FaucetLimitReachedError } from "../api_error";
 import { Coinbase } from "../coinbase";
@@ -68,7 +68,7 @@ describe("Address", () => {
   });
 
   it("should return the correct list of balances", async () => {
-    const balances = await address.listBalances();
+    const balances = await address.getBalances();
     expect(balances.get(Coinbase.assetList.Eth)).toEqual(new Decimal(1));
     expect(balances.get("usdc")).toEqual(new Decimal(5000));
     expect(balances.get("weth")).toEqual(new Decimal(3));
@@ -303,6 +303,42 @@ describe("Address", () => {
 
     afterEach(() => {
       jest.restoreAllMocks();
+    });
+  });
+
+  describe(".getTransfers", () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      const pages = ["http://localhost?starting_after=abc", "http://localhost?starting_after=def"];
+      const response = {
+        data: [VALID_TRANSFER_MODEL],
+        has_more: false,
+        next_page: "",
+        total_count: 0,
+      } as TransferList;
+      Coinbase.apiClients.transfer!.listTransfers = mockFn(() => {
+        response.next_page = pages.shift() as string;
+        response.data = [VALID_TRANSFER_MODEL];
+        response.has_more = !!response.next_page;
+        return { data: response };
+      });
+    });
+    it("should return the list of transfers", async () => {
+      const transfers = await address.getTransfers();
+      expect(transfers).toHaveLength(3);
+      expect(Coinbase.apiClients.transfer!.listTransfers).toHaveBeenCalledTimes(3);
+      expect(Coinbase.apiClients.transfer!.listTransfers).toHaveBeenCalledWith(
+        address.getWalletId(),
+        address.getId(),
+        100,
+        undefined,
+      );
+      expect(Coinbase.apiClients.transfer!.listTransfers).toHaveBeenCalledWith(
+        address.getWalletId(),
+        address.getId(),
+        100,
+        "abc",
+      );
     });
   });
 });

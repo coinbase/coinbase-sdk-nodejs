@@ -5,6 +5,7 @@ import { User as UserModel, Address as AddressModel, Wallet as WalletModel } fro
 import { Wallet } from "./wallet";
 import { Coinbase } from "./coinbase";
 import { ArgumentError } from "./errors";
+import { UnhydratedWallet } from "./unhydrated_wallet";
 
 /**
  * A representation of a User.
@@ -97,7 +98,10 @@ export class User {
    * @param nextPageToken - The token for the next page of Wallets
    * @returns The list of Wallets.
    */
-  public async getWallets(pageSize: number = 10, nextPageToken: string = ""): Promise<Wallet[]> {
+  public async getWallets(
+    pageSize: number = 10,
+    nextPageToken: string = "",
+  ): Promise<UnhydratedWallet[]> {
     const addressModelMap: { [key: string]: AddressModel[] } = {};
     const walletList = await Coinbase.apiClients.wallet!.listWallets(pageSize, nextPageToken);
     const walletsModels: WalletModel[] = [];
@@ -113,11 +117,9 @@ export class User {
       addressModelMap[wallet.id!] = addressList.data.data;
     }
 
-    return await Promise.all(
-      walletsModels.map(async wallet => {
-        return await Wallet.init(wallet, "", addressModelMap[wallet.id!]);
-      }),
-    );
+    return walletsModels.map(wallet => {
+      return new UnhydratedWallet(wallet, addressModelMap[wallet.id!]);
+    });
   }
 
   /**

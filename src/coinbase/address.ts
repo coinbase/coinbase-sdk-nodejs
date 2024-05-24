@@ -16,7 +16,7 @@ import { ATOMIC_UNITS_PER_USDC, WEI_PER_ETHER, WEI_PER_GWEI } from "./constants"
  */
 export class Address {
   private model: AddressModel;
-  private key: ethers.Wallet;
+  private key?: ethers.Wallet;
 
   /**
    * Initializes a new Address instance.
@@ -25,14 +25,10 @@ export class Address {
    * @param key - The ethers.js Wallet the Address uses to sign data.
    * @throws {InternalError} If the model or key is empty.
    */
-  constructor(model: AddressModel, key: ethers.Wallet) {
+  constructor(model: AddressModel, key?: ethers.Wallet) {
     if (!model) {
       throw new InternalError("Address model cannot be empty");
     }
-    if (!key) {
-      throw new InternalError("Key cannot be empty");
-    }
-
     this.model = model;
     this.key = key;
   }
@@ -76,13 +72,46 @@ export class Address {
    *
    * @returns {BalanceMap} - The map from asset ID to balance.
    */
-  async listBalances(): Promise<BalanceMap> {
+  async getBalances(): Promise<BalanceMap> {
     const response = await Coinbase.apiClients.address!.listAddressBalances(
       this.model.wallet_id,
       this.model.address_id,
     );
 
     return BalanceMap.fromBalances(response.data.data);
+  }
+
+  /**
+   * Returns all of the transfers associated with the address.
+   *
+   * @returns {Transfer[]} The list of transfers.
+   */
+  async getTransfers(): Promise<Transfer[]> {
+    const transfers: Transfer[] = [];
+    const queue: string[] = [""];
+
+    while (queue.length > 0) {
+      const page = queue.shift();
+      const response = await Coinbase.apiClients.transfer!.listTransfers(
+        this.model.wallet_id,
+        this.model.address_id,
+        100,
+        page || undefined,
+      );
+
+      response.data.data.forEach(transferModel => {
+        transfers.push(Transfer.fromModel(transferModel));
+      });
+
+      if (response.data.has_more) {
+        const nextPage = new URL(response.data.next_page).searchParams.get("starting_after");
+        if (nextPage) {
+          queue.push(nextPage);
+        }
+      }
+    }
+
+    return transfers;
   }
 
   /**
@@ -115,11 +144,11 @@ export class Address {
   }
 
   /**
-   * Sends an amount of an asset to a destination.
+   * Transfers the given amount of the given Asset to the given address. Only same-Network Transfers are supported.
    *
-   * @param amount - The amount to send.
-   * @param assetId - The asset ID to send.
-   * @param destination - The destination address.
+   * @param amount - The amount of the Asset to send.
+   * @param assetId - The ID of the Asset to send. For Ether, Coinbase.assetList.Eth, Coinbase.assetList.Gwei, and Coinbase.assetList.Wei supported.
+   * @param destination - The destination of the transfer. If a Wallet, sends to the Wallet's default address. If a String, interprets it as the address ID.
    * @param intervalSeconds - The interval at which to poll the Network for Transfer status, in seconds.
    * @param timeoutSeconds - The maximum amount of time to wait for the Transfer to complete, in seconds.
    * @returns The transfer object.
@@ -134,8 +163,10 @@ export class Address {
     intervalSeconds = 0.2,
     timeoutSeconds = 10,
   ): Promise<Transfer> {
+    if (!this.key) {
+      throw new InternalError("Cannot transfer from address without private key loaded");
+    }
     let normalizedAmount = new Decimal(amount.toString());
-
     const currentBalance = await this.getBalance(assetId);
     if (currentBalance.lessThan(normalizedAmount)) {
       throw new ArgumentError(

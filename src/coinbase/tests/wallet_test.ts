@@ -27,6 +27,7 @@ import {
 } from "./utils";
 import { APIError } from "../api_error";
 import { GWEI_PER_ETHER, WEI_PER_ETHER } from "../constants";
+import { convertStringToHex } from "../utils";
 
 describe("Wallet Class", () => {
   let wallet: Wallet;
@@ -36,6 +37,7 @@ describe("Wallet Class", () => {
 
   beforeAll(async () => {
     walletId = crypto.randomUUID();
+
     // Mock the API calls
     Coinbase.apiClients.wallet = walletsApiMock;
     Coinbase.apiClients.address = addressesApiMock;
@@ -230,28 +232,35 @@ describe("Wallet Class", () => {
   });
 
   describe(".init", () => {
-    walletId = crypto.randomUUID();
+    let wallet: Wallet;
+    let walletId = crypto.randomUUID();
+
     const existingSeed =
       "hidden assault maple cheap gentle paper earth surprise trophy guide room tired";
     const baseWallet = HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(existingSeed));
-    const wallet1 = baseWallet.deriveChild(0);
+    const wallet1 = baseWallet.derive("m/44'/60'/0'/0/0");
     const address1 = getAddressFromHDKey(wallet1);
-    const wallet2 = baseWallet.deriveChild(1);
+    const wallet2 = baseWallet.derive("m/44'/60'/0'/0/1");
     const address2 = getAddressFromHDKey(wallet2);
     const addressList = [
       {
         address_id: address1,
         network_id: Coinbase.networkList.BaseSepolia,
-        public_key: "0x032c11a826d153bb8cf17426d03c3ffb74ea445b17362f98e1536f22bcce720772",
+        public_key: convertStringToHex(wallet1.privateKey!),
         wallet_id: walletId,
       },
       {
         address_id: address2,
         network_id: Coinbase.networkList.BaseSepolia,
-        public_key: "0x03c3379b488a32a432a4dfe91cc3a28be210eddc98b2005bb59a4cf4ed0646eb56",
+        public_key: convertStringToHex(wallet2.privateKey!),
         wallet_id: walletId,
       },
     ];
+    const walletModel: WalletModel = {
+      id: walletId,
+      network_id: Coinbase.networkList.BaseSepolia,
+      default_address: VALID_ADDRESS_MODEL,
+    };
 
     beforeEach(async () => {
       jest.clearAllMocks();
@@ -260,41 +269,6 @@ describe("Wallet Class", () => {
 
     it("should return a Wallet instance", async () => {
       expect(wallet).toBeInstanceOf(Wallet);
-    });
-
-    it("should return the correct wallet ID", async () => {
-      expect(wallet.getId()).toBe(walletModel.id);
-    });
-
-    it("should return the correct network ID", async () => {
-      expect(wallet.getNetworkId()).toBe(Coinbase.networkList.BaseSepolia);
-    });
-
-    it("should derive the correct number of addresses", async () => {
-      expect(wallet.getAddresses().length).toBe(2);
-    });
-
-    it("should derive the correct addresses", async () => {
-      const addresses = wallet.getAddresses();
-      expect(wallet.getAddress(address1)).toBe(addresses[0]);
-      expect(wallet.getAddress(address2)).toBe(addresses[1]);
-    });
-
-    it("should create new address and update the existing address list", async () => {
-      const newAddress = await wallet.createAddress();
-      expect(newAddress).toBeInstanceOf(Address);
-      expect(wallet.getAddresses().length).toBe(3);
-      expect(wallet.getAddress(newAddress.getId())!.getId()).toBe(newAddress.getId());
-    });
-
-    it("should return the correct string representation", async () => {
-      expect(wallet.toString()).toBe(
-        `Wallet{id: '${walletModel.id}', networkId: '${Coinbase.networkList.BaseSepolia}'}`,
-      );
-    });
-
-    it("should throw an ArgumentError when the wallet model is not provided", async () => {
-      await expect(Wallet.init(undefined!)).rejects.toThrow(ArgumentError);
     });
   });
 

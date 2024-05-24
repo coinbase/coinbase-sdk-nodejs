@@ -38,11 +38,11 @@ export const generateRandomHash = (length = 8) => {
 };
 
 // newAddressModel creates a new AddressModel with a random wallet ID and a random Ethereum address.
-export const newAddressModel = (walletId: string): AddressModel => {
+export const newAddressModel = (walletId: string, address_id: string = ""): AddressModel => {
   const ethAddress = ethers.Wallet.createRandom();
 
   return {
-    address_id: ethAddress.address,
+    address_id: address_id ? address_id : ethAddress.address,
     network_id: Coinbase.networkList.BaseSepolia,
     public_key: ethAddress.publicKey,
     wallet_id: walletId,

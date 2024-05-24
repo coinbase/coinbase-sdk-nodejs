@@ -6,27 +6,20 @@ import * as secp256k1 from "secp256k1";
 import { Address as AddressModel, Wallet as WalletModel } from "../client";
 import { Address } from "./address";
 import { Coinbase } from "./coinbase";
-import { Transfer } from "./transfer";
 import { ArgumentError, InternalError } from "./errors";
-import { FaucetTransaction } from "./faucet_transaction";
+import { Transfer } from "./transfer";
 import { Amount, Destination, WalletData } from "./types";
+import { UnhydratedWallet } from "./unhydrated_wallet";
 import { convertStringToHex } from "./utils";
-import { BalanceMap } from "./balance_map";
-import Decimal from "decimal.js";
-import { Balance } from "./balance";
 
 /**
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
  * each of which can hold a balance of one or more Assets. Wallets can create new Addresses, list their addresses,
  * list their balances, and transfer Assets to other Addresses. Wallets should be created through User.createWallet or User.importWallet.
  */
-export class Wallet {
-  private model: WalletModel;
-
+export class Wallet extends UnhydratedWallet {
   private master: HDKey;
   private seed: string;
-  private addresses: Address[] = [];
-  private addressModels: AddressModel[] = [];
   private readonly addressPathPrefix = "m/44'/60'/0'/0";
   private addressIndex = 0;
   static MAX_ADDRESSES = 20;
@@ -47,6 +40,7 @@ export class Wallet {
     seed: string,
     addressModels: AddressModel[] = [],
   ) {
+    super(model, addressModels);
     this.model = model;
     this.master = master;
     this.seed = seed;
@@ -119,20 +113,6 @@ export class Wallet {
   }
 
   /**
-   * Derives a key for an already registered Address in the Wallet.
-   *
-   * @throws {InternalError} - If the key derivation fails.
-   * @returns The derived key.
-   */
-  private deriveKey(): HDKey {
-    const derivedKey = this.master.derive(`${this.addressPathPrefix}/${this.addressIndex++}`);
-    if (!derivedKey?.privateKey) {
-      throw new InternalError("Failed to derive key");
-    }
-    return derivedKey;
-  }
-
-  /**
    * Creates a new Address in the Wallet.
    *
    * @returns The new Address.
@@ -194,21 +174,31 @@ export class Wallet {
   }
 
   /**
+   * Derives a key for an already registered Address in the Wallet.
+   *
+   * @throws {InternalError} - If the key derivation fails.
+   * @returns The derived key.
+   */
+  private deriveKey(): HDKey {
+    const derivedKey = this.master.derive(this.addressPathPrefix + "/" + this.addressIndex);
+    if (!derivedKey?.privateKey) {
+      throw new InternalError("Failed to derive key");
+    }
+    return derivedKey;
+  }
+
+  /**
    * Derives an already registered Address in the Wallet.
    *
    * @param addressMap - The map of registered Address IDs
    * @param addressModel - The Address model
    * @throws {InternalError} - If address derivation fails.
    * @throws {APIError} - If the request fails.
-   * @returns A promise that resolves when the address is derived.
    */
-  private async deriveAddress(
-    addressMap: { [key: string]: boolean },
-    addressModel: AddressModel,
-  ): Promise<void> {
+  private deriveAddress(addressMap: { [key: string]: boolean }, addressModel: AddressModel): void {
     const hdKey = this.deriveKey();
     const key = new ethers.Wallet(convertStringToHex(hdKey.privateKey!));
-    if (addressMap[key.address]) {
+    if (!addressMap[key.address.toString()]) {
       throw new InternalError("Invalid address");
     }
 
@@ -220,7 +210,7 @@ export class Wallet {
    *
    * @param addresses - The models of the addresses already registered with the
    */
-  public async deriveAddresses(addresses: AddressModel[]): Promise<void> {
+  public deriveAddresses(addresses: AddressModel[]): void {
     const addressMap = this.buildAddressMap(addresses);
     for (const address of addresses) {
       this.deriveAddress(addressMap, address);
@@ -253,82 +243,6 @@ export class Wallet {
    */
   private cacheAddress(address: AddressModel, key: ethers.Wallet): void {
     this.addresses.push(new Address(address, key));
-    this.addressIndex++;
-  }
-
-  /**
-   * Returns the Address with the given ID.
-   *
-   * @param addressId - The ID of the Address to retrieve.
-   * @returns The Address.
-   */
-  public getAddress(addressId: string): Address | undefined {
-    return this.addresses.find(address => {
-      return address.getId() === addressId;
-    });
-  }
-
-  /**
-   * Returns the list of Addresses in the Wallet.
-   *
-   * @returns The list of Addresses.
-   */
-  public getAddresses(): Address[] {
-    return this.addresses;
-  }
-
-  /**
-   * Returns the list of balances of this Wallet. Balances are aggregated across all Addresses in the Wallet.
-   *
-   * @returns The list of balances. The key is the Asset ID, and the value is the balance.
-   */
-  public async getBalances(): Promise<BalanceMap> {
-    const response = await Coinbase.apiClients.wallet!.listWalletBalances(this.model.id!);
-    return BalanceMap.fromBalances(response.data.data);
-  }
-
-  /**
-   * Returns the balance of the provided Asset. Balances are aggregated across all Addresses in the Wallet.
-   *
-   * @param assetId - The ID of the Asset to retrieve the balance for.
-   * @returns The balance of the Asset.
-   */
-  public async getBalance(assetId: string): Promise<Decimal> {
-    const response = await Coinbase.apiClients.wallet!.getWalletBalance(this.model.id!, assetId);
-    if (!response.data.amount) {
-      return new Decimal(0);
-    }
-    const balance = Balance.fromModelAndAssetId(response.data, assetId);
-    return balance.amount;
-  }
-
-  /**
-   * Returns the Network ID of the Wallet.
-   *
-   * @returns The network ID.
-   */
-  public getNetworkId(): string {
-    return this.model.network_id;
-  }
-
-  /**
-   * Returns the wallet ID.
-   *
-   * @returns The wallet ID.
-   */
-  public getId(): string | undefined {
-    return this.model.id;
-  }
-
-  /**
-   * Returns the default address of the Wallet.
-   *
-   * @returns The default address
-   */
-  public getDefaultAddress(): Address | undefined {
-    return this.addresses.find(
-      address => address.getId() === this.model.default_address?.address_id,
-    );
   }
 
   /**
@@ -338,22 +252,6 @@ export class Wallet {
    */
   public canSign(): boolean {
     return this.master.publicKey !== undefined;
-  }
-
-  /**
-   * Requests funds from the faucet for the Wallet's default address and returns the faucet transaction.
-   * This is only supported on testnet networks.
-   *
-   * @throws {InternalError} If the default address is not found.
-   * @throws {APIError} If the request fails.
-   * @returns The successful faucet transaction
-   */
-  public async faucet(): Promise<FaucetTransaction> {
-    if (!this.model.default_address) {
-      throw new InternalError("Default address not found");
-    }
-    const transaction = await this.getDefaultAddress()!.faucet();
-    return transaction!;
   }
 
   /**
