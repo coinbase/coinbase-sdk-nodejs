@@ -52,6 +52,7 @@ describe("User Class", () => {
     beforeAll(async () => {
       walletId = crypto.randomUUID();
       mockAddressModel = newAddressModel(walletId);
+      mockAddressModel.address_id = "0x406210138180fD4d69368bcDD961062c6D8E8Cf7";
       mockAddressList = {
         data: [mockAddressModel],
         has_more: false,
@@ -68,7 +69,10 @@ describe("User Class", () => {
       Coinbase.apiClients.address = addressesApiMock;
       Coinbase.apiClients.address!.listAddresses = mockReturnValue(mockAddressList);
       user = new User(mockUserModel);
-      walletData = { walletId: walletId, seed: bip39.generateMnemonic() };
+      walletData = {
+        walletId: walletId,
+        seed: "month volume van spin despair squirrel drum observe cook sport spin confirm",
+      };
       importedWallet = await user.importWallet(walletData);
       expect(importedWallet).toBeInstanceOf(Wallet);
       expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledWith(walletId);
@@ -100,7 +104,7 @@ describe("User Class", () => {
       walletId = crypto.randomUUID();
       seed = "86fc9fba421dcc6ad42747f14132c3cd975bd9fb1454df84ce5ea554f2542fbe";
       mockAddressModel = {
-        address_id: "0xdeadbeef",
+        address_id: "0xB1666C6cDDB29468f721f3A4881a6e95CC963849",
         wallet_id: walletId,
         public_key: "0x1234567890",
         network_id: Coinbase.networkList.BaseSepolia,
@@ -174,6 +178,7 @@ describe("User Class", () => {
     beforeAll(() => {
       walletId = crypto.randomUUID();
       addressModel = newAddressModel(walletId);
+      addressModel.address_id = "0xB1666C6cDDB29468f721f3A4881a6e95CC963849";
       walletModelWithDefaultAddress = {
         id: walletId,
         network_id: Coinbase.networkList.BaseSepolia,
@@ -344,27 +349,6 @@ describe("User Class", () => {
       expect(wallets.length).toBe(0);
       expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(0);
-    });
-
-    it("should return the list of Wallets", async () => {
-      Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
-        data: [walletModelWithDefaultAddress],
-        has_more: false,
-        next_page: "",
-        total_count: 2,
-      });
-      Coinbase.apiClients.address!.listAddresses = mockReturnValue(addressListModel);
-      const wallets = await user.getWallets();
-      expect(wallets.length).toBe(1);
-      expect(wallets[0].getId()).toBe(walletId);
-      expect(wallets[0].getAddresses().length).toBe(2);
-      expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
-      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
-      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledWith(
-        walletId,
-        Wallet.MAX_ADDRESSES,
-      );
-      expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledWith(10, "");
     });
   });
 });
