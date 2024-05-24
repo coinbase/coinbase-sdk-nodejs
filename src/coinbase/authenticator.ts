@@ -73,14 +73,15 @@ export class CoinbaseAuthenticator {
       nonce: this.nonce(),
     };
 
-    const uri = `${method} ${url.substring(8)}`;
+    const urlObject = new URL(url);
+    const uri = `${method} ${urlObject.host}${urlObject.pathname}`;
     const claims = {
       sub: this.apiKey,
       iss: "coinbase-cloud",
       aud: ["cdp_service"],
       nbf: Math.floor(Date.now() / 1000),
       exp: Math.floor(Date.now() / 1000) + 60, // +1 minute
-      uri,
+      uris: [uri],
     };
 
     const payload = Buffer.from(JSON.stringify(claims)).toString("utf8");
