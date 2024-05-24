@@ -244,13 +244,13 @@ describe("Wallet Class", () => {
     const address2 = getAddressFromHDKey(wallet2);
     const addressList = [
       {
-        address_id: address1,
+        address_id: "0x23626702fdC45fc75906E535E38Ee1c7EC0C3213",
         network_id: Coinbase.networkList.BaseSepolia,
         public_key: convertStringToHex(wallet1.privateKey!),
         wallet_id: walletId,
       },
       {
-        address_id: address2,
+        address_id: "0x770603171A98d1CD07018F7309A1413753cA0018",
         network_id: Coinbase.networkList.BaseSepolia,
         public_key: convertStringToHex(wallet2.privateKey!),
         wallet_id: walletId,
@@ -419,7 +419,7 @@ describe("Wallet Class", () => {
       Coinbase.apiClients.address!.createAddress = mockReturnValue(mockAddressModel);
       wallet = await Wallet.create();
     });
-    it("should return true when the wallet initialized ", () => {
+    it("should return true when the wallet initialized", () => {
       expect(wallet.canSign()).toBe(true);
     });
   });

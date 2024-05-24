@@ -186,6 +186,7 @@ describe("User Class", () => {
     beforeAll(() => {
       walletId = crypto.randomUUID();
       addressModel = newAddressModel(walletId);
+      addressModel.address_id = "0xB1666C6cDDB29468f721f3A4881a6e95CC963849";
       walletModelWithDefaultAddress = {
         id: walletId,
         network_id: Coinbase.networkList.BaseSepolia,

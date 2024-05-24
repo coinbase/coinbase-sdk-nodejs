@@ -198,7 +198,7 @@ export class Wallet extends UnhydratedWallet {
   private deriveAddress(addressMap: { [key: string]: boolean }, addressModel: AddressModel): void {
     const hdKey = this.deriveKey();
     const key = new ethers.Wallet(convertStringToHex(hdKey.privateKey!));
-    if (!addressMap[key.address.toString()]) {
+    if (!addressMap[key.address]) {
       throw new InternalError("Invalid address");
     }
 
