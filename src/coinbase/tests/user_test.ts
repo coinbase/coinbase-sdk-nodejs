@@ -14,6 +14,7 @@ import { User } from "./../user";
 import { Wallet } from "./../wallet";
 import {
   addressesApiMock,
+  generateWalletFromSeed,
   getAddressFromHDKey,
   mockReturnRejectedValue,
   mockReturnValue,
@@ -56,9 +57,7 @@ describe("User Class", () => {
     beforeAll(async () => {
       walletId = crypto.randomUUID();
       walletData = { walletId: walletId, seed: bip39.generateMnemonic() };
-      const baseWallet = HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(walletData.seed));
-      const wallet1 = baseWallet.derive("m/44'/60'/0'/0/0");
-      const address1 = getAddressFromHDKey(wallet1);
+      const { address1 } = generateWalletFromSeed(walletData.seed);
       mockAddressModel = newAddressModel(walletId, address1);
       mockAddressList = {
         data: [mockAddressModel],
@@ -106,14 +105,11 @@ describe("User Class", () => {
     beforeAll(async () => {
       walletId = crypto.randomUUID();
       seed = "86fc9fba421dcc6ad42747f14132c3cd975bd9fb1454df84ce5ea554f2542fbe";
-      const baseWallet = HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(seed));
-      const wallet1 = baseWallet.derive("m/44'/60'/0'/0/0");
-      const address1 = getAddressFromHDKey(wallet1);
-
+      const { address1, wallet1PrivateKey } = generateWalletFromSeed(seed);
       mockAddressModel = {
         address_id: address1,
         wallet_id: walletId,
-        public_key: convertStringToHex(wallet1.privateKey!),
+        public_key: wallet1PrivateKey,
         network_id: Coinbase.networkList.BaseSepolia,
       };
       mockWalletModel = {
@@ -181,7 +177,6 @@ describe("User Class", () => {
     let seedDataWithoutSeed: Record<string, any>;
     let seedDataWithoutIv: Record<string, any>;
     let seedDataWithoutAuthTag: Record<string, any>;
-    let seed: string = "86fc9fba421dcc6ad42747f14132c3cd975bd9fb1454df84ce5ea554f2542fbe";
 
     beforeAll(() => {
       walletId = crypto.randomUUID();
@@ -212,7 +207,7 @@ describe("User Class", () => {
 
       initialSeedData = {
         [walletId]: {
-          seed,
+          seed: "86fc9fba421dcc6ad42747f14132c3cd975bd9fb1454df84ce5ea554f2542fbe",
           encrypted: false,
           iv: "",
           authTag: "",
@@ -229,7 +224,7 @@ describe("User Class", () => {
       };
       seedDataWithoutIv = {
         [walletId]: {
-          seed,
+          seed: "86fc9fba421dcc6ad42747f14132c3cd975bd9fb1454df84ce5ea554f2542fbe",
           encrypted: true,
           iv: "",
           auth_tag: "0x111",
@@ -237,7 +232,7 @@ describe("User Class", () => {
       };
       seedDataWithoutAuthTag = {
         [walletId]: {
-          seed,
+          seed: "86fc9fba421dcc6ad42747f14132c3cd975bd9fb1454df84ce5ea554f2542fbe",
           encrypted: true,
           iv: "0x111",
           auth_tag: "",
@@ -257,13 +252,8 @@ describe("User Class", () => {
     });
 
     it("loads the Wallet from backup", async () => {
-      const baseWallet = HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(seed));
-      const wallet1 = baseWallet.derive("m/44'/60'/0'/0/0");
-      const address1 = getAddressFromHDKey(wallet1);
-
-      const wallet2 = baseWallet.derive("m/44'/60'/0'/0/1");
-      const address2 = getAddressFromHDKey(wallet2);
-
+      const seed = "86fc9fba421dcc6ad42747f14132c3cd975bd9fb1454df84ce5ea554f2542fbe"
+      const { address1, address2 } = generateWalletFromSeed(seed);
       const addressModel1: AddressModel = newAddressModel(walletId, address1);
       const addressModel2: AddressModel = newAddressModel(walletId, address2);
       walletModelWithDefaultAddress = {
@@ -326,9 +316,7 @@ describe("User Class", () => {
       jest.clearAllMocks();
       walletId = crypto.randomUUID();
       const seed = bip39.generateMnemonic();
-      const baseWallet = HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(seed));
-      const wallet1 = baseWallet.derive("m/44'/60'/0'/0/0");
-      const address1 = getAddressFromHDKey(wallet1);
+      const { address1 } = generateWalletFromSeed(seed);
       mockAddressModel = newAddressModel(walletId, address1);
 
       const addressModel1: AddressModel = newAddressModel(walletId);
@@ -388,9 +376,7 @@ describe("User Class", () => {
 
     it("should return the list of Wallets", async () => {
       const seed = bip39.generateMnemonic();
-      const baseWallet = HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(seed));
-      const wallet1 = baseWallet.derive("m/44'/60'/0'/0/0");
-      const address1 = getAddressFromHDKey(wallet1);
+      const { address1 } = generateWalletFromSeed(seed);
       mockAddressModel = newAddressModel(walletId, address1);
 
       Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
@@ -401,7 +387,6 @@ describe("User Class", () => {
       });
       Coinbase.apiClients.address!.listAddresses = mockReturnValue(addressListModel);
       const wallets = await user.getWallets();
-      // instance of UnhydratedWallet
       expect(wallets[0]).toBeInstanceOf(UnhydratedWallet);
       expect(wallets.length).toBe(1);
       expect(wallets[0].getId()).toBe(walletId);

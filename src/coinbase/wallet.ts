@@ -44,6 +44,7 @@ export class Wallet extends UnhydratedWallet {
     this.model = model;
     this.master = master;
     this.seed = seed;
+    this.addresses = [];
   }
 
   /**
@@ -112,6 +113,20 @@ export class Wallet extends UnhydratedWallet {
   }
 
   /**
+   * Derives a key for an already registered Address in the Wallet.
+   *
+   * @throws {InternalError} - If the key derivation fails.
+   * @returns The derived key.
+   */
+  private deriveKey(): HDKey {
+    const derivedKey = this.master.derive(this.addressPathPrefix + "/" + this.addressIndex);
+    if (!derivedKey?.privateKey) {
+      throw new InternalError("Failed to derive key");
+    }
+    return derivedKey;
+  }
+
+  /**
    * Creates a new Address in the Wallet.
    *
    * @returns The new Address.
@@ -173,20 +188,6 @@ export class Wallet extends UnhydratedWallet {
   }
 
   /**
-   * Derives a key for an already registered Address in the Wallet.
-   *
-   * @throws {InternalError} - If the key derivation fails.
-   * @returns The derived key.
-   */
-  private deriveKey(): HDKey {
-    const derivedKey = this.master.derive(this.addressPathPrefix + "/" + this.addressIndex);
-    if (!derivedKey?.privateKey) {
-      throw new InternalError("Failed to derive key");
-    }
-    return derivedKey;
-  }
-
-  /**
    * Derives an already registered Address in the Wallet.
    *
    * @param addressMap - The map of registered Address IDs
@@ -200,7 +201,6 @@ export class Wallet extends UnhydratedWallet {
     if (!addressMap[key.address]) {
       throw new InternalError("Invalid address");
     }
-
     this.cacheAddress(addressModel, key);
   }
 
