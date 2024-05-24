@@ -96,7 +96,7 @@ export class Address {
         this.model.wallet_id,
         this.model.address_id,
         100,
-        page || undefined,
+        page?.length ? page : undefined,
       );
 
       response.data.data.forEach(transferModel => {

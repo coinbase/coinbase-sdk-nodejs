@@ -19,6 +19,7 @@ import {
   transfersApiMock,
 } from "./utils";
 import { ArgumentError } from "../errors";
+import { Transfer } from "../transfer";
 
 // Test suite for Address class
 describe("Address", () => {
@@ -323,9 +324,11 @@ describe("Address", () => {
         return { data: response };
       });
     });
+
     it("should return the list of transfers", async () => {
       const transfers = await address.getTransfers();
       expect(transfers).toHaveLength(3);
+      expect(transfers[0]).toBeInstanceOf(Transfer);
       expect(Coinbase.apiClients.transfer!.listTransfers).toHaveBeenCalledTimes(3);
       expect(Coinbase.apiClients.transfer!.listTransfers).toHaveBeenCalledWith(
         address.getWalletId(),
@@ -339,6 +342,13 @@ describe("Address", () => {
         100,
         "abc",
       );
+    });
+
+    it("should raise an APIError when the API call fails", async () => {
+      jest.clearAllMocks();
+      Coinbase.apiClients.transfer!.listTransfers = mockReturnRejectedValue(new APIError(""));
+      await expect(address.getTransfers()).rejects.toThrow(APIError);
+      expect(Coinbase.apiClients.transfer!.listTransfers).toHaveBeenCalledTimes(1);
     });
   });
 });
