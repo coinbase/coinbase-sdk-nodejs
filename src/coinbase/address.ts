@@ -166,6 +166,7 @@ export class Address {
       throw new InternalError("Cannot transfer from address without private key loaded");
     }
     let normalizedAmount = new Decimal(amount.toString());
+
     const currentBalance = await this.getBalance(assetId);
     if (currentBalance.lessThan(normalizedAmount)) {
       throw new ArgumentError(

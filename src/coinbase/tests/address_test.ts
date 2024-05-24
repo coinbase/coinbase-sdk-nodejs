@@ -317,7 +317,9 @@ describe("Address", () => {
         next_page: "",
         total_count: 0,
       } as TransferList;
-      Coinbase.apiClients.transfer!.listTransfers = mockFn(() => {
+      Coinbase.apiClients.transfer!.listTransfers = mockFn((walletId, addressId) => {
+        VALID_TRANSFER_MODEL.wallet_id = walletId;
+        VALID_TRANSFER_MODEL.address_id = addressId;
         response.next_page = pages.shift() as string;
         response.data = [VALID_TRANSFER_MODEL];
         response.has_more = !!response.next_page;
