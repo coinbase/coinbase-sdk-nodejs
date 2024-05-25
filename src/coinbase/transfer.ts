@@ -101,7 +101,7 @@ export class Transfer {
   public getAmount(): Decimal {
     const amount = new Decimal(this.model.amount);
 
-    if (this.getAssetId() === Coinbase.assetList.Eth) {
+    if (this.getAssetId() === Coinbase.assets.Eth) {
       return amount.div(WEI_PER_ETHER);
     }
     return amount;

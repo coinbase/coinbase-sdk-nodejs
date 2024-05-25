@@ -34,7 +34,7 @@ export class Coinbase {
    *
    * @constant
    */
-  static assetList = {
+  static assets = {
     Eth: "eth",
     Wei: "wei",
     Gwei: "gwei",

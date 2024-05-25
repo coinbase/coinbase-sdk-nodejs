@@ -146,7 +146,7 @@ export class Address {
    * Transfers the given amount of the given Asset to the given address. Only same-Network Transfers are supported.
    *
    * @param amount - The amount of the Asset to send.
-   * @param assetId - The ID of the Asset to send. For Ether, Coinbase.assetList.Eth, Coinbase.assetList.Gwei, and Coinbase.assetList.Wei supported.
+   * @param assetId - The ID of the Asset to send. For Ether, Coinbase.assets.Eth, Coinbase.assets.Gwei, and Coinbase.assets.Wei supported.
    * @param destination - The destination of the transfer. If a Wallet, sends to the Wallet's default address. If a String, interprets it as the address ID.
    * @param intervalSeconds - The interval at which to poll the Network for Transfer status, in seconds.
    * @param timeoutSeconds - The maximum amount of time to wait for the Transfer to complete, in seconds.
@@ -175,18 +175,18 @@ export class Address {
     }
 
     switch (assetId) {
-      case Coinbase.assetList.Eth:
+      case Coinbase.assets.Eth:
         normalizedAmount = normalizedAmount.mul(WEI_PER_ETHER);
         break;
-      case Coinbase.assetList.Gwei:
+      case Coinbase.assets.Gwei:
         normalizedAmount = normalizedAmount.mul(WEI_PER_GWEI);
         break;
-      case Coinbase.assetList.Wei:
+      case Coinbase.assets.Wei:
         break;
-      case Coinbase.assetList.Weth:
+      case Coinbase.assets.Weth:
         normalizedAmount = normalizedAmount.mul(WEI_PER_ETHER);
         break;
-      case Coinbase.assetList.Usdc:
+      case Coinbase.assets.Usdc:
         normalizedAmount = normalizedAmount.mul(ATOMIC_UNITS_PER_USDC);
         break;
       default:
@@ -197,9 +197,9 @@ export class Address {
 
     const normalizedAssetId = ((): string => {
       switch (assetId) {
-        case Coinbase.assetList.Gwei:
-        case Coinbase.assetList.Wei:
-          return Coinbase.assetList.Eth;
+        case Coinbase.assets.Gwei:
+        case Coinbase.assets.Wei:
+          return Coinbase.assets.Eth;
         default:
           return assetId;
       }

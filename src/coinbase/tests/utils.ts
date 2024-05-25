@@ -81,7 +81,7 @@ export const VALID_TRANSFER_MODEL: TransferModel = {
   wallet_id: walletId,
   address_id: ethers.Wallet.createRandom().address,
   destination: "0x4D9E4F3f4D1A8B5F4f7b1F5b5C7b8d6b2B3b1b0b",
-  asset_id: Coinbase.assetList.Eth,
+  asset_id: Coinbase.assets.Eth,
   amount: new Decimal(ethers.parseUnits("100", 18).toString()).toString(),
   unsigned_payload:
     "7b2274797065223a22307832222c22636861696e4964223a2230783134613334222c226e6f6e63" +
@@ -102,7 +102,7 @@ export const VALID_ADDRESS_BALANCE_LIST: AddressBalanceList = {
     {
       amount: "1000000000000000000",
       asset: {
-        asset_id: Coinbase.assetList.Eth,
+        asset_id: Coinbase.assets.Eth,
         network_id: Coinbase.networkList.BaseSepolia,
         decimals: 18,
       },
@@ -132,7 +132,7 @@ export const VALID_ADDRESS_BALANCE_LIST: AddressBalanceList = {
 export const VALID_BALANCE_MODEL: BalanceModel = {
   amount: "1000000000000000000",
   asset: {
-    asset_id: Coinbase.assetList.Eth,
+    asset_id: Coinbase.assets.Eth,
     network_id: Coinbase.networkList.BaseSepolia,
   },
 };
