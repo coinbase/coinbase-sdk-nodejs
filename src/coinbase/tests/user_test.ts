@@ -442,7 +442,7 @@ describe("User Class", () => {
       await expect(
         unhydratedWallet.createTransfer(
           new Decimal("500000000000000000"),
-          Coinbase.assetList.Eth,
+          Coinbase.assets.Eth,
           address1,
         ),
       ).rejects.toThrow(InternalError);
@@ -463,7 +463,7 @@ describe("User Class", () => {
       const mockWalletBalance: BalanceModel = {
         amount: "5000000000000000000",
         asset: {
-          asset_id: Coinbase.assetList.Eth,
+          asset_id: Coinbase.assets.Eth,
           network_id: Coinbase.networkList.BaseSepolia,
           decimals: 18,
         },
@@ -491,7 +491,7 @@ describe("User Class", () => {
       expect(wallet.getAddress(addressListModel.data[0].address_id)?.getId()).toBe(
         addressListModel.data[0].address_id,
       );
-      const balance = await wallet.getBalance(Coinbase.assetList.Eth);
+      const balance = await wallet.getBalance(Coinbase.assets.Eth);
       expect(balance).toEqual(new Decimal("5"));
 
       const balanceMap = await wallet.getBalances();

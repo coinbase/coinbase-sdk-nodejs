@@ -15,7 +15,7 @@ describe("BalanceMap", () => {
   describe(".fromBalances", () => {
     const ethBalanceModel: BalanceModel = {
       asset: {
-        asset_id: Coinbase.assetList.Eth,
+        asset_id: Coinbase.assets.Eth,
         network_id: Coinbase.networkList.BaseSepolia,
       },
       amount: ethAtomicAmount,
@@ -42,14 +42,14 @@ describe("BalanceMap", () => {
     const balanceMap = BalanceMap.fromBalances(balances);
 
     it("returns a new BalanceMap object with the correct balances", () => {
-      expect(balanceMap.get(Coinbase.assetList.Eth)).toEqual(ethAmount);
+      expect(balanceMap.get(Coinbase.assets.Eth)).toEqual(ethAmount);
       expect(balanceMap.get("usdc")).toEqual(usdcAmount);
       expect(balanceMap.get("weth")).toEqual(wethAmount);
     });
   });
 
   describe(".add", () => {
-    const assetId = Coinbase.assetList.Eth;
+    const assetId = Coinbase.assets.Eth;
     const balance = Balance.fromModelAndAssetId(
       {
         amount: ethAtomicAmount,
@@ -67,7 +67,7 @@ describe("BalanceMap", () => {
   });
 
   describe(".toString", () => {
-    const assetId = Coinbase.assetList.Eth;
+    const assetId = Coinbase.assets.Eth;
     const balance = Balance.fromModelAndAssetId(
       {
         amount: ethAtomicAmount,

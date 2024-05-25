@@ -98,7 +98,7 @@ console.log(`Faucet transaction: ${faucetTransaction}`);
 // Create a new Wallet to transfer funds to.
 // Then, we can transfer 0.00001 ETH out of the Wallet to another Wallet.
 const anotherWallet = await user.createWallet();
-const transfer = await wallet.createTransfer(0.00001, Coinbase.assetList.Eth, anotherWallet);
+const transfer = await wallet.createTransfer(0.00001, Coinbase.assets.Eth, anotherWallet);
 ```
 
 ### Re-Instantiating Wallets

@@ -105,7 +105,7 @@ describe("Wallet Class", () => {
 
       const transfer = await wallet.createTransfer(
         weiAmount,
-        Coinbase.assetList.Wei,
+        Coinbase.assets.Wei,
         destination,
         intervalSeconds,
         timeoutSeconds,
@@ -122,7 +122,7 @@ describe("Wallet Class", () => {
       await expect(
         wallet.createTransfer(
           weiAmount,
-          Coinbase.assetList.Wei,
+          Coinbase.assets.Wei,
           destination,
           intervalSeconds,
           timeoutSeconds,
@@ -138,7 +138,7 @@ describe("Wallet Class", () => {
       await expect(
         wallet.createTransfer(
           weiAmount,
-          Coinbase.assetList.Wei,
+          Coinbase.assets.Wei,
           destination,
           intervalSeconds,
           timeoutSeconds,
@@ -158,7 +158,7 @@ describe("Wallet Class", () => {
       await expect(
         wallet.createTransfer(
           weiAmount,
-          Coinbase.assetList.Wei,
+          Coinbase.assets.Wei,
           destination,
           intervalSeconds,
           timeoutSeconds,
@@ -171,7 +171,7 @@ describe("Wallet Class", () => {
       await expect(
         wallet.createTransfer(
           insufficientAmount,
-          Coinbase.assetList.Wei,
+          Coinbase.assets.Wei,
           destination,
           intervalSeconds,
           timeoutSeconds,
@@ -353,7 +353,7 @@ describe("Wallet Class", () => {
           {
             amount: "1000000000000000000",
             asset: {
-              asset_id: Coinbase.assetList.Eth,
+              asset_id: Coinbase.assets.Eth,
               network_id: Coinbase.networkList.BaseSepolia,
               decimals: 18,
             },
@@ -388,7 +388,7 @@ describe("Wallet Class", () => {
       const mockWalletBalance: BalanceModel = {
         amount: "5000000000000000000",
         asset: {
-          asset_id: Coinbase.assetList.Eth,
+          asset_id: Coinbase.assets.Eth,
           network_id: Coinbase.networkList.BaseSepolia,
           decimals: 18,
         },
@@ -397,43 +397,43 @@ describe("Wallet Class", () => {
     });
 
     it("should return the correct ETH balance", async () => {
-      const balanceMap = await wallet.getBalance(Coinbase.assetList.Eth);
+      const balanceMap = await wallet.getBalance(Coinbase.assets.Eth);
       expect(balanceMap).toEqual(new Decimal(5));
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledWith(
         walletId,
-        Coinbase.assetList.Eth,
+        Coinbase.assets.Eth,
       );
     });
 
     it("should return the correct GWEI balance", async () => {
-      const balance = await wallet.getBalance(Coinbase.assetList.Gwei);
+      const balance = await wallet.getBalance(Coinbase.assets.Gwei);
       expect(balance).toEqual(GWEI_PER_ETHER.mul(5));
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledWith(
         walletId,
-        Coinbase.assetList.Gwei,
+        Coinbase.assets.Gwei,
       );
     });
 
     it("should return the correct WEI balance", async () => {
-      const balance = await wallet.getBalance(Coinbase.assetList.Wei);
+      const balance = await wallet.getBalance(Coinbase.assets.Wei);
       expect(balance).toEqual(WEI_PER_ETHER.mul(5));
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledWith(
         walletId,
-        Coinbase.assetList.Wei,
+        Coinbase.assets.Wei,
       );
     });
 
     it("should return 0 when the balance is not found", async () => {
       Coinbase.apiClients.wallet!.getWalletBalance = mockReturnValue({});
-      const balance = await wallet.getBalance(Coinbase.assetList.Wei);
+      const balance = await wallet.getBalance(Coinbase.assets.Wei);
       expect(balance).toEqual(new Decimal(0));
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledWith(
         walletId,
-        Coinbase.assetList.Wei,
+        Coinbase.assets.Wei,
       );
     });
   });

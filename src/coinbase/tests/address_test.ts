@@ -70,7 +70,7 @@ describe("Address", () => {
 
   it("should return the correct list of balances", async () => {
     const balances = await address.getBalances();
-    expect(balances.get(Coinbase.assetList.Eth)).toEqual(new Decimal(1));
+    expect(balances.get(Coinbase.assets.Eth)).toEqual(new Decimal(1));
     expect(balances.get("usdc")).toEqual(new Decimal(5000));
     expect(balances.get("weth")).toEqual(new Decimal(3));
     expect(Coinbase.apiClients.address!.listAddressBalances).toHaveBeenCalledWith(
@@ -81,13 +81,13 @@ describe("Address", () => {
   });
 
   it("should return the correct ETH balance", async () => {
-    const ethBalance = await address.getBalance(Coinbase.assetList.Eth);
+    const ethBalance = await address.getBalance(Coinbase.assets.Eth);
     expect(ethBalance).toBeInstanceOf(Decimal);
     expect(ethBalance).toEqual(new Decimal(1));
     expect(Coinbase.apiClients.address!.getAddressBalance).toHaveBeenCalledWith(
       address.getWalletId(),
       address.getId(),
-      Coinbase.assetList.Eth,
+      Coinbase.assets.Eth,
     );
     expect(Coinbase.apiClients.address!.getAddressBalance).toHaveBeenCalledTimes(1);
   });
@@ -228,7 +228,7 @@ describe("Address", () => {
 
       const transfer = await address.createTransfer(
         weiAmount,
-        Coinbase.assetList.Wei,
+        Coinbase.assets.Wei,
         destination,
         intervalSeconds,
         timeoutSeconds,
@@ -245,7 +245,7 @@ describe("Address", () => {
       await expect(
         address.createTransfer(
           weiAmount,
-          Coinbase.assetList.Wei,
+          Coinbase.assets.Wei,
           destination,
           intervalSeconds,
           timeoutSeconds,
@@ -258,7 +258,7 @@ describe("Address", () => {
       await expect(
         addressWithoutKey.createTransfer(
           weiAmount,
-          Coinbase.assetList.Wei,
+          Coinbase.assets.Wei,
           destination,
           intervalSeconds,
           timeoutSeconds,
@@ -274,7 +274,7 @@ describe("Address", () => {
       await expect(
         address.createTransfer(
           weiAmount,
-          Coinbase.assetList.Wei,
+          Coinbase.assets.Wei,
           destination,
           intervalSeconds,
           timeoutSeconds,
@@ -294,7 +294,7 @@ describe("Address", () => {
       await expect(
         address.createTransfer(
           weiAmount,
-          Coinbase.assetList.Wei,
+          Coinbase.assets.Wei,
           destination,
           intervalSeconds,
           timeoutSeconds,
@@ -307,7 +307,7 @@ describe("Address", () => {
       await expect(
         address.createTransfer(
           insufficientAmount,
-          Coinbase.assetList.Wei,
+          Coinbase.assets.Wei,
           destination,
           intervalSeconds,
           timeoutSeconds,
