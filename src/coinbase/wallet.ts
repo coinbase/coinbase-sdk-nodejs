@@ -377,7 +377,7 @@ export class Wallet {
 
     fs.writeFileSync(filePath, JSON.stringify(existingSeedsInStore, null, 2), "utf8");
 
-    return `Successfully saved seed for ${this.getId()} to ${filePath}.`;
+    return `Successfully saved seed for ${data.walletId} to ${filePath}.`;
   }
 
   /**
