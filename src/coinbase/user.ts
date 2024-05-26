@@ -1,4 +1,3 @@
-import * as crypto from "crypto";
 import { WalletData } from "./types";
 import { User as UserModel, Address as AddressModel, Wallet as WalletModel } from "./../client/api";
 import { Wallet } from "./wallet";
@@ -85,21 +84,6 @@ export class User {
     const walletModel = await Coinbase.apiClients.wallet!.getWallet(data.walletId);
     const addressList = await Coinbase.apiClients.address!.listAddresses(data.walletId);
     return Wallet.init(walletModel.data, data.seed, addressList.data.data);
-  }
-
-  /**
-   * Stores the encryption key for encrypting the backup.
-   *
-   * @returns The encryption key.
-   */
-  private storeEncryptionKey(): Buffer {
-    const privateKey = crypto.createPrivateKey(Coinbase.apiKeyPrivateKey);
-    const publicKey = crypto.createPublicKey(Coinbase.apiKeyPrivateKey);
-    const sharedSecret = crypto.diffieHellman({
-      privateKey,
-      publicKey,
-    });
-    return sharedSecret;
   }
 
   /**

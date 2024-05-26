@@ -1,6 +1,7 @@
 import { HDKey } from "@scure/bip32";
 import * as bip39 from "bip39";
 import * as crypto from "crypto";
+import * as fs from "fs";
 import { ethers } from "ethers";
 import * as secp256k1 from "secp256k1";
 import { Address as AddressModel, Wallet as WalletModel } from "../client";
@@ -8,7 +9,7 @@ import { Address } from "./address";
 import { Coinbase } from "./coinbase";
 import { ArgumentError, InternalError } from "./errors";
 import { Transfer } from "./transfer";
-import { Amount, Destination, WalletData } from "./types";
+import { Amount, Destination, SeedData, WalletData } from "./types";
 import { convertStringToHex } from "./utils";
 import { FaucetTransaction } from "./faucet_transaction";
 import { BalanceMap } from "./balance_map";
@@ -331,6 +332,53 @@ export class Wallet {
   }
 
   /**
+   * Saves the seed of the Wallet to the given file. Wallets whose seeds are saved this way can be
+   * rehydrated using load_seed. A single file can be used for multiple Wallet seeds.
+   * This is an insecure method of storing Wallet seeds and should only be used for development purposes.
+   *
+   * @param filePath - The path of the file to save the seed to
+   * @param encrypt - Whether the seed information persisted to the local file system should be
+   * encrypted or not. Data is unencrypted by default.
+   * @returns A string indicating the success of the operation
+   */
+  public saveSeed(filePath: string, encrypt: boolean = false): string {
+    if (!this.seed) {
+      throw new InternalError("Cannot save Wallet without loaded seed");
+    }
+
+    const existingSeedsInStore = this.getExistingSeeds(filePath);
+    const data = this.export();
+    let seedToStore = data.seed;
+    let authTag = "";
+    let iv = "";
+
+    if (encrypt) {
+      const ivBytes = crypto.randomBytes(12);
+      const sharedSecret = this.getEncryptionKey();
+      const cipher: crypto.CipherCCM = crypto.createCipheriv(
+        "aes-256-gcm",
+        crypto.createHash("sha256").update(sharedSecret).digest(),
+        ivBytes,
+      );
+      const encryptedData = Buffer.concat([cipher.update(data.seed, "utf8"), cipher.final()]);
+      authTag = cipher.getAuthTag().toString("hex");
+      seedToStore = encryptedData.toString("hex");
+      iv = ivBytes.toString("hex");
+    }
+
+    existingSeedsInStore[data.walletId] = {
+      seed: seedToStore,
+      encrypted: encrypt,
+      authTag: authTag,
+      iv: iv,
+    };
+
+    fs.writeFileSync(filePath, JSON.stringify(existingSeedsInStore, null, 2), "utf8");
+
+    return `Successfully saved seed for ${this.getId()} to ${filePath}.`;
+  }
+
+  /**
    * Returns the default address of the Wallet.
    *
    * @returns The default address
@@ -406,5 +454,57 @@ export class Wallet {
    */
   public toString(): string {
     return `Wallet{id: '${this.model.id}', networkId: '${this.model.network_id}'}`;
+  }
+
+  /**
+   * Loads the seed data from the given file.
+   *
+   * @param filePath - The path of the file to load the seed data from
+   * @returns The seed data
+   */
+  private getExistingSeeds(filePath: string): Record<string, SeedData> {
+    try {
+      const data = fs.readFileSync(filePath, "utf8");
+      if (!data) {
+        return {} as Record<string, SeedData>;
+      }
+      const seedData = JSON.parse(data);
+      if (
+        !Object.entries(seedData).every(
+          ([key, value]) =>
+            typeof key === "string" &&
+            /* eslint-disable @typescript-eslint/no-explicit-any */
+            typeof (value! as any).authTag! === "string" &&
+            typeof (value! as any).encrypted! === "boolean" &&
+            typeof (value! as any).iv! === "string" &&
+            typeof (value! as any).seed! === "string",
+        )
+      ) {
+        throw new ArgumentError("Malformed backup data");
+      }
+
+      return seedData;
+    } catch (error: any) {
+      /* eslint-enable @typescript-eslint/no-explicit-any */
+      if (error.code === "ENOENT") {
+        return {} as Record<string, SeedData>;
+      }
+      throw new ArgumentError("Malformed backup data");
+    }
+  }
+
+  /**
+   * Gets the key for encrypting seed data.
+   *
+   * @returns The encryption key.
+   */
+  private getEncryptionKey(): Buffer {
+    const privateKey = crypto.createPrivateKey(Coinbase.apiKeyPrivateKey);
+    const publicKey = crypto.createPublicKey(Coinbase.apiKeyPrivateKey);
+    const encryptionKey = crypto.diffieHellman({
+      privateKey,
+      publicKey,
+    });
+    return encryptionKey;
   }
 }
