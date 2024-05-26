@@ -340,6 +340,7 @@ export class Wallet {
    * @param encrypt - Whether the seed information persisted to the local file system should be
    * encrypted or not. Data is unencrypted by default.
    * @returns A string indicating the success of the operation
+   * @throws {InternalError} If the Wallet does not have a seed
    */
   public saveSeed(filePath: string, encrypt: boolean = false): string {
     if (!this.seed) {
@@ -376,6 +377,56 @@ export class Wallet {
     fs.writeFileSync(filePath, JSON.stringify(existingSeedsInStore, null, 2), "utf8");
 
     return `Successfully saved seed for ${this.getId()} to ${filePath}.`;
+  }
+
+  /**
+   * Loads the seed of the Wallet from the given file.
+   *
+   * @param filePath - The path of the file to load the seed from
+   * @returns A string indicating the success of the operation
+   */
+  public async loadSeed(filePath: string): Promise<string> {
+    const existingSeedsInStore = this.getExistingSeeds(filePath);
+    if (Object.keys(existingSeedsInStore).length === 0) {
+      throw new ArgumentError(`File ${filePath} does not contain any seed data`);
+    }
+
+    if (existingSeedsInStore[this.getId()!] === undefined) {
+      throw new ArgumentError(
+        `File ${filePath} does not contain seed data for wallet ${this.getId()}`,
+      );
+    }
+
+    const seedData = existingSeedsInStore[this.getId()!];
+    let seed = seedData.seed;
+    if (!seed) {
+      throw new Error("Seed data is malformed");
+    }
+
+    if (seedData.encrypted) {
+      const sharedSecret = this.getEncryptionKey();
+      if (!seedData.iv || !seedData.authTag) {
+        throw new Error("Encrypted seed data is malformed");
+      }
+
+      const decipher = crypto.createDecipheriv(
+        "aes-256-gcm",
+        crypto.createHash("sha256").update(sharedSecret).digest(),
+        Buffer.from(seedData.iv, "hex"),
+      );
+      decipher.setAuthTag(Buffer.from(seedData.authTag, "hex"));
+
+      const decryptedData = Buffer.concat([
+        decipher.update(Buffer.from(seed, "hex")),
+        decipher.final(),
+      ]);
+
+      seed = decryptedData.toString("utf8");
+    }
+
+    this.setSeed(seed);
+
+    return `Successfully loaded seed for wallet ${this.getId()} from ${filePath}.`;
   }
 
   /**
