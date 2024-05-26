@@ -82,6 +82,18 @@ export class User {
   }
 
   /**
+   * Returns the Wallet with the given ID.
+   *
+   * @param wallet_id - the ID of the Wallet
+   * @returns the Wallet with the given ID
+   */
+  public async getWallet(wallet_id: string): Promise<Wallet> {
+    const walletModel = await Coinbase.apiClients.wallet!.getWallet(wallet_id);
+    const addressList = await Coinbase.apiClients.address!.listAddresses(wallet_id);
+    return Wallet.init(walletModel.data, "", addressList.data.data);
+  }
+
+  /**
    * Imports a Wallet belonging to a User.
    *
    * @param data - The Wallet data to import.

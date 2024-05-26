@@ -292,4 +292,73 @@ describe("User Class", () => {
       expect(faucet).toBeInstanceOf(FaucetTransaction);
     });
   });
+
+  describe(".getWallet", () => {
+    let user: User;
+    let walletId: string;
+    let walletModelWithDefaultAddress: WalletModel;
+    let addressListModel: AddressList;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      walletId = crypto.randomUUID();
+      const seed = bip39.generateMnemonic();
+      const { address1 } = generateWalletFromSeed(seed);
+      mockAddressModel = newAddressModel(walletId, address1);
+
+      const addressModel1: AddressModel = newAddressModel(walletId);
+      const addressModel2: AddressModel = newAddressModel(walletId);
+      walletModelWithDefaultAddress = {
+        id: walletId,
+        network_id: Coinbase.networkList.BaseSepolia,
+        default_address: addressModel1,
+      };
+      addressListModel = {
+        data: [addressModel1, addressModel2],
+        has_more: false,
+        next_page: "",
+        total_count: 1,
+      };
+      Coinbase.apiClients.wallet = walletsApiMock;
+      Coinbase.apiClients.address = addressesApiMock;
+      const mockUserModel: UserModel = {
+        id: "12345",
+      } as UserModel;
+      user = new User(mockUserModel);
+    });
+
+    it("should raise an error when the Wallet API call fails", async () => {
+      Coinbase.apiClients.wallet!.getWallet = mockReturnRejectedValue(new Error("API Error"));
+      await expect(user.getWallet(walletId)).rejects.toThrow(new Error("API Error"));
+      expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenLastCalledWith(walletId);
+    });
+
+    it("should raise an error when the Address API call fails", async () => {
+      Coinbase.apiClients.wallet!.getWallet = mockReturnValue(walletModelWithDefaultAddress);
+      Coinbase.apiClients.address!.listAddresses = mockReturnRejectedValue(new Error("API Error"));
+      await expect(user.getWallet(walletId)).rejects.toThrow(new Error("API Error"));
+      expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenLastCalledWith(walletId);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenLastCalledWith(walletId);
+    });
+
+    it("should return the Wallet", async () => {
+      const seed = bip39.generateMnemonic();
+      const { address1 } = generateWalletFromSeed(seed);
+      mockAddressModel = newAddressModel(walletId, address1);
+      Coinbase.apiClients.wallet!.getWallet = mockReturnValue(walletModelWithDefaultAddress);
+      Coinbase.apiClients.address!.listAddresses = mockReturnValue(addressListModel);
+      const result = await user.getWallet(walletId);
+      expect(result).toBeInstanceOf(Wallet);
+      expect(result.getId()).toBe(walletId);
+      expect(result.getAddresses().length).toBe(2);
+      expect(result.canSign()).toBe(false);
+      expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledWith(walletId);
+      expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledWith(walletId);
+    });
+  });
 });
