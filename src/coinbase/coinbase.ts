@@ -45,13 +45,6 @@ export class Coinbase {
   static apiClients: ApiClients = {};
 
   /**
-   * The backup file path for Wallet seeds.
-   *
-   * @constant
-   */
-  static backupFilePath: string = "seed.json";
-
-  /**
    * The CDP API key Private Key.
    *
    * @constant
@@ -66,7 +59,6 @@ export class Coinbase {
    * @param privateKey - The private key associated with the API key.
    * @param debugging - If true, logs API requests and responses to the console.
    * @param basePath - The base path for the API.
-   * @param backupFilePath - The path to the file containing the Wallet backup data.
    * @throws {InternalError} If the configuration is invalid.
    * @throws {InvalidAPIKeyFormat} If not able to create JWT token.
    */
@@ -75,7 +67,6 @@ export class Coinbase {
     privateKey: string,
     debugging = false,
     basePath: string = BASE_PATH,
-    backupFilePath?: string,
   ) {
     if (apiKeyName === "") {
       throw new InternalError("Invalid configuration: apiKeyName is empty");
@@ -101,7 +92,6 @@ export class Coinbase {
     Coinbase.apiClients.baseSepoliaProvider = new ethers.JsonRpcProvider(
       "https://sepolia.base.org",
     );
-    Coinbase.backupFilePath = backupFilePath ? backupFilePath : Coinbase.backupFilePath;
     Coinbase.apiKeyPrivateKey = privateKey;
   }
 
@@ -111,7 +101,6 @@ export class Coinbase {
    * @param filePath - The path to the JSON file containing the API key and private key.
    * @param debugging - If true, logs API requests and responses to the console.
    * @param basePath - The base path for the API.
-   * @param backupFilePath - The path to the file containing the Wallet backup data.
    * @returns A new instance of the Coinbase SDK.
    * @throws {InvalidAPIKeyFormat} If the file does not exist or the configuration values are missing/invalid.
    * @throws {InvalidConfiguration} If the configuration is invalid.
@@ -121,7 +110,6 @@ export class Coinbase {
     filePath: string = "coinbase_cloud_api_key.json",
     debugging: boolean = false,
     basePath: string = BASE_PATH,
-    backupFilePath?: string,
   ): Coinbase {
     if (!fs.existsSync(filePath)) {
       throw new InvalidConfiguration(`Invalid configuration: file not found at ${filePath}`);
@@ -133,7 +121,7 @@ export class Coinbase {
         throw new InvalidAPIKeyFormat("Invalid configuration: missing configuration values");
       }
 
-      return new Coinbase(config.name, config.privateKey, debugging, basePath, backupFilePath);
+      return new Coinbase(config.name, config.privateKey, debugging, basePath);
     } catch (e) {
       if (e instanceof SyntaxError) {
         throw new InvalidAPIKeyFormat("Not able to parse the configuration file");

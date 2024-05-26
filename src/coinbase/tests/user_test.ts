@@ -1,7 +1,6 @@
 import * as bip39 from "bip39";
 import * as crypto from "crypto";
-import * as fs from "fs";
-import { ArgumentError, InternalError } from "../errors";
+import { InternalError } from "../errors";
 import {
   AddressBalanceList,
   AddressList,
@@ -11,21 +10,18 @@ import {
   Wallet as WalletModel,
 } from "./../../client/api";
 import { Coinbase } from "./../coinbase";
-import { SeedData, WalletData } from "./../types";
+import { WalletData } from "./../types";
 import { User } from "./../user";
 import { Wallet } from "./../wallet";
 import {
   addressesApiMock,
   generateRandomHash,
   generateWalletFromSeed,
-  getAddressFromHDKey,
   mockReturnRejectedValue,
   mockReturnValue,
   newAddressModel,
   walletsApiMock,
 } from "./utils";
-import { HDKey } from "@scure/bip32";
-import { convertStringToHex } from "../utils";
 import Decimal from "decimal.js";
 import { FaucetTransaction } from "../faucet_transaction";
 
@@ -97,216 +93,6 @@ describe("User Class", () => {
 
     it("should contain the same seed when re-exported", async () => {
       expect(importedWallet.export().seed!).toBe(walletData.seed);
-    });
-  });
-
-  describe(".saveWallet", () => {
-    let seed: string;
-    let walletId: string;
-    let mockSeedWallet: Wallet;
-    let savedWallet: Wallet;
-
-    beforeAll(async () => {
-      walletId = crypto.randomUUID();
-      seed = "86fc9fba421dcc6ad42747f14132c3cd975bd9fb1454df84ce5ea554f2542fbe";
-      const { address1, wallet1PrivateKey } = generateWalletFromSeed(seed);
-      mockAddressModel = {
-        address_id: address1,
-        wallet_id: walletId,
-        public_key: wallet1PrivateKey,
-        network_id: Coinbase.networkList.BaseSepolia,
-      };
-      mockWalletModel = {
-        id: walletId,
-        network_id: Coinbase.networkList.BaseSepolia,
-        default_address: mockAddressModel,
-      };
-      user = new User(mockUserModel);
-      Coinbase.apiClients.address = addressesApiMock;
-      Coinbase.apiClients.address!.getAddress = mockReturnValue(mockAddressModel);
-      Coinbase.backupFilePath = crypto.randomUUID() + ".json";
-      Coinbase.apiKeyPrivateKey = crypto.generateKeyPairSync("ec", {
-        namedCurve: "prime256v1",
-        privateKeyEncoding: { type: "pkcs8", format: "pem" },
-        publicKeyEncoding: { type: "spki", format: "pem" },
-      }).privateKey;
-      mockSeedWallet = await Wallet.init(mockWalletModel, seed, [mockAddressModel]);
-    });
-
-    afterEach(async () => {
-      fs.unlinkSync(Coinbase.backupFilePath);
-    });
-
-    it("should save the Wallet data when encryption is false", async () => {
-      savedWallet = user.saveWallet(mockSeedWallet);
-      expect(savedWallet).toBe(mockSeedWallet);
-      const storedSeedData = fs.readFileSync(Coinbase.backupFilePath);
-      const walletSeedData = JSON.parse(storedSeedData.toString());
-      expect(walletSeedData[walletId].encrypted).toBe(false);
-      expect(walletSeedData[walletId].iv).toBe("");
-      expect(walletSeedData[walletId].authTag).toBe("");
-      expect(walletSeedData[walletId].seed).toBe(seed);
-    });
-
-    it("should save the Wallet data when encryption is true", async () => {
-      savedWallet = user.saveWallet(mockSeedWallet, true);
-      expect(savedWallet).toBe(mockSeedWallet);
-      const storedSeedData = fs.readFileSync(Coinbase.backupFilePath);
-      const walletSeedData = JSON.parse(storedSeedData.toString());
-      expect(walletSeedData[walletId].encrypted).toBe(true);
-      expect(walletSeedData[walletId].iv).toBeTruthy();
-      expect(walletSeedData[walletId].authTag).toBeTruthy();
-      expect(walletSeedData[walletId].seed).not.toBe(seed);
-    });
-
-    it("should throw an error when the existing file is malformed", async () => {
-      fs.writeFileSync(
-        Coinbase.backupFilePath,
-        JSON.stringify({ malformed: "test" }, null, 2),
-        "utf8",
-      );
-      expect(() => user.saveWallet(mockSeedWallet)).toThrow(ArgumentError);
-    });
-  });
-
-  describe(".loadWallets", () => {
-    let mockUserModel: UserModel;
-    let user: User;
-    let walletId: string;
-    let addressModel: AddressModel;
-    let walletModelWithDefaultAddress: WalletModel;
-    let addressListModel: AddressList;
-    let initialSeedData: Record<string, SeedData>;
-    let malformedSeedData: Record<string, any>;
-    let seedDataWithoutSeed: Record<string, any>;
-    let seedDataWithoutIv: Record<string, any>;
-    let seedDataWithoutAuthTag: Record<string, any>;
-
-    beforeAll(() => {
-      walletId = crypto.randomUUID();
-      addressModel = newAddressModel(walletId);
-      addressModel.address_id = "0xB1666C6cDDB29468f721f3A4881a6e95CC963849";
-      walletModelWithDefaultAddress = {
-        id: walletId,
-        network_id: Coinbase.networkList.BaseSepolia,
-        default_address: addressModel,
-      };
-      addressListModel = {
-        data: [addressModel],
-        has_more: false,
-        next_page: "",
-        total_count: 1,
-      };
-      Coinbase.apiClients.wallet = walletsApiMock;
-      Coinbase.apiClients.address = addressesApiMock;
-      Coinbase.backupFilePath = `${crypto.randomUUID()}.json`;
-      Coinbase.apiKeyPrivateKey = crypto.generateKeyPairSync("ec", {
-        namedCurve: "prime256v1",
-        privateKeyEncoding: { type: "pkcs8", format: "pem" },
-        publicKeyEncoding: { type: "spki", format: "pem" },
-      }).privateKey;
-      mockUserModel = {
-        id: "12345",
-      } as UserModel;
-
-      initialSeedData = {
-        [walletId]: {
-          seed: "86fc9fba421dcc6ad42747f14132c3cd975bd9fb1454df84ce5ea554f2542fbe",
-          encrypted: false,
-          iv: "",
-          authTag: "",
-        },
-      };
-      malformedSeedData = {
-        [walletId]: "test",
-      };
-      seedDataWithoutSeed = {
-        [walletId]: {
-          seed: "",
-          encrypted: false,
-        },
-      };
-      seedDataWithoutIv = {
-        [walletId]: {
-          seed: "86fc9fba421dcc6ad42747f14132c3cd975bd9fb1454df84ce5ea554f2542fbe",
-          encrypted: true,
-          iv: "",
-          auth_tag: "0x111",
-        },
-      };
-      seedDataWithoutAuthTag = {
-        [walletId]: {
-          seed: "86fc9fba421dcc6ad42747f14132c3cd975bd9fb1454df84ce5ea554f2542fbe",
-          encrypted: true,
-          iv: "0x111",
-          auth_tag: "",
-        },
-      };
-    });
-
-    beforeEach(() => {
-      user = new User(mockUserModel);
-      fs.writeFileSync(Coinbase.backupFilePath, JSON.stringify(initialSeedData, null, 2));
-    });
-
-    afterEach(() => {
-      if (fs.existsSync(Coinbase.backupFilePath)) {
-        fs.unlinkSync(Coinbase.backupFilePath);
-      }
-    });
-
-    it("loads the Wallet from backup", async () => {
-      const seed = "86fc9fba421dcc6ad42747f14132c3cd975bd9fb1454df84ce5ea554f2542fbe";
-      const { address1, address2 } = generateWalletFromSeed(seed);
-      const addressModel1: AddressModel = newAddressModel(walletId, address1);
-      const addressModel2: AddressModel = newAddressModel(walletId, address2);
-      walletModelWithDefaultAddress = {
-        id: walletId,
-        network_id: Coinbase.networkList.BaseSepolia,
-        default_address: addressModel1,
-      };
-      addressListModel = {
-        data: [addressModel1, addressModel2],
-        has_more: false,
-        next_page: "",
-        total_count: 2,
-      };
-
-      Coinbase.apiClients.wallet = walletsApiMock;
-      Coinbase.apiClients.wallet!.getWallet = mockReturnValue(walletModelWithDefaultAddress);
-      Coinbase.apiClients.address = addressesApiMock;
-      Coinbase.apiClients.address!.listAddresses = mockReturnValue(addressListModel);
-
-      const wallets = await user.loadWallets();
-      const wallet = wallets[walletId];
-      expect(wallet).not.toBeNull();
-      expect(wallet.getId()).toBe(walletId);
-      expect(wallet.getDefaultAddress()?.getId()).toBe(addressModel1.address_id);
-    });
-
-    it("throws an error when the backup file is absent", async () => {
-      fs.unlinkSync(Coinbase.backupFilePath);
-      await expect(user.loadWallets()).rejects.toThrow(new ArgumentError("Backup file not found"));
-    });
-
-    it("throws an error when the backup file is corrupted", async () => {
-      fs.writeFileSync(Coinbase.backupFilePath, JSON.stringify(malformedSeedData, null, 2));
-      await expect(user.loadWallets()).rejects.toThrow(new ArgumentError("Malformed backup data"));
-    });
-
-    it("throws an error when backup does not contain seed", async () => {
-      fs.writeFileSync(Coinbase.backupFilePath, JSON.stringify(seedDataWithoutSeed, null, 2));
-      await expect(user.loadWallets()).rejects.toThrow(new ArgumentError("Malformed backup data"));
-    });
-
-    it("throws an error when backup does not contain iv", async () => {
-      fs.writeFileSync(Coinbase.backupFilePath, JSON.stringify(seedDataWithoutIv, null, 2));
-      await expect(user.loadWallets()).rejects.toThrow(new ArgumentError("Malformed backup data"));
-    });
-
-    it("throws an error when backup does not contain auth_tag", async () => {
-      fs.writeFileSync(Coinbase.backupFilePath, JSON.stringify(seedDataWithoutAuthTag, null, 2));
-      await expect(user.loadWallets()).rejects.toThrow(new ArgumentError("Malformed backup data"));
     });
   });
 
