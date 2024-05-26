@@ -72,7 +72,9 @@ export class User {
 
     const wallets = await Promise.all(
       walletsModels.map(async wallet => {
-        return await Wallet.init(wallet, undefined, addressModelMap[wallet.id!]);
+        const walletId = wallet.id!;
+        const addressModels = addressModelMap[walletId];
+        return await Wallet.init(wallet, "", addressModels);
       }),
     );
 
