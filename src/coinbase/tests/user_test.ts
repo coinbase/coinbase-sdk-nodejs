@@ -173,7 +173,7 @@ describe("User Class", () => {
       Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
         data: [walletModelWithDefaultAddress],
         has_more: false,
-        next_page: "",
+        next_page: "nextPageToken",
         total_count: 1,
       });
       Coinbase.apiClients.address!.listAddresses = mockReturnValue(addressListModel);
@@ -182,6 +182,7 @@ describe("User Class", () => {
       expect(result.wallets.length).toBe(1);
       expect(result.wallets[0].getId()).toBe(walletId);
       expect(result.wallets[0].getAddresses().length).toBe(2);
+      expect(result.nextPageToken).toBe("nextPageToken");
       expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledWith(
