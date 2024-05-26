@@ -293,7 +293,7 @@ export class Wallet {
    *
    * @returns The list of balances. The key is the Asset ID, and the value is the balance.
    */
-  public async getBalances(): Promise<BalanceMap> {
+  public async listBalances(): Promise<BalanceMap> {
     const response = await Coinbase.apiClients.wallet!.listWalletBalances(this.model.id!);
     return BalanceMap.fromBalances(response.data.data);
   }

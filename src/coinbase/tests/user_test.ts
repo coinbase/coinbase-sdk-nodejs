@@ -280,7 +280,7 @@ describe("User Class", () => {
       const balance = await wallet.getBalance(Coinbase.assets.Eth);
       expect(balance).toEqual(new Decimal("5"));
 
-      const balanceMap = await wallet.getBalances();
+      const balanceMap = await wallet.listBalances();
       expect(balanceMap.get("eth")).toEqual(new Decimal("5"));
 
       const faucet = await wallet.faucet();

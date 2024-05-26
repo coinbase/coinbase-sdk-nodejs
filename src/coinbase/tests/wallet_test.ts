@@ -23,7 +23,7 @@ import {
   mockReturnValue,
   newAddressModel,
   transfersApiMock,
-  walletsApiMock
+  walletsApiMock,
 } from "./utils";
 
 describe("Wallet Class", () => {
@@ -375,7 +375,7 @@ describe("Wallet Class", () => {
     });
 
     it("should return a hash with an ETH and USDC balance", async () => {
-      const balanceMap = await wallet.getBalances();
+      const balanceMap = await wallet.listBalances();
       expect(balanceMap.get("eth")).toEqual(new Decimal(1));
       expect(balanceMap.get("usdc")).toEqual(new Decimal(5));
       expect(Coinbase.apiClients.wallet!.listWalletBalances).toHaveBeenCalledTimes(1);
