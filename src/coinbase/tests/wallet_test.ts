@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import crypto, { randomUUID } from "crypto";
+import crypto from "crypto";
 import Decimal from "decimal.js";
 import { ethers } from "ethers";
 import { Address } from "../address";
