@@ -97,7 +97,7 @@ export class User {
    * @param nextPageToken - The token for the next page of Wallets
    * @returns The list of Wallets.
    */
-  public async getWallets(pageSize: number = 10, nextPageToken?: string): Promise<Wallet[]> {
+  public async listWallets(pageSize: number = 10, nextPageToken?: string): Promise<Wallet[]> {
     const addressModelMap: { [key: string]: AddressModel[] } = {};
     const walletList = await Coinbase.apiClients.wallet!.listWallets(
       pageSize,
@@ -118,7 +118,7 @@ export class User {
 
     return Promise.all(
       walletsModels.map(async wallet => {
-        return await Wallet.init(wallet, undefined, addressModelMap[wallet.id!]);
+        return await Wallet.init(wallet, "", addressModelMap[wallet.id!]);
       }),
     );
   }

@@ -1,4 +1,3 @@
-import * as bip39 from "bip39";
 import * as crypto from "crypto";
 import * as fs from "fs";
 import { ArgumentError, InternalError } from "../errors";
@@ -18,14 +17,11 @@ import {
   addressesApiMock,
   generateRandomHash,
   generateWalletFromSeed,
-  getAddressFromHDKey,
   mockReturnRejectedValue,
   mockReturnValue,
   newAddressModel,
   walletsApiMock,
 } from "./utils";
-import { HDKey } from "@scure/bip32";
-import { convertStringToHex } from "../utils";
 import Decimal from "decimal.js";
 import { FaucetTransaction } from "../faucet_transaction";
 
@@ -60,7 +56,10 @@ describe("User Class", () => {
 
     beforeAll(async () => {
       walletId = crypto.randomUUID();
-      walletData = { walletId: walletId, seed: bip39.generateMnemonic() };
+      walletData = {
+        walletId: walletId,
+        seed: "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      };
       const { address1 } = generateWalletFromSeed(walletData.seed);
       mockAddressModel = newAddressModel(walletId, address1);
       mockAddressList = {
@@ -177,10 +176,10 @@ describe("User Class", () => {
     let walletModelWithDefaultAddress: WalletModel;
     let addressListModel: AddressList;
     let initialSeedData: Record<string, SeedData>;
-    let malformedSeedData: Record<string, any>;
-    let seedDataWithoutSeed: Record<string, any>;
-    let seedDataWithoutIv: Record<string, any>;
-    let seedDataWithoutAuthTag: Record<string, any>;
+    let malformedSeedData: Record<string, string>;
+    let seedDataWithoutSeed: Record<string, object>;
+    let seedDataWithoutIv: Record<string, object>;
+    let seedDataWithoutAuthTag: Record<string, object>;
 
     beforeAll(() => {
       walletId = crypto.randomUUID();
@@ -310,16 +309,16 @@ describe("User Class", () => {
     });
   });
 
-  describe(".getWallets", () => {
+  describe(".listWallets", () => {
     let user: User;
     let walletId: string;
     let walletModelWithDefaultAddress: WalletModel;
     let addressListModel: AddressList;
+    const seed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
 
     beforeEach(() => {
       jest.clearAllMocks();
       walletId = crypto.randomUUID();
-      const seed = bip39.generateMnemonic();
       const { address1 } = generateWalletFromSeed(seed);
       mockAddressModel = newAddressModel(walletId, address1);
 
@@ -346,7 +345,7 @@ describe("User Class", () => {
 
     it("should raise an error when the Wallet API call fails", async () => {
       Coinbase.apiClients.wallet!.listWallets = mockReturnRejectedValue(new Error("API Error"));
-      await expect(user.getWallets()).rejects.toThrow(new Error("API Error"));
+      await expect(user.listWallets()).rejects.toThrow(new Error("API Error"));
       expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(0);
       expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledWith(10, undefined);
@@ -360,7 +359,7 @@ describe("User Class", () => {
         total_count: 1,
       });
       Coinbase.apiClients.address!.listAddresses = mockReturnRejectedValue(new Error("API Error"));
-      await expect(user.getWallets()).rejects.toThrow(new Error("API Error"));
+      await expect(user.listWallets()).rejects.toThrow(new Error("API Error"));
       expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
     });
@@ -372,14 +371,13 @@ describe("User Class", () => {
         next_page: "",
         total_count: 0,
       });
-      const wallets = await user.getWallets();
+      const wallets = await user.listWallets();
       expect(wallets.length).toBe(0);
       expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(0);
     });
 
     it("should return the list of Wallets", async () => {
-      const seed = bip39.generateMnemonic();
       const { address1 } = generateWalletFromSeed(seed);
       mockAddressModel = newAddressModel(walletId, address1);
 
@@ -390,11 +388,11 @@ describe("User Class", () => {
         total_count: 1,
       });
       Coinbase.apiClients.address!.listAddresses = mockReturnValue(addressListModel);
-      const wallets = await user.getWallets();
+      const wallets = await user.listWallets();
       expect(wallets[0]).toBeInstanceOf(Wallet);
       expect(wallets.length).toBe(1);
       expect(wallets[0].getId()).toBe(walletId);
-      expect(wallets[0].getAddresses().length).toBe(2);
+      expect(wallets[0].listAddresses().length).toBe(2);
       expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledWith(
@@ -405,7 +403,6 @@ describe("User Class", () => {
     });
 
     it("should create Wallets when seed is provided", async () => {
-      const seed = bip39.generateMnemonic();
       const { address1 } = generateWalletFromSeed(seed);
       mockAddressModel = newAddressModel(walletId, address1);
       Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
@@ -414,8 +411,8 @@ describe("User Class", () => {
         next_page: "",
         total_count: 1,
       });
-      Coinbase.apiClients.address!.listAddresses = mockReturnValue(mockAddressModel);
-      const [unhydratedWallet] = await user.getWallets();
+      Coinbase.apiClients.address!.listAddresses = mockReturnValue(addressListModel);
+      const [unhydratedWallet] = await user.listWallets();
       expect(unhydratedWallet.canSign()).toBe(false);
       await unhydratedWallet.setSeed(seed);
       expect(unhydratedWallet).toBeInstanceOf(Wallet);
@@ -424,7 +421,6 @@ describe("User Class", () => {
     });
 
     it("should prevent access to master wallet required methods", async () => {
-      const seed = bip39.generateMnemonic();
       const { address1 } = generateWalletFromSeed(seed);
       mockAddressModel = newAddressModel(walletId, address1);
       Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
@@ -433,8 +429,8 @@ describe("User Class", () => {
         next_page: "",
         total_count: 1,
       });
-      Coinbase.apiClients.address!.listAddresses = mockReturnValue(mockAddressModel);
-      const [unhydratedWallet] = await user.getWallets();
+      Coinbase.apiClients.address!.listAddresses = mockReturnValue(addressListModel);
+      const [unhydratedWallet] = await user.listWallets();
       expect(() => unhydratedWallet.export()).toThrow(
         new InternalError("Cannot export Wallet without loaded seed"),
       );
@@ -450,7 +446,6 @@ describe("User Class", () => {
     });
 
     it("should access read-only methods", async () => {
-      const seed = bip39.generateMnemonic();
       const { address1 } = generateWalletFromSeed(seed);
       mockAddressModel = newAddressModel(walletId, address1);
       Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
@@ -480,21 +475,21 @@ describe("User Class", () => {
         transaction_hash: generateRandomHash(8),
       });
 
-      const [wallet] = await user.getWallets();
+      const [wallet] = await user.listWallets();
       expect(wallet.getId()).toBe(walletId);
       expect(wallet.canSign()).toBe(false);
       expect(wallet.getNetworkId()).toBe(Coinbase.networkList.BaseSepolia);
       expect(wallet.getDefaultAddress()?.getId()).toBe(
         walletModelWithDefaultAddress.default_address?.address_id,
       );
-      expect(wallet.getAddresses().length).toBe(2);
+      expect(wallet.listAddresses().length).toBe(2);
       expect(wallet.getAddress(addressListModel.data[0].address_id)?.getId()).toBe(
         addressListModel.data[0].address_id,
       );
       const balance = await wallet.getBalance(Coinbase.assets.Eth);
       expect(balance).toEqual(new Decimal("5"));
 
-      const balanceMap = await wallet.getBalances();
+      const balanceMap = await wallet.listBalances();
       expect(balanceMap.get("eth")).toEqual(new Decimal("5"));
 
       const faucet = await wallet.faucet();

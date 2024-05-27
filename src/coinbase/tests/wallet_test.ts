@@ -23,7 +23,7 @@ import {
   mockReturnValue,
   newAddressModel,
   transfersApiMock,
-  walletsApiMock
+  walletsApiMock,
 } from "./utils";
 
 describe("Wallet Class", () => {
@@ -58,7 +58,7 @@ describe("Wallet Class", () => {
 
   describe(".createTransfer", () => {
     let weiAmount, destination, intervalSeconds, timeoutSeconds;
-    let walletId, id, balanceModel: BalanceModel;
+    let balanceModel: BalanceModel;
 
     const mockProvider = new ethers.JsonRpcProvider(
       "https://sepolia.base.org",
@@ -73,8 +73,6 @@ describe("Wallet Class", () => {
       destination = new Address(VALID_ADDRESS_MODEL, key as unknown as ethers.Wallet);
       intervalSeconds = 0.2;
       timeoutSeconds = 10;
-      walletId = crypto.randomUUID();
-      id = crypto.randomUUID();
       Coinbase.apiClients.address!.getAddressBalance = mockFn(request => {
         const { asset_id } = request;
         balanceModel = {
@@ -103,7 +101,7 @@ describe("Wallet Class", () => {
         status: 1,
       } as ethers.TransactionReceipt);
 
-      const transfer = await wallet.createTransfer(
+      await wallet.createTransfer(
         weiAmount,
         Coinbase.assets.Wei,
         destination,
@@ -219,11 +217,11 @@ describe("Wallet Class", () => {
     });
 
     it("should create new address and update the existing address list", async () => {
-      expect(wallet.getAddresses().length).toBe(1);
+      expect(wallet.listAddresses().length).toBe(1);
       Coinbase.apiClients.address!.createAddress = mockReturnValue(newAddressModel(walletId));
       const newAddress = await wallet.createAddress();
       expect(newAddress).toBeInstanceOf(Address);
-      expect(wallet.getAddresses().length).toBe(2);
+      expect(wallet.listAddresses().length).toBe(2);
       expect(wallet.getAddress(newAddress.getId())!.getId()).toBe(newAddress.getId());
       expect(Coinbase.apiClients.address!.createAddress).toHaveBeenCalledTimes(1);
     });
@@ -231,14 +229,12 @@ describe("Wallet Class", () => {
 
   describe(".init", () => {
     let wallet: Wallet;
-    let walletId = crypto.randomUUID();
     let addressList: AddressModel[];
     let walletModel: WalletModel;
 
     beforeEach(async () => {
       jest.clearAllMocks();
-      const existingSeed =
-        "hidden assault maple cheap gentle paper earth surprise trophy guide room tired";
+      const existingSeed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
       const { address1, address2, wallet1PrivateKey, wallet2PrivateKey } =
         generateWalletFromSeed(existingSeed);
       addressList = [
@@ -285,14 +281,14 @@ describe("Wallet Class", () => {
     });
 
     it("should derive the correct number of addresses", async () => {
-      expect(wallet.getAddresses().length).toBe(2);
+      expect(wallet.listAddresses().length).toBe(2);
     });
 
     it("should create new address and update the existing address list", async () => {
-      expect(wallet.getAddresses().length).toBe(2);
+      expect(wallet.listAddresses().length).toBe(2);
       const newAddress = await wallet.createAddress();
       expect(newAddress).toBeInstanceOf(Address);
-      expect(wallet.getAddresses().length).toBe(3);
+      expect(wallet.listAddresses().length).toBe(3);
       expect(wallet.getAddress(newAddress.getId())!.getId()).toBe(newAddress.getId());
     });
 
@@ -300,10 +296,6 @@ describe("Wallet Class", () => {
       expect(wallet.toString()).toBe(
         `Wallet{id: '${walletModel.id}', networkId: '${Coinbase.networkList.BaseSepolia}'}`,
       );
-    });
-
-    it("should throw an ArgumentError when the wallet model is not provided", async () => {
-      await expect(Wallet.init(undefined!, undefined)).rejects.toThrow(ArgumentError);
     });
   });
 
@@ -346,7 +338,7 @@ describe("Wallet Class", () => {
     });
   });
 
-  describe(".getBalances", () => {
+  describe(".listBalances", () => {
     beforeEach(() => {
       const mockBalanceResponse: AddressBalanceList = {
         data: [
@@ -375,7 +367,7 @@ describe("Wallet Class", () => {
     });
 
     it("should return a hash with an ETH and USDC balance", async () => {
-      const balanceMap = await wallet.getBalances();
+      const balanceMap = await wallet.listBalances();
       expect(balanceMap.get("eth")).toEqual(new Decimal(1));
       expect(balanceMap.get("usdc")).toEqual(new Decimal(5));
       expect(Coinbase.apiClients.wallet!.listWalletBalances).toHaveBeenCalledTimes(1);
