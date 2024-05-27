@@ -263,7 +263,7 @@ export class Wallet {
    */
   public async setSeed(seed: string): Promise<void> {
     if (this.master === undefined) {
-      this.master = HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(seed));
+      this.master = HDKey.fromMasterSeed(Buffer.from(seed, "hex"));
     }
   }
 

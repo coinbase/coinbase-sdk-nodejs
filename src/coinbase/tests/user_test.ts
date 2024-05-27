@@ -1,4 +1,3 @@
-import * as bip39 from "bip39";
 import * as crypto from "crypto";
 import * as fs from "fs";
 import { ArgumentError, InternalError } from "../errors";
@@ -18,14 +17,11 @@ import {
   addressesApiMock,
   generateRandomHash,
   generateWalletFromSeed,
-  getAddressFromHDKey,
   mockReturnRejectedValue,
   mockReturnValue,
   newAddressModel,
   walletsApiMock,
 } from "./utils";
-import { HDKey } from "@scure/bip32";
-import { convertStringToHex } from "../utils";
 import Decimal from "decimal.js";
 import { FaucetTransaction } from "../faucet_transaction";
 
@@ -60,7 +56,10 @@ describe("User Class", () => {
 
     beforeAll(async () => {
       walletId = crypto.randomUUID();
-      walletData = { walletId: walletId, seed: bip39.generateMnemonic() };
+      walletData = {
+        walletId: walletId,
+        seed: "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      };
       const { address1 } = generateWalletFromSeed(walletData.seed);
       mockAddressModel = newAddressModel(walletId, address1);
       mockAddressList = {
@@ -177,10 +176,10 @@ describe("User Class", () => {
     let walletModelWithDefaultAddress: WalletModel;
     let addressListModel: AddressList;
     let initialSeedData: Record<string, SeedData>;
-    let malformedSeedData: Record<string, any>;
-    let seedDataWithoutSeed: Record<string, any>;
-    let seedDataWithoutIv: Record<string, any>;
-    let seedDataWithoutAuthTag: Record<string, any>;
+    let malformedSeedData: Record<string, string>;
+    let seedDataWithoutSeed: Record<string, object>;
+    let seedDataWithoutIv: Record<string, object>;
+    let seedDataWithoutAuthTag: Record<string, object>;
 
     beforeAll(() => {
       walletId = crypto.randomUUID();
@@ -315,11 +314,11 @@ describe("User Class", () => {
     let walletId: string;
     let walletModelWithDefaultAddress: WalletModel;
     let addressListModel: AddressList;
+    const seed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
 
     beforeEach(() => {
       jest.clearAllMocks();
       walletId = crypto.randomUUID();
-      const seed = bip39.generateMnemonic();
       const { address1 } = generateWalletFromSeed(seed);
       mockAddressModel = newAddressModel(walletId, address1);
 
@@ -379,7 +378,6 @@ describe("User Class", () => {
     });
 
     it("should return the list of Wallets", async () => {
-      const seed = bip39.generateMnemonic();
       const { address1 } = generateWalletFromSeed(seed);
       mockAddressModel = newAddressModel(walletId, address1);
 
@@ -405,7 +403,6 @@ describe("User Class", () => {
     });
 
     it("should create Wallets when seed is provided", async () => {
-      const seed = bip39.generateMnemonic();
       const { address1 } = generateWalletFromSeed(seed);
       mockAddressModel = newAddressModel(walletId, address1);
       Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
@@ -414,7 +411,7 @@ describe("User Class", () => {
         next_page: "",
         total_count: 1,
       });
-      Coinbase.apiClients.address!.listAddresses = mockReturnValue(mockAddressModel);
+      Coinbase.apiClients.address!.listAddresses = mockReturnValue(addressListModel);
       const [unhydratedWallet] = await user.getWallets();
       expect(unhydratedWallet.canSign()).toBe(false);
       await unhydratedWallet.setSeed(seed);
@@ -424,7 +421,6 @@ describe("User Class", () => {
     });
 
     it("should prevent access to master wallet required methods", async () => {
-      const seed = bip39.generateMnemonic();
       const { address1 } = generateWalletFromSeed(seed);
       mockAddressModel = newAddressModel(walletId, address1);
       Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
@@ -433,7 +429,7 @@ describe("User Class", () => {
         next_page: "",
         total_count: 1,
       });
-      Coinbase.apiClients.address!.listAddresses = mockReturnValue(mockAddressModel);
+      Coinbase.apiClients.address!.listAddresses = mockReturnValue(addressListModel);
       const [unhydratedWallet] = await user.getWallets();
       expect(() => unhydratedWallet.export()).toThrow(
         new InternalError("Cannot export Wallet without loaded seed"),
@@ -450,7 +446,6 @@ describe("User Class", () => {
     });
 
     it("should access read-only methods", async () => {
-      const seed = bip39.generateMnemonic();
       const { address1 } = generateWalletFromSeed(seed);
       mockAddressModel = newAddressModel(walletId, address1);
       Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
