@@ -419,9 +419,8 @@ export class Wallet {
     seed: string | undefined,
     addressModels: AddressModel[],
   ): void {
-    if (seed && seed.length !== 64 && seed.length !== 128) {
-      // TODO: Shouldn't this be just 32?
-      throw new ArgumentError("Seed must be 32 or 64 bytes");
+    if (seed && seed.length !== 64) {
+      throw new ArgumentError("Seed must be 32 bytes");
     }
 
     if (addressModels.length > 0 && seed === undefined) {
