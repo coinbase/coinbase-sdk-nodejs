@@ -69,7 +69,7 @@ describe("Address", () => {
   });
 
   it("should return the correct list of balances", async () => {
-    const balances = await address.getBalances();
+    const balances = await address.listBalances();
     expect(balances.get(Coinbase.assets.Eth)).toEqual(new Decimal(1));
     expect(balances.get("usdc")).toEqual(new Decimal(5000));
     expect(balances.get("weth")).toEqual(new Decimal(3));

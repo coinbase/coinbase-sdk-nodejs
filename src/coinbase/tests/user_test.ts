@@ -309,7 +309,7 @@ describe("User Class", () => {
     });
   });
 
-  describe(".getWallets", () => {
+  describe(".listWallets", () => {
     let user: User;
     let walletId: string;
     let walletModelWithDefaultAddress: WalletModel;
@@ -345,7 +345,7 @@ describe("User Class", () => {
 
     it("should raise an error when the Wallet API call fails", async () => {
       Coinbase.apiClients.wallet!.listWallets = mockReturnRejectedValue(new Error("API Error"));
-      await expect(user.getWallets()).rejects.toThrow(new Error("API Error"));
+      await expect(user.listWallets()).rejects.toThrow(new Error("API Error"));
       expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(0);
       expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledWith(10, undefined);
@@ -359,7 +359,7 @@ describe("User Class", () => {
         total_count: 1,
       });
       Coinbase.apiClients.address!.listAddresses = mockReturnRejectedValue(new Error("API Error"));
-      await expect(user.getWallets()).rejects.toThrow(new Error("API Error"));
+      await expect(user.listWallets()).rejects.toThrow(new Error("API Error"));
       expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
     });
@@ -371,7 +371,7 @@ describe("User Class", () => {
         next_page: "",
         total_count: 0,
       });
-      const wallets = await user.getWallets();
+      const wallets = await user.listWallets();
       expect(wallets.length).toBe(0);
       expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(0);
@@ -388,11 +388,11 @@ describe("User Class", () => {
         total_count: 1,
       });
       Coinbase.apiClients.address!.listAddresses = mockReturnValue(addressListModel);
-      const wallets = await user.getWallets();
+      const wallets = await user.listWallets();
       expect(wallets[0]).toBeInstanceOf(Wallet);
       expect(wallets.length).toBe(1);
       expect(wallets[0].getId()).toBe(walletId);
-      expect(wallets[0].getAddresses().length).toBe(2);
+      expect(wallets[0].listAddresses().length).toBe(2);
       expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledWith(
@@ -412,7 +412,7 @@ describe("User Class", () => {
         total_count: 1,
       });
       Coinbase.apiClients.address!.listAddresses = mockReturnValue(addressListModel);
-      const [unhydratedWallet] = await user.getWallets();
+      const [unhydratedWallet] = await user.listWallets();
       expect(unhydratedWallet.canSign()).toBe(false);
       await unhydratedWallet.setSeed(seed);
       expect(unhydratedWallet).toBeInstanceOf(Wallet);
@@ -430,7 +430,7 @@ describe("User Class", () => {
         total_count: 1,
       });
       Coinbase.apiClients.address!.listAddresses = mockReturnValue(addressListModel);
-      const [unhydratedWallet] = await user.getWallets();
+      const [unhydratedWallet] = await user.listWallets();
       expect(() => unhydratedWallet.export()).toThrow(
         new InternalError("Cannot export Wallet without loaded seed"),
       );
@@ -475,21 +475,21 @@ describe("User Class", () => {
         transaction_hash: generateRandomHash(8),
       });
 
-      const [wallet] = await user.getWallets();
+      const [wallet] = await user.listWallets();
       expect(wallet.getId()).toBe(walletId);
       expect(wallet.canSign()).toBe(false);
       expect(wallet.getNetworkId()).toBe(Coinbase.networkList.BaseSepolia);
       expect(wallet.getDefaultAddress()?.getId()).toBe(
         walletModelWithDefaultAddress.default_address?.address_id,
       );
-      expect(wallet.getAddresses().length).toBe(2);
+      expect(wallet.listAddresses().length).toBe(2);
       expect(wallet.getAddress(addressListModel.data[0].address_id)?.getId()).toBe(
         addressListModel.data[0].address_id,
       );
       const balance = await wallet.getBalance(Coinbase.assets.Eth);
       expect(balance).toEqual(new Decimal("5"));
 
-      const balanceMap = await wallet.getBalances();
+      const balanceMap = await wallet.listBalances();
       expect(balanceMap.get("eth")).toEqual(new Decimal("5"));
 
       const faucet = await wallet.faucet();

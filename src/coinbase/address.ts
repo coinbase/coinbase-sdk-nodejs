@@ -72,7 +72,7 @@ export class Address {
    *
    * @returns {BalanceMap} - The map from asset ID to balance.
    */
-  async getBalances(): Promise<BalanceMap> {
+  async listBalances(): Promise<BalanceMap> {
     const response = await Coinbase.apiClients.address!.listAddressBalances(
       this.model.wallet_id,
       this.model.address_id,
