@@ -219,11 +219,11 @@ describe("Wallet Class", () => {
     });
 
     it("should create new address and update the existing address list", async () => {
-      expect(wallet.getAddresses().length).toBe(1);
+      expect(wallet.listAddresses().length).toBe(1);
       Coinbase.apiClients.address!.createAddress = mockReturnValue(newAddressModel(walletId));
       const newAddress = await wallet.createAddress();
       expect(newAddress).toBeInstanceOf(Address);
-      expect(wallet.getAddresses().length).toBe(2);
+      expect(wallet.listAddresses().length).toBe(2);
       expect(wallet.getAddress(newAddress.getId())!.getId()).toBe(newAddress.getId());
       expect(Coinbase.apiClients.address!.createAddress).toHaveBeenCalledTimes(1);
     });
@@ -231,15 +231,12 @@ describe("Wallet Class", () => {
 
   describe(".init", () => {
     let wallet: Wallet;
-    const walletId = crypto.randomUUID();
     let addressList: AddressModel[];
     let walletModel: WalletModel;
 
     beforeEach(async () => {
       jest.clearAllMocks();
-      const mnemonic =
-        "hidden assault maple cheap gentle paper earth surprise trophy guide room tired";
-      const existingSeed = bip39.mnemonicToSeedSync(mnemonic).toString("hex");
+      const existingSeed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
       const { address1, address2, wallet1PrivateKey, wallet2PrivateKey } =
         generateWalletFromSeed(existingSeed);
       addressList = [
@@ -286,14 +283,14 @@ describe("Wallet Class", () => {
     });
 
     it("should derive the correct number of addresses", async () => {
-      expect(wallet.getAddresses().length).toBe(2);
+      expect(wallet.listAddresses().length).toBe(2);
     });
 
     it("should create new address and update the existing address list", async () => {
-      expect(wallet.getAddresses().length).toBe(2);
+      expect(wallet.listAddresses().length).toBe(2);
       const newAddress = await wallet.createAddress();
       expect(newAddress).toBeInstanceOf(Address);
-      expect(wallet.getAddresses().length).toBe(3);
+      expect(wallet.listAddresses().length).toBe(3);
       expect(wallet.getAddress(newAddress.getId())!.getId()).toBe(newAddress.getId());
     });
 
@@ -343,7 +340,7 @@ describe("Wallet Class", () => {
     });
   });
 
-  describe(".getBalances", () => {
+  describe(".listBalances", () => {
     beforeEach(() => {
       const mockBalanceResponse: AddressBalanceList = {
         data: [

@@ -1,4 +1,3 @@
-import * as bip39 from "bip39";
 import * as crypto from "crypto";
 import { InternalError } from "../errors";
 import {
@@ -56,8 +55,10 @@ describe("User Class", () => {
 
     beforeAll(async () => {
       walletId = crypto.randomUUID();
-      const seed = bip39.generateMnemonic(128);
-      walletData = { walletId: walletId, seed: bip39.mnemonicToSeedSync(seed).toString("hex") };
+      walletData = {
+        walletId: walletId,
+        seed: "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      };
       const { address1 } = generateWalletFromSeed(walletData.seed);
       mockAddressModel = newAddressModel(walletId, address1);
       mockAddressList = {
@@ -102,11 +103,11 @@ describe("User Class", () => {
     let walletId: string;
     let walletModelWithDefaultAddress: WalletModel;
     let addressListModel: AddressList;
+    const seed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
 
     beforeEach(() => {
       jest.clearAllMocks();
       walletId = crypto.randomUUID();
-      const seed = bip39.generateMnemonic();
       const { address1 } = generateWalletFromSeed(seed);
       mockAddressModel = newAddressModel(walletId, address1);
 
@@ -166,7 +167,6 @@ describe("User Class", () => {
     });
 
     it("should return the list of Wallets", async () => {
-      const seed = bip39.generateMnemonic();
       const { address1 } = generateWalletFromSeed(seed);
       mockAddressModel = newAddressModel(walletId, address1);
 
@@ -181,7 +181,7 @@ describe("User Class", () => {
       expect(result.wallets[0]).toBeInstanceOf(Wallet);
       expect(result.wallets.length).toBe(1);
       expect(result.wallets[0].getId()).toBe(walletId);
-      expect(result.wallets[0].getAddresses().length).toBe(2);
+      expect(result.wallets[0].listAddresses().length).toBe(2);
       expect(result.nextPageToken).toBe("nextPageToken");
       expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
@@ -193,7 +193,6 @@ describe("User Class", () => {
     });
 
     it("should create Wallets when seed is provided", async () => {
-      const seed = bip39.generateMnemonic();
       const { address1 } = generateWalletFromSeed(seed);
       mockAddressModel = newAddressModel(walletId, address1);
       Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
@@ -213,7 +212,6 @@ describe("User Class", () => {
     });
 
     it("should prevent access to master wallet required methods", async () => {
-      const seed = bip39.generateMnemonic();
       const { address1 } = generateWalletFromSeed(seed);
       mockAddressModel = newAddressModel(walletId, address1);
       Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
@@ -240,7 +238,6 @@ describe("User Class", () => {
     });
 
     it("should access read-only methods", async () => {
-      const seed = bip39.generateMnemonic();
       const { address1 } = generateWalletFromSeed(seed);
       mockAddressModel = newAddressModel(walletId, address1);
       Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
@@ -278,7 +275,7 @@ describe("User Class", () => {
       expect(wallet.getDefaultAddress()?.getId()).toBe(
         walletModelWithDefaultAddress.default_address?.address_id,
       );
-      expect(wallet.getAddresses().length).toBe(2);
+      expect(wallet.listAddresses().length).toBe(2);
       expect(wallet.getAddress(addressListModel.data[0].address_id)?.getId()).toBe(
         addressListModel.data[0].address_id,
       );

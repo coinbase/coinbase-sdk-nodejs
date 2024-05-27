@@ -3,7 +3,6 @@ import axios, { AxiosInstance } from "axios";
 import { Decimal } from "decimal.js";
 import { ethers } from "ethers";
 import { randomUUID } from "crypto";
-import * as bip39 from "bip39";
 import {
   Configuration,
   Wallet as WalletModel,
@@ -30,7 +29,7 @@ export const walletId = randomUUID();
 export const transferId = randomUUID();
 
 export const generateWalletFromSeed = (seed: string, count = 2) => {
-  const baseWallet = HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(seed));
+  const baseWallet = HDKey.fromMasterSeed(Buffer.from(seed, "hex"));
   const data: Record<string, string> = {};
   for (let i = 0; i < count; i++) {
     const wallet = baseWallet.derive(`m/44'/60'/0'/0/${i}`);
