@@ -508,4 +508,64 @@ describe("Wallet Class", () => {
       }
     });
   });
+
+  describe(".loadSeed", () => {
+    const seed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
+    let apiPrivateKey;
+    const filePath = "seeds.json";
+    let seedWallet;
+    let seedlessWallet;
+    const addressModel = newAddressModel(walletId, "0x375d038838F338B9CC53769Ba0d60745181f1dEE");
+
+    beforeEach(async () => {
+      apiPrivateKey = Coinbase.apiKeyPrivateKey;
+      Coinbase.apiKeyPrivateKey = crypto.generateKeyPairSync("ec", {
+        namedCurve: "prime256v1",
+        privateKeyEncoding: { type: "pkcs8", format: "pem" },
+        publicKeyEncoding: { type: "spki", format: "pem" },
+      }).privateKey;
+
+      const initialSeedData = {
+        [walletId]: {
+          encrypted: false,
+          iv: "",
+          authTag: "",
+          seed,
+        },
+      };
+      fs.writeFileSync(filePath, JSON.stringify(initialSeedData), "utf8");
+      seedWallet = await Wallet.init(walletModel, seed, [addressModel]);
+      seedlessWallet = await Wallet.init(walletModel, "", [addressModel]);
+    });
+
+    afterEach(async () => {
+      fs.unlinkSync(filePath);
+      Coinbase.apiKeyPrivateKey = apiPrivateKey;
+    });
+
+    it("loads the seed from the file", async () => {
+      seedlessWallet.loadSeed(filePath);
+      expect(seedlessWallet.canSign()).toBe(true);
+    });
+
+    it("loads the encrypted seed from the file", async () => {
+      seedWallet.saveSeed(filePath, true);
+      seedlessWallet.loadSeed(filePath);
+      expect(seedlessWallet.canSign()).toBe(true);
+    });
+
+    it("loads the encrypted seed from the file with multiple seeds", async () => {
+      seedWallet.saveSeed(filePath, true);
+
+      const otherModel = {
+        id: crypto.randomUUID(),
+        network_id: Coinbase.networkList.BaseSepolia,
+      };
+      const otherWallet = await Wallet.init(otherModel);
+      otherWallet.saveSeed(filePath, true);
+
+      seedlessWallet.loadSeed(filePath);
+      expect(seedlessWallet.canSign()).toBe(true);
+    });
+  });
 });

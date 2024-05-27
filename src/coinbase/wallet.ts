@@ -100,8 +100,8 @@ export class Wallet {
   ): Promise<Wallet> {
     this.validateSeedAndAddressModels(seed, addressModels);
 
-    const master = this.getMasterKey(seed);
-    const wallet = new Wallet(model, master, seed, addressModels);
+    const seedAndMaster = this.getSeedAndMasterKey(seed);
+    const wallet = new Wallet(model, seedAndMaster.master, seedAndMaster.seed, addressModels);
     wallet.deriveAddresses(addressModels);
 
     return wallet;
@@ -208,6 +208,8 @@ export class Wallet {
       ? new ethers.Wallet(convertStringToHex(this.deriveKey().privateKey!))
       : undefined;
     if (key && !addressMap[key.address]) {
+      console.log(`Address map: ${Object.keys(addressMap)}`);
+      console.log(`Key address: ${key.address}`);
       throw new InternalError("Invalid address");
     }
     this.cacheAddress(addressModel, key);
@@ -344,7 +346,7 @@ export class Wallet {
    * @throws {InternalError} If the Wallet does not have a seed
    */
   public saveSeed(filePath: string, encrypt: boolean = false): string {
-    if (!this.seed) {
+    if (!this.master) {
       throw new InternalError("Cannot save Wallet without loaded seed");
     }
 
@@ -533,22 +535,35 @@ export class Wallet {
   }
 
   /**
-   * Returns the master key of the provided seed.
+   * Returns the seed and master key.
    *
-   * @param seed - The seed to use for the Wallet
+   * @param seed - The seed to use for the Wallet. The function will generate one if it is not provided.
    * @returns The master key
    */
-  private static getMasterKey(seed: string | undefined): HDKey | undefined {
+  private static getSeedAndMasterKey(seed: string | undefined): {
+    seed: string | undefined;
+    master: HDKey | undefined;
+  } {
     switch (seed) {
       case undefined: {
         const mnemonic = bip39.generateMnemonic();
-        return HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(mnemonic));
+        const seedBuffer = bip39.mnemonicToSeedSync(mnemonic);
+        return {
+          seed: seedBuffer.toString("hex"),
+          master: HDKey.fromMasterSeed(seedBuffer),
+        };
       }
       case "": {
-        return undefined;
+        return {
+          seed: undefined,
+          master: undefined,
+        };
       }
       default: {
-        return HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(seed));
+        return {
+          seed: seed,
+          master: HDKey.fromMasterSeed(Buffer.from(seed, "hex")),
+        };
       }
     }
   }
