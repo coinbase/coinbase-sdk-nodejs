@@ -1,6 +1,5 @@
-import * as bip39 from "bip39";
 import * as fs from "fs";
-import crypto from "crypto";
+import crypto, { randomUUID } from "crypto";
 import Decimal from "decimal.js";
 import { ethers } from "ethers";
 import { Address } from "../address";
@@ -497,12 +496,7 @@ describe("Wallet Class", () => {
 
     it("should throw an error when the wallet is seedless", async () => {
       const seedlessWallet = await Wallet.init(walletModel, "", [newAddressModel(walletId)]);
-      try {
-        seedlessWallet.saveSeed(filePath, false);
-        fail("Expected an error to be thrown");
-      } catch (e) {
-        expect(e).toBeInstanceOf(InternalError);
-      }
+      expect(() => seedlessWallet.saveSeed(filePath, false)).toThrow(InternalError);
     });
   });
 
@@ -512,7 +506,7 @@ describe("Wallet Class", () => {
     const filePath = "seeds.json";
     let seedWallet;
     let seedlessWallet;
-    const addressModel = newAddressModel(walletId, "0x375d038838F338B9CC53769Ba0d60745181f1dEE");
+    const addressModel = newAddressModel(walletId, "0x919538116b4F25f1CE01429fd9Ed7964556bf565");
 
     beforeEach(async () => {
       apiPrivateKey = Coinbase.apiKeyPrivateKey;
@@ -563,6 +557,34 @@ describe("Wallet Class", () => {
 
       seedlessWallet.loadSeed(filePath);
       expect(seedlessWallet.canSign()).toBe(true);
+    });
+
+    it("raises an error if the wallet is already hydrated", async () => {
+      expect(() => seedWallet.loadSeed(filePath)).toThrow(InternalError);
+    });
+
+    it("raises an error when file contains different wallet data", async () => {
+      const otherSeedData = {
+        [crypto.randomUUID()]: {
+          encrypted: false,
+          iv: "",
+          authTag: "",
+          seed,
+        },
+      };
+      fs.writeFileSync(filePath, JSON.stringify(otherSeedData), "utf8");
+
+      expect(() => seedlessWallet.loadSeed(filePath)).toThrow(ArgumentError);
+    });
+
+    it("raises an error when the file is absent", async () => {
+      expect(() => seedlessWallet.loadSeed("non-file.json")).toThrow(ArgumentError);
+    });
+
+    it("raises an error when the file is corrupted", async () => {
+      fs.writeFileSync(filePath, "corrupted data", "utf8");
+
+      expect(() => seedlessWallet.loadSeed(filePath)).toThrow(ArgumentError);
     });
   });
 });

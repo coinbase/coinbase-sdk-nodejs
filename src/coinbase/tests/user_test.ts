@@ -299,7 +299,7 @@ describe("User Class", () => {
     beforeEach(() => {
       jest.clearAllMocks();
       walletId = crypto.randomUUID();
-      const seed = bip39.generateMnemonic();
+      const seed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
       const { address1 } = generateWalletFromSeed(seed);
       mockAddressModel = newAddressModel(walletId, address1);
 
@@ -342,7 +342,7 @@ describe("User Class", () => {
     });
 
     it("should return the Wallet", async () => {
-      const seed = bip39.generateMnemonic();
+      const seed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
       const { address1 } = generateWalletFromSeed(seed);
       mockAddressModel = newAddressModel(walletId, address1);
       Coinbase.apiClients.wallet!.getWallet = mockReturnValue(walletModelWithDefaultAddress);
@@ -350,7 +350,7 @@ describe("User Class", () => {
       const result = await user.getWallet(walletId);
       expect(result).toBeInstanceOf(Wallet);
       expect(result.getId()).toBe(walletId);
-      expect(result.getAddresses().length).toBe(2);
+      expect(result.listAddresses().length).toBe(2);
       expect(result.canSign()).toBe(false);
       expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);

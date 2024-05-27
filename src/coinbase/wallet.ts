@@ -208,8 +208,6 @@ export class Wallet {
       ? new ethers.Wallet(convertStringToHex(this.deriveKey().privateKey!))
       : undefined;
     if (key && !addressMap[key.address]) {
-      console.log(`Address map: ${Object.keys(addressMap)}`);
-      console.log(`Key address: ${key.address}`);
       throw new InternalError("Invalid address");
     }
     this.cacheAddress(addressModel, key);
@@ -264,9 +262,11 @@ export class Wallet {
    *
    * @param seed - The seed to use for the Wallet. Expects a 32-byte hexadecimal with no 0x prefix.
    */
-  public async setSeed(seed: string): Promise<void> {
-    if (this.master === undefined) {
+  public setSeed(seed: string) {
+    if (this.master === undefined && (this.seed === undefined || this.seed === "")) {
       this.master = HDKey.fromMasterSeed(Buffer.from(seed, "hex"));
+    } else {
+      throw new InternalError("Cannot set seed on Wallet with existing seed");
     }
   }
 
@@ -388,7 +388,7 @@ export class Wallet {
    * @param filePath - The path of the file to load the seed from
    * @returns A string indicating the success of the operation
    */
-  public async loadSeed(filePath: string): Promise<string> {
+  public loadSeed(filePath: string): string {
     const existingSeedsInStore = this.getExistingSeeds(filePath);
     if (Object.keys(existingSeedsInStore).length === 0) {
       throw new ArgumentError(`File ${filePath} does not contain any seed data`);
@@ -403,13 +403,13 @@ export class Wallet {
     const seedData = existingSeedsInStore[this.getId()!];
     let seed = seedData.seed;
     if (!seed) {
-      throw new Error("Seed data is malformed");
+      throw new ArgumentError("Seed data is malformed");
     }
 
     if (seedData.encrypted) {
       const sharedSecret = this.getEncryptionKey();
       if (!seedData.iv || !seedData.authTag) {
-        throw new Error("Encrypted seed data is malformed");
+        throw new ArgumentError("Encrypted seed data is malformed");
       }
 
       const decipher = crypto.createDecipheriv(
