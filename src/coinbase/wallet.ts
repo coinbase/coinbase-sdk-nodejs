@@ -71,8 +71,7 @@ export class Wallet {
       },
     });
 
-    const seed = bip39.generateMnemonic();
-    const wallet = await Wallet.init(walletData.data, seed);
+    const wallet = await Wallet.init(walletData.data, undefined, []);
 
     await wallet.createAddress();
     await wallet.reload();
@@ -85,7 +84,8 @@ export class Wallet {
    *
    * @constructs Wallet
    * @param model - The underlying Wallet model object
-   * @param seed - The seed to use for the Wallet. Expects a 32-byte hexadecimal with no 0x prefix. If not provided, a new seed will be generated.
+   * @param seed - The seed to use for the Wallet. Expects a 32-byte hexadecimal with no 0x prefix. If null or undefined, a new seed will be generated.
+   * If the empty string, no seed is generated, and the Wallet will be instantiated without a seed and its corresponding private keys.
    * @param addressModels - The models of the addresses already registered with the Wallet. If not provided, the Wallet will derive the first default address.
    * @throws {ArgumentError} If the model or client is not provided.
    * @throws {InternalError} - If address derivation or caching fails.
@@ -97,15 +97,12 @@ export class Wallet {
     seed: string | undefined,
     addressModels: AddressModel[] = [],
   ): Promise<Wallet> {
-    if (!model) {
-      throw new ArgumentError("Wallet model cannot be empty");
-    }
+    this.validateSeedAndAddressModels(seed, addressModels);
 
-    const master = seed ? HDKey.fromMasterSeed(bip39.mnemonicToSeedSync(seed)) : undefined;
-    const wallet = new Wallet(model, master, seed, addressModels);
-    if (addressModels.length > 0) {
-      wallet.deriveAddresses(addressModels);
-    }
+    const seedAndMaster = this.getSeedAndMasterKey(seed);
+    const wallet = new Wallet(model, seedAndMaster.master, seedAndMaster.seed, addressModels);
+    wallet.deriveAddresses(addressModels);
+
     return wallet;
   }
 
@@ -221,6 +218,10 @@ export class Wallet {
    * @param addresses - The models of the addresses already registered with the
    */
   private deriveAddresses(addresses: AddressModel[]): void {
+    if (addresses.length === 0) {
+      return;
+    }
+
     const addressMap = this.buildAddressMap(addresses);
     for (const address of addresses) {
       this.deriveAddress(addressMap, address);
@@ -406,5 +407,63 @@ export class Wallet {
    */
   public toString(): string {
     return `Wallet{id: '${this.model.id}', networkId: '${this.model.network_id}'}`;
+  }
+
+  /**
+   * Validates the seed and address models passed to the constructor.
+   *
+   * @param seed - The seed to use for the Wallet
+   * @param addressModels - The models of the addresses already registered with the Wallet
+   */
+  private static validateSeedAndAddressModels(
+    seed: string | undefined,
+    addressModels: AddressModel[],
+  ): void {
+    if (seed && seed.length !== 64 && seed.length !== 128) {
+      // TODO: Shouldn't this be just 32?
+      throw new ArgumentError("Seed must be 32 or 64 bytes");
+    }
+
+    if (addressModels.length > 0 && seed === undefined) {
+      throw new ArgumentError("Seed must be present if address models are provided");
+    }
+
+    if (addressModels.length === 0 && seed === "") {
+      throw new ArgumentError("Seed must not be empty if address models are not provided");
+    }
+  }
+
+  /**
+   * Returns the seed and master key.
+   *
+   * @param seed - The seed to use for the Wallet. The function will generate one if it is not provided.
+   * @returns The master key
+   */
+  private static getSeedAndMasterKey(seed: string | undefined): {
+    seed: string | undefined;
+    master: HDKey | undefined;
+  } {
+    switch (seed) {
+      case undefined: {
+        const mnemonic = bip39.generateMnemonic();
+        const seedBuffer = bip39.mnemonicToSeedSync(mnemonic);
+        return {
+          seed: seedBuffer.toString("hex"),
+          master: HDKey.fromMasterSeed(seedBuffer),
+        };
+      }
+      case "": {
+        return {
+          seed: undefined,
+          master: undefined,
+        };
+      }
+      default: {
+        return {
+          seed: seed,
+          master: HDKey.fromMasterSeed(Buffer.from(seed, "hex")),
+        };
+      }
+    }
   }
 }

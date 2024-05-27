@@ -118,7 +118,7 @@ export class User {
 
     return Promise.all(
       walletsModels.map(async wallet => {
-        return await Wallet.init(wallet, undefined, addressModelMap[wallet.id!]);
+        return await Wallet.init(wallet, "", addressModelMap[wallet.id!]);
       }),
     );
   }
