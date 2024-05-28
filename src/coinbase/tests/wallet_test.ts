@@ -1,3 +1,4 @@
+import * as fs from "fs";
 import crypto from "crypto";
 import Decimal from "decimal.js";
 import { ethers } from "ethers";
@@ -5,7 +6,7 @@ import { Address } from "../address";
 import { APIError } from "../api_error";
 import { Coinbase } from "../coinbase";
 import { GWEI_PER_ETHER, WEI_PER_ETHER } from "../constants";
-import { ArgumentError } from "../errors";
+import { ArgumentError, InternalError } from "../errors";
 import { Wallet } from "../wallet";
 import {
   AddressBalanceList,
@@ -448,6 +449,142 @@ describe("Wallet Class", () => {
     });
     it("should return true when the wallet initialized", () => {
       expect(wallet.canSign()).toBe(true);
+    });
+  });
+
+  describe(".saveSeed", () => {
+    const seed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
+    let apiPrivateKey;
+    const filePath = "seeds.json";
+    let seedWallet;
+
+    beforeEach(async () => {
+      apiPrivateKey = Coinbase.apiKeyPrivateKey;
+      Coinbase.apiKeyPrivateKey = crypto.generateKeyPairSync("ec", {
+        namedCurve: "prime256v1",
+        privateKeyEncoding: { type: "pkcs8", format: "pem" },
+        publicKeyEncoding: { type: "spki", format: "pem" },
+      }).privateKey;
+      fs.writeFileSync(filePath, JSON.stringify({}), "utf8");
+      seedWallet = await Wallet.init(walletModel, seed);
+    });
+
+    afterEach(async () => {
+      fs.unlinkSync(filePath);
+      Coinbase.apiKeyPrivateKey = apiPrivateKey;
+    });
+
+    it("should save the seed when encryption is false", async () => {
+      seedWallet.saveSeed(filePath, false);
+      const storedSeedData = fs.readFileSync(filePath);
+      const walletSeedData = JSON.parse(storedSeedData.toString());
+      expect(walletSeedData[walletId].encrypted).toBe(false);
+      expect(walletSeedData[walletId].iv).toBe("");
+      expect(walletSeedData[walletId].authTag).toBe("");
+      expect(walletSeedData[walletId].seed).toBe(seed);
+    });
+
+    it("should save the seed when encryption is true", async () => {
+      seedWallet.saveSeed(filePath, true);
+      const storedSeedData = fs.readFileSync(filePath);
+      const walletSeedData = JSON.parse(storedSeedData.toString());
+      expect(walletSeedData[walletId].encrypted).toBe(true);
+      expect(walletSeedData[walletId].iv).not.toBe("");
+      expect(walletSeedData[walletId].authTag).not.toBe("");
+      expect(walletSeedData[walletId].seed).not.toBe(seed);
+    });
+
+    it("should throw an error when the wallet is seedless", async () => {
+      const seedlessWallet = await Wallet.init(walletModel, "", [newAddressModel(walletId)]);
+      expect(() => seedlessWallet.saveSeed(filePath, false)).toThrow(InternalError);
+    });
+  });
+
+  describe(".loadSeed", () => {
+    const seed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
+    let apiPrivateKey;
+    const filePath = "seeds.json";
+    let seedWallet;
+    let seedlessWallet;
+    const addressModel = newAddressModel(walletId, "0x919538116b4F25f1CE01429fd9Ed7964556bf565");
+
+    beforeEach(async () => {
+      apiPrivateKey = Coinbase.apiKeyPrivateKey;
+      Coinbase.apiKeyPrivateKey = crypto.generateKeyPairSync("ec", {
+        namedCurve: "prime256v1",
+        privateKeyEncoding: { type: "pkcs8", format: "pem" },
+        publicKeyEncoding: { type: "spki", format: "pem" },
+      }).privateKey;
+
+      const initialSeedData = {
+        [walletId]: {
+          encrypted: false,
+          iv: "",
+          authTag: "",
+          seed,
+        },
+      };
+      fs.writeFileSync(filePath, JSON.stringify(initialSeedData), "utf8");
+      seedWallet = await Wallet.init(walletModel, seed, [addressModel]);
+      seedlessWallet = await Wallet.init(walletModel, "", [addressModel]);
+    });
+
+    afterEach(async () => {
+      fs.unlinkSync(filePath);
+      Coinbase.apiKeyPrivateKey = apiPrivateKey;
+    });
+
+    it("loads the seed from the file", async () => {
+      seedlessWallet.loadSeed(filePath);
+      expect(seedlessWallet.canSign()).toBe(true);
+    });
+
+    it("loads the encrypted seed from the file", async () => {
+      seedWallet.saveSeed(filePath, true);
+      seedlessWallet.loadSeed(filePath);
+      expect(seedlessWallet.canSign()).toBe(true);
+    });
+
+    it("loads the encrypted seed from the file with multiple seeds", async () => {
+      seedWallet.saveSeed(filePath, true);
+
+      const otherModel = {
+        id: crypto.randomUUID(),
+        network_id: Coinbase.networkList.BaseSepolia,
+      };
+      const otherWallet = await Wallet.init(otherModel);
+      otherWallet.saveSeed(filePath, true);
+
+      seedlessWallet.loadSeed(filePath);
+      expect(seedlessWallet.canSign()).toBe(true);
+    });
+
+    it("raises an error if the wallet is already hydrated", async () => {
+      expect(() => seedWallet.loadSeed(filePath)).toThrow(InternalError);
+    });
+
+    it("raises an error when file contains different wallet data", async () => {
+      const otherSeedData = {
+        [crypto.randomUUID()]: {
+          encrypted: false,
+          iv: "",
+          authTag: "",
+          seed,
+        },
+      };
+      fs.writeFileSync(filePath, JSON.stringify(otherSeedData), "utf8");
+
+      expect(() => seedlessWallet.loadSeed(filePath)).toThrow(ArgumentError);
+    });
+
+    it("raises an error when the file is absent", async () => {
+      expect(() => seedlessWallet.loadSeed("non-file.json")).toThrow(ArgumentError);
+    });
+
+    it("raises an error when the file is corrupted", async () => {
+      fs.writeFileSync(filePath, "corrupted data", "utf8");
+
+      expect(() => seedlessWallet.loadSeed(filePath)).toThrow(ArgumentError);
     });
   });
 });

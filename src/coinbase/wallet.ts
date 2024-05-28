@@ -1,6 +1,7 @@
 import { HDKey } from "@scure/bip32";
 import * as bip39 from "bip39";
 import * as crypto from "crypto";
+import * as fs from "fs";
 import { ethers } from "ethers";
 import * as secp256k1 from "secp256k1";
 import { Address as AddressModel, Wallet as WalletModel } from "../client";
@@ -8,7 +9,7 @@ import { Address } from "./address";
 import { Coinbase } from "./coinbase";
 import { ArgumentError, InternalError } from "./errors";
 import { Transfer } from "./transfer";
-import { Amount, Destination, WalletData } from "./types";
+import { Amount, Destination, SeedData, WalletData } from "./types";
 import { convertStringToHex } from "./utils";
 import { FaucetTransaction } from "./faucet_transaction";
 import { BalanceMap } from "./balance_map";
@@ -65,13 +66,13 @@ export class Wallet {
    * @returns A promise that resolves with the new Wallet object.
    */
   public static async create(): Promise<Wallet> {
-    const walletData = await Coinbase.apiClients.wallet!.createWallet({
+    const result = await Coinbase.apiClients.wallet!.createWallet({
       wallet: {
         network_id: Coinbase.networkList.BaseSepolia,
       },
     });
 
-    const wallet = await Wallet.init(walletData.data, undefined, []);
+    const wallet = await Wallet.init(result.data, undefined, []);
 
     await wallet.createAddress();
     await wallet.reload();
@@ -94,7 +95,7 @@ export class Wallet {
    */
   public static async init(
     model: WalletModel,
-    seed: string | undefined,
+    seed?: string | undefined,
     addressModels: AddressModel[] = [],
   ): Promise<Wallet> {
     this.validateSeedAndAddressModels(seed, addressModels);
@@ -261,9 +262,11 @@ export class Wallet {
    *
    * @param seed - The seed to use for the Wallet. Expects a 32-byte hexadecimal with no 0x prefix.
    */
-  public async setSeed(seed: string): Promise<void> {
-    if (this.master === undefined) {
+  public setSeed(seed: string) {
+    if (this.master === undefined && (this.seed === undefined || this.seed === "")) {
       this.master = HDKey.fromMasterSeed(Buffer.from(seed, "hex"));
+    } else {
+      throw new InternalError("Cannot set seed on Wallet with existing seed");
     }
   }
 
@@ -329,6 +332,104 @@ export class Wallet {
    */
   public getId(): string | undefined {
     return this.model.id;
+  }
+
+  /**
+   * Saves the seed of the Wallet to the given file. Wallets whose seeds are saved this way can be
+   * rehydrated using load_seed. A single file can be used for multiple Wallet seeds.
+   * This is an insecure method of storing Wallet seeds and should only be used for development purposes.
+   *
+   * @param filePath - The path of the file to save the seed to
+   * @param encrypt - Whether the seed information persisted to the local file system should be
+   * encrypted or not. Data is unencrypted by default.
+   * @returns A string indicating the success of the operation
+   * @throws {InternalError} If the Wallet does not have a seed
+   */
+  public saveSeed(filePath: string, encrypt: boolean = false): string {
+    if (!this.master) {
+      throw new InternalError("Cannot save Wallet without loaded seed");
+    }
+
+    const existingSeedsInStore = this.getExistingSeeds(filePath);
+    const data = this.export();
+    let seedToStore = data.seed;
+    let authTag = "";
+    let iv = "";
+
+    if (encrypt) {
+      const ivBytes = crypto.randomBytes(12);
+      const sharedSecret = this.getEncryptionKey();
+      const cipher: crypto.CipherCCM = crypto.createCipheriv(
+        "aes-256-gcm",
+        crypto.createHash("sha256").update(sharedSecret).digest(),
+        ivBytes,
+      );
+      const encryptedData = Buffer.concat([cipher.update(data.seed, "utf8"), cipher.final()]);
+      authTag = cipher.getAuthTag().toString("hex");
+      seedToStore = encryptedData.toString("hex");
+      iv = ivBytes.toString("hex");
+    }
+
+    existingSeedsInStore[data.walletId] = {
+      seed: seedToStore,
+      encrypted: encrypt,
+      authTag: authTag,
+      iv: iv,
+    };
+
+    fs.writeFileSync(filePath, JSON.stringify(existingSeedsInStore, null, 2), "utf8");
+
+    return `Successfully saved seed for ${data.walletId} to ${filePath}.`;
+  }
+
+  /**
+   * Loads the seed of the Wallet from the given file.
+   *
+   * @param filePath - The path of the file to load the seed from
+   * @returns A string indicating the success of the operation
+   */
+  public loadSeed(filePath: string): string {
+    const existingSeedsInStore = this.getExistingSeeds(filePath);
+    if (Object.keys(existingSeedsInStore).length === 0) {
+      throw new ArgumentError(`File ${filePath} does not contain any seed data`);
+    }
+
+    if (existingSeedsInStore[this.getId()!] === undefined) {
+      throw new ArgumentError(
+        `File ${filePath} does not contain seed data for wallet ${this.getId()}`,
+      );
+    }
+
+    const seedData = existingSeedsInStore[this.getId()!];
+    let seed = seedData.seed;
+    if (!seed) {
+      throw new ArgumentError("Seed data is malformed");
+    }
+
+    if (seedData.encrypted) {
+      const sharedSecret = this.getEncryptionKey();
+      if (!seedData.iv || !seedData.authTag) {
+        throw new ArgumentError("Encrypted seed data is malformed");
+      }
+
+      const decipher = crypto.createDecipheriv(
+        "aes-256-gcm",
+        crypto.createHash("sha256").update(sharedSecret).digest(),
+        Buffer.from(seedData.iv, "hex"),
+      );
+      decipher.setAuthTag(Buffer.from(seedData.authTag, "hex"));
+
+      const decryptedData = Buffer.concat([
+        decipher.update(Buffer.from(seed, "hex")),
+        decipher.final(),
+      ]);
+
+      seed = decryptedData.toString("utf8");
+    }
+
+    this.setSeed(seed);
+
+    return `Successfully loaded seed for wallet ${this.getId()} from ${filePath}.`;
   }
 
   /**
@@ -464,5 +565,57 @@ export class Wallet {
         };
       }
     }
+  }
+
+  /**
+   * Loads the seed data from the given file.
+   *
+   * @param filePath - The path of the file to load the seed data from
+   * @returns The seed data
+   */
+  private getExistingSeeds(filePath: string): Record<string, SeedData> {
+    try {
+      const data = fs.readFileSync(filePath, "utf8");
+      if (!data) {
+        return {} as Record<string, SeedData>;
+      }
+      const seedData = JSON.parse(data);
+      if (
+        !Object.entries(seedData).every(
+          ([key, value]) =>
+            typeof key === "string" &&
+            /* eslint-disable @typescript-eslint/no-explicit-any */
+            typeof (value! as any).authTag! === "string" &&
+            typeof (value! as any).encrypted! === "boolean" &&
+            typeof (value! as any).iv! === "string" &&
+            typeof (value! as any).seed! === "string",
+        )
+      ) {
+        throw new ArgumentError("Malformed backup data");
+      }
+
+      return seedData;
+    } catch (error: any) {
+      /* eslint-enable @typescript-eslint/no-explicit-any */
+      if (error.code === "ENOENT") {
+        return {} as Record<string, SeedData>;
+      }
+      throw new ArgumentError("Malformed backup data");
+    }
+  }
+
+  /**
+   * Gets the key for encrypting seed data.
+   *
+   * @returns The encryption key.
+   */
+  private getEncryptionKey(): Buffer {
+    const privateKey = crypto.createPrivateKey(Coinbase.apiKeyPrivateKey);
+    const publicKey = crypto.createPublicKey(Coinbase.apiKeyPrivateKey);
+    const encryptionKey = crypto.diffieHellman({
+      privateKey,
+      publicKey,
+    });
+    return encryptionKey;
   }
 }
