@@ -445,7 +445,7 @@ export class Wallet {
     switch (seed) {
       case undefined: {
         const mnemonic = bip39.generateMnemonic();
-        const seedBuffer = bip39.mnemonicToSeedSync(mnemonic);
+        const seedBuffer = bip39.mnemonicToSeedSync(mnemonic).subarray(0, 32);
         return {
           seed: seedBuffer.toString("hex"),
           master: HDKey.fromMasterSeed(seedBuffer),
