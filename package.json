@@ -3,6 +3,7 @@
   "author": "Coinbase Inc.",
   "license": "ISC",
   "description": "Coinbase Platform SDK",
+  "repository": "https://github.com/coinbase/coinbase-sdk-nodejs",
   "version": "0.0.5",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
