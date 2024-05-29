@@ -4,11 +4,7 @@
   "license": "ISC",
   "description": "Coinbase Platform SDK",
   "repository": "https://github.com/coinbase/coinbase-sdk-nodejs",
-<<<<<<< HEAD
   "version": "0.0.6",
-=======
-  "version": "0.0.5",
->>>>>>> bd5ee2c (Updating Repo URL in package.json (#38))
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
