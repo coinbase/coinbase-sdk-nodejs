@@ -15,6 +15,7 @@ import { InternalError, InvalidAPIKeyFormat, InvalidConfiguration } from "./erro
 import { ApiClients } from "./types";
 import { User } from "./user";
 import { logApiResponse, registerAxiosInterceptors } from "./utils";
+import * as os from "os";
 
 /**
  * The Coinbase SDK.
@@ -111,6 +112,7 @@ export class Coinbase {
     debugging: boolean = false,
     basePath: string = BASE_PATH,
   ): Coinbase {
+    filePath = filePath.startsWith("~") ? filePath.replace("~", os.homedir()) : filePath;
     if (!fs.existsSync(filePath)) {
       throw new InvalidConfiguration(`Invalid configuration: file not found at ${filePath}`);
     }

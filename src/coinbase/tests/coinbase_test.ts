@@ -1,3 +1,5 @@
+import * as os from "os";
+import * as fs from "fs";
 import { randomUUID } from "crypto";
 import { APIError } from "../api_error";
 import { Coinbase } from "../coinbase";
@@ -11,6 +13,7 @@ import {
   walletsApiMock,
 } from "./utils";
 import { ethers } from "ethers";
+import path from "path";
 
 const PATH_PREFIX = "./src/coinbase/tests/config";
 
@@ -41,6 +44,17 @@ describe("Coinbase tests", () => {
     expect(() => Coinbase.configureFromJson(`${PATH_PREFIX}/not_parseable.json`)).toThrow(
       "Not able to parse the configuration file",
     );
+  });
+
+  it("should expand the tilde to the home directory", () => {
+    const configuration = fs.readFileSync(`${PATH_PREFIX}/coinbase_cloud_api_key.json`, "utf8");
+    const homeDir = os.homedir();
+    const relativePath = "~/test_config.json";
+    const expandedPath = path.join(homeDir, "test_config.json");
+    fs.writeFileSync(expandedPath, configuration, "utf8");
+    const cbInstance = Coinbase.configureFromJson(relativePath);
+    expect(cbInstance).toBeInstanceOf(Coinbase);
+    fs.unlinkSync(expandedPath);
   });
 
   describe("should able to interact with the API", () => {
