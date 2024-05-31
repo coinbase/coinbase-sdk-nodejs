@@ -1,3 +1,4 @@
+import util from "util";
 import { Decimal } from "decimal.js";
 import { TransferStatus } from "./types";
 import { Coinbase } from "./coinbase";
@@ -219,10 +220,19 @@ export class Transfer {
   public async toString(): Promise<string> {
     const status = await this.getStatus();
     return (
-      `Transfer{transferId: '${this.getId()}', networkId: '${this.getNetworkId()}', ` +
+      `Transfer{ transferId: '${this.getId()}', networkId: '${this.getNetworkId()}', ` +
       `fromAddressId: '${this.getFromAddressId()}', destinationAddressId: '${this.getDestinationAddressId()}', ` +
       `assetId: '${this.getAssetId()}', amount: '${this.getAmount()}', transactionHash: '${this.getTransactionHash()}', ` +
-      `transactionLink: '${this.getTransactionLink()}', status: '${status}'}`
+      `transactionLink: '${this.getTransactionLink()}', status: '${status}' }`
     );
+  }
+
+  /**
+   * Returns a string representation of the Transfer.
+   *
+   * @returns The string representation of the Transfer.
+   */
+  async [util.inspect.custom](): Promise<string> {
+    return await this.toString();
   }
 }

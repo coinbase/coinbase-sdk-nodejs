@@ -1,3 +1,4 @@
+import util from "util";
 import globalAxios from "axios";
 import * as fs from "fs";
 import {
@@ -142,5 +143,22 @@ export class Coinbase {
   async getDefaultUser(): Promise<User> {
     const userResponse = await Coinbase.apiClients.user!.getCurrentUser();
     return new User(userResponse.data as UserModel);
+  }
+  /**
+   * Coinbase SDK string representation.
+   *
+   * @returns The string representation of the Coinbase SDK.
+   */
+  public toString(): string {
+    return `Coinbase { networkList: ${Coinbase.networkList}, assets: ${Coinbase.assets} }`;
+  }
+
+  /**
+   * Coinbase SDK string representation.
+   *
+   * @returns The string representation of the Coinbase SDK.
+   */
+  [util.inspect.custom](): string {
+    return this.toString();
   }
 }

@@ -1,3 +1,4 @@
+import util from "util";
 import { Balance } from "./balance";
 import { Balance as BalanceModel } from "../client";
 import { Decimal } from "decimal.js";
@@ -47,6 +48,15 @@ export class BalanceMap extends Map<string, Decimal> {
       }
       result[key] = str;
     });
-    return `BalanceMap${JSON.stringify(result)}`;
+    return `BalanceMap ${JSON.stringify(result, null, 2)}`;
+  }
+
+  /**
+   * Returns a string representation of the balance map.
+   *
+   * @returns The string representation of the balance map.
+   */
+  [util.inspect.custom](): string {
+    return this.toString();
   }
 }

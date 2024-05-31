@@ -1,3 +1,4 @@
+import util from "util";
 import { WalletData } from "./types";
 import { User as UserModel, Address as AddressModel, Wallet as WalletModel } from "./../client/api";
 import { Wallet } from "./wallet";
@@ -111,6 +112,15 @@ export class User {
    * @returns The string representation of the User.
    */
   toString(): string {
-    return `User{ userId: ${this.model.id} }`;
+    return `User { userId: ${this.model.id} }`;
+  }
+
+  /**
+   * Returns a string representation of the User.
+   *
+   * @returns The string representation of the User.
+   */
+  [util.inspect.custom](): string {
+    return this.toString();
   }
 }

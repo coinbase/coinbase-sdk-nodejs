@@ -1,3 +1,4 @@
+import util from "util";
 import { ethers } from "ethers";
 import { Decimal } from "decimal.js";
 import { Address as AddressModel } from "../client";
@@ -253,6 +254,15 @@ export class Address {
    * @returns {string} A string representing the address.
    */
   public toString(): string {
-    return `Coinbase:Address{addressId: '${this.model.address_id}', networkId: '${this.model.network_id}', walletId: '${this.model.wallet_id}'}`;
+    return `Address { addressId: '${this.model.address_id}', networkId: '${this.model.network_id}', walletId: '${this.model.wallet_id}' }`;
+  }
+
+  /**
+   * Returns a string representation of the address.
+   *
+   * @returns {string} A string representing the address.
+   */
+  [util.inspect.custom](): string {
+    return this.toString();
   }
 }

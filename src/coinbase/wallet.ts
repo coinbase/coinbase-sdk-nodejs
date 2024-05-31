@@ -1,3 +1,4 @@
+import util from "util";
 import { HDKey } from "@scure/bip32";
 import * as bip39 from "bip39";
 import * as crypto from "crypto";
@@ -507,7 +508,16 @@ export class Wallet {
    * @returns a String representation of the Wallet
    */
   public toString(): string {
-    return `Wallet{id: '${this.model.id}', networkId: '${this.model.network_id}'}`;
+    return `Wallet { id: '${this.model.id}', networkId: '${this.model.network_id}' }`;
+  }
+
+  /**
+   * Returns a String representation of the Wallet.
+   *
+   * @returns a String representation of the Wallet
+   */
+  [util.inspect.custom](): string {
+    return this.toString();
   }
 
   /**

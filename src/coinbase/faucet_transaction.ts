@@ -1,3 +1,4 @@
+import util from "util";
 import { FaucetTransaction as FaucetTransactionModel } from "../client";
 import { InternalError } from "./errors";
 
@@ -47,6 +48,15 @@ export class FaucetTransaction {
    * @returns {string} A string representation of the FaucetTransaction.
    */
   public toString(): string {
-    return `Coinbase::FaucetTransaction{transaction_hash: '${this.getTransactionHash()}', transaction_link: '${this.getTransactionLink()}'}`;
+    return `FaucetTransaction { transaction_hash: '${this.getTransactionHash()}', transaction_link: '${this.getTransactionLink()}' }`;
+  }
+
+  /**
+   * Returns a string representation of the FaucetTransaction.
+   *
+   * @returns {string} A string representation of the FaucetTransaction.
+   */
+  [util.inspect.custom](): string {
+    return this.toString();
   }
 }
