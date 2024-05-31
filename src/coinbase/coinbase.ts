@@ -53,11 +53,19 @@ export class Coinbase {
   static apiKeyPrivateKey: string;
 
   /**
+   * Whether to use server signer or not.
+   *
+   * @constant
+   */
+  static useServerSigner: boolean;
+
+  /**
    * Initializes the Coinbase SDK.
    *
    * @class
    * @param apiKeyName - The API key name.
    * @param privateKey - The private key associated with the API key.
+   * @param useServerSigner - Whether to use server signer or not.
    * @param debugging - If true, logs API requests and responses to the console.
    * @param basePath - The base path for the API.
    * @throws {InternalError} If the configuration is invalid.
@@ -66,6 +74,7 @@ export class Coinbase {
   constructor(
     apiKeyName: string,
     privateKey: string,
+    useServerSigner: boolean = false,
     debugging = false,
     basePath: string = BASE_PATH,
   ) {
@@ -94,12 +103,14 @@ export class Coinbase {
       "https://sepolia.base.org",
     );
     Coinbase.apiKeyPrivateKey = privateKey;
+    Coinbase.useServerSigner = useServerSigner;
   }
 
   /**
    * Reads the API key and private key from a JSON file and initializes the Coinbase SDK.
    *
    * @param filePath - The path to the JSON file containing the API key and private key.
+   * @param useServerSigner - Whether to use server signer or not.
    * @param debugging - If true, logs API requests and responses to the console.
    * @param basePath - The base path for the API.
    * @returns A new instance of the Coinbase SDK.
@@ -109,6 +120,7 @@ export class Coinbase {
    */
   static configureFromJson(
     filePath: string = "coinbase_cloud_api_key.json",
+    useServerSigner: boolean = false,
     debugging: boolean = false,
     basePath: string = BASE_PATH,
   ): Coinbase {
@@ -123,7 +135,7 @@ export class Coinbase {
         throw new InvalidAPIKeyFormat("Invalid configuration: missing configuration values");
       }
 
-      return new Coinbase(config.name, config.privateKey, debugging, basePath);
+      return new Coinbase(config.name, config.privateKey, useServerSigner, debugging, basePath);
     } catch (e) {
       if (e instanceof SyntaxError) {
         throw new InvalidAPIKeyFormat("Not able to parse the configuration file");

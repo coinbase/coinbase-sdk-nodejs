@@ -305,10 +305,10 @@ export type ApiClients = {
  * Transfer status type definition.
  */
 export enum TransferStatus {
-  PENDING = "PENDING",
-  BROADCAST = "BROADCAST",
-  COMPLETE = "COMPLETE",
-  FAILED = "FAILED",
+  PENDING = "pending",
+  BROADCAST = "broadcast",
+  COMPLETE = "complete",
+  FAILED = "failed",
 }
 
 /**
@@ -339,3 +339,11 @@ export type Amount = number | bigint | Decimal;
  * Destination type definition.
  */
 export type Destination = string | Address | Wallet;
+
+/**
+ * ServerSigner status type definition.
+ */
+export enum ServerSignerStatus {
+  PENDING = "pending_seed_creation",
+  ACTIVE = "active_seed",
+}
