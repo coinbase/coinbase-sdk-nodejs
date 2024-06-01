@@ -60,12 +60,14 @@ export class Wallet {
    * Instead, use User.createWallet.
    *
    * @constructs Wallet
+   * @param intervalSeconds - The interval at which to poll the CDPService, in seconds.
+   * @param timeoutSeconds - The maximum amount of time to wait for the ServerSigner to create a seed, in seconds.
    * @throws {ArgumentError} If the model or client is not provided.
    * @throws {InternalError} - If address derivation or caching fails.
    * @throws {APIError} - If the request fails.
    * @returns A promise that resolves with the new Wallet object.
    */
-  public static async create(): Promise<Wallet> {
+  public static async create(intervalSeconds = 0.2, timeoutSeconds = 20): Promise<Wallet> {
     const result = await Coinbase.apiClients.wallet!.createWallet({
       wallet: {
         network_id: Coinbase.networkList.BaseSepolia,
@@ -76,7 +78,7 @@ export class Wallet {
     const wallet = await Wallet.init(result.data, undefined, []);
 
     if (Coinbase.useServerSigner) {
-      await wallet.waitForSigner(wallet.getId()!);
+      await wallet.waitForSigner(wallet.getId()!, intervalSeconds, timeoutSeconds);
     }
 
     await wallet.createAddress();

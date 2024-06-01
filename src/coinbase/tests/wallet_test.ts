@@ -8,6 +8,7 @@ import { Coinbase } from "../coinbase";
 import { GWEI_PER_ETHER, WEI_PER_ETHER } from "../constants";
 import { ArgumentError, InternalError } from "../errors";
 import { Wallet } from "../wallet";
+import { ServerSignerStatus, TransferStatus } from "../types";
 import {
   AddressBalanceList,
   Address as AddressModel,
@@ -17,6 +18,7 @@ import {
 import {
   VALID_ADDRESS_MODEL,
   VALID_TRANSFER_MODEL,
+  VALID_WALLET_MODEL,
   addressesApiMock,
   generateWalletFromSeed,
   mockFn,
@@ -57,16 +59,13 @@ describe("Wallet Class", () => {
     wallet = await Wallet.create();
   });
 
+  beforeEach(async () => {
+    Coinbase.useServerSigner = false;
+  });
+
   describe(".createTransfer", () => {
     let weiAmount, destination, intervalSeconds, timeoutSeconds;
     let balanceModel: BalanceModel;
-
-    const mockProvider = new ethers.JsonRpcProvider(
-      "https://sepolia.base.org",
-    ) as jest.Mocked<ethers.JsonRpcProvider>;
-    mockProvider.getTransaction = jest.fn();
-    mockProvider.getTransactionReceipt = jest.fn();
-    Coinbase.apiClients.baseSepoliaProvider = mockProvider;
 
     beforeEach(() => {
       const key = ethers.Wallet.createRandom();
@@ -95,12 +94,10 @@ describe("Wallet Class", () => {
         transaction_hash: "0x6c087c1676e8269dd81e0777244584d0cbfd39b6997b3477242a008fa9349e11",
         ...VALID_TRANSFER_MODEL,
       });
-      mockProvider.getTransaction.mockResolvedValueOnce({
-        blockHash: "0xdeadbeef",
-      } as ethers.TransactionResponse);
-      mockProvider.getTransactionReceipt.mockResolvedValueOnce({
-        status: 1,
-      } as ethers.TransactionReceipt);
+      Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
+        ...VALID_TRANSFER_MODEL,
+        status: TransferStatus.COMPLETE,
+      });
 
       await wallet.createTransfer(
         weiAmount,
@@ -112,6 +109,7 @@ describe("Wallet Class", () => {
 
       expect(Coinbase.apiClients.transfer!.createTransfer).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.transfer!.broadcastTransfer).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.transfer!.getTransfer).toHaveBeenCalledTimes(1);
     });
 
     it("should throw an APIError if the createTransfer API call fails", async () => {
@@ -151,6 +149,10 @@ describe("Wallet Class", () => {
         transaction_hash: "0x6c087c1676e8269dd81e0777244584d0cbfd39b6997b3477242a008fa9349e11",
         ...VALID_TRANSFER_MODEL,
       });
+      Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
+        ...VALID_TRANSFER_MODEL,
+        status: TransferStatus.BROADCAST,
+      });
       intervalSeconds = 0.000002;
       timeoutSeconds = 0.000002;
 
@@ -176,6 +178,26 @@ describe("Wallet Class", () => {
           timeoutSeconds,
         ),
       ).rejects.toThrow(ArgumentError);
+    });
+
+    it("should successfully create and complete a transfer when using server signer", async () => {
+      Coinbase.useServerSigner = true;
+      Coinbase.apiClients.transfer!.createTransfer = mockReturnValue(VALID_TRANSFER_MODEL);
+      Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
+        ...VALID_TRANSFER_MODEL,
+        status: TransferStatus.COMPLETE,
+      });
+
+      await wallet.createTransfer(
+        weiAmount,
+        Coinbase.assets.Wei,
+        destination,
+        intervalSeconds,
+        timeoutSeconds,
+      );
+
+      expect(Coinbase.apiClients.transfer!.createTransfer).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.transfer!.getTransfer).toHaveBeenCalledTimes(1);
     });
 
     afterEach(() => {
@@ -225,6 +247,49 @@ describe("Wallet Class", () => {
       expect(wallet.listAddresses().length).toBe(2);
       expect(wallet.getAddress(newAddress.getId())!.getId()).toBe(newAddress.getId());
       expect(Coinbase.apiClients.address!.createAddress).toHaveBeenCalledTimes(1);
+    });
+
+    describe("when using a server signer", () => {
+      let walletId = crypto.randomUUID();
+      let wallet: Wallet;
+      beforeEach(async () => {
+        jest.clearAllMocks();
+        Coinbase.useServerSigner = true;
+      });
+
+      it("should return a Wallet instance", async () => {
+        Coinbase.apiClients.wallet!.createWallet = mockReturnValue({
+          ...VALID_WALLET_MODEL,
+          server_signer_status: ServerSignerStatus.PENDING,
+        });
+        Coinbase.apiClients.wallet!.getWallet = mockReturnValue({
+          ...VALID_WALLET_MODEL,
+          server_signer_status: ServerSignerStatus.ACTIVE,
+        });
+        Coinbase.apiClients.address!.createAddress = mockReturnValue(newAddressModel(walletId));
+
+        wallet = await Wallet.create();
+        expect(wallet).toBeInstanceOf(Wallet);
+        expect(wallet.getServerSignerStatus()).toBe(ServerSignerStatus.ACTIVE);
+        expect(Coinbase.apiClients.wallet!.createWallet).toHaveBeenCalledTimes(1);
+        expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledTimes(2);
+        expect(Coinbase.apiClients.address!.createAddress).toHaveBeenCalledTimes(1);
+      });
+
+      it("should throw an Error if the Wallet times out waiting on a not active server signer", async () => {
+        const intervalSeconds = 0.000002;
+        const timeoutSeconds = 0.000002;
+        Coinbase.apiClients.wallet!.getWallet = mockReturnValue({
+          ...VALID_WALLET_MODEL,
+          server_signer_status: ServerSignerStatus.PENDING,
+        });
+
+        await expect(Wallet.create(intervalSeconds, timeoutSeconds)).rejects.toThrow(
+          "Wallet creation timed out. Check status of your Server-Signer",
+        );
+        expect(Coinbase.apiClients.wallet!.createWallet).toHaveBeenCalledTimes(1);
+        expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalled();
+      });
     });
   });
 
