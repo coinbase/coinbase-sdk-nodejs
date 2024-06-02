@@ -7,12 +7,11 @@ import {
   AddressesApiFactory,
   WalletsApiFactory,
 } from "../client";
-import { ethers } from "ethers";
 import { BASE_PATH } from "./../client/base";
 import { Configuration } from "./../client/configuration";
 import { CoinbaseAuthenticator } from "./authenticator";
 import { InternalError, InvalidAPIKeyFormat, InvalidConfiguration } from "./errors";
-import { ApiClients } from "./types";
+import { ApiClients, CoinbaseConfigureFromJsonOptions, CoinbaseOptions } from "./types";
 import { User } from "./user";
 import { logApiResponse, registerAxiosInterceptors } from "./utils";
 import * as os from "os";
@@ -63,28 +62,24 @@ export class Coinbase {
    * Initializes the Coinbase SDK.
    *
    * @class
-   * @param apiKeyName - The API key name.
-   * @param privateKey - The private key associated with the API key.
-   * @param useServerSigner - Whether to use server signer or not.
-   * @param debugging - If true, logs API requests and responses to the console.
-   * @param basePath - The base path for the API.
+   * @param options - The constructor options.
    * @throws {InternalError} If the configuration is invalid.
    * @throws {InvalidAPIKeyFormat} If not able to create JWT token.
    */
-  constructor(
-    apiKeyName: string,
-    privateKey: string,
-    useServerSigner: boolean = false,
-    debugging = false,
-    basePath: string = BASE_PATH,
-  ) {
+  constructor(options: CoinbaseOptions) {
+    const apiKeyName = options.apiKeyName ?? "";
+    const privateKey = options.privateKey ?? "";
+    const useServerSigner = options.useServerSigner === true;
+    const debugging = options.debugging === true;
+    const basePath = options.basePath ?? BASE_PATH;
+
     if (apiKeyName === "") {
       throw new InternalError("Invalid configuration: apiKeyName is empty");
     }
     if (privateKey === "") {
       throw new InternalError("Invalid configuration: privateKey is empty");
     }
-    const coinbaseAuthenticator = new CoinbaseAuthenticator(apiKeyName, privateKey);
+    const coinbaseAuthenticator = new CoinbaseAuthenticator(apiKeyName!, privateKey!);
     const config = new Configuration({
       basePath: basePath,
     });
@@ -95,13 +90,10 @@ export class Coinbase {
       response => logApiResponse(response, debugging),
     );
 
-    Coinbase.apiClients.user = UsersApiFactory(config, BASE_PATH, axiosInstance);
-    Coinbase.apiClients.wallet = WalletsApiFactory(config, BASE_PATH, axiosInstance);
-    Coinbase.apiClients.address = AddressesApiFactory(config, BASE_PATH, axiosInstance);
-    Coinbase.apiClients.transfer = TransfersApiFactory(config, BASE_PATH, axiosInstance);
-    Coinbase.apiClients.baseSepoliaProvider = new ethers.JsonRpcProvider(
-      "https://sepolia.base.org",
-    );
+    Coinbase.apiClients.user = UsersApiFactory(config, basePath, axiosInstance);
+    Coinbase.apiClients.wallet = WalletsApiFactory(config, basePath, axiosInstance);
+    Coinbase.apiClients.address = AddressesApiFactory(config, basePath, axiosInstance);
+    Coinbase.apiClients.transfer = TransfersApiFactory(config, basePath, axiosInstance);
     Coinbase.apiKeyPrivateKey = privateKey;
     Coinbase.useServerSigner = useServerSigner;
   }
@@ -109,22 +101,19 @@ export class Coinbase {
   /**
    * Reads the API key and private key from a JSON file and initializes the Coinbase SDK.
    *
-   * @param filePath - The path to the JSON file containing the API key and private key.
-   * @param useServerSigner - Whether to use server signer or not.
-   * @param debugging - If true, logs API requests and responses to the console.
-   * @param basePath - The base path for the API.
+   * @param options - The configuration options.
    * @returns A new instance of the Coinbase SDK.
    * @throws {InvalidAPIKeyFormat} If the file does not exist or the configuration values are missing/invalid.
    * @throws {InvalidConfiguration} If the configuration is invalid.
    * @throws {InvalidAPIKeyFormat} If not able to create JWT token.
    */
-  static configureFromJson(
-    filePath: string = "coinbase_cloud_api_key.json",
-    useServerSigner: boolean = false,
-    debugging: boolean = false,
-    basePath: string = BASE_PATH,
-  ): Coinbase {
+  static configureFromJson(options: CoinbaseConfigureFromJsonOptions): Coinbase {
+    let filePath = options.filePath ?? "coinbase_cloud_api_key.json";
     filePath = filePath.startsWith("~") ? filePath.replace("~", os.homedir()) : filePath;
+    const useServerSigner = options.useServerSigner === true;
+    const debugging = options.debugging === true;
+    const basePath = options.basePath ?? BASE_PATH;
+
     if (!fs.existsSync(filePath)) {
       throw new InvalidConfiguration(`Invalid configuration: file not found at ${filePath}`);
     }
@@ -135,7 +124,13 @@ export class Coinbase {
         throw new InvalidAPIKeyFormat("Invalid configuration: missing configuration values");
       }
 
-      return new Coinbase(config.name, config.privateKey, useServerSigner, debugging, basePath);
+      return new Coinbase({
+        apiKeyName: config.name,
+        privateKey: config.privateKey,
+        useServerSigner: useServerSigner,
+        debugging: debugging,
+        basePath: basePath,
+      });
     } catch (e) {
       if (e instanceof SyntaxError) {
         throw new InvalidAPIKeyFormat("Not able to parse the configuration file");
