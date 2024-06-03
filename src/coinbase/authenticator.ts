@@ -77,7 +77,7 @@ export class CoinbaseAuthenticator {
     const uri = `${method} ${urlObject.host}${urlObject.pathname}`;
     const claims = {
       sub: this.apiKey,
-      iss: "coinbase-cloud",
+      iss: "cdp",
       aud: ["cdp_service"],
       nbf: Math.floor(Date.now() / 1000),
       exp: Math.floor(Date.now() / 1000) + 60, // +1 minute
