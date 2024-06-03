@@ -1,0 +1,22 @@
+name: Run E2E Tests
+
+on: [pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Run E2E Tests
+      env:
+        NAME: ${{ secrets.NAME }}
+        PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+        WALLET_DATA: ${{ secrets.WALLET_DATA }}
+      run: npm run test:dry-run && npm run test:e2e
