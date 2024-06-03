@@ -15,10 +15,35 @@ Currently, the SDK is intended for use on testnet for quick bootstrapping of cry
 
 - [Platform API Documentation](https://docs.cdp.coinbase.com/platform-apis/docs/welcome)
 
+## Requirements
+
+The Coinbase server-side SDK requires Node.js version 18 or higher and npm version 9.7.2 or higher. To view your currently installed versions of Node.js, run the following from the command-line:
+
+```bash
+node -v
+npm -v
+```
+
+We recommend installing and managing Node.js and npm versions with `nvm`. See [Installing and Updating](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating) in the `nvm` README for instructions on how to install `nvm`.
+
+Once `nvm` has been installed, you can install and use the latest versions of Node.js and npm by running the following commands:
+
+```bash
+nvm install node # "node" is an alias for the latest version
+nvm use node
+```
+
 ## Installation
 
-### In Your Node.js Project
+Optional: Initialize the npm
 
+This command initializes a new npm project with default settings and configures it to use ES modules by setting the type field to "module" in the package.json file. 
+
+```bash
+npm init -y; npm pkg set type="module"
+```
+
+#### You can import the SDK as follows
 ```bash
 npm install @coinbase/coinbase-sdk
 ```
@@ -29,21 +54,23 @@ or
 yarn install @coinbase/coinbase-sdk
 ```
 
-### In the ts-node REPL
+## Usage
 
-After running `npx ts-node` to start the REPL, you can import the SDK as follows:
+### Initialization
+
+#### You can import the SDK as follows:
+
+CommonJs:
+
+```javascript
+const { Coinbase } = require("@coinbase/coinbase-sdk");
+```
+
+ES modules:
 
 ```typescript
 import { Coinbase } from "@coinbase/coinbase-sdk";
 ```
-
-### Requirements
-
-- Node.js 18 or higher
-
-## Usage
-
-### Initialization
 
 To start, [create a CDP API Key](https://portal.cdp.coinbase.com/access/api). Then, initialize the Platform SDK by passing your API Key name and API Key's private key via the `Coinbase` constructor:
 
@@ -63,8 +90,23 @@ const coinbase = Coinbase.configureFromJson("path/to/your/api-key.json");
 
 This will allow you to authenticate with the Platform APIs and get access to the default `User`.
 
+CommonJs:
+
+```javascript
+const { Coinbase } = require("@coinbase/coinbase-sdk");
+const coinbase = Coinbase.configureFromJson("path/to/your/api-key.json");
+coinbase.getDefaultUser().then(user => {
+  console.log(user);
+});
+```
+
+Or using ES modules and async/await:
+
 ```typescript
+import { Coinbase } from "@coinbase/coinbase-sdk";
+const coinbase = Coinbase.configureFromJson("path/to/your/api-key.json");
 const user = await coinbase.getDefaultUser();
+console.log(user);
 ```
 
 ### Wallets, Addresses, and Transfers
@@ -191,14 +233,6 @@ To run a specific test, run (for example):
 
 ```bash
 npx jest ./src/coinbase/tests/wallet_test.ts
-```
-
-### REPL
-
-The repository is equipped with a REPL to allow developers to play with the SDK. To start it, run:
-
-```bash
-npx ts-node
 ```
 
 ### Generating Documentation
