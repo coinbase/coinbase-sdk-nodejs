@@ -25,5 +25,8 @@ jobs:
         NAME: ${{ secrets.NAME }}
         PRIVATEKEY: ${{ secrets.PRIVATEKEY }}
         SEED: ${{ secrets.SEED }}
-      run: npm run test:e2e
+      - run: npm install
+      - run: npm ci
+      - run: npm publish --dry-run
+      - run: npm run test:e2e
 

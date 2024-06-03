@@ -8,16 +8,26 @@ describe("Coinbase SDK E2E Test", () => {
   beforeAll(() => {
     dotenv.config();
   });
+
   beforeEach(() => {
     coinbase = new Coinbase({
       apiKeyName: process.env.NAME,
       privateKey: process.env.PRIVATEKEY,
     });
   });
+
   it("should be able to access environment variables", () => {
     expect(process.env.NAME).toBeDefined();
     expect(process.env.PRIVATEKEY).toBeDefined();
   });
+
+  it("should have created a dist folder for NPM", () => {
+    expect(fs.existsSync("./dist")).toBe(true);
+    expect(fs.existsSync("./dist/index.js")).toBe(true);
+    expect(fs.existsSync("./dist/client/index.js")).toBe(true);
+    expect(fs.existsSync("./dist/coinbase/coinbase.js")).toBe(true);
+  });
+
   it("should be able to interact with the Coinbase SDK", async () => {
     console.log("Fetching default user...");
     const user = await coinbase.getDefaultUser();
