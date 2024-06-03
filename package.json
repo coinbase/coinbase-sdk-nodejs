@@ -14,6 +14,7 @@
     "format-check": "prettier -c .prettierrc --check \"**/*.{ts,js,cjs,json,md}\"",
     "check": "tsc --noEmit",
     "test": "npx jest --no-cache  --testMatch=**/*_test.ts",
+    "test:dry-run": "npm install && npm ci && npm publish --dry-run",
     "test:e2e": "npx jest --no-cache --testMatch=**/e2e.ts",
     "clean": "rm -rf dist/*",
     "build": "tsc",

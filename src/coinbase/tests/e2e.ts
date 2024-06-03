@@ -12,13 +12,13 @@ describe("Coinbase SDK E2E Test", () => {
   beforeEach(() => {
     coinbase = new Coinbase({
       apiKeyName: process.env.NAME,
-      privateKey: process.env.PRIVATEKEY,
+      privateKey: process.env.PRIVATE_KEY,
     });
   });
 
   it("should be able to access environment variables", () => {
     expect(process.env.NAME).toBeDefined();
-    expect(process.env.PRIVATEKEY).toBeDefined();
+    expect(process.env.PRIVATE_KEY).toBeDefined();
   });
 
   it("should have created a dist folder for NPM", () => {
@@ -42,7 +42,7 @@ describe("Coinbase SDK E2E Test", () => {
     );
 
     console.log("Importing wallet with balance...");
-    const seedFile = JSON.parse(process.env.SEED || "");
+    const seedFile = JSON.parse(process.env.WALLET_DATA || "");
     const walletId = Object.keys(seedFile)[0];
     const seed = seedFile[walletId].seed;
 

@@ -77,7 +77,7 @@ To start, [create a CDP API Key](https://portal.cdp.coinbase.com/access/api). Th
 ```typescript
 const apiKeyName = "Copy your API Key name here.";
 
-const privatekey = "Copy your API Key's private key here.";
+const privateKey = "Copy your API Key's private key here.";
 
 const coinbase = new Coinbase({ apiKeyName: apiKeyName, privateKey: privateKey });
 ```
@@ -165,16 +165,16 @@ In order to persist the data for the Wallet, you will need to implement a store 
 await store(data);
 ```
 
-For convenience during testing, we provide a `saveWallet` method that stores the Wallet data in your local file system. This is an insecure method of storing wallet seeds and should only be used for development purposes.
+For convenience during testing, we provide a `saveSeed` method that stores the Wallet data in your local file system. This is an insecure method of storing wallet seeds and should only be used for development purposes.
 
 ```typescript
-user.saveWallet(wallet);
+user.saveSeed(wallet);
 ```
 
-To encrypt the saved data, set encrypt to true. Note that your CDP API key also serves as the encryption key for the data persisted locally. To re-instantiate wallets with encrypted data, ensure that your SDK is configured with the same API key when invoking `saveWallet` and `loadWallets`.
+To encrypt the saved data, set encrypt to true. Note that your CDP API key also serves as the encryption key for the data persisted locally. To re-instantiate wallets with encrypted data, ensure that your SDK is configured with the same API key when invoking `saveSeed` and `loadWallets`.
 
 ```typescript
-user.saveWallet(wallet, true);
+user.saveSeed(wallet, true);
 ```
 
 The below code demonstrates how to re-instantiate a Wallet from the data export.
@@ -238,6 +238,11 @@ To run a specific test, run (for example):
 
 ```bash
 npx jest ./src/coinbase/tests/wallet_test.ts
+```
+To run e2e tests, run:
+
+```bash
+npm run test:dry-run && NAME="placeholder" PRIVATE_KEY="placeholder" WALLET_DATA="placeholder" && npm run test:e2e
 ```
 
 ### Generating Documentation
