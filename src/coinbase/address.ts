@@ -120,10 +120,21 @@ export class Address {
    * @returns {Decimal} The balance of the asset.
    */
   async getBalance(assetId: string): Promise<Decimal> {
+    const normalizedAssetId = ((): string => {
+      switch (assetId) {
+        case Coinbase.assets.Gwei:
+          return Coinbase.assets.Eth;
+        case Coinbase.assets.Wei:
+          return Coinbase.assets.Eth;
+        default:
+          return assetId;
+      }
+    })();
+
     const response = await Coinbase.apiClients.address!.getAddressBalance(
       this.model.wallet_id,
       this.model.address_id,
-      assetId,
+      normalizedAssetId,
     );
 
     if (!response.data) {
@@ -198,6 +209,7 @@ export class Address {
     const normalizedAssetId = ((): string => {
       switch (assetId) {
         case Coinbase.assets.Gwei:
+          return Coinbase.assets.Eth;
         case Coinbase.assets.Wei:
           return Coinbase.assets.Eth;
         default:
