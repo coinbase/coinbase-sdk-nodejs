@@ -63,6 +63,11 @@ export class Coinbase {
    *
    * @class
    * @param options - The constructor options.
+   * @param options.apiKeyName - The API key name.
+   * @param options.privateKey - The private key associated with the API key.
+   * @param options.useServerSigner - Whether to use a Server-Signer or not.
+   * @param options.debugging - If true, logs API requests and responses to the console.
+   * @param options.basePath - The base path for the API.
    * @throws {InternalError} If the configuration is invalid.
    * @throws {InvalidAPIKeyFormat} If not able to create JWT token.
    */
@@ -102,6 +107,10 @@ export class Coinbase {
    * Reads the API key and private key from a JSON file and initializes the Coinbase SDK.
    *
    * @param options - The configuration options.
+   * @param options.filePath - The path to the JSON file containing the API key and private key.
+   * @param options.useServerSigner - Whether to use a Server-Signer or not.
+   * @param options.debugging - If true, logs API requests and responses to the console.
+   * @param options.basePath - The base path for the API.
    * @returns A new instance of the Coinbase SDK.
    * @throws {InvalidAPIKeyFormat} If the file does not exist or the configuration values are missing/invalid.
    * @throws {InvalidConfiguration} If the configuration is invalid.
