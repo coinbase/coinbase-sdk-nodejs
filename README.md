@@ -165,16 +165,16 @@ In order to persist the data for the Wallet, you will need to implement a store 
 await store(data);
 ```
 
-For convenience during testing, we provide a `saveSeed` method that stores the Wallet data in your local file system. This is an insecure method of storing wallet seeds and should only be used for development purposes.
+For convenience during testing, we provide a `saveSeed` method that stores the wallet's seed in your local file system. This is an insecure method of storing wallet seeds and should only be used for development purposes.
 
 ```typescript
-user.saveSeed(wallet);
+wallet.saveSeed(wallet);
 ```
 
-To encrypt the saved data, set encrypt to true. Note that your CDP API key also serves as the encryption key for the data persisted locally. To re-instantiate wallets with encrypted data, ensure that your SDK is configured with the same API key when invoking `saveSeed` and `loadWallets`.
+To encrypt the saved data, set encrypt to true. Note that your CDP API key also serves as the encryption key for the data persisted locally. To re-instantiate wallets with encrypted data, ensure that your SDK is configured with the same API key when invoking `saveSeed` and `loadSeed`.
 
 ```typescript
-user.saveSeed(wallet, true);
+wallet.saveSeed(wallet, true);
 ```
 
 The below code demonstrates how to re-instantiate a Wallet from the data export.
@@ -184,12 +184,12 @@ The below code demonstrates how to re-instantiate a Wallet from the data export.
 const importedWallet = await user.importWallet(data);
 ```
 
-To import Wallets that were persisted to your local file system using `saveWallet`, use the below code.
+To import Wallets that were persisted to your local file system using `saveSeed`, use the below code.
 
 ```typescript
 // The Wallet can be re-instantiated using the exported data.
-const wallets = await user.loadWallets();
-const reinitWallet = wallets[wallet.getId()];
+const w = await user.getWallet(w.getId());
+w.loadSeed(filePath);
 ```
 
 ## Development
