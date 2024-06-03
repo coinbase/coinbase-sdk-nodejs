@@ -60,7 +60,7 @@ describe("Coinbase tests", () => {
     const relativePath = "~/test_config.json";
     const expandedPath = path.join(homeDir, "test_config.json");
     fs.writeFileSync(expandedPath, configuration, "utf8");
-    const cbInstance = Coinbase.configureFromJson(relativePath);
+    const cbInstance = Coinbase.configureFromJson({ filePath: relativePath });
     expect(cbInstance).toBeInstanceOf(Coinbase);
     fs.unlinkSync(expandedPath);
   });
