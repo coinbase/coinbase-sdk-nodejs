@@ -52,7 +52,7 @@ export class Coinbase {
   static apiKeyPrivateKey: string;
 
   /**
-   * Whether to use server signer or not.
+   * Whether to use a server signer or not.
    *
    * @constant
    */
@@ -66,13 +66,13 @@ export class Coinbase {
    * @throws {InternalError} If the configuration is invalid.
    * @throws {InvalidAPIKeyFormat} If not able to create JWT token.
    */
-  constructor(options: CoinbaseOptions) {
-    const apiKeyName = options.apiKeyName ?? "";
-    const privateKey = options.privateKey ?? "";
-    const useServerSigner = options.useServerSigner === true;
-    const debugging = options.debugging === true;
-    const basePath = options.basePath ?? BASE_PATH;
-
+  constructor({
+    apiKeyName = "",
+    privateKey = "",
+    useServerSigner = false,
+    debugging = false,
+    basePath = BASE_PATH,
+  }: CoinbaseOptions) {
     if (apiKeyName === "") {
       throw new InternalError("Invalid configuration: apiKeyName is empty");
     }
@@ -107,12 +107,13 @@ export class Coinbase {
    * @throws {InvalidConfiguration} If the configuration is invalid.
    * @throws {InvalidAPIKeyFormat} If not able to create JWT token.
    */
-  static configureFromJson(options: CoinbaseConfigureFromJsonOptions): Coinbase {
-    let filePath = options.filePath ?? "coinbase_cloud_api_key.json";
+  static configureFromJson({
+    filePath = "coinbase_cloud_api_key.json",
+    useServerSigner = false,
+    debugging = false,
+    basePath = BASE_PATH,
+  }: CoinbaseConfigureFromJsonOptions): Coinbase {
     filePath = filePath.startsWith("~") ? filePath.replace("~", os.homedir()) : filePath;
-    const useServerSigner = options.useServerSigner === true;
-    const debugging = options.debugging === true;
-    const basePath = options.basePath ?? BASE_PATH;
 
     if (!fs.existsSync(filePath)) {
       throw new InvalidConfiguration(`Invalid configuration: file not found at ${filePath}`);
