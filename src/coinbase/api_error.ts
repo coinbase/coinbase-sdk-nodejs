@@ -45,6 +45,7 @@ export class APIError extends AxiosError {
    * @returns {APIError} A specific APIError instance.
    */
   static fromError(error: AxiosError) {
+    console.log("error", error);
     const apiError = new APIError(error);
     if (!error.response || !error.response.data) {
       return apiError;
