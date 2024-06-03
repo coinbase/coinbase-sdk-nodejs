@@ -376,6 +376,9 @@ export type CoinbaseOptions = {
   basePath?: string;
 };
 
+/**
+ * CoinbaseConfigureFromJsonOptions type definition.
+ */
 export type CoinbaseConfigureFromJsonOptions = {
   /**
    * The path to the JSON file containing the API key and private key.

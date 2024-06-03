@@ -79,7 +79,7 @@ export class Coinbase {
     if (privateKey === "") {
       throw new InternalError("Invalid configuration: privateKey is empty");
     }
-    const coinbaseAuthenticator = new CoinbaseAuthenticator(apiKeyName!, privateKey!);
+    const coinbaseAuthenticator = new CoinbaseAuthenticator(apiKeyName, privateKey);
     const config = new Configuration({
       basePath: basePath,
     });
