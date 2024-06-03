@@ -198,6 +198,7 @@ export class Address {
     const normalizedAssetId = ((): string => {
       switch (assetId) {
         case Coinbase.assets.Gwei:
+          return Coinbase.assets.Eth;
         case Coinbase.assets.Wei:
           return Coinbase.assets.Eth;
         default:
