@@ -101,7 +101,7 @@ describe("Address", () => {
     expect(Coinbase.apiClients.address!.getAddressBalance).toHaveBeenCalledWith(
       address.getWalletId(),
       address.getId(),
-      assetId,
+      Coinbase.assets.Eth,
     );
     expect(Coinbase.apiClients.address!.getAddressBalance).toHaveBeenCalledTimes(1);
   });
@@ -114,7 +114,7 @@ describe("Address", () => {
     expect(Coinbase.apiClients.address!.getAddressBalance).toHaveBeenCalledWith(
       address.getWalletId(),
       address.getId(),
-      assetId,
+      Coinbase.assets.Eth,
     );
     expect(Coinbase.apiClients.address!.getAddressBalance).toHaveBeenCalledTimes(1);
   });
