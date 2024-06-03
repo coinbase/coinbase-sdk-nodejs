@@ -5,7 +5,7 @@ import { TransferStatus } from "../types";
 import { Transfer } from "../transfer";
 import { Coinbase } from "../coinbase";
 import { WEI_PER_ETHER } from "../constants";
-import { VALID_TRANSFER_MODEL } from "./utils";
+import { VALID_TRANSFER_MODEL, mockReturnValue, transfersApiMock } from "./utils";
 
 const amount = new Decimal(ethers.parseUnits("100", 18).toString());
 const ethAmount = amount.div(WEI_PER_ETHER);
@@ -16,20 +16,13 @@ const signedPayload =
 
 const transactionHash = "0x6c087c1676e8269dd81e0777244584d0cbfd39b6997b3477242a008fa9349e11";
 
-const mockProvider = new ethers.JsonRpcProvider(
-  "https://sepolia.base.org",
-) as jest.Mocked<ethers.JsonRpcProvider>;
-mockProvider.getTransaction = jest.fn();
-mockProvider.getTransactionReceipt = jest.fn();
-Coinbase.apiClients.baseSepoliaProvider = mockProvider;
-
 describe("Transfer Class", () => {
   let transferModel: TransferModel;
   let transfer: Transfer;
 
   beforeEach(() => {
+    Coinbase.apiClients.transfer = transfersApiMock;
     transferModel = VALID_TRANSFER_MODEL;
-
     transfer = Transfer.fromModel(transferModel);
   });
 
@@ -138,52 +131,67 @@ describe("Transfer Class", () => {
 
   describe("getStatus", () => {
     it("should return PENDING when the transaction has not been created", async () => {
-      const status = await transfer.getStatus();
+      const status = transfer.getStatus();
       expect(status).toEqual(TransferStatus.PENDING);
     });
 
     it("should return PENDING when the transaction has been created but not broadcast", async () => {
-      transferModel.transaction_hash = transactionHash;
       transfer = Transfer.fromModel(transferModel);
-      mockProvider.getTransaction.mockResolvedValueOnce(null);
-      const status = await transfer.getStatus();
+      const status = transfer.getStatus();
       expect(status).toEqual(TransferStatus.PENDING);
     });
 
     it("should return BROADCAST when the transaction has been broadcast but not included in a block", async () => {
-      transferModel.transaction_hash = transactionHash;
+      transferModel.status = TransferStatus.BROADCAST;
       transfer = Transfer.fromModel(transferModel);
-      mockProvider.getTransaction.mockResolvedValueOnce({
-        blockHash: null,
-      } as ethers.TransactionResponse);
-      const status = await transfer.getStatus();
+      const status = transfer.getStatus();
       expect(status).toEqual(TransferStatus.BROADCAST);
     });
 
     it("should return COMPLETE when the transaction has confirmed", async () => {
-      transferModel.transaction_hash = transactionHash;
+      transferModel.status = TransferStatus.COMPLETE;
       transfer = Transfer.fromModel(transferModel);
-      mockProvider.getTransaction.mockResolvedValueOnce({
-        blockHash: "0xdeadbeef",
-      } as ethers.TransactionResponse);
-      mockProvider.getTransactionReceipt.mockResolvedValueOnce({
-        status: 1,
-      } as ethers.TransactionReceipt);
-      const status = await transfer.getStatus();
+      const status = transfer.getStatus();
       expect(status).toEqual(TransferStatus.COMPLETE);
     });
 
     it("should return FAILED when the transaction has failed", async () => {
-      transferModel.transaction_hash = transactionHash;
+      transferModel.status = TransferStatus.FAILED;
       transfer = Transfer.fromModel(transferModel);
-      mockProvider.getTransaction.mockResolvedValueOnce({
-        blockHash: "0xdeadbeef",
-      } as ethers.TransactionResponse);
-      mockProvider.getTransactionReceipt.mockResolvedValueOnce({
-        status: 0,
-      } as ethers.TransactionReceipt);
-      const status = await transfer.getStatus();
+      const status = transfer.getStatus();
       expect(status).toEqual(TransferStatus.FAILED);
+    });
+  });
+
+  describe("reload", () => {
+    it("should return PENDING when the trnasaction has not been created", async () => {
+      Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
+        ...VALID_TRANSFER_MODEL,
+        status: TransferStatus.PENDING,
+      });
+      await transfer.reload();
+      expect(transfer.getStatus()).toEqual(TransferStatus.PENDING);
+      expect(Coinbase.apiClients.transfer!.getTransfer).toHaveBeenCalledTimes(1);
+    });
+
+    it("should return COMPLETE when the trnasaction is complete", async () => {
+      Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
+        ...VALID_TRANSFER_MODEL,
+        status: TransferStatus.COMPLETE,
+      });
+      await transfer.reload();
+      expect(transfer.getStatus()).toEqual(TransferStatus.COMPLETE);
+      expect(Coinbase.apiClients.transfer!.getTransfer).toHaveBeenCalledTimes(1);
+    });
+
+    it("should return FAILED when the trnasaction has failed", async () => {
+      Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
+        ...VALID_TRANSFER_MODEL,
+        status: TransferStatus.FAILED,
+      });
+      await transfer.reload();
+      expect(transfer.getStatus()).toEqual(TransferStatus.FAILED);
+      expect(Coinbase.apiClients.transfer!.getTransfer).toHaveBeenCalledTimes(1);
     });
   });
 });

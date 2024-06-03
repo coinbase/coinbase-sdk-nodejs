@@ -1,6 +1,5 @@
 import { Decimal } from "decimal.js";
 import { AxiosPromise, AxiosRequestConfig, RawAxiosRequestConfig } from "axios";
-import { ethers } from "ethers";
 import {
   Address as AddressModel,
   AddressList,
@@ -298,17 +297,16 @@ export type ApiClients = {
   wallet?: WalletAPIClient;
   address?: AddressAPIClient;
   transfer?: TransferAPIClient;
-  baseSepoliaProvider?: ethers.Provider;
 };
 
 /**
  * Transfer status type definition.
  */
 export enum TransferStatus {
-  PENDING = "PENDING",
-  BROADCAST = "BROADCAST",
-  COMPLETE = "COMPLETE",
-  FAILED = "FAILED",
+  PENDING = "pending",
+  BROADCAST = "broadcast",
+  COMPLETE = "complete",
+  FAILED = "failed",
 }
 
 /**
@@ -339,3 +337,66 @@ export type Amount = number | bigint | Decimal;
  * Destination type definition.
  */
 export type Destination = string | Address | Wallet;
+
+/**
+ * ServerSigner status type definition.
+ */
+export enum ServerSignerStatus {
+  PENDING = "pending_seed_creation",
+  ACTIVE = "active_seed",
+}
+
+/**
+ * CoinbaseOptions type definition.
+ */
+export type CoinbaseOptions = {
+  /**
+   * The API key name.
+   */
+  apiKeyName?: string;
+
+  /**
+   * The private key associated with the API key.
+   */
+  privateKey?: string;
+
+  /**
+   * Whether to use a Server-Signer or not.
+   */
+  useServerSigner?: boolean;
+
+  /**
+   * If true, logs API requests and responses to the console.
+   */
+  debugging?: boolean;
+
+  /**
+   * The base path for the API.
+   */
+  basePath?: string;
+};
+
+/**
+ * CoinbaseConfigureFromJsonOptions type definition.
+ */
+export type CoinbaseConfigureFromJsonOptions = {
+  /**
+   * The path to the JSON file containing the API key and private key.
+   */
+  filePath: string;
+
+  /**
+   * Whether to use a Server-Signer or not.
+   */
+  useServerSigner?: boolean;
+
+  /**
+   * If true, logs API requests and responses to the console.
+   */
+  debugging?: boolean;
+
+  /**
+   * The base path for the API.
+   */
+  basePath?: string;
+};

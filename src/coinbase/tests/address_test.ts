@@ -20,6 +20,7 @@ import {
 } from "./utils";
 import { ArgumentError } from "../errors";
 import { Transfer } from "../transfer";
+import { TransferStatus } from "../types";
 
 // Test suite for Address class
 describe("Address", () => {
@@ -184,13 +185,6 @@ describe("Address", () => {
     let weiAmount, destination, intervalSeconds, timeoutSeconds;
     let walletId, id;
 
-    const mockProvider = new ethers.JsonRpcProvider(
-      "https://sepolia.base.org",
-    ) as jest.Mocked<ethers.JsonRpcProvider>;
-    mockProvider.getTransaction = jest.fn();
-    mockProvider.getTransactionReceipt = jest.fn();
-    Coinbase.apiClients.baseSepoliaProvider = mockProvider;
-
     beforeEach(() => {
       weiAmount = new Decimal("500000000000000000");
       destination = new Address(VALID_ADDRESS_MODEL, key as unknown as ethers.Wallet);
@@ -219,14 +213,12 @@ describe("Address", () => {
         transaction_hash: "0x6c087c1676e8269dd81e0777244584d0cbfd39b6997b3477242a008fa9349e11",
         ...VALID_TRANSFER_MODEL,
       });
-      mockProvider.getTransaction.mockResolvedValueOnce({
-        blockHash: "0xdeadbeef",
-      } as ethers.TransactionResponse);
-      mockProvider.getTransactionReceipt.mockResolvedValueOnce({
-        status: 1,
-      } as ethers.TransactionReceipt);
+      Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
+        ...VALID_TRANSFER_MODEL,
+        status: TransferStatus.COMPLETE,
+      });
 
-      const transfer = await address.createTransfer(
+      await address.createTransfer(
         weiAmount,
         Coinbase.assets.Wei,
         destination,
@@ -236,6 +228,7 @@ describe("Address", () => {
 
       expect(Coinbase.apiClients.transfer!.createTransfer).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.transfer!.broadcastTransfer).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.transfer!.getTransfer).toHaveBeenCalledTimes(1);
     });
 
     it("should throw an APIError if the createTransfer API call fails", async () => {
@@ -288,6 +281,10 @@ describe("Address", () => {
         transaction_hash: "0x6c087c1676e8269dd81e0777244584d0cbfd39b6997b3477242a008fa9349e11",
         ...VALID_TRANSFER_MODEL,
       });
+      Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
+        ...VALID_TRANSFER_MODEL,
+        status: TransferStatus.BROADCAST,
+      });
       intervalSeconds = 0.000002;
       timeoutSeconds = 0.000002;
 
@@ -313,6 +310,26 @@ describe("Address", () => {
           timeoutSeconds,
         ),
       ).rejects.toThrow(ArgumentError);
+    });
+
+    it("should successfully create and complete a transfer when using server signer", async () => {
+      Coinbase.useServerSigner = true;
+      Coinbase.apiClients.transfer!.createTransfer = mockReturnValue(VALID_TRANSFER_MODEL);
+      Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
+        ...VALID_TRANSFER_MODEL,
+        status: TransferStatus.COMPLETE,
+      });
+
+      await address.createTransfer(
+        weiAmount,
+        Coinbase.assets.Wei,
+        destination,
+        intervalSeconds,
+        timeoutSeconds,
+      );
+
+      expect(Coinbase.apiClients.transfer!.createTransfer).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.transfer!.getTransfer).toHaveBeenCalledTimes(1);
     });
 
     afterEach(() => {

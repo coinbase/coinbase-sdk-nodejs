@@ -9,8 +9,8 @@ import { Address } from "./address";
 import { Coinbase } from "./coinbase";
 import { ArgumentError, InternalError } from "./errors";
 import { Transfer } from "./transfer";
-import { Amount, Destination, SeedData, WalletData } from "./types";
-import { convertStringToHex } from "./utils";
+import { Amount, Destination, SeedData, WalletData, ServerSignerStatus } from "./types";
+import { convertStringToHex, delay } from "./utils";
 import { FaucetTransaction } from "./faucet_transaction";
 import { BalanceMap } from "./balance_map";
 import Decimal from "decimal.js";
@@ -60,24 +60,56 @@ export class Wallet {
    * Instead, use User.createWallet.
    *
    * @constructs Wallet
+   * @param intervalSeconds - The interval at which to poll the CDPService, in seconds.
+   * @param timeoutSeconds - The maximum amount of time to wait for the ServerSigner to create a seed, in seconds.
    * @throws {ArgumentError} If the model or client is not provided.
    * @throws {InternalError} - If address derivation or caching fails.
    * @throws {APIError} - If the request fails.
    * @returns A promise that resolves with the new Wallet object.
    */
-  public static async create(): Promise<Wallet> {
+  public static async create(intervalSeconds = 0.2, timeoutSeconds = 20): Promise<Wallet> {
     const result = await Coinbase.apiClients.wallet!.createWallet({
       wallet: {
         network_id: Coinbase.networkList.BaseSepolia,
+        use_server_signer: Coinbase.useServerSigner,
       },
     });
 
     const wallet = await Wallet.init(result.data, undefined, []);
 
+    if (Coinbase.useServerSigner) {
+      await wallet.waitForSigner(wallet.getId()!, intervalSeconds, timeoutSeconds);
+    }
+
     await wallet.createAddress();
     await wallet.reload();
 
     return wallet;
+  }
+
+  /**
+   * Waits until the ServerSigner has created a seed for the Wallet.
+   *
+   * @param walletId - The ID of the Wallet that is awaiting seed creation.
+   * @param intervalSeconds - The interval at which to poll the CDPService, in seconds.
+   * @param timeoutSeconds - The maximum amount of time to wait for the ServerSigner to create a seed, in seconds.
+   * @throws {APIError} if the API request to get a Wallet fails.
+   * @throws {Error} if the ServerSigner times out.
+   */
+  private async waitForSigner(
+    walletId: string,
+    intervalSeconds = 0.2,
+    timeoutSeconds = 20,
+  ): Promise<void> {
+    const startTime = Date.now();
+    while (Date.now() - startTime < timeoutSeconds * 1000) {
+      const response = await Coinbase.apiClients.wallet!.getWallet(walletId);
+      if (response?.data.server_signer_status === ServerSignerStatus.ACTIVE) {
+        return;
+      }
+      await delay(intervalSeconds);
+    }
+    throw new Error("Wallet creation timed out. Check status of your Server-Signer");
   }
 
   /**
@@ -100,6 +132,10 @@ export class Wallet {
   ): Promise<Wallet> {
     this.validateSeedAndAddressModels(seed, addressModels);
 
+    if (Coinbase.useServerSigner) {
+      return new Wallet(model, undefined, undefined, addressModels);
+    }
+
     const seedAndMaster = this.getSeedAndMasterKey(seed);
     const wallet = new Wallet(model, seedAndMaster.master, seedAndMaster.seed, addressModels);
     wallet.deriveAddresses(addressModels);
@@ -111,6 +147,7 @@ export class Wallet {
    * Exports the Wallet's data to a WalletData object.
    *
    * @returns The Wallet's data.
+   * @throws {APIError} - If the request fails.
    */
   public export(): WalletData {
     if (!this.seed) {
@@ -140,15 +177,18 @@ export class Wallet {
    * @throws {APIError} - If the address creation fails.
    */
   public async createAddress(): Promise<Address> {
-    const hdKey = this.deriveKey();
-    const attestation = this.createAttestation(hdKey);
-    const publicKey = convertStringToHex(hdKey.publicKey!);
-    const key = new ethers.Wallet(convertStringToHex(hdKey.privateKey!));
+    let payload, key;
+    if (!Coinbase.useServerSigner) {
+      const hdKey = this.deriveKey();
+      const attestation = this.createAttestation(hdKey);
+      const publicKey = convertStringToHex(hdKey.publicKey!);
+      key = new ethers.Wallet(convertStringToHex(hdKey.privateKey!));
 
-    const payload = {
-      public_key: publicKey,
-      attestation: attestation,
-    };
+      payload = {
+        public_key: publicKey,
+        attestation: attestation,
+      };
+    }
     const response = await Coinbase.apiClients.address!.createAddress(this.model.id!, payload);
 
     this.cacheAddress(response!.data, key);
@@ -188,6 +228,8 @@ export class Wallet {
 
   /**
    * Reloads the Wallet model with the latest data from the server.
+   *
+   * @throws {APIError} if the API request to get a Wallet fails.
    */
   private async reload(): Promise<void> {
     const result = await Coinbase.apiClients.wallet!.getWallet(this.model.id!);
@@ -323,6 +365,22 @@ export class Wallet {
    */
   public getNetworkId(): string {
     return this.model.network_id;
+  }
+
+  /**
+   * Returns the ServerSigner Status of the Wallet.
+   *
+   * @returns the ServerSigner Status.
+   */
+  public getServerSignerStatus(): ServerSignerStatus | undefined {
+    switch (this.model.server_signer_status) {
+      case ServerSignerStatus.PENDING:
+        return ServerSignerStatus.PENDING;
+      case ServerSignerStatus.ACTIVE:
+        return ServerSignerStatus.ACTIVE;
+      default:
+        return undefined;
+    }
   }
 
   /**

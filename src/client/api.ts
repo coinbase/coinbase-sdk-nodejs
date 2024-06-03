@@ -179,6 +179,19 @@ export interface Balance {
 /**
  *
  * @export
+ * @interface BroadcastTradeRequest
+ */
+export interface BroadcastTradeRequest {
+  /**
+   * The hex-encoded signed payload of the trade
+   * @type {string}
+   * @memberof BroadcastTradeRequest
+   */
+  signed_payload: string;
+}
+/**
+ *
+ * @export
  * @interface BroadcastTransferRequest
  */
 export interface BroadcastTransferRequest {
@@ -200,13 +213,57 @@ export interface CreateAddressRequest {
    * @type {string}
    * @memberof CreateAddressRequest
    */
-  public_key: string;
+  public_key?: string;
   /**
    * An attestation signed by the private key that is associated with the wallet. The attestation will be a hex-encoded signature of a json payload with fields `wallet_id` and `public_key`, signed by the private key associated with the public_key set in the request.
    * @type {string}
    * @memberof CreateAddressRequest
    */
-  attestation: string;
+  attestation?: string;
+}
+/**
+ *
+ * @export
+ * @interface CreateServerSignerRequest
+ */
+export interface CreateServerSignerRequest {
+  /**
+   * The ID of the server signer
+   * @type {string}
+   * @memberof CreateServerSignerRequest
+   */
+  server_signer_id: string;
+  /**
+   * The enrollment data of the server signer. This will be the base64 encoded server-signer-id.
+   * @type {string}
+   * @memberof CreateServerSignerRequest
+   */
+  enrollment_data: string;
+}
+/**
+ *
+ * @export
+ * @interface CreateTradeRequest
+ */
+export interface CreateTradeRequest {
+  /**
+   * The amount to trade
+   * @type {string}
+   * @memberof CreateTradeRequest
+   */
+  amount: string;
+  /**
+   * The ID of the asset to trade
+   * @type {string}
+   * @memberof CreateTradeRequest
+   */
+  from_asset_id: string;
+  /**
+   * The ID of the asset to receive from the trade
+   * @type {string}
+   * @memberof CreateTradeRequest
+   */
+  to_asset_id: string;
 }
 /**
  *
@@ -247,10 +304,29 @@ export interface CreateTransferRequest {
 export interface CreateWalletRequest {
   /**
    *
-   * @type {Wallet}
+   * @type {CreateWalletRequestWallet}
    * @memberof CreateWalletRequest
    */
-  wallet: Wallet;
+  wallet: CreateWalletRequestWallet;
+}
+/**
+ * Parameters for configuring a wallet
+ * @export
+ * @interface CreateWalletRequestWallet
+ */
+export interface CreateWalletRequestWallet {
+  /**
+   * The ID of the blockchain network
+   * @type {string}
+   * @memberof CreateWalletRequestWallet
+   */
+  network_id: string;
+  /**
+   * Whether the wallet should use the project\'s server signer or if the addresses in the wallets will belong to a private key the developer manages. Defaults to false.
+   * @type {boolean}
+   * @memberof CreateWalletRequestWallet
+   */
+  use_server_signer?: boolean;
 }
 /**
  *
@@ -284,6 +360,389 @@ export interface ModelError {
    */
   message: string;
 }
+/**
+ * An event representing a seed creation.
+ * @export
+ * @interface SeedCreationEvent
+ */
+export interface SeedCreationEvent {
+  /**
+   * The ID of the wallet that the server-signer should create the seed for
+   * @type {string}
+   * @memberof SeedCreationEvent
+   */
+  wallet_id: string;
+  /**
+   * The ID of the user that the wallet belongs to
+   * @type {string}
+   * @memberof SeedCreationEvent
+   */
+  wallet_user_id: string;
+}
+/**
+ * The result to a SeedCreationEvent.
+ * @export
+ * @interface SeedCreationEventResult
+ */
+export interface SeedCreationEventResult {
+  /**
+   * The ID of the wallet that the seed was created for
+   * @type {string}
+   * @memberof SeedCreationEventResult
+   */
+  wallet_id: string;
+  /**
+   * The ID of the user that the wallet belongs to
+   * @type {string}
+   * @memberof SeedCreationEventResult
+   */
+  wallet_user_id: string;
+  /**
+   * The extended public key for the first master key derived from seed.
+   * @type {string}
+   * @memberof SeedCreationEventResult
+   */
+  extended_public_key: string;
+  /**
+   * The ID of the seed in Server-Signer used to generate the extended public key.
+   * @type {string}
+   * @memberof SeedCreationEventResult
+   */
+  seed_id: string;
+}
+/**
+ * A Server-Signer assigned to sign transactions in a wallet.
+ * @export
+ * @interface ServerSigner
+ */
+export interface ServerSigner {
+  /**
+   * The ID of the server-signer
+   * @type {string}
+   * @memberof ServerSigner
+   */
+  server_signer_id: string;
+  /**
+   * The IDs of the wallets that the server-signer can sign for
+   * @type {Array<string>}
+   * @memberof ServerSigner
+   */
+  wallets?: Array<string>;
+}
+/**
+ * An event that is waiting to be processed by a Server-Signer.
+ * @export
+ * @interface ServerSignerEvent
+ */
+export interface ServerSignerEvent {
+  /**
+   * The ID of the server-signer that the event is for
+   * @type {string}
+   * @memberof ServerSignerEvent
+   */
+  server_signer_id: string;
+  /**
+   *
+   * @type {ServerSignerEventEvent}
+   * @memberof ServerSignerEvent
+   */
+  event: ServerSignerEventEvent;
+}
+/**
+ * @type ServerSignerEventEvent
+ * @export
+ */
+export type ServerSignerEventEvent = SeedCreationEvent | SignatureCreationEvent;
+
+/**
+ *
+ * @export
+ * @interface ServerSignerEventList
+ */
+export interface ServerSignerEventList {
+  /**
+   *
+   * @type {Array<ServerSignerEvent>}
+   * @memberof ServerSignerEventList
+   */
+  data: Array<ServerSignerEvent>;
+  /**
+   * True if this list has another page of items after this one that can be fetched.
+   * @type {boolean}
+   * @memberof ServerSignerEventList
+   */
+  has_more: boolean;
+  /**
+   * The page token to be used to fetch the next page.
+   * @type {string}
+   * @memberof ServerSignerEventList
+   */
+  next_page: string;
+  /**
+   * The total number of events for the server signer.
+   * @type {number}
+   * @memberof ServerSignerEventList
+   */
+  total_count: number;
+}
+/**
+ * An event representing a signature creation.
+ * @export
+ * @interface SignatureCreationEvent
+ */
+export interface SignatureCreationEvent {
+  /**
+   * The ID of the seed that the server-signer should create the signature for
+   * @type {string}
+   * @memberof SignatureCreationEvent
+   */
+  seed_id: string;
+  /**
+   * The ID of the wallet the signature is for
+   * @type {string}
+   * @memberof SignatureCreationEvent
+   */
+  wallet_id: string;
+  /**
+   * The ID of the user that the wallet belongs to
+   * @type {string}
+   * @memberof SignatureCreationEvent
+   */
+  wallet_user_id: string;
+  /**
+   * The ID of the address the transfer belongs to
+   * @type {string}
+   * @memberof SignatureCreationEvent
+   */
+  address_id: string;
+  /**
+   * The index of the address that the server-signer should sign with
+   * @type {number}
+   * @memberof SignatureCreationEvent
+   */
+  address_index: number;
+  /**
+   * The payload that the server-signer should sign
+   * @type {string}
+   * @memberof SignatureCreationEvent
+   */
+  signing_payload: string;
+  /**
+   *
+   * @type {TransactionType}
+   * @memberof SignatureCreationEvent
+   */
+  transaction_type: TransactionType;
+  /**
+   * The ID of the transaction that the server-signer should sign
+   * @type {string}
+   * @memberof SignatureCreationEvent
+   */
+  transaction_id: string;
+}
+
+/**
+ * The result to a SignatureCreationEvent.
+ * @export
+ * @interface SignatureCreationEventResult
+ */
+export interface SignatureCreationEventResult {
+  /**
+   * The ID of the wallet that the event was created for.
+   * @type {string}
+   * @memberof SignatureCreationEventResult
+   */
+  wallet_id: string;
+  /**
+   * The ID of the user that the wallet belongs to
+   * @type {string}
+   * @memberof SignatureCreationEventResult
+   */
+  wallet_user_id: string;
+  /**
+   * The ID of the address the transfer belongs to
+   * @type {string}
+   * @memberof SignatureCreationEventResult
+   */
+  address_id: string;
+  /**
+   *
+   * @type {TransactionType}
+   * @memberof SignatureCreationEventResult
+   */
+  transaction_type: TransactionType;
+  /**
+   * The ID of the transaction that the Server-Signer has signed for
+   * @type {string}
+   * @memberof SignatureCreationEventResult
+   */
+  transaction_id: string;
+  /**
+   * The signature created by the server-signer.
+   * @type {string}
+   * @memberof SignatureCreationEventResult
+   */
+  signature: string;
+}
+
+/**
+ * A trade of an asset to another asset
+ * @export
+ * @interface Trade
+ */
+export interface Trade {
+  /**
+   * The ID of the blockchain network
+   * @type {string}
+   * @memberof Trade
+   */
+  network_id: string;
+  /**
+   * The ID of the wallet that owns the from address
+   * @type {string}
+   * @memberof Trade
+   */
+  wallet_id: string;
+  /**
+   * The onchain address of the sender
+   * @type {string}
+   * @memberof Trade
+   */
+  address_id: string;
+  /**
+   * The ID of the trade
+   * @type {string}
+   * @memberof Trade
+   */
+  trade_id: string;
+  /**
+   * The amount of the from asset to be traded (in atomic units of the from asset)
+   * @type {string}
+   * @memberof Trade
+   */
+  from_amount: string;
+  /**
+   *
+   * @type {Asset}
+   * @memberof Trade
+   */
+  from_asset: Asset;
+  /**
+   * The amount of the to asset that will be received (in atomic units of the to asset)
+   * @type {string}
+   * @memberof Trade
+   */
+  to_amount: string;
+  /**
+   *
+   * @type {Asset}
+   * @memberof Trade
+   */
+  to_asset: Asset;
+  /**
+   *
+   * @type {Transaction}
+   * @memberof Trade
+   */
+  transaction: Transaction;
+}
+/**
+ *
+ * @export
+ * @interface TradeList
+ */
+export interface TradeList {
+  /**
+   *
+   * @type {Array<Trade>}
+   * @memberof TradeList
+   */
+  data: Array<Trade>;
+  /**
+   * True if this list has another page of items after this one that can be fetched.
+   * @type {boolean}
+   * @memberof TradeList
+   */
+  has_more: boolean;
+  /**
+   * The page token to be used to fetch the next page.
+   * @type {string}
+   * @memberof TradeList
+   */
+  next_page: string;
+  /**
+   * The total number of trades for the address in the wallet.
+   * @type {number}
+   * @memberof TradeList
+   */
+  total_count: number;
+}
+/**
+ * An onchain transaction.
+ * @export
+ * @interface Transaction
+ */
+export interface Transaction {
+  /**
+   * The ID of the blockchain network
+   * @type {string}
+   * @memberof Transaction
+   */
+  network_id: string;
+  /**
+   * The onchain address of the sender
+   * @type {string}
+   * @memberof Transaction
+   */
+  from_address_id: string;
+  /**
+   * The unsigned payload of the transaction. This is the payload that needs to be signed by the sender.
+   * @type {string}
+   * @memberof Transaction
+   */
+  unsigned_payload: string;
+  /**
+   * The signed payload of the transaction. This is the payload that has been signed by the sender.
+   * @type {string}
+   * @memberof Transaction
+   */
+  signed_payload?: string;
+  /**
+   * The hash of the transaction
+   * @type {string}
+   * @memberof Transaction
+   */
+  transaction_hash?: string;
+  /**
+   * The status of the transaction
+   * @type {string}
+   * @memberof Transaction
+   */
+  status: TransactionStatusEnum;
+}
+
+export const TransactionStatusEnum = {
+  Pending: "pending",
+  Broadcast: "broadcast",
+  Complete: "complete",
+  Failed: "failed",
+} as const;
+
+export type TransactionStatusEnum =
+  (typeof TransactionStatusEnum)[keyof typeof TransactionStatusEnum];
+
+/**
+ *
+ * @export
+ * @enum {string}
+ */
+
+export const TransactionType = {
+  Transfer: "transfer",
+} as const;
+
+export type TransactionType = (typeof TransactionType)[keyof typeof TransactionType];
+
 /**
  * A transfer of an asset from one address to another
  * @export
@@ -428,7 +887,7 @@ export interface Wallet {
    * @type {string}
    * @memberof Wallet
    */
-  id?: string;
+  id: string;
   /**
    * The ID of the blockchain network
    * @type {string}
@@ -441,7 +900,22 @@ export interface Wallet {
    * @memberof Wallet
    */
   default_address?: Address;
+  /**
+   * The status of the Server-Signer for the wallet if present.
+   * @type {string}
+   * @memberof Wallet
+   */
+  server_signer_status?: WalletServerSignerStatusEnum;
 }
+
+export const WalletServerSignerStatusEnum = {
+  PendingSeedCreation: "pending_seed_creation",
+  ActiveSeed: "active_seed",
+} as const;
+
+export type WalletServerSignerStatusEnum =
+  (typeof WalletServerSignerStatusEnum)[keyof typeof WalletServerSignerStatusEnum];
+
 /**
  * Paginated list of wallets
  * @export
@@ -506,11 +980,7 @@ export const AddressesApiAxiosParamCreator = function (configuration?: Configura
         baseOptions = configuration.baseOptions;
       }
 
-      const localVarRequestOptions = {
-        method: "POST",
-        ...baseOptions,
-        ...options,
-      };
+      const localVarRequestOptions = { method: "POST", ...baseOptions, ...options };
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
@@ -561,11 +1031,7 @@ export const AddressesApiAxiosParamCreator = function (configuration?: Configura
         baseOptions = configuration.baseOptions;
       }
 
-      const localVarRequestOptions = {
-        method: "GET",
-        ...baseOptions,
-        ...options,
-      };
+      const localVarRequestOptions = { method: "GET", ...baseOptions, ...options };
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
@@ -614,11 +1080,7 @@ export const AddressesApiAxiosParamCreator = function (configuration?: Configura
         baseOptions = configuration.baseOptions;
       }
 
-      const localVarRequestOptions = {
-        method: "GET",
-        ...baseOptions,
-        ...options,
-      };
+      const localVarRequestOptions = { method: "GET", ...baseOptions, ...options };
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
@@ -664,11 +1126,7 @@ export const AddressesApiAxiosParamCreator = function (configuration?: Configura
         baseOptions = configuration.baseOptions;
       }
 
-      const localVarRequestOptions = {
-        method: "GET",
-        ...baseOptions,
-        ...options,
-      };
+      const localVarRequestOptions = { method: "GET", ...baseOptions, ...options };
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
@@ -717,11 +1175,7 @@ export const AddressesApiAxiosParamCreator = function (configuration?: Configura
         baseOptions = configuration.baseOptions;
       }
 
-      const localVarRequestOptions = {
-        method: "GET",
-        ...baseOptions,
-        ...options,
-      };
+      const localVarRequestOptions = { method: "GET", ...baseOptions, ...options };
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
@@ -773,11 +1227,7 @@ export const AddressesApiAxiosParamCreator = function (configuration?: Configura
         baseOptions = configuration.baseOptions;
       }
 
-      const localVarRequestOptions = {
-        method: "POST",
-        ...baseOptions,
-        ...options,
-      };
+      const localVarRequestOptions = { method: "POST", ...baseOptions, ...options };
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
@@ -1109,12 +1559,115 @@ export const AddressesApiFactory = function (
 };
 
 /**
+ * AddressesApi - interface
+ * @export
+ * @interface AddressesApi
+ */
+export interface AddressesApiInterface {
+  /**
+   * Create a new address scoped to the wallet.
+   * @summary Create a new address
+   * @param {string} walletId The ID of the wallet to create the address in.
+   * @param {CreateAddressRequest} [createAddressRequest]
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof AddressesApiInterface
+   */
+  createAddress(
+    walletId: string,
+    createAddressRequest?: CreateAddressRequest,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<Address>;
+
+  /**
+   * Get address
+   * @summary Get address by onchain address
+   * @param {string} walletId The ID of the wallet the address belongs to.
+   * @param {string} addressId The onchain address of the address that is being fetched.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof AddressesApiInterface
+   */
+  getAddress(
+    walletId: string,
+    addressId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<Address>;
+
+  /**
+   * Get address balance
+   * @summary Get address balance for asset
+   * @param {string} walletId The ID of the wallet to fetch the balance for
+   * @param {string} addressId The onchain address of the address that is being fetched.
+   * @param {string} assetId The symbol of the asset to fetch the balance for
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof AddressesApiInterface
+   */
+  getAddressBalance(
+    walletId: string,
+    addressId: string,
+    assetId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<Balance>;
+
+  /**
+   * Get address balances
+   * @summary Get all balances for address
+   * @param {string} walletId The ID of the wallet to fetch the balances for
+   * @param {string} addressId The onchain address of the address that is being fetched.
+   * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof AddressesApiInterface
+   */
+  listAddressBalances(
+    walletId: string,
+    addressId: string,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<AddressBalanceList>;
+
+  /**
+   * List addresses in the wallet.
+   * @summary List addresses in a wallet.
+   * @param {string} walletId The ID of the wallet whose addresses to fetch
+   * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof AddressesApiInterface
+   */
+  listAddresses(
+    walletId: string,
+    limit?: number,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<AddressList>;
+
+  /**
+   * Request faucet funds to be sent to onchain address.
+   * @summary Request faucet funds for onchain address.
+   * @param {string} walletId The ID of the wallet the address belongs to.
+   * @param {string} addressId The onchain address of the address that is being fetched.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof AddressesApiInterface
+   */
+  requestFaucetFunds(
+    walletId: string,
+    addressId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<FaucetTransaction>;
+}
+
+/**
  * AddressesApi - object-oriented interface
  * @export
  * @class AddressesApi
  * @extends {BaseAPI}
  */
-export class AddressesApi extends BaseAPI {
+export class AddressesApi extends BaseAPI implements AddressesApiInterface {
   /**
    * Create a new address scoped to the wallet.
    * @summary Create a new address
@@ -1229,6 +1782,1420 @@ export class AddressesApi extends BaseAPI {
 }
 
 /**
+ * ServerSignersApi - axios parameter creator
+ * @export
+ */
+export const ServerSignersApiAxiosParamCreator = function (configuration?: Configuration) {
+  return {
+    /**
+     * Create a new Server-Signer
+     * @summary Create a new Server-Signer
+     * @param {CreateServerSignerRequest} [createServerSignerRequest]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    createServerSigner: async (
+      createServerSignerRequest?: CreateServerSignerRequest,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      const localVarPath = `/v1/server_signers`;
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = { method: "POST", ...baseOptions, ...options };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      localVarHeaderParameter["Content-Type"] = "application/json";
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter);
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+      localVarRequestOptions.data = serializeDataIfNeeded(
+        createServerSignerRequest,
+        localVarRequestOptions,
+        configuration,
+      );
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     * Get a server signer by ID
+     * @summary Get a server signer by ID
+     * @param {string} serverSignerId The ID of the server signer to fetch
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getServerSigner: async (
+      serverSignerId: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'serverSignerId' is not null or undefined
+      assertParamExists("getServerSigner", "serverSignerId", serverSignerId);
+      const localVarPath = `/v1/server_signers/{server_signer_id}`.replace(
+        `{${"server_signer_id"}}`,
+        encodeURIComponent(String(serverSignerId)),
+      );
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = { method: "GET", ...baseOptions, ...options };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter);
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     * List events for a server signer
+     * @summary List events for a server signer
+     * @param {string} serverSignerId The ID of the server signer to fetch events for
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    listServerSignerEvents: async (
+      serverSignerId: string,
+      limit?: number,
+      page?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'serverSignerId' is not null or undefined
+      assertParamExists("listServerSignerEvents", "serverSignerId", serverSignerId);
+      const localVarPath = `/v1/server_signers/{server_signer_id}/events`.replace(
+        `{${"server_signer_id"}}`,
+        encodeURIComponent(String(serverSignerId)),
+      );
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = { method: "GET", ...baseOptions, ...options };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      if (limit !== undefined) {
+        localVarQueryParameter["limit"] = limit;
+      }
+
+      if (page !== undefined) {
+        localVarQueryParameter["page"] = page;
+      }
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter);
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     * List server signers for the current project
+     * @summary List server signers for the current project
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    listServerSigners: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      const localVarPath = `/v1/server_signers`;
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = { method: "GET", ...baseOptions, ...options };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter);
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     * Submit the result of a server signer event
+     * @summary Submit the result of a server signer event
+     * @param {string} serverSignerId The ID of the server signer to submit the event result for
+     * @param {SeedCreationEventResult} [seedCreationEventResult]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    submitServerSignerSeedEventResult: async (
+      serverSignerId: string,
+      seedCreationEventResult?: SeedCreationEventResult,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'serverSignerId' is not null or undefined
+      assertParamExists("submitServerSignerSeedEventResult", "serverSignerId", serverSignerId);
+      const localVarPath = `/v1/server_signers/{server_signer_id}/seed_event_result`.replace(
+        `{${"server_signer_id"}}`,
+        encodeURIComponent(String(serverSignerId)),
+      );
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = { method: "POST", ...baseOptions, ...options };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      localVarHeaderParameter["Content-Type"] = "application/json";
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter);
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+      localVarRequestOptions.data = serializeDataIfNeeded(
+        seedCreationEventResult,
+        localVarRequestOptions,
+        configuration,
+      );
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     * Submit the result of a server signer event
+     * @summary Submit the result of a server signer event
+     * @param {string} serverSignerId The ID of the server signer to submit the event result for
+     * @param {SignatureCreationEventResult} [signatureCreationEventResult]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    submitServerSignerSignatureEventResult: async (
+      serverSignerId: string,
+      signatureCreationEventResult?: SignatureCreationEventResult,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'serverSignerId' is not null or undefined
+      assertParamExists("submitServerSignerSignatureEventResult", "serverSignerId", serverSignerId);
+      const localVarPath = `/v1/server_signers/{server_signer_id}/signature_event_result`.replace(
+        `{${"server_signer_id"}}`,
+        encodeURIComponent(String(serverSignerId)),
+      );
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = { method: "POST", ...baseOptions, ...options };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      localVarHeaderParameter["Content-Type"] = "application/json";
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter);
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+      localVarRequestOptions.data = serializeDataIfNeeded(
+        signatureCreationEventResult,
+        localVarRequestOptions,
+        configuration,
+      );
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+  };
+};
+
+/**
+ * ServerSignersApi - functional programming interface
+ * @export
+ */
+export const ServerSignersApiFp = function (configuration?: Configuration) {
+  const localVarAxiosParamCreator = ServerSignersApiAxiosParamCreator(configuration);
+  return {
+    /**
+     * Create a new Server-Signer
+     * @summary Create a new Server-Signer
+     * @param {CreateServerSignerRequest} [createServerSignerRequest]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async createServerSigner(
+      createServerSignerRequest?: CreateServerSignerRequest,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ServerSigner>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.createServerSigner(
+        createServerSignerRequest,
+        options,
+      );
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["ServerSignersApi.createServerSigner"]?.[localVarOperationServerIndex]
+          ?.url;
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath);
+    },
+    /**
+     * Get a server signer by ID
+     * @summary Get a server signer by ID
+     * @param {string} serverSignerId The ID of the server signer to fetch
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getServerSigner(
+      serverSignerId: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ServerSigner>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getServerSigner(
+        serverSignerId,
+        options,
+      );
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["ServerSignersApi.getServerSigner"]?.[localVarOperationServerIndex]?.url;
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath);
+    },
+    /**
+     * List events for a server signer
+     * @summary List events for a server signer
+     * @param {string} serverSignerId The ID of the server signer to fetch events for
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async listServerSignerEvents(
+      serverSignerId: string,
+      limit?: number,
+      page?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ServerSignerEventList>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.listServerSignerEvents(
+        serverSignerId,
+        limit,
+        page,
+        options,
+      );
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["ServerSignersApi.listServerSignerEvents"]?.[
+          localVarOperationServerIndex
+        ]?.url;
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath);
+    },
+    /**
+     * List server signers for the current project
+     * @summary List server signers for the current project
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async listServerSigners(
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ServerSigner>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.listServerSigners(options);
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["ServerSignersApi.listServerSigners"]?.[localVarOperationServerIndex]
+          ?.url;
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath);
+    },
+    /**
+     * Submit the result of a server signer event
+     * @summary Submit the result of a server signer event
+     * @param {string} serverSignerId The ID of the server signer to submit the event result for
+     * @param {SeedCreationEventResult} [seedCreationEventResult]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async submitServerSignerSeedEventResult(
+      serverSignerId: string,
+      seedCreationEventResult?: SeedCreationEventResult,
+      options?: RawAxiosRequestConfig,
+    ): Promise<
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<SeedCreationEventResult>
+    > {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.submitServerSignerSeedEventResult(
+        serverSignerId,
+        seedCreationEventResult,
+        options,
+      );
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["ServerSignersApi.submitServerSignerSeedEventResult"]?.[
+          localVarOperationServerIndex
+        ]?.url;
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath);
+    },
+    /**
+     * Submit the result of a server signer event
+     * @summary Submit the result of a server signer event
+     * @param {string} serverSignerId The ID of the server signer to submit the event result for
+     * @param {SignatureCreationEventResult} [signatureCreationEventResult]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async submitServerSignerSignatureEventResult(
+      serverSignerId: string,
+      signatureCreationEventResult?: SignatureCreationEventResult,
+      options?: RawAxiosRequestConfig,
+    ): Promise<
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<SignatureCreationEventResult>
+    > {
+      const localVarAxiosArgs =
+        await localVarAxiosParamCreator.submitServerSignerSignatureEventResult(
+          serverSignerId,
+          signatureCreationEventResult,
+          options,
+        );
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["ServerSignersApi.submitServerSignerSignatureEventResult"]?.[
+          localVarOperationServerIndex
+        ]?.url;
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath);
+    },
+  };
+};
+
+/**
+ * ServerSignersApi - factory interface
+ * @export
+ */
+export const ServerSignersApiFactory = function (
+  configuration?: Configuration,
+  basePath?: string,
+  axios?: AxiosInstance,
+) {
+  const localVarFp = ServerSignersApiFp(configuration);
+  return {
+    /**
+     * Create a new Server-Signer
+     * @summary Create a new Server-Signer
+     * @param {CreateServerSignerRequest} [createServerSignerRequest]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    createServerSigner(
+      createServerSignerRequest?: CreateServerSignerRequest,
+      options?: any,
+    ): AxiosPromise<ServerSigner> {
+      return localVarFp
+        .createServerSigner(createServerSignerRequest, options)
+        .then(request => request(axios, basePath));
+    },
+    /**
+     * Get a server signer by ID
+     * @summary Get a server signer by ID
+     * @param {string} serverSignerId The ID of the server signer to fetch
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getServerSigner(serverSignerId: string, options?: any): AxiosPromise<ServerSigner> {
+      return localVarFp
+        .getServerSigner(serverSignerId, options)
+        .then(request => request(axios, basePath));
+    },
+    /**
+     * List events for a server signer
+     * @summary List events for a server signer
+     * @param {string} serverSignerId The ID of the server signer to fetch events for
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    listServerSignerEvents(
+      serverSignerId: string,
+      limit?: number,
+      page?: string,
+      options?: any,
+    ): AxiosPromise<ServerSignerEventList> {
+      return localVarFp
+        .listServerSignerEvents(serverSignerId, limit, page, options)
+        .then(request => request(axios, basePath));
+    },
+    /**
+     * List server signers for the current project
+     * @summary List server signers for the current project
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    listServerSigners(options?: any): AxiosPromise<ServerSigner> {
+      return localVarFp.listServerSigners(options).then(request => request(axios, basePath));
+    },
+    /**
+     * Submit the result of a server signer event
+     * @summary Submit the result of a server signer event
+     * @param {string} serverSignerId The ID of the server signer to submit the event result for
+     * @param {SeedCreationEventResult} [seedCreationEventResult]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    submitServerSignerSeedEventResult(
+      serverSignerId: string,
+      seedCreationEventResult?: SeedCreationEventResult,
+      options?: any,
+    ): AxiosPromise<SeedCreationEventResult> {
+      return localVarFp
+        .submitServerSignerSeedEventResult(serverSignerId, seedCreationEventResult, options)
+        .then(request => request(axios, basePath));
+    },
+    /**
+     * Submit the result of a server signer event
+     * @summary Submit the result of a server signer event
+     * @param {string} serverSignerId The ID of the server signer to submit the event result for
+     * @param {SignatureCreationEventResult} [signatureCreationEventResult]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    submitServerSignerSignatureEventResult(
+      serverSignerId: string,
+      signatureCreationEventResult?: SignatureCreationEventResult,
+      options?: any,
+    ): AxiosPromise<SignatureCreationEventResult> {
+      return localVarFp
+        .submitServerSignerSignatureEventResult(
+          serverSignerId,
+          signatureCreationEventResult,
+          options,
+        )
+        .then(request => request(axios, basePath));
+    },
+  };
+};
+
+/**
+ * ServerSignersApi - interface
+ * @export
+ * @interface ServerSignersApi
+ */
+export interface ServerSignersApiInterface {
+  /**
+   * Create a new Server-Signer
+   * @summary Create a new Server-Signer
+   * @param {CreateServerSignerRequest} [createServerSignerRequest]
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ServerSignersApiInterface
+   */
+  createServerSigner(
+    createServerSignerRequest?: CreateServerSignerRequest,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<ServerSigner>;
+
+  /**
+   * Get a server signer by ID
+   * @summary Get a server signer by ID
+   * @param {string} serverSignerId The ID of the server signer to fetch
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ServerSignersApiInterface
+   */
+  getServerSigner(
+    serverSignerId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<ServerSigner>;
+
+  /**
+   * List events for a server signer
+   * @summary List events for a server signer
+   * @param {string} serverSignerId The ID of the server signer to fetch events for
+   * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ServerSignersApiInterface
+   */
+  listServerSignerEvents(
+    serverSignerId: string,
+    limit?: number,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<ServerSignerEventList>;
+
+  /**
+   * List server signers for the current project
+   * @summary List server signers for the current project
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ServerSignersApiInterface
+   */
+  listServerSigners(options?: RawAxiosRequestConfig): AxiosPromise<ServerSigner>;
+
+  /**
+   * Submit the result of a server signer event
+   * @summary Submit the result of a server signer event
+   * @param {string} serverSignerId The ID of the server signer to submit the event result for
+   * @param {SeedCreationEventResult} [seedCreationEventResult]
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ServerSignersApiInterface
+   */
+  submitServerSignerSeedEventResult(
+    serverSignerId: string,
+    seedCreationEventResult?: SeedCreationEventResult,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<SeedCreationEventResult>;
+
+  /**
+   * Submit the result of a server signer event
+   * @summary Submit the result of a server signer event
+   * @param {string} serverSignerId The ID of the server signer to submit the event result for
+   * @param {SignatureCreationEventResult} [signatureCreationEventResult]
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ServerSignersApiInterface
+   */
+  submitServerSignerSignatureEventResult(
+    serverSignerId: string,
+    signatureCreationEventResult?: SignatureCreationEventResult,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<SignatureCreationEventResult>;
+}
+
+/**
+ * ServerSignersApi - object-oriented interface
+ * @export
+ * @class ServerSignersApi
+ * @extends {BaseAPI}
+ */
+export class ServerSignersApi extends BaseAPI implements ServerSignersApiInterface {
+  /**
+   * Create a new Server-Signer
+   * @summary Create a new Server-Signer
+   * @param {CreateServerSignerRequest} [createServerSignerRequest]
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ServerSignersApi
+   */
+  public createServerSigner(
+    createServerSignerRequest?: CreateServerSignerRequest,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ServerSignersApiFp(this.configuration)
+      .createServerSigner(createServerSignerRequest, options)
+      .then(request => request(this.axios, this.basePath));
+  }
+
+  /**
+   * Get a server signer by ID
+   * @summary Get a server signer by ID
+   * @param {string} serverSignerId The ID of the server signer to fetch
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ServerSignersApi
+   */
+  public getServerSigner(serverSignerId: string, options?: RawAxiosRequestConfig) {
+    return ServerSignersApiFp(this.configuration)
+      .getServerSigner(serverSignerId, options)
+      .then(request => request(this.axios, this.basePath));
+  }
+
+  /**
+   * List events for a server signer
+   * @summary List events for a server signer
+   * @param {string} serverSignerId The ID of the server signer to fetch events for
+   * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ServerSignersApi
+   */
+  public listServerSignerEvents(
+    serverSignerId: string,
+    limit?: number,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ServerSignersApiFp(this.configuration)
+      .listServerSignerEvents(serverSignerId, limit, page, options)
+      .then(request => request(this.axios, this.basePath));
+  }
+
+  /**
+   * List server signers for the current project
+   * @summary List server signers for the current project
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ServerSignersApi
+   */
+  public listServerSigners(options?: RawAxiosRequestConfig) {
+    return ServerSignersApiFp(this.configuration)
+      .listServerSigners(options)
+      .then(request => request(this.axios, this.basePath));
+  }
+
+  /**
+   * Submit the result of a server signer event
+   * @summary Submit the result of a server signer event
+   * @param {string} serverSignerId The ID of the server signer to submit the event result for
+   * @param {SeedCreationEventResult} [seedCreationEventResult]
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ServerSignersApi
+   */
+  public submitServerSignerSeedEventResult(
+    serverSignerId: string,
+    seedCreationEventResult?: SeedCreationEventResult,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ServerSignersApiFp(this.configuration)
+      .submitServerSignerSeedEventResult(serverSignerId, seedCreationEventResult, options)
+      .then(request => request(this.axios, this.basePath));
+  }
+
+  /**
+   * Submit the result of a server signer event
+   * @summary Submit the result of a server signer event
+   * @param {string} serverSignerId The ID of the server signer to submit the event result for
+   * @param {SignatureCreationEventResult} [signatureCreationEventResult]
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ServerSignersApi
+   */
+  public submitServerSignerSignatureEventResult(
+    serverSignerId: string,
+    signatureCreationEventResult?: SignatureCreationEventResult,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ServerSignersApiFp(this.configuration)
+      .submitServerSignerSignatureEventResult(serverSignerId, signatureCreationEventResult, options)
+      .then(request => request(this.axios, this.basePath));
+  }
+}
+
+/**
+ * TradesApi - axios parameter creator
+ * @export
+ */
+export const TradesApiAxiosParamCreator = function (configuration?: Configuration) {
+  return {
+    /**
+     * Broadcast a trade
+     * @summary Broadcast a trade
+     * @param {string} walletId The ID of the wallet the address belongs to
+     * @param {string} addressId The ID of the address the trade belongs to
+     * @param {string} tradeId The ID of the trade to broadcast
+     * @param {BroadcastTradeRequest} broadcastTradeRequest
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    broadcastTrade: async (
+      walletId: string,
+      addressId: string,
+      tradeId: string,
+      broadcastTradeRequest: BroadcastTradeRequest,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'walletId' is not null or undefined
+      assertParamExists("broadcastTrade", "walletId", walletId);
+      // verify required parameter 'addressId' is not null or undefined
+      assertParamExists("broadcastTrade", "addressId", addressId);
+      // verify required parameter 'tradeId' is not null or undefined
+      assertParamExists("broadcastTrade", "tradeId", tradeId);
+      // verify required parameter 'broadcastTradeRequest' is not null or undefined
+      assertParamExists("broadcastTrade", "broadcastTradeRequest", broadcastTradeRequest);
+      const localVarPath =
+        `/v1/wallets/{wallet_id}/addresses/{address_id}/trades/{trade_id}/broadcast`
+          .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
+          .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)))
+          .replace(`{${"trade_id"}}`, encodeURIComponent(String(tradeId)));
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = { method: "POST", ...baseOptions, ...options };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      localVarHeaderParameter["Content-Type"] = "application/json";
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter);
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+      localVarRequestOptions.data = serializeDataIfNeeded(
+        broadcastTradeRequest,
+        localVarRequestOptions,
+        configuration,
+      );
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     * Create a new trade
+     * @summary Create a new trade for an address
+     * @param {string} walletId The ID of the wallet the source address belongs to
+     * @param {string} addressId The ID of the address to conduct the trade from
+     * @param {CreateTradeRequest} createTradeRequest
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    createTrade: async (
+      walletId: string,
+      addressId: string,
+      createTradeRequest: CreateTradeRequest,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'walletId' is not null or undefined
+      assertParamExists("createTrade", "walletId", walletId);
+      // verify required parameter 'addressId' is not null or undefined
+      assertParamExists("createTrade", "addressId", addressId);
+      // verify required parameter 'createTradeRequest' is not null or undefined
+      assertParamExists("createTrade", "createTradeRequest", createTradeRequest);
+      const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/trades`
+        .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
+        .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)));
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = { method: "POST", ...baseOptions, ...options };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      localVarHeaderParameter["Content-Type"] = "application/json";
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter);
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+      localVarRequestOptions.data = serializeDataIfNeeded(
+        createTradeRequest,
+        localVarRequestOptions,
+        configuration,
+      );
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     * Get a trade by ID
+     * @summary Get a trade by ID
+     * @param {string} walletId The ID of the wallet the address belongs to
+     * @param {string} addressId The ID of the address the trade belongs to
+     * @param {string} tradeId The ID of the trade to fetch
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getTrade: async (
+      walletId: string,
+      addressId: string,
+      tradeId: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'walletId' is not null or undefined
+      assertParamExists("getTrade", "walletId", walletId);
+      // verify required parameter 'addressId' is not null or undefined
+      assertParamExists("getTrade", "addressId", addressId);
+      // verify required parameter 'tradeId' is not null or undefined
+      assertParamExists("getTrade", "tradeId", tradeId);
+      const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/trades/{trade_id}`
+        .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
+        .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)))
+        .replace(`{${"trade_id"}}`, encodeURIComponent(String(tradeId)));
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = { method: "GET", ...baseOptions, ...options };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter);
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     * List trades for an address.
+     * @summary List trades for an address.
+     * @param {string} walletId The ID of the wallet the address belongs to
+     * @param {string} addressId The ID of the address to list trades for
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    listTrades: async (
+      walletId: string,
+      addressId: string,
+      limit?: number,
+      page?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'walletId' is not null or undefined
+      assertParamExists("listTrades", "walletId", walletId);
+      // verify required parameter 'addressId' is not null or undefined
+      assertParamExists("listTrades", "addressId", addressId);
+      const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/trades`
+        .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
+        .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)));
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = { method: "GET", ...baseOptions, ...options };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      if (limit !== undefined) {
+        localVarQueryParameter["limit"] = limit;
+      }
+
+      if (page !== undefined) {
+        localVarQueryParameter["page"] = page;
+      }
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter);
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+  };
+};
+
+/**
+ * TradesApi - functional programming interface
+ * @export
+ */
+export const TradesApiFp = function (configuration?: Configuration) {
+  const localVarAxiosParamCreator = TradesApiAxiosParamCreator(configuration);
+  return {
+    /**
+     * Broadcast a trade
+     * @summary Broadcast a trade
+     * @param {string} walletId The ID of the wallet the address belongs to
+     * @param {string} addressId The ID of the address the trade belongs to
+     * @param {string} tradeId The ID of the trade to broadcast
+     * @param {BroadcastTradeRequest} broadcastTradeRequest
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async broadcastTrade(
+      walletId: string,
+      addressId: string,
+      tradeId: string,
+      broadcastTradeRequest: BroadcastTradeRequest,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Trade>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.broadcastTrade(
+        walletId,
+        addressId,
+        tradeId,
+        broadcastTradeRequest,
+        options,
+      );
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["TradesApi.broadcastTrade"]?.[localVarOperationServerIndex]?.url;
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath);
+    },
+    /**
+     * Create a new trade
+     * @summary Create a new trade for an address
+     * @param {string} walletId The ID of the wallet the source address belongs to
+     * @param {string} addressId The ID of the address to conduct the trade from
+     * @param {CreateTradeRequest} createTradeRequest
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async createTrade(
+      walletId: string,
+      addressId: string,
+      createTradeRequest: CreateTradeRequest,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Trade>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.createTrade(
+        walletId,
+        addressId,
+        createTradeRequest,
+        options,
+      );
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["TradesApi.createTrade"]?.[localVarOperationServerIndex]?.url;
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath);
+    },
+    /**
+     * Get a trade by ID
+     * @summary Get a trade by ID
+     * @param {string} walletId The ID of the wallet the address belongs to
+     * @param {string} addressId The ID of the address the trade belongs to
+     * @param {string} tradeId The ID of the trade to fetch
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getTrade(
+      walletId: string,
+      addressId: string,
+      tradeId: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Trade>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getTrade(
+        walletId,
+        addressId,
+        tradeId,
+        options,
+      );
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["TradesApi.getTrade"]?.[localVarOperationServerIndex]?.url;
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath);
+    },
+    /**
+     * List trades for an address.
+     * @summary List trades for an address.
+     * @param {string} walletId The ID of the wallet the address belongs to
+     * @param {string} addressId The ID of the address to list trades for
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async listTrades(
+      walletId: string,
+      addressId: string,
+      limit?: number,
+      page?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TradeList>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.listTrades(
+        walletId,
+        addressId,
+        limit,
+        page,
+        options,
+      );
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap["TradesApi.listTrades"]?.[localVarOperationServerIndex]?.url;
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath);
+    },
+  };
+};
+
+/**
+ * TradesApi - factory interface
+ * @export
+ */
+export const TradesApiFactory = function (
+  configuration?: Configuration,
+  basePath?: string,
+  axios?: AxiosInstance,
+) {
+  const localVarFp = TradesApiFp(configuration);
+  return {
+    /**
+     * Broadcast a trade
+     * @summary Broadcast a trade
+     * @param {string} walletId The ID of the wallet the address belongs to
+     * @param {string} addressId The ID of the address the trade belongs to
+     * @param {string} tradeId The ID of the trade to broadcast
+     * @param {BroadcastTradeRequest} broadcastTradeRequest
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    broadcastTrade(
+      walletId: string,
+      addressId: string,
+      tradeId: string,
+      broadcastTradeRequest: BroadcastTradeRequest,
+      options?: any,
+    ): AxiosPromise<Trade> {
+      return localVarFp
+        .broadcastTrade(walletId, addressId, tradeId, broadcastTradeRequest, options)
+        .then(request => request(axios, basePath));
+    },
+    /**
+     * Create a new trade
+     * @summary Create a new trade for an address
+     * @param {string} walletId The ID of the wallet the source address belongs to
+     * @param {string} addressId The ID of the address to conduct the trade from
+     * @param {CreateTradeRequest} createTradeRequest
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    createTrade(
+      walletId: string,
+      addressId: string,
+      createTradeRequest: CreateTradeRequest,
+      options?: any,
+    ): AxiosPromise<Trade> {
+      return localVarFp
+        .createTrade(walletId, addressId, createTradeRequest, options)
+        .then(request => request(axios, basePath));
+    },
+    /**
+     * Get a trade by ID
+     * @summary Get a trade by ID
+     * @param {string} walletId The ID of the wallet the address belongs to
+     * @param {string} addressId The ID of the address the trade belongs to
+     * @param {string} tradeId The ID of the trade to fetch
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getTrade(
+      walletId: string,
+      addressId: string,
+      tradeId: string,
+      options?: any,
+    ): AxiosPromise<Trade> {
+      return localVarFp
+        .getTrade(walletId, addressId, tradeId, options)
+        .then(request => request(axios, basePath));
+    },
+    /**
+     * List trades for an address.
+     * @summary List trades for an address.
+     * @param {string} walletId The ID of the wallet the address belongs to
+     * @param {string} addressId The ID of the address to list trades for
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    listTrades(
+      walletId: string,
+      addressId: string,
+      limit?: number,
+      page?: string,
+      options?: any,
+    ): AxiosPromise<TradeList> {
+      return localVarFp
+        .listTrades(walletId, addressId, limit, page, options)
+        .then(request => request(axios, basePath));
+    },
+  };
+};
+
+/**
+ * TradesApi - interface
+ * @export
+ * @interface TradesApi
+ */
+export interface TradesApiInterface {
+  /**
+   * Broadcast a trade
+   * @summary Broadcast a trade
+   * @param {string} walletId The ID of the wallet the address belongs to
+   * @param {string} addressId The ID of the address the trade belongs to
+   * @param {string} tradeId The ID of the trade to broadcast
+   * @param {BroadcastTradeRequest} broadcastTradeRequest
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof TradesApiInterface
+   */
+  broadcastTrade(
+    walletId: string,
+    addressId: string,
+    tradeId: string,
+    broadcastTradeRequest: BroadcastTradeRequest,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<Trade>;
+
+  /**
+   * Create a new trade
+   * @summary Create a new trade for an address
+   * @param {string} walletId The ID of the wallet the source address belongs to
+   * @param {string} addressId The ID of the address to conduct the trade from
+   * @param {CreateTradeRequest} createTradeRequest
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof TradesApiInterface
+   */
+  createTrade(
+    walletId: string,
+    addressId: string,
+    createTradeRequest: CreateTradeRequest,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<Trade>;
+
+  /**
+   * Get a trade by ID
+   * @summary Get a trade by ID
+   * @param {string} walletId The ID of the wallet the address belongs to
+   * @param {string} addressId The ID of the address the trade belongs to
+   * @param {string} tradeId The ID of the trade to fetch
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof TradesApiInterface
+   */
+  getTrade(
+    walletId: string,
+    addressId: string,
+    tradeId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<Trade>;
+
+  /**
+   * List trades for an address.
+   * @summary List trades for an address.
+   * @param {string} walletId The ID of the wallet the address belongs to
+   * @param {string} addressId The ID of the address to list trades for
+   * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof TradesApiInterface
+   */
+  listTrades(
+    walletId: string,
+    addressId: string,
+    limit?: number,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<TradeList>;
+}
+
+/**
+ * TradesApi - object-oriented interface
+ * @export
+ * @class TradesApi
+ * @extends {BaseAPI}
+ */
+export class TradesApi extends BaseAPI implements TradesApiInterface {
+  /**
+   * Broadcast a trade
+   * @summary Broadcast a trade
+   * @param {string} walletId The ID of the wallet the address belongs to
+   * @param {string} addressId The ID of the address the trade belongs to
+   * @param {string} tradeId The ID of the trade to broadcast
+   * @param {BroadcastTradeRequest} broadcastTradeRequest
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof TradesApi
+   */
+  public broadcastTrade(
+    walletId: string,
+    addressId: string,
+    tradeId: string,
+    broadcastTradeRequest: BroadcastTradeRequest,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return TradesApiFp(this.configuration)
+      .broadcastTrade(walletId, addressId, tradeId, broadcastTradeRequest, options)
+      .then(request => request(this.axios, this.basePath));
+  }
+
+  /**
+   * Create a new trade
+   * @summary Create a new trade for an address
+   * @param {string} walletId The ID of the wallet the source address belongs to
+   * @param {string} addressId The ID of the address to conduct the trade from
+   * @param {CreateTradeRequest} createTradeRequest
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof TradesApi
+   */
+  public createTrade(
+    walletId: string,
+    addressId: string,
+    createTradeRequest: CreateTradeRequest,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return TradesApiFp(this.configuration)
+      .createTrade(walletId, addressId, createTradeRequest, options)
+      .then(request => request(this.axios, this.basePath));
+  }
+
+  /**
+   * Get a trade by ID
+   * @summary Get a trade by ID
+   * @param {string} walletId The ID of the wallet the address belongs to
+   * @param {string} addressId The ID of the address the trade belongs to
+   * @param {string} tradeId The ID of the trade to fetch
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof TradesApi
+   */
+  public getTrade(
+    walletId: string,
+    addressId: string,
+    tradeId: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return TradesApiFp(this.configuration)
+      .getTrade(walletId, addressId, tradeId, options)
+      .then(request => request(this.axios, this.basePath));
+  }
+
+  /**
+   * List trades for an address.
+   * @summary List trades for an address.
+   * @param {string} walletId The ID of the wallet the address belongs to
+   * @param {string} addressId The ID of the address to list trades for
+   * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof TradesApi
+   */
+  public listTrades(
+    walletId: string,
+    addressId: string,
+    limit?: number,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return TradesApiFp(this.configuration)
+      .listTrades(walletId, addressId, limit, page, options)
+      .then(request => request(this.axios, this.basePath));
+  }
+}
+
+/**
  * TransfersApi - axios parameter creator
  * @export
  */
@@ -1271,11 +3238,7 @@ export const TransfersApiAxiosParamCreator = function (configuration?: Configura
         baseOptions = configuration.baseOptions;
       }
 
-      const localVarRequestOptions = {
-        method: "POST",
-        ...baseOptions,
-        ...options,
-      };
+      const localVarRequestOptions = { method: "POST", ...baseOptions, ...options };
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
@@ -1330,11 +3293,7 @@ export const TransfersApiAxiosParamCreator = function (configuration?: Configura
         baseOptions = configuration.baseOptions;
       }
 
-      const localVarRequestOptions = {
-        method: "POST",
-        ...baseOptions,
-        ...options,
-      };
+      const localVarRequestOptions = { method: "POST", ...baseOptions, ...options };
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
@@ -1390,11 +3349,7 @@ export const TransfersApiAxiosParamCreator = function (configuration?: Configura
         baseOptions = configuration.baseOptions;
       }
 
-      const localVarRequestOptions = {
-        method: "GET",
-        ...baseOptions,
-        ...options,
-      };
+      const localVarRequestOptions = { method: "GET", ...baseOptions, ...options };
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
@@ -1442,11 +3397,7 @@ export const TransfersApiAxiosParamCreator = function (configuration?: Configura
         baseOptions = configuration.baseOptions;
       }
 
-      const localVarRequestOptions = {
-        method: "GET",
-        ...baseOptions,
-        ...options,
-      };
+      const localVarRequestOptions = { method: "GET", ...baseOptions, ...options };
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
@@ -1713,12 +3664,91 @@ export const TransfersApiFactory = function (
 };
 
 /**
+ * TransfersApi - interface
+ * @export
+ * @interface TransfersApi
+ */
+export interface TransfersApiInterface {
+  /**
+   * Broadcast a transfer
+   * @summary Broadcast a transfer
+   * @param {string} walletId The ID of the wallet the address belongs to
+   * @param {string} addressId The ID of the address the transfer belongs to
+   * @param {string} transferId The ID of the transfer to broadcast
+   * @param {BroadcastTransferRequest} broadcastTransferRequest
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof TransfersApiInterface
+   */
+  broadcastTransfer(
+    walletId: string,
+    addressId: string,
+    transferId: string,
+    broadcastTransferRequest: BroadcastTransferRequest,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<Transfer>;
+
+  /**
+   * Create a new transfer
+   * @summary Create a new transfer for an address
+   * @param {string} walletId The ID of the wallet the source address belongs to
+   * @param {string} addressId The ID of the address to transfer from
+   * @param {CreateTransferRequest} createTransferRequest
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof TransfersApiInterface
+   */
+  createTransfer(
+    walletId: string,
+    addressId: string,
+    createTransferRequest: CreateTransferRequest,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<Transfer>;
+
+  /**
+   * Get a transfer by ID
+   * @summary Get a transfer by ID
+   * @param {string} walletId The ID of the wallet the address belongs to
+   * @param {string} addressId The ID of the address the transfer belongs to
+   * @param {string} transferId The ID of the transfer to fetch
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof TransfersApiInterface
+   */
+  getTransfer(
+    walletId: string,
+    addressId: string,
+    transferId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<Transfer>;
+
+  /**
+   * List transfers for an address.
+   * @summary List transfers for an address.
+   * @param {string} walletId The ID of the wallet the address belongs to
+   * @param {string} addressId The ID of the address to list transfers for
+   * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof TransfersApiInterface
+   */
+  listTransfers(
+    walletId: string,
+    addressId: string,
+    limit?: number,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<TransferList>;
+}
+
+/**
  * TransfersApi - object-oriented interface
  * @export
  * @class TransfersApi
  * @extends {BaseAPI}
  */
-export class TransfersApi extends BaseAPI {
+export class TransfersApi extends BaseAPI implements TransfersApiInterface {
   /**
    * Broadcast a transfer
    * @summary Broadcast a transfer
@@ -1829,11 +3859,7 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
         baseOptions = configuration.baseOptions;
       }
 
-      const localVarRequestOptions = {
-        method: "GET",
-        ...baseOptions,
-        ...options,
-      };
+      const localVarRequestOptions = { method: "GET", ...baseOptions, ...options };
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
@@ -1908,12 +3934,28 @@ export const UsersApiFactory = function (
 };
 
 /**
+ * UsersApi - interface
+ * @export
+ * @interface UsersApi
+ */
+export interface UsersApiInterface {
+  /**
+   * Get current user
+   * @summary Get current user
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof UsersApiInterface
+   */
+  getCurrentUser(options?: RawAxiosRequestConfig): AxiosPromise<User>;
+}
+
+/**
  * UsersApi - object-oriented interface
  * @export
  * @class UsersApi
  * @extends {BaseAPI}
  */
-export class UsersApi extends BaseAPI {
+export class UsersApi extends BaseAPI implements UsersApiInterface {
   /**
    * Get current user
    * @summary Get current user
@@ -1953,11 +3995,7 @@ export const WalletsApiAxiosParamCreator = function (configuration?: Configurati
         baseOptions = configuration.baseOptions;
       }
 
-      const localVarRequestOptions = {
-        method: "POST",
-        ...baseOptions,
-        ...options,
-      };
+      const localVarRequestOptions = { method: "POST", ...baseOptions, ...options };
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
@@ -2005,11 +4043,7 @@ export const WalletsApiAxiosParamCreator = function (configuration?: Configurati
         baseOptions = configuration.baseOptions;
       }
 
-      const localVarRequestOptions = {
-        method: "GET",
-        ...baseOptions,
-        ...options,
-      };
+      const localVarRequestOptions = { method: "GET", ...baseOptions, ...options };
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
@@ -2053,11 +4087,7 @@ export const WalletsApiAxiosParamCreator = function (configuration?: Configurati
         baseOptions = configuration.baseOptions;
       }
 
-      const localVarRequestOptions = {
-        method: "GET",
-        ...baseOptions,
-        ...options,
-      };
+      const localVarRequestOptions = { method: "GET", ...baseOptions, ...options };
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
@@ -2098,11 +4128,7 @@ export const WalletsApiAxiosParamCreator = function (configuration?: Configurati
         baseOptions = configuration.baseOptions;
       }
 
-      const localVarRequestOptions = {
-        method: "GET",
-        ...baseOptions,
-        ...options,
-      };
+      const localVarRequestOptions = { method: "GET", ...baseOptions, ...options };
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
@@ -2140,11 +4166,7 @@ export const WalletsApiAxiosParamCreator = function (configuration?: Configurati
         baseOptions = configuration.baseOptions;
       }
 
-      const localVarRequestOptions = {
-        method: "GET",
-        ...baseOptions,
-        ...options,
-      };
+      const localVarRequestOptions = { method: "GET", ...baseOptions, ...options };
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
 
@@ -2384,12 +4406,85 @@ export const WalletsApiFactory = function (
 };
 
 /**
+ * WalletsApi - interface
+ * @export
+ * @interface WalletsApi
+ */
+export interface WalletsApiInterface {
+  /**
+   * Create a new wallet scoped to the user.
+   * @summary Create a new wallet
+   * @param {CreateWalletRequest} [createWalletRequest]
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof WalletsApiInterface
+   */
+  createWallet(
+    createWalletRequest?: CreateWalletRequest,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<Wallet>;
+
+  /**
+   * Get wallet
+   * @summary Get wallet by ID
+   * @param {string} walletId The ID of the wallet to fetch
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof WalletsApiInterface
+   */
+  getWallet(walletId: string, options?: RawAxiosRequestConfig): AxiosPromise<Wallet>;
+
+  /**
+   * Get the aggregated balance of an asset across all of the addresses in the wallet.
+   * @summary Get the balance of an asset in the wallet
+   * @param {string} walletId The ID of the wallet to fetch the balance for
+   * @param {string} assetId The symbol of the asset to fetch the balance for
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof WalletsApiInterface
+   */
+  getWalletBalance(
+    walletId: string,
+    assetId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<Balance>;
+
+  /**
+   * List the balances of all of the addresses in the wallet aggregated by asset.
+   * @summary List wallet balances
+   * @param {string} walletId The ID of the wallet to fetch the balances for
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof WalletsApiInterface
+   */
+  listWalletBalances(
+    walletId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<AddressBalanceList>;
+
+  /**
+   * List wallets belonging to the user.
+   * @summary List wallets
+   * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof WalletsApiInterface
+   */
+  listWallets(
+    limit?: number,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<WalletList>;
+}
+
+/**
  * WalletsApi - object-oriented interface
  * @export
  * @class WalletsApi
  * @extends {BaseAPI}
  */
-export class WalletsApi extends BaseAPI {
+export class WalletsApi extends BaseAPI implements WalletsApiInterface {
   /**
    * Create a new wallet scoped to the user.
    * @summary Create a new wallet

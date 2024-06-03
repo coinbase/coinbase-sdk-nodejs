@@ -188,18 +188,19 @@ export class Transfer {
    *
    * @returns The Status of the Transfer.
    */
-  public async getStatus(): Promise<TransferStatus> {
-    const transactionHash = this.getTransactionHash();
-    if (!transactionHash) return TransferStatus.PENDING;
-
-    const onchainTransaction =
-      await Coinbase.apiClients.baseSepoliaProvider!.getTransaction(transactionHash);
-    if (!onchainTransaction) return TransferStatus.PENDING;
-    if (!onchainTransaction.blockHash) return TransferStatus.BROADCAST;
-
-    const transactionReceipt =
-      await Coinbase.apiClients.baseSepoliaProvider!.getTransactionReceipt(transactionHash);
-    return transactionReceipt?.status ? TransferStatus.COMPLETE : TransferStatus.FAILED;
+  public getStatus(): TransferStatus | undefined {
+    switch (this.model.status) {
+      case TransferStatus.PENDING:
+        return TransferStatus.PENDING;
+      case TransferStatus.BROADCAST:
+        return TransferStatus.BROADCAST;
+      case TransferStatus.COMPLETE:
+        return TransferStatus.COMPLETE;
+      case TransferStatus.FAILED:
+        return TransferStatus.FAILED;
+      default:
+        return undefined;
+    }
   }
 
   /**
@@ -212,17 +213,30 @@ export class Transfer {
   }
 
   /**
+   * Reloads the Transfer model with the latest data from the server.
+   *
+   * @throws {APIError} if the API request to get a Transfer fails.
+   */
+  public async reload(): Promise<void> {
+    const result = await Coinbase.apiClients.transfer!.getTransfer(
+      this.getWalletId(),
+      this.getFromAddressId(),
+      this.getId(),
+    );
+    this.model = result?.data;
+  }
+
+  /**
    * Returns a string representation of the Transfer.
    *
    * @returns The string representation of the Transfer.
    */
   public async toString(): Promise<string> {
-    const status = await this.getStatus();
     return (
       `Transfer{transferId: '${this.getId()}', networkId: '${this.getNetworkId()}', ` +
       `fromAddressId: '${this.getFromAddressId()}', destinationAddressId: '${this.getDestinationAddressId()}', ` +
       `assetId: '${this.getAssetId()}', amount: '${this.getAmount()}', transactionHash: '${this.getTransactionHash()}', ` +
-      `transactionLink: '${this.getTransactionLink()}', status: '${status}'}`
+      `transactionLink: '${this.getTransactionLink()}', status: '${this.getStatus()}'}`
     );
   }
 }
