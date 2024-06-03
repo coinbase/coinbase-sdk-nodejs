@@ -120,10 +120,21 @@ export class Address {
    * @returns {Decimal} The balance of the asset.
    */
   async getBalance(assetId: string): Promise<Decimal> {
+    const normalizedAssetId = ((): string => {
+      switch (assetId) {
+        case Coinbase.assets.Gwei:
+          return Coinbase.assets.Eth;
+        case Coinbase.assets.Wei:
+          return Coinbase.assets.Eth;
+        default:
+          return assetId;
+      }
+    })();
+
     const response = await Coinbase.apiClients.address!.getAddressBalance(
       this.model.wallet_id,
       this.model.address_id,
-      assetId,
+      normalizedAssetId,
     );
 
     if (!response.data) {
@@ -162,7 +173,7 @@ export class Address {
     intervalSeconds = 0.2,
     timeoutSeconds = 10,
   ): Promise<Transfer> {
-    if (!this.key) {
+    if (!Coinbase.useServerSigner && !this.key) {
       throw new InternalError("Cannot transfer from address without private key loaded");
     }
     let normalizedAmount = new Decimal(amount.toString());
@@ -198,6 +209,7 @@ export class Address {
     const normalizedAssetId = ((): string => {
       switch (assetId) {
         case Coinbase.assets.Gwei:
+          return Coinbase.assets.Eth;
         case Coinbase.assets.Wei:
           return Coinbase.assets.Eth;
         default:
@@ -218,29 +230,33 @@ export class Address {
       createTransferRequest,
     );
 
-    const transfer = Transfer.fromModel(response.data);
-    const transaction = transfer.getTransaction();
-    let signedPayload = await this.key.signTransaction(transaction);
-    signedPayload = signedPayload.slice(2);
+    let transfer = Transfer.fromModel(response.data);
 
-    const broadcastTransferRequest = {
-      signed_payload: signedPayload,
-    };
+    if (!Coinbase.useServerSigner) {
+      const transaction = transfer.getTransaction();
+      let signedPayload = await this.key!.signTransaction(transaction);
+      signedPayload = signedPayload.slice(2);
 
-    response = await Coinbase.apiClients.transfer!.broadcastTransfer(
-      this.getWalletId(),
-      this.getId(),
-      transfer.getId(),
-      broadcastTransferRequest,
-    );
+      const broadcastTransferRequest = {
+        signed_payload: signedPayload,
+      };
 
-    const updatedTransfer = Transfer.fromModel(response.data);
+      response = await Coinbase.apiClients.transfer!.broadcastTransfer(
+        this.getWalletId(),
+        this.getId(),
+        transfer.getId(),
+        broadcastTransferRequest,
+      );
+
+      transfer = Transfer.fromModel(response.data);
+    }
 
     const startTime = Date.now();
     while (Date.now() - startTime < timeoutSeconds * 1000) {
-      const status = await updatedTransfer.getStatus();
+      await transfer.reload();
+      const status = transfer.getStatus();
       if (status === TransferStatus.COMPLETE || status === TransferStatus.FAILED) {
-        return updatedTransfer;
+        return transfer;
       }
       await delay(intervalSeconds);
     }
