@@ -307,6 +307,17 @@ export class Wallet {
   public setSeed(seed: string) {
     if (this.master === undefined && (this.seed === undefined || this.seed === "")) {
       this.master = HDKey.fromMasterSeed(Buffer.from(seed, "hex"));
+      this.addresses = [];
+      this.addressModels.map((addressModel: AddressModel) => {
+        const derivedKey = this.deriveKey();
+        const etherKey = new ethers.Wallet(convertStringToHex(derivedKey.privateKey!));
+        if (etherKey.address != addressModel.address_id) {
+          throw new InternalError(
+            `Seed does not match wallet; cannot find address ${etherKey.address}`,
+          );
+        }
+        this.cacheAddress(addressModel, etherKey);
+      });
     } else {
       throw new InternalError("Cannot set seed on Wallet with existing seed");
     }
