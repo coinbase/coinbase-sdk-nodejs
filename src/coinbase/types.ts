@@ -347,6 +347,15 @@ export enum ServerSignerStatus {
 }
 
 /**
+ * Options for creating a Wallet.
+ */
+export type WalletCreateOptions = {
+  networkId?: string;
+  intervalSeconds?: number;
+  timeoutSeconds?: number;
+};
+
+/**
  * CoinbaseOptions type definition.
  */
 export type CoinbaseOptions = {

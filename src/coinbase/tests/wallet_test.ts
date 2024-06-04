@@ -260,20 +260,28 @@ describe("Wallet Class", () => {
       it("should return a Wallet instance", async () => {
         Coinbase.apiClients.wallet!.createWallet = mockReturnValue({
           ...VALID_WALLET_MODEL,
+          network_id: Coinbase.networkList.BaseMainnet,
           server_signer_status: ServerSignerStatus.PENDING,
         });
         Coinbase.apiClients.wallet!.getWallet = mockReturnValue({
           ...VALID_WALLET_MODEL,
+          network_id: Coinbase.networkList.BaseMainnet,
           server_signer_status: ServerSignerStatus.ACTIVE,
         });
         Coinbase.apiClients.address!.createAddress = mockReturnValue(newAddressModel(walletId));
 
-        wallet = await Wallet.create();
+        wallet = await Wallet.create({
+          networkId: Coinbase.networkList.BaseMainnet,
+        });
         expect(wallet).toBeInstanceOf(Wallet);
         expect(wallet.getServerSignerStatus()).toBe(ServerSignerStatus.ACTIVE);
+        expect(wallet.getNetworkId()).toBe(Coinbase.networkList.BaseMainnet);
         expect(Coinbase.apiClients.wallet!.createWallet).toHaveBeenCalledTimes(1);
         expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledTimes(2);
         expect(Coinbase.apiClients.address!.createAddress).toHaveBeenCalledTimes(1);
+        expect(Coinbase.apiClients.wallet!.createWallet).toHaveBeenCalledWith({
+          wallet: { network_id: Coinbase.networkList.BaseMainnet, use_server_signer: true },
+        });
       });
 
       it("should throw an Error if the Wallet times out waiting on a not active server signer", async () => {
@@ -284,7 +292,7 @@ describe("Wallet Class", () => {
           server_signer_status: ServerSignerStatus.PENDING,
         });
 
-        await expect(Wallet.create(intervalSeconds, timeoutSeconds)).rejects.toThrow(
+        await expect(Wallet.create({ intervalSeconds, timeoutSeconds })).rejects.toThrow(
           "Wallet creation timed out. Check status of your Server-Signer",
         );
         expect(Coinbase.apiClients.wallet!.createWallet).toHaveBeenCalledTimes(1);

@@ -27,6 +27,7 @@ export class Coinbase {
    */
   static networkList = {
     BaseSepolia: "base-sepolia",
+    BaseMainnet: "base-mainnet",
   };
 
   /**
