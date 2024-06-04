@@ -321,6 +321,7 @@ describe("Wallet Class", () => {
         id: walletId,
         network_id: Coinbase.networkList.BaseSepolia,
         default_address: addressList[0],
+        enabled_features: [],
       };
       wallet = await Wallet.init(walletModel, existingSeed, addressList);
       Coinbase.apiClients.address!.createAddress = mockFn(walletId => {
@@ -379,6 +380,7 @@ describe("Wallet Class", () => {
         id: walletId,
         network_id: Coinbase.networkList.BaseSepolia,
         default_address: addressModel,
+        enabled_features: [],
       };
       Coinbase.apiClients.address = addressesApiMock;
       Coinbase.apiClients.address!.getAddress = mockFn(() => {
@@ -616,6 +618,7 @@ describe("Wallet Class", () => {
       const otherModel = {
         id: crypto.randomUUID(),
         network_id: Coinbase.networkList.BaseSepolia,
+        enabled_features: [],
       };
       const otherWallet = await Wallet.init(otherModel);
       otherWallet.saveSeed(filePath, true);

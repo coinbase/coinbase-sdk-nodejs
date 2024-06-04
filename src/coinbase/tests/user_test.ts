@@ -71,6 +71,7 @@ describe("User Class", () => {
         id: walletId,
         network_id: Coinbase.networkList.BaseSepolia,
         default_address: mockAddressModel,
+        enabled_features: [],
       };
       Coinbase.apiClients.wallet = walletsApiMock;
       Coinbase.apiClients.wallet!.getWallet = mockReturnValue(mockWalletModel);
@@ -117,6 +118,7 @@ describe("User Class", () => {
         id: walletId,
         network_id: Coinbase.networkList.BaseSepolia,
         default_address: addressModel1,
+        enabled_features: [],
       };
       addressListModel = {
         data: [addressModel1, addressModel2],
@@ -309,6 +311,7 @@ describe("User Class", () => {
         id: walletId,
         network_id: Coinbase.networkList.BaseSepolia,
         default_address: addressModel1,
+        enabled_features: [],
       };
       addressListModel = {
         data: [addressModel1, addressModel2],
