@@ -37,7 +37,7 @@ describe("Address", () => {
         amount: "1000000000000000000",
         asset: {
           asset_id,
-          network_id: Coinbase.networkList.BaseSepolia,
+          network_id: Coinbase.networks.BaseSepolia,
         },
       };
       return { data: balanceModel };
@@ -198,7 +198,7 @@ describe("Address", () => {
           amount: "1000000000000000000",
           asset: {
             asset_id,
-            network_id: Coinbase.networkList.BaseSepolia,
+            network_id: Coinbase.networks.BaseSepolia,
           },
         };
         return { data: balanceModel };

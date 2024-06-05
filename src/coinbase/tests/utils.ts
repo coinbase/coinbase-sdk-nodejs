@@ -55,7 +55,7 @@ export const newAddressModel = (walletId: string, address_id: string = ""): Addr
 
   return {
     address_id: address_id ? address_id : ethAddress.address,
-    network_id: Coinbase.networkList.BaseSepolia,
+    network_id: Coinbase.networks.BaseSepolia,
     public_key: ethAddress.publicKey,
     wallet_id: walletId,
   };
@@ -65,19 +65,19 @@ export const VALID_ADDRESS_MODEL = newAddressModel(randomUUID());
 
 export const VALID_WALLET_MODEL: WalletModel = {
   id: randomUUID(),
-  network_id: Coinbase.networkList.BaseSepolia,
+  network_id: Coinbase.networks.BaseSepolia,
   enabled_features: [],
   default_address: {
     wallet_id: walletId,
     address_id: "0xdeadbeef",
     public_key: "0x1234567890",
-    network_id: Coinbase.networkList.BaseSepolia,
+    network_id: Coinbase.networks.BaseSepolia,
   },
 };
 
 export const VALID_TRANSFER_MODEL: TransferModel = {
   transfer_id: transferId,
-  network_id: Coinbase.networkList.BaseSepolia,
+  network_id: Coinbase.networks.BaseSepolia,
   wallet_id: walletId,
   address_id: ethers.Wallet.createRandom().address,
   destination: "0x4D9E4F3f4D1A8B5F4f7b1F5b5C7b8d6b2B3b1b0b",
@@ -103,7 +103,7 @@ export const VALID_ADDRESS_BALANCE_LIST: AddressBalanceList = {
       amount: "1000000000000000000",
       asset: {
         asset_id: Coinbase.assets.Eth,
-        network_id: Coinbase.networkList.BaseSepolia,
+        network_id: Coinbase.networks.BaseSepolia,
         decimals: 18,
       },
     },
@@ -111,7 +111,7 @@ export const VALID_ADDRESS_BALANCE_LIST: AddressBalanceList = {
       amount: "5000000000",
       asset: {
         asset_id: "usdc",
-        network_id: Coinbase.networkList.BaseSepolia,
+        network_id: Coinbase.networks.BaseSepolia,
         decimals: 6,
       },
     },
@@ -119,7 +119,7 @@ export const VALID_ADDRESS_BALANCE_LIST: AddressBalanceList = {
       amount: "3000000000000000000",
       asset: {
         asset_id: "weth",
-        network_id: Coinbase.networkList.BaseSepolia,
+        network_id: Coinbase.networks.BaseSepolia,
         decimals: 6,
       },
     },
@@ -133,7 +133,7 @@ export const VALID_BALANCE_MODEL: BalanceModel = {
   amount: "1000000000000000000",
   asset: {
     asset_id: Coinbase.assets.Eth,
-    network_id: Coinbase.networkList.BaseSepolia,
+    network_id: Coinbase.networks.BaseSepolia,
   },
 };
 
