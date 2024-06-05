@@ -77,7 +77,7 @@ export class Coinbase {
     useServerSigner = false,
     debugging = false,
     basePath = BASE_PATH,
-  }: CoinbaseOptions) {
+  }: CoinbaseOptions = {}) {
     if (apiKeyName === "") {
       throw new InternalError("Invalid configuration: apiKeyName is empty");
     }
@@ -121,7 +121,7 @@ export class Coinbase {
     useServerSigner = false,
     debugging = false,
     basePath = BASE_PATH,
-  }: CoinbaseConfigureFromJsonOptions): Coinbase {
+  }: CoinbaseConfigureFromJsonOptions = {}): Coinbase {
     filePath = filePath.startsWith("~") ? filePath.replace("~", os.homedir()) : filePath;
 
     if (!fs.existsSync(filePath)) {

@@ -383,7 +383,7 @@ export type CoinbaseConfigureFromJsonOptions = {
   /**
    * The path to the JSON file containing the API key and private key.
    */
-  filePath: string;
+  filePath?: string;
 
   /**
    * Whether to use a Server-Signer or not.
