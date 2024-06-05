@@ -76,12 +76,11 @@ export class Wallet {
    * @throws {APIError} - If the request fails.
    * @returns A promise that resolves with the new Wallet object.
    */
-  public static async create(options?: WalletCreateOptions): Promise<Wallet> {
-    const {
-      networkId = Coinbase.networkList.BaseSepolia,
-      intervalSeconds = 0.2,
-      timeoutSeconds = 20,
-    } = options || {};
+  public static async create({
+    networkId = Coinbase.networks.BaseSepolia,
+    intervalSeconds = 0.2,
+    timeoutSeconds = 20,
+  }: WalletCreateOptions = {}): Promise<Wallet> {
     const result = await Coinbase.apiClients.wallet!.createWallet({
       wallet: {
         network_id: networkId,

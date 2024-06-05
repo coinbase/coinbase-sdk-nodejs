@@ -86,12 +86,12 @@ describe("Coinbase tests", () => {
 
       const walletModel = {
         id: walletId,
-        network_id: Coinbase.networkList.BaseSepolia,
+        network_id: Coinbase.networks.BaseSepolia,
         default_address: {
           wallet_id: walletId,
           address_id: addressId,
           public_key: publicKey,
-          network_id: Coinbase.networkList.BaseSepolia,
+          network_id: Coinbase.networks.BaseSepolia,
         },
       };
 
