@@ -72,12 +72,12 @@ export class Coinbase {
    * @throws {InvalidAPIKeyFormat} If not able to create JWT token.
    */
   constructor({
-    apiKeyName = "",
-    privateKey = "",
+    apiKeyName,
+    privateKey,
     useServerSigner = false,
     debugging = false,
     basePath = BASE_PATH,
-  }: CoinbaseOptions = {}) {
+  }: CoinbaseOptions) {
     if (apiKeyName === "") {
       throw new InternalError("Invalid configuration: apiKeyName is empty");
     }
