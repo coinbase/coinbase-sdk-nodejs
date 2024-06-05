@@ -310,6 +310,16 @@ export enum TransferStatus {
 }
 
 /**
+ * Transaction status type definition.
+ */
+export enum TransactionStatus {
+  PENDING = "pending",
+  BROADCAST = "broadcast",
+  COMPLETE = "complete",
+  FAILED = "failed",
+}
+
+/**
  * The Wallet Data type definition.
  * The data required to recreate a Wallet.
  */
