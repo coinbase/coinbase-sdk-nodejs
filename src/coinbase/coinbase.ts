@@ -25,8 +25,9 @@ export class Coinbase {
    *
    * @constant
    */
-  static networkList = {
+  static networks = {
     BaseSepolia: "base-sepolia",
+    BaseMainnet: "base-mainnet",
   };
 
   /**

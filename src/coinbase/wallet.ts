@@ -9,7 +9,14 @@ import { Address } from "./address";
 import { Coinbase } from "./coinbase";
 import { ArgumentError, InternalError } from "./errors";
 import { Transfer } from "./transfer";
-import { Amount, Destination, SeedData, WalletData, ServerSignerStatus } from "./types";
+import {
+  Amount,
+  Destination,
+  SeedData,
+  WalletData,
+  ServerSignerStatus,
+  WalletCreateOptions,
+} from "./types";
 import { convertStringToHex, delay } from "./utils";
 import { FaucetTransaction } from "./faucet_transaction";
 import { BalanceMap } from "./balance_map";
@@ -60,17 +67,23 @@ export class Wallet {
    * Instead, use User.createWallet.
    *
    * @constructs Wallet
-   * @param intervalSeconds - The interval at which to poll the CDPService, in seconds.
-   * @param timeoutSeconds - The maximum amount of time to wait for the ServerSigner to create a seed, in seconds.
+   * @param options - The options to create the Wallet.
+   * @param options.networkId - the ID of the blockchain network. Defaults to 'base-sepolia'.
+   * @param options.intervalSeconds - The interval at which to poll the CDPService, in seconds.
+   * @param options.timeoutSeconds - The maximum amount of time to wait for the ServerSigner to create a seed, in seconds.
    * @throws {ArgumentError} If the model or client is not provided.
    * @throws {InternalError} - If address derivation or caching fails.
    * @throws {APIError} - If the request fails.
    * @returns A promise that resolves with the new Wallet object.
    */
-  public static async create(intervalSeconds = 0.2, timeoutSeconds = 20): Promise<Wallet> {
+  public static async create({
+    networkId = Coinbase.networks.BaseSepolia,
+    intervalSeconds = 0.2,
+    timeoutSeconds = 20,
+  }: WalletCreateOptions = {}): Promise<Wallet> {
     const result = await Coinbase.apiClients.wallet!.createWallet({
       wallet: {
-        network_id: Coinbase.networkList.BaseSepolia,
+        network_id: networkId,
         use_server_signer: Coinbase.useServerSigner,
       },
     });
