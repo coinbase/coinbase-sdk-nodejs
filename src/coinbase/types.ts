@@ -14,6 +14,7 @@ import {
   Wallet as WalletModel,
   Transfer as TransferModel,
   WalletList,
+  ServerSignerList,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -289,6 +290,26 @@ export type TransferAPIClient = {
 };
 
 /**
+ * ServerSignerAPI client type definition.
+ */
+export type ServerSignerAPIClient = {
+  /**
+   * Lists Server-Signers.
+   *
+   * @param limit - The maximum number of Server-Signers to return.
+   * @param page - The cursor for pagination across multiple pages of Server-Signers.
+   * @param options - Axios request options.
+   * @returns - A promise resolving to the Server-Signer list.
+   * @throws {APIError} If the request fails.
+   */
+  listServerSigners(
+    limit?: number,
+    page?: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<ServerSignerList>;
+};
+
+/**
  * API clients type definition for the Coinbase SDK.
  * Represents the set of API clients available in the SDK.
  */
@@ -297,6 +318,7 @@ export type ApiClients = {
   wallet?: WalletAPIClient;
   address?: AddressAPIClient;
   transfer?: TransferAPIClient;
+  serverSigner?: ServerSignerAPIClient;
 };
 
 /**

@@ -5,6 +5,8 @@
 ### Added
 
 - Added Base Mainnet network support
+- `ServerSigner` object
+- Ability to get default Server-Signer
 
 ### Changed
 
