@@ -4,6 +4,7 @@ import { Destination } from "./types";
 import { APIError } from "./api_error";
 import { Wallet } from "./wallet";
 import { Address } from "./address";
+import { InvalidUnsignedPayload } from "./errors";
 
 /**
  * Prints Axios response to the console for debugging purposes.
@@ -101,4 +102,29 @@ export function destinationToAddressHexString(destination: Destination): string 
   } else {
     throw new Error("Unsupported type");
   }
+}
+
+/**
+ * Parses an Unsigned Payload and returns the JSON object.
+ *
+ * @throws {InvalidUnsignedPayload} If the Unsigned Payload is invalid.
+ * @param payload - The Unsigned Payload.
+ * @returns The parsed JSON object.
+ */
+export function parseUnsignedPayload(payload: string): Record<string, any> {
+  const rawPayload = payload.match(/../g)?.map(byte => parseInt(byte, 16));
+  if (!rawPayload) {
+    throw new InvalidUnsignedPayload("Unable to parse unsigned payload");
+  }
+
+  let parsedPayload;
+  try {
+    const rawPayloadBytes = new Uint8Array(rawPayload);
+    const decoder = new TextDecoder();
+    parsedPayload = JSON.parse(decoder.decode(rawPayloadBytes));
+  } catch (error) {
+    throw new InvalidUnsignedPayload("Unable to decode unsigned payload JSON");
+  }
+
+  return parsedPayload;
 }

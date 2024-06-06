@@ -557,6 +557,31 @@ describe("Wallet Class", () => {
     });
   });
 
+  describe("should change the network ID", () => {
+    let wallet;
+    beforeAll(async () => {
+      Coinbase.apiClients.wallet = walletsApiMock;
+      Coinbase.apiClients.address = addressesApiMock;
+      Coinbase.apiClients.wallet!.createWallet = mockReturnValue({
+        ...VALID_WALLET_MODEL,
+        network_id: Coinbase.networks.BaseMainnet,
+        server_signer_status: ServerSignerStatus.PENDING,
+      });
+      Coinbase.apiClients.wallet!.getWallet = mockReturnValue({
+        ...VALID_WALLET_MODEL,
+        network_id: Coinbase.networks.BaseMainnet,
+        server_signer_status: ServerSignerStatus.ACTIVE,
+      });
+      Coinbase.apiClients.address!.createAddress = mockReturnValue(newAddressModel(walletId));
+      wallet = await Wallet.create({
+        networkId: Coinbase.networks.BaseMainnet,
+      });
+    });
+    it("should return true when the wallet initialized", () => {
+      expect(wallet.getNetworkId()).toBe(Coinbase.networks.BaseMainnet);
+    });
+  });
+
   describe(".saveSeed", () => {
     const seed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
     let apiPrivateKey;
