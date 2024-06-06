@@ -105,10 +105,10 @@ export function destinationToAddressHexString(destination: Destination): string 
 }
 
 /**
- * Parses an unsigned payload and returns the JSON object.
+ * Parses an Unsigned Payload and returns the JSON object.
  *
- * @throws {InvalidUnsignedPayload} If the payload is invalid.
- * @param payload - The unsigned payload.
+ * @throws {InvalidUnsignedPayload} If the Unsigned Payload is invalid.
+ * @param payload - The Unsigned Payload.
  * @returns The parsed JSON object.
  */
 export function parseUnsignedPayload(payload: string): Record<string, any> {

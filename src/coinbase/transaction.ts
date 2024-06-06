@@ -51,7 +51,7 @@ export class Transaction {
   }
 
   /**
-   * Returns the status of the Transaction.
+   * Returns the Status of the Transaction.
    *
    * @returns The Status
    */
@@ -60,27 +60,27 @@ export class Transaction {
   }
 
   /**
-   * Returns the from address for the Transaction.
+   * Returns the From Address ID for the Transaction.
    *
-   * @returns The from address
+   * @returns The From Address ID
    */
   fromAddressId(): string {
     return this.model.from_address_id;
   }
 
   /**
-   * Returns whether the Transaction is in a terminal state.
+   * Returns whether the Transaction is in a terminal State.
    *
-   * @returns Whether the Transaction is in a terminal state
+   * @returns Whether the Transaction is in a terminal State
    */
   isTerminalState(): boolean {
     return this.getStatus() in [TransactionStatus.COMPLETE, TransactionStatus.FAILED];
   }
 
   /**
-   * Returns the link to the transaction on the blockchain explorer.
+   * Returns the link to the Transaction on the blockchain explorer.
    *
-   * @returns The link to the transaction on the blockchain explorer
+   * @returns The link to the Transaction on the blockchain explorer
    */
   getTransactionLink(): string {
     // TODO: Parameterize this by Network.
@@ -90,8 +90,8 @@ export class Transaction {
   /**
    * Returns the underlying raw transaction.
    *
-   * @throws {InvalidUnsignedPayload} If the payload is invalid.
-   * @returns The raw transaction
+   * @throws {InvalidUnsignedPayload} If the Unsigned Payload is invalid.
+   * @returns The ethers.js Transaction object
    */
   rawTransaction(): ethers.Transaction {
     if (this.raw) {

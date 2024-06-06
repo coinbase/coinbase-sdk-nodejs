@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 import { Transaction as TransactionModel } from "../../client/api";
 import { Transaction } from "./../transaction";
 
-describe("Coinbase::Transaction", () => {
+describe("Transaction", () => {
   let fromKey;
   let fromAddressId;
   let toAddressId;
