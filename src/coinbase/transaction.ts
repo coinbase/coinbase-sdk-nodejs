@@ -55,8 +55,19 @@ export class Transaction {
    *
    * @returns The Status
    */
-  getStatus(): string {
-    return this.model.status;
+  getStatus(): TransactionStatus | undefined {
+    switch (this.model.status) {
+      case TransactionStatus.PENDING:
+        return TransactionStatus.PENDING;
+      case TransactionStatus.BROADCAST:
+        return TransactionStatus.BROADCAST;
+      case TransactionStatus.COMPLETE:
+        return TransactionStatus.COMPLETE;
+      case TransactionStatus.FAILED:
+        return TransactionStatus.FAILED;
+      default:
+        return undefined;
+    }
   }
 
   /**
@@ -74,7 +85,10 @@ export class Transaction {
    * @returns Whether the Transaction is in a terminal State
    */
   isTerminalState(): boolean {
-    return this.getStatus() in [TransactionStatus.COMPLETE, TransactionStatus.FAILED];
+    const status = this.getStatus();
+    return !status
+      ? false
+      : [TransactionStatus.COMPLETE, TransactionStatus.FAILED].includes(status);
   }
 
   /**
