@@ -73,8 +73,8 @@ export class Coinbase {
    * @throws {InvalidAPIKeyFormat} If not able to create JWT token.
    */
   constructor({
-    apiKeyName = "",
-    privateKey = "",
+    apiKeyName,
+    privateKey,
     useServerSigner = false,
     debugging = false,
     basePath = BASE_PATH,
@@ -122,7 +122,7 @@ export class Coinbase {
     useServerSigner = false,
     debugging = false,
     basePath = BASE_PATH,
-  }: CoinbaseConfigureFromJsonOptions): Coinbase {
+  }: CoinbaseConfigureFromJsonOptions = {}): Coinbase {
     filePath = filePath.startsWith("~") ? filePath.replace("~", os.homedir()) : filePath;
 
     if (!fs.existsSync(filePath)) {

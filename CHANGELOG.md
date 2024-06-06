@@ -1,9 +1,12 @@
 # Coinbase Node.js SDK Changelog
 
-## [0.0.7] - 2024-06-03
+## [0.0.7] - 2024-06-10
 
 ### Changed
 Updated the usage of `Coinbase.networkList` to `Coinbase.networks`
+
+### Added
+- Added Base Mainnet network support
 
 ## [0.0.6] - 2024-06-03
 
