@@ -10,6 +10,8 @@ import { Amount, Destination, TransferStatus } from "./types";
 import { Transfer } from "./transfer";
 import { delay, destinationToAddressHexString } from "./utils";
 import { ATOMIC_UNITS_PER_USDC, WEI_PER_ETHER, WEI_PER_GWEI } from "./constants";
+import { Asset } from "./asset";
+import { Trade } from "./trade";
 
 /**
  * A representation of a blockchain address, which is a user-controlled account on a network.
@@ -261,6 +263,119 @@ export class Address {
       await delay(intervalSeconds);
     }
     throw new Error("Transfer timed out");
+  }
+
+  /**
+   * Trades the given amount of the given Asset for another Asset. Only same-network Trades are supported.
+   *
+   * @param amount - The amount of the Asset to send.
+   * @param fromAssetId - The ID of the Asset to trade from. For Ether, eth, gwei, and wei are supported.
+   * @param toAssetId - The ID of the Asset to trade to. For Ether, eth, gwei, and wei are supported.
+   * @returns The Trade object.
+   * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
+   */
+  public async trade(amount: Amount, fromAssetId: string, toAssetId: string): Promise<Trade> {
+    await this.validateCanTrade(amount, fromAssetId, toAssetId);
+    const trade = await this.createTrade(amount, fromAssetId, toAssetId);
+    // NOTE: Trading does not yet support server signers at this point.
+    const signed_payload = await trade.getTransaction().sign(this.key!);
+    const approveTransactionSignedPayload = trade.getApproveTransaction()
+      ? await trade.getApproveTransaction()!.sign(this.key!)
+      : undefined;
+
+    return this.broadcastTrade(trade, signed_payload, approveTransactionSignedPayload);
+  }
+
+  /**
+   * Creates a trade model for the specified amount and assets.
+   *
+   * @param amount - The amount of the Asset to send.
+   * @param fromAssetId - The ID of the Asset to trade from. For Ether, eth, gwei, and wei are supported.
+   * @param toAssetId - The ID of the Asset to trade to. For Ether, eth, gwei, and wei are supported.
+   * @returns A promise that resolves to a Trade object representing the new trade.
+   */
+  private async createTrade(
+    amount: Amount,
+    fromAssetId: string,
+    toAssetId: string,
+  ): Promise<Trade> {
+    const tradeRequestPayload = {
+      amount: Asset.toAtomicAmount(new Decimal(amount.toString()), fromAssetId).toString(),
+      from_asset_id: Asset.primaryDenomination(fromAssetId),
+      to_asset_id: Asset.primaryDenomination(toAssetId),
+    };
+    const tradeModel = await Coinbase.apiClients.trade!.createTrade(
+      this.getWalletId(),
+      this.getId(),
+      tradeRequestPayload,
+    );
+    return new Trade(tradeModel?.data);
+  }
+
+  /**
+   * Broadcasts a trade using the provided signed payloads.
+   *
+   * @param trade - The Trade object representing the trade.
+   * @param signedPayload - The signed payload of the trade.
+   * @param approveTransactionPayload - The signed payload of the approval transaction, if any.
+   * @returns A promise that resolves to a Trade object representing the broadcasted trade.
+   */
+  private async broadcastTrade(
+    trade: Trade,
+    signedPayload: string,
+    approveTransactionPayload?: string,
+  ): Promise<Trade> {
+    const broadcastTradeRequest = {
+      signed_payload: signedPayload,
+      approve_transaction_signed_payload: approveTransactionPayload
+        ? approveTransactionPayload
+        : undefined,
+    };
+
+    const response = await Coinbase.apiClients.trade!.broadcastTrade(
+      this.getWalletId(),
+      this.getId(),
+      trade.getId(),
+      broadcastTradeRequest,
+    );
+
+    return new Trade(response.data);
+  }
+
+  /**
+   * Checks if trading is possible and raises an error if not.
+   *
+   * @param amount - The amount of the Asset to send.
+   * @param fromAssetId - The ID of the Asset to trade from. For Ether, eth, gwei, and wei are supported.
+   * @param toAssetId - The ID of the Asset to trade to. For Ether, eth, gwei, and wei are supported.
+   * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
+   */
+  private async validateCanTrade(amount: Amount, fromAssetId: string, toAssetId: string) {
+    if (!this.canSign()) {
+      throw new Error("Cannot trade from address without private key loaded");
+    }
+    if (!Asset.isSupported(fromAssetId)) {
+      throw new Error(`Unsupported from asset: ${fromAssetId}`);
+    }
+    if (!Asset.isSupported(toAssetId)) {
+      throw new Error(`Unsupported to asset: ${toAssetId}`);
+    }
+    const currentBalance = await this.getBalance(fromAssetId);
+    amount = new Decimal(amount.toString());
+    if (currentBalance.lessThan(amount)) {
+      throw new Error(
+        `Insufficient funds: ${amount} requested, but only ${currentBalance} available`,
+      );
+    }
+  }
+
+  /**
+   * Returns whether the Address has a private key backing it to sign transactions.
+   *
+   * @returns Whether the Address has a private key backing it to sign transactions.
+   */
+  public canSign(): boolean {
+    return !!this.key;
   }
 
   /**

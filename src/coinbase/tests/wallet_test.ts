@@ -13,7 +13,9 @@ import {
   AddressBalanceList,
   Address as AddressModel,
   Balance as BalanceModel,
+  TransactionStatusEnum,
   Wallet as WalletModel,
+  Trade as TradeModel,
 } from "./../../client";
 import {
   VALID_ADDRESS_MODEL,
@@ -28,6 +30,8 @@ import {
   transfersApiMock,
   walletsApiMock,
 } from "./utils";
+import { Transaction } from "../transaction";
+import { Trade } from "../trade";
 
 describe("Wallet Class", () => {
   let wallet: Wallet;
@@ -716,6 +720,34 @@ describe("Wallet Class", () => {
       fs.writeFileSync(filePath, "corrupted data", "utf8");
 
       expect(() => seedlessWallet.loadSeed(filePath)).toThrow(ArgumentError);
+    });
+  });
+
+  describe(".trade", () => {
+    let tradeObject;
+    beforeAll(() => {
+      tradeObject = new Trade({
+        network_id: Coinbase.networks.BaseSepolia,
+        wallet_id: walletId,
+        address_id: VALID_ADDRESS_MODEL.address_id,
+        trade_id: crypto.randomUUID(),
+        from_amount: "0.01",
+        transaction: {
+          network_id: Coinbase.networks.BaseSepolia,
+          from_address_id: VALID_ADDRESS_MODEL.address_id,
+          unsigned_payload: "unsigned_payload",
+          status: TransactionStatusEnum.Pending,
+        },
+      } as TradeModel);
+      const trade = Promise.resolve(tradeObject);
+      jest.spyOn(Address.prototype, "trade").mockReturnValue(trade);
+    });
+    it("should create a trade from the default address", async () => {
+      const result = await wallet.trade(0.01, "eth", "usdc");
+      expect(result).toBeInstanceOf(Trade);
+      expect(result.getAddressId()).toBe(tradeObject.getAddressId());
+      expect(result.getWalletId()).toBe(tradeObject.getWalletId());
+      expect(result.getId()).toBe(tradeObject.getId());
     });
   });
 });
