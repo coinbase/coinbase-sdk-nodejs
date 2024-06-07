@@ -185,3 +185,7 @@ export const transfersApiMock = {
   getTransfer: jest.fn(),
   listTransfers: jest.fn(),
 };
+
+export const serverSignersApiMock = {
+  listServerSigners: jest.fn(),
+};

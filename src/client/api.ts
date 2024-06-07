@@ -201,6 +201,43 @@ export interface BroadcastTransferRequest {
 /**
  * 
  * @export
+ * @interface BuildStakingOperationRequest
+ */
+export interface BuildStakingOperationRequest {
+    /**
+     * The ID of the blockchain network
+     * @type {string}
+     * @memberof BuildStakingOperationRequest
+     */
+    'network_id': string;
+    /**
+     * The ID of the asset being staked
+     * @type {string}
+     * @memberof BuildStakingOperationRequest
+     */
+    'asset_id': string;
+    /**
+     * The onchain address from which the staking transaction originates and is responsible for signing the transaction.
+     * @type {string}
+     * @memberof BuildStakingOperationRequest
+     */
+    'address_id': string;
+    /**
+     * The type of staking operation
+     * @type {string}
+     * @memberof BuildStakingOperationRequest
+     */
+    'action': string;
+    /**
+     * 
+     * @type {{ [key: string]: string; }}
+     * @memberof BuildStakingOperationRequest
+     */
+    'options': { [key: string]: string; };
+}
+/**
+ * 
+ * @export
  * @interface CreateAddressRequest
  */
 export interface CreateAddressRequest {
@@ -498,6 +535,37 @@ export interface ServerSignerEventList {
     'total_count': number;
 }
 /**
+ * 
+ * @export
+ * @interface ServerSignerList
+ */
+export interface ServerSignerList {
+    /**
+     * 
+     * @type {Array<ServerSigner>}
+     * @memberof ServerSignerList
+     */
+    'data': Array<ServerSigner>;
+    /**
+     * True if this list has another page of items after this one that can be fetched.
+     * @type {boolean}
+     * @memberof ServerSignerList
+     */
+    'has_more': boolean;
+    /**
+     * The page token to be used to fetch the next page.
+     * @type {string}
+     * @memberof ServerSignerList
+     */
+    'next_page': string;
+    /**
+     * The total number of server-signers for the project.
+     * @type {number}
+     * @memberof ServerSignerList
+     */
+    'total_count': number;
+}
+/**
  * An event representing a signature creation.
  * @export
  * @interface SignatureCreationEvent
@@ -599,6 +667,19 @@ export interface SignatureCreationEventResult {
 }
 
 
+/**
+ * An onchain transaction to help realize a staking action.
+ * @export
+ * @interface StakingOperation
+ */
+export interface StakingOperation {
+    /**
+     * 
+     * @type {Transaction}
+     * @memberof StakingOperation
+     */
+    'transaction': Transaction;
+}
 /**
  * A trade of an asset to another asset
  * @export
@@ -1690,10 +1771,12 @@ export const ServerSignersApiAxiosParamCreator = function (configuration?: Confi
         /**
          * List server signers for the current project
          * @summary List server signers for the current project
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listServerSigners: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listServerSigners: async (limit?: number, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/v1/server_signers`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1705,6 +1788,14 @@ export const ServerSignersApiAxiosParamCreator = function (configuration?: Confi
             const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
 
 
     
@@ -1847,11 +1938,13 @@ export const ServerSignersApiFp = function(configuration?: Configuration) {
         /**
          * List server signers for the current project
          * @summary List server signers for the current project
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listServerSigners(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ServerSigner>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listServerSigners(options);
+        async listServerSigners(limit?: number, page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ServerSignerList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listServerSigners(limit, page, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ServerSignersApi.listServerSigners']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -1929,11 +2022,13 @@ export const ServerSignersApiFactory = function (configuration?: Configuration, 
         /**
          * List server signers for the current project
          * @summary List server signers for the current project
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listServerSigners(options?: any): AxiosPromise<ServerSigner> {
-            return localVarFp.listServerSigners(options).then((request) => request(axios, basePath));
+        listServerSigners(limit?: number, page?: string, options?: any): AxiosPromise<ServerSignerList> {
+            return localVarFp.listServerSigners(limit, page, options).then((request) => request(axios, basePath));
         },
         /**
          * Submit the result of a server signer event
@@ -2001,11 +2096,13 @@ export interface ServerSignersApiInterface {
     /**
      * List server signers for the current project
      * @summary List server signers for the current project
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ServerSignersApiInterface
      */
-    listServerSigners(options?: RawAxiosRequestConfig): AxiosPromise<ServerSigner>;
+    listServerSigners(limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<ServerSignerList>;
 
     /**
      * Submit the result of a server signer event
@@ -2079,12 +2176,14 @@ export class ServerSignersApi extends BaseAPI implements ServerSignersApiInterfa
     /**
      * List server signers for the current project
      * @summary List server signers for the current project
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ServerSignersApi
      */
-    public listServerSigners(options?: RawAxiosRequestConfig) {
-        return ServerSignersApiFp(this.configuration).listServerSigners(options).then((request) => request(this.axios, this.basePath));
+    public listServerSigners(limit?: number, page?: string, options?: RawAxiosRequestConfig) {
+        return ServerSignersApiFp(this.configuration).listServerSigners(limit, page, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -2111,6 +2210,132 @@ export class ServerSignersApi extends BaseAPI implements ServerSignersApiInterfa
      */
     public submitServerSignerSignatureEventResult(serverSignerId: string, signatureCreationEventResult?: SignatureCreationEventResult, options?: RawAxiosRequestConfig) {
         return ServerSignersApiFp(this.configuration).submitServerSignerSignatureEventResult(serverSignerId, signatureCreationEventResult, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * StakeApi - axios parameter creator
+ * @export
+ */
+export const StakeApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Build a new staking operation
+         * @summary Build a new staking operation
+         * @param {BuildStakingOperationRequest} [buildStakingOperationRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        buildStakingOperation: async (buildStakingOperationRequest?: BuildStakingOperationRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/v1/stake/build`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(buildStakingOperationRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * StakeApi - functional programming interface
+ * @export
+ */
+export const StakeApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = StakeApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Build a new staking operation
+         * @summary Build a new staking operation
+         * @param {BuildStakingOperationRequest} [buildStakingOperationRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async buildStakingOperation(buildStakingOperationRequest?: BuildStakingOperationRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<StakingOperation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.buildStakingOperation(buildStakingOperationRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['StakeApi.buildStakingOperation']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * StakeApi - factory interface
+ * @export
+ */
+export const StakeApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = StakeApiFp(configuration)
+    return {
+        /**
+         * Build a new staking operation
+         * @summary Build a new staking operation
+         * @param {BuildStakingOperationRequest} [buildStakingOperationRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        buildStakingOperation(buildStakingOperationRequest?: BuildStakingOperationRequest, options?: any): AxiosPromise<StakingOperation> {
+            return localVarFp.buildStakingOperation(buildStakingOperationRequest, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * StakeApi - interface
+ * @export
+ * @interface StakeApi
+ */
+export interface StakeApiInterface {
+    /**
+     * Build a new staking operation
+     * @summary Build a new staking operation
+     * @param {BuildStakingOperationRequest} [buildStakingOperationRequest] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApiInterface
+     */
+    buildStakingOperation(buildStakingOperationRequest?: BuildStakingOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation>;
+
+}
+
+/**
+ * StakeApi - object-oriented interface
+ * @export
+ * @class StakeApi
+ * @extends {BaseAPI}
+ */
+export class StakeApi extends BaseAPI implements StakeApiInterface {
+    /**
+     * Build a new staking operation
+     * @summary Build a new staking operation
+     * @param {BuildStakingOperationRequest} [buildStakingOperationRequest] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApi
+     */
+    public buildStakingOperation(buildStakingOperationRequest?: BuildStakingOperationRequest, options?: RawAxiosRequestConfig) {
+        return StakeApiFp(this.configuration).buildStakingOperation(buildStakingOperationRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
