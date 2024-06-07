@@ -16,7 +16,7 @@ export class Trade {
   private approveTransaction?: Transaction;
 
   /**
-   * Trades should be created through Wallet#trade or Address#trade.
+   * Trades should be created through Wallet.trade or Address.trade.
    *
    * @class
    * @param model - The underlying Trade object.
@@ -50,7 +50,7 @@ export class Trade {
   /**
    * Returns the Wallet ID of the Trade.
    *
-   * @returns The Wallet ID
+   * @returns The Wallet ID.
    */
   public getWalletId(): string {
     return this.model.wallet_id;
@@ -59,7 +59,7 @@ export class Trade {
   /**
    * Returns the Address ID of the Trade.
    *
-   * @returns The Address ID
+   * @returns The Address ID.
    */
   public getAddressId(): string {
     return this.model.address_id;
@@ -68,7 +68,7 @@ export class Trade {
   /**
    * Returns the From Asset ID of the Trade.
    *
-   * @returns The From Asset ID
+   * @returns The From Asset ID.
    */
   public getFromAssetId(): string {
     return this.model.from_asset.asset_id;
@@ -77,7 +77,7 @@ export class Trade {
   /**
    * Returns the amount of the from asset for the Trade.
    *
-   * @returns The amount of the from asset
+   * @returns The amount of the from asset.
    */
   public getFromAmount(): Decimal {
     const amount = new Decimal(this.model.from_amount);
@@ -87,7 +87,7 @@ export class Trade {
   /**
    * Returns the To Asset ID of the Trade.
    *
-   * @returns The To Asset ID
+   * @returns The To Asset ID.
    */
   public getToAssetId(): string {
     return this.model.to_asset.asset_id;
@@ -96,7 +96,7 @@ export class Trade {
   /**
    * Returns the amount of the to asset for the Trade.
    *
-   * @returns The amount of the to asset
+   * @returns The amount of the to asset.
    */
   public getToAmount(): Decimal {
     const amount = new Decimal(this.model.to_amount);
@@ -106,7 +106,7 @@ export class Trade {
   /**
    * Returns the Trade transaction.
    *
-   * @returns The Trade transaction
+   * @returns The Trade transaction.
    */
   public getTransaction(): Transaction {
     this.transaction = new Transaction(this.model.transaction);
@@ -116,7 +116,7 @@ export class Trade {
   /**
    * Returns the approve transaction if it exists.
    *
-   * @returns The approve transaction
+   * @returns The approve transaction.
    */
   public getApproveTransaction(): Transaction | undefined {
     if (!this.approveTransaction && this.model.approve_transaction) {
@@ -128,7 +128,7 @@ export class Trade {
   /**
    * Returns the status of the Trade.
    *
-   * @returns The status
+   * @returns The status.
    */
   public getStatus(): TransactionStatus | undefined {
     return this.getTransaction()?.getStatus();
@@ -141,6 +141,8 @@ export class Trade {
    * @param options - The options to configure the wait function.
    * @param options.intervalSeconds - The interval at which to poll the Network, in seconds
    * @param options.timeoutSeconds - The maximum amount of time to wait for the Trade to complete, in seconds
+   * @throws {Error} If the Trade takes longer than the given timeout.
+   * @throws {APIError} If the request fails.
    * @returns The completed Trade object.
    */
   public async wait({ intervalSeconds = 0.2, timeoutSeconds = 10 } = {}): Promise<Trade> {
@@ -182,7 +184,7 @@ export class Trade {
   /**
    * Returns a String representation of the Trade.
    *
-   * @returns A String representation of the Trade
+   * @returns A String representation of the Trade.
    */
   public toString(): string {
     return (

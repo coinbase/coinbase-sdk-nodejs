@@ -1,10 +1,6 @@
 import { Decimal } from "decimal.js";
 import { ethers } from "ethers";
-import {
-  Transaction as CoinbaseTransaction,
-  Asset as AssetModel,
-  Trade as TradeModel,
-} from "../../client/api";
+import { Transaction as CoinbaseTransaction, Trade as TradeModel } from "../../client/api";
 import { Transaction } from "../transaction";
 import { Coinbase } from "./../coinbase";
 import { ATOMIC_UNITS_PER_USDC, WEI_PER_ETHER } from "./../constants";
@@ -245,7 +241,7 @@ describe("Trade", () => {
   });
 
   describe("#toString", () => {
-    it("returns the same value as toString", () => {
+    it("should return the same value as toString", () => {
       expect(trade.toString()).toEqual(
         `Trade { transfer_id: '${trade.getId()}', network_id: '${trade.getNetworkId()}', address_id: '${trade.getAddressId()}', from_asset_id: '${trade.getFromAssetId()}', to_asset_id: '${trade.getToAssetId()}', from_amount: '${trade.getFromAmount()}', to_amount: '${trade.getToAmount()}', status: '${trade.getStatus()}' }`,
       );
