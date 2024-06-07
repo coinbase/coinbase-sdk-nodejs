@@ -13,11 +13,85 @@ import {
   User as UserModel,
   Wallet as WalletModel,
   Transfer as TransferModel,
+  Trade as TradeModel,
   WalletList,
+  TradeList as TradeListModel,
+  CreateTradeRequest,
+  BroadcastTradeRequest,
   ServerSignerList,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
+
+export type TradeApiClients = {
+  /**
+   * Broadcast a trade.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address the trade belongs to.
+   * @param tradeId - The ID of the trade to broadcast.
+   * @param broadcastTradeRequest - The request body.
+   * @param options - Override http request option.
+   * @throws {RequiredError} If the required parameter is not provided.
+   */
+  broadcastTrade(
+    walletId: string,
+    addressId: string,
+    tradeId: string,
+    broadcastTradeRequest: BroadcastTradeRequest,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<TradeModel>;
+
+  /**
+   * Create a new trade.
+   *
+   * @param walletId - The ID of the wallet the source address belongs to.
+   * @param addressId - The ID of the address to conduct the trade from.
+   * @param createTradeRequest - The request body.
+   * @param options - Override http request option.
+   * @throws {RequiredError} If the required parameter is not provided.
+   */
+  createTrade(
+    walletId: string,
+    addressId: string,
+    createTradeRequest: CreateTradeRequest,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<TradeModel>;
+
+  /**
+   * Get a trade by ID.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address the trade belongs to.
+   * @param tradeId - The ID of the trade to fetch.
+   * @param options - Override http request option.
+   * @throws {RequiredError} If the required parameter is not provided.
+   */
+  getTrade(
+    walletId: string,
+    addressId: string,
+    tradeId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<TradeModel>;
+
+  /**
+   * List trades for an address.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address to list trades for.
+   * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param page - A cursor for pagination across multiple pages of results. Don't include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param options - Override http request option.
+   * @throws {RequiredError} If the required parameter is not provided.
+   */
+  listTrades(
+    walletId: string,
+    addressId: string,
+    limit?: number,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<TradeListModel>;
+};
 
 /**
  * WalletAPI client type definition.
@@ -318,6 +392,7 @@ export type ApiClients = {
   wallet?: WalletAPIClient;
   address?: AddressAPIClient;
   transfer?: TransferAPIClient;
+  trade?: TradeApiClients;
   serverSigner?: ServerSignerAPIClient;
 };
 
