@@ -3,6 +3,10 @@ import { User as UserModel, Address as AddressModel, Wallet as WalletModel } fro
 import { Wallet } from "./wallet";
 import { Coinbase } from "./coinbase";
 
+type CreateWalletOptionsType = {
+  networkId?: string;
+};
+
 /**
  * A representation of a User.
  * Users have Wallets, which can hold balances of Assets.
@@ -23,13 +27,15 @@ export class User {
   /**
    * Creates a new Wallet belonging to the User.
    *
+   * @param createWalletOptions - The options for creating the Wallet.
+   * @param createWalletOptions.networkId - the ID of the blockchain network. Defaults to 'base-sepolia'.
    * @throws {APIError} - If the request fails.
    * @throws {ArgumentError} - If the model or client is not provided.
    * @throws {InternalError} - If address derivation or caching fails.
    * @returns the new Wallet
    */
-  async createWallet(): Promise<Wallet> {
-    return Wallet.create();
+  async createWallet(createWalletOptions: CreateWalletOptionsType = {}): Promise<Wallet> {
+    return Wallet.create(createWalletOptions);
   }
 
   /**

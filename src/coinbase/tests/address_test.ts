@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Address } from "./../address";
 import * as crypto from "crypto";
 import { ethers } from "ethers";
 import { FaucetTransaction } from "./../faucet_transaction";
-import { Balance as BalanceModel, TransferList } from "../../client";
+import { Balance as BalanceModel, TransferList, Trade as TradeModel } from "../../client";
 import Decimal from "decimal.js";
 import { APIError, FaucetLimitReachedError } from "../api_error";
 import { Coinbase } from "../coinbase";
@@ -16,11 +17,15 @@ import {
   mockFn,
   mockReturnRejectedValue,
   mockReturnValue,
+  tradeApiMock,
   transfersApiMock,
 } from "./utils";
 import { ArgumentError } from "../errors";
 import { Transfer } from "../transfer";
-import { TransferStatus } from "../types";
+import { TransactionStatus, TransferStatus } from "../types";
+import { Trade } from "../trade";
+import { Transaction } from "../transaction";
+import { Asset } from "../asset";
 
 // Test suite for Address class
 describe("Address", () => {
@@ -381,6 +386,245 @@ describe("Address", () => {
       Coinbase.apiClients.transfer!.listTransfers = mockReturnRejectedValue(new APIError(""));
       await expect(address.getTransfers()).rejects.toThrow(APIError);
       expect(Coinbase.apiClients.transfer!.listTransfers).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("#trade", () => {
+    let addressId;
+    let toAddressId;
+    let ethBalanceResponse;
+    let usdcBalanceResponse;
+    let tradeId;
+    let transactionHash;
+    let unsignedPayload;
+    let signedPayload;
+    let broadcastTradeRequest;
+    let transaction;
+    let approveTransaction;
+    let createdTrade;
+    let transactionModel;
+    let tradeModel;
+    let broadcastedTransactionModel;
+    let broadcastedTradeModel;
+    let broadcastedTrade;
+    let fromAssetId;
+    let normalizedFromAssetId;
+    let toAssetId;
+    let balanceResponse;
+    let destination;
+    let amount;
+    let useServerSigner;
+
+    beforeEach(() => {
+      addressId = "address_id";
+      ethBalanceResponse = { amount: "1000000000000000000", asset: "eth" };
+      usdcBalanceResponse = { amount: "10000000000", asset: "usdc" };
+      tradeId = crypto.randomUUID();
+      transactionHash = "0xdeadbeef";
+      unsignedPayload = "unsigned_payload";
+      signedPayload = "signed_payload";
+      broadcastTradeRequest = { signed_payload: signedPayload };
+      transaction = { sign: jest.fn().mockReturnValue(signedPayload) } as unknown as Transaction;
+      approveTransaction = null;
+      createdTrade = {
+        id: tradeId,
+        transaction: transaction,
+        approve_transaction: approveTransaction,
+      } as unknown as Trade;
+      transactionModel = {
+        status: "pending",
+        unsigned_payload: unsignedPayload,
+      } as unknown as TradeModel;
+      tradeModel = {
+        transaction: transactionModel,
+        address_id: addressId,
+      } as unknown as TradeModel;
+      broadcastedTransactionModel = {
+        status: "broadcast",
+        unsigned_payload: unsignedPayload,
+        signed_payload: signedPayload,
+      } as unknown as TradeModel;
+      broadcastedTradeModel = {
+        transaction: broadcastedTransactionModel,
+        address_id: addressId,
+      } as unknown as TradeModel;
+      broadcastedTrade = {
+        transaction: transaction,
+        id: tradeId,
+      } as unknown as Trade;
+      fromAssetId = "eth";
+      normalizedFromAssetId = "eth";
+      toAssetId = "usdc";
+      balanceResponse = ethBalanceResponse;
+      destination = toAddressId;
+      amount = new Decimal(0.5);
+      useServerSigner = false;
+    });
+
+    describe("when the trade is successful", () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+        Coinbase.apiClients.trade = tradeApiMock;
+        Coinbase.apiClients.address!.getAddressBalance = mockReturnValue(balanceResponse);
+        Coinbase.apiClients.trade!.createTrade = mockReturnValue(tradeModel);
+        jest.spyOn(Transaction.prototype, "sign").mockReturnValue(signedPayload);
+      });
+
+      it("should return the broadcasted trade", async () => {
+        Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
+        const result = await address.trade(amount, fromAssetId, toAssetId);
+        const transaction = result.getTransaction();
+        expect(transaction.getSignedPayload()).toEqual(signedPayload);
+        expect(transaction.getStatus()).toEqual(TransactionStatus.BROADCAST);
+        expect(transaction.getUnsignedPayload()).toEqual(unsignedPayload);
+        expect(Coinbase.apiClients.trade!.createTrade).toHaveBeenCalledWith(
+          address.getWalletId(),
+          address.getId(),
+          {
+            amount: Asset.toAtomicAmount(amount, fromAssetId).toString(),
+            from_asset_id: normalizedFromAssetId,
+            to_asset_id: toAssetId,
+          },
+        );
+      });
+
+      it("should sign the transaction with the key", async () => {
+        Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
+        const result = await address.trade(amount, fromAssetId, toAssetId);
+        const transaction = result.getTransaction();
+        expect(transaction.sign).toHaveBeenCalledWith(key);
+      });
+
+      describe("when the asset is Gwei", () => {
+        beforeEach(() => {
+          fromAssetId = "gwei";
+          normalizedFromAssetId = "eth";
+          amount = new Decimal(500000000);
+        });
+
+        it("should return the broadcast trade", async () => {
+          Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
+          await address.trade(amount, fromAssetId, toAssetId);
+          expect(Coinbase.apiClients.trade!.createTrade).toHaveBeenCalledWith(
+            address.getWalletId(),
+            address.getId(),
+            {
+              amount: Asset.toAtomicAmount(amount, fromAssetId).toString(),
+              from_asset_id: normalizedFromAssetId,
+              to_asset_id: toAssetId,
+            },
+          );
+        });
+
+        it("should sign the transaction with the address key", async () => {
+          Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
+          const result = await address.trade(amount, fromAssetId, toAssetId);
+          const transaction = result.getTransaction();
+          expect(transaction.sign).toHaveBeenCalledWith(key);
+        });
+      });
+
+      describe("when the asset is ETH", () => {
+        beforeEach(() => {
+          fromAssetId = "eth";
+          normalizedFromAssetId = "eth";
+          amount = new Decimal(0.5);
+        });
+
+        it("should return the broadcast trade", async () => {
+          Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
+          await address.trade(amount, fromAssetId, toAssetId);
+          expect(Coinbase.apiClients.trade!.createTrade).toHaveBeenCalledWith(
+            address.getWalletId(),
+            address.getId(),
+            {
+              amount: Asset.toAtomicAmount(amount, fromAssetId).toString(),
+              from_asset_id: normalizedFromAssetId,
+              to_asset_id: toAssetId,
+            },
+          );
+        });
+
+        it("should sign the transaction with the address key", async () => {
+          Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
+          const result = await address.trade(amount, fromAssetId, toAssetId);
+          const transaction = result.getTransaction();
+          expect(transaction.sign).toHaveBeenCalledWith(key);
+        });
+      });
+
+      describe("when the asset is USDC", () => {
+        beforeEach(() => {
+          fromAssetId = "usdc";
+          normalizedFromAssetId = "usdc";
+          amount = new Decimal(5);
+          balanceResponse = { amount: "5000000", asset: { asset_id: "usdc", decimals: 6 } };
+          Coinbase.apiClients.address!.getAddressBalance = mockReturnValue(balanceResponse);
+        });
+
+        it("should return the broadcast trade", async () => {
+          Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
+          await address.trade(amount, fromAssetId, toAssetId);
+          expect(Coinbase.apiClients.trade!.createTrade).toHaveBeenCalledWith(
+            address.getWalletId(),
+            address.getId(),
+            {
+              amount: Asset.toAtomicAmount(amount, fromAssetId).toString(),
+              from_asset_id: normalizedFromAssetId,
+              to_asset_id: toAssetId,
+            },
+          );
+        });
+
+        it("should sign the transaction with the address key", async () => {
+          Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
+          const result = await address.trade(amount, fromAssetId, toAssetId);
+          const transaction = result.getTransaction();
+          expect(transaction.sign).toHaveBeenCalledWith(key);
+        });
+      });
+
+      describe("when there is an approve transaction", () => {
+        let approveSignedPayload;
+
+        beforeEach(() => {
+          approveSignedPayload = "approve_signed_payload";
+          approveTransaction = { sign: jest.fn().mockReturnValue(approveSignedPayload) };
+          broadcastedTradeModel = {
+            ...broadcastedTradeModel,
+            approve_transaction: approveTransaction,
+          };
+        });
+
+        it("should sign the trade transaction with the address key", async () => {
+          const trade = await address.trade(amount, fromAssetId, toAssetId);
+          const transaction = trade.getTransaction();
+          expect(transaction.sign).toHaveBeenCalledWith(key);
+        });
+      });
+    });
+
+    describe("when the address cannot sign", () => {
+      it("should raise an Error", async () => {
+        const newAddress = new Address(VALID_ADDRESS_MODEL, null!);
+        await expect(newAddress.trade(new Decimal(100), "eth", "usdc")).rejects.toThrow(Error);
+      });
+    });
+
+    describe("when the to asset is unsupported", () => {
+      it("should raise an ArgumentError", async () => {
+        await expect(address.trade(new Decimal(100), "eth", "XYZ")).rejects.toThrow(Error);
+      });
+    });
+
+    describe("when the balance is insufficient", () => {
+      beforeAll(() => {
+        Coinbase.apiClients.address = addressesApiMock;
+        Coinbase.apiClients.address!.getAddressBalance = mockReturnValue({ amount: "0" });
+      });
+      it("should raise an Error", async () => {
+        await expect(address.trade(new Decimal(100), "eth", "usdc")).rejects.toThrow(Error);
+      });
     });
   });
 });

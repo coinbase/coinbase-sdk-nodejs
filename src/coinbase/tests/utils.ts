@@ -179,6 +179,13 @@ export const addressesApiMock = {
   createAddress: jest.fn(),
 };
 
+export const tradeApiMock = {
+  getTrade: jest.fn(),
+  listTrades: jest.fn(),
+  createTrade: jest.fn(),
+  broadcastTrade: jest.fn(),
+};
+
 export const transfersApiMock = {
   broadcastTransfer: jest.fn(),
   createTransfer: jest.fn(),

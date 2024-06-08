@@ -22,6 +22,7 @@ import { FaucetTransaction } from "./faucet_transaction";
 import { BalanceMap } from "./balance_map";
 import Decimal from "decimal.js";
 import { Balance } from "./balance";
+import { Trade } from "./trade";
 
 /**
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
@@ -355,6 +356,23 @@ export class Wallet {
    */
   public listAddresses(): Address[] {
     return this.addresses;
+  }
+
+  /**
+   *  Trades the given amount of the given Asset for another Asset. Currently only the default address is used to source the Trade
+   *
+   * @param amount - The amount of the Asset to send.
+   * @param fromAssetId - The ID of the Asset to trade from. For Ether, eth, gwei, and wei are supported.
+   * @param toAssetId - The ID of the Asset to trade to. For Ether, eth, gwei, and wei are supported.
+   * @throws {InternalError} If the default address is not found.
+   * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
+   * @returns The Trade object.
+   */
+  public async trade(amount: Amount, fromAssetId: string, toAssetId: string): Promise<Trade> {
+    if (!this.getDefaultAddress()) {
+      throw new InternalError("Default address not found");
+    }
+    return await this.getDefaultAddress()!.trade(amount, fromAssetId, toAssetId);
   }
 
   /**
