@@ -472,7 +472,7 @@ describe("Address", () => {
 
       it("should return the broadcasted trade", async () => {
         Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
-        const result = await address.trade(amount, fromAssetId, toAssetId);
+        const result = await address.createTrade(amount, fromAssetId, toAssetId);
         const transaction = result.getTransaction();
         expect(transaction.getSignedPayload()).toEqual(signedPayload);
         expect(transaction.getStatus()).toEqual(TransactionStatus.BROADCAST);
@@ -490,7 +490,7 @@ describe("Address", () => {
 
       it("should sign the transaction with the key", async () => {
         Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
-        const result = await address.trade(amount, fromAssetId, toAssetId);
+        const result = await address.createTrade(amount, fromAssetId, toAssetId);
         const transaction = result.getTransaction();
         expect(transaction.sign).toHaveBeenCalledWith(key);
       });
@@ -504,7 +504,7 @@ describe("Address", () => {
 
         it("should return the broadcast trade", async () => {
           Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
-          await address.trade(amount, fromAssetId, toAssetId);
+          await address.createTrade(amount, fromAssetId, toAssetId);
           expect(Coinbase.apiClients.trade!.createTrade).toHaveBeenCalledWith(
             address.getWalletId(),
             address.getId(),
@@ -518,7 +518,7 @@ describe("Address", () => {
 
         it("should sign the transaction with the address key", async () => {
           Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
-          const result = await address.trade(amount, fromAssetId, toAssetId);
+          const result = await address.createTrade(amount, fromAssetId, toAssetId);
           const transaction = result.getTransaction();
           expect(transaction.sign).toHaveBeenCalledWith(key);
         });
@@ -533,7 +533,7 @@ describe("Address", () => {
 
         it("should return the broadcast trade", async () => {
           Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
-          await address.trade(amount, fromAssetId, toAssetId);
+          await address.createTrade(amount, fromAssetId, toAssetId);
           expect(Coinbase.apiClients.trade!.createTrade).toHaveBeenCalledWith(
             address.getWalletId(),
             address.getId(),
@@ -547,7 +547,7 @@ describe("Address", () => {
 
         it("should sign the transaction with the address key", async () => {
           Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
-          const result = await address.trade(amount, fromAssetId, toAssetId);
+          const result = await address.createTrade(amount, fromAssetId, toAssetId);
           const transaction = result.getTransaction();
           expect(transaction.sign).toHaveBeenCalledWith(key);
         });
@@ -564,7 +564,7 @@ describe("Address", () => {
 
         it("should return the broadcast trade", async () => {
           Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
-          await address.trade(amount, fromAssetId, toAssetId);
+          await address.createTrade(amount, fromAssetId, toAssetId);
           expect(Coinbase.apiClients.trade!.createTrade).toHaveBeenCalledWith(
             address.getWalletId(),
             address.getId(),
@@ -578,7 +578,7 @@ describe("Address", () => {
 
         it("should sign the transaction with the address key", async () => {
           Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
-          const result = await address.trade(amount, fromAssetId, toAssetId);
+          const result = await address.createTrade(amount, fromAssetId, toAssetId);
           const transaction = result.getTransaction();
           expect(transaction.sign).toHaveBeenCalledWith(key);
         });
@@ -597,7 +597,7 @@ describe("Address", () => {
         });
 
         it("should sign the trade transaction with the address key", async () => {
-          const trade = await address.trade(amount, fromAssetId, toAssetId);
+          const trade = await address.createTrade(amount, fromAssetId, toAssetId);
           const transaction = trade.getTransaction();
           expect(transaction.sign).toHaveBeenCalledWith(key);
         });
@@ -607,13 +607,13 @@ describe("Address", () => {
     describe("when the address cannot sign", () => {
       it("should raise an Error", async () => {
         const newAddress = new Address(VALID_ADDRESS_MODEL, null!);
-        await expect(newAddress.trade(new Decimal(100), "eth", "usdc")).rejects.toThrow(Error);
+        await expect(newAddress.createTrade(new Decimal(100), "eth", "usdc")).rejects.toThrow(Error);
       });
     });
 
     describe("when the to asset is unsupported", () => {
       it("should raise an ArgumentError", async () => {
-        await expect(address.trade(new Decimal(100), "eth", "XYZ")).rejects.toThrow(Error);
+        await expect(address.createTrade(new Decimal(100), "eth", "XYZ")).rejects.toThrow(Error);
       });
     });
 
@@ -623,7 +623,7 @@ describe("Address", () => {
         Coinbase.apiClients.address!.getAddressBalance = mockReturnValue({ amount: "0" });
       });
       it("should raise an Error", async () => {
-        await expect(address.trade(new Decimal(100), "eth", "usdc")).rejects.toThrow(Error);
+        await expect(address.createTrade(new Decimal(100), "eth", "usdc")).rejects.toThrow(Error);
       });
     });
   });

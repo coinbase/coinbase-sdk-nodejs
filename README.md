@@ -160,7 +160,7 @@ console.log(`Wallet successfully created: ${mainnetWallet}`);
 // Fund your Wallet's default Address with ETH from an external source.
 
 // Trade 0.00001 ETH to USDC
-let trade = await wallet.trade(0.00001, Coinbase.assets.Eth, Coinbase.assets.Usdc);
+let trade = await wallet.createTrade(0.00001, Coinbase.assets.Eth, Coinbase.assets.Usdc);
 
 console.log(`Second trade successfully completed: ${trade}`);
 ```
