@@ -274,16 +274,16 @@ export class Address {
    * @returns The Trade object.
    * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
    */
-  public async trade(amount: Amount, fromAssetId: string, toAssetId: string): Promise<Trade> {
+  public async createTrade(amount: Amount, fromAssetId: string, toAssetId: string): Promise<Trade> {
     await this.validateCanTrade(amount, fromAssetId, toAssetId);
-    const trade = await this.createTrade(amount, fromAssetId, toAssetId);
+    const trade = await this.createTradeRequest(amount, fromAssetId, toAssetId);
     // NOTE: Trading does not yet support server signers at this point.
     const signed_payload = await trade.getTransaction().sign(this.key!);
     const approveTransactionSignedPayload = trade.getApproveTransaction()
       ? await trade.getApproveTransaction()!.sign(this.key!)
       : undefined;
 
-    return this.broadcastTrade(trade, signed_payload, approveTransactionSignedPayload);
+    return this.broadcastTradeRequest(trade, signed_payload, approveTransactionSignedPayload);
   }
 
   /**
@@ -294,7 +294,7 @@ export class Address {
    * @param toAssetId - The ID of the Asset to trade to. For Ether, eth, gwei, and wei are supported.
    * @returns A promise that resolves to a Trade object representing the new trade.
    */
-  private async createTrade(
+  private async createTradeRequest(
     amount: Amount,
     fromAssetId: string,
     toAssetId: string,
@@ -320,12 +320,12 @@ export class Address {
    * @param approveTransactionPayload - The signed payload of the approval transaction, if any.
    * @returns A promise that resolves to a Trade object representing the broadcasted trade.
    */
-  private async broadcastTrade(
+  private async broadcastTradeRequest(
     trade: Trade,
     signedPayload: string,
     approveTransactionPayload?: string,
   ): Promise<Trade> {
-    const broadcastTradeRequest = {
+    const broadcastTradeRequestPayload = {
       signed_payload: signedPayload,
       approve_transaction_signed_payload: approveTransactionPayload
         ? approveTransactionPayload
@@ -336,7 +336,7 @@ export class Address {
       this.getWalletId(),
       this.getId(),
       trade.getId(),
-      broadcastTradeRequest,
+      broadcastTradeRequestPayload,
     );
 
     return new Trade(response.data);

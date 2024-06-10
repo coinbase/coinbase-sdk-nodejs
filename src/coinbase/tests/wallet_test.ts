@@ -740,10 +740,10 @@ describe("Wallet Class", () => {
         },
       } as TradeModel);
       const trade = Promise.resolve(tradeObject);
-      jest.spyOn(Address.prototype, "trade").mockReturnValue(trade);
+      jest.spyOn(Address.prototype, "createTrade").mockReturnValue(trade);
     });
     it("should create a trade from the default address", async () => {
-      const result = await wallet.trade(0.01, "eth", "usdc");
+      const result = await wallet.createTrade(0.01, "eth", "usdc");
       expect(result).toBeInstanceOf(Trade);
       expect(result.getAddressId()).toBe(tradeObject.getAddressId());
       expect(result.getWalletId()).toBe(tradeObject.getWalletId());
