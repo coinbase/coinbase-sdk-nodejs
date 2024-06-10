@@ -152,7 +152,7 @@ const transfer = await wallet.createTransfer(0.00001, Coinbase.assets.Eth, anoth
 ### Trading Funds
 
 ```typescript
-// Create a wallet on `base-mainnet` to trade assets with.
+// Create a Wallet on `base-mainnet` to trade assets with.
 let mainnetWallet = await user.createWallet({ networkId: Coinbase.networks.BaseMainnet });
 
 console.log(`Wallet successfully created: ${mainnetWallet}`);
