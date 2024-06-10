@@ -19,7 +19,7 @@
     "clean": "rm -rf dist/*",
     "build": "tsc",
     "prepack": "tsc",
-    "docs": "typedoc --entryPoints ./src --entryPointStrategy expand"
+    "docs": "typedoc --entryPoints ./src --entryPointStrategy expand --exclude ./src/coinbase/tests/**/*.ts"
   },
   "files": [
     "dist"
