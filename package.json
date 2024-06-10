@@ -4,7 +4,7 @@
   "license": "ISC",
   "description": "Coinbase Platform SDK",
   "repository": "https://github.com/coinbase/coinbase-sdk-nodejs",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -19,7 +19,7 @@
     "clean": "rm -rf dist/*",
     "build": "tsc",
     "prepack": "tsc",
-    "docs": "typedoc --entryPoints ./src --entryPointStrategy expand"
+    "docs": "typedoc --entryPoints ./src --entryPointStrategy expand --exclude ./src/coinbase/tests/**/*.ts"
   },
   "files": [
     "dist"

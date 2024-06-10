@@ -19,10 +19,10 @@ const PATH_PREFIX = "./src/coinbase/tests/config";
 
 describe("Coinbase tests", () => {
   it("should throw an error if the API key name or private key is empty", () => {
-    expect(() => new Coinbase({ privateKey: "test" })).toThrow(
+    expect(() => new Coinbase({ apiKeyName: "", privateKey: "test" })).toThrow(
       "Invalid configuration: apiKeyName is empty",
     );
-    expect(() => new Coinbase({ apiKeyName: "test" })).toThrow(
+    expect(() => new Coinbase({ apiKeyName: "test", privateKey: "" })).toThrow(
       "Invalid configuration: privateKey is empty",
     );
   });
@@ -86,12 +86,12 @@ describe("Coinbase tests", () => {
 
       const walletModel = {
         id: walletId,
-        network_id: Coinbase.networkList.BaseSepolia,
+        network_id: Coinbase.networks.BaseSepolia,
         default_address: {
           wallet_id: walletId,
           address_id: addressId,
           public_key: publicKey,
-          network_id: Coinbase.networkList.BaseSepolia,
+          network_id: Coinbase.networks.BaseSepolia,
         },
       };
 

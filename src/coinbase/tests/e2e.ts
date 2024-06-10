@@ -11,8 +11,8 @@ describe("Coinbase SDK E2E Test", () => {
 
   beforeEach(() => {
     coinbase = new Coinbase({
-      apiKeyName: process.env.NAME,
-      privateKey: process.env.PRIVATE_KEY,
+      apiKeyName: process.env.NAME as string,
+      privateKey: process.env.PRIVATE_KEY as string,
     });
   });
 

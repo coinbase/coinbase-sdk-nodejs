@@ -6,6 +6,8 @@ import {
   TransfersApiFactory,
   AddressesApiFactory,
   WalletsApiFactory,
+  TradesApiFactory,
+  ServerSignersApiFactory,
 } from "../client";
 import { BASE_PATH } from "./../client/base";
 import { Configuration } from "./../client/configuration";
@@ -25,8 +27,9 @@ export class Coinbase {
    *
    * @constant
    */
-  static networkList = {
+  static networks = {
     BaseSepolia: "base-sepolia",
+    BaseMainnet: "base-mainnet",
   };
 
   /**
@@ -72,8 +75,8 @@ export class Coinbase {
    * @throws {InvalidAPIKeyFormat} If not able to create JWT token.
    */
   constructor({
-    apiKeyName = "",
-    privateKey = "",
+    apiKeyName,
+    privateKey,
     useServerSigner = false,
     debugging = false,
     basePath = BASE_PATH,
@@ -99,6 +102,8 @@ export class Coinbase {
     Coinbase.apiClients.wallet = WalletsApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.address = AddressesApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.transfer = TransfersApiFactory(config, basePath, axiosInstance);
+    Coinbase.apiClients.trade = TradesApiFactory(config, basePath, axiosInstance);
+    Coinbase.apiClients.serverSigner = ServerSignersApiFactory(config, basePath, axiosInstance);
     Coinbase.apiKeyPrivateKey = privateKey;
     Coinbase.useServerSigner = useServerSigner;
   }
@@ -121,7 +126,7 @@ export class Coinbase {
     useServerSigner = false,
     debugging = false,
     basePath = BASE_PATH,
-  }: CoinbaseConfigureFromJsonOptions): Coinbase {
+  }: CoinbaseConfigureFromJsonOptions = {}): Coinbase {
     filePath = filePath.startsWith("~") ? filePath.replace("~", os.homedir()) : filePath;
 
     if (!fs.existsSync(filePath)) {

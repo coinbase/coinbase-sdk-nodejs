@@ -1,0 +1,6 @@
+docs/
+coverage/
+.github/
+src/client
+**/**/*.json
+*.md

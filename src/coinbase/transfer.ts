@@ -3,8 +3,9 @@ import { TransferStatus } from "./types";
 import { Coinbase } from "./coinbase";
 import { Transfer as TransferModel } from "../client/api";
 import { ethers } from "ethers";
-import { InternalError, InvalidUnsignedPayload } from "./errors";
+import { InternalError } from "./errors";
 import { WEI_PER_ETHER } from "./constants";
+import { parseUnsignedPayload } from "./utils";
 
 /**
  * A representation of a Transfer, which moves an Amount of an Asset from
@@ -145,21 +146,7 @@ export class Transfer {
 
     const transaction = new ethers.Transaction();
 
-    const rawPayload = this.getUnsignedPayload()
-      .match(/../g)
-      ?.map(byte => parseInt(byte, 16));
-    if (!rawPayload) {
-      throw new InvalidUnsignedPayload("Unable to parse unsigned payload");
-    }
-
-    let parsedPayload;
-    try {
-      const rawPayloadBytes = new Uint8Array(rawPayload);
-      const decoder = new TextDecoder();
-      parsedPayload = JSON.parse(decoder.decode(rawPayloadBytes));
-    } catch (error) {
-      throw new InvalidUnsignedPayload("Unable to decode unsigned payload JSON");
-    }
+    const parsedPayload = parseUnsignedPayload(this.getUnsignedPayload());
 
     transaction.chainId = BigInt(parsedPayload.chainId);
     transaction.nonce = BigInt(parsedPayload.nonce);

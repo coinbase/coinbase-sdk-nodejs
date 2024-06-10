@@ -69,8 +69,9 @@ describe("User Class", () => {
       };
       mockWalletModel = {
         id: walletId,
-        network_id: Coinbase.networkList.BaseSepolia,
+        network_id: Coinbase.networks.BaseSepolia,
         default_address: mockAddressModel,
+        enabled_features: [],
       };
       Coinbase.apiClients.wallet = walletsApiMock;
       Coinbase.apiClients.wallet!.getWallet = mockReturnValue(mockWalletModel);
@@ -115,8 +116,9 @@ describe("User Class", () => {
       const addressModel2: AddressModel = newAddressModel(walletId);
       walletModelWithDefaultAddress = {
         id: walletId,
-        network_id: Coinbase.networkList.BaseSepolia,
+        network_id: Coinbase.networks.BaseSepolia,
         default_address: addressModel1,
+        enabled_features: [],
       };
       addressListModel = {
         data: [addressModel1, addressModel2],
@@ -251,7 +253,7 @@ describe("User Class", () => {
         amount: "5000000000000000000",
         asset: {
           asset_id: Coinbase.assets.Eth,
-          network_id: Coinbase.networkList.BaseSepolia,
+          network_id: Coinbase.networks.BaseSepolia,
           decimals: 18,
         },
       };
@@ -271,7 +273,7 @@ describe("User Class", () => {
       const wallet = result.wallets[0];
       expect(wallet.getId()).toBe(walletId);
       expect(wallet.canSign()).toBe(false);
-      expect(wallet.getNetworkId()).toBe(Coinbase.networkList.BaseSepolia);
+      expect(wallet.getNetworkId()).toBe(Coinbase.networks.BaseSepolia);
       expect(wallet.getDefaultAddress()?.getId()).toBe(
         walletModelWithDefaultAddress.default_address?.address_id,
       );
@@ -307,8 +309,9 @@ describe("User Class", () => {
       const addressModel2: AddressModel = newAddressModel(walletId);
       walletModelWithDefaultAddress = {
         id: walletId,
-        network_id: Coinbase.networkList.BaseSepolia,
+        network_id: Coinbase.networks.BaseSepolia,
         default_address: addressModel1,
+        enabled_features: [],
       };
       addressListModel = {
         data: [addressModel1, addressModel2],

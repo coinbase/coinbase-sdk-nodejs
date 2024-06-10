@@ -13,7 +13,9 @@ import {
   AddressBalanceList,
   Address as AddressModel,
   Balance as BalanceModel,
+  TransactionStatusEnum,
   Wallet as WalletModel,
+  Trade as TradeModel,
 } from "./../../client";
 import {
   VALID_ADDRESS_MODEL,
@@ -28,6 +30,8 @@ import {
   transfersApiMock,
   walletsApiMock,
 } from "./utils";
+import { Transaction } from "../transaction";
+import { Trade } from "../trade";
 
 describe("Wallet Class", () => {
   let wallet: Wallet;
@@ -79,7 +83,7 @@ describe("Wallet Class", () => {
           amount: "1000000000000000000",
           asset: {
             asset_id,
-            network_id: Coinbase.networkList.BaseSepolia,
+            network_id: Coinbase.networks.BaseSepolia,
           },
         };
         return { data: balanceModel };
@@ -212,7 +216,7 @@ describe("Wallet Class", () => {
       expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.createAddress).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.wallet!.createWallet).toHaveBeenCalledWith({
-        wallet: { network_id: Coinbase.networkList.BaseSepolia },
+        wallet: { network_id: Coinbase.networks.BaseSepolia },
       });
       expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledWith(walletId);
     });
@@ -223,9 +227,48 @@ describe("Wallet Class", () => {
       });
     });
 
-    describe(".getNetworkID", () => {
-      it("should return the correct network ID", async () => {
-        expect(wallet.getNetworkId()).toBe(Coinbase.networkList.BaseSepolia);
+    describe("#getNetworkId", () => {
+      let wallet;
+      let network_id = Coinbase.networks.BaseMainnet;
+
+      beforeEach(async () => {
+        Coinbase.apiClients.wallet = walletsApiMock;
+        Coinbase.apiClients.address = addressesApiMock;
+        Coinbase.apiClients.wallet!.createWallet = mockReturnValue({
+          ...VALID_WALLET_MODEL,
+          network_id,
+          server_signer_status: ServerSignerStatus.PENDING,
+        });
+        Coinbase.apiClients.wallet!.getWallet = mockReturnValue({
+          ...VALID_WALLET_MODEL,
+          network_id,
+          server_signer_status: ServerSignerStatus.ACTIVE,
+        });
+        Coinbase.apiClients.address!.createAddress = mockReturnValue(newAddressModel(walletId));
+        const createWalletParams =
+          network_id === Coinbase.networks.BaseMainnet
+            ? {
+                networkId: network_id,
+              }
+            : undefined;
+        wallet = await Wallet.create(createWalletParams);
+      });
+
+      describe("when a network is specified", () => {
+        beforeAll(() => {
+          network_id = Coinbase.networks.BaseMainnet;
+        });
+        it("it creates a wallet scoped to the specified network", () => {
+          expect(wallet.getNetworkId()).toBe(Coinbase.networks.BaseMainnet);
+        });
+      });
+      describe("when no network is specified", () => {
+        beforeAll(() => {
+          network_id = Coinbase.networks.BaseSepolia;
+        });
+        it("it creates a wallet scoped to the default network", () => {
+          expect(wallet.getNetworkId()).toBe(Coinbase.networks.BaseSepolia);
+        });
       });
     });
 
@@ -284,7 +327,7 @@ describe("Wallet Class", () => {
           server_signer_status: ServerSignerStatus.PENDING,
         });
 
-        await expect(Wallet.create(intervalSeconds, timeoutSeconds)).rejects.toThrow(
+        await expect(Wallet.create({ intervalSeconds, timeoutSeconds })).rejects.toThrow(
           "Wallet creation timed out. Check status of your Server-Signer",
         );
         expect(Coinbase.apiClients.wallet!.createWallet).toHaveBeenCalledTimes(1);
@@ -306,28 +349,29 @@ describe("Wallet Class", () => {
       addressList = [
         {
           address_id: address1,
-          network_id: Coinbase.networkList.BaseSepolia,
+          network_id: Coinbase.networks.BaseSepolia,
           public_key: wallet1PrivateKey,
           wallet_id: walletId,
         },
         {
           address_id: address2,
-          network_id: Coinbase.networkList.BaseSepolia,
+          network_id: Coinbase.networks.BaseSepolia,
           public_key: wallet2PrivateKey,
           wallet_id: walletId,
         },
       ];
       walletModel = {
         id: walletId,
-        network_id: Coinbase.networkList.BaseSepolia,
+        network_id: Coinbase.networks.BaseSepolia,
         default_address: addressList[0],
+        enabled_features: [],
       };
       wallet = await Wallet.init(walletModel, existingSeed, addressList);
       Coinbase.apiClients.address!.createAddress = mockFn(walletId => {
         return {
           data: {
             id: walletId,
-            network_id: Coinbase.networkList.BaseSepolia,
+            network_id: Coinbase.networks.BaseSepolia,
             default_address: newAddressModel(walletId),
           },
         };
@@ -343,7 +387,7 @@ describe("Wallet Class", () => {
     });
 
     it("should return the correct network ID", async () => {
-      expect(wallet.getNetworkId()).toBe(Coinbase.networkList.BaseSepolia);
+      expect(wallet.getNetworkId()).toBe(Coinbase.networks.BaseSepolia);
     });
 
     it("should derive the correct number of addresses", async () => {
@@ -360,7 +404,7 @@ describe("Wallet Class", () => {
 
     it("should return the correct string representation", async () => {
       expect(wallet.toString()).toBe(
-        `Wallet{id: '${walletModel.id}', networkId: '${Coinbase.networkList.BaseSepolia}'}`,
+        `Wallet{id: '${walletModel.id}', networkId: '${Coinbase.networks.BaseSepolia}'}`,
       );
     });
   });
@@ -377,8 +421,9 @@ describe("Wallet Class", () => {
       addressModel = newAddressModel(walletId);
       walletModel = {
         id: walletId,
-        network_id: Coinbase.networkList.BaseSepolia,
+        network_id: Coinbase.networks.BaseSepolia,
         default_address: addressModel,
+        enabled_features: [],
       };
       Coinbase.apiClients.address = addressesApiMock;
       Coinbase.apiClients.address!.getAddress = mockFn(() => {
@@ -412,7 +457,7 @@ describe("Wallet Class", () => {
             amount: "1000000000000000000",
             asset: {
               asset_id: Coinbase.assets.Eth,
-              network_id: Coinbase.networkList.BaseSepolia,
+              network_id: Coinbase.networks.BaseSepolia,
               decimals: 18,
             },
           },
@@ -420,7 +465,7 @@ describe("Wallet Class", () => {
             amount: "5000000",
             asset: {
               asset_id: "usdc",
-              network_id: Coinbase.networkList.BaseSepolia,
+              network_id: Coinbase.networks.BaseSepolia,
               decimals: 6,
             },
           },
@@ -447,7 +492,7 @@ describe("Wallet Class", () => {
         amount: "5000000000000000000",
         asset: {
           asset_id: Coinbase.assets.Eth,
-          network_id: Coinbase.networkList.BaseSepolia,
+          network_id: Coinbase.networks.BaseSepolia,
           decimals: 18,
         },
       };
@@ -502,7 +547,6 @@ describe("Wallet Class", () => {
       const mockAddressModel = newAddressModel(walletId);
       const mockWalletModel = {
         id: walletId,
-        network_id: Coinbase.networkList.BaseSepolia,
         default_address: mockAddressModel,
       };
       Coinbase.apiClients.wallet = walletsApiMock;
@@ -514,6 +558,31 @@ describe("Wallet Class", () => {
     });
     it("should return true when the wallet initialized", () => {
       expect(wallet.canSign()).toBe(true);
+    });
+  });
+
+  describe("should change the network ID", () => {
+    let wallet;
+    beforeAll(async () => {
+      Coinbase.apiClients.wallet = walletsApiMock;
+      Coinbase.apiClients.address = addressesApiMock;
+      Coinbase.apiClients.wallet!.createWallet = mockReturnValue({
+        ...VALID_WALLET_MODEL,
+        network_id: Coinbase.networks.BaseMainnet,
+        server_signer_status: ServerSignerStatus.PENDING,
+      });
+      Coinbase.apiClients.wallet!.getWallet = mockReturnValue({
+        ...VALID_WALLET_MODEL,
+        network_id: Coinbase.networks.BaseMainnet,
+        server_signer_status: ServerSignerStatus.ACTIVE,
+      });
+      Coinbase.apiClients.address!.createAddress = mockReturnValue(newAddressModel(walletId));
+      wallet = await Wallet.create({
+        networkId: Coinbase.networks.BaseMainnet,
+      });
+    });
+    it("should return true when the wallet initialized", () => {
+      expect(wallet.getNetworkId()).toBe(Coinbase.networks.BaseMainnet);
     });
   });
 
@@ -615,7 +684,8 @@ describe("Wallet Class", () => {
 
       const otherModel = {
         id: crypto.randomUUID(),
-        network_id: Coinbase.networkList.BaseSepolia,
+        network_id: Coinbase.networks.BaseSepolia,
+        enabled_features: [],
       };
       const otherWallet = await Wallet.init(otherModel);
       otherWallet.saveSeed(filePath, true);
@@ -650,6 +720,34 @@ describe("Wallet Class", () => {
       fs.writeFileSync(filePath, "corrupted data", "utf8");
 
       expect(() => seedlessWallet.loadSeed(filePath)).toThrow(ArgumentError);
+    });
+  });
+
+  describe(".trade", () => {
+    let tradeObject;
+    beforeAll(() => {
+      tradeObject = new Trade({
+        network_id: Coinbase.networks.BaseSepolia,
+        wallet_id: walletId,
+        address_id: VALID_ADDRESS_MODEL.address_id,
+        trade_id: crypto.randomUUID(),
+        from_amount: "0.01",
+        transaction: {
+          network_id: Coinbase.networks.BaseSepolia,
+          from_address_id: VALID_ADDRESS_MODEL.address_id,
+          unsigned_payload: "unsigned_payload",
+          status: TransactionStatusEnum.Pending,
+        },
+      } as TradeModel);
+      const trade = Promise.resolve(tradeObject);
+      jest.spyOn(Address.prototype, "createTrade").mockReturnValue(trade);
+    });
+    it("should create a trade from the default address", async () => {
+      const result = await wallet.createTrade(0.01, "eth", "usdc");
+      expect(result).toBeInstanceOf(Trade);
+      expect(result.getAddressId()).toBe(tradeObject.getAddressId());
+      expect(result.getWalletId()).toBe(tradeObject.getWalletId());
+      expect(result.getId()).toBe(tradeObject.getId());
     });
   });
 });

@@ -16,7 +16,7 @@ describe("BalanceMap", () => {
     const ethBalanceModel: BalanceModel = {
       asset: {
         asset_id: Coinbase.assets.Eth,
-        network_id: Coinbase.networkList.BaseSepolia,
+        network_id: Coinbase.networks.BaseSepolia,
       },
       amount: ethAtomicAmount,
     };
@@ -24,7 +24,7 @@ describe("BalanceMap", () => {
     const usdcBalanceModel: BalanceModel = {
       asset: {
         asset_id: "usdc",
-        network_id: Coinbase.networkList.BaseSepolia,
+        network_id: Coinbase.networks.BaseSepolia,
       },
       amount: usdcAtomicAmount,
     };
@@ -32,7 +32,7 @@ describe("BalanceMap", () => {
     const wethBalanceModel: BalanceModel = {
       asset: {
         asset_id: "weth",
-        network_id: Coinbase.networkList.BaseSepolia,
+        network_id: Coinbase.networks.BaseSepolia,
       },
       amount: wethAtomicAmount,
     };
@@ -53,7 +53,7 @@ describe("BalanceMap", () => {
     const balance = Balance.fromModelAndAssetId(
       {
         amount: ethAtomicAmount,
-        asset: { asset_id: assetId, network_id: Coinbase.networkList.BaseSepolia },
+        asset: { asset_id: assetId, network_id: Coinbase.networks.BaseSepolia },
       },
       assetId,
     );
@@ -71,7 +71,7 @@ describe("BalanceMap", () => {
     const balance = Balance.fromModelAndAssetId(
       {
         amount: ethAtomicAmount,
-        asset: { asset_id: assetId, network_id: Coinbase.networkList.BaseSepolia },
+        asset: { asset_id: assetId, network_id: Coinbase.networks.BaseSepolia },
       },
       assetId,
     );

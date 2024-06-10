@@ -13,10 +13,85 @@ import {
   User as UserModel,
   Wallet as WalletModel,
   Transfer as TransferModel,
+  Trade as TradeModel,
   WalletList,
+  TradeList as TradeListModel,
+  CreateTradeRequest,
+  BroadcastTradeRequest,
+  ServerSignerList,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
+
+export type TradeApiClients = {
+  /**
+   * Broadcast a trade.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address the trade belongs to.
+   * @param tradeId - The ID of the trade to broadcast.
+   * @param broadcastTradeRequest - The request body.
+   * @param options - Override http request option.
+   * @throws {RequiredError} If the required parameter is not provided.
+   */
+  broadcastTrade(
+    walletId: string,
+    addressId: string,
+    tradeId: string,
+    broadcastTradeRequest: BroadcastTradeRequest,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<TradeModel>;
+
+  /**
+   * Create a new trade.
+   *
+   * @param walletId - The ID of the wallet the source address belongs to.
+   * @param addressId - The ID of the address to conduct the trade from.
+   * @param createTradeRequest - The request body.
+   * @param options - Override http request option.
+   * @throws {RequiredError} If the required parameter is not provided.
+   */
+  createTrade(
+    walletId: string,
+    addressId: string,
+    createTradeRequest: CreateTradeRequest,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<TradeModel>;
+
+  /**
+   * Get a trade by ID.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address the trade belongs to.
+   * @param tradeId - The ID of the trade to fetch.
+   * @param options - Override http request option.
+   * @throws {RequiredError} If the required parameter is not provided.
+   */
+  getTrade(
+    walletId: string,
+    addressId: string,
+    tradeId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<TradeModel>;
+
+  /**
+   * List trades for an address.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address to list trades for.
+   * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param page - A cursor for pagination across multiple pages of results. Don't include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param options - Override http request option.
+   * @throws {RequiredError} If the required parameter is not provided.
+   */
+  listTrades(
+    walletId: string,
+    addressId: string,
+    limit?: number,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<TradeListModel>;
+};
 
 /**
  * WalletAPI client type definition.
@@ -289,6 +364,26 @@ export type TransferAPIClient = {
 };
 
 /**
+ * ServerSignerAPI client type definition.
+ */
+export type ServerSignerAPIClient = {
+  /**
+   * Lists Server-Signers.
+   *
+   * @param limit - The maximum number of Server-Signers to return.
+   * @param page - The cursor for pagination across multiple pages of Server-Signers.
+   * @param options - Axios request options.
+   * @returns - A promise resolving to the Server-Signer list.
+   * @throws {APIError} If the request fails.
+   */
+  listServerSigners(
+    limit?: number,
+    page?: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<ServerSignerList>;
+};
+
+/**
  * API clients type definition for the Coinbase SDK.
  * Represents the set of API clients available in the SDK.
  */
@@ -297,12 +392,24 @@ export type ApiClients = {
   wallet?: WalletAPIClient;
   address?: AddressAPIClient;
   transfer?: TransferAPIClient;
+  trade?: TradeApiClients;
+  serverSigner?: ServerSignerAPIClient;
 };
 
 /**
  * Transfer status type definition.
  */
 export enum TransferStatus {
+  PENDING = "pending",
+  BROADCAST = "broadcast",
+  COMPLETE = "complete",
+  FAILED = "failed",
+}
+
+/**
+ * Transaction status type definition.
+ */
+export enum TransactionStatus {
   PENDING = "pending",
   BROADCAST = "broadcast",
   COMPLETE = "complete",
@@ -347,18 +454,27 @@ export enum ServerSignerStatus {
 }
 
 /**
+ * Options for creating a Wallet.
+ */
+export type WalletCreateOptions = {
+  networkId?: string;
+  intervalSeconds?: number;
+  timeoutSeconds?: number;
+};
+
+/**
  * CoinbaseOptions type definition.
  */
 export type CoinbaseOptions = {
   /**
    * The API key name.
    */
-  apiKeyName?: string;
+  apiKeyName: string;
 
   /**
    * The private key associated with the API key.
    */
-  privateKey?: string;
+  privateKey: string;
 
   /**
    * Whether to use a Server-Signer or not.
@@ -383,7 +499,7 @@ export type CoinbaseConfigureFromJsonOptions = {
   /**
    * The path to the JSON file containing the API key and private key.
    */
-  filePath: string;
+  filePath?: string;
 
   /**
    * Whether to use a Server-Signer or not.

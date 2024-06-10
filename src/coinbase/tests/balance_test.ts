@@ -10,7 +10,7 @@ describe("Balance", () => {
       amount: "1000000000000000000",
       asset: {
         asset_id: Coinbase.assets.Eth,
-        network_id: Coinbase.networkList.BaseSepolia,
+        network_id: Coinbase.networks.BaseSepolia,
       },
     };
 
@@ -28,7 +28,7 @@ describe("Balance", () => {
   describe(".fromModelAndAssetId", () => {
     const amount = new Decimal(1);
     const balanceModel: BalanceModel = {
-      asset: { asset_id: Coinbase.assets.Eth, network_id: Coinbase.networkList.BaseSepolia },
+      asset: { asset_id: Coinbase.assets.Eth, network_id: Coinbase.networks.BaseSepolia },
       amount: "1000000000000000000",
     };
 
