@@ -157,7 +157,7 @@ let mainnetWallet = await user.createWallet({ networkId: Coinbase.networks.BaseM
 
 console.log(`Wallet successfully created: ${mainnetWallet}`);
 
-// Fund wallet's default address with ETH from an external source.
+// Fund your Wallet's default Address with ETH from an external source.
 
 // Trade 0.00001 ETH to USDC
 let trade = await wallet.trade(0.00001, Coinbase.assets.Eth, Coinbase.assets.Usdc);
