@@ -148,6 +148,23 @@ const anotherWallet = await user.createWallet();
 const transfer = await wallet.createTransfer(0.00001, Coinbase.assets.Eth, anotherWallet);
 ```
 
+
+### Trading Funds
+
+```typescript
+// Create a wallet on `base-mainnet` to trade assets with.
+let mainnetWallet = await user.createWallet({ networkId: Coinbase.networks.BaseMainnet });
+
+console.log(`Wallet successfully created: ${mainnetWallet}`);
+
+// Fund wallet's default address with ETH from an external source.
+
+// Trade 0.00001 ETH to USDC
+let trade = await wallet.trade(0.00001, Coinbase.assets.Eth, Coinbase.assets.Usdc);
+
+console.log(`Second trade successfully completed: ${trade}`);
+```
+
 ### Re-Instantiating Wallets
 
 The SDK creates Wallets with developer managed keys, which means you are responsible for securely storing the keys required to re-instantiate Wallets. The below code walks you through how to export a Wallet and store it in a secure location.
