@@ -96,6 +96,8 @@ export class APIError extends AxiosError {
         return new InvalidSignedPayloadError(error);
       case "invalid_transfer_status":
         return new InvalidTransferStatusError(error);
+      case "network_feature_unsupported":
+        return new NetworkFeatureUnsupportedError(error);
       default:
         return apiError;
     }
@@ -132,3 +134,4 @@ export class ResourceExhaustedError extends APIError {}
 export class FaucetLimitReachedError extends APIError {}
 export class InvalidSignedPayloadError extends APIError {}
 export class InvalidTransferStatusError extends APIError {}
+export class NetworkFeatureUnsupportedError extends APIError {}
