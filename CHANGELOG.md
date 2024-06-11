@@ -1,6 +1,6 @@
 # Coinbase Node.js SDK Changelog
 
-## [0.0.7] - 2024-06-10
+## [0.0.7] - 2024-06-11
 
 ### Added
 
