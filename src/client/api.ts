@@ -391,13 +391,44 @@ export type Feature = typeof Feature[keyof typeof Feature];
 
 
 /**
- * 
+ *
+ * @export
+ * @interface GetStakingContextRequest
+ */
+export interface GetStakingContextRequest {
+    /**
+     * The ID of the blockchain network
+     * @type {string}
+     * @memberof GetStakingContextRequest
+     */
+    'network_id': string;
+    /**
+     * The ID of the asset being staked
+     * @type {string}
+     * @memberof GetStakingContextRequest
+     */
+    'asset_id': string;
+    /**
+     * The onchain address for which the staking context is being fetched
+     * @type {string}
+     * @memberof GetStakingContextRequest
+     */
+    'address_id': string;
+    /**
+     *
+     * @type {{ [key: string]: string; }}
+     * @memberof GetStakingContextRequest
+     */
+    'options': { [key: string]: string; };
+}
+/**
+ *
  * @export
  * @interface FetchStakingRewards200Response
  */
 export interface FetchStakingRewards200Response {
     /**
-     * 
+     *
      * @type {Array<StakingReward>}
      * @memberof FetchStakingRewards200Response
      */
@@ -416,7 +447,7 @@ export interface FetchStakingRewards200Response {
     'next_page': string;
 }
 /**
- * 
+ *
  * @export
  * @interface FetchStakingRewardsRequest
  */
@@ -467,7 +498,7 @@ export const FetchStakingRewardsRequestFormatEnum = {
 export type FetchStakingRewardsRequestFormatEnum = typeof FetchStakingRewardsRequestFormatEnum[keyof typeof FetchStakingRewardsRequestFormatEnum];
 
 /**
- * 
+ *
  * @export
  * @interface GetStakingContextRequest
  */
@@ -491,7 +522,7 @@ export interface GetStakingContextRequest {
      */
     'address_id': string;
     /**
-     * 
+     *
      * @type {{ [key: string]: string; }}
      * @memberof GetStakingContextRequest
      */
@@ -806,7 +837,7 @@ export interface SignatureCreationEventResult {
  */
 export interface StakingContext {
     /**
-     * 
+     *
      * @type {StakingContextContext}
      * @memberof StakingContext
      */
@@ -1083,7 +1114,7 @@ export interface Transfer {
      */
     'asset_id': string;
     /**
-     * 
+     *
      * @type {Asset}
      * @memberof Transfer
      */
@@ -1095,7 +1126,7 @@ export interface Transfer {
      */
     'transfer_id': string;
     /**
-     * 
+     *
      * @type {Transaction}
      * @memberof Transfer
      */
@@ -1892,7 +1923,7 @@ export const AssetsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2030,7 +2061,7 @@ export const ExternalAddressesApiAxiosParamCreator = function (configuration?: C
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2073,7 +2104,7 @@ export const ExternalAddressesApiAxiosParamCreator = function (configuration?: C
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2111,7 +2142,7 @@ export const ExternalAddressesApiAxiosParamCreator = function (configuration?: C
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2891,7 +2922,7 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Build a new staking operation
          * @summary Build a new staking operation
-         * @param {BuildStakingOperationRequest} buildStakingOperationRequest 
+         * @param {BuildStakingOperationRequest} buildStakingOperationRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2925,9 +2956,45 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * Get staking context for an address
+         * @summary Get staking context
+         * @param {GetStakingContextRequest} getStakingContextRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getStakingContext: async (getStakingContextRequest: GetStakingContextRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'getStakingContextRequest' is not null or undefined
+            assertParamExists('getStakingContext', 'getStakingContextRequest', getStakingContextRequest)
+            const localVarPath = `/v1/stake/context`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(getStakingContextRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Fetch staking rewards for a list of addresses
          * @summary Fetch staking rewards
-         * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest 
+         * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest
          * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
          * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
          * @param {*} [options] Override http request option.
@@ -2957,7 +3024,7 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
             }
 
 
-    
+
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -2973,7 +3040,7 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Get staking context for an address
          * @summary Get staking context
-         * @param {GetStakingContextRequest} getStakingContextRequest 
+         * @param {GetStakingContextRequest} getStakingContextRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2993,7 +3060,7 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
             const localVarQueryParameter = {} as any;
 
 
-    
+
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -3019,7 +3086,7 @@ export const StakeApiFp = function(configuration?: Configuration) {
         /**
          * Build a new staking operation
          * @summary Build a new staking operation
-         * @param {BuildStakingOperationRequest} buildStakingOperationRequest 
+         * @param {BuildStakingOperationRequest} buildStakingOperationRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3032,7 +3099,7 @@ export const StakeApiFp = function(configuration?: Configuration) {
         /**
          * Fetch staking rewards for a list of addresses
          * @summary Fetch staking rewards
-         * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest 
+         * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest
          * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
          * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
          * @param {*} [options] Override http request option.
@@ -3047,7 +3114,20 @@ export const StakeApiFp = function(configuration?: Configuration) {
         /**
          * Get staking context for an address
          * @summary Get staking context
-         * @param {GetStakingContextRequest} getStakingContextRequest 
+         * @param {GetStakingContextRequest} getStakingContextRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getStakingContext(getStakingContextRequest: GetStakingContextRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<StakingContext>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getStakingContext(getStakingContextRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['StakeApi.getStakingContext']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get staking context for an address
+         * @summary Get staking context
+         * @param {GetStakingContextRequest} getStakingContextRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3070,7 +3150,7 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
         /**
          * Build a new staking operation
          * @summary Build a new staking operation
-         * @param {BuildStakingOperationRequest} buildStakingOperationRequest 
+         * @param {BuildStakingOperationRequest} buildStakingOperationRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3078,9 +3158,19 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.buildStakingOperation(buildStakingOperationRequest, options).then((request) => request(axios, basePath));
         },
         /**
+         * Get staking context for an address
+         * @summary Get staking context
+         * @param {GetStakingContextRequest} getStakingContextRequest
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getStakingContext(getStakingContextRequest: GetStakingContextRequest, options?: any): AxiosPromise<StakingContext> {
+            return localVarFp.getStakingContext(getStakingContextRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Fetch staking rewards for a list of addresses
          * @summary Fetch staking rewards
-         * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest 
+         * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest
          * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
          * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
          * @param {*} [options] Override http request option.
@@ -3092,7 +3182,7 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
         /**
          * Get staking context for an address
          * @summary Get staking context
-         * @param {GetStakingContextRequest} getStakingContextRequest 
+         * @param {GetStakingContextRequest} getStakingContextRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3111,7 +3201,18 @@ export interface StakeApiInterface {
     /**
      * Build a new staking operation
      * @summary Build a new staking operation
-     * @param {BuildStakingOperationRequest} buildStakingOperationRequest 
+     * @param {BuildStakingOperationRequest} buildStakingOperationRequest
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApiInterface
+     */
+    buildStakingOperation(buildStakingOperationRequest: BuildStakingOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation>;
+
+    /**
+     * Get staking context for an address
+     * @summary Get staking context
+     * @param {GetStakingContextRequest} getStakingContextRequest
+     * @param {BuildStakingOperationRequest} buildStakingOperationRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StakeApiInterface
@@ -3121,7 +3222,7 @@ export interface StakeApiInterface {
     /**
      * Fetch staking rewards for a list of addresses
      * @summary Fetch staking rewards
-     * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest 
+     * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest
      * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
      * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
      * @param {*} [options] Override http request option.
@@ -3133,7 +3234,7 @@ export interface StakeApiInterface {
     /**
      * Get staking context for an address
      * @summary Get staking context
-     * @param {GetStakingContextRequest} getStakingContextRequest 
+     * @param {GetStakingContextRequest} getStakingContextRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StakeApiInterface
@@ -3152,7 +3253,7 @@ export class StakeApi extends BaseAPI implements StakeApiInterface {
     /**
      * Build a new staking operation
      * @summary Build a new staking operation
-     * @param {BuildStakingOperationRequest} buildStakingOperationRequest 
+     * @param {BuildStakingOperationRequest} buildStakingOperationRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StakeApi
@@ -3162,9 +3263,21 @@ export class StakeApi extends BaseAPI implements StakeApiInterface {
     }
 
     /**
+     * Get staking context for an address
+     * @summary Get staking context
+     * @param {GetStakingContextRequest} getStakingContextRequest
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApi
+     */
+    public getStakingContext(getStakingContextRequest: GetStakingContextRequest, options?: RawAxiosRequestConfig) {
+        return StakeApiFp(this.configuration).getStakingContext(getStakingContextRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Fetch staking rewards for a list of addresses
      * @summary Fetch staking rewards
-     * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest 
+     * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest
      * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
      * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
      * @param {*} [options] Override http request option.
@@ -3178,7 +3291,7 @@ export class StakeApi extends BaseAPI implements StakeApiInterface {
     /**
      * Get staking context for an address
      * @summary Get staking context
-     * @param {GetStakingContextRequest} getStakingContextRequest 
+     * @param {GetStakingContextRequest} getStakingContextRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StakeApi
@@ -4663,6 +4776,3 @@ export class WalletsApi extends BaseAPI implements WalletsApiInterface {
         return WalletsApiFp(this.configuration).listWallets(limit, page, options).then((request) => request(this.axios, this.basePath));
     }
 }
-
-
-

@@ -23,6 +23,7 @@ import { BalanceMap } from "./balance_map";
 import Decimal from "decimal.js";
 import { Balance } from "./balance";
 import { Trade } from "./trade";
+import { DeveloperAddress } from "./address/developer_address";
 import { Asset } from "./asset";
 
 /**
@@ -35,7 +36,7 @@ export class Wallet {
 
   private master?: HDKey;
   private seed?: string;
-  private addresses: Address[] = [];
+  private addresses: DeveloperAddress[] = [];
   private addressModels: AddressModel[] = [];
 
   private readonly addressPathPrefix = "m/44'/60'/0'/0";
@@ -212,7 +213,7 @@ export class Wallet {
     const response = await Coinbase.apiClients.address!.createAddress(this.model.id!, payload);
 
     this.cacheAddress(response!.data, key);
-    return new Address(response!.data, key);
+    return new DeveloperAddress(response!.data, key);
   }
 
   /**
@@ -316,7 +317,7 @@ export class Wallet {
    * @returns {void}
    */
   private cacheAddress(address: AddressModel, key?: ethers.Wallet): void {
-    this.addresses.push(new Address(address, key));
+    this.addresses.push(new DeveloperAddress(address, key!.signingKey));
   }
 
   /**
@@ -351,7 +352,7 @@ export class Wallet {
    */
   public getAddress(addressId: string): Address | undefined {
     return this.addresses.find(address => {
-      return address.getId() === addressId;
+      return address.id === addressId;
     });
   }
 
@@ -378,7 +379,7 @@ export class Wallet {
     if (!this.getDefaultAddress()) {
       throw new InternalError("Default address not found");
     }
-    return await this.getDefaultAddress()!.createTrade(amount, fromAssetId, toAssetId);
+    return await this.getDefaultAddress()!.trade(amount, fromAssetId, toAssetId);
   }
 
   /**
@@ -546,10 +547,8 @@ export class Wallet {
    *
    * @returns The default address
    */
-  public getDefaultAddress(): Address | undefined {
-    return this.addresses.find(
-      address => address.getId() === this.model.default_address?.address_id,
-    );
+  public getDefaultAddress(): DeveloperAddress | undefined {
+    return this.addresses.find(address => address.id === this.model.default_address?.address_id);
   }
 
   /**
@@ -601,7 +600,7 @@ export class Wallet {
     if (!this.getDefaultAddress()) {
       throw new InternalError("Default address not found");
     }
-    return await this.getDefaultAddress()!.createTransfer(
+    return await this.getDefaultAddress()!.transfer(
       amount,
       assetId,
       destination,
