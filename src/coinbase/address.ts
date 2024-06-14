@@ -8,8 +8,7 @@ import { ArgumentError, InternalError } from "./errors";
 import { FaucetTransaction } from "./faucet_transaction";
 import { Amount, Destination, TransferStatus } from "./types";
 import { Transfer } from "./transfer";
-import { delay, destinationToAddressHexString } from "./utils";
-import { ATOMIC_UNITS_PER_USDC, WEI_PER_ETHER, WEI_PER_GWEI } from "./constants";
+import { convertAmount, delay, destinationToAddressHexString, getNormalizedAssetId } from "./utils";
 import { Asset } from "./asset";
 import { Trade } from "./trade";
 
@@ -122,16 +121,7 @@ export class Address {
    * @returns {Decimal} The balance of the asset.
    */
   async getBalance(assetId: string): Promise<Decimal> {
-    const normalizedAssetId = ((): string => {
-      switch (assetId) {
-        case Coinbase.assets.Gwei:
-          return Coinbase.assets.Eth;
-        case Coinbase.assets.Wei:
-          return Coinbase.assets.Eth;
-        default:
-          return assetId;
-      }
-    })();
+    const normalizedAssetId = getNormalizedAssetId(assetId);
 
     const response = await Coinbase.apiClients.address!.getAddressBalance(
       this.model.wallet_id,
@@ -187,37 +177,10 @@ export class Address {
       );
     }
 
-    switch (assetId) {
-      case Coinbase.assets.Eth:
-        normalizedAmount = normalizedAmount.mul(WEI_PER_ETHER);
-        break;
-      case Coinbase.assets.Gwei:
-        normalizedAmount = normalizedAmount.mul(WEI_PER_GWEI);
-        break;
-      case Coinbase.assets.Wei:
-        break;
-      case Coinbase.assets.Weth:
-        normalizedAmount = normalizedAmount.mul(WEI_PER_ETHER);
-        break;
-      case Coinbase.assets.Usdc:
-        normalizedAmount = normalizedAmount.mul(ATOMIC_UNITS_PER_USDC);
-        break;
-      default:
-        throw new InternalError(`Unsupported asset ID: ${assetId}`);
-    }
-
+    normalizedAmount = convertAmount(normalizedAmount, assetId);
     const normalizedDestination = destinationToAddressHexString(destination);
 
-    const normalizedAssetId = ((): string => {
-      switch (assetId) {
-        case Coinbase.assets.Gwei:
-          return Coinbase.assets.Eth;
-        case Coinbase.assets.Wei:
-          return Coinbase.assets.Eth;
-        default:
-          return assetId;
-      }
-    })();
+    const normalizedAssetId = getNormalizedAssetId(assetId);
 
     const createTransferRequest = {
       amount: normalizedAmount.toFixed(0),

@@ -177,6 +177,11 @@ export class Wallet {
    * @returns The derived key.
    */
   private deriveKey(): HDKey {
+    const [networkPrefix] = this.model.network_id.split("-");
+    // TODO: Push this logic to the backend.
+    if (!["base", "ethereum"].includes(networkPrefix)) {
+      throw new InternalError(`Unsupported network ID: ${this.model.network_id}`);
+    }
     const derivedKey = this.master?.derive(this.addressPathPrefix + "/" + this.addressIndex++);
     if (!derivedKey?.privateKey) {
       throw new InternalError("Failed to derive key");

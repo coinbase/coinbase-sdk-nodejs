@@ -1,6 +1,6 @@
-import { BalanceMap } from "../balance_map";
-import { Balance as BalanceModel } from "../../client";
-import { Balance } from "../balance";
+import { BalanceMap } from "../coinbase/balance_map";
+import { Balance as BalanceModel } from "../client";
+import { Balance } from "../coinbase/balance";
 import { Decimal } from "decimal.js";
 import { Coinbase } from "../coinbase";
 
@@ -63,6 +63,10 @@ describe("BalanceMap", () => {
     it("sets the amount", () => {
       balanceMap.add(balance);
       expect(balanceMap.get(assetId)).toEqual(ethAmount);
+    });
+
+    it("throws an error if the balance parameter is not instance of Balance", () => {
+      expect(() => balanceMap.add(null!)).toThrow(Error);
     });
   });
 

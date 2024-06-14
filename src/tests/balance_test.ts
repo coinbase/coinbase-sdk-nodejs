@@ -1,5 +1,5 @@
-import { Balance } from "../balance";
-import { Balance as BalanceModel } from "../../client";
+import { Balance } from "../coinbase/balance";
+import { Balance as BalanceModel } from "../client";
 import { Decimal } from "decimal.js";
 import { Coinbase } from "../coinbase";
 

@@ -1,10 +1,10 @@
 import { ethers } from "ethers";
 import { Decimal } from "decimal.js";
-import { Transfer as TransferModel } from "../../client/api";
-import { TransferStatus } from "../types";
-import { Transfer } from "../transfer";
+import { Transfer as TransferModel } from "../client/api";
+import { TransferStatus } from "../coinbase/types";
+import { Transfer } from "../coinbase/transfer";
 import { Coinbase } from "../coinbase";
-import { WEI_PER_ETHER } from "../constants";
+import { WEI_PER_ETHER } from "../coinbase/constants";
 import { VALID_TRANSFER_MODEL, mockReturnValue, transfersApiMock } from "./utils";
 
 const amount = new Decimal(ethers.parseUnits("100", 18).toString());
@@ -34,45 +34,48 @@ describe("Transfer Class", () => {
     it("should initialize a new Transfer", () => {
       expect(transfer).toBeInstanceOf(Transfer);
     });
+    it("should raise an error when the transfer model is empty", () => {
+      expect(() => Transfer.fromModel(undefined!)).toThrow("Transfer model cannot be empty");
+    });
   });
 
-  describe("getId", () => {
+  describe("#getId", () => {
     it("should return the transfer ID", () => {
       expect(transfer.getId()).toEqual(VALID_TRANSFER_MODEL.transfer_id);
     });
   });
 
-  describe("getNetworkId", () => {
+  describe("#getNetworkId", () => {
     it("should return the network ID", () => {
       expect(transfer.getNetworkId()).toEqual(VALID_TRANSFER_MODEL.network_id);
     });
   });
 
-  describe("getWalletId", () => {
+  describe("#getWalletId", () => {
     it("should return the wallet ID", () => {
       expect(transfer.getWalletId()).toEqual(VALID_TRANSFER_MODEL.wallet_id);
     });
   });
 
-  describe("getFromAddressId", () => {
+  describe("#getFromAddressId", () => {
     it("should return the source address ID", () => {
       expect(transfer.getFromAddressId()).toEqual(VALID_TRANSFER_MODEL.address_id);
     });
   });
 
-  describe("getDestinationAddressId", () => {
+  describe("#getDestinationAddressId", () => {
     it("should return the destination address ID", () => {
       expect(transfer.getDestinationAddressId()).toEqual(VALID_TRANSFER_MODEL.destination);
     });
   });
 
-  describe("getAssetId", () => {
+  describe(".getAssetId", () => {
     it("should return the asset ID", () => {
       expect(transfer.getAssetId()).toEqual(VALID_TRANSFER_MODEL.asset_id);
     });
   });
 
-  describe("getAmount", () => {
+  describe("#getAmount", () => {
     it("should return the ETH amount when the asset ID is eth", () => {
       expect(transfer.getAmount()).toEqual(ethAmount);
     });
@@ -84,13 +87,22 @@ describe("Transfer Class", () => {
     });
   });
 
-  describe("getUnsignedPayload", () => {
+  describe("#getUnsignedPayload", () => {
     it("should return the unsigned payload", () => {
       expect(transfer.getUnsignedPayload()).toEqual(VALID_TRANSFER_MODEL.unsigned_payload);
     });
   });
 
-  describe("getSignedPayload", () => {
+  describe("#setSignedTransaction", () => {
+    it("should return the unsigned payload", () => {
+      const transfer = Transfer.fromModel(transferModel);
+      const transaction = new ethers.Transaction();
+      transfer.setSignedTransaction(transaction);
+      expect(transfer.getTransaction()).toEqual(transaction);
+    });
+  });
+
+  describe("#getSignedPayload", () => {
     it("should return undefined when the transfer has not been broadcast on chain", () => {
       expect(transfer.getSignedPayload()).toBeUndefined();
     });
@@ -102,7 +114,7 @@ describe("Transfer Class", () => {
     });
   });
 
-  describe("getTransactionHash", () => {
+  describe("#getTransactionHash", () => {
     it("should return undefined when the transfer has not been broadcast on chain", () => {
       expect(transfer.getTransactionHash()).toBeUndefined();
     });
@@ -114,7 +126,15 @@ describe("Transfer Class", () => {
     });
   });
 
-  describe("getTransaction", () => {
+  describe("#getTransactionLink", () => {
+    it("should return the transaction link when the transaction hash is available", () => {
+      expect(transfer.getTransactionLink()).toEqual(
+        `https://sepolia.basescan.org/tx/${transferModel.transaction_hash}`,
+      );
+    });
+  });
+
+  describe("#getTransaction", () => {
     it("should return the Transfer transaction", () => {
       const transaction = transfer.getTransaction();
       expect(transaction).toBeInstanceOf(ethers.Transaction);
@@ -129,7 +149,7 @@ describe("Transfer Class", () => {
     });
   });
 
-  describe("getStatus", () => {
+  describe("#getStatus", () => {
     it("should return PENDING when the transaction has not been created", async () => {
       const status = transfer.getStatus();
       expect(status).toEqual(TransferStatus.PENDING);
@@ -161,9 +181,16 @@ describe("Transfer Class", () => {
       const status = transfer.getStatus();
       expect(status).toEqual(TransferStatus.FAILED);
     });
+
+    it("should return undefined when the transaction does not exist", async () => {
+      transferModel.status = "" as TransferStatus;
+      transfer = Transfer.fromModel(transferModel);
+      const status = transfer.getStatus();
+      expect(status).toEqual(undefined);
+    });
   });
 
-  describe("reload", () => {
+  describe("#reload", () => {
     it("should return PENDING when the trnasaction has not been created", async () => {
       Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
         ...VALID_TRANSFER_MODEL,
