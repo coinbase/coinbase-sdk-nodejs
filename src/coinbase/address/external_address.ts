@@ -123,9 +123,9 @@ export class ExternalAddress extends Address {
     this.processOptions(mode, assetId, options);
 
     const request = {
-      network_id: this.networkId,
+      network_id: this.getNetworkId,
       asset_id: assetId,
-      address_id: this.id,
+      address_id: this.getId,
       options: options,
     };
 
@@ -153,9 +153,9 @@ export class ExternalAddress extends Address {
     options: { [key: string]: string } = {},
   ): Promise<Transaction> {
     const request = {
-      network_id: this.networkId,
+      network_id: this.getNetworkId,
       asset_id: assetId,
-      address_id: this.id,
+      address_id: this.getId,
       action: action,
       options: options,
     };

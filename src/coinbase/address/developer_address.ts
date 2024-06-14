@@ -44,7 +44,7 @@ export class DeveloperAddress extends Address {
    * @returns {string} A string representing the developer address.
    */
   public toString(): string {
-    return `Coinbase:DeveloperAddress{addressId: '${this.id}', networkId: '${this.networkId}', walletId: '${this.walletId}'}`;
+    return `Coinbase:DeveloperAddress{addressId: '${this.getId}', networkId: '${this.getNetworkId}', walletId: '${this.getWalletId}'}`;
   }
 
   /**
@@ -52,7 +52,7 @@ export class DeveloperAddress extends Address {
    *
    * @returns {string} The wallet ID.
    */
-  get walletId(): string {
+  get getWalletId(): string {
     return this._model.wallet_id;
   }
 
@@ -62,7 +62,7 @@ export class DeveloperAddress extends Address {
    * @param key - The ethers.js SigningKey the Address uses to sign data.
    * @throws {InternalError} If the private key is already set.
    */
-  set key(key: ethers.SigningKey) {
+  set getKey(key: ethers.SigningKey) {
     if (this._key !== undefined) {
       throw new InternalError("Private key is already set");
     }
@@ -74,7 +74,7 @@ export class DeveloperAddress extends Address {
    *
    * @returns {BalanceMap} - The map from asset ID to balance.
    */
-  async balances(): Promise<BalanceMap> {
+  async listBalances(): Promise<BalanceMap> {
     const response = await Coinbase.apiClients.address!.listAddressBalances(
       this._model.wallet_id,
       this._model.address_id,
@@ -89,7 +89,7 @@ export class DeveloperAddress extends Address {
    * @param {string} assetId - The asset ID.
    * @returns {Decimal} The balance of the asset.
    */
-  async balance(assetId: string): Promise<Decimal> {
+  async getBalance(assetId: string): Promise<Decimal> {
     const normalizedAssetId = ((): string => {
       switch (assetId) {
         case Coinbase.assets.Gwei:
@@ -135,7 +135,7 @@ export class DeveloperAddress extends Address {
    *
    * @returns {Transfer[]} The list of transfers.
    */
-  public async transfers(): Promise<Transfer[]> {
+  public async listTransfers(): Promise<Transfer[]> {
     const transfers: Transfer[] = [];
     const queue: string[] = [""];
 
@@ -182,12 +182,12 @@ export class DeveloperAddress extends Address {
     intervalSeconds = 0.2,
     timeoutSeconds = 10,
   ): Promise<Transfer> {
-    if (!Coinbase.useServerSigner && !this.key) {
+    if (!Coinbase.useServerSigner && !this.getKey) {
       throw new InternalError("Cannot transfer from address without private key loaded");
     }
     let normalizedAmount = new Decimal(amount.toString());
 
-    const currentBalance = await this.balance(assetId);
+    const currentBalance = await this.getBalance(assetId);
     if (currentBalance.lessThan(normalizedAmount)) {
       throw new ArgumentError(
         `Insufficient funds: ${normalizedAmount} requested, but only ${currentBalance} available`,
@@ -228,14 +228,14 @@ export class DeveloperAddress extends Address {
 
     const createTransferRequest = {
       amount: normalizedAmount.toFixed(0),
-      network_id: this.networkId,
+      network_id: this.getNetworkId,
       asset_id: normalizedAssetId,
       destination: normalizedDestination,
     };
 
     let response = await Coinbase.apiClients.transfer!.createTransfer(
-      this.walletId,
-      this.id,
+      this.getWalletId,
+      this.getId,
       createTransferRequest,
     );
 
@@ -252,8 +252,8 @@ export class DeveloperAddress extends Address {
       };
 
       response = await Coinbase.apiClients.transfer!.broadcastTransfer(
-        this.walletId,
-        this.id,
+        this.getWalletId,
+        this.getId,
         transfer.getId(),
         broadcastTransferRequest,
       );
@@ -279,7 +279,7 @@ export class DeveloperAddress extends Address {
    * @returns Whether the Address has a private key backing it to sign transactions.
    */
   public canSign(): boolean {
-    return !!this.key;
+    return !!this.getKey;
   }
 
   /**
@@ -323,8 +323,8 @@ export class DeveloperAddress extends Address {
       to_asset_id: Asset.primaryDenomination(toAssetId),
     };
     const tradeModel = await Coinbase.apiClients.trade!.createTrade(
-      this.walletId,
-      this.id,
+      this.getWalletId,
+      this.getId,
       tradeRequestPayload,
     );
     return new Trade(tradeModel?.data);
@@ -351,8 +351,8 @@ export class DeveloperAddress extends Address {
     };
 
     const response = await Coinbase.apiClients.trade!.broadcastTrade(
-      this.walletId,
-      this.id,
+      this.getWalletId,
+      this.getId,
       trade.getId(),
       broadcastTradeRequestPayload,
     );
@@ -378,7 +378,7 @@ export class DeveloperAddress extends Address {
     if (!Asset.isSupported(toAssetId)) {
       throw new Error(`Unsupported to asset: ${toAssetId}`);
     }
-    const currentBalance = await this.balance(fromAssetId);
+    const currentBalance = await this.getBalance(fromAssetId);
     amount = new Decimal(amount.toString());
     if (currentBalance.lessThan(amount)) {
       throw new Error(
