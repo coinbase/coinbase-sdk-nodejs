@@ -1,19 +1,13 @@
 const { Coinbase } = require("@coinbase/coinbase-sdk");
 
-let coinbase = Coinbase.configureFromJson({ filePath: "~/Downloads/cdp_api_key.json" });
+async function fundWallet() {
+  const coinbase = Coinbase.configureFromJson({ filePath: "~/Downloads/cdp_api_key.json" });
+  const user = await coinbase.getDefaultUser();
+  const wallet = await user.createWallet();
 
-coinbase
-  .getDefaultUser()
-  .then(user => {
-    return user.createWallet();
-  })
-  .then(wallet => {
-    // Fund the wallet with a faucet transaction.
-    return wallet.faucet();
-  })
-  .then(faucetTransaction => {
-    console.log(`Faucet transaction successfully completed: ${faucetTransaction}`);
-  })
-  .catch(error => {
-    console.error("An error occurred:", error);
-  });
+  // Fund the wallet with a faucet transaction.
+  const faucetTransaction = await wallet.faucet();
+  console.log(`Faucet transaction successfully completed: ${faucetTransaction}`);
+}
+
+fundWallet();
