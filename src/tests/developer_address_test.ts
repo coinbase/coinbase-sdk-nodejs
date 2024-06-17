@@ -161,7 +161,7 @@ describe("DeveloperAddress", () => {
     expect(Coinbase.apiClients.address!.requestFaucetFunds).toHaveBeenCalledTimes(1);
   });
 
-  it("should throw an APIError when the request is unsuccesful", async () => {
+  it("should throw an APIError when the request is unsuccessful", async () => {
     Coinbase.apiClients.address!.requestFaucetFunds = mockReturnRejectedValue(new APIError(""));
     await expect(address.faucet()).rejects.toThrow(APIError);
     expect(Coinbase.apiClients.address!.requestFaucetFunds).toHaveBeenCalledWith(

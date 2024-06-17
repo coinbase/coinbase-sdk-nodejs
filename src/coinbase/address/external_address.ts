@@ -23,7 +23,7 @@ export class ExternalAddress extends Address {
   public async buildUnstakeOperation(
     amount: Amount,
     assetId: string,
-    options: { [key: string]: string } = {},
+    options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<Transaction> {
     await this.validateCanUnstake(amount, assetId, options);
     return this.buildStakingOperation(amount, assetId, "unstake", options);
@@ -32,7 +32,7 @@ export class ExternalAddress extends Address {
   public async buildClaimStakeOperation(
     amount: Amount,
     assetId: string,
-    options: { [key: string]: string } = {},
+    options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<Transaction> {
     await this.validateCanClaimStake(amount, assetId, options);
     return this.buildStakingOperation(amount, assetId, "claim_stake", options);
@@ -48,7 +48,7 @@ export class ExternalAddress extends Address {
 
   public async getUnstakeableBalance(
     asset_id: string,
-    options: { [key: string]: string } = {},
+    options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<string> {
     const balances = await this.getStakingBalances(asset_id, options);
     return balances["unstakeableBalance"];
@@ -56,7 +56,7 @@ export class ExternalAddress extends Address {
 
   public async getClaimableBalance(
     asset_id: string,
-    options: { [key: string]: string } = {},
+    options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<string> {
     const balances = await this.getStakingBalances(asset_id, options);
     return balances["claimableBalance"];
@@ -79,7 +79,7 @@ export class ExternalAddress extends Address {
   private async validateCanUnstake(
     amount: Amount,
     assetId: string,
-    options: { [key: string]: string } = {},
+    options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<void> {
     const unstakeableBalance = new Decimal(await this.getUnstakeableBalance(assetId, options));
 
@@ -93,7 +93,7 @@ export class ExternalAddress extends Address {
   private async validateCanClaimStake(
     amount: Amount,
     assetId: string,
-    options: { [key: string]: string } = {},
+    options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<void> {
     const claimableBalance = new Decimal(await this.getClaimableBalance(assetId, options));
 
@@ -156,7 +156,7 @@ export class ExternalAddress extends Address {
       options: options,
     };
 
-    const response = await Coinbase.apiClients.stake?.buildStakingOperation(request);
+    const response = await Coinbase.apiClients.stake!.buildStakingOperation(request);
 
     return new Transaction(response!.data.transaction);
   }
@@ -168,10 +168,6 @@ export class ExternalAddress extends Address {
 
     if (options.mode !== undefined) {
       result["mode"] = options.mode;
-    }
-
-    if (options.amount !== undefined) {
-      result["amount"] = String(options.amount);
     }
 
     return result;

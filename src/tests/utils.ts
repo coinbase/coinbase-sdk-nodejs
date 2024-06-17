@@ -274,6 +274,11 @@ export const transfersApiMock = {
   listTransfers: jest.fn(),
 };
 
+export const stakeApiMock = {
+  buildStakingOperation: jest.fn(),
+  getStakingContext: jest.fn(),
+};
+
 export const serverSignersApiMock = {
   listServerSigners: jest.fn(),
 };
