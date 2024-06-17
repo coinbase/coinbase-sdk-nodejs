@@ -2,8 +2,7 @@ import * as fs from "fs";
 import crypto from "crypto";
 import Decimal from "decimal.js";
 import { ethers } from "ethers";
-import { Address } from "../coinbase/address";
-import { APIError } from "../coinbase/api_error";
+import { APIError } from "../api_error";
 import { Coinbase } from "../coinbase";
 import { ArgumentError, InternalError } from "../coinbase/errors";
 import { Wallet } from "../coinbase/wallet";
@@ -30,7 +29,9 @@ import {
   transfersApiMock,
   walletsApiMock,
 } from "./utils";
-import { Trade } from "../coinbase/trade";
+import { Transaction } from "../transaction";
+import { Trade } from "../trade";
+import { DeveloperAddress } from "../address/developer_address";
 
 describe("Wallet Class", () => {
   let wallet: Wallet;
@@ -73,7 +74,7 @@ describe("Wallet Class", () => {
     beforeEach(() => {
       const key = ethers.Wallet.createRandom();
       weiAmount = new Decimal("500000000000000000");
-      destination = new Address(VALID_ADDRESS_MODEL, key as unknown as ethers.Wallet);
+      destination = new DeveloperAddress(VALID_ADDRESS_MODEL, key as unknown as ethers.SigningKey);
       intervalSeconds = 0.2;
       timeoutSeconds = 10;
       Coinbase.apiClients.asset = assetsApiMock;
@@ -298,14 +299,14 @@ describe("Wallet Class", () => {
       expect(wallet.listAddresses().length).toBe(1);
       Coinbase.apiClients.address!.createAddress = mockReturnValue(newAddressModel(walletId));
       const newAddress = await wallet.createAddress();
-      expect(newAddress).toBeInstanceOf(Address);
+      expect(newAddress).toBeInstanceOf(DeveloperAddress);
       expect(wallet.listAddresses().length).toBe(2);
       expect(wallet.getAddress(newAddress.getId())!.getId()).toBe(newAddress.getId());
       expect(Coinbase.apiClients.address!.createAddress).toHaveBeenCalledTimes(1);
     });
 
     describe("when using a server signer", () => {
-      let walletId = crypto.randomUUID();
+      const walletId = crypto.randomUUID();
       let wallet: Wallet;
       beforeEach(async () => {
         jest.clearAllMocks();
@@ -436,7 +437,7 @@ describe("Wallet Class", () => {
     it("should create new address and update the existing address list", async () => {
       expect(wallet.listAddresses().length).toBe(2);
       const newAddress = await wallet.createAddress();
-      expect(newAddress).toBeInstanceOf(Address);
+      expect(newAddress).toBeInstanceOf(DeveloperAddress);
       expect(wallet.listAddresses().length).toBe(3);
       expect(wallet.getAddress(newAddress.getId())!.getId()).toBe(newAddress.getId());
     });
@@ -797,7 +798,7 @@ describe("Wallet Class", () => {
         },
       } as TradeModel);
       const trade = Promise.resolve(tradeObject);
-      jest.spyOn(Address.prototype, "createTrade").mockReturnValue(trade);
+      jest.spyOn(DeveloperAddress.prototype, "createTrade").mockReturnValue(trade);
     });
 
     it("should throw an error when the wallet does not have a default address", async () => {

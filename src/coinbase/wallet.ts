@@ -317,7 +317,7 @@ export class Wallet {
    * @returns {void}
    */
   private cacheAddress(address: AddressModel, key?: ethers.Wallet): void {
-    this.addresses.push(new DeveloperAddress(address, key!.signingKey));
+    this.addresses.push(new DeveloperAddress(address, key?.signingKey));
   }
 
   /**
@@ -352,7 +352,7 @@ export class Wallet {
    */
   public getAddress(addressId: string): Address | undefined {
     return this.addresses.find(address => {
-      return address.getId === addressId;
+      return address.getId() === addressId;
     });
   }
 
@@ -379,7 +379,7 @@ export class Wallet {
     if (!this.getDefaultAddress()) {
       throw new InternalError("Default address not found");
     }
-    return await this.getDefaultAddress()!.trade(amount, fromAssetId, toAssetId);
+    return await this.getDefaultAddress()!.createTrade(amount, fromAssetId, toAssetId);
   }
 
   /**
@@ -548,7 +548,9 @@ export class Wallet {
    * @returns The default address
    */
   public getDefaultAddress(): DeveloperAddress | undefined {
-    return this.addresses.find(address => address.getId === this.model.default_address?.address_id);
+    return this.addresses.find(
+      address => address.getId() === this.model.default_address?.address_id,
+    );
   }
 
   /**
@@ -600,7 +602,7 @@ export class Wallet {
     if (!this.getDefaultAddress()) {
       throw new InternalError("Default address not found");
     }
-    return await this.getDefaultAddress()!.transfer(
+    return await this.getDefaultAddress()!.createTransfer(
       amount,
       assetId,
       destination,

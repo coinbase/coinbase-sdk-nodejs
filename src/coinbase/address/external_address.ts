@@ -111,9 +111,9 @@ export class ExternalAddress extends Address {
     this.processOptions(assetId, options);
 
     const request = {
-      network_id: this.getNetworkId,
+      network_id: this.getNetworkId(),
       asset_id: assetId,
-      address_id: this.getId,
+      address_id: this.getId(),
       options: this.transformStakeOptions(options),
     };
 
@@ -149,9 +149,9 @@ export class ExternalAddress extends Address {
     options.amount = Asset.toAtomicAmount(new Decimal(amount.toString()), assetId).toString();
 
     const request = {
-      network_id: this.getNetworkId,
+      network_id: this.getNetworkId(),
       asset_id: assetId,
-      address_id: this.getId,
+      address_id: this.getId(),
       action: action,
       options: options,
     };
