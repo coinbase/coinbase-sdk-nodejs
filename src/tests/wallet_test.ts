@@ -29,7 +29,6 @@ import {
   transfersApiMock,
   walletsApiMock,
 } from "./utils";
-import { Transaction } from "../transaction";
 import { Trade } from "../trade";
 import { DeveloperAddress } from "../address/developer_address";
 
