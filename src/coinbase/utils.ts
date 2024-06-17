@@ -93,9 +93,9 @@ export function destinationToAddressHexString(destination: Destination): string 
   if (typeof destination === "string") {
     return destination;
   } else if (destination instanceof Address) {
-    return destination.id;
+    return destination.getId;
   } else if (destination instanceof Wallet) {
-    return destination.getDefaultAddress()!.id;
+    return destination.getDefaultAddress()!.getId;
   } else {
     throw new Error("Unsupported type");
   }

@@ -352,7 +352,7 @@ export class Wallet {
    */
   public getAddress(addressId: string): Address | undefined {
     return this.addresses.find(address => {
-      return address.id === addressId;
+      return address.getId === addressId;
     });
   }
 
@@ -548,7 +548,7 @@ export class Wallet {
    * @returns The default address
    */
   public getDefaultAddress(): DeveloperAddress | undefined {
-    return this.addresses.find(address => address.id === this.model.default_address?.address_id);
+    return this.addresses.find(address => address.getId === this.model.default_address?.address_id);
   }
 
   /**

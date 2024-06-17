@@ -566,3 +566,33 @@ export type CoinbaseConfigureFromJsonOptions = {
    */
   basePath?: string;
 };
+
+/**
+ * CoinbaseExternalAddressStakeOptions type definition.
+ */
+export type CoinbaseExternalAddressStakeOptions = {
+  /**
+   * The mode type that you're trying to stake with.
+   * e.g.
+   */
+  mode?: StakeOptionsMode;
+
+  /**
+   * The amount to stake, unstake, or claim_stake for in a staking operation.
+   */
+  amount?: string;
+};
+
+/**
+ * StakeOptionsMode type definition.
+ */
+export enum StakeOptionsMode {
+  /**
+   * Defaults to the mode specific to the asset.
+   */
+  DEFAULT = "default",
+  /**
+   * Partial represents Partial Ethereumn Staking mode.
+   */
+  PARTIAL = "partial",
+}

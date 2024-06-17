@@ -1,5 +1,5 @@
 import { Address } from "../address";
-import { Amount } from "../types";
+import { Amount, CoinbaseExternalAddressStakeOptions, StakeOptionsMode } from "../types";
 import { Coinbase } from "../coinbase";
 import Decimal from "decimal.js";
 import { Transaction } from "../transaction";
@@ -14,67 +14,60 @@ export class ExternalAddress extends Address {
   public async buildStakeOperation(
     amount: Amount,
     assetId: string,
-    mode = "default",
-    options: { [key: string]: string } = {},
+    options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<Transaction> {
-    await this.validateCanStake(amount, assetId, mode, options);
-    return this.buildStakingOperation(amount, assetId, "stake", mode, options);
+    await this.validateCanStake(amount, assetId, options);
+    return this.buildStakingOperation(amount, assetId, "stake", options);
   }
 
   public async buildUnstakeOperation(
     amount: Amount,
     assetId: string,
-    mode = "default",
     options: { [key: string]: string } = {},
   ): Promise<Transaction> {
-    await this.validateCanUnstake(amount, assetId, mode, options);
-    return this.buildStakingOperation(amount, assetId, "unstake", mode, options);
+    await this.validateCanUnstake(amount, assetId, options);
+    return this.buildStakingOperation(amount, assetId, "unstake", options);
   }
 
   public async buildClaimStakeOperation(
     amount: Amount,
     assetId: string,
-    mode = "default",
     options: { [key: string]: string } = {},
   ): Promise<Transaction> {
-    await this.validateCanClaimStake(amount, assetId, mode, options);
-    return this.buildStakingOperation(amount, assetId, "claim_stake", mode, options);
+    await this.validateCanClaimStake(amount, assetId, options);
+    return this.buildStakingOperation(amount, assetId, "claim_stake", options);
   }
 
   public async getStakeableBalance(
     asset_id: string,
-    mode = "default",
-    options: { [key: string]: string } = {},
+    options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<string> {
-    const balances = await this.getStakingBalances(asset_id, mode, options);
+    const balances = await this.getStakingBalances(asset_id, options);
     return balances["stakeableBalance"];
   }
 
   public async getUnstakeableBalance(
     asset_id: string,
-    mode = "default",
     options: { [key: string]: string } = {},
   ): Promise<string> {
-    const balances = await this.getStakingBalances(asset_id, mode, options);
+    const balances = await this.getStakingBalances(asset_id, options);
     return balances["unstakeableBalance"];
   }
 
   public async getClaimableBalance(
     asset_id: string,
-    mode = "default",
     options: { [key: string]: string } = {},
   ): Promise<string> {
-    const balances = await this.getStakingBalances(asset_id, mode, options);
+    const balances = await this.getStakingBalances(asset_id, options);
     return balances["claimableBalance"];
   }
 
   private async validateCanStake(
     amount: Amount,
     assetId: string,
-    mode = "default",
-    options: { [key: string]: string } = {},
+    options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<void> {
-    const stakeableBalance = await this.getStakeableBalance(assetId, mode, options);
+    const stakeableBalance = await this.getStakeableBalance(assetId, options);
 
     if (new Decimal(stakeableBalance).lessThan(amount.toString())) {
       throw new Error(
@@ -86,12 +79,9 @@ export class ExternalAddress extends Address {
   private async validateCanUnstake(
     amount: Amount,
     assetId: string,
-    mode = "default",
     options: { [key: string]: string } = {},
   ): Promise<void> {
-    const unstakeableBalance = new Decimal(
-      await this.getUnstakeableBalance(assetId, mode, options),
-    );
+    const unstakeableBalance = new Decimal(await this.getUnstakeableBalance(assetId, options));
 
     if (unstakeableBalance.lessThan(amount.toString())) {
       throw new Error(
@@ -103,10 +93,9 @@ export class ExternalAddress extends Address {
   private async validateCanClaimStake(
     amount: Amount,
     assetId: string,
-    mode = "default",
     options: { [key: string]: string } = {},
   ): Promise<void> {
-    const claimableBalance = new Decimal(await this.getClaimableBalance(assetId, mode, options));
+    const claimableBalance = new Decimal(await this.getClaimableBalance(assetId, options));
 
     if (claimableBalance.lessThan(amount.toString())) {
       throw new Error(
@@ -117,16 +106,15 @@ export class ExternalAddress extends Address {
 
   private async getStakingBalances(
     assetId: string,
-    mode = "default",
-    options: { [key: string]: string } = {},
+    options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<{ [key: string]: string }> {
-    this.processOptions(mode, assetId, options);
+    this.processOptions(assetId, options);
 
     const request = {
       network_id: this.getNetworkId,
       asset_id: assetId,
       address_id: this.getId,
-      options: options,
+      options: this.transformStakeOptions(options),
     };
 
     const response = await Coinbase.apiClients.stake!.getStakingContext(request);
@@ -149,9 +137,17 @@ export class ExternalAddress extends Address {
     amount: Amount,
     assetId: string,
     action: string,
-    mode = "default",
-    options: { [key: string]: string } = {},
+    options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<Transaction> {
+    const stakingAmount = new Decimal(amount.toString());
+    if (stakingAmount.lessThanOrEqualTo(0)) {
+      throw new Error(`Amount required greater than zero.`);
+    }
+
+    this.processOptions(assetId, options);
+
+    options.amount = Asset.toAtomicAmount(new Decimal(amount.toString()), assetId).toString();
+
     const request = {
       network_id: this.getNetworkId,
       asset_id: assetId,
@@ -160,29 +156,35 @@ export class ExternalAddress extends Address {
       options: options,
     };
 
-    this.processOptions(mode, assetId, options);
-
-    options["amount"] = Asset.toAtomicAmount(new Decimal(amount.toString()), assetId).toString();
-
-    const stakingAmount = new Decimal(amount.toString());
-    if (stakingAmount.lessThanOrEqualTo(0)) {
-      throw new Error(`Amount required greater than zero.`);
-    }
-
     const response = await Coinbase.apiClients.stake?.buildStakingOperation(request);
 
     return new Transaction(response!.data.transaction);
   }
 
+  private transformStakeOptions(options: CoinbaseExternalAddressStakeOptions): {
+    [key: string]: string;
+  } {
+    const result: { [key: string]: string } = {};
+
+    if (options.mode !== undefined) {
+      result["mode"] = options.mode;
+    }
+
+    if (options.amount !== undefined) {
+      result["amount"] = String(options.amount);
+    }
+
+    return result;
+  }
+
   private processOptions(
-    mode = "default",
     assetId: string,
-    options: { [key: string]: string } = {},
+    options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): void {
-    if (mode == "default") {
+    if (options.mode == "default") {
       switch (assetId) {
-        case "eth":
-          options["mode"] = "partial";
+        case Coinbase.assets.Eth:
+          options.mode = StakeOptionsMode.PARTIAL;
       }
     }
   }
