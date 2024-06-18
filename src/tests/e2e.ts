@@ -85,8 +85,12 @@ describe("Coinbase SDK E2E Test", () => {
     expect(unhydratedWallet.canSign()).toBe(true);
     expect(unhydratedWallet.getId()).toBe(walletId);
 
-    console.log("Transfering 1 Gwei from default address to second address...");
-    const transfer = await unhydratedWallet.createTransfer(1, Coinbase.assets.Gwei, wallet);
+    console.log("Transfering 0.000000001 ETH from default address to second address...");
+    const transfer = await unhydratedWallet.createTransfer(
+      0.000000001,
+      Coinbase.assets.Eth,
+      wallet,
+    );
     expect(await transfer.getStatus()).toBe(TransferStatus.COMPLETE);
     console.log(`Transferred 1 Gwei from ${unhydratedWallet} to ${wallet}`);
 
