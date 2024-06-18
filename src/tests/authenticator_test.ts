@@ -10,7 +10,7 @@ const VALID_CONFIG = {
 };
 
 describe("Authenticator tests", () => {
-  const filePath = "./config/coinbase_cloud_api_key.json";
+  const filePath = "./config/test_api_key.json";
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const keys = require(filePath);
   const authenticator = new CoinbaseAuthenticator(keys.name, keys.privateKey);

@@ -122,7 +122,7 @@ export class Coinbase {
    * @throws {InvalidAPIKeyFormat} If not able to create JWT token.
    */
   static configureFromJson({
-    filePath = "coinbase_cloud_api_key.json",
+    filePath = "test_api_key.json",
     useServerSigner = false,
     debugging = false,
     basePath = BASE_PATH,
