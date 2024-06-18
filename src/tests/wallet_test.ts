@@ -2,7 +2,7 @@ import * as fs from "fs";
 import crypto from "crypto";
 import Decimal from "decimal.js";
 import { ethers } from "ethers";
-import { APIError } from "../api_error";
+import { APIError } from "../coinbase/api_error";
 import { Coinbase } from "../coinbase";
 import { ArgumentError, InternalError } from "../coinbase/errors";
 import { Wallet } from "../coinbase/wallet";
@@ -29,8 +29,8 @@ import {
   transfersApiMock,
   walletsApiMock,
 } from "./utils";
-import { Trade } from "../trade";
-import { DeveloperAddress } from "../address/developer_address";
+import { Trade } from "../coinbase/trade";
+import { DeveloperAddress } from "../coinbase/address/developer_address";
 
 describe("Wallet Class", () => {
   let wallet: Wallet;
