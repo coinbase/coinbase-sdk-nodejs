@@ -5,7 +5,6 @@ import { ethers } from "ethers";
 import { Address } from "../coinbase/address";
 import { APIError } from "../coinbase/api_error";
 import { Coinbase } from "../coinbase";
-import { GWEI_PER_ETHER, WEI_PER_ETHER } from "../coinbase/constants";
 import { ArgumentError, InternalError } from "../coinbase/errors";
 import { Wallet } from "../coinbase/wallet";
 import { ServerSignerStatus, TransferStatus } from "../coinbase/types";
@@ -22,6 +21,7 @@ import {
   VALID_TRANSFER_MODEL,
   VALID_WALLET_MODEL,
   addressesApiMock,
+  assetsApiMock,
   generateWalletFromSeed,
   mockFn,
   mockReturnRejectedValue,
@@ -76,6 +76,19 @@ describe("Wallet Class", () => {
       destination = new Address(VALID_ADDRESS_MODEL, key as unknown as ethers.Wallet);
       intervalSeconds = 0.2;
       timeoutSeconds = 10;
+      Coinbase.apiClients.asset = assetsApiMock;
+      Coinbase.apiClients.asset!.getAsset = mockFn(request => {
+        const { asset_id, network_id } = request;
+        return {
+          data: {
+            amount: "1000000000000000000",
+            network_id,
+            asset_id,
+            contract_address: "0x",
+          },
+        };
+      });
+
       Coinbase.apiClients.address!.getAddressBalance = mockFn(request => {
         const { asset_id } = request;
         balanceModel = {
@@ -542,21 +555,21 @@ describe("Wallet Class", () => {
 
     it("should return the correct GWEI balance", async () => {
       const balance = await wallet.getBalance(Coinbase.assets.Gwei);
-      expect(balance).toEqual(GWEI_PER_ETHER.mul(5));
+      expect(balance).toEqual(new Decimal(5000000000));
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledWith(
         walletId,
-        Coinbase.assets.Gwei,
+        Coinbase.assets.Eth,
       );
     });
 
     it("should return the correct WEI balance", async () => {
       const balance = await wallet.getBalance(Coinbase.assets.Wei);
-      expect(balance).toEqual(WEI_PER_ETHER.mul(5));
+      expect(balance).toEqual(new Decimal(5000000000000000000));
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledWith(
         walletId,
-        Coinbase.assets.Wei,
+        Coinbase.assets.Eth,
       );
     });
 
@@ -567,7 +580,7 @@ describe("Wallet Class", () => {
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledWith(
         walletId,
-        Coinbase.assets.Wei,
+        Coinbase.assets.Eth,
       );
     });
   });

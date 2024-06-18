@@ -27,6 +27,7 @@
   "dependencies": {
     "@scure/bip32": "^1.4.0",
     "axios": "^1.6.8",
+    "axios-mock-adapter": "^1.22.0",
     "bip32": "^4.0.0",
     "bip39": "^3.1.0",
     "decimal.js": "^10.4.3",

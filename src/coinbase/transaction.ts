@@ -97,8 +97,7 @@ export class Transaction {
    * @returns The link to the Transaction on the blockchain explorer
    */
   getTransactionLink(): string {
-    // TODO: Parameterize this by Network.
-    return `https://sepolia.basescan.org/tx/${this.getTransactionHash()}`;
+    return this.model.transaction_link!;
   }
 
   /**

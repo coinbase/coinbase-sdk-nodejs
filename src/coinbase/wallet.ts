@@ -23,6 +23,7 @@ import { BalanceMap } from "./balance_map";
 import Decimal from "decimal.js";
 import { Balance } from "./balance";
 import { Trade } from "./trade";
+import { Asset } from "./asset";
 
 /**
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
@@ -397,7 +398,10 @@ export class Wallet {
    * @returns The balance of the Asset.
    */
   public async getBalance(assetId: string): Promise<Decimal> {
-    const response = await Coinbase.apiClients.wallet!.getWalletBalance(this.model.id!, assetId);
+    const response = await Coinbase.apiClients.wallet!.getWalletBalance(
+      this.model.id!,
+      Asset.primaryDenomination(assetId),
+    );
     if (!response.data.amount) {
       return new Decimal(0);
     }

@@ -45,6 +45,7 @@ describe("Transaction", () => {
       unsigned_payload: unsignedPayload,
       signed_payload: signedPayload,
       transaction_hash: transactionHash,
+      transaction_link: `https://sepolia.basescan.org/tx/${transactionHash}`,
     } as TransactionModel;
     transaction = new Transaction(model);
   });

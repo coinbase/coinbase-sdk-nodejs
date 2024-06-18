@@ -1,61 +1,97 @@
 import Decimal from "decimal.js";
-import {
-  ATOMIC_UNITS_PER_USDC,
-  SUPPORTED_ASSET_IDS,
-  WEI_PER_ETHER,
-  WEI_PER_GWEI,
-} from "./constants";
+import { Asset as AssetModel } from "./../client/api";
 import { Coinbase } from "./coinbase";
+import { GWEI_DECIMALS } from "./constants";
+import { ArgumentError, InternalError } from "./errors";
 
 /** A representation of an Asset. */
 export class Asset {
+  public readonly networkId: string;
+  public readonly assetId: string;
+  public readonly contractAddress: string;
+  public readonly decimals: number;
+
   /**
-   * Converts an amount from the atomic value of the primary denomination of the provided Asset ID
-   * to whole units of the specified asset ID.
+   * Private constructor for the Asset class.
    *
-   * @param {Decimal} atomicAmount - The amount in atomic units.
-   * @param {string} assetId - The asset ID.
-   * @returns The amount in whole units of the asset with the specified ID.
+   * @param networkId - The network ID.
+   * @param assetId - The asset ID.
+   * @param contractAddress - The address ID.
+   * @param decimals - The number of decimals.
    */
-  static fromAtomicAmount(atomicAmount: Decimal, assetId: string): Decimal {
-    switch (assetId) {
-      case "eth":
-        return atomicAmount.div(WEI_PER_ETHER);
-      case "gwei":
-        return atomicAmount.div(WEI_PER_GWEI);
-      case "usdc":
-        return atomicAmount.div(ATOMIC_UNITS_PER_USDC);
-      case "weth":
-        return atomicAmount.div(WEI_PER_ETHER);
-      default:
-        return atomicAmount;
-    }
+  private constructor(
+    networkId: string,
+    assetId: string,
+    contractAddress: string,
+    decimals: number,
+  ) {
+    this.networkId = networkId;
+    this.assetId = assetId;
+    this.contractAddress = contractAddress;
+    this.decimals = decimals;
   }
 
   /**
-   * Converts the amount of the Asset to the atomic units of the primary denomination of the Asset.
+   * Returns the Asset ID.
    *
-   * @param amount - The amount to normalize.
-   * @param assetId - The ID of the Asset being transferred.
-   * @returns The normalized amount in atomic units.
+   * @returns The Asset ID.
    */
-  static toAtomicAmount(amount: Decimal, assetId: string): Decimal {
-    switch (assetId) {
-      case "eth":
-        return amount.mul(WEI_PER_ETHER);
-      case "gwei":
-        return amount.mul(WEI_PER_GWEI);
-      case "usdc":
-        return amount.mul(ATOMIC_UNITS_PER_USDC);
-      case "weth":
-        return amount.mul(WEI_PER_ETHER);
-      default:
-        return amount;
+  getAssetId(): string {
+    return this.assetId;
+  }
+
+  /**
+   * Creates an Asset from an Asset Model.
+   *
+   * @param model - The Asset Model.
+   * @param assetId - The Asset ID.
+   * @throws If the Asset Model is invalid.
+   * @returns The Asset Class.
+   */
+  public static fromModel(model: AssetModel, assetId?: string) {
+    if (!model) {
+      throw new InternalError("Invalid asset model");
     }
+
+    let decimals = model.decimals!;
+    // TODO: Push this logic down to the backend.
+    if (assetId && model.asset_id !== Coinbase.toAssetId(assetId)) {
+      switch (assetId) {
+        case "gwei":
+          decimals = GWEI_DECIMALS;
+          break;
+        case "wei":
+          decimals = 0;
+          break;
+        case "eth":
+          break;
+        default:
+          throw new ArgumentError(`Invalid asset ID: ${assetId}`);
+      }
+    }
+    return new Asset(model.network_id, model.asset_id, model.contract_address!, decimals);
+  }
+
+  /**
+   * Fetches the Asset with the provided Asset ID.
+   *
+   * @param networkId - The network ID.
+   * @param assetId - The asset ID.
+   * @throws If the Asset cannot be fetched.
+   * @returns The Asset Class.
+   */
+  static async fetch(networkId: string, assetId: string) {
+    const asset = await Coinbase.apiClients.asset!.getAsset(
+      Coinbase.normalizeNetwork(networkId),
+      assetId,
+    );
+    return Asset.fromModel(asset?.data, assetId);
   }
 
   /**
    * Returns the primary denomination for the provided Asset ID.
+   * For `gwei` and `wei` the primary denomination is `eth`.
+   * For all other assets, the primary denomination is the same asset ID.
    *
    * @param assetId - The Asset ID.
    * @returns The primary denomination for the Asset ID.
@@ -67,12 +103,39 @@ export class Asset {
   }
 
   /**
-   * Returns whether the provided asset ID is supported.
+   * Converts the amount of the Asset from whole to atomic units.
    *
-   * @param assetId - The Asset ID.
-   * @returns Whether the Asset ID is supported.
+   * @param wholeAmount - The whole amount to convert to atomic units.
+   * @returns The amount in atomic units
    */
-  public static isSupported(assetId): boolean {
-    return SUPPORTED_ASSET_IDS.has(assetId);
+  toAtomicAmount(wholeAmount: Decimal): Decimal {
+    return wholeAmount.times(new Decimal(10).pow(this.decimals));
+  }
+  /**
+   * Converts the amount of the Asset from atomic to whole units.
+   *
+   * @param wholeAmount - The atomic amount to convert to whole units.
+   * @returns The amount in atomic units
+   */
+  fromAtomicAmount(wholeAmount: Decimal): Decimal {
+    return wholeAmount.dividedBy(new Decimal(10).pow(this.decimals));
+  }
+
+  /**
+   * Returns the primary denomination for the Asset.
+   *
+   * @returns The primary denomination for the Asset.
+   */
+  public primaryDenomination(): string {
+    return Asset.primaryDenomination(this.assetId);
+  }
+
+  /**
+   * Returns a string representation of the Asset.
+   *
+   * @returns a string representation of the Asset
+   */
+  toString(): string {
+    return `Asset{ networkId: ${this.networkId}, assetId: ${this.assetId}, contractAddress: ${this.contractAddress}, decimals: ${this.decimals} }`;
   }
 }

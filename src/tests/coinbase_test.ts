@@ -14,6 +14,8 @@ import {
 } from "./utils";
 import { ethers } from "ethers";
 import path from "path";
+import MockAdapter from "axios-mock-adapter";
+import axios from "axios";
 
 const PATH_PREFIX = "./src/tests/config";
 
@@ -70,7 +72,8 @@ describe("Coinbase tests", () => {
       debugging: true,
     });
 
-    beforeAll(async () => {
+    beforeEach(async () => {
+      jest.clearAllMocks();
       Coinbase.apiClients = {
         user: usersApiMock,
         wallet: walletsApiMock,
@@ -114,17 +117,17 @@ describe("Coinbase tests", () => {
       expect(usersApiMock.getCurrentUser).toHaveBeenCalledTimes(1);
     });
   });
+});
 
+describe("Axios Interceptors", () => {
   it("should raise an error if the user is not found", async () => {
+    const mock = new MockAdapter(axios);
+    mock.onGet("/v1/users/me").reply(401, "unauthorized");
     const cbInstance = Coinbase.configureFromJson({
       filePath: `${PATH_PREFIX}/test_api_key.json`,
+      debugging: true,
     });
-    Coinbase.apiClients.user!.getCurrentUser = mockReturnRejectedValue(
-      new APIError("User not found"),
-    );
 
     await expect(cbInstance.getDefaultUser()).rejects.toThrow(APIError);
-    expect(usersApiMock.getCurrentUser).toHaveBeenCalledWith();
-    expect(usersApiMock.getCurrentUser).toHaveBeenCalledTimes(1);
   });
 });
