@@ -1,11 +1,11 @@
 import { Decimal } from "decimal.js";
 import { ethers } from "ethers";
-import { Transaction as CoinbaseTransaction, Trade as TradeModel } from "../../client/api";
-import { Transaction } from "../transaction";
+import { Transaction as CoinbaseTransaction, Trade as TradeModel } from "../client/api";
+import { Transaction } from "../coinbase/transaction";
 import { Coinbase } from "./../coinbase";
-import { ATOMIC_UNITS_PER_USDC, WEI_PER_ETHER } from "./../constants";
-import { Trade } from "./../trade";
-import { TransactionStatus } from "./../types";
+import { ATOMIC_UNITS_PER_USDC, WEI_PER_ETHER } from "./../coinbase/constants";
+import { Trade } from "./../coinbase/trade";
+import { TransactionStatus } from "./../coinbase/types";
 import { mockReturnValue } from "./utils";
 
 describe("Trade", () => {
@@ -180,6 +180,11 @@ describe("Trade", () => {
           status: "complete",
         },
         to_amount: "500000000",
+        approve_transaction: {
+          status: "complete",
+          from_address_id: addressId,
+          unsigned_payload: unsignedPayload,
+        },
       } as TradeModel;
       tradesApi.getTrade.mockResolvedValueOnce({ data: updatedModel });
 
@@ -231,6 +236,22 @@ describe("Trade", () => {
     });
 
     it("should raise a timeout error", async () => {
+      await expect(
+        trade.wait({
+          intervalSeconds: 0.2,
+          timeoutSeconds: 0.00001,
+        }),
+      ).rejects.toThrow("Trade timed out");
+    });
+
+    it("should raise a timeout when the request takes longer than the timeout", async () => {
+      tradesApi.getTrade.mockResolvedValueOnce(
+        new Promise(resolve => {
+          setTimeout(() => {
+            resolve({ data: model });
+          }, 400);
+        }),
+      );
       await expect(
         trade.wait({
           intervalSeconds: 0.2,

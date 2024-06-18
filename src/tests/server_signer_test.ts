@@ -1,9 +1,9 @@
 import * as crypto from "crypto";
 import { Coinbase } from "../coinbase";
-import { APIError } from "../api_error";
-import { ServerSigner as ServerSignerModel, ServerSignerList } from "../../client";
+import { APIError } from "../coinbase/api_error";
+import { ServerSigner as ServerSignerModel, ServerSignerList } from "../client";
 import { serverSignersApiMock, mockReturnValue, mockReturnRejectedValue } from "./utils";
-import { ServerSigner } from "../server_signer";
+import { ServerSigner } from "../coinbase/server_signer";
 
 describe("ServerSigner", () => {
   let serverSigner: ServerSigner;

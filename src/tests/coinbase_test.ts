@@ -1,8 +1,8 @@
 import * as os from "os";
 import * as fs from "fs";
 import { randomUUID } from "crypto";
-import { APIError } from "../api_error";
-import { Coinbase } from "../coinbase";
+import { APIError } from "../coinbase/api_error";
+import { Coinbase } from "../index";
 import {
   VALID_WALLET_MODEL,
   addressesApiMock,
@@ -15,7 +15,7 @@ import {
 import { ethers } from "ethers";
 import path from "path";
 
-const PATH_PREFIX = "./src/coinbase/tests/config";
+const PATH_PREFIX = "./src/tests/config";
 
 describe("Coinbase tests", () => {
   it("should throw an error if the API key name or private key is empty", () => {
@@ -30,14 +30,12 @@ describe("Coinbase tests", () => {
   it("should throw an error if the file does not exist", () => {
     expect(() =>
       Coinbase.configureFromJson({ filePath: `${PATH_PREFIX}/does-not-exist.json` }),
-    ).toThrow(
-      "Invalid configuration: file not found at ./src/coinbase/tests/config/does-not-exist.json",
-    );
+    ).toThrow("Invalid configuration: file not found at ./src/tests/config/does-not-exist.json");
   });
 
   it("should initialize the Coinbase SDK from a JSON file", () => {
     const cbInstance = Coinbase.configureFromJson({
-      filePath: `${PATH_PREFIX}/coinbase_cloud_api_key.json`,
+      filePath: `${PATH_PREFIX}/test_api_key.json`,
     });
     expect(cbInstance).toBeInstanceOf(Coinbase);
   });
@@ -55,7 +53,7 @@ describe("Coinbase tests", () => {
   });
 
   it("should expand the tilde to the home directory", () => {
-    const configuration = fs.readFileSync(`${PATH_PREFIX}/coinbase_cloud_api_key.json`, "utf8");
+    const configuration = fs.readFileSync(`${PATH_PREFIX}/test_api_key.json`, "utf8");
     const homeDir = os.homedir();
     const relativePath = "~/test_config.json";
     const expandedPath = path.join(homeDir, "test_config.json");
@@ -68,7 +66,8 @@ describe("Coinbase tests", () => {
   describe("should able to interact with the API", () => {
     let user, walletId, publicKey, addressId, transactionHash;
     const cbInstance = Coinbase.configureFromJson({
-      filePath: `${PATH_PREFIX}/coinbase_cloud_api_key.json`,
+      filePath: `${PATH_PREFIX}/test_api_key.json`,
+      debugging: true,
     });
 
     beforeAll(async () => {
@@ -118,7 +117,7 @@ describe("Coinbase tests", () => {
 
   it("should raise an error if the user is not found", async () => {
     const cbInstance = Coinbase.configureFromJson({
-      filePath: `${PATH_PREFIX}/coinbase_cloud_api_key.json`,
+      filePath: `${PATH_PREFIX}/test_api_key.json`,
     });
     Coinbase.apiClients.user!.getCurrentUser = mockReturnRejectedValue(
       new APIError("User not found"),

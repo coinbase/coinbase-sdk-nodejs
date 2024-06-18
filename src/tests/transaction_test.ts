@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
-import { Transaction as TransactionModel } from "../../client/api";
-import { Transaction } from "./../transaction";
+import { Transaction as TransactionModel } from "../client/api";
+import { Transaction } from "./../coinbase/transaction";
 
 describe("Transaction", () => {
   let fromKey;
@@ -129,6 +129,19 @@ describe("Transaction", () => {
     it("should return the correct input", () => {
       expect(raw.data).toEqual(rawPayload.input);
     });
+
+    it("should return the same raw transaction when called multiple times", () => {
+      expect(raw).toEqual(transaction.rawTransaction());
+    });
+  });
+
+  describe("#getTransactionLink", () => {
+    it("should return the transaction link when the transaction hash is available", () => {
+      const transaction = new Transaction(broadcastedModel);
+      expect(transaction.getTransactionLink()).toEqual(
+        `https://sepolia.basescan.org/tx/${transactionHash}`,
+      );
+    });
   });
 
   describe("#sign", () => {
@@ -149,6 +162,14 @@ describe("Transaction", () => {
     it("returns a hex representation of the signed raw transaction", async () => {
       expect(signature).not.toBeNull();
       expect(signature.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("#getStatus", () => {
+    it("should return undefined when the transaction has not been initiated with a model", async () => {
+      model.status = "";
+      const transaction = new Transaction(model);
+      expect(transaction.getStatus()).toBeUndefined();
     });
   });
 

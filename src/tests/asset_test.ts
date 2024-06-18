@@ -1,6 +1,6 @@
 import Decimal from "decimal.js";
-import { Asset } from "./../asset";
-import { ATOMIC_UNITS_PER_USDC, WEI_PER_ETHER, WEI_PER_GWEI } from "./../constants";
+import { Asset } from "./../coinbase/asset";
+import { ATOMIC_UNITS_PER_USDC, WEI_PER_ETHER, WEI_PER_GWEI } from "./../coinbase/constants";
 
 describe("Asset", () => {
   describe(".isSupported", () => {

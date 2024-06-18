@@ -1,5 +1,5 @@
 import * as crypto from "crypto";
-import { InternalError } from "../errors";
+import { InternalError } from "../coinbase/errors";
 import {
   AddressBalanceList,
   AddressList,
@@ -7,12 +7,14 @@ import {
   Balance as BalanceModel,
   User as UserModel,
   Wallet as WalletModel,
-} from "./../../client/api";
+} from "./../client/api";
 import { Coinbase } from "./../coinbase";
-import { WalletData } from "./../types";
-import { User } from "./../user";
-import { Wallet } from "./../wallet";
+import { WalletData } from "./../coinbase/types";
+import { User } from "./../coinbase/user";
+import { Wallet } from "./../coinbase/wallet";
 import {
+  VALID_ADDRESS_MODEL,
+  VALID_WALLET_MODEL,
   addressesApiMock,
   generateRandomHash,
   generateWalletFromSeed,
@@ -22,7 +24,7 @@ import {
   walletsApiMock,
 } from "./utils";
 import Decimal from "decimal.js";
-import { FaucetTransaction } from "../faucet_transaction";
+import { FaucetTransaction } from "../coinbase/faucet_transaction";
 
 describe("User Class", () => {
   let mockUserModel: UserModel;
@@ -136,10 +138,10 @@ describe("User Class", () => {
 
     it("should raise an error when the Wallet API call fails", async () => {
       Coinbase.apiClients.wallet!.listWallets = mockReturnRejectedValue(new Error("API Error"));
-      await expect(user.listWallets()).rejects.toThrow(new Error("API Error"));
+      await expect(user.listWallets(10, "xyz")).rejects.toThrow(new Error("API Error"));
       expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(0);
-      expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledWith(10, undefined);
+      expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledWith(10, "xyz");
     });
 
     it("should raise an error when the Address API call fails", async () => {
@@ -359,6 +361,16 @@ describe("User Class", () => {
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledWith(walletId);
       expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledWith(walletId);
+    });
+  });
+
+  describe(".createWallet", () => {
+    it("should create a Wallet", async () => {
+      const wallet = await Wallet.init(VALID_WALLET_MODEL, "", [VALID_ADDRESS_MODEL]);
+      jest.spyOn(Wallet, "create").mockReturnValue(Promise.resolve(wallet));
+      const user = new User(mockUserModel);
+      const result = await user.createWallet();
+      expect(result).toBeInstanceOf(Wallet);
     });
   });
 });

@@ -1,4 +1,4 @@
-import { FaucetTransaction } from "../faucet_transaction";
+import { FaucetTransaction } from "../coinbase/faucet_transaction";
 
 describe("FaucetTransaction tests", () => {
   it("should create a new FaucetTransaction instance and return the transaction hash", () => {

@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Address } from "./../address";
+import { Address } from "./../coinbase/address";
 import * as crypto from "crypto";
 import { ethers } from "ethers";
-import { FaucetTransaction } from "./../faucet_transaction";
-import { Balance as BalanceModel, TransferList, Trade as TradeModel } from "../../client";
+import { FaucetTransaction } from "./../coinbase/faucet_transaction";
+import { Balance as BalanceModel, TransferList, Trade as TradeModel } from "../client";
 import Decimal from "decimal.js";
-import { APIError, FaucetLimitReachedError } from "../api_error";
+import { APIError, FaucetLimitReachedError } from "../coinbase/api_error";
 import { Coinbase } from "../coinbase";
-import { InternalError } from "../errors";
+import { InternalError } from "../coinbase/errors";
 import {
   VALID_ADDRESS_BALANCE_LIST,
   VALID_ADDRESS_MODEL,
@@ -20,12 +20,12 @@ import {
   tradeApiMock,
   transfersApiMock,
 } from "./utils";
-import { ArgumentError } from "../errors";
-import { Transfer } from "../transfer";
-import { TransactionStatus, TransferStatus } from "../types";
-import { Trade } from "../trade";
-import { Transaction } from "../transaction";
-import { Asset } from "../asset";
+import { ArgumentError } from "../coinbase/errors";
+import { Transfer } from "../coinbase/transfer";
+import { TransactionStatus, TransferStatus } from "../coinbase/types";
+import { Trade } from "../coinbase/trade";
+import { Transaction } from "../coinbase/transaction";
+import { Asset } from "../coinbase/asset";
 
 // Test suite for Address class
 describe("Address", () => {
@@ -34,7 +34,7 @@ describe("Address", () => {
   let balanceModel: BalanceModel;
   let key;
 
-  beforeAll(() => {
+  beforeEach(() => {
     Coinbase.apiClients.address = addressesApiMock;
     Coinbase.apiClients.address!.getAddressBalance = mockFn(request => {
       const { asset_id } = request;
@@ -96,6 +96,13 @@ describe("Address", () => {
       Coinbase.assets.Eth,
     );
     expect(Coinbase.apiClients.address!.getAddressBalance).toHaveBeenCalledTimes(1);
+  });
+
+  it("should return 0 balance when the response is empty", async () => {
+    Coinbase.apiClients.address!.getAddressBalance = mockReturnValue(null);
+    const ethBalance = await address.getBalance(Coinbase.assets.Eth);
+    expect(ethBalance).toBeInstanceOf(Decimal);
+    expect(ethBalance).toEqual(new Decimal(0));
   });
 
   it("should return the correct Gwei balance", async () => {
@@ -607,11 +614,19 @@ describe("Address", () => {
     describe("when the address cannot sign", () => {
       it("should raise an Error", async () => {
         const newAddress = new Address(VALID_ADDRESS_MODEL, null!);
-        await expect(newAddress.createTrade(new Decimal(100), "eth", "usdc")).rejects.toThrow(Error);
+        await expect(newAddress.createTrade(new Decimal(100), "eth", "usdc")).rejects.toThrow(
+          Error,
+        );
       });
     });
 
-    describe("when the to asset is unsupported", () => {
+    describe("when the to fromAssetId is unsupported", () => {
+      it("should raise an ArgumentError", async () => {
+        await expect(address.createTrade(new Decimal(100), "XYZ", "eth")).rejects.toThrow(Error);
+      });
+    });
+
+    describe("when the to toAssetId is unsupported", () => {
       it("should raise an ArgumentError", async () => {
         await expect(address.createTrade(new Decimal(100), "eth", "XYZ")).rejects.toThrow(Error);
       });

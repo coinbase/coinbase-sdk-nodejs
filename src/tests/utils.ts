@@ -11,10 +11,10 @@ import {
   Address as AddressModel,
   Transfer as TransferModel,
   TransferStatusEnum,
-} from "../../client";
-import { BASE_PATH } from "../../client/base";
+} from "../client";
+import { BASE_PATH } from "../client/base";
 import { Coinbase } from "../coinbase";
-import { convertStringToHex, registerAxiosInterceptors } from "../utils";
+import { convertStringToHex, registerAxiosInterceptors } from "../coinbase/utils";
 import { HDKey } from "@scure/bip32";
 
 export const mockFn = (...args) => jest.fn(...args) as any;
