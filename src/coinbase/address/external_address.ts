@@ -2,8 +2,8 @@ import { Address } from "../address";
 import { Amount, CoinbaseExternalAddressStakeOptions, StakeOptionsMode } from "../types";
 import { Coinbase } from "../coinbase";
 import Decimal from "decimal.js";
-import { Transaction } from "../transaction";
 import { Asset } from "../asset";
+import { StakingOperation } from "../staking_operation";
 
 /**
  * A representation of a blockchain Address, which is a user-controlled account on a Network. Addresses are used to
@@ -18,13 +18,13 @@ export class ExternalAddress extends Address {
    * @param amount - The amount of the asset to stake.
    * @param assetId - The asset to stake.
    * @param options - Additional options for the stake operation.
-   * @returns {Transaction} The stake operation.
+   * @returns {StakingOperation} The stake operation.
    */
   public async buildStakeOperation(
     amount: Amount,
     assetId: string,
     options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
-  ): Promise<Transaction> {
+  ): Promise<StakingOperation> {
     await this.validateCanStake(amount, assetId, options);
     return this.buildStakingOperation(amount, assetId, "stake", options);
   }
@@ -35,13 +35,13 @@ export class ExternalAddress extends Address {
    * @param amount - The amount of the asset to unstake.
    * @param assetId - The asset to unstake.
    * @param options - Additional options for the unstake operation.
-   * @returns {Transaction} The unstake operation.
+   * @returns {StakingOperation} The unstake operation.
    */
   public async buildUnstakeOperation(
     amount: Amount,
     assetId: string,
     options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
-  ): Promise<Transaction> {
+  ): Promise<StakingOperation> {
     await this.validateCanUnstake(amount, assetId, options);
     return this.buildStakingOperation(amount, assetId, "unstake", options);
   }
@@ -58,7 +58,7 @@ export class ExternalAddress extends Address {
     amount: Amount,
     assetId: string,
     options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
-  ): Promise<Transaction> {
+  ): Promise<StakingOperation> {
     await this.validateCanClaimStake(amount, assetId, options);
     return this.buildStakingOperation(amount, assetId, "claim_stake", options);
   }
@@ -222,7 +222,7 @@ export class ExternalAddress extends Address {
    * @param action - The specific action for the staking operation. e.g. stake, unstake, claim_stake
    * @param options - Additional options to build a stake operation.
    * @private
-   * @returns {Transaction} The staking operation.
+   * @returns {StakingOperation} The staking operation.
    * @throws {Error} If the supplied input cannot build a valid staking operation.
    */
   private async buildStakingOperation(
@@ -230,7 +230,7 @@ export class ExternalAddress extends Address {
     assetId: string,
     action: string,
     options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
-  ): Promise<Transaction> {
+  ): Promise<StakingOperation> {
     const stakingAmount = new Decimal(amount.toString());
     if (stakingAmount.lessThanOrEqualTo(0)) {
       throw new Error(`Amount required greater than zero.`);
@@ -250,7 +250,7 @@ export class ExternalAddress extends Address {
 
     const response = await Coinbase.apiClients.stake!.buildStakingOperation(request);
 
-    return new Transaction(response!.data.transaction);
+    return new StakingOperation(response!.data);
   }
 
   /**

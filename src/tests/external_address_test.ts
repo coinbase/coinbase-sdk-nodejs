@@ -8,6 +8,7 @@ import Decimal from "decimal.js";
 import { ExternalAddress } from "../coinbase/address/external_address";
 import { Transaction } from "../coinbase/transaction";
 import { StakeOptionsMode } from "../coinbase/types";
+import { StakingOperation } from "../coinbase/staking_operation";
 
 describe("DeveloperAddress", () => {
   const address = new ExternalAddress(
@@ -53,7 +54,7 @@ describe("DeveloperAddress", () => {
     it("should successfully build a stake operation", async () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       Coinbase.apiClients.stake!.buildStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
-      const tx = await address.buildStakeOperation(new Decimal("0.0001"), Coinbase.assets.Eth);
+      const op = await address.buildStakeOperation(new Decimal("0.0001"), Coinbase.assets.Eth);
 
       expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
         address_id: address.getId(),
@@ -73,9 +74,8 @@ describe("DeveloperAddress", () => {
           amount: "100000000000000",
         },
       });
-      expect(tx).toBeInstanceOf(Transaction);
-      expect(tx.getStatus()).toEqual("pending");
-      expect(tx.fromAddressId()).toEqual(address.getId());
+
+      expect(op).toBeInstanceOf(StakingOperation);
     });
 
     it("should return an error for not enough amount to stake", async () => {
@@ -119,7 +119,7 @@ describe("DeveloperAddress", () => {
     it("should successfully build a unstake operation", async () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       Coinbase.apiClients.stake!.buildStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
-      const tx = await address.buildUnstakeOperation(new Decimal("0.0001"), Coinbase.assets.Eth);
+      const op = await address.buildUnstakeOperation(new Decimal("0.0001"), Coinbase.assets.Eth);
 
       expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
         address_id: address.getId(),
@@ -139,9 +139,7 @@ describe("DeveloperAddress", () => {
           amount: "100000000000000",
         },
       });
-      expect(tx).toBeInstanceOf(Transaction);
-      expect(tx.getStatus()).toEqual("pending");
-      expect(tx.fromAddressId()).toEqual(address.getId());
+      expect(op).toBeInstanceOf(StakingOperation);
     });
 
     it("should return an error for not enough amount to unstake", async () => {
@@ -185,7 +183,7 @@ describe("DeveloperAddress", () => {
     it("should successfully build a claim stake operation", async () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       Coinbase.apiClients.stake!.buildStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
-      const tx = await address.buildClaimStakeOperation(new Decimal("0.0001"), Coinbase.assets.Eth);
+      const op = await address.buildClaimStakeOperation(new Decimal("0.0001"), Coinbase.assets.Eth);
 
       expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
         address_id: address.getId(),
@@ -205,9 +203,7 @@ describe("DeveloperAddress", () => {
           amount: "100000000000000",
         },
       });
-      expect(tx).toBeInstanceOf(Transaction);
-      expect(tx.getStatus()).toEqual("pending");
-      expect(tx.fromAddressId()).toEqual(address.getId());
+      expect(op).toBeInstanceOf(StakingOperation);
     });
 
     it("should return an error for not enough amount to claim stake", async () => {
