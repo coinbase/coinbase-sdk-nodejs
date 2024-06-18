@@ -3,11 +3,11 @@ import { mockReturnValue, stakeApiMock, VALID_ADDRESS_MODEL } from "./utils";
 import {
   StakingContext as StakingContextModel,
   StakingOperation as StakingOperationModel,
-} from "../../client";
+} from "../client";
 import Decimal from "decimal.js";
-import { ExternalAddress } from "../address/external_address";
-import { Transaction } from "../transaction";
-import { StakeOptionsMode } from "../types";
+import { ExternalAddress } from "../coinbase/address/external_address";
+import { Transaction } from "../coinbase/transaction";
+import { StakeOptionsMode } from "../coinbase/types";
 
 describe("DeveloperAddress", () => {
   const address = new ExternalAddress(

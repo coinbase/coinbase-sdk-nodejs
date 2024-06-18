@@ -8,9 +8,13 @@ import { BalanceMap } from "../balance_map";
 import { Coinbase } from "../coinbase";
 import { Transfer } from "../transfer";
 import { FaucetTransaction } from "../faucet_transaction";
-import { delay, destinationToAddressHexString } from "../utils";
+import {
+  convertAmount,
+  delay,
+  destinationToAddressHexString,
+  getNormalizedAssetId,
+} from "../utils";
 import { Amount, Destination, TransferStatus } from "../types";
-import { ATOMIC_UNITS_PER_USDC, WEI_PER_ETHER, WEI_PER_GWEI } from "../constants";
 import { Asset } from "../asset";
 import { Trade } from "../trade";
 
@@ -90,16 +94,7 @@ export class DeveloperAddress extends Address {
    * @returns {Decimal} The balance of the asset.
    */
   public async getBalance(assetId: string): Promise<Decimal> {
-    const normalizedAssetId = ((): string => {
-      switch (assetId) {
-        case Coinbase.assets.Gwei:
-          return Coinbase.assets.Eth;
-        case Coinbase.assets.Wei:
-          return Coinbase.assets.Eth;
-        default:
-          return assetId;
-      }
-    })();
+    const normalizedAssetId = getNormalizedAssetId(assetId);
 
     const response = await Coinbase.apiClients.address!.getAddressBalance(
       this._model.wallet_id,
@@ -194,24 +189,7 @@ export class DeveloperAddress extends Address {
       );
     }
 
-    switch (assetId) {
-      case Coinbase.assets.Eth:
-        normalizedAmount = normalizedAmount.mul(WEI_PER_ETHER);
-        break;
-      case Coinbase.assets.Gwei:
-        normalizedAmount = normalizedAmount.mul(WEI_PER_GWEI);
-        break;
-      case Coinbase.assets.Wei:
-        break;
-      case Coinbase.assets.Weth:
-        normalizedAmount = normalizedAmount.mul(WEI_PER_ETHER);
-        break;
-      case Coinbase.assets.Usdc:
-        normalizedAmount = normalizedAmount.mul(ATOMIC_UNITS_PER_USDC);
-        break;
-      default:
-        throw new InternalError(`Unsupported asset ID: ${assetId}`);
-    }
+    normalizedAmount = convertAmount(normalizedAmount, assetId);
 
     const normalizedDestination = destinationToAddressHexString(destination);
 

@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as crypto from "crypto";
 import { ethers } from "ethers";
-import { FaucetTransaction } from "../faucet_transaction";
-import { Balance as BalanceModel, TransferList, Trade as TradeModel } from "../../client";
+import { FaucetTransaction } from "../coinbase/faucet_transaction";
+import { Balance as BalanceModel, TransferList, Trade as TradeModel } from "../client";
 import Decimal from "decimal.js";
-import { APIError, FaucetLimitReachedError } from "../api_error";
+import { APIError, FaucetLimitReachedError } from "../coinbase/api_error";
 import { Coinbase } from "../coinbase";
-import { InternalError } from "../errors";
+import { InternalError } from "../coinbase/errors";
 import {
   VALID_ADDRESS_BALANCE_LIST,
   VALID_ADDRESS_MODEL,
@@ -19,13 +19,13 @@ import {
   tradeApiMock,
   transfersApiMock,
 } from "./utils";
-import { ArgumentError } from "../errors";
-import { Transfer } from "../transfer";
-import { TransactionStatus, TransferStatus } from "../types";
-import { Trade } from "../trade";
-import { Transaction } from "../transaction";
-import { Asset } from "../asset";
-import { DeveloperAddress } from "../address/developer_address";
+import { ArgumentError } from "../coinbase/errors";
+import { Transfer } from "../coinbase/transfer";
+import { TransactionStatus, TransferStatus } from "../coinbase/types";
+import { Trade } from "../coinbase/trade";
+import { Transaction } from "../coinbase/transaction";
+import { Asset } from "../coinbase/asset";
+import { DeveloperAddress } from "../coinbase/address/developer_address";
 
 // Test suite for the DeveloperAddress class
 describe("DeveloperAddress", () => {
