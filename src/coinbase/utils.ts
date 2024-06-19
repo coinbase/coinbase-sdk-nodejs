@@ -1,12 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Axios, AxiosResponse, InternalAxiosRequestConfig } from "axios";
-import { Destination } from "./types";
 import { APIError } from "./api_error";
-import { Wallet } from "./wallet";
-import { Address } from "./address";
-import { InternalError, InvalidUnsignedPayload } from "./errors";
-import { Coinbase } from "./coinbase";
-import { ATOMIC_UNITS_PER_USDC, WEI_PER_ETHER, WEI_PER_GWEI } from "./constants";
+import { InvalidUnsignedPayload } from "./errors";
 
 /**
  * Prints Axios response to the console for debugging purposes.
@@ -88,25 +83,6 @@ export async function delay(seconds: number): Promise<void> {
 }
 
 /**
- * Converts a Destination to an Address hex string.
- *
- * @param destination - The Destination to convert.
- * @returns The Address Hex string.
- * @throws {Error} If the Destination is an unsupported type.
- */
-export function destinationToAddressHexString(destination: Destination): string {
-  if (typeof destination === "string") {
-    return destination;
-  } else if (destination instanceof Address) {
-    return destination.getId();
-  } else if (destination instanceof Wallet) {
-    return destination.getDefaultAddress()!.getId();
-  } else {
-    throw new Error("Unsupported type");
-  }
-}
-
-/**
  * Parses an Unsigned Payload and returns the JSON object.
  *
  * @throws {InvalidUnsignedPayload} If the Unsigned Payload is invalid.
@@ -130,45 +106,3 @@ export function parseUnsignedPayload(payload: string): Record<string, any> {
 
   return parsedPayload;
 }
-
-/**
- * Converts the given amount to a normalized value based on the specified asset ID.
- *
- * @param {Decimal} amount - The amount to be normalized.
- * @param {string} assetId - The identifier of the asset to determine the normalization factor.
- * @returns {Decimal} The normalized amount.
- * @throws {InternalError} If the asset ID is unsupported.
- */
-export const convertAmount = (amount, assetId) => {
-  switch (assetId) {
-    case Coinbase.assets.Eth:
-      return amount.mul(WEI_PER_ETHER);
-    case Coinbase.assets.Gwei:
-      return amount.mul(WEI_PER_GWEI);
-    case Coinbase.assets.Wei:
-      return amount;
-    case Coinbase.assets.Weth:
-      return amount.mul(WEI_PER_ETHER);
-    case Coinbase.assets.Usdc:
-      return amount.mul(ATOMIC_UNITS_PER_USDC);
-    default:
-      throw new InternalError(`Unsupported asset ID: ${assetId}`);
-  }
-};
-
-/**
- * Returns the normalized asset ID based on the provided asset ID.
- *
- * @param {string} assetId - The identifier of the asset to be normalized.
- * @returns {string} The normalized asset ID.
- */
-export const getNormalizedAssetId = (assetId: string) => {
-  switch (assetId) {
-    case Coinbase.assets.Gwei:
-      return Coinbase.assets.Eth;
-    case Coinbase.assets.Wei:
-      return Coinbase.assets.Eth;
-    default:
-      return assetId;
-  }
-};

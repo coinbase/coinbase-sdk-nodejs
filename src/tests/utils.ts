@@ -50,12 +50,16 @@ export const generateRandomHash = (length = 8) => {
 };
 
 // newAddressModel creates a new AddressModel with a random wallet ID and a random Ethereum address.
-export const newAddressModel = (walletId: string, address_id: string = ""): AddressModel => {
+export const newAddressModel = (
+  walletId: string,
+  address_id: string = "",
+  network_id: string = Coinbase.networks.BaseSepolia,
+): AddressModel => {
   const ethAddress = ethers.Wallet.createRandom();
 
   return {
     address_id: address_id ? address_id : ethAddress.address,
-    network_id: Coinbase.networks.BaseSepolia,
+    network_id: network_id ? network_id : Coinbase.networks.BaseSepolia,
     public_key: ethAddress.publicKey,
     wallet_id: walletId,
   };
@@ -79,6 +83,30 @@ export const VALID_TRANSFER_MODEL: TransferModel = {
   transfer_id: transferId,
   network_id: Coinbase.networks.BaseSepolia,
   wallet_id: walletId,
+  asset: {
+    asset_id: Coinbase.assets.Eth,
+    network_id: Coinbase.networks.BaseSepolia,
+    decimals: 18,
+    contract_address: "0x",
+  },
+  transaction: {
+    network_id: Coinbase.networks.BaseSepolia,
+    from_address_id: "0xdeadbeef",
+    unsigned_payload:
+      "7b2274797065223a22307832222c22636861696e4964223a2230783134613334222c226e6f6e63" +
+      "65223a22307830222c22746f223a22307834643965346633663464316138623566346637623166" +
+      "356235633762386436623262336231623062222c22676173223a22307835323038222c22676173" +
+      "5072696365223a6e756c6c2c226d61785072696f72697479466565506572476173223a223078" +
+      "3539363832663030222c226d6178466565506572476173223a2230783539363832663030222c22" +
+      "76616c7565223a2230783536626337356532643633313030303030222c22696e707574223a22" +
+      "3078222c226163636573734c697374223a5b5d2c2276223a22307830222c2272223a2230783022" +
+      "2c2273223a22307830222c2279506172697479223a22307830222c2268617368223a2230783664" +
+      "633334306534643663323633653363396561396135656438646561346332383966613861363966" +
+      "3031653635393462333732386230386138323335333433227d",
+    transaction_hash: "0xdeadbeef",
+    transaction_link: "https://sepolia.basescan.org/tx/0xdeadbeef",
+    status: "pending",
+  },
   address_id: ethers.Wallet.createRandom().address,
   destination: "0x4D9E4F3f4D1A8B5F4f7b1F5b5C7b8d6b2B3b1b0b",
   asset_id: Coinbase.assets.Eth,
@@ -105,6 +133,7 @@ export const VALID_ADDRESS_BALANCE_LIST: AddressBalanceList = {
         asset_id: Coinbase.assets.Eth,
         network_id: Coinbase.networks.BaseSepolia,
         decimals: 18,
+        contract_address: "0x",
       },
     },
     {
@@ -112,6 +141,7 @@ export const VALID_ADDRESS_BALANCE_LIST: AddressBalanceList = {
       asset: {
         asset_id: "usdc",
         network_id: Coinbase.networks.BaseSepolia,
+        contract_address: "0x",
         decimals: 6,
       },
     },
@@ -120,7 +150,8 @@ export const VALID_ADDRESS_BALANCE_LIST: AddressBalanceList = {
       asset: {
         asset_id: "weth",
         network_id: Coinbase.networks.BaseSepolia,
-        decimals: 6,
+        contract_address: "0x",
+        decimals: 18,
       },
     },
   ],
@@ -135,6 +166,32 @@ export const VALID_BALANCE_MODEL: BalanceModel = {
     asset_id: Coinbase.assets.Eth,
     network_id: Coinbase.networks.BaseSepolia,
   },
+};
+
+/**
+ * getAssetMock returns a mock function that returns an AssetModel with the provided network ID and asset ID.
+ *
+ * @returns The mock function.
+ */
+export const getAssetMock = () => {
+  return mockFn((...request) => {
+    const [network_id, asset_id] = request;
+    const decimals = {
+      wei: 18,
+      gwei: 18,
+      eth: 18,
+      usdc: 6,
+      weth: 18,
+    };
+    return {
+      data: {
+        network_id,
+        asset_id: asset_id.includes("wei") ? "eth" : asset_id,
+        decimals: decimals[asset_id],
+        contract_address: "0x",
+      },
+    };
+  });
 };
 
 /**
@@ -160,6 +217,10 @@ export const createAxiosMock = (): AxiosMockType => {
 
 export const usersApiMock = {
   getCurrentUser: jest.fn(),
+};
+
+export const assetsApiMock = {
+  getAsset: jest.fn(),
 };
 
 export const walletsApiMock = {

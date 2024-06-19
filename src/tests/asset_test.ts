@@ -1,103 +1,62 @@
-import Decimal from "decimal.js";
+import { Coinbase } from "../coinbase";
+import { GWEI_DECIMALS } from "../coinbase/constants";
 import { Asset } from "./../coinbase/asset";
-import { ATOMIC_UNITS_PER_USDC, WEI_PER_ETHER, WEI_PER_GWEI } from "./../coinbase/constants";
 
 describe("Asset", () => {
-  describe(".isSupported", () => {
-    ["eth", "gwei", "wei", "usdc", "weth"].forEach(assetId => {
-      describe(`when the assetId is ${assetId}`, () => {
-        it("should return true", () => {
-          expect(Asset.isSupported(assetId)).toBe(true);
-        });
+  describe(".fromModel", () => {
+    it("should return an Asset object", () => {
+      const model = {
+        asset_id: Coinbase.assets.Eth,
+        network_id: Coinbase.networks.BaseSepolia,
+        contract_address: "0x",
+        decimals: 18,
+      };
+      const asset = Asset.fromModel(model);
+      expect(asset).toBeInstanceOf(Asset);
+      expect(asset.getAssetId()).toEqual(Coinbase.assets.Eth);
+    });
+
+    describe("when the model is invalid", () => {
+      it("should throw an error", () => {
+        expect(() => Asset.fromModel(null!)).toThrow("Invalid asset model");
       });
     });
 
-    describe("when the assetId is not supported", () => {
-      it("should return false", () => {
-        expect(Asset.isSupported("unsupported")).toBe(false);
+    describe("when the asset_id is gwei", () => {
+      it("should set the decimals to 9", () => {
+        const model = {
+          asset_id: "eth",
+          network_id: Coinbase.networks.BaseSepolia,
+          contract_address: "0x",
+          decimals: 18,
+        };
+        expect(Asset.fromModel(model, Coinbase.assets.Gwei).decimals).toEqual(GWEI_DECIMALS);
       });
     });
-  });
-
-  describe(".toAtomicAmount", () => {
-    const amount = new Decimal(123.0);
-
-    describe("when the assetId is eth", () => {
-      it("should return the amount in atomic units", () => {
-        expect(Asset.toAtomicAmount(amount, "eth")).toEqual(amount.mul(WEI_PER_ETHER));
-      });
-    });
-
-    describe("when the assetId is gwei", () => {
-      it("should return the amount in atomic units", () => {
-        expect(Asset.toAtomicAmount(amount, "gwei")).toEqual(amount.mul(WEI_PER_GWEI));
-      });
-    });
-
-    describe("when the assetId is usdc", () => {
-      it("should return the amount in atomic units", () => {
-        expect(Asset.toAtomicAmount(amount, "usdc")).toEqual(amount.mul(ATOMIC_UNITS_PER_USDC));
-      });
-    });
-
-    describe("when the assetId is weth", () => {
-      it("should return the amount in atomic units", () => {
-        expect(Asset.toAtomicAmount(amount, "weth")).toEqual(amount.mul(WEI_PER_ETHER));
-      });
-    });
-
-    describe("when the assetId is wei", () => {
-      it("should return the amount", () => {
-        expect(Asset.toAtomicAmount(amount, "wei")).toEqual(amount);
-      });
-    });
-
-    describe("when the assetId is not explicitly handled", () => {
-      it("should return the amount", () => {
-        expect(Asset.toAtomicAmount(amount, "other")).toEqual(amount);
+    describe("when the asset_id is wei", () => {
+      it("should set the decimals to 0", () => {
+        const model = {
+          asset_id: "eth",
+          network_id: Coinbase.networks.BaseSepolia,
+          contract_address: "0x",
+          decimals: 18,
+        };
+        expect(Asset.fromModel(model, Coinbase.assets.Wei).decimals).toEqual(0);
       });
     });
   });
 
-  describe(".fromAtomicAmount", () => {
-    const atomicAmount = new Decimal("123000000000000000000");
-
-    describe("when the assetId is eth", () => {
-      it("should return the amount in whole units", () => {
-        expect(Asset.fromAtomicAmount(atomicAmount, "eth")).toEqual(
-          atomicAmount.div(WEI_PER_ETHER),
-        );
+  describe(".toString", () => {
+    it("should return the assetId", () => {
+      const asset = Asset.fromModel({
+        asset_id: "eth",
+        network_id: Coinbase.networks.BaseSepolia,
+        contract_address: "contractAddress",
+        decimals: 18,
       });
-    });
-
-    describe("when the assetId is gwei", () => {
-      it("should return the amount in gwei", () => {
-        expect(Asset.fromAtomicAmount(atomicAmount, "gwei")).toEqual(
-          atomicAmount.div(WEI_PER_GWEI),
-        );
-      });
-    });
-
-    describe("when the assetId is usdc", () => {
-      it("should return the amount in whole units", () => {
-        expect(Asset.fromAtomicAmount(atomicAmount, "usdc")).toEqual(
-          atomicAmount.div(ATOMIC_UNITS_PER_USDC),
-        );
-      });
-    });
-
-    describe("when the assetId is weth", () => {
-      it("should return the amount in whole units", () => {
-        expect(Asset.fromAtomicAmount(atomicAmount, "weth")).toEqual(
-          atomicAmount.div(WEI_PER_ETHER),
-        );
-      });
-    });
-
-    describe("when the assetId is wei", () => {
-      it("should return the amount", () => {
-        expect(Asset.fromAtomicAmount(atomicAmount, "wei")).toEqual(atomicAmount);
-      });
+      expect(asset.toString()).toEqual(
+        `Asset{ networkId: base-sepolia, assetId: eth, contractAddress: contractAddress, decimals: 18 }`,
+      );
     });
   });
 

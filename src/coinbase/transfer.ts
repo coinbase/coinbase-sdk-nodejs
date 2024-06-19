@@ -4,7 +4,6 @@ import { Coinbase } from "./coinbase";
 import { Transfer as TransferModel } from "../client/api";
 import { ethers } from "ethers";
 import { InternalError } from "./errors";
-import { WEI_PER_ETHER } from "./constants";
 import { parseUnsignedPayload } from "./utils";
 
 /**
@@ -101,11 +100,7 @@ export class Transfer {
    */
   public getAmount(): Decimal {
     const amount = new Decimal(this.model.amount);
-
-    if (this.getAssetId() === Coinbase.assets.Eth) {
-      return amount.div(WEI_PER_ETHER);
-    }
-    return amount;
+    return amount.dividedBy(new Decimal(10).pow(this.model.asset.decimals!));
   }
 
   /**

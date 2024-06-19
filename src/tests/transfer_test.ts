@@ -80,10 +80,12 @@ describe("Transfer Class", () => {
       expect(transfer.getAmount()).toEqual(ethAmount);
     });
 
-    it("should return the amoun when the asset ID is not eth", () => {
+    it("should return the amount when the asset ID is not eth", () => {
       transferModel.asset_id = "usdc";
+      transferModel.asset.decimals = 6;
+      transferModel.amount = "100000000";
       transfer = Transfer.fromModel(transferModel);
-      expect(transfer.getAmount()).toEqual(amount);
+      expect(transfer.getAmount()).toEqual(new Decimal(100));
     });
   });
 

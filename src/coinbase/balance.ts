@@ -6,6 +6,7 @@ import { Asset } from "./asset";
 export class Balance {
   public readonly amount: Decimal;
   public readonly assetId: string;
+  public readonly asset?: Asset;
 
   /**
    * Private constructor to prevent direct instantiation outside of the factory methods.
@@ -15,9 +16,10 @@ export class Balance {
    * @param {string} assetId - The asset ID.
    * @hideconstructor
    */
-  private constructor(amount: Decimal, assetId: string) {
+  private constructor(amount: Decimal, assetId: string, asset?: Asset) {
     this.amount = amount;
     this.assetId = assetId;
+    this.asset = asset;
   }
 
   /**
@@ -27,7 +29,12 @@ export class Balance {
    * @returns {Balance} The Balance object.
    */
   public static fromModel(model: BalanceModel): Balance {
-    return this.fromModelAndAssetId(model, model.asset.asset_id);
+    const asset = Asset.fromModel(model.asset);
+    return new Balance(
+      asset.fromAtomicAmount(new Decimal(model.amount)),
+      asset.getAssetId(),
+      asset,
+    );
   }
 
   /**
@@ -38,6 +45,11 @@ export class Balance {
    * @returns {Balance} The Balance object.
    */
   public static fromModelAndAssetId(model: BalanceModel, assetId: string): Balance {
-    return new Balance(Asset.fromAtomicAmount(new Decimal(model.amount), assetId), assetId);
+    const asset = Asset.fromModel(model.asset, assetId);
+    return new Balance(
+      asset.fromAtomicAmount(new Decimal(model.amount)),
+      asset.getAssetId(),
+      asset,
+    );
   }
 }
