@@ -83,7 +83,7 @@ export class Asset {
   static async fetch(networkId: string, assetId: string) {
     const asset = await Coinbase.apiClients.asset!.getAsset(
       Coinbase.normalizeNetwork(networkId),
-      assetId,
+      Asset.primaryDenomination(assetId),
     );
     return Asset.fromModel(asset?.data, assetId);
   }
