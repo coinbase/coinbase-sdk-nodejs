@@ -1,5 +1,11 @@
 # Coinbase Node.js SDK Changelog
 
+## [0.0.8] - 2024-06-18
+
+### Added
+
+- Support assets dynamically from the backend without SDK changes.
+
 ## [0.0.7] - 2024-06-11
 
 ### Added
