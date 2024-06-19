@@ -236,7 +236,7 @@ export class Address {
       throw new ArgumentError("Transfer must be on the same Network");
     }
     if (destination instanceof WalletClass) {
-      return [destination.getNetworkId(), destination.getNetworkId()];
+      return [destination.getDefaultAddress()!.getId(), destination.getNetworkId()];
     }
     if (destination instanceof Address) {
       return [destination.getId(), destination.getNetworkId()];
