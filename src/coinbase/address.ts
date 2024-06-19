@@ -248,8 +248,8 @@ export class Address {
    * Trades the given amount of the given Asset for another Asset. Only same-network Trades are supported.
    *
    * @param amount - The amount of the Asset to send.
-   * @param fromAssetId - The ID of the Asset to trade from. For Ether, eth, gwei, and wei are supported.
-   * @param toAssetId - The ID of the Asset to trade to. For Ether, eth, gwei, and wei are supported.
+   * @param fromAssetId - The ID of the Asset to trade from.
+   * @param toAssetId - The ID of the Asset to trade to.
    * @returns The Trade object.
    * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
    */
@@ -272,8 +272,8 @@ export class Address {
    * Creates a trade model for the specified amount and assets.
    *
    * @param amount - The amount of the Asset to send.
-   * @param fromAsset - The Asset to trade from. For Ether, eth, gwei, and wei are supported.
-   * @param toAsset - The Asset to trade to. For Ether, eth, gwei, and wei are supported.
+   * @param fromAsset - The Asset to trade from.
+   * @param toAsset - The Asset to trade to.
    * @returns A promise that resolves to a Trade object representing the new trade.
    */
   private async createTradeRequest(

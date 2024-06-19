@@ -368,8 +368,8 @@ export class Wallet {
    *  Trades the given amount of the given Asset for another Asset. Currently only the default address is used to source the Trade
    *
    * @param amount - The amount of the Asset to send.
-   * @param fromAssetId - The ID of the Asset to trade from. For Ether, eth, gwei, and wei are supported.
-   * @param toAssetId - The ID of the Asset to trade to. For Ether, eth, gwei, and wei are supported.
+   * @param fromAssetId - The ID of the Asset to trade from.
+   * @param toAssetId - The ID of the Asset to trade to.
    * @throws {InternalError} If the default address is not found.
    * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
    * @returns The Trade object.
