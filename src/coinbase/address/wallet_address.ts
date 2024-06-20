@@ -18,8 +18,8 @@ import { Wallet as WalletClass } from "../wallet";
  * A representation of a blockchain address, which is a wallet-controlled account on a network.
  */
 export class WalletAddress extends Address {
-  private _model: AddressModel;
-  private _key?: ethers.SigningKey;
+  private model: AddressModel;
+  private key?: ethers.SigningKey;
 
   /**
    * Initializes a new Wallet Address instance.
@@ -34,8 +34,8 @@ export class WalletAddress extends Address {
     }
     super(model.network_id, model.address_id);
 
-    this._model = model;
-    this._key = key;
+    this.model = model;
+    this.key = key;
   }
 
   /**
@@ -53,7 +53,7 @@ export class WalletAddress extends Address {
    * @returns {string} The wallet ID.
    */
   public getWalletId(): string {
-    return this._model.wallet_id;
+    return this.model.wallet_id;
   }
 
   /**
@@ -63,10 +63,10 @@ export class WalletAddress extends Address {
    * @throws {InternalError} If the private key is already set.
    */
   public setKey(key: ethers.SigningKey) {
-    if (this._key !== undefined) {
+    if (this.key !== undefined) {
       throw new InternalError("Private key is already set");
     }
-    this._key = key;
+    this.key = key;
   }
 
   /**
@@ -76,8 +76,8 @@ export class WalletAddress extends Address {
    */
   public async listBalances(): Promise<BalanceMap> {
     const response = await Coinbase.apiClients.address!.listAddressBalances(
-      this._model.wallet_id,
-      this._model.address_id,
+      this.model.wallet_id,
+      this.model.address_id,
     );
 
     return BalanceMap.fromBalances(response.data.data);
@@ -91,8 +91,8 @@ export class WalletAddress extends Address {
    */
   async getBalance(assetId: string): Promise<Decimal> {
     const response = await Coinbase.apiClients.address!.getAddressBalance(
-      this._model.wallet_id,
-      this._model.address_id,
+      this.model.wallet_id,
+      this.model.address_id,
       Asset.primaryDenomination(assetId),
     );
 
@@ -113,8 +113,8 @@ export class WalletAddress extends Address {
    */
   public async faucet(): Promise<FaucetTransaction> {
     const response = await Coinbase.apiClients.address!.requestFaucetFunds(
-      this._model.wallet_id,
-      this._model.address_id,
+      this.model.wallet_id,
+      this.model.address_id,
     );
     return new FaucetTransaction(response.data);
   }
@@ -131,8 +131,8 @@ export class WalletAddress extends Address {
     while (queue.length > 0) {
       const page = queue.shift();
       const response = await Coinbase.apiClients.transfer!.listTransfers(
-        this._model.wallet_id,
-        this._model.address_id,
+        this.model.wallet_id,
+        this.model.address_id,
         100,
         page?.length ? page : undefined,
       );
@@ -171,7 +171,7 @@ export class WalletAddress extends Address {
     intervalSeconds = 0.2,
     timeoutSeconds = 10,
   ): Promise<Transfer> {
-    if (!Coinbase.useServerSigner && !this._key) {
+    if (!Coinbase.useServerSigner && !this.key) {
       throw new InternalError("Cannot transfer from address without private key loaded");
     }
     const asset = await Asset.fetch(this.getNetworkId(), assetId);
@@ -200,7 +200,7 @@ export class WalletAddress extends Address {
     );
 
     let transfer = Transfer.fromModel(response.data);
-    const wallet = new ethers.Wallet(this._key!.privateKey);
+    const wallet = new ethers.Wallet(this.key!.privateKey);
 
     if (!Coinbase.useServerSigner) {
       const transaction = transfer.getTransaction();
@@ -258,7 +258,7 @@ export class WalletAddress extends Address {
    * @returns Whether the Address has a private key backing it to sign transactions.
    */
   public canSign(): boolean {
-    return !!this._key;
+    return !!this.key;
   }
 
   /**
@@ -273,7 +273,7 @@ export class WalletAddress extends Address {
   public async createTrade(amount: Amount, fromAssetId: string, toAssetId: string): Promise<Trade> {
     const fromAsset = await Asset.fetch(this.getNetworkId(), fromAssetId);
     const toAsset = await Asset.fetch(this.getNetworkId(), toAssetId);
-    const wallet = new ethers.Wallet(this._key!.privateKey);
+    const wallet = new ethers.Wallet(this.key!.privateKey);
 
     await this.validateCanTrade(amount, fromAssetId);
     const trade = await this.createTradeRequest(amount, fromAsset, toAsset);

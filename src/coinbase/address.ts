@@ -2,8 +2,8 @@
  * A representation of a blockchain address, which is a user-controlled account on a network.
  */
 export class Address {
-  protected _networkId: string;
-  protected _id: string;
+  protected networkId: string;
+  protected id: string;
 
   /**
    * Initializes a new Address instance.
@@ -12,8 +12,8 @@ export class Address {
    * @param id - The onchain address id.
    */
   constructor(networkId: string, id: string) {
-    this._networkId = networkId;
-    this._id = id;
+    this.networkId = networkId;
+    this.id = id;
   }
 
   /**
@@ -22,7 +22,7 @@ export class Address {
    * @returns {string} The network ID.
    */
   public getNetworkId(): string {
-    return this._networkId;
+    return this.networkId;
   }
 
   /**
@@ -31,7 +31,7 @@ export class Address {
    * @returns {string} The address ID.
    */
   public getId(): string {
-    return this._id;
+    return this.id;
   }
 
   /**
@@ -40,6 +40,6 @@ export class Address {
    * @returns {string} A string representing the address.
    */
   public toString(): string {
-    return `Coinbase:Address{addressId: '${this.getId()}', networkId: '${this.getNetworkId()}'}`;
+    return `Address { addressId: '${this.getId()}', networkId: '${this.getNetworkId()}' }`;
   }
 }
