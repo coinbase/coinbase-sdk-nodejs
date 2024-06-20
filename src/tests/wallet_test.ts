@@ -2,13 +2,12 @@ import * as fs from "fs";
 import crypto from "crypto";
 import Decimal from "decimal.js";
 import { ethers } from "ethers";
-import { Address } from "../address";
-import { APIError } from "../api_error";
+import { Address } from "../coinbase/address";
+import { APIError } from "../coinbase/api_error";
 import { Coinbase } from "../coinbase";
-import { GWEI_PER_ETHER, WEI_PER_ETHER } from "../constants";
-import { ArgumentError, InternalError } from "../errors";
-import { Wallet } from "../wallet";
-import { ServerSignerStatus, TransferStatus } from "../types";
+import { ArgumentError, InternalError } from "../coinbase/errors";
+import { Wallet } from "../coinbase/wallet";
+import { ServerSignerStatus, TransferStatus } from "../coinbase/types";
 import {
   AddressBalanceList,
   Address as AddressModel,
@@ -16,12 +15,13 @@ import {
   TransactionStatusEnum,
   Wallet as WalletModel,
   Trade as TradeModel,
-} from "./../../client";
+} from "./../client";
 import {
   VALID_ADDRESS_MODEL,
   VALID_TRANSFER_MODEL,
   VALID_WALLET_MODEL,
   addressesApiMock,
+  assetsApiMock,
   generateWalletFromSeed,
   mockFn,
   mockReturnRejectedValue,
@@ -30,8 +30,7 @@ import {
   transfersApiMock,
   walletsApiMock,
 } from "./utils";
-import { Transaction } from "../transaction";
-import { Trade } from "../trade";
+import { Trade } from "../coinbase/trade";
 
 describe("Wallet Class", () => {
   let wallet: Wallet;
@@ -77,6 +76,19 @@ describe("Wallet Class", () => {
       destination = new Address(VALID_ADDRESS_MODEL, key as unknown as ethers.Wallet);
       intervalSeconds = 0.2;
       timeoutSeconds = 10;
+      Coinbase.apiClients.asset = assetsApiMock;
+      Coinbase.apiClients.asset!.getAsset = mockFn(request => {
+        const { asset_id, network_id } = request;
+        return {
+          data: {
+            amount: "1000000000000000000",
+            network_id,
+            asset_id,
+            contract_address: "0x",
+          },
+        };
+      });
+
       Coinbase.apiClients.address!.getAddressBalance = mockFn(request => {
         const { asset_id } = request;
         balanceModel = {
@@ -378,6 +390,33 @@ describe("Wallet Class", () => {
       });
     });
 
+    describe("should validate the seed and addressModels", () => {
+      it("should validate the seed length", async () => {
+        await expect(async () => {
+          await Wallet.init(VALID_WALLET_MODEL, "000", []);
+        }).rejects.toThrow(ArgumentError);
+      });
+      it("should have a seed when the address list is not empty", async () => {
+        await expect(async () => {
+          await Wallet.init(VALID_WALLET_MODEL, "", []);
+        }).rejects.toThrow(ArgumentError);
+      });
+      it("should have a seed when the address list is not empty", async () => {
+        await expect(async () => {
+          await Wallet.init(VALID_WALLET_MODEL, undefined, [VALID_ADDRESS_MODEL]);
+        }).rejects.toThrow(ArgumentError);
+      });
+    });
+
+    it("should throw an error when the wallet does not have a default address", async () => {
+      const wallet = await Wallet.init({
+        id: walletId,
+        network_id: Coinbase.networks.BaseSepolia,
+        enabled_features: [],
+      });
+      await expect(async () => await wallet.faucet()).rejects.toThrow(InternalError);
+    });
+
     it("should return a Wallet instance", async () => {
       expect(wallet).toBeInstanceOf(Wallet);
     });
@@ -442,6 +481,11 @@ describe("Wallet Class", () => {
       const walletData = seedWallet.export();
       const newWallet = await Wallet.init(walletModel, walletData.seed);
       expect(newWallet).toBeInstanceOf(Wallet);
+    });
+
+    it("throws an error when the Wallet is seedless", async () => {
+      const seedlessWallet = await Wallet.init(walletModel, "", [addressModel]);
+      expect(() => seedlessWallet.export()).toThrow(InternalError);
     });
 
     it("should return true for canSign when the wallet is initialized with a seed", () => {
@@ -511,21 +555,21 @@ describe("Wallet Class", () => {
 
     it("should return the correct GWEI balance", async () => {
       const balance = await wallet.getBalance(Coinbase.assets.Gwei);
-      expect(balance).toEqual(GWEI_PER_ETHER.mul(5));
+      expect(balance).toEqual(new Decimal(5000000000));
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledWith(
         walletId,
-        Coinbase.assets.Gwei,
+        Coinbase.assets.Eth,
       );
     });
 
     it("should return the correct WEI balance", async () => {
       const balance = await wallet.getBalance(Coinbase.assets.Wei);
-      expect(balance).toEqual(WEI_PER_ETHER.mul(5));
+      expect(balance).toEqual(new Decimal(5000000000000000000));
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledWith(
         walletId,
-        Coinbase.assets.Wei,
+        Coinbase.assets.Eth,
       );
     });
 
@@ -536,7 +580,7 @@ describe("Wallet Class", () => {
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledWith(
         walletId,
-        Coinbase.assets.Wei,
+        Coinbase.assets.Eth,
       );
     });
   });
@@ -548,6 +592,7 @@ describe("Wallet Class", () => {
       const mockWalletModel = {
         id: walletId,
         default_address: mockAddressModel,
+        network_id: Coinbase.networks.BaseSepolia,
       };
       Coinbase.apiClients.wallet = walletsApiMock;
       Coinbase.apiClients.address = addressesApiMock;
@@ -721,6 +766,18 @@ describe("Wallet Class", () => {
 
       expect(() => seedlessWallet.loadSeed(filePath)).toThrow(ArgumentError);
     });
+
+    it("throws an error when the file is empty", async () => {
+      fs.writeFileSync("invalid-file.json", "", "utf8");
+      expect(() => wallet.loadSeed("invalid-file.json")).toThrow(ArgumentError);
+      fs.unlinkSync("invalid-file.json");
+    });
+
+    it("throws an error when the file is not a valid JSON", async () => {
+      fs.writeFileSync("invalid-file.json", `{"test":{"authTag":false}}`, "utf8");
+      expect(() => wallet.loadSeed("invalid-file.json")).toThrow(ArgumentError);
+      fs.unlinkSync("invalid-file.json");
+    });
   });
 
   describe(".trade", () => {
@@ -742,6 +799,14 @@ describe("Wallet Class", () => {
       const trade = Promise.resolve(tradeObject);
       jest.spyOn(Address.prototype, "createTrade").mockReturnValue(trade);
     });
+
+    it("should throw an error when the wallet does not have a default address", async () => {
+      const wallet = await Wallet.init(walletModel);
+      await expect(async () => await wallet.createTrade(0.01, "eth", "usdc")).rejects.toThrow(
+        InternalError,
+      );
+    });
+
     it("should create a trade from the default address", async () => {
       const result = await wallet.createTrade(0.01, "eth", "usdc");
       expect(result).toBeInstanceOf(Trade);

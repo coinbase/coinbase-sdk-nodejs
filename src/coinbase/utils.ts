@@ -1,9 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Axios, AxiosResponse, InternalAxiosRequestConfig } from "axios";
-import { Destination } from "./types";
 import { APIError } from "./api_error";
-import { Wallet } from "./wallet";
-import { Address } from "./address";
 import { InvalidUnsignedPayload } from "./errors";
 
 /**
@@ -83,25 +80,6 @@ export const convertStringToHex = (key: Uint8Array): string => {
  */
 export async function delay(seconds: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, seconds * 1000));
-}
-
-/**
- * Converts a Destination to an Address hex string.
- *
- * @param destination - The Destination to convert.
- * @returns The Address Hex string.
- * @throws {Error} If the Destination is an unsupported type.
- */
-export function destinationToAddressHexString(destination: Destination): string {
-  if (typeof destination === "string") {
-    return destination;
-  } else if (destination instanceof Address) {
-    return destination.getId();
-  } else if (destination instanceof Wallet) {
-    return destination.getDefaultAddress()!.getId();
-  } else {
-    throw new Error("Unsupported type");
-  }
 }
 
 /**

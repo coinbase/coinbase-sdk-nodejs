@@ -8,6 +8,7 @@ import {
   WalletsApiFactory,
   TradesApiFactory,
   ServerSignersApiFactory,
+  AssetsApiFactory,
 } from "../client";
 import { BASE_PATH } from "./../client/base";
 import { Configuration } from "./../client/configuration";
@@ -95,6 +96,7 @@ export class Coinbase {
     registerAxiosInterceptors(
       axiosInstance,
       config => coinbaseAuthenticator.authenticateRequest(config, debugging),
+      /* istanbul ignore file */
       response => logApiResponse(response, debugging),
     );
 
@@ -104,6 +106,7 @@ export class Coinbase {
     Coinbase.apiClients.transfer = TransfersApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.trade = TradesApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.serverSigner = ServerSignersApiFactory(config, basePath, axiosInstance);
+    Coinbase.apiClients.asset = AssetsApiFactory(config, basePath, axiosInstance);
     Coinbase.apiKeyPrivateKey = privateKey;
     Coinbase.useServerSigner = useServerSigner;
   }
@@ -166,5 +169,25 @@ export class Coinbase {
   async getDefaultUser(): Promise<User> {
     const userResponse = await Coinbase.apiClients.user!.getCurrentUser();
     return new User(userResponse.data as UserModel);
+  }
+
+  /**
+   * Converts a network symbol to a string, replacing underscores with hyphens.
+   *
+   * @param network - The network symbol to convert
+   * @returns the converted string
+   */
+  static normalizeNetwork(network: string): string {
+    return network.replace(/_/g, "-");
+  }
+
+  /**
+   * Converts a string to a symbol, replacing hyphens with underscores.
+   *
+   * @param asset - The string to convert
+   * @returns the converted symbol
+   */
+  static toAssetId(asset: string): string {
+    return asset.replace(/-/g, "_");
   }
 }

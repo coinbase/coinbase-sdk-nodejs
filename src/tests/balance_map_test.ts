@@ -1,6 +1,6 @@
-import { BalanceMap } from "../balance_map";
-import { Balance as BalanceModel } from "../../client";
-import { Balance } from "../balance";
+import { BalanceMap } from "../coinbase/balance_map";
+import { Balance as BalanceModel } from "../client";
+import { Balance } from "../coinbase/balance";
 import { Decimal } from "decimal.js";
 import { Coinbase } from "../coinbase";
 
@@ -17,6 +17,8 @@ describe("BalanceMap", () => {
       asset: {
         asset_id: Coinbase.assets.Eth,
         network_id: Coinbase.networks.BaseSepolia,
+        decimals: 18,
+        contract_address: "0x",
       },
       amount: ethAtomicAmount,
     };
@@ -25,6 +27,8 @@ describe("BalanceMap", () => {
       asset: {
         asset_id: "usdc",
         network_id: Coinbase.networks.BaseSepolia,
+        decimals: 6,
+        contract_address: "0x",
       },
       amount: usdcAtomicAmount,
     };
@@ -33,6 +37,8 @@ describe("BalanceMap", () => {
       asset: {
         asset_id: "weth",
         network_id: Coinbase.networks.BaseSepolia,
+        decimals: 18,
+        contract_address: "0x",
       },
       amount: wethAtomicAmount,
     };
@@ -53,7 +59,12 @@ describe("BalanceMap", () => {
     const balance = Balance.fromModelAndAssetId(
       {
         amount: ethAtomicAmount,
-        asset: { asset_id: assetId, network_id: Coinbase.networks.BaseSepolia },
+        asset: {
+          asset_id: assetId,
+          network_id: Coinbase.networks.BaseSepolia,
+          decimals: 18,
+          contract_address: "0x",
+        },
       },
       assetId,
     );
@@ -64,6 +75,10 @@ describe("BalanceMap", () => {
       balanceMap.add(balance);
       expect(balanceMap.get(assetId)).toEqual(ethAmount);
     });
+
+    it("throws an error if the balance parameter is not instance of Balance", () => {
+      expect(() => balanceMap.add(null!)).toThrow(Error);
+    });
   });
 
   describe(".toString", () => {
@@ -71,7 +86,12 @@ describe("BalanceMap", () => {
     const balance = Balance.fromModelAndAssetId(
       {
         amount: ethAtomicAmount,
-        asset: { asset_id: assetId, network_id: Coinbase.networks.BaseSepolia },
+        asset: {
+          asset_id: assetId,
+          network_id: Coinbase.networks.BaseSepolia,
+          decimals: 18,
+          contract_address: "0x",
+        },
       },
       assetId,
     );

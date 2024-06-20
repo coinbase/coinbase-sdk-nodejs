@@ -23,6 +23,7 @@ import { BalanceMap } from "./balance_map";
 import Decimal from "decimal.js";
 import { Balance } from "./balance";
 import { Trade } from "./trade";
+import { Asset } from "./asset";
 
 /**
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
@@ -177,6 +178,11 @@ export class Wallet {
    * @returns The derived key.
    */
   private deriveKey(): HDKey {
+    const [networkPrefix] = this.model.network_id.split("-");
+    // TODO: Push this logic to the backend.
+    if (!["base", "ethereum"].includes(networkPrefix)) {
+      throw new InternalError(`Unsupported network ID: ${this.model.network_id}`);
+    }
     const derivedKey = this.master?.derive(this.addressPathPrefix + "/" + this.addressIndex++);
     if (!derivedKey?.privateKey) {
       throw new InternalError("Failed to derive key");
@@ -362,8 +368,8 @@ export class Wallet {
    *  Trades the given amount of the given Asset for another Asset. Currently only the default address is used to source the Trade
    *
    * @param amount - The amount of the Asset to send.
-   * @param fromAssetId - The ID of the Asset to trade from. For Ether, eth, gwei, and wei are supported.
-   * @param toAssetId - The ID of the Asset to trade to. For Ether, eth, gwei, and wei are supported.
+   * @param fromAssetId - The ID of the Asset to trade from.
+   * @param toAssetId - The ID of the Asset to trade to.
    * @throws {InternalError} If the default address is not found.
    * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
    * @returns The Trade object.
@@ -392,7 +398,10 @@ export class Wallet {
    * @returns The balance of the Asset.
    */
   public async getBalance(assetId: string): Promise<Decimal> {
-    const response = await Coinbase.apiClients.wallet!.getWalletBalance(this.model.id!, assetId);
+    const response = await Coinbase.apiClients.wallet!.getWalletBalance(
+      this.model.id!,
+      Asset.primaryDenomination(assetId),
+    );
     if (!response.data.amount) {
       return new Decimal(0);
     }

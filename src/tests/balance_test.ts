@@ -1,5 +1,5 @@
-import { Balance } from "../balance";
-import { Balance as BalanceModel } from "../../client";
+import { Balance } from "../coinbase/balance";
+import { Balance as BalanceModel } from "../client";
 import { Decimal } from "decimal.js";
 import { Coinbase } from "../coinbase";
 
@@ -11,6 +11,8 @@ describe("Balance", () => {
       asset: {
         asset_id: Coinbase.assets.Eth,
         network_id: Coinbase.networks.BaseSepolia,
+        decimals: 18,
+        contract_address: "0x",
       },
     };
 
@@ -28,7 +30,12 @@ describe("Balance", () => {
   describe(".fromModelAndAssetId", () => {
     const amount = new Decimal(1);
     const balanceModel: BalanceModel = {
-      asset: { asset_id: Coinbase.assets.Eth, network_id: Coinbase.networks.BaseSepolia },
+      asset: {
+        asset_id: Coinbase.assets.Eth,
+        network_id: Coinbase.networks.BaseSepolia,
+        decimals: 18,
+        contract_address: "0x",
+      },
       amount: "1000000000000000000",
     };
 

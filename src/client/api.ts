@@ -391,6 +391,113 @@ export type Feature = typeof Feature[keyof typeof Feature];
 
 
 /**
+ * 
+ * @export
+ * @interface FetchStakingRewards200Response
+ */
+export interface FetchStakingRewards200Response {
+    /**
+     * 
+     * @type {Array<StakingReward>}
+     * @memberof FetchStakingRewards200Response
+     */
+    'data': Array<StakingReward>;
+    /**
+     * True if this list has another page of items after this one that can be fetched.
+     * @type {boolean}
+     * @memberof FetchStakingRewards200Response
+     */
+    'has_more': boolean;
+    /**
+     * The page token to be used to fetch the next page.
+     * @type {string}
+     * @memberof FetchStakingRewards200Response
+     */
+    'next_page': string;
+}
+/**
+ * 
+ * @export
+ * @interface FetchStakingRewardsRequest
+ */
+export interface FetchStakingRewardsRequest {
+    /**
+     * The ID of the blockchain network
+     * @type {string}
+     * @memberof FetchStakingRewardsRequest
+     */
+    'network_id': string;
+    /**
+     * The ID of the asset for which the staking rewards are being fetched
+     * @type {string}
+     * @memberof FetchStakingRewardsRequest
+     */
+    'asset_id': string;
+    /**
+     * The onchain addresses for which the staking rewards are being fetched
+     * @type {Array<string>}
+     * @memberof FetchStakingRewardsRequest
+     */
+    'address_ids': Array<string>;
+    /**
+     * The start time of this reward period
+     * @type {string}
+     * @memberof FetchStakingRewardsRequest
+     */
+    'start_time': string;
+    /**
+     * The end time of this reward period
+     * @type {string}
+     * @memberof FetchStakingRewardsRequest
+     */
+    'end_time': string;
+    /**
+     * The format in which the rewards are to be fetched i.e native or in equivalent USD
+     * @type {string}
+     * @memberof FetchStakingRewardsRequest
+     */
+    'format': FetchStakingRewardsRequestFormatEnum;
+}
+
+export const FetchStakingRewardsRequestFormatEnum = {
+    Usd: 'usd',
+    Native: 'native'
+} as const;
+
+export type FetchStakingRewardsRequestFormatEnum = typeof FetchStakingRewardsRequestFormatEnum[keyof typeof FetchStakingRewardsRequestFormatEnum];
+
+/**
+ * 
+ * @export
+ * @interface GetStakingContextRequest
+ */
+export interface GetStakingContextRequest {
+    /**
+     * The ID of the blockchain network
+     * @type {string}
+     * @memberof GetStakingContextRequest
+     */
+    'network_id': string;
+    /**
+     * The ID of the asset being staked
+     * @type {string}
+     * @memberof GetStakingContextRequest
+     */
+    'asset_id': string;
+    /**
+     * The onchain address for which the staking context is being fetched
+     * @type {string}
+     * @memberof GetStakingContextRequest
+     */
+    'address_id': string;
+    /**
+     * 
+     * @type {{ [key: string]: string; }}
+     * @memberof GetStakingContextRequest
+     */
+    'options': { [key: string]: string; };
+}
+/**
  * An error response from the Coinbase Developer Platform API
  * @export
  * @interface ModelError
@@ -408,6 +515,31 @@ export interface ModelError {
      * @memberof ModelError
      */
     'message': string;
+}
+/**
+ * The partial eth staking context
+ * @export
+ * @interface PartialEthStakingContext
+ */
+export interface PartialEthStakingContext {
+    /**
+     * The balance that can be staked. This is typically the wallet balance in atomic units.
+     * @type {string}
+     * @memberof PartialEthStakingContext
+     */
+    'stakeable_balance': string;
+    /**
+     * The total staked balance of the wallet that can be unstaked in atomic units.
+     * @type {string}
+     * @memberof PartialEthStakingContext
+     */
+    'unstakeable_balance': string;
+    /**
+     * The total unstaked balance that can be claimed in atomic units.
+     * @type {string}
+     * @memberof PartialEthStakingContext
+     */
+    'claimable_balance': string;
 }
 /**
  * An event representing a seed creation.
@@ -668,6 +800,25 @@ export interface SignatureCreationEventResult {
 
 
 /**
+ * Context needed to perform a staking operation
+ * @export
+ * @interface StakingContext
+ */
+export interface StakingContext {
+    /**
+     * 
+     * @type {StakingContextContext}
+     * @memberof StakingContext
+     */
+    'context': StakingContextContext;
+}
+/**
+ * @type StakingContextContext
+ * @export
+ */
+export type StakingContextContext = PartialEthStakingContext;
+
+/**
  * An onchain transaction to help realize a staking action.
  * @export
  * @interface StakingOperation
@@ -680,6 +831,45 @@ export interface StakingOperation {
      */
     'transaction': Transaction;
 }
+/**
+ * The staking rewards for an address
+ * @export
+ * @interface StakingReward
+ */
+export interface StakingReward {
+    /**
+     * The onchain address for which the staking rewards are being fetched
+     * @type {string}
+     * @memberof StakingReward
+     */
+    'address_id': string;
+    /**
+     * The date of the reward in format \'YYYY-MM-DD\' in UTC.
+     * @type {string}
+     * @memberof StakingReward
+     */
+    'date': string;
+    /**
+     * The reward amount in requested \"format\". Default is USD.
+     * @type {string}
+     * @memberof StakingReward
+     */
+    'amount': string;
+    /**
+     * The state of the reward
+     * @type {string}
+     * @memberof StakingReward
+     */
+    'state': StakingRewardStateEnum;
+}
+
+export const StakingRewardStateEnum = {
+    Pending: 'pending',
+    Distributed: 'distributed'
+} as const;
+
+export type StakingRewardStateEnum = typeof StakingRewardStateEnum[keyof typeof StakingRewardStateEnum];
+
 /**
  * A trade of an asset to another asset
  * @export
@@ -815,6 +1005,12 @@ export interface Transaction {
      */
     'transaction_hash'?: string;
     /**
+     * The link to view the transaction on a block explorer. This is optional and may not be present for all transactions.
+     * @type {string}
+     * @memberof Transaction
+     */
+    'transaction_link'?: string;
+    /**
      * The status of the transaction
      * @type {string}
      * @memberof Transaction
@@ -887,11 +1083,23 @@ export interface Transfer {
      */
     'asset_id': string;
     /**
+     * 
+     * @type {Asset}
+     * @memberof Transfer
+     */
+    'asset': Asset;
+    /**
      * The ID of the transfer
      * @type {string}
      * @memberof Transfer
      */
     'transfer_id': string;
+    /**
+     * 
+     * @type {Transaction}
+     * @memberof Transfer
+     */
+    'transaction': Transaction;
     /**
      * The unsigned payload of the transfer. This is the payload that needs to be signed by the sender.
      * @type {string}
@@ -1651,6 +1859,465 @@ export class AddressesApi extends BaseAPI implements AddressesApiInterface {
 
 
 /**
+ * AssetsApi - axios parameter creator
+ * @export
+ */
+export const AssetsApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Get the asset for the specified asset ID.
+         * @summary Get the asset for the specified asset ID.
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} assetId The ID of the asset to fetch
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAsset: async (networkId: string, assetId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('getAsset', 'networkId', networkId)
+            // verify required parameter 'assetId' is not null or undefined
+            assertParamExists('getAsset', 'assetId', assetId)
+            const localVarPath = `/v1/networks/{network_id}/assets/{asset_id}`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"asset_id"}}`, encodeURIComponent(String(assetId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * AssetsApi - functional programming interface
+ * @export
+ */
+export const AssetsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = AssetsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Get the asset for the specified asset ID.
+         * @summary Get the asset for the specified asset ID.
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} assetId The ID of the asset to fetch
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getAsset(networkId: string, assetId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Asset>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getAsset(networkId, assetId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AssetsApi.getAsset']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * AssetsApi - factory interface
+ * @export
+ */
+export const AssetsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = AssetsApiFp(configuration)
+    return {
+        /**
+         * Get the asset for the specified asset ID.
+         * @summary Get the asset for the specified asset ID.
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} assetId The ID of the asset to fetch
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAsset(networkId: string, assetId: string, options?: any): AxiosPromise<Asset> {
+            return localVarFp.getAsset(networkId, assetId, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * AssetsApi - interface
+ * @export
+ * @interface AssetsApi
+ */
+export interface AssetsApiInterface {
+    /**
+     * Get the asset for the specified asset ID.
+     * @summary Get the asset for the specified asset ID.
+     * @param {string} networkId The ID of the blockchain network
+     * @param {string} assetId The ID of the asset to fetch
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AssetsApiInterface
+     */
+    getAsset(networkId: string, assetId: string, options?: RawAxiosRequestConfig): AxiosPromise<Asset>;
+
+}
+
+/**
+ * AssetsApi - object-oriented interface
+ * @export
+ * @class AssetsApi
+ * @extends {BaseAPI}
+ */
+export class AssetsApi extends BaseAPI implements AssetsApiInterface {
+    /**
+     * Get the asset for the specified asset ID.
+     * @summary Get the asset for the specified asset ID.
+     * @param {string} networkId The ID of the blockchain network
+     * @param {string} assetId The ID of the asset to fetch
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AssetsApi
+     */
+    public getAsset(networkId: string, assetId: string, options?: RawAxiosRequestConfig) {
+        return AssetsApiFp(this.configuration).getAsset(networkId, assetId, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * ExternalAddressesApi - axios parameter creator
+ * @export
+ */
+export const ExternalAddressesApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Get the balance of an asset in an external address
+         * @summary Get the balance of an asset in an external address
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the balance for
+         * @param {string} assetId The ID of the asset to fetch the balance for
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getExternalAddressBalance: async (networkId: string, addressId: string, assetId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('getExternalAddressBalance', 'networkId', networkId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('getExternalAddressBalance', 'addressId', addressId)
+            // verify required parameter 'assetId' is not null or undefined
+            assertParamExists('getExternalAddressBalance', 'assetId', assetId)
+            const localVarPath = `/v1/networks/{network_id}/addresses/{address_id}/balances/{asset_id}`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)))
+                .replace(`{${"asset_id"}}`, encodeURIComponent(String(assetId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * List all of the balances of an external address
+         * @summary Get the balances of an external address
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the balance for
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listExternalAddressBalances: async (networkId: string, addressId: string, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('listExternalAddressBalances', 'networkId', networkId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('listExternalAddressBalances', 'addressId', addressId)
+            const localVarPath = `/v1/networks/{network_id}/addresses/{address_id}/balances`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Request faucet funds to be sent to external address.
+         * @summary Request faucet funds for external address.
+         * @param {string} networkId The ID of the wallet the address belongs to.
+         * @param {string} addressId The onchain address of the address that is being fetched.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        requestExternalFaucetFunds: async (networkId: string, addressId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('requestExternalFaucetFunds', 'networkId', networkId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('requestExternalFaucetFunds', 'addressId', addressId)
+            const localVarPath = `/v1/networks/{network_id}/addresses/{address_id}/faucet`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * ExternalAddressesApi - functional programming interface
+ * @export
+ */
+export const ExternalAddressesApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = ExternalAddressesApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Get the balance of an asset in an external address
+         * @summary Get the balance of an asset in an external address
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the balance for
+         * @param {string} assetId The ID of the asset to fetch the balance for
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getExternalAddressBalance(networkId: string, addressId: string, assetId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Balance>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getExternalAddressBalance(networkId, addressId, assetId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ExternalAddressesApi.getExternalAddressBalance']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * List all of the balances of an external address
+         * @summary Get the balances of an external address
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the balance for
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listExternalAddressBalances(networkId: string, addressId: string, page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AddressBalanceList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listExternalAddressBalances(networkId, addressId, page, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ExternalAddressesApi.listExternalAddressBalances']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Request faucet funds to be sent to external address.
+         * @summary Request faucet funds for external address.
+         * @param {string} networkId The ID of the wallet the address belongs to.
+         * @param {string} addressId The onchain address of the address that is being fetched.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async requestExternalFaucetFunds(networkId: string, addressId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FaucetTransaction>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.requestExternalFaucetFunds(networkId, addressId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ExternalAddressesApi.requestExternalFaucetFunds']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * ExternalAddressesApi - factory interface
+ * @export
+ */
+export const ExternalAddressesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = ExternalAddressesApiFp(configuration)
+    return {
+        /**
+         * Get the balance of an asset in an external address
+         * @summary Get the balance of an asset in an external address
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the balance for
+         * @param {string} assetId The ID of the asset to fetch the balance for
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getExternalAddressBalance(networkId: string, addressId: string, assetId: string, options?: any): AxiosPromise<Balance> {
+            return localVarFp.getExternalAddressBalance(networkId, addressId, assetId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * List all of the balances of an external address
+         * @summary Get the balances of an external address
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the balance for
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listExternalAddressBalances(networkId: string, addressId: string, page?: string, options?: any): AxiosPromise<AddressBalanceList> {
+            return localVarFp.listExternalAddressBalances(networkId, addressId, page, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Request faucet funds to be sent to external address.
+         * @summary Request faucet funds for external address.
+         * @param {string} networkId The ID of the wallet the address belongs to.
+         * @param {string} addressId The onchain address of the address that is being fetched.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        requestExternalFaucetFunds(networkId: string, addressId: string, options?: any): AxiosPromise<FaucetTransaction> {
+            return localVarFp.requestExternalFaucetFunds(networkId, addressId, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * ExternalAddressesApi - interface
+ * @export
+ * @interface ExternalAddressesApi
+ */
+export interface ExternalAddressesApiInterface {
+    /**
+     * Get the balance of an asset in an external address
+     * @summary Get the balance of an asset in an external address
+     * @param {string} networkId The ID of the blockchain network
+     * @param {string} addressId The ID of the address to fetch the balance for
+     * @param {string} assetId The ID of the asset to fetch the balance for
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExternalAddressesApiInterface
+     */
+    getExternalAddressBalance(networkId: string, addressId: string, assetId: string, options?: RawAxiosRequestConfig): AxiosPromise<Balance>;
+
+    /**
+     * List all of the balances of an external address
+     * @summary Get the balances of an external address
+     * @param {string} networkId The ID of the blockchain network
+     * @param {string} addressId The ID of the address to fetch the balance for
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExternalAddressesApiInterface
+     */
+    listExternalAddressBalances(networkId: string, addressId: string, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<AddressBalanceList>;
+
+    /**
+     * Request faucet funds to be sent to external address.
+     * @summary Request faucet funds for external address.
+     * @param {string} networkId The ID of the wallet the address belongs to.
+     * @param {string} addressId The onchain address of the address that is being fetched.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExternalAddressesApiInterface
+     */
+    requestExternalFaucetFunds(networkId: string, addressId: string, options?: RawAxiosRequestConfig): AxiosPromise<FaucetTransaction>;
+
+}
+
+/**
+ * ExternalAddressesApi - object-oriented interface
+ * @export
+ * @class ExternalAddressesApi
+ * @extends {BaseAPI}
+ */
+export class ExternalAddressesApi extends BaseAPI implements ExternalAddressesApiInterface {
+    /**
+     * Get the balance of an asset in an external address
+     * @summary Get the balance of an asset in an external address
+     * @param {string} networkId The ID of the blockchain network
+     * @param {string} addressId The ID of the address to fetch the balance for
+     * @param {string} assetId The ID of the asset to fetch the balance for
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExternalAddressesApi
+     */
+    public getExternalAddressBalance(networkId: string, addressId: string, assetId: string, options?: RawAxiosRequestConfig) {
+        return ExternalAddressesApiFp(this.configuration).getExternalAddressBalance(networkId, addressId, assetId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * List all of the balances of an external address
+     * @summary Get the balances of an external address
+     * @param {string} networkId The ID of the blockchain network
+     * @param {string} addressId The ID of the address to fetch the balance for
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExternalAddressesApi
+     */
+    public listExternalAddressBalances(networkId: string, addressId: string, page?: string, options?: RawAxiosRequestConfig) {
+        return ExternalAddressesApiFp(this.configuration).listExternalAddressBalances(networkId, addressId, page, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Request faucet funds to be sent to external address.
+     * @summary Request faucet funds for external address.
+     * @param {string} networkId The ID of the wallet the address belongs to.
+     * @param {string} addressId The onchain address of the address that is being fetched.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExternalAddressesApi
+     */
+    public requestExternalFaucetFunds(networkId: string, addressId: string, options?: RawAxiosRequestConfig) {
+        return ExternalAddressesApiFp(this.configuration).requestExternalFaucetFunds(networkId, addressId, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
  * ServerSignersApi - axios parameter creator
  * @export
  */
@@ -2224,11 +2891,13 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Build a new staking operation
          * @summary Build a new staking operation
-         * @param {BuildStakingOperationRequest} [buildStakingOperationRequest] 
+         * @param {BuildStakingOperationRequest} buildStakingOperationRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        buildStakingOperation: async (buildStakingOperationRequest?: BuildStakingOperationRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        buildStakingOperation: async (buildStakingOperationRequest: BuildStakingOperationRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'buildStakingOperationRequest' is not null or undefined
+            assertParamExists('buildStakingOperation', 'buildStakingOperationRequest', buildStakingOperationRequest)
             const localVarPath = `/v1/stake/build`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -2255,6 +2924,88 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Fetch staking rewards for a list of addresses
+         * @summary Fetch staking rewards
+         * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest 
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        fetchStakingRewards: async (fetchStakingRewardsRequest: FetchStakingRewardsRequest, limit?: number, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'fetchStakingRewardsRequest' is not null or undefined
+            assertParamExists('fetchStakingRewards', 'fetchStakingRewardsRequest', fetchStakingRewardsRequest)
+            const localVarPath = `/v1/stake/rewards/search`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(fetchStakingRewardsRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get staking context for an address
+         * @summary Get staking context
+         * @param {GetStakingContextRequest} getStakingContextRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getStakingContext: async (getStakingContextRequest: GetStakingContextRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'getStakingContextRequest' is not null or undefined
+            assertParamExists('getStakingContext', 'getStakingContextRequest', getStakingContextRequest)
+            const localVarPath = `/v1/stake/context`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(getStakingContextRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -2268,14 +3019,42 @@ export const StakeApiFp = function(configuration?: Configuration) {
         /**
          * Build a new staking operation
          * @summary Build a new staking operation
-         * @param {BuildStakingOperationRequest} [buildStakingOperationRequest] 
+         * @param {BuildStakingOperationRequest} buildStakingOperationRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async buildStakingOperation(buildStakingOperationRequest?: BuildStakingOperationRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<StakingOperation>> {
+        async buildStakingOperation(buildStakingOperationRequest: BuildStakingOperationRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<StakingOperation>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.buildStakingOperation(buildStakingOperationRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['StakeApi.buildStakingOperation']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Fetch staking rewards for a list of addresses
+         * @summary Fetch staking rewards
+         * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest 
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async fetchStakingRewards(fetchStakingRewardsRequest: FetchStakingRewardsRequest, limit?: number, page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FetchStakingRewards200Response>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.fetchStakingRewards(fetchStakingRewardsRequest, limit, page, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['StakeApi.fetchStakingRewards']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get staking context for an address
+         * @summary Get staking context
+         * @param {GetStakingContextRequest} getStakingContextRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getStakingContext(getStakingContextRequest: GetStakingContextRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<StakingContext>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getStakingContext(getStakingContextRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['StakeApi.getStakingContext']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
@@ -2291,12 +3070,34 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
         /**
          * Build a new staking operation
          * @summary Build a new staking operation
-         * @param {BuildStakingOperationRequest} [buildStakingOperationRequest] 
+         * @param {BuildStakingOperationRequest} buildStakingOperationRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        buildStakingOperation(buildStakingOperationRequest?: BuildStakingOperationRequest, options?: any): AxiosPromise<StakingOperation> {
+        buildStakingOperation(buildStakingOperationRequest: BuildStakingOperationRequest, options?: any): AxiosPromise<StakingOperation> {
             return localVarFp.buildStakingOperation(buildStakingOperationRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Fetch staking rewards for a list of addresses
+         * @summary Fetch staking rewards
+         * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest 
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        fetchStakingRewards(fetchStakingRewardsRequest: FetchStakingRewardsRequest, limit?: number, page?: string, options?: any): AxiosPromise<FetchStakingRewards200Response> {
+            return localVarFp.fetchStakingRewards(fetchStakingRewardsRequest, limit, page, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get staking context for an address
+         * @summary Get staking context
+         * @param {GetStakingContextRequest} getStakingContextRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getStakingContext(getStakingContextRequest: GetStakingContextRequest, options?: any): AxiosPromise<StakingContext> {
+            return localVarFp.getStakingContext(getStakingContextRequest, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -2310,12 +3111,34 @@ export interface StakeApiInterface {
     /**
      * Build a new staking operation
      * @summary Build a new staking operation
-     * @param {BuildStakingOperationRequest} [buildStakingOperationRequest] 
+     * @param {BuildStakingOperationRequest} buildStakingOperationRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StakeApiInterface
      */
-    buildStakingOperation(buildStakingOperationRequest?: BuildStakingOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation>;
+    buildStakingOperation(buildStakingOperationRequest: BuildStakingOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation>;
+
+    /**
+     * Fetch staking rewards for a list of addresses
+     * @summary Fetch staking rewards
+     * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest 
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApiInterface
+     */
+    fetchStakingRewards(fetchStakingRewardsRequest: FetchStakingRewardsRequest, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<FetchStakingRewards200Response>;
+
+    /**
+     * Get staking context for an address
+     * @summary Get staking context
+     * @param {GetStakingContextRequest} getStakingContextRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApiInterface
+     */
+    getStakingContext(getStakingContextRequest: GetStakingContextRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingContext>;
 
 }
 
@@ -2329,13 +3152,39 @@ export class StakeApi extends BaseAPI implements StakeApiInterface {
     /**
      * Build a new staking operation
      * @summary Build a new staking operation
-     * @param {BuildStakingOperationRequest} [buildStakingOperationRequest] 
+     * @param {BuildStakingOperationRequest} buildStakingOperationRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StakeApi
      */
-    public buildStakingOperation(buildStakingOperationRequest?: BuildStakingOperationRequest, options?: RawAxiosRequestConfig) {
+    public buildStakingOperation(buildStakingOperationRequest: BuildStakingOperationRequest, options?: RawAxiosRequestConfig) {
         return StakeApiFp(this.configuration).buildStakingOperation(buildStakingOperationRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Fetch staking rewards for a list of addresses
+     * @summary Fetch staking rewards
+     * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest 
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApi
+     */
+    public fetchStakingRewards(fetchStakingRewardsRequest: FetchStakingRewardsRequest, limit?: number, page?: string, options?: RawAxiosRequestConfig) {
+        return StakeApiFp(this.configuration).fetchStakingRewards(fetchStakingRewardsRequest, limit, page, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get staking context for an address
+     * @summary Get staking context
+     * @param {GetStakingContextRequest} getStakingContextRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApi
+     */
+    public getStakingContext(getStakingContextRequest: GetStakingContextRequest, options?: RawAxiosRequestConfig) {
+        return StakeApiFp(this.configuration).getStakingContext(getStakingContextRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

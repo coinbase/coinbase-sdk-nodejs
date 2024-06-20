@@ -1,17 +1,17 @@
-import { ethers } from "ethers";
 import { Decimal } from "decimal.js";
+import { ethers } from "ethers";
 import { Address as AddressModel } from "../client";
+import { Asset } from "./asset";
 import { Balance } from "./balance";
 import { BalanceMap } from "./balance_map";
 import { Coinbase } from "./coinbase";
 import { ArgumentError, InternalError } from "./errors";
 import { FaucetTransaction } from "./faucet_transaction";
-import { Amount, Destination, TransferStatus } from "./types";
-import { Transfer } from "./transfer";
-import { delay, destinationToAddressHexString } from "./utils";
-import { ATOMIC_UNITS_PER_USDC, WEI_PER_ETHER, WEI_PER_GWEI } from "./constants";
-import { Asset } from "./asset";
 import { Trade } from "./trade";
+import { Transfer } from "./transfer";
+import { Amount, Destination, TransferStatus } from "./types";
+import { delay } from "./utils";
+import { Wallet as WalletClass } from "./wallet";
 
 /**
  * A representation of a blockchain address, which is a user-controlled account on a network.
@@ -122,21 +122,10 @@ export class Address {
    * @returns {Decimal} The balance of the asset.
    */
   async getBalance(assetId: string): Promise<Decimal> {
-    const normalizedAssetId = ((): string => {
-      switch (assetId) {
-        case Coinbase.assets.Gwei:
-          return Coinbase.assets.Eth;
-        case Coinbase.assets.Wei:
-          return Coinbase.assets.Eth;
-        default:
-          return assetId;
-      }
-    })();
-
     const response = await Coinbase.apiClients.address!.getAddressBalance(
       this.model.wallet_id,
       this.model.address_id,
-      normalizedAssetId,
+      Asset.primaryDenomination(assetId),
     );
 
     if (!response.data) {
@@ -178,8 +167,11 @@ export class Address {
     if (!Coinbase.useServerSigner && !this.key) {
       throw new InternalError("Cannot transfer from address without private key loaded");
     }
-    let normalizedAmount = new Decimal(amount.toString());
+    const asset = await Asset.fetch(this.getNetworkId(), assetId);
+    const [destinationAddress, destinationNetworkId] =
+      this.getDestinationAddressAndNetwork(destination);
 
+    const normalizedAmount = new Decimal(amount.toString());
     const currentBalance = await this.getBalance(assetId);
     if (currentBalance.lessThan(normalizedAmount)) {
       throw new ArgumentError(
@@ -187,43 +179,11 @@ export class Address {
       );
     }
 
-    switch (assetId) {
-      case Coinbase.assets.Eth:
-        normalizedAmount = normalizedAmount.mul(WEI_PER_ETHER);
-        break;
-      case Coinbase.assets.Gwei:
-        normalizedAmount = normalizedAmount.mul(WEI_PER_GWEI);
-        break;
-      case Coinbase.assets.Wei:
-        break;
-      case Coinbase.assets.Weth:
-        normalizedAmount = normalizedAmount.mul(WEI_PER_ETHER);
-        break;
-      case Coinbase.assets.Usdc:
-        normalizedAmount = normalizedAmount.mul(ATOMIC_UNITS_PER_USDC);
-        break;
-      default:
-        throw new InternalError(`Unsupported asset ID: ${assetId}`);
-    }
-
-    const normalizedDestination = destinationToAddressHexString(destination);
-
-    const normalizedAssetId = ((): string => {
-      switch (assetId) {
-        case Coinbase.assets.Gwei:
-          return Coinbase.assets.Eth;
-        case Coinbase.assets.Wei:
-          return Coinbase.assets.Eth;
-        default:
-          return assetId;
-      }
-    })();
-
     const createTransferRequest = {
-      amount: normalizedAmount.toFixed(0),
-      network_id: this.getNetworkId(),
-      asset_id: normalizedAssetId,
-      destination: normalizedDestination,
+      amount: asset.toAtomicAmount(normalizedAmount).toString(),
+      network_id: destinationNetworkId,
+      asset_id: asset.primaryDenomination(),
+      destination: destinationAddress,
     };
 
     let response = await Coinbase.apiClients.transfer!.createTransfer(
@@ -266,17 +226,39 @@ export class Address {
   }
 
   /**
+   * Returns the address and network ID of the given destination.
+   *
+   * @param destination - The destination to get the address and network ID of.
+   * @returns The address and network ID of the destination.
+   */
+  private getDestinationAddressAndNetwork(destination: Destination): [string, string] {
+    if (typeof destination !== "string" && destination.getNetworkId() !== this.getNetworkId()) {
+      throw new ArgumentError("Transfer must be on the same Network");
+    }
+    if (destination instanceof WalletClass) {
+      return [destination.getDefaultAddress()!.getId(), destination.getNetworkId()];
+    }
+    if (destination instanceof Address) {
+      return [destination.getId(), destination.getNetworkId()];
+    }
+    return [destination, this.getNetworkId()];
+  }
+
+  /**
    * Trades the given amount of the given Asset for another Asset. Only same-network Trades are supported.
    *
    * @param amount - The amount of the Asset to send.
-   * @param fromAssetId - The ID of the Asset to trade from. For Ether, eth, gwei, and wei are supported.
-   * @param toAssetId - The ID of the Asset to trade to. For Ether, eth, gwei, and wei are supported.
+   * @param fromAssetId - The ID of the Asset to trade from.
+   * @param toAssetId - The ID of the Asset to trade to.
    * @returns The Trade object.
    * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
    */
   public async createTrade(amount: Amount, fromAssetId: string, toAssetId: string): Promise<Trade> {
-    await this.validateCanTrade(amount, fromAssetId, toAssetId);
-    const trade = await this.createTradeRequest(amount, fromAssetId, toAssetId);
+    const fromAsset = await Asset.fetch(this.getNetworkId(), fromAssetId);
+    const toAsset = await Asset.fetch(this.getNetworkId(), toAssetId);
+
+    await this.validateCanTrade(amount, fromAssetId);
+    const trade = await this.createTradeRequest(amount, fromAsset, toAsset);
     // NOTE: Trading does not yet support server signers at this point.
     const signed_payload = await trade.getTransaction().sign(this.key!);
     const approveTransactionSignedPayload = trade.getApproveTransaction()
@@ -290,19 +272,19 @@ export class Address {
    * Creates a trade model for the specified amount and assets.
    *
    * @param amount - The amount of the Asset to send.
-   * @param fromAssetId - The ID of the Asset to trade from. For Ether, eth, gwei, and wei are supported.
-   * @param toAssetId - The ID of the Asset to trade to. For Ether, eth, gwei, and wei are supported.
+   * @param fromAsset - The Asset to trade from.
+   * @param toAsset - The Asset to trade to.
    * @returns A promise that resolves to a Trade object representing the new trade.
    */
   private async createTradeRequest(
     amount: Amount,
-    fromAssetId: string,
-    toAssetId: string,
+    fromAsset: Asset,
+    toAsset: Asset,
   ): Promise<Trade> {
     const tradeRequestPayload = {
-      amount: Asset.toAtomicAmount(new Decimal(amount.toString()), fromAssetId).toString(),
-      from_asset_id: Asset.primaryDenomination(fromAssetId),
-      to_asset_id: Asset.primaryDenomination(toAssetId),
+      amount: fromAsset.toAtomicAmount(new Decimal(amount.toString())).toString(),
+      from_asset_id: fromAsset.primaryDenomination(),
+      to_asset_id: toAsset.primaryDenomination(),
     };
     const tradeModel = await Coinbase.apiClients.trade!.createTrade(
       this.getWalletId(),
@@ -347,18 +329,11 @@ export class Address {
    *
    * @param amount - The amount of the Asset to send.
    * @param fromAssetId - The ID of the Asset to trade from. For Ether, eth, gwei, and wei are supported.
-   * @param toAssetId - The ID of the Asset to trade to. For Ether, eth, gwei, and wei are supported.
    * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
    */
-  private async validateCanTrade(amount: Amount, fromAssetId: string, toAssetId: string) {
+  private async validateCanTrade(amount: Amount, fromAssetId: string) {
     if (!this.canSign()) {
       throw new Error("Cannot trade from address without private key loaded");
-    }
-    if (!Asset.isSupported(fromAssetId)) {
-      throw new Error(`Unsupported from asset: ${fromAssetId}`);
-    }
-    if (!Asset.isSupported(toAssetId)) {
-      throw new Error(`Unsupported to asset: ${toAssetId}`);
     }
     const currentBalance = await this.getBalance(fromAssetId);
     amount = new Decimal(amount.toString());

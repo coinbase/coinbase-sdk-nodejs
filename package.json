@@ -4,22 +4,22 @@
   "license": "ISC",
   "description": "Coinbase Platform SDK",
   "repository": "https://github.com/coinbase/coinbase-sdk-nodejs",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "lint": "eslint -c .eslintrc.json src/**/*.ts",
-    "lint-fix": "eslint -c .eslintrc.json src/**/*.ts --fix",
+    "lint": "eslint -c .eslintrc.json src/coinbase/**.ts",
+    "lint-fix": "eslint -c .eslintrc.json src/coinbase/*.ts --fix",
     "format": "prettier -c .prettierrc --write \"**/*.{ts,js,cjs,json,md}\"",
     "format-check": "prettier -c .prettierrc --check \"**/*.{ts,js,cjs,json,md}\"",
     "check": "tsc --noEmit",
     "test": "npx jest --no-cache  --testMatch=**/*_test.ts",
     "test:dry-run": "npm install && npm ci && npm publish --dry-run",
-    "test:e2e": "npx jest --no-cache --testMatch=**/e2e.ts",
+    "test:e2e": "npx jest --no-cache --testMatch=**/e2e.ts --coverageThreshold '{}'",
     "clean": "rm -rf dist/*",
     "build": "tsc",
     "prepack": "tsc",
-    "docs": "typedoc --entryPoints ./src --entryPointStrategy expand --exclude ./src/coinbase/tests/**/*.ts"
+    "docs": "typedoc --entryPoints ./src --entryPointStrategy expand --exclude ./src/tests/**/*.ts"
   },
   "files": [
     "dist"
@@ -27,6 +27,7 @@
   "dependencies": {
     "@scure/bip32": "^1.4.0",
     "axios": "^1.6.8",
+    "axios-mock-adapter": "^1.22.0",
     "bip32": "^4.0.0",
     "bip39": "^3.1.0",
     "decimal.js": "^10.4.3",
@@ -53,25 +54,5 @@
     "ts-node": "^10.9.2",
     "typedoc": "^0.25.13",
     "typescript": "^5.4.5"
-  },
-  "jest": {
-    "preset": "ts-jest",
-    "testEnvironment": "node",
-    "extensionsToTreatAsEsm": [
-      ".ts"
-    ],
-    "coveragePathIgnorePatterns": [
-      "node_modules",
-      "client",
-      "__tests__"
-    ],
-    "collectCoverage": true,
-    "coverageReporters": [
-      "json",
-      "html",
-      "text"
-    ],
-    "verbose": true,
-    "maxWorkers": 1
   }
 }

@@ -14,6 +14,7 @@ import {
   Wallet as WalletModel,
   Transfer as TransferModel,
   Trade as TradeModel,
+  Asset as AssetModel,
   WalletList,
   TradeList as TradeListModel,
   CreateTradeRequest,
@@ -22,6 +23,23 @@ import {
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
+
+export type AssetAPIClient = {
+  /**
+   * Get the asset for the specified asset ID.
+   *
+   * @summary Get the asset for the specified asset ID.
+   * @param networkId - networkId The ID of the blockchain network.
+   * @param assetId - assetId The ID of the asset to fetch.
+   * @param options - Override http request option.
+   * @throws {RequiredError} If the required parameter is not provided.
+   */
+  getAsset(
+    networkId: string,
+    assetId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<AssetModel>;
+};
 
 export type TradeApiClients = {
   /**
@@ -394,6 +412,7 @@ export type ApiClients = {
   transfer?: TransferAPIClient;
   trade?: TradeApiClients;
   serverSigner?: ServerSignerAPIClient;
+  asset?: AssetAPIClient;
 };
 
 /**
