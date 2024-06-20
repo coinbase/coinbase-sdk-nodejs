@@ -11,6 +11,7 @@ import {
   VALID_ADDRESS_BALANCE_LIST,
   VALID_ADDRESS_MODEL,
   VALID_TRANSFER_MODEL,
+  VALID_WALLET_MODEL,
   generateRandomHash,
   getAssetMock,
   addressesApiMock,
@@ -18,8 +19,10 @@ import {
   mockFn,
   mockReturnRejectedValue,
   mockReturnValue,
+  newAddressModel,
   tradeApiMock,
   transfersApiMock,
+  walletsApiMock,
 } from "./utils";
 import { ArgumentError } from "../coinbase/errors";
 import { Transfer } from "../coinbase/transfer";
@@ -27,6 +30,7 @@ import { TransactionStatus, TransferStatus } from "../coinbase/types";
 import { Trade } from "../coinbase/trade";
 import { Transaction } from "../coinbase/transaction";
 import { WalletAddress } from "../coinbase/address/wallet_address";
+import { Wallet } from "../coinbase";
 
 // Test suite for the WalletAddress class
 describe("WalletAddress", () => {
@@ -209,13 +213,17 @@ describe("WalletAddress", () => {
       timeoutSeconds = 10;
       walletId = crypto.randomUUID();
       id = crypto.randomUUID();
-      Coinbase.apiClients.address!.getAddressBalance = mockFn(request => {
-        const { asset_id } = request;
+      Coinbase.apiClients.asset = assetsApiMock;
+      Coinbase.apiClients.asset.getAsset = getAssetMock();
+      Coinbase.apiClients.address!.getAddressBalance = mockFn((...request) => {
+        const [, , asset_id] = request;
         balanceModel = {
           amount: "1000000000000000000",
           asset: {
             asset_id,
             network_id: Coinbase.networks.BaseSepolia,
+            decimals: 18,
+            contract_address: "0x",
           },
         };
         return { data: balanceModel };
@@ -274,6 +282,50 @@ describe("WalletAddress", () => {
           timeoutSeconds,
         ),
       ).rejects.toThrow(InternalError);
+    });
+
+    it("should throw an ArgumentError if the Wallet Network ID does not match the Address Network ID", async () => {
+      Coinbase.apiClients.wallet = walletsApiMock;
+      Coinbase.apiClients.address = addressesApiMock;
+      Coinbase.apiClients.address.createAddress = mockReturnValue(
+        newAddressModel(walletId, id, Coinbase.networks.BaseMainnet),
+      );
+      Coinbase.apiClients.wallet!.createWallet = mockReturnValue({
+        ...VALID_WALLET_MODEL,
+        network_id: Coinbase.networks.BaseMainnet,
+      });
+      Coinbase.apiClients.wallet!.getWallet = mockReturnValue({
+        ...VALID_WALLET_MODEL,
+        network_id: Coinbase.networks.BaseMainnet,
+      });
+      const invalidDestination = await Wallet.create({
+        networkId: Coinbase.networks.BaseMainnet,
+      });
+      await expect(
+        address.createTransfer(
+          weiAmount,
+          Coinbase.assets.Wei,
+          invalidDestination,
+          intervalSeconds,
+          timeoutSeconds,
+        ),
+      ).rejects.toThrow(ArgumentError);
+    });
+
+    it("should throw an ArgumentError if the Address Network ID does not match the Wallet Network ID", async () => {
+      const invalidDestination = new WalletAddress(
+        newAddressModel("invalidDestination", "", Coinbase.networks.BaseMainnet),
+        null!,
+      );
+      await expect(
+        address.createTransfer(
+          weiAmount,
+          Coinbase.assets.Wei,
+          invalidDestination,
+          intervalSeconds,
+          timeoutSeconds,
+        ),
+      ).rejects.toThrow(ArgumentError);
     });
 
     it("should throw an APIError if the broadcastTransfer API call fails", async () => {
