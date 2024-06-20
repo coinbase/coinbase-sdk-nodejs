@@ -189,8 +189,6 @@ export class ExternalAddress extends Address {
     assetId: string,
     options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<{ [key: string]: string }> {
-    this.processOptions(assetId, options);
-
     const request = {
       network_id: this.getNetworkId(),
       asset_id: assetId,
@@ -236,8 +234,6 @@ export class ExternalAddress extends Address {
       throw new Error(`Amount required greater than zero.`);
     }
 
-    this.processOptions(assetId, options);
-
     options.amount = Asset.toAtomicAmount(new Decimal(amount.toString()), assetId).toString();
 
     const request = {
@@ -270,24 +266,5 @@ export class ExternalAddress extends Address {
     }
 
     return result;
-  }
-
-  /**
-   * Process the supplied options based on different asset types.
-   *
-   * @param assetId - The supplied asset.
-   * @param options - The options to process.
-   * @private
-   */
-  private processOptions(
-    assetId: string,
-    options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
-  ): void {
-    if (options.mode == "default") {
-      switch (assetId) {
-        case Coinbase.assets.Eth:
-          options.mode = StakeOptionsMode.PARTIAL;
-      }
-    }
   }
 }

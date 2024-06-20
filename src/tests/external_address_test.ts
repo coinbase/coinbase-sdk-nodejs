@@ -6,7 +6,6 @@ import {
 } from "../client";
 import Decimal from "decimal.js";
 import { ExternalAddress } from "../coinbase/address/external_address";
-import { Transaction } from "../coinbase/transaction";
 import { StakeOptionsMode } from "../coinbase/types";
 import { StakingOperation } from "../coinbase/staking_operation";
 
@@ -61,7 +60,7 @@ describe("DeveloperAddress", () => {
         network_id: address.getNetworkId(),
         asset_id: Coinbase.assets.Eth,
         options: {
-          mode: StakeOptionsMode.PARTIAL,
+          mode: StakeOptionsMode.DEFAULT,
         },
       });
       expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledWith({
@@ -70,7 +69,7 @@ describe("DeveloperAddress", () => {
         asset_id: Coinbase.assets.Eth,
         action: "stake",
         options: {
-          mode: StakeOptionsMode.PARTIAL,
+          mode: StakeOptionsMode.DEFAULT,
           amount: "100000000000000",
         },
       });
@@ -89,7 +88,7 @@ describe("DeveloperAddress", () => {
         network_id: address.getNetworkId(),
         asset_id: Coinbase.assets.Eth,
         options: {
-          mode: StakeOptionsMode.PARTIAL,
+          mode: StakeOptionsMode.DEFAULT,
         },
       });
       expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledTimes(0);
@@ -108,7 +107,7 @@ describe("DeveloperAddress", () => {
         network_id: address.getNetworkId(),
         asset_id: Coinbase.assets.Eth,
         options: {
-          mode: StakeOptionsMode.PARTIAL,
+          mode: StakeOptionsMode.DEFAULT,
         },
       });
       expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledTimes(0);
@@ -126,7 +125,7 @@ describe("DeveloperAddress", () => {
         network_id: address.getNetworkId(),
         asset_id: Coinbase.assets.Eth,
         options: {
-          mode: StakeOptionsMode.PARTIAL,
+          mode: StakeOptionsMode.DEFAULT,
         },
       });
       expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledWith({
@@ -135,7 +134,7 @@ describe("DeveloperAddress", () => {
         asset_id: Coinbase.assets.Eth,
         action: "unstake",
         options: {
-          mode: StakeOptionsMode.PARTIAL,
+          mode: StakeOptionsMode.DEFAULT,
           amount: "100000000000000",
         },
       });
@@ -153,7 +152,7 @@ describe("DeveloperAddress", () => {
         network_id: address.getNetworkId(),
         asset_id: Coinbase.assets.Eth,
         options: {
-          mode: StakeOptionsMode.PARTIAL,
+          mode: StakeOptionsMode.DEFAULT,
         },
       });
       expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledTimes(0);
@@ -172,7 +171,7 @@ describe("DeveloperAddress", () => {
         network_id: address.getNetworkId(),
         asset_id: Coinbase.assets.Eth,
         options: {
-          mode: StakeOptionsMode.PARTIAL,
+          mode: StakeOptionsMode.DEFAULT,
         },
       });
       expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledTimes(0);
@@ -190,7 +189,7 @@ describe("DeveloperAddress", () => {
         network_id: address.getNetworkId(),
         asset_id: Coinbase.assets.Eth,
         options: {
-          mode: StakeOptionsMode.PARTIAL,
+          mode: StakeOptionsMode.DEFAULT,
         },
       });
       expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledWith({
@@ -199,7 +198,7 @@ describe("DeveloperAddress", () => {
         asset_id: Coinbase.assets.Eth,
         action: "claim_stake",
         options: {
-          mode: StakeOptionsMode.PARTIAL,
+          mode: StakeOptionsMode.DEFAULT,
           amount: "100000000000000",
         },
       });
@@ -217,7 +216,7 @@ describe("DeveloperAddress", () => {
         network_id: address.getNetworkId(),
         asset_id: Coinbase.assets.Eth,
         options: {
-          mode: StakeOptionsMode.PARTIAL,
+          mode: StakeOptionsMode.DEFAULT,
         },
       });
       expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledTimes(0);
@@ -236,7 +235,7 @@ describe("DeveloperAddress", () => {
         network_id: address.getNetworkId(),
         asset_id: Coinbase.assets.Eth,
         options: {
-          mode: StakeOptionsMode.PARTIAL,
+          mode: StakeOptionsMode.DEFAULT,
         },
       });
       expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledTimes(0);
