@@ -273,7 +273,7 @@ export class ExternalAddress extends Address {
   /**
    * Returns the list of balances for the address.
    *
-   * @returns {BalanceMap} - The map from asset ID to balance.
+   * @returns The map from asset ID to balance.
    */
   public async listBalances(): Promise<BalanceMap> {
     const response = await Coinbase.apiClients.externalAddress!.listExternalAddressBalances(
@@ -287,8 +287,8 @@ export class ExternalAddress extends Address {
   /**
    * Returns the balance of the provided asset.
    *
-   * @param {string} assetId - The asset ID.
-   * @returns {Decimal} The balance of the asset.
+   * @param assetId - The asset ID.
+   * @returns The balance of the asset.
    */
   async getBalance(assetId: string): Promise<Decimal> {
     const response = await Coinbase.apiClients.externalAddress!.getExternalAddressBalance(
@@ -308,7 +308,7 @@ export class ExternalAddress extends Address {
    * Requests faucet funds for the address.
    * Only supported on testnet networks.
    *
-   * @returns {Promise<FaucetTransaction>} The faucet transaction object.
+   * @returns The faucet transaction object.
    * @throws {InternalError} If the request does not return a transaction hash.
    * @throws {Error} If the request fails.
    */
