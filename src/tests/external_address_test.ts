@@ -15,7 +15,7 @@ import { ExternalAddress } from "../coinbase/address/external_address";
 import { StakeOptionsMode } from "../coinbase/types";
 import { StakingOperation } from "../coinbase/staking_operation";
 
-describe("DeveloperAddress", () => {
+describe("ExternalAddress", () => {
   const address = new ExternalAddress(
     VALID_ADDRESS_MODEL.network_id,
     VALID_ADDRESS_MODEL.address_id,
