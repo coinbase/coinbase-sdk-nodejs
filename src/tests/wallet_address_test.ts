@@ -66,7 +66,7 @@ describe("WalletAddress", () => {
 
   beforeEach(() => {
     key = ethers.Wallet.createRandom();
-    address = new WalletAddress(VALID_ADDRESS_MODEL, key as unknown as ethers.SigningKey);
+    address = new WalletAddress(VALID_ADDRESS_MODEL, key as unknown as ethers.Wallet);
 
     jest.clearAllMocks();
   });
@@ -154,7 +154,7 @@ describe("WalletAddress", () => {
   });
 
   it("should throw an InternalError when model is not provided", () => {
-    expect(() => new WalletAddress(null!, key as unknown as ethers.SigningKey)).toThrow(
+    expect(() => new WalletAddress(null!, key as unknown as ethers.Wallet)).toThrow(
       `Address model cannot be empty`,
     );
   });
@@ -208,7 +208,7 @@ describe("WalletAddress", () => {
 
     beforeEach(() => {
       weiAmount = new Decimal("500000000000000000");
-      destination = new WalletAddress(VALID_ADDRESS_MODEL, key as unknown as ethers.SigningKey);
+      destination = new WalletAddress(VALID_ADDRESS_MODEL,  key as unknown as ethers.Wallet);
       intervalSeconds = 0.2;
       timeoutSeconds = 10;
       walletId = crypto.randomUUID();
@@ -574,8 +574,7 @@ describe("WalletAddress", () => {
         Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
         const result = await address.createTrade(amount, fromAssetId, toAssetId);
         const transaction = result.getTransaction();
-        const wallet = new ethers.Wallet(key.privateKey);
-        expect(transaction.sign).toHaveBeenCalledWith(wallet);
+        expect(transaction.sign).toHaveBeenCalledWith(key);
       });
 
       describe("when the asset is Gwei", () => {
@@ -603,8 +602,7 @@ describe("WalletAddress", () => {
           Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
           const result = await address.createTrade(amount, fromAssetId, toAssetId);
           const transaction = result.getTransaction();
-          const wallet = new ethers.Wallet(key.privateKey);
-          expect(transaction.sign).toHaveBeenCalledWith(wallet);
+          expect(transaction.sign).toHaveBeenCalledWith(key);
         });
       });
 
@@ -633,8 +631,7 @@ describe("WalletAddress", () => {
           Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
           const result = await address.createTrade(amount, fromAssetId, toAssetId);
           const transaction = result.getTransaction();
-          const wallet = new ethers.Wallet(key.privateKey);
-          expect(transaction.sign).toHaveBeenCalledWith(wallet);
+          expect(transaction.sign).toHaveBeenCalledWith(key);
         });
       });
 
@@ -665,8 +662,7 @@ describe("WalletAddress", () => {
           Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
           const result = await address.createTrade(amount, fromAssetId, toAssetId);
           const transaction = result.getTransaction();
-          const wallet = new ethers.Wallet(key.privateKey);
-          expect(transaction.sign).toHaveBeenCalledWith(wallet);
+          expect(transaction.sign).toHaveBeenCalledWith(key);
         });
       });
 
@@ -685,8 +681,7 @@ describe("WalletAddress", () => {
         it("should sign the trade transaction with the address key", async () => {
           const trade = await address.createTrade(amount, fromAssetId, toAssetId);
           const transaction = trade.getTransaction();
-          const wallet = new ethers.Wallet(key.privateKey);
-          expect(transaction.sign).toHaveBeenCalledWith(wallet);
+          expect(transaction.sign).toHaveBeenCalledWith(key);
         });
       });
     });

@@ -317,7 +317,7 @@ export class Wallet {
    * @returns {void}
    */
   private cacheAddress(address: AddressModel, key?: ethers.Wallet): void {
-    this.addresses.push(new WalletAddress(address, key?.signingKey));
+    this.addresses.push(new WalletAddress(address, key));
   }
 
   /**

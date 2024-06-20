@@ -19,7 +19,7 @@ import { Wallet as WalletClass } from "../wallet";
  */
 export class WalletAddress extends Address {
   private model: AddressModel;
-  private key?: ethers.SigningKey;
+  private key?: ethers.Wallet;
 
   /**
    * Initializes a new Wallet Address instance.
@@ -28,7 +28,7 @@ export class WalletAddress extends Address {
    * @param key - The ethers.js SigningKey the Address uses to sign data.
    * @throws {InternalError} If the address model is empty.
    */
-  constructor(model: AddressModel, key?: ethers.SigningKey) {
+  constructor(model: AddressModel, key?: ethers.Wallet) {
     if (!model) {
       throw new InternalError("Address model cannot be empty");
     }
@@ -62,7 +62,7 @@ export class WalletAddress extends Address {
    * @param key - The ethers.js SigningKey the Address uses to sign data.
    * @throws {InternalError} If the private key is already set.
    */
-  public setKey(key: ethers.SigningKey) {
+  public setKey(key: ethers.Wallet) {
     if (this.key !== undefined) {
       throw new InternalError("Private key is already set");
     }
@@ -273,14 +273,13 @@ export class WalletAddress extends Address {
   public async createTrade(amount: Amount, fromAssetId: string, toAssetId: string): Promise<Trade> {
     const fromAsset = await Asset.fetch(this.getNetworkId(), fromAssetId);
     const toAsset = await Asset.fetch(this.getNetworkId(), toAssetId);
-    const wallet = new ethers.Wallet(this.key!.privateKey);
 
     await this.validateCanTrade(amount, fromAssetId);
     const trade = await this.createTradeRequest(amount, fromAsset, toAsset);
     // NOTE: Trading does not yet support server signers at this point.
-    const signed_payload = await trade.getTransaction().sign(wallet);
+    const signed_payload = await trade.getTransaction().sign(this.key!);
     const approveTransactionSignedPayload = trade.getApproveTransaction()
-      ? await trade.getApproveTransaction()!.sign(wallet)
+      ? await trade.getApproveTransaction()!.sign(this.key!)
       : undefined;
 
     return this.broadcastTradeRequest(trade, signed_payload, approveTransactionSignedPayload);
