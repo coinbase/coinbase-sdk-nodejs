@@ -198,15 +198,13 @@ export class ExternalAddress extends Address {
 
     const response = await Coinbase.apiClients.stake!.getStakingContext(request);
     const { claimable_balance, stakeable_balance, unstakeable_balance } = response!.data.context;
+    const asset = await Asset.fetch(this.getNetworkId(), assetId);
 
     return {
-      claimableBalance: Asset.fromAtomicAmount(new Decimal(claimable_balance), assetId)
-        .toFixed()
-        .toString(),
-      stakeableBalance: Asset.fromAtomicAmount(new Decimal(stakeable_balance), assetId)
-        .toFixed()
-        .toString(),
-      unstakeableBalance: Asset.fromAtomicAmount(new Decimal(unstakeable_balance), assetId)
+      claimableBalance: asset.fromAtomicAmount(new Decimal(claimable_balance)).toFixed().toString(),
+      stakeableBalance: asset.fromAtomicAmount(new Decimal(stakeable_balance)).toFixed().toString(),
+      unstakeableBalance: asset
+        .fromAtomicAmount(new Decimal(unstakeable_balance))
         .toFixed()
         .toString(),
     };
@@ -233,8 +231,9 @@ export class ExternalAddress extends Address {
     if (stakingAmount.lessThanOrEqualTo(0)) {
       throw new Error(`Amount required greater than zero.`);
     }
+    const asset = await Asset.fetch(this.getNetworkId(), assetId);
 
-    options.amount = Asset.toAtomicAmount(new Decimal(amount.toString()), assetId).toString();
+    options.amount = asset.toAtomicAmount(new Decimal(amount.toString())).toString();
 
     const request = {
       network_id: this.getNetworkId(),

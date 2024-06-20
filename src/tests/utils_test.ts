@@ -1,192 +1,376 @@
-import { AxiosResponse } from "axios";
-import { InvalidUnsignedPayload } from "../coinbase/errors";
+import * as crypto from "crypto";
+import { InternalError } from "../coinbase/errors";
+import {
+  AddressBalanceList,
+  AddressList,
+  Address as AddressModel,
+  Balance as BalanceModel,
+  User as UserModel,
+  Wallet as WalletModel,
+} from "./../client/api";
+import { Coinbase } from "./../coinbase";
+import { WalletData } from "./../coinbase/types";
+import { User } from "./../coinbase/user";
+import { Wallet } from "./../coinbase/wallet";
+import {
+  VALID_ADDRESS_MODEL,
+  VALID_WALLET_MODEL,
+  addressesApiMock,
+  generateRandomHash,
+  generateWalletFromSeed,
+  mockReturnRejectedValue,
+  mockReturnValue,
+  newAddressModel,
+  walletsApiMock,
+} from "./utils";
 import Decimal from "decimal.js";
-import { Coinbase } from "../coinbase";
-import { ATOMIC_UNITS_PER_USDC, WEI_PER_ETHER, WEI_PER_GWEI } from "../coinbase/constants";
-import { DeveloperAddress } from "../coinbase/address/developer_address";
-import { logApiResponse, parseUnsignedPayload } from "./../coinbase/utils"; // Adjust the path as necessary
+import { FaucetTransaction } from "../coinbase/faucet_transaction";
 
-describe("destinationToAddressHexString", () => {
-  it("should return the string if destination is a string", () => {
-    const destination = "0x12345";
-    expect(destinationToAddressHexString(destination)).toBe(destination);
-  });
-
-  it("should return the ID if destination is an Address instance", () => {
-    const address = new DeveloperAddress(VALID_ADDRESS_MODEL);
-    jest.spyOn(address, "getId").mockReturnValue("0xabcde");
-    expect(destinationToAddressHexString(address)).toBe("0xabcde");
-  });
-
-  it("should return the default address ID if destination is a Wallet instance", async () => {
-    const address = new DeveloperAddress(VALID_ADDRESS_MODEL);
-    const wallet = await Wallet.init(VALID_WALLET_MODEL);
-
-    jest.spyOn(wallet, "getDefaultAddress").mockReturnValue(address);
-    jest.spyOn(address, "getId").mockReturnValue("0x67890");
-    expect(destinationToAddressHexString(wallet)).toBe("0x67890");
-  });
-
-  it("should throw an error if destination is an unsupported type", () => {
-    const destination = 12345;
-    expect(() => destinationToAddressHexString(destination as unknown as Destination)).toThrow(
-      "Unsupported type",
-    );
-  });
-});
-
-describe("parseUnsignedPayload", () => {
-  it("should parse and return a valid payload", () => {
-    const payload = "7b226b6579223a2276616c7565227d"; // {"key":"value"} in hex
-    const expectedOutput = { key: "value" };
-    expect(parseUnsignedPayload(payload)).toEqual(expectedOutput);
-  });
-
-  it("should throw InvalidUnsignedPayload error if payload cannot be parsed", () => {
-    const payload = "invalidhexstring";
-    expect(() => parseUnsignedPayload(payload)).toThrow(InvalidUnsignedPayload);
-  });
-
-  it("should throw InvalidUnsignedPayload error if payload cannot be decoded to JSON", () => {
-    const payload = "000102"; // Invalid JSON
-    expect(() => parseUnsignedPayload(payload)).toThrow(InvalidUnsignedPayload);
-  });
-
-  it("should throw InvalidUnsignedPayload error if payload is an empty string", () => {
-    const payload = "";
-    expect(() => parseUnsignedPayload(payload)).toThrow(InvalidUnsignedPayload);
-  });
-
-  it("should throw InvalidUnsignedPayload error if payload contains non-hex characters", () => {
-    const payload = "7b226b6579223a2276616c75657g7d"; // Invalid hex due to 'g'
-    expect(() => parseUnsignedPayload(payload)).toThrow(InvalidUnsignedPayload);
-  });
-});
-
-describe("logApiResponse", () => {
-  let consoleSpy: jest.SpyInstance;
+describe("User Class", () => {
+  let mockUserModel: UserModel;
+  let mockAddressModel: AddressModel;
+  let mockWalletModel: WalletModel;
+  let mockAddressList: AddressList;
+  let user: User;
 
   beforeEach(() => {
-    consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+    mockUserModel = {
+      id: "12345",
+    } as UserModel;
   });
 
-  afterEach(() => {
-    consoleSpy.mockRestore();
+  it("should initialize User instance with a valid user model and API clients, and set the user ID correctly", () => {
+    const user = new User(mockUserModel);
+    expect(user).toBeInstanceOf(User);
+    expect(user.getId()).toBe(mockUserModel.id);
   });
 
-  it("should log response data as string when debugging is true and response data is a string", () => {
-    const response = {
-      data: "Response data",
-      status: 200,
-      statusText: "OK",
-      headers: {},
-      config: { url: "http://example.com" },
-    } as AxiosResponse;
-    logApiResponse(response, true);
-    expect(consoleSpy).toHaveBeenCalledWith(`API RESPONSE: 
-      Status: ${response.status} 
-      URL: ${response.config.url} 
-      Data: ${response.data}`);
+  it("should return a correctly formatted string representation of the User instance", () => {
+    const user = new User(mockUserModel);
+    expect(user.toString()).toBe(`User{ userId: ${mockUserModel.id} }`);
   });
 
-  it("should log response data as JSON string when debugging is true and response data is an object", () => {
-    const response = {
-      data: { key: "value" },
-      status: 200,
-      statusText: "OK",
-      headers: {},
-      config: { url: "http://example.com" },
-    } as AxiosResponse;
-    const expectedOutput = JSON.stringify(response.data, null, 4);
-    logApiResponse(response, true);
-    expect(consoleSpy).toHaveBeenCalledWith(`API RESPONSE: 
-      Status: ${response.status} 
-      URL: ${response.config.url} 
-      Data: ${expectedOutput}`);
+  describe(".importWallet", () => {
+    let importedWallet: Wallet;
+    let walletId: string;
+    let walletData: WalletData;
+
+    beforeAll(async () => {
+      walletId = crypto.randomUUID();
+      walletData = {
+        walletId: walletId,
+        seed: "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      };
+      const { address1 } = generateWalletFromSeed(walletData.seed);
+      mockAddressModel = newAddressModel(walletId, address1);
+      mockAddressList = {
+        data: [mockAddressModel],
+        has_more: false,
+        next_page: "",
+        total_count: 1,
+      };
+      mockWalletModel = {
+        id: walletId,
+        network_id: Coinbase.networks.BaseSepolia,
+        default_address: mockAddressModel,
+        enabled_features: [],
+      };
+      Coinbase.apiClients.wallet = walletsApiMock;
+      Coinbase.apiClients.wallet!.getWallet = mockReturnValue(mockWalletModel);
+      Coinbase.apiClients.address = addressesApiMock;
+      Coinbase.apiClients.address!.listAddresses = mockReturnValue(mockAddressList);
+      user = new User(mockUserModel);
+      importedWallet = await user.importWallet(walletData);
+      expect(importedWallet).toBeInstanceOf(Wallet);
+      expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledWith(walletId);
+      expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledWith(walletId);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
+    });
+
+    it("should import an exported wallet", async () => {
+      expect(importedWallet.getId()).toBe(walletId);
+    });
+
+    it("should load the wallet addresses", async () => {
+      expect(importedWallet.getDefaultAddress()!.getId()).toBe(mockAddressModel.address_id);
+    });
+
+    it("should contain the same seed when re-exported", async () => {
+      expect(importedWallet.export().seed!).toBe(walletData.seed);
+    });
   });
 
-  it("should not log anything when debugging is false", () => {
-    const response = {
-      data: { key: "value" },
-      status: 200,
-      statusText: "OK",
-      headers: {},
-      config: { url: "http://example.com" },
-    } as AxiosResponse;
-    logApiResponse(response, false);
-    expect(consoleSpy).not.toHaveBeenCalled();
+  describe(".listWallets", () => {
+    let user: User;
+    let walletId: string;
+    let walletModelWithDefaultAddress: WalletModel;
+    let addressListModel: AddressList;
+    const seed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      walletId = crypto.randomUUID();
+      const { address1 } = generateWalletFromSeed(seed);
+      mockAddressModel = newAddressModel(walletId, address1);
+
+      const addressModel1: AddressModel = newAddressModel(walletId);
+      const addressModel2: AddressModel = newAddressModel(walletId);
+      walletModelWithDefaultAddress = {
+        id: walletId,
+        network_id: Coinbase.networks.BaseSepolia,
+        default_address: addressModel1,
+        enabled_features: [],
+      };
+      addressListModel = {
+        data: [addressModel1, addressModel2],
+        has_more: false,
+        next_page: "",
+        total_count: 1,
+      };
+      Coinbase.apiClients.wallet = walletsApiMock;
+      Coinbase.apiClients.address = addressesApiMock;
+      const mockUserModel: UserModel = {
+        id: "12345",
+      } as UserModel;
+      user = new User(mockUserModel);
+    });
+
+    it("should raise an error when the Wallet API call fails", async () => {
+      Coinbase.apiClients.wallet!.listWallets = mockReturnRejectedValue(new Error("API Error"));
+      await expect(user.listWallets(10, "xyz")).rejects.toThrow(new Error("API Error"));
+      expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(0);
+      expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledWith(10, "xyz");
+    });
+
+    it("should raise an error when the Address API call fails", async () => {
+      Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
+        data: [walletModelWithDefaultAddress],
+        has_more: false,
+        next_page: "",
+        total_count: 1,
+      });
+      Coinbase.apiClients.address!.listAddresses = mockReturnRejectedValue(new Error("API Error"));
+      await expect(user.listWallets()).rejects.toThrow(new Error("API Error"));
+      expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
+    });
+
+    it("should return an empty list of Wallets when the User has no Wallets", async () => {
+      Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
+        data: [],
+        has_more: false,
+        next_page: "",
+        total_count: 0,
+      });
+      const result = await user.listWallets();
+      expect(result.wallets.length).toBe(0);
+      expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(0);
+    });
+
+    it("should return the list of Wallets", async () => {
+      const { address1 } = generateWalletFromSeed(seed);
+      mockAddressModel = newAddressModel(walletId, address1);
+
+      Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
+        data: [walletModelWithDefaultAddress],
+        has_more: false,
+        next_page: "nextPageToken",
+        total_count: 1,
+      });
+      Coinbase.apiClients.address!.listAddresses = mockReturnValue(addressListModel);
+      const result = await user.listWallets();
+      expect(result.wallets[0]).toBeInstanceOf(Wallet);
+      expect(result.wallets.length).toBe(1);
+      expect(result.wallets[0].getId()).toBe(walletId);
+      expect(result.wallets[0].listAddresses().length).toBe(2);
+      expect(result.nextPageToken).toBe("nextPageToken");
+      expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledWith(
+        walletId,
+        Wallet.MAX_ADDRESSES,
+      );
+      expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledWith(10, undefined);
+    });
+
+    it("should create Wallets when seed is provided", async () => {
+      const { address1 } = generateWalletFromSeed(seed);
+      mockAddressModel = newAddressModel(walletId, address1);
+      Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
+        data: [walletModelWithDefaultAddress],
+        has_more: false,
+        next_page: "",
+        total_count: 1,
+      });
+      Coinbase.apiClients.address!.listAddresses = mockReturnValue(mockAddressList);
+      const result = await user.listWallets();
+      const unhydratedWallet = result.wallets[0];
+      expect(unhydratedWallet.canSign()).toBe(false);
+      await unhydratedWallet.setSeed(seed);
+      expect(unhydratedWallet).toBeInstanceOf(Wallet);
+      expect(unhydratedWallet?.getId()).toBe(walletId);
+      expect(unhydratedWallet.canSign()).toBe(true);
+    });
+
+    it("should prevent access to master wallet required methods", async () => {
+      const { address1 } = generateWalletFromSeed(seed);
+      mockAddressModel = newAddressModel(walletId, address1);
+      Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
+        data: [walletModelWithDefaultAddress],
+        has_more: false,
+        next_page: "",
+        total_count: 1,
+      });
+      Coinbase.apiClients.address!.listAddresses = mockReturnValue(mockAddressList);
+      const result = await user.listWallets();
+      const unhydratedWallet = result.wallets[0];
+      expect(() => unhydratedWallet.export()).toThrow(
+        new InternalError("Cannot export Wallet without loaded seed"),
+      );
+      await expect(unhydratedWallet.createAddress()).rejects.toThrow(InternalError);
+      await expect(
+        unhydratedWallet.createTransfer(
+          new Decimal("500000000000000000"),
+          Coinbase.assets.Eth,
+          address1,
+        ),
+      ).rejects.toThrow(InternalError);
+      expect(unhydratedWallet.canSign()).toBe(false);
+    });
+
+    it("should access read-only methods", async () => {
+      const { address1 } = generateWalletFromSeed(seed);
+      mockAddressModel = newAddressModel(walletId, address1);
+      Coinbase.apiClients.wallet!.listWallets = mockReturnValue({
+        data: [walletModelWithDefaultAddress],
+        has_more: false,
+        next_page: "",
+        total_count: 1,
+      });
+      Coinbase.apiClients.address!.listAddresses = mockReturnValue(addressListModel);
+      const mockWalletBalance: BalanceModel = {
+        amount: "5000000000000000000",
+        asset: {
+          asset_id: Coinbase.assets.Eth,
+          network_id: Coinbase.networks.BaseSepolia,
+          decimals: 18,
+        },
+      };
+      const addressBalanceList: AddressBalanceList = {
+        data: [mockWalletBalance],
+        has_more: false,
+        next_page: "",
+        total_count: 2,
+      };
+      Coinbase.apiClients.wallet!.getWalletBalance = mockReturnValue(mockWalletBalance);
+      Coinbase.apiClients.wallet!.listWalletBalances = mockReturnValue(addressBalanceList);
+      Coinbase.apiClients.address!.requestFaucetFunds = mockReturnValue({
+        transaction_hash: generateRandomHash(8),
+      });
+
+      const result = await user.listWallets();
+      const wallet = result.wallets[0];
+      expect(wallet.getId()).toBe(walletId);
+      expect(wallet.canSign()).toBe(false);
+      expect(wallet.getNetworkId()).toBe(Coinbase.networks.BaseSepolia);
+      expect(wallet.getDefaultAddress()?.getId()).toBe(
+        walletModelWithDefaultAddress.default_address?.address_id,
+      );
+      expect(wallet.listAddresses().length).toBe(2);
+      expect(wallet.getAddress(addressListModel.data[0].address_id)?.getId()).toBe(
+        addressListModel.data[0].address_id,
+      );
+      const balance = await wallet.getBalance(Coinbase.assets.Eth);
+      expect(balance).toEqual(new Decimal("5"));
+
+      const balanceMap = await wallet.listBalances();
+      expect(balanceMap.get("eth")).toEqual(new Decimal("5"));
+
+      const faucet = await wallet.faucet();
+      expect(faucet).toBeInstanceOf(FaucetTransaction);
+    });
   });
 
-  it("should return the response object", () => {
-    const response = {
-      data: { key: "value" },
-      status: 200,
-      statusText: "OK",
-      headers: {},
-      config: { url: "http://example.com" },
-    } as AxiosResponse;
-    const result = logApiResponse(response, false);
-    expect(result).toBe(response);
-  });
-});
+  describe(".getWallet", () => {
+    let user: User;
+    let walletId: string;
+    let walletModelWithDefaultAddress: WalletModel;
+    let addressListModel: AddressList;
 
-describe("convertAmount", () => {
-  test("should normalize ETH amount", () => {
-    const amount = new Decimal(1);
-    const assetId = Coinbase.assets.Eth;
-    const expected = amount.mul(WEI_PER_ETHER);
-    expect(convertAmount(amount, assetId).toString()).toBe(expected.toString());
+    beforeEach(() => {
+      jest.clearAllMocks();
+      walletId = crypto.randomUUID();
+      const seed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
+      const { address1 } = generateWalletFromSeed(seed);
+      mockAddressModel = newAddressModel(walletId, address1);
+
+      const addressModel1: AddressModel = newAddressModel(walletId);
+      const addressModel2: AddressModel = newAddressModel(walletId);
+      walletModelWithDefaultAddress = {
+        id: walletId,
+        network_id: Coinbase.networks.BaseSepolia,
+        default_address: addressModel1,
+        enabled_features: [],
+      };
+      addressListModel = {
+        data: [addressModel1, addressModel2],
+        has_more: false,
+        next_page: "",
+        total_count: 1,
+      };
+      Coinbase.apiClients.wallet = walletsApiMock;
+      Coinbase.apiClients.address = addressesApiMock;
+      const mockUserModel: UserModel = {
+        id: "12345",
+      } as UserModel;
+      user = new User(mockUserModel);
+    });
+
+    it("should raise an error when the Wallet API call fails", async () => {
+      Coinbase.apiClients.wallet!.getWallet = mockReturnRejectedValue(new Error("API Error"));
+      await expect(user.getWallet(walletId)).rejects.toThrow(new Error("API Error"));
+      expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenLastCalledWith(walletId);
+    });
+
+    it("should raise an error when the Address API call fails", async () => {
+      Coinbase.apiClients.wallet!.getWallet = mockReturnValue(walletModelWithDefaultAddress);
+      Coinbase.apiClients.address!.listAddresses = mockReturnRejectedValue(new Error("API Error"));
+      await expect(user.getWallet(walletId)).rejects.toThrow(new Error("API Error"));
+      expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenLastCalledWith(walletId);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenLastCalledWith(walletId);
+    });
+
+    it("should return the Wallet", async () => {
+      const seed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
+      const { address1 } = generateWalletFromSeed(seed);
+      mockAddressModel = newAddressModel(walletId, address1);
+      Coinbase.apiClients.wallet!.getWallet = mockReturnValue(walletModelWithDefaultAddress);
+      Coinbase.apiClients.address!.listAddresses = mockReturnValue(addressListModel);
+      const result = await user.getWallet(walletId);
+      expect(result).toBeInstanceOf(Wallet);
+      expect(result.getId()).toBe(walletId);
+      expect(result.listAddresses().length).toBe(2);
+      expect(result.canSign()).toBe(false);
+      expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledWith(walletId);
+      expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledWith(walletId);
+    });
   });
 
-  test("should normalize Gwei amount", () => {
-    const amount = new Decimal(1);
-    const assetId = Coinbase.assets.Gwei;
-    const expected = amount.mul(WEI_PER_GWEI);
-    expect(convertAmount(amount, assetId).toString()).toBe(expected.toString());
-  });
-
-  test("should return the same amount for Wei", () => {
-    const amount = new Decimal(1);
-    const assetId = Coinbase.assets.Wei;
-    expect(convertAmount(amount, assetId).toString()).toBe(amount.toString());
-  });
-
-  test("should normalize Weth amount", () => {
-    const amount = new Decimal(1);
-    const assetId = Coinbase.assets.Weth;
-    const expected = amount.mul(WEI_PER_ETHER);
-    expect(convertAmount(amount, assetId).toString()).toBe(expected.toString());
-  });
-
-  test("should normalize Usdc amount", () => {
-    const amount = new Decimal(1);
-    const assetId = Coinbase.assets.Usdc;
-    const expected = amount.mul(ATOMIC_UNITS_PER_USDC);
-    expect(convertAmount(amount, assetId).toString()).toBe(expected.toString());
-  });
-
-  test("should throw an error for unsupported asset ID", () => {
-    const amount = new Decimal(1);
-    const assetId = "unsupported_asset";
-    expect(() => convertAmount(amount, assetId)).toThrow("Unsupported asset ID: unsupported_asset");
-  });
-});
-
-describe("getNormalizedAssetId", () => {
-  test("should return Eth for Gwei", () => {
-    expect(getNormalizedAssetId(Coinbase.assets.Gwei)).toBe(Coinbase.assets.Eth);
-  });
-
-  test("should return Eth for Wei", () => {
-    expect(getNormalizedAssetId(Coinbase.assets.Wei)).toBe(Coinbase.assets.Eth);
-  });
-
-  test("should return Usdc for Usdc", () => {
-    expect(getNormalizedAssetId(Coinbase.assets.Usdc)).toBe(Coinbase.assets.Usdc);
-  });
-
-  test("should return the same asset ID for unsupported assets", () => {
-    const unsupportedAsset = "unsupported_asset";
-    expect(getNormalizedAssetId(unsupportedAsset)).toBe(unsupportedAsset);
+  describe(".createWallet", () => {
+    it("should create a Wallet", async () => {
+      const wallet = await Wallet.init(VALID_WALLET_MODEL, "", [VALID_ADDRESS_MODEL]);
+      jest.spyOn(Wallet, "create").mockReturnValue(Promise.resolve(wallet));
+      const user = new User(mockUserModel);
+      const result = await user.createWallet();
+      expect(result).toBeInstanceOf(Wallet);
+    });
   });
 });

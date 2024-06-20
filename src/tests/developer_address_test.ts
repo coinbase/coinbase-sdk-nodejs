@@ -11,8 +11,10 @@ import {
   VALID_ADDRESS_BALANCE_LIST,
   VALID_ADDRESS_MODEL,
   VALID_TRANSFER_MODEL,
-  addressesApiMock,
   generateRandomHash,
+  getAssetMock,
+  addressesApiMock,
+  assetsApiMock,
   mockFn,
   mockReturnRejectedValue,
   mockReturnValue,
@@ -24,7 +26,6 @@ import { Transfer } from "../coinbase/transfer";
 import { TransactionStatus, TransferStatus } from "../coinbase/types";
 import { Trade } from "../coinbase/trade";
 import { Transaction } from "../coinbase/transaction";
-import { Asset } from "../coinbase/asset";
 import { DeveloperAddress } from "../coinbase/address/developer_address";
 
 // Test suite for the DeveloperAddress class
@@ -36,13 +37,17 @@ describe("DeveloperAddress", () => {
 
   beforeEach(() => {
     Coinbase.apiClients.address = addressesApiMock;
+    Coinbase.apiClients.asset = assetsApiMock;
+    Coinbase.apiClients.asset.getAsset = getAssetMock();
     Coinbase.apiClients.address!.getAddressBalance = mockFn(request => {
-      const { asset_id } = request;
+      const [, , asset_id] = request;
       balanceModel = {
         amount: "1000000000000000000",
         asset: {
           asset_id,
           network_id: Coinbase.networks.BaseSepolia,
+          decimals: 18,
+          contract_address: "0x",
         },
       };
       return { data: balanceModel };
@@ -424,8 +429,24 @@ describe("DeveloperAddress", () => {
 
     beforeEach(() => {
       addressId = "address_id";
-      ethBalanceResponse = { amount: "1000000000000000000", asset: "eth" };
-      usdcBalanceResponse = { amount: "10000000000", asset: "usdc" };
+      ethBalanceResponse = {
+        amount: "1000000000000000000",
+        asset: {
+          asset_id: "eth",
+          decimals: 18,
+          network_id: Coinbase.networks.BaseSepolia,
+          contract_address: "0x",
+        },
+      };
+      usdcBalanceResponse = {
+        amount: "10000000000",
+        asset: {
+          asset_id: "usdc",
+          decimals: 6,
+          network_id: Coinbase.networks.BaseSepolia,
+          contract_address: "0x",
+        },
+      };
       tradeId = crypto.randomUUID();
       transactionHash = "0xdeadbeef";
       unsignedPayload = "unsigned_payload";
@@ -471,9 +492,11 @@ describe("DeveloperAddress", () => {
     describe("when the trade is successful", () => {
       beforeEach(() => {
         jest.clearAllMocks();
+        Coinbase.apiClients.asset = assetsApiMock;
         Coinbase.apiClients.trade = tradeApiMock;
         Coinbase.apiClients.address!.getAddressBalance = mockReturnValue(balanceResponse);
         Coinbase.apiClients.trade!.createTrade = mockReturnValue(tradeModel);
+        Coinbase.apiClients.asset.getAsset = getAssetMock();
         jest.spyOn(Transaction.prototype, "sign").mockReturnValue(signedPayload);
       });
 
@@ -488,7 +511,7 @@ describe("DeveloperAddress", () => {
           address.getWalletId(),
           address.getId(),
           {
-            amount: Asset.toAtomicAmount(amount, fromAssetId).toString(),
+            amount: `500000000000000000`,
             from_asset_id: normalizedFromAssetId,
             to_asset_id: toAssetId,
           },
@@ -517,7 +540,7 @@ describe("DeveloperAddress", () => {
             address.getWalletId(),
             address.getId(),
             {
-              amount: Asset.toAtomicAmount(amount, fromAssetId).toString(),
+              amount: `500000000000000000`,
               from_asset_id: normalizedFromAssetId,
               to_asset_id: toAssetId,
             },
@@ -547,7 +570,7 @@ describe("DeveloperAddress", () => {
             address.getWalletId(),
             address.getId(),
             {
-              amount: Asset.toAtomicAmount(amount, fromAssetId).toString(),
+              amount: `500000000000000000`,
               from_asset_id: normalizedFromAssetId,
               to_asset_id: toAssetId,
             },
@@ -579,7 +602,7 @@ describe("DeveloperAddress", () => {
             address.getWalletId(),
             address.getId(),
             {
-              amount: Asset.toAtomicAmount(amount, fromAssetId).toString(),
+              amount: `5000000`,
               from_asset_id: normalizedFromAssetId,
               to_asset_id: toAssetId,
             },

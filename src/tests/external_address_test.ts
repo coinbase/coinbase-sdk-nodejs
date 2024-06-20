@@ -1,5 +1,11 @@
 import { Coinbase } from "../coinbase";
-import { mockReturnValue, stakeApiMock, VALID_ADDRESS_MODEL } from "./utils";
+import {
+  assetsApiMock,
+  getAssetMock,
+  mockReturnValue,
+  stakeApiMock,
+  VALID_ADDRESS_MODEL,
+} from "./utils";
 import {
   StakingContext as StakingContextModel,
   StakingOperation as StakingOperationModel,
@@ -43,6 +49,7 @@ describe("DeveloperAddress", () => {
 
   beforeAll(() => {
     Coinbase.apiClients.stake = stakeApiMock;
+    Coinbase.apiClients.asset = assetsApiMock;
   });
 
   beforeEach(() => {
@@ -53,6 +60,7 @@ describe("DeveloperAddress", () => {
     it("should successfully build a stake operation", async () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       Coinbase.apiClients.stake!.buildStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
+      Coinbase.apiClients.asset!.getAsset = getAssetMock();
       const op = await address.buildStakeOperation(new Decimal("0.0001"), Coinbase.assets.Eth);
 
       expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
@@ -118,6 +126,7 @@ describe("DeveloperAddress", () => {
     it("should successfully build a unstake operation", async () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       Coinbase.apiClients.stake!.buildStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
+      Coinbase.apiClients.asset!.getAsset = getAssetMock();
       const op = await address.buildUnstakeOperation(new Decimal("0.0001"), Coinbase.assets.Eth);
 
       expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
@@ -182,6 +191,7 @@ describe("DeveloperAddress", () => {
     it("should successfully build a claim stake operation", async () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       Coinbase.apiClients.stake!.buildStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
+      Coinbase.apiClients.asset!.getAsset = getAssetMock();
       const op = await address.buildClaimStakeOperation(new Decimal("0.0001"), Coinbase.assets.Eth);
 
       expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
