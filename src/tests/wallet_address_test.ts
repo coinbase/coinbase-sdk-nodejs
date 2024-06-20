@@ -26,12 +26,12 @@ import { Transfer } from "../coinbase/transfer";
 import { TransactionStatus, TransferStatus } from "../coinbase/types";
 import { Trade } from "../coinbase/trade";
 import { Transaction } from "../coinbase/transaction";
-import { DeveloperAddress } from "../coinbase/address/developer_address";
+import { WalletAddress } from "../coinbase/address/wallet_address";
 
-// Test suite for the DeveloperAddress class
-describe("DeveloperAddress", () => {
+// Test suite for the WalletAddress class
+describe("WalletAddress", () => {
   const transactionHash = generateRandomHash();
-  let address: DeveloperAddress;
+  let address: WalletAddress;
   let balanceModel: BalanceModel;
   let key;
 
@@ -62,13 +62,13 @@ describe("DeveloperAddress", () => {
 
   beforeEach(() => {
     key = ethers.Wallet.createRandom();
-    address = new DeveloperAddress(VALID_ADDRESS_MODEL, key as unknown as ethers.SigningKey);
+    address = new WalletAddress(VALID_ADDRESS_MODEL, key as unknown as ethers.SigningKey);
 
     jest.clearAllMocks();
   });
 
-  it("should initialize a new DeveloperAddress", () => {
-    expect(address).toBeInstanceOf(DeveloperAddress);
+  it("should initialize a new WalletAddress", () => {
+    expect(address).toBeInstanceOf(WalletAddress);
   });
 
   it("should return the address ID", () => {
@@ -150,7 +150,7 @@ describe("DeveloperAddress", () => {
   });
 
   it("should throw an InternalError when model is not provided", () => {
-    expect(() => new DeveloperAddress(null!, key as unknown as ethers.SigningKey)).toThrow(
+    expect(() => new WalletAddress(null!, key as unknown as ethers.SigningKey)).toThrow(
       `Address model cannot be empty`,
     );
   });
@@ -194,7 +194,7 @@ describe("DeveloperAddress", () => {
 
   it("should return the correct string representation", () => {
     expect(address.toString()).toBe(
-      `Coinbase:DeveloperAddress{addressId: '${VALID_ADDRESS_MODEL.address_id}', networkId: '${VALID_ADDRESS_MODEL.network_id}', walletId: '${VALID_ADDRESS_MODEL.wallet_id}'}`,
+      `Coinbase:WalletAddress{addressId: '${VALID_ADDRESS_MODEL.address_id}', networkId: '${VALID_ADDRESS_MODEL.network_id}', walletId: '${VALID_ADDRESS_MODEL.wallet_id}'}`,
     );
   });
 
@@ -204,7 +204,7 @@ describe("DeveloperAddress", () => {
 
     beforeEach(() => {
       weiAmount = new Decimal("500000000000000000");
-      destination = new DeveloperAddress(VALID_ADDRESS_MODEL, key as unknown as ethers.SigningKey);
+      destination = new WalletAddress(VALID_ADDRESS_MODEL, key as unknown as ethers.SigningKey);
       intervalSeconds = 0.2;
       timeoutSeconds = 10;
       walletId = crypto.randomUUID();
@@ -264,7 +264,7 @@ describe("DeveloperAddress", () => {
     });
 
     it("should throw an InternalError if the address key is not provided", async () => {
-      const addressWithoutKey = new DeveloperAddress(VALID_ADDRESS_MODEL, null!);
+      const addressWithoutKey = new WalletAddress(VALID_ADDRESS_MODEL, null!);
       await expect(
         addressWithoutKey.createTransfer(
           weiAmount,
@@ -641,7 +641,7 @@ describe("DeveloperAddress", () => {
 
     describe("when the address cannot sign", () => {
       it("should raise an Error", async () => {
-        const newAddress = new DeveloperAddress(VALID_ADDRESS_MODEL, null!);
+        const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, null!);
         await expect(newAddress.createTrade(new Decimal(100), "eth", "usdc")).rejects.toThrow(
           Error,
         );

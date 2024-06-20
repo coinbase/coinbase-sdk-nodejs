@@ -15,14 +15,14 @@ import { delay } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
 
 /**
- * A representation of a blockchain address, which is a developer-controlled account on a network.
+ * A representation of a blockchain address, which is a wallet-controlled account on a network.
  */
-export class DeveloperAddress extends Address {
+export class WalletAddress extends Address {
   private _model: AddressModel;
   private _key?: ethers.SigningKey;
 
   /**
-   * Initializes a new Developer Address instance.
+   * Initializes a new Wallet Address instance.
    *
    * @param model - The address model data.
    * @param key - The ethers.js SigningKey the Address uses to sign data.
@@ -39,12 +39,12 @@ export class DeveloperAddress extends Address {
   }
 
   /**
-   * Returns a string representation of the developer address.
+   * Returns a string representation of the wallet address.
    *
-   * @returns {string} A string representing the developer address.
+   * @returns {string} A string representing the wallet address.
    */
   public toString(): string {
-    return `Coinbase:DeveloperAddress{addressId: '${this.getId()}', networkId: '${this.getNetworkId()}', walletId: '${this.getWalletId()}'}`;
+    return `Coinbase:WalletAddress{addressId: '${this.getId()}', networkId: '${this.getNetworkId()}', walletId: '${this.getWalletId()}'}`;
   }
 
   /**
@@ -62,7 +62,7 @@ export class DeveloperAddress extends Address {
    * @param key - The ethers.js SigningKey the Address uses to sign data.
    * @throws {InternalError} If the private key is already set.
    */
-  public getKey(key: ethers.SigningKey) {
+  public setKey(key: ethers.SigningKey) {
     if (this._key !== undefined) {
       throw new InternalError("Private key is already set");
     }
@@ -258,7 +258,7 @@ export class DeveloperAddress extends Address {
    * @returns Whether the Address has a private key backing it to sign transactions.
    */
   public canSign(): boolean {
-    return !!this.getKey;
+    return !!this._key;
   }
 
   /**
