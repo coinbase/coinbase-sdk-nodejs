@@ -259,6 +259,12 @@ export const stakeApiMock = {
   getStakingContext: jest.fn(),
 };
 
+export const externalAddressApiMock = {
+  listExternalAddressBalances: jest.fn(),
+  getExternalAddressBalance: jest.fn(),
+  requestExternalFaucetFunds: jest.fn(),
+};
+
 export const serverSignersApiMock = {
   listServerSigners: jest.fn(),
 };

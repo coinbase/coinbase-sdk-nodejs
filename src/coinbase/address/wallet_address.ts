@@ -44,7 +44,7 @@ export class WalletAddress extends Address {
    * @returns {string} A string representing the wallet address.
    */
   public toString(): string {
-    return `Coinbase:WalletAddress{addressId: '${this.getId()}', networkId: '${this.getNetworkId()}', walletId: '${this.getWalletId()}'}`;
+    return `WalletAddress{ addressId: '${this.getId()}', networkId: '${this.getNetworkId()}', walletId: '${this.getWalletId()}' }`;
   }
 
   /**

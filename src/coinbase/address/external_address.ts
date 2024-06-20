@@ -4,6 +4,9 @@ import { Coinbase } from "../coinbase";
 import Decimal from "decimal.js";
 import { Asset } from "../asset";
 import { StakingOperation } from "../staking_operation";
+import { BalanceMap } from "../balance_map";
+import { Balance } from "../balance";
+import { FaucetTransaction } from "../faucet_transaction";
 
 /**
  * A representation of a blockchain Address, which is a user-controlled account on a Network. Addresses are used to
@@ -265,5 +268,55 @@ export class ExternalAddress extends Address {
     }
 
     return result;
+  }
+
+  /**
+   * Returns the list of balances for the address.
+   *
+   * @returns {BalanceMap} - The map from asset ID to balance.
+   */
+  public async listBalances(): Promise<BalanceMap> {
+    const response = await Coinbase.apiClients.externalAddress!.listExternalAddressBalances(
+      this.getNetworkId(),
+      this.getId(),
+    );
+
+    return BalanceMap.fromBalances(response.data.data);
+  }
+
+  /**
+   * Returns the balance of the provided asset.
+   *
+   * @param {string} assetId - The asset ID.
+   * @returns {Decimal} The balance of the asset.
+   */
+  async getBalance(assetId: string): Promise<Decimal> {
+    const response = await Coinbase.apiClients.externalAddress!.getExternalAddressBalance(
+      this.getNetworkId(),
+      this.getId(),
+      Asset.primaryDenomination(assetId),
+    );
+
+    if (!response.data) {
+      return new Decimal(0);
+    }
+
+    return Balance.fromModelAndAssetId(response.data, assetId).amount;
+  }
+
+  /**
+   * Requests faucet funds for the address.
+   * Only supported on testnet networks.
+   *
+   * @returns {Promise<FaucetTransaction>} The faucet transaction object.
+   * @throws {InternalError} If the request does not return a transaction hash.
+   * @throws {Error} If the request fails.
+   */
+  public async faucet(): Promise<FaucetTransaction> {
+    const response = await Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds(
+      this.getNetworkId(),
+      this.getId(),
+    );
+    return new FaucetTransaction(response.data);
   }
 }
