@@ -1,6 +1,6 @@
 import fs from "fs";
 import dotenv from "dotenv";
-import { Coinbase } from "../coinbase";
+import { Coinbase } from "../coinbase/coinbase";
 import { TransferStatus } from "../coinbase/types";
 
 describe("Coinbase SDK E2E Test", () => {

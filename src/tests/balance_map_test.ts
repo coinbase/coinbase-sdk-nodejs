@@ -2,7 +2,7 @@ import { BalanceMap } from "../coinbase/balance_map";
 import { Balance as BalanceModel } from "../client";
 import { Balance } from "../coinbase/balance";
 import { Decimal } from "decimal.js";
-import { Coinbase } from "../coinbase";
+import { Coinbase } from "../coinbase/coinbase";
 
 describe("BalanceMap", () => {
   const ethAmount = new Decimal(1);

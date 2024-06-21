@@ -1,4 +1,4 @@
-import { Coinbase } from "../coinbase";
+import { Coinbase } from "../coinbase/coinbase";
 import {
   assetsApiMock,
   getAssetMock,

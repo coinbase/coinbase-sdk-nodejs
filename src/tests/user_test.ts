@@ -8,7 +8,7 @@ import {
   User as UserModel,
   Wallet as WalletModel,
 } from "./../client/api";
-import { Coinbase } from "./../coinbase";
+import { Coinbase } from "./../coinbase/coinbase";
 import { WalletData } from "./../coinbase/types";
 import { User } from "./../coinbase/user";
 import { Wallet } from "./../coinbase/wallet";

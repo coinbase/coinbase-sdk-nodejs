@@ -5,7 +5,7 @@ import { FaucetTransaction } from "../coinbase/faucet_transaction";
 import { Balance as BalanceModel, TransferList, Trade as TradeModel } from "../client";
 import Decimal from "decimal.js";
 import { APIError, FaucetLimitReachedError } from "../coinbase/api_error";
-import { Coinbase } from "../coinbase";
+import { Coinbase } from "../coinbase/coinbase";
 import { InternalError } from "../coinbase/errors";
 import {
   VALID_ADDRESS_BALANCE_LIST,
@@ -30,7 +30,7 @@ import { TransactionStatus, TransferStatus } from "../coinbase/types";
 import { Trade } from "../coinbase/trade";
 import { Transaction } from "../coinbase/transaction";
 import { WalletAddress } from "../coinbase/address/wallet_address";
-import { Wallet } from "../coinbase";
+import { Wallet } from "../coinbase/wallet";
 
 // Test suite for the WalletAddress class
 describe("WalletAddress", () => {
@@ -208,7 +208,7 @@ describe("WalletAddress", () => {
 
     beforeEach(() => {
       weiAmount = new Decimal("500000000000000000");
-      destination = new WalletAddress(VALID_ADDRESS_MODEL,  key as unknown as ethers.Wallet);
+      destination = new WalletAddress(VALID_ADDRESS_MODEL, key as unknown as ethers.Wallet);
       intervalSeconds = 0.2;
       timeoutSeconds = 10;
       walletId = crypto.randomUUID();

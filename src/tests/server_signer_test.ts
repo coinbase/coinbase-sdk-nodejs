@@ -1,5 +1,5 @@
 import * as crypto from "crypto";
-import { Coinbase } from "../coinbase";
+import { Coinbase } from "../coinbase/coinbase";
 import { APIError } from "../coinbase/api_error";
 import { ServerSigner as ServerSignerModel, ServerSignerList } from "../client";
 import { serverSignersApiMock, mockReturnValue, mockReturnRejectedValue } from "./utils";
