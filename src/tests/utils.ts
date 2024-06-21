@@ -13,7 +13,7 @@ import {
   TransferStatusEnum,
 } from "../client";
 import { BASE_PATH } from "../client/base";
-import { Coinbase } from "../coinbase";
+import { Coinbase } from "../coinbase/coinbase";
 import { convertStringToHex, registerAxiosInterceptors } from "../coinbase/utils";
 import { HDKey } from "@scure/bip32";
 

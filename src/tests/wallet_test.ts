@@ -3,7 +3,7 @@ import crypto from "crypto";
 import Decimal from "decimal.js";
 import { ethers } from "ethers";
 import { APIError } from "../coinbase/api_error";
-import { Coinbase } from "../coinbase";
+import { Coinbase } from "../coinbase/coinbase";
 import { ArgumentError, InternalError } from "../coinbase/errors";
 import { Wallet } from "../coinbase/wallet";
 import { ServerSignerStatus, TransferStatus } from "../coinbase/types";

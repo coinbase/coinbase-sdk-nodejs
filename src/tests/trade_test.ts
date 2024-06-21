@@ -2,7 +2,7 @@ import { Decimal } from "decimal.js";
 import { ethers } from "ethers";
 import { Transaction as CoinbaseTransaction, Trade as TradeModel } from "../client/api";
 import { Transaction } from "../coinbase/transaction";
-import { Coinbase } from "./../coinbase";
+import { Coinbase } from "./../coinbase/coinbase";
 import { ATOMIC_UNITS_PER_USDC, WEI_PER_ETHER } from "./../coinbase/constants";
 import { Trade } from "./../coinbase/trade";
 import { TransactionStatus } from "./../coinbase/types";

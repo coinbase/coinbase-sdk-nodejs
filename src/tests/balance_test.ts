@@ -1,7 +1,7 @@
 import { Balance } from "../coinbase/balance";
 import { Balance as BalanceModel } from "../client";
 import { Decimal } from "decimal.js";
-import { Coinbase } from "../coinbase";
+import { Coinbase } from "../coinbase/coinbase";
 
 describe("Balance", () => {
   describe(".fromModel", () => {

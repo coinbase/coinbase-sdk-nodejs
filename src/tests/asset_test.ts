@@ -1,4 +1,4 @@
-import { Coinbase } from "../coinbase";
+import { Coinbase } from "../coinbase/coinbase";
 import { GWEI_DECIMALS } from "../coinbase/constants";
 import { Asset } from "./../coinbase/asset";
 
