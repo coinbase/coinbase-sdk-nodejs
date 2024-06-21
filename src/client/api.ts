@@ -825,11 +825,11 @@ export type StakingContextContext = PartialEthStakingContext;
  */
 export interface StakingOperation {
     /**
-     * 
-     * @type {Transaction}
+     * The transaction(s) that will execute the staking operation onchain
+     * @type {Array<Transaction>}
      * @memberof StakingOperation
      */
-    'transaction': Transaction;
+    'transactions': Array<Transaction>;
 }
 /**
  * The staking rewards for an address
