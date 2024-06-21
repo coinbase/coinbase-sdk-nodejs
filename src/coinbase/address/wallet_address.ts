@@ -10,7 +10,7 @@ import { ArgumentError, InternalError } from "../errors";
 import { FaucetTransaction } from "../faucet_transaction";
 import { Trade } from "../trade";
 import { Transfer } from "../transfer";
-import { Amount, Destination, TransferStatus } from "../types";
+import { Amount, Destination, TransferStatus, CreateTransferOptions } from "../types";
 import { delay } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
 
@@ -154,23 +154,24 @@ export class WalletAddress extends Address {
   /**
    * Transfers the given amount of the given Asset to the given address. Only same-Network Transfers are supported.
    *
-   * @param amount - The amount of the Asset to send.
-   * @param assetId - The ID of the Asset to send. For Ether, Coinbase.assets.Eth, Coinbase.assets.Gwei, and Coinbase.assets.Wei supported.
-   * @param destination - The destination of the transfer. If a Wallet, sends to the Wallet's default address. If a String, interprets it as the address ID.
-   * @param intervalSeconds - The interval at which to poll the Network for Transfer status, in seconds.
-   * @param timeoutSeconds - The maximum amount of time to wait for the Transfer to complete, in seconds.
+   * @param options - The options to create the Transfer.
+   * @param options.amount - The amount of the Asset to send.
+   * @param options.assetId - The ID of the Asset to send. For Ether, Coinbase.assets.Eth, Coinbase.assets.Gwei, and Coinbase.assets.Wei supported.
+   * @param options.destination - The destination of the transfer. If a Wallet, sends to the Wallet's default address. If a String, interprets it as the address ID.
+   * @param options.timeoutSeconds - The maximum amount of time to wait for the Transfer to complete, in seconds.
+   * @param options.intervalSeconds - The interval at which to poll the Network for Transfer status, in seconds.
    * @returns The transfer object.
    * @throws {APIError} if the API request to create a Transfer fails.
    * @throws {APIError} if the API request to broadcast a Transfer fails.
    * @throws {Error} if the Transfer times out.
    */
-  public async createTransfer(
-    amount: Amount,
-    assetId: string,
-    destination: Destination,
-    intervalSeconds = 0.2,
+  public async createTransfer({
+    amount,
+    assetId,
+    destination,
     timeoutSeconds = 10,
-  ): Promise<Transfer> {
+    intervalSeconds = 0.2,
+  }: CreateTransferOptions): Promise<Transfer> {
     if (!Coinbase.useServerSigner && !this.key) {
       throw new InternalError("Cannot transfer from address without private key loaded");
     }

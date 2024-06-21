@@ -11,11 +11,11 @@ import { ArgumentError, InternalError } from "./errors";
 import { Transfer } from "./transfer";
 import {
   Amount,
-  Destination,
   SeedData,
   WalletData,
   ServerSignerStatus,
   WalletCreateOptions,
+  CreateTransferOptions,
 } from "./types";
 import { convertStringToHex, delay } from "./utils";
 import { FaucetTransaction } from "./faucet_transaction";
@@ -81,8 +81,8 @@ export class Wallet {
    */
   public static async create({
     networkId = Coinbase.networks.BaseSepolia,
-    intervalSeconds = 0.2,
     timeoutSeconds = 20,
+    intervalSeconds = 0.2,
   }: WalletCreateOptions = {}): Promise<Wallet> {
     const result = await Coinbase.apiClients.wallet!.createWallet({
       wallet: {
@@ -582,33 +582,34 @@ export class Wallet {
    * Transfers the given amount of the given Asset to the given address. Only same-Network Transfers are supported.
    * Currently only the default_address is used to source the Transfer.
    *
-   * @param amount - The amount of the Asset to send.
-   * @param assetId - The ID of the Asset to send.
-   * @param destination - The destination of the transfer. If a Wallet, sends to the Wallet's default address. If a String, interprets it as the address ID.
-   * @param intervalSeconds - The interval at which to poll the Network for Transfer status, in seconds.
-   * @param timeoutSeconds - The maximum amount of time to wait for the Transfer to complete, in seconds.
+   * @param options - The options to create the Transfer.
+   * @param options.amount - The amount of the Asset to send.
+   * @param options.assetId - The ID of the Asset to send.
+   * @param options.destination - The destination of the transfer. If a Wallet, sends to the Wallet's default address. If a String, interprets it as the address ID.
+   * @param options.timeoutSeconds - The maximum amount of time to wait for the Transfer to complete, in seconds.
+   * @param options.intervalSeconds - The interval at which to poll the Network for Transfer status, in seconds.
    * @returns The hash of the Transfer transaction.
    * @throws {APIError} if the API request to create a Transfer fails.
    * @throws {APIError} if the API request to broadcast a Transfer fails.
    * @throws {Error} if the Transfer times out.
    */
-  public async createTransfer(
-    amount: Amount,
-    assetId: string,
-    destination: Destination,
-    intervalSeconds = 0.2,
+  public async createTransfer({
+    amount,
+    assetId,
+    destination,
     timeoutSeconds = 10,
-  ): Promise<Transfer> {
+    intervalSeconds = 0.2,
+  }: CreateTransferOptions): Promise<Transfer> {
     if (!this.getDefaultAddress()) {
       throw new InternalError("Default address not found");
     }
-    return await this.getDefaultAddress()!.createTransfer(
+    return await this.getDefaultAddress()!.createTransfer({
       amount,
       assetId,
       destination,
-      intervalSeconds,
       timeoutSeconds,
-    );
+      intervalSeconds,
+    });
   }
 
   /**
