@@ -70,7 +70,7 @@ export class ExternalAddress extends Address {
    * @param options - Additional options for getting the stakeable balance.
    * @returns The stakeable balance.
    */
-  public async getStakeableBalance(
+  public async stakeableBalance(
     asset_id: string,
     options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<string> {
@@ -85,7 +85,7 @@ export class ExternalAddress extends Address {
    * @param options - Additional options for getting the unstakeable balance.
    * @returns The unstakeable balance.
    */
-  public async getUnstakeableBalance(
+  public async unstakeableBalance(
     asset_id: string,
     options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<string> {
@@ -100,7 +100,7 @@ export class ExternalAddress extends Address {
    * @param options - Additional options for getting the claimable balance.
    * @returns The claimable balance.
    */
-  public async getClaimableBalance(
+  public async claimableBalance(
     asset_id: string,
     options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<string> {
@@ -122,7 +122,7 @@ export class ExternalAddress extends Address {
     assetId: string,
     options: CoinbaseExternalAddressStakeOptions,
   ): Promise<void> {
-    const stakeableBalance = await this.getStakeableBalance(assetId, options);
+    const stakeableBalance = await this.stakeableBalance(assetId, options);
 
     if (new Decimal(stakeableBalance).lessThan(amount.toString())) {
       throw new Error(
@@ -145,7 +145,7 @@ export class ExternalAddress extends Address {
     assetId: string,
     options: CoinbaseExternalAddressStakeOptions,
   ): Promise<void> {
-    const unstakeableBalance = new Decimal(await this.getUnstakeableBalance(assetId, options));
+    const unstakeableBalance = new Decimal(await this.unstakeableBalance(assetId, options));
 
     if (unstakeableBalance.lessThan(amount.toString())) {
       throw new Error(
@@ -168,7 +168,7 @@ export class ExternalAddress extends Address {
     assetId: string,
     options: CoinbaseExternalAddressStakeOptions,
   ): Promise<void> {
-    const claimableBalance = new Decimal(await this.getClaimableBalance(assetId, options));
+    const claimableBalance = new Decimal(await this.claimableBalance(assetId, options));
 
     if (claimableBalance.lessThan(amount.toString())) {
       throw new Error(

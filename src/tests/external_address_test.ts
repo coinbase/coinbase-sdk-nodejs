@@ -257,26 +257,26 @@ describe("ExternalAddress", () => {
     });
   });
 
-  describe(".getStakeableBalance", () => {
+  describe(".stakeableBalance", () => {
     it("should return the stakeable balance successfully", async () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
-      const stakeableBalance = await address.getStakeableBalance(Coinbase.assets.Eth);
+      const stakeableBalance = await address.stakeableBalance(Coinbase.assets.Eth);
       expect(stakeableBalance).toEqual("3");
     });
   });
 
-  describe(".getUnstakeableBalance", () => {
+  describe(".unstakeableBalance", () => {
     it("should return the unstakeable balance successfully", async () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
-      const unstakeableBalance = await address.getUnstakeableBalance(Coinbase.assets.Eth);
+      const unstakeableBalance = await address.unstakeableBalance(Coinbase.assets.Eth);
       expect(unstakeableBalance).toEqual("2");
     });
   });
 
-  describe(".getClaimableBalance", () => {
+  describe(".claimableBalance", () => {
     it("should return the claimable balance successfully", async () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
-      const claimableBalance = await address.getClaimableBalance(Coinbase.assets.Eth);
+      const claimableBalance = await address.claimableBalance(Coinbase.assets.Eth);
       expect(claimableBalance).toEqual("1");
     });
   });
