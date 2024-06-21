@@ -4,6 +4,10 @@ import { Coinbase } from "../coinbase";
 import Decimal from "decimal.js";
 import { Asset } from "../asset";
 import { StakingOperation } from "../staking_operation";
+import {
+  FetchStakingRewardsRequestFormatEnum,
+  StakingReward as StakingRewardModel,
+} from "../../client";
 import { BalanceMap } from "../balance_map";
 import { Balance } from "../balance";
 import { FaucetTransaction } from "../faucet_transaction";
@@ -109,6 +113,24 @@ export class ExternalAddress extends Address {
   ): Promise<string> {
     const balances = await this.getStakingBalances(asset_id, options);
     return balances["claimableBalance"];
+  }
+
+  public async stakingRewards(
+    assetId: string,
+    startTime: string,
+    endTime: string,
+    format = FetchStakingRewardsRequestFormatEnum.Usd,
+  ): Promise<Array<StakingRewardModel>> {
+    const request = {
+      network_id: this.getNetworkId(),
+      asset_id: assetId,
+      address_ids: [this.getId()],
+      start_time: startTime,
+      end_time: endTime,
+      format: format,
+    };
+    const response = await Coinbase.apiClients.stake!.fetchStakingRewards(request);
+    return response.data.data;
   }
 
   /**

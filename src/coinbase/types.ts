@@ -1,5 +1,5 @@
 import { Decimal } from "decimal.js";
-import { AxiosPromise, AxiosRequestConfig, RawAxiosRequestConfig } from "axios";
+import { type AxiosInstance, AxiosPromise, AxiosRequestConfig, RawAxiosRequestConfig } from "axios";
 import {
   Address as AddressModel,
   AddressList,
@@ -24,6 +24,8 @@ import {
   StakingOperation as StakingOperationModel,
   GetStakingContextRequest,
   StakingContext as StakingContextModel,
+  FetchStakingRewardsRequest,
+  FetchStakingRewards200Response,
   FaucetTransaction,
 } from "./../client/api";
 import { Address } from "./address";
@@ -384,6 +386,21 @@ export type StakeAPIClient = {
     getStakingContextRequest: GetStakingContextRequest,
     options?: AxiosRequestConfig,
   ): AxiosPromise<StakingContextModel>;
+
+  /**
+   * Get the staking rewards for an address.
+   *
+   * @param fetchStakingRewardsRequest - The request to get the staking rewards for an address.
+   * @param limit - The amount of records to return in a single call.
+   * @param page - The batch of records for a given section in the response.
+   * @param options - Axios request options.
+   */
+  fetchStakingRewards(
+    fetchStakingRewardsRequest: FetchStakingRewardsRequest,
+    limit?: number,
+    page?: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<FetchStakingRewards200Response>;
 };
 
 /**
