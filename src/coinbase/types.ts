@@ -508,8 +508,8 @@ export enum ServerSignerStatus {
  */
 export type WalletCreateOptions = {
   networkId?: string;
-  intervalSeconds?: number;
   timeoutSeconds?: number;
+  intervalSeconds?: number;
 };
 
 /**
@@ -596,3 +596,14 @@ export enum StakeOptionsMode {
    */
   PARTIAL = "partial",
 }
+
+/**
+ * Options for creating a Transfer.
+ */
+export type CreateTransferOptions = {
+  amount: Amount;
+  assetId: string;
+  destination: Destination;
+  timeoutSeconds?: number;
+  intervalSeconds?: number;
+};

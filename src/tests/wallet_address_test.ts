@@ -202,13 +202,13 @@ describe("WalletAddress", () => {
     );
   });
 
-  describe(".createTransfer", () => {
+  describe("#createTransfer", () => {
     let weiAmount, destination, intervalSeconds, timeoutSeconds;
     let walletId, id;
 
     beforeEach(() => {
       weiAmount = new Decimal("500000000000000000");
-      destination = new WalletAddress(VALID_ADDRESS_MODEL,  key as unknown as ethers.Wallet);
+      destination = new WalletAddress(VALID_ADDRESS_MODEL, key as unknown as ethers.Wallet);
       intervalSeconds = 0.2;
       timeoutSeconds = 10;
       walletId = crypto.randomUUID();
@@ -243,13 +243,13 @@ describe("WalletAddress", () => {
         status: TransferStatus.COMPLETE,
       });
 
-      await address.createTransfer(
-        weiAmount,
-        Coinbase.assets.Wei,
+      await address.createTransfer({
+        amount: weiAmount,
+        assetId: Coinbase.assets.Wei,
         destination,
-        intervalSeconds,
         timeoutSeconds,
-      );
+        intervalSeconds,
+      });
 
       expect(Coinbase.apiClients.transfer!.createTransfer).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.transfer!.broadcastTransfer).toHaveBeenCalledTimes(1);
@@ -261,26 +261,26 @@ describe("WalletAddress", () => {
         new APIError("Failed to create transfer"),
       );
       await expect(
-        address.createTransfer(
-          weiAmount,
-          Coinbase.assets.Wei,
+        address.createTransfer({
+          amount: weiAmount,
+          assetId: Coinbase.assets.Wei,
           destination,
-          intervalSeconds,
           timeoutSeconds,
-        ),
+          intervalSeconds,
+        }),
       ).rejects.toThrow(APIError);
     });
 
     it("should throw an InternalError if the address key is not provided", async () => {
       const addressWithoutKey = new WalletAddress(VALID_ADDRESS_MODEL, null!);
       await expect(
-        addressWithoutKey.createTransfer(
-          weiAmount,
-          Coinbase.assets.Wei,
+        addressWithoutKey.createTransfer({
+          amount: weiAmount,
+          assetId: Coinbase.assets.Wei,
           destination,
-          intervalSeconds,
           timeoutSeconds,
-        ),
+          intervalSeconds,
+        }),
       ).rejects.toThrow(InternalError);
     });
 
@@ -302,13 +302,13 @@ describe("WalletAddress", () => {
         networkId: Coinbase.networks.BaseMainnet,
       });
       await expect(
-        address.createTransfer(
-          weiAmount,
-          Coinbase.assets.Wei,
-          invalidDestination,
-          intervalSeconds,
+        address.createTransfer({
+          amount: weiAmount,
+          assetId: Coinbase.assets.Wei,
+          destination: invalidDestination,
           timeoutSeconds,
-        ),
+          intervalSeconds,
+        }),
       ).rejects.toThrow(ArgumentError);
     });
 
@@ -318,13 +318,13 @@ describe("WalletAddress", () => {
         null!,
       );
       await expect(
-        address.createTransfer(
-          weiAmount,
-          Coinbase.assets.Wei,
-          invalidDestination,
-          intervalSeconds,
+        address.createTransfer({
+          amount: weiAmount,
+          assetId: Coinbase.assets.Wei,
+          destination: invalidDestination,
           timeoutSeconds,
-        ),
+          intervalSeconds,
+        }),
       ).rejects.toThrow(ArgumentError);
     });
 
@@ -334,13 +334,13 @@ describe("WalletAddress", () => {
         new APIError("Failed to broadcast transfer"),
       );
       await expect(
-        address.createTransfer(
-          weiAmount,
-          Coinbase.assets.Wei,
+        address.createTransfer({
+          amount: weiAmount,
+          assetId: Coinbase.assets.Wei,
           destination,
-          intervalSeconds,
           timeoutSeconds,
-        ),
+          intervalSeconds,
+        }),
       ).rejects.toThrow(APIError);
     });
 
@@ -358,26 +358,26 @@ describe("WalletAddress", () => {
       timeoutSeconds = 0.000002;
 
       await expect(
-        address.createTransfer(
-          weiAmount,
-          Coinbase.assets.Wei,
+        address.createTransfer({
+          amount: weiAmount,
+          assetId: Coinbase.assets.Wei,
           destination,
-          intervalSeconds,
           timeoutSeconds,
-        ),
+          intervalSeconds,
+        }),
       ).rejects.toThrow("Transfer timed out");
     });
 
     it("should throw an ArgumentError if there are insufficient funds", async () => {
       const insufficientAmount = new Decimal("10000000000000000000");
       await expect(
-        address.createTransfer(
-          insufficientAmount,
-          Coinbase.assets.Wei,
+        address.createTransfer({
+          amount: insufficientAmount,
+          assetId: Coinbase.assets.Wei,
           destination,
-          intervalSeconds,
           timeoutSeconds,
-        ),
+          intervalSeconds,
+        }),
       ).rejects.toThrow(ArgumentError);
     });
 
@@ -389,13 +389,13 @@ describe("WalletAddress", () => {
         status: TransferStatus.COMPLETE,
       });
 
-      await address.createTransfer(
-        weiAmount,
-        Coinbase.assets.Wei,
+      await address.createTransfer({
+        amount: weiAmount,
+        assetId: Coinbase.assets.Wei,
         destination,
-        intervalSeconds,
         timeoutSeconds,
-      );
+        intervalSeconds,
+      });
 
       expect(Coinbase.apiClients.transfer!.createTransfer).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.transfer!.getTransfer).toHaveBeenCalledTimes(1);
@@ -406,7 +406,7 @@ describe("WalletAddress", () => {
     });
   });
 
-  describe(".getTransfers", () => {
+  describe("#getTransfers", () => {
     beforeEach(() => {
       jest.clearAllMocks();
       const pages = ["abc", "def"];

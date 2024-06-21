@@ -66,7 +66,7 @@ describe("Wallet Class", () => {
     Coinbase.useServerSigner = false;
   });
 
-  describe(".createTransfer", () => {
+  describe("#createTransfer", () => {
     let weiAmount, destination, intervalSeconds, timeoutSeconds;
     let balanceModel: BalanceModel;
 
@@ -115,13 +115,13 @@ describe("Wallet Class", () => {
         status: TransferStatus.COMPLETE,
       });
 
-      await wallet.createTransfer(
-        weiAmount,
-        Coinbase.assets.Wei,
+      await wallet.createTransfer({
+        amount: weiAmount,
+        assetId: Coinbase.assets.Wei,
         destination,
-        intervalSeconds,
         timeoutSeconds,
-      );
+        intervalSeconds,
+      });
 
       expect(Coinbase.apiClients.transfer!.createTransfer).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.transfer!.broadcastTransfer).toHaveBeenCalledTimes(1);
@@ -133,13 +133,13 @@ describe("Wallet Class", () => {
         new APIError("Failed to create transfer"),
       );
       await expect(
-        wallet.createTransfer(
-          weiAmount,
-          Coinbase.assets.Wei,
+        wallet.createTransfer({
+          amount: weiAmount,
+          assetId: Coinbase.assets.Wei,
           destination,
-          intervalSeconds,
           timeoutSeconds,
-        ),
+          intervalSeconds,
+        }),
       ).rejects.toThrow(APIError);
     });
 
@@ -149,13 +149,13 @@ describe("Wallet Class", () => {
         new APIError("Failed to broadcast transfer"),
       );
       await expect(
-        wallet.createTransfer(
-          weiAmount,
-          Coinbase.assets.Wei,
+        wallet.createTransfer({
+          amount: weiAmount,
+          assetId: Coinbase.assets.Wei,
           destination,
-          intervalSeconds,
           timeoutSeconds,
-        ),
+          intervalSeconds,
+        }),
       ).rejects.toThrow(APIError);
     });
 
@@ -173,26 +173,26 @@ describe("Wallet Class", () => {
       timeoutSeconds = 0.000002;
 
       await expect(
-        wallet.createTransfer(
-          weiAmount,
-          Coinbase.assets.Wei,
+        wallet.createTransfer({
+          amount: weiAmount,
+          assetId: Coinbase.assets.Wei,
           destination,
-          intervalSeconds,
           timeoutSeconds,
-        ),
+          intervalSeconds,
+        }),
       ).rejects.toThrow("Transfer timed out");
     });
 
     it("should throw an ArgumentError if there are insufficient funds", async () => {
       const insufficientAmount = new Decimal("10000000000000000000");
       await expect(
-        wallet.createTransfer(
-          insufficientAmount,
-          Coinbase.assets.Wei,
+        wallet.createTransfer({
+          amount: insufficientAmount,
+          assetId: Coinbase.assets.Wei,
           destination,
-          intervalSeconds,
           timeoutSeconds,
-        ),
+          intervalSeconds,
+        }),
       ).rejects.toThrow(ArgumentError);
     });
 
@@ -204,13 +204,13 @@ describe("Wallet Class", () => {
         status: TransferStatus.COMPLETE,
       });
 
-      await wallet.createTransfer(
-        weiAmount,
-        Coinbase.assets.Wei,
+      await wallet.createTransfer({
+        amount: weiAmount,
+        assetId: Coinbase.assets.Wei,
         destination,
-        intervalSeconds,
         timeoutSeconds,
-      );
+        intervalSeconds,
+      });
 
       expect(Coinbase.apiClients.transfer!.createTransfer).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.transfer!.getTransfer).toHaveBeenCalledTimes(1);
@@ -233,7 +233,7 @@ describe("Wallet Class", () => {
       expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledWith(walletId);
     });
 
-    describe(".getId", () => {
+    describe("#getId", () => {
       it("should return the correct wallet ID", async () => {
         expect(wallet.getId()).toBe(walletModel.id);
       });
@@ -284,7 +284,7 @@ describe("Wallet Class", () => {
       });
     });
 
-    describe(".getDefaultAddress", () => {
+    describe("#getDefaultAddress", () => {
       it("should return the correct default address", async () => {
         expect(wallet.getDefaultAddress()!.getId()).toBe(walletModel.default_address!.address_id);
       });
@@ -339,7 +339,7 @@ describe("Wallet Class", () => {
           server_signer_status: ServerSignerStatus.PENDING,
         });
 
-        await expect(Wallet.create({ intervalSeconds, timeoutSeconds })).rejects.toThrow(
+        await expect(Wallet.create({ timeoutSeconds, intervalSeconds })).rejects.toThrow(
           "Wallet creation timed out. Check status of your Server-Signer",
         );
         expect(Coinbase.apiClients.wallet!.createWallet).toHaveBeenCalledTimes(1);
@@ -448,7 +448,7 @@ describe("Wallet Class", () => {
     });
   });
 
-  describe(".export", () => {
+  describe("#export", () => {
     let walletId: string;
     let addressModel: AddressModel;
     let walletModel: WalletModel;
@@ -493,7 +493,7 @@ describe("Wallet Class", () => {
     });
   });
 
-  describe(".listBalances", () => {
+  describe("#listBalances", () => {
     beforeEach(() => {
       const mockBalanceResponse: AddressBalanceList = {
         data: [
@@ -530,7 +530,7 @@ describe("Wallet Class", () => {
     });
   });
 
-  describe(".getBalance", () => {
+  describe("#getBalance", () => {
     beforeEach(() => {
       const mockWalletBalance: BalanceModel = {
         amount: "5000000000000000000",
@@ -585,7 +585,7 @@ describe("Wallet Class", () => {
     });
   });
 
-  describe(".canSign", () => {
+  describe("#canSign", () => {
     let wallet;
     beforeAll(async () => {
       const mockAddressModel = newAddressModel(walletId);
@@ -631,7 +631,7 @@ describe("Wallet Class", () => {
     });
   });
 
-  describe(".saveSeed", () => {
+  describe("#saveSeed", () => {
     const seed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
     let apiPrivateKey;
     const filePath = "seeds.json";
@@ -780,7 +780,7 @@ describe("Wallet Class", () => {
     });
   });
 
-  describe(".trade", () => {
+  describe("#trade", () => {
     let tradeObject;
     beforeAll(() => {
       tradeObject = new Trade({

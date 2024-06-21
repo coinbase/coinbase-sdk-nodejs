@@ -1,5 +1,11 @@
 # Coinbase Node.js SDK Changelog
 
+## Pending
+
+### Added
+
+- `CreateTransferOptions` type
+
 ## [0.0.8] - 2024-06-18
 
 ### Added
