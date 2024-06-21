@@ -15,6 +15,13 @@ export class StakingReward {
   private asset: Asset;
   private format: FetchStakingRewardsRequestFormatEnum;
 
+  /**
+   * Creates the StakingReward object.
+   *
+   * @param model - The underlying staking reward object.
+   * @param asset - The asset for the staking reward.
+   * @param format - The format to return the rewards in. (usd, native). Defaults to usd.
+   */
   constructor(
     model: StakingRewardModel,
     asset: Asset,
