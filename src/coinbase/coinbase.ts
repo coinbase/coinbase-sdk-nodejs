@@ -10,6 +10,7 @@ import {
   ServerSignersApiFactory,
   StakeApiFactory,
   AssetsApiFactory,
+  ExternalAddressesApiFactory,
 } from "../client";
 import { BASE_PATH } from "./../client/base";
 import { Configuration } from "./../client/configuration";
@@ -109,6 +110,11 @@ export class Coinbase {
     Coinbase.apiClients.serverSigner = ServerSignersApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.stake = StakeApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.asset = AssetsApiFactory(config, basePath, axiosInstance);
+    Coinbase.apiClients.externalAddress = ExternalAddressesApiFactory(
+      config,
+      basePath,
+      axiosInstance,
+    );
     Coinbase.apiKeyPrivateKey = privateKey;
     Coinbase.useServerSigner = useServerSigner;
   }

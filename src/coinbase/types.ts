@@ -24,6 +24,7 @@ import {
   StakingOperation as StakingOperationModel,
   GetStakingContextRequest,
   StakingContext as StakingContextModel,
+  FaucetTransaction,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -279,7 +280,7 @@ export type AddressAPIClient = {
     options?: AxiosRequestConfig,
   ): AxiosPromise<AddressBalanceList>;
 
-  /*
+  /**
    * Create a new address scoped to the wallet.
    *
    * @param walletId - The ID of the wallet to create the address in.
@@ -292,6 +293,57 @@ export type AddressAPIClient = {
     createAddressRequest?: CreateAddressRequest,
     options?: AxiosRequestConfig,
   ): AxiosPromise<AddressModel>;
+};
+
+/**
+ * ExternalAddressAPIClient client type definition.
+ */
+export type ExternalAddressAPIClient = {
+  /**
+   * List all of the balances of an external address
+   *
+   * @param networkId - The ID of the blockchain network
+   * @param addressId - The ID of the address to fetch the balance for
+   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param options - Override http request option.
+   * @throws {APIError} If the request fails.
+   */
+  listExternalAddressBalances(
+    networkId: string,
+    addressId: string,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<AddressBalanceList>;
+
+  /**
+   * Get the balance of an asset in an external address
+   *
+   * @param networkId - The ID of the blockchain network
+   * @param addressId - The ID of the address to fetch the balance for
+   * @param assetId - The ID of the asset to fetch the balance for
+   * @param options - Override http request option.
+   * @throws {APIError} If the request fails.
+   */
+  getExternalAddressBalance(
+    networkId: string,
+    addressId: string,
+    assetId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<Balance>;
+
+  /**
+   * Request faucet funds to be sent to external address.
+   *
+   * @param networkId - The ID of the wallet the address belongs to.
+   * @param addressId - The onchain address of the address that is being fetched.
+   * @param options - Override http request option.
+   * @throws {APIError} If the request fails.
+   */
+  requestExternalFaucetFunds(
+    networkId: string,
+    addressId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<FaucetTransaction>;
 };
 
 /**
@@ -444,6 +496,7 @@ export type ApiClients = {
   serverSigner?: ServerSignerAPIClient;
   stake?: StakeAPIClient;
   asset?: AssetAPIClient;
+  externalAddress?: ExternalAddressAPIClient;
 };
 
 /**

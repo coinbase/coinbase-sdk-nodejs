@@ -198,7 +198,7 @@ describe("WalletAddress", () => {
 
   it("should return the correct string representation", () => {
     expect(address.toString()).toBe(
-      `Coinbase:WalletAddress{addressId: '${VALID_ADDRESS_MODEL.address_id}', networkId: '${VALID_ADDRESS_MODEL.network_id}', walletId: '${VALID_ADDRESS_MODEL.wallet_id}'}`,
+      `WalletAddress{ addressId: '${VALID_ADDRESS_MODEL.address_id}', networkId: '${VALID_ADDRESS_MODEL.network_id}', walletId: '${VALID_ADDRESS_MODEL.wallet_id}' }`,
     );
   });
 
