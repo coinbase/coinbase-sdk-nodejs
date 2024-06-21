@@ -23,6 +23,7 @@ import { BalanceMap } from "./balance_map";
 import Decimal from "decimal.js";
 import { Balance } from "./balance";
 import { Trade } from "./trade";
+import { WalletAddress } from "./address/wallet_address";
 import { Asset } from "./asset";
 
 /**
@@ -35,7 +36,7 @@ export class Wallet {
 
   private master?: HDKey;
   private seed?: string;
-  private addresses: Address[] = [];
+  private addresses: WalletAddress[] = [];
   private addressModels: AddressModel[] = [];
 
   private readonly addressPathPrefix = "m/44'/60'/0'/0";
@@ -212,7 +213,7 @@ export class Wallet {
     const response = await Coinbase.apiClients.address!.createAddress(this.model.id!, payload);
 
     this.cacheAddress(response!.data, key);
-    return new Address(response!.data, key);
+    return new WalletAddress(response!.data, key);
   }
 
   /**
@@ -316,7 +317,7 @@ export class Wallet {
    * @returns {void}
    */
   private cacheAddress(address: AddressModel, key?: ethers.Wallet): void {
-    this.addresses.push(new Address(address, key));
+    this.addresses.push(new WalletAddress(address, key));
   }
 
   /**
@@ -546,7 +547,7 @@ export class Wallet {
    *
    * @returns The default address
    */
-  public getDefaultAddress(): Address | undefined {
+  public getDefaultAddress(): WalletAddress | undefined {
     return this.addresses.find(
       address => address.getId() === this.model.default_address?.address_id,
     );

@@ -8,6 +8,7 @@ import {
   WalletsApiFactory,
   TradesApiFactory,
   ServerSignersApiFactory,
+  StakeApiFactory,
   AssetsApiFactory,
 } from "../client";
 import { BASE_PATH } from "./../client/base";
@@ -106,6 +107,7 @@ export class Coinbase {
     Coinbase.apiClients.transfer = TransfersApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.trade = TradesApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.serverSigner = ServerSignersApiFactory(config, basePath, axiosInstance);
+    Coinbase.apiClients.stake = StakeApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.asset = AssetsApiFactory(config, basePath, axiosInstance);
     Coinbase.apiKeyPrivateKey = privateKey;
     Coinbase.useServerSigner = useServerSigner;

@@ -9,6 +9,7 @@ import { parseUnsignedPayload } from "./utils";
 export class Transaction {
   private model: TransactionModel;
   private raw?: ethers.Transaction;
+  private signed: boolean | undefined;
 
   /**
    * Transactions should be constructed via higher level abstractions like Trade or Transfer.
@@ -134,7 +135,17 @@ export class Transaction {
    */
   async sign(key: ethers.Wallet) {
     const signedPayload = await key!.signTransaction(this.rawTransaction());
+    this.signed = true;
     return signedPayload?.slice(2);
+  }
+
+  /**
+   * Returns whether the transaction has been signed.
+   *
+   * @returns if the transaction has been signed.
+   */
+  isSigned(): boolean | undefined {
+    return this.signed;
   }
 
   /**

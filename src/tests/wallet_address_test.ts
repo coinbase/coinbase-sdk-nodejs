@@ -1,26 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as crypto from "crypto";
-import Decimal from "decimal.js";
 import { ethers } from "ethers";
-import { Balance as BalanceModel, Trade as TradeModel, TransferList } from "../client";
-import { Coinbase } from "../coinbase";
+import { FaucetTransaction } from "../coinbase/faucet_transaction";
+import { Balance as BalanceModel, TransferList, Trade as TradeModel } from "../client";
+import Decimal from "decimal.js";
 import { APIError, FaucetLimitReachedError } from "../coinbase/api_error";
-import { ArgumentError, InternalError } from "../coinbase/errors";
-import { Trade } from "../coinbase/trade";
-import { Transaction } from "../coinbase/transaction";
-import { Transfer } from "../coinbase/transfer";
-import { TransactionStatus, TransferStatus } from "../coinbase/types";
-import { Address } from "./../coinbase/address";
-import { FaucetTransaction } from "./../coinbase/faucet_transaction";
+import { Coinbase } from "../coinbase";
+import { InternalError } from "../coinbase/errors";
 import {
   VALID_ADDRESS_BALANCE_LIST,
   VALID_ADDRESS_MODEL,
   VALID_TRANSFER_MODEL,
   VALID_WALLET_MODEL,
-  addressesApiMock,
-  assetsApiMock,
   generateRandomHash,
   getAssetMock,
+  addressesApiMock,
+  assetsApiMock,
   mockFn,
   mockReturnRejectedValue,
   mockReturnValue,
@@ -29,12 +24,18 @@ import {
   transfersApiMock,
   walletsApiMock,
 } from "./utils";
-import { Wallet } from "../coinbase/wallet";
+import { ArgumentError } from "../coinbase/errors";
+import { Transfer } from "../coinbase/transfer";
+import { TransactionStatus, TransferStatus } from "../coinbase/types";
+import { Trade } from "../coinbase/trade";
+import { Transaction } from "../coinbase/transaction";
+import { WalletAddress } from "../coinbase/address/wallet_address";
+import { Wallet } from "../coinbase";
 
-// Test suite for Address class
-describe("Address", () => {
+// Test suite for the WalletAddress class
+describe("WalletAddress", () => {
   const transactionHash = generateRandomHash();
-  let address: Address;
+  let address: WalletAddress;
   let balanceModel: BalanceModel;
   let key;
 
@@ -65,13 +66,13 @@ describe("Address", () => {
 
   beforeEach(() => {
     key = ethers.Wallet.createRandom();
-    address = new Address(VALID_ADDRESS_MODEL, key as unknown as ethers.Wallet);
+    address = new WalletAddress(VALID_ADDRESS_MODEL, key as unknown as ethers.Wallet);
 
     jest.clearAllMocks();
   });
 
-  it("should initialize a new Address", () => {
-    expect(address).toBeInstanceOf(Address);
+  it("should initialize a new WalletAddress", () => {
+    expect(address).toBeInstanceOf(WalletAddress);
   });
 
   it("should return the address ID", () => {
@@ -153,7 +154,7 @@ describe("Address", () => {
   });
 
   it("should throw an InternalError when model is not provided", () => {
-    expect(() => new Address(null!, key as unknown as ethers.Wallet)).toThrow(
+    expect(() => new WalletAddress(null!, key as unknown as ethers.Wallet)).toThrow(
       `Address model cannot be empty`,
     );
   });
@@ -169,7 +170,7 @@ describe("Address", () => {
     expect(Coinbase.apiClients.address!.requestFaucetFunds).toHaveBeenCalledTimes(1);
   });
 
-  it("should throw an APIError when the request is unsuccesful", async () => {
+  it("should throw an APIError when the request is unsuccessful", async () => {
     Coinbase.apiClients.address!.requestFaucetFunds = mockReturnRejectedValue(new APIError(""));
     await expect(address.faucet()).rejects.toThrow(APIError);
     expect(Coinbase.apiClients.address!.requestFaucetFunds).toHaveBeenCalledWith(
@@ -197,7 +198,7 @@ describe("Address", () => {
 
   it("should return the correct string representation", () => {
     expect(address.toString()).toBe(
-      `Coinbase:Address{addressId: '${VALID_ADDRESS_MODEL.address_id}', networkId: '${VALID_ADDRESS_MODEL.network_id}', walletId: '${VALID_ADDRESS_MODEL.wallet_id}'}`,
+      `Coinbase:WalletAddress{addressId: '${VALID_ADDRESS_MODEL.address_id}', networkId: '${VALID_ADDRESS_MODEL.network_id}', walletId: '${VALID_ADDRESS_MODEL.wallet_id}'}`,
     );
   });
 
@@ -207,7 +208,7 @@ describe("Address", () => {
 
     beforeEach(() => {
       weiAmount = new Decimal("500000000000000000");
-      destination = new Address(VALID_ADDRESS_MODEL, key as unknown as ethers.Wallet);
+      destination = new WalletAddress(VALID_ADDRESS_MODEL,  key as unknown as ethers.Wallet);
       intervalSeconds = 0.2;
       timeoutSeconds = 10;
       walletId = crypto.randomUUID();
@@ -271,7 +272,7 @@ describe("Address", () => {
     });
 
     it("should throw an InternalError if the address key is not provided", async () => {
-      const addressWithoutKey = new Address(VALID_ADDRESS_MODEL, null!);
+      const addressWithoutKey = new WalletAddress(VALID_ADDRESS_MODEL, null!);
       await expect(
         addressWithoutKey.createTransfer(
           weiAmount,
@@ -312,7 +313,7 @@ describe("Address", () => {
     });
 
     it("should throw an ArgumentError if the Address Network ID does not match the Wallet Network ID", async () => {
-      const invalidDestination = new Address(
+      const invalidDestination = new WalletAddress(
         newAddressModel("invalidDestination", "", Coinbase.networks.BaseMainnet),
         null!,
       );
@@ -380,7 +381,7 @@ describe("Address", () => {
       ).rejects.toThrow(ArgumentError);
     });
 
-    it("should successfully create and complete a trans2fer when using server signer", async () => {
+    it("should successfully create and complete a transfer when using server signer", async () => {
       Coinbase.useServerSigner = true;
       Coinbase.apiClients.transfer!.createTransfer = mockReturnValue(VALID_TRANSFER_MODEL);
       Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
@@ -426,7 +427,7 @@ describe("Address", () => {
     });
 
     it("should return the list of transfers", async () => {
-      const transfers = await address.getTransfers();
+      const transfers = await address.listTransfers();
       expect(transfers).toHaveLength(3);
       expect(transfers[0]).toBeInstanceOf(Transfer);
       expect(Coinbase.apiClients.transfer!.listTransfers).toHaveBeenCalledTimes(3);
@@ -447,7 +448,7 @@ describe("Address", () => {
     it("should raise an APIError when the API call fails", async () => {
       jest.clearAllMocks();
       Coinbase.apiClients.transfer!.listTransfers = mockReturnRejectedValue(new APIError(""));
-      await expect(address.getTransfers()).rejects.toThrow(APIError);
+      await expect(address.listTransfers()).rejects.toThrow(APIError);
       expect(Coinbase.apiClients.transfer!.listTransfers).toHaveBeenCalledTimes(1);
     });
   });
@@ -687,7 +688,7 @@ describe("Address", () => {
 
     describe("when the address cannot sign", () => {
       it("should raise an Error", async () => {
-        const newAddress = new Address(VALID_ADDRESS_MODEL, null!);
+        const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, null!);
         await expect(newAddress.createTrade(new Decimal(100), "eth", "usdc")).rejects.toThrow(
           Error,
         );
@@ -717,4 +718,3 @@ describe("Address", () => {
     });
   });
 });
-

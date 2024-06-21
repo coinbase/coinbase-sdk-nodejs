@@ -20,6 +20,10 @@ import {
   CreateTradeRequest,
   BroadcastTradeRequest,
   ServerSignerList,
+  BuildStakingOperationRequest,
+  StakingOperation as StakingOperationModel,
+  GetStakingContextRequest,
+  StakingContext as StakingContextModel,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -304,6 +308,32 @@ export type UserAPIClient = {
   getCurrentUser(options?: AxiosRequestConfig): AxiosPromise<UserModel>;
 };
 
+export type StakeAPIClient = {
+  /**
+   * Build a new staking operation.
+   *
+   * @param buildStakingOperationRequest - The request to build a staking operation.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+  buildStakingOperation(
+    buildStakingOperationRequest: BuildStakingOperationRequest,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<StakingOperationModel>;
+
+  /**
+   * Get staking context for an address.
+   *
+   * @param getStakingContextRequest - The request to get the staking context for an address.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+  getStakingContext(
+    getStakingContextRequest: GetStakingContextRequest,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<StakingContextModel>;
+};
+
 /**
  * TransferAPI client type definition.
  */
@@ -412,6 +442,7 @@ export type ApiClients = {
   transfer?: TransferAPIClient;
   trade?: TradeApiClients;
   serverSigner?: ServerSignerAPIClient;
+  stake?: StakeAPIClient;
   asset?: AssetAPIClient;
 };
 
@@ -535,3 +566,33 @@ export type CoinbaseConfigureFromJsonOptions = {
    */
   basePath?: string;
 };
+
+/**
+ * CoinbaseExternalAddressStakeOptions type definition.
+ */
+export type CoinbaseExternalAddressStakeOptions = {
+  /**
+   * The mode type that you're trying to stake with.
+   * e.g.
+   */
+  mode?: StakeOptionsMode;
+
+  /**
+   * The amount to stake, unstake, or claim_stake for in a staking operation.
+   */
+  amount?: string;
+};
+
+/**
+ * StakeOptionsMode type definition.
+ */
+export enum StakeOptionsMode {
+  /**
+   * Defaults to the mode specific to the asset.
+   */
+  DEFAULT = "default",
+  /**
+   * Partial represents Partial Ethereumn Staking mode.
+   */
+  PARTIAL = "partial",
+}
