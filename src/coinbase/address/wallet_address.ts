@@ -41,7 +41,7 @@ export class WalletAddress extends Address {
   /**
    * Returns a string representation of the wallet address.
    *
-   * @returns {string} A string representing the wallet address.
+   * @returns A string representing the wallet address.
    */
   public toString(): string {
     return `WalletAddress{ addressId: '${this.getId()}', networkId: '${this.getNetworkId()}', walletId: '${this.getWalletId()}' }`;
@@ -50,7 +50,7 @@ export class WalletAddress extends Address {
   /**
    * Returns the wallet ID.
    *
-   * @returns {string} The wallet ID.
+   * @returns The wallet ID.
    */
   public getWalletId(): string {
     return this.model.wallet_id;
@@ -72,7 +72,7 @@ export class WalletAddress extends Address {
   /**
    * Returns the list of balances for the address.
    *
-   * @returns {BalanceMap} - The map from asset ID to balance.
+   * @returns The map from asset ID to balance.
    */
   public async listBalances(): Promise<BalanceMap> {
     const response = await Coinbase.apiClients.address!.listAddressBalances(
@@ -86,8 +86,8 @@ export class WalletAddress extends Address {
   /**
    * Returns the balance of the provided asset.
    *
-   * @param {string} assetId - The asset ID.
-   * @returns {Decimal} The balance of the asset.
+   * @param assetId - The asset ID.
+   * @returns The balance of the asset.
    */
   async getBalance(assetId: string): Promise<Decimal> {
     const response = await Coinbase.apiClients.address!.getAddressBalance(
@@ -107,7 +107,7 @@ export class WalletAddress extends Address {
    * Requests faucet funds for the address.
    * Only supported on testnet networks.
    *
-   * @returns {Promise<FaucetTransaction>} The faucet transaction object.
+   * @returns The faucet transaction object.
    * @throws {InternalError} If the request does not return a transaction hash.
    * @throws {Error} If the request fails.
    */
@@ -122,7 +122,7 @@ export class WalletAddress extends Address {
   /**
    * Returns all the transfers associated with the address.
    *
-   * @returns {Transfer[]} The list of transfers.
+   * @returns The list of transfers.
    */
   public async listTransfers(): Promise<Transfer[]> {
     const transfers: Transfer[] = [];

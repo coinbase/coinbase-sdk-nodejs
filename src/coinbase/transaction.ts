@@ -142,7 +142,7 @@ export class Transaction {
   /**
    * Returns whether the transaction has been signed.
    *
-   * @returns {boolean} if the transaction has been signed.
+   * @returns if the transaction has been signed.
    */
   isSigned(): boolean | undefined {
     return this.signed;

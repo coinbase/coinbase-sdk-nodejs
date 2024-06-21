@@ -21,7 +21,10 @@ export class StakingOperation {
       throw new Error("Invalid model type");
     }
     this.model = model;
-    this.transactions = [new Transaction(model.transaction)];
+    this.transactions = [];
+    model.transactions.forEach(transaction => {
+      this.transactions.push(new Transaction(transaction));
+    });
   }
 
   /**

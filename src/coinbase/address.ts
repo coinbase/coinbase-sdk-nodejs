@@ -19,7 +19,7 @@ export class Address {
   /**
    * Returns the network ID.
    *
-   * @returns {string} The network ID.
+   * @returns The network ID.
    */
   public getNetworkId(): string {
     return this.networkId;
@@ -28,7 +28,7 @@ export class Address {
   /**
    * Returns the address ID.
    *
-   * @returns {string} The address ID.
+   * @returns The address ID.
    */
   public getId(): string {
     return this.id;
@@ -37,7 +37,7 @@ export class Address {
   /**
    * Returns a string representation of the address.
    *
-   * @returns {string} A string representing the address.
+   * @returns A string representing the address.
    */
   public toString(): string {
     return `Address { addressId: '${this.getId()}', networkId: '${this.getNetworkId()}' }`;
