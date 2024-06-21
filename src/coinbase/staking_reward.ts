@@ -25,6 +25,17 @@ export class StakingReward {
     this.format = format;
   }
 
+  /**
+   * Returns a list of StakingRewards for the provided network, asset, and addresses.
+   *
+   * @param networkId - The network ID.
+   * @param assetId - The asset ID.
+   * @param addressIds - The address ID.
+   * @param startTime - The start time.
+   * @param endTime - The end time.
+   * @param format - The format to return the rewards in. (usd, native). Defaults to usd.
+   * @returns The staking rewards.
+   */
   public static async list(
     networkId: string,
     assetId: string,

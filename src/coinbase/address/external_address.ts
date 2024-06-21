@@ -8,6 +8,7 @@ import {
   FetchStakingRewardsRequestFormatEnum,
   StakingReward as StakingRewardModel,
 } from "../../client";
+import { StakingReward } from "../staking_reward";
 import { BalanceMap } from "../balance_map";
 import { Balance } from "../balance";
 import { FaucetTransaction } from "../faucet_transaction";
@@ -115,22 +116,29 @@ export class ExternalAddress extends Address {
     return balances["claimableBalance"];
   }
 
+  /**
+   * Lists the staking rewards for the address.
+   *
+   * @param assetId - The asset ID.
+   * @param startTime - The start time.
+   * @param endTime - The end time.
+   * @param format - The format to return the rewards in. (usd, native). Defaults to usd.
+   * @returns The staking rewards.
+   */
   public async stakingRewards(
     assetId: string,
     startTime: string,
     endTime: string,
     format = FetchStakingRewardsRequestFormatEnum.Usd,
-  ): Promise<Array<StakingRewardModel>> {
-    const request = {
-      network_id: this.getNetworkId(),
-      asset_id: assetId,
-      address_ids: [this.getId()],
-      start_time: startTime,
-      end_time: endTime,
-      format: format,
-    };
-    const response = await Coinbase.apiClients.stake!.fetchStakingRewards(request);
-    return response.data.data;
+  ): Promise<StakingReward[]> {
+    return StakingReward.list(
+      this.getNetworkId(),
+      assetId,
+      [this.getId()],
+      startTime,
+      endTime,
+      format,
+    );
   }
 
   /**
