@@ -18,7 +18,7 @@ export class ExternalAddress extends Address {
    * @param amount - The amount of the asset to stake.
    * @param assetId - The asset to stake.
    * @param options - Additional options for the stake operation.
-   * @returns {StakingOperation} The stake operation.
+   * @returns The stake operation.
    */
   public async buildStakeOperation(
     amount: Amount,
@@ -35,7 +35,7 @@ export class ExternalAddress extends Address {
    * @param amount - The amount of the asset to unstake.
    * @param assetId - The asset to unstake.
    * @param options - Additional options for the unstake operation.
-   * @returns {StakingOperation} The unstake operation.
+   * @returns The unstake operation.
    */
   public async buildUnstakeOperation(
     amount: Amount,
@@ -52,7 +52,7 @@ export class ExternalAddress extends Address {
    * @param amount - The amount of the asset to claim stake.
    * @param assetId - The asset to claim stake.
    * @param options - Additional options for the claim stake operation.
-   * @returns {Transaction} The claim stake operation.
+   * @returns The claim stake operation.
    */
   public async buildClaimStakeOperation(
     amount: Amount,
@@ -68,7 +68,7 @@ export class ExternalAddress extends Address {
    *
    * @param asset_id - The asset to check the stakeable balance for.
    * @param options - Additional options for getting the stakeable balance.
-   * @returns {string} The stakeable balance.
+   * @returns The stakeable balance.
    */
   public async getStakeableBalance(
     asset_id: string,
@@ -83,7 +83,7 @@ export class ExternalAddress extends Address {
    *
    * @param asset_id - The asset to check the unstakeable balance for.
    * @param options - Additional options for getting the unstakeable balance.
-   * @returns {string} The unstakeable balance.
+   * @returns The unstakeable balance.
    */
   public async getUnstakeableBalance(
     asset_id: string,
@@ -98,7 +98,7 @@ export class ExternalAddress extends Address {
    *
    * @param asset_id - The asset to check claimable balance for.
    * @param options - Additional options for getting the claimable balance.
-   * @returns {string} The claimable balance.
+   * @returns The claimable balance.
    */
   public async getClaimableBalance(
     asset_id: string,
@@ -183,7 +183,7 @@ export class ExternalAddress extends Address {
    * @param assetId - The asset to lookup balances for.
    * @param options - Additional options for the balance lookup.
    * @private
-   * @returns { Map } The different balance types.
+   * @returns The different balance types.
    */
   private async getStakingBalances(
     assetId: string,
@@ -218,7 +218,7 @@ export class ExternalAddress extends Address {
    * @param action - The specific action for the staking operation. e.g. stake, unstake, claim_stake
    * @param options - Additional options to build a stake operation.
    * @private
-   * @returns {StakingOperation} The staking operation.
+   * @returns The staking operation.
    * @throws {Error} If the supplied input cannot build a valid staking operation.
    */
   private async buildStakingOperation(
@@ -253,7 +253,7 @@ export class ExternalAddress extends Address {
    *
    * @param options - The supplied options to transform.
    * @private
-   * @returns {Map} The transformed options.
+   * @returns The transformed options.
    */
   private transformStakeOptions(options: CoinbaseExternalAddressStakeOptions): {
     [key: string]: string;
