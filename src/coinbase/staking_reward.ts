@@ -25,41 +25,47 @@ export class StakingReward {
     this.format = format;
   }
 
-  public static async listRewards(
+  public static async list(
     networkId: string,
     assetId: string,
     addressIds: Array<string>,
     startTime: string,
     endTime: string,
     format = FetchStakingRewardsRequestFormatEnum.Usd,
-  ): Promise<Iterator<StakingReward>> {
-    const request = {
-      network_id: networkId,
-      asset_id: assetId,
-      address_ids: addressIds,
-      start_time: startTime,
-      end_time: endTime,
-      format: format,
-    };
+  ): Promise<StakingReward[]> {
+    const stakingRewards: StakingReward[] = [];
+    const queue: string[] = [""];
 
-    let index = 0;
-    const response = await Coinbase.apiClients.stake!.fetchStakingRewards(request);
-    const asset = await Asset.fetch(networkId, assetId);
-    const rewards = response.data.data;
+    while (queue.length > 0) {
+      const page = queue.shift();
+      const request = {
+        network_id: networkId,
+        asset_id: assetId,
+        address_ids: addressIds,
+        start_time: startTime,
+        end_time: endTime,
+        format: format,
+      };
 
-    return {
-      [Symbol.iterator]: function () {
-        return {
-          next(): IteratorResult<StakingReward> {
-            if (index < rewards.length) {
-              return { value: new StakingReward(rewards[index++], asset, format), done: false };
-            } else {
-              return { done: true } as IteratorResult<StakingReward>;
-            }
-          },
-        };
-      },
-    };
+      const response = await Coinbase.apiClients.stake!.fetchStakingRewards(
+        request,
+        100,
+        page?.length ? page : undefined,
+      );
+      const asset = await Asset.fetch(networkId, assetId);
+
+      response.data.data.forEach(stakingReward => {
+        stakingRewards.push(new StakingReward(stakingReward, asset, format));
+      });
+
+      if (response.data.has_more) {
+        if (response.data.next_page) {
+          queue.push(response.data.next_page);
+        }
+      }
+    }
+
+    return stakingRewards;
   }
 
   /**
