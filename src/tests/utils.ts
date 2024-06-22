@@ -257,6 +257,7 @@ export const transfersApiMock = {
 export const stakeApiMock = {
   buildStakingOperation: jest.fn(),
   getStakingContext: jest.fn(),
+  fetchStakingRewards: jest.fn(),
 };
 
 export const externalAddressApiMock = {

@@ -4,10 +4,7 @@ import { Coinbase } from "../coinbase";
 import Decimal from "decimal.js";
 import { Asset } from "../asset";
 import { StakingOperation } from "../staking_operation";
-import {
-  FetchStakingRewardsRequestFormatEnum,
-  StakingReward as StakingRewardModel,
-} from "../../client";
+import { FetchStakingRewardsRequestFormatEnum } from "../../client";
 import { StakingReward } from "../staking_reward";
 import { BalanceMap } from "../balance_map";
 import { Balance } from "../balance";

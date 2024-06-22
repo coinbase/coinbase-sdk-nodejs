@@ -95,7 +95,7 @@ export class StakingReward {
     if (this.format == FetchStakingRewardsRequestFormatEnum.Usd) {
       return new Decimal(this.model.amount).div(new Decimal("100"));
     }
-    return this.asset.fromAtomicAmount(new Decimal(this.model.amount));
+    return this.asset.fromAtomicAmount(new Decimal(this.model.amount)).toNumber();
   }
 
   /**
@@ -107,7 +107,12 @@ export class StakingReward {
     return new Date(this.model.date);
   }
 
+  /**
+   * Print the Staking Reward as a string.
+   *
+   * @returns The string representation of the Staking Reward.
+   */
   public toString(): string {
-    return `StakingReward { amount: '${this.amount().toString}' }`;
+    return `StakingReward { amount: '${this.amount().toString()}' }`;
   }
 }
