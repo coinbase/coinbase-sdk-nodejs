@@ -1,5 +1,5 @@
 import { Decimal } from "decimal.js";
-import { type AxiosInstance, AxiosPromise, AxiosRequestConfig, RawAxiosRequestConfig } from "axios";
+import { AxiosPromise, AxiosRequestConfig, RawAxiosRequestConfig } from "axios";
 import {
   Address as AddressModel,
   AddressList,
