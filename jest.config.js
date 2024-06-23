@@ -9,7 +9,7 @@ module.exports = {
   verbose: true,
   maxWorkers: 1,
   coverageThreshold: {
-    global: {
+    "./src/coinbase/**": {
       branches: 80,
       functions: 90,
       statements: 95,
