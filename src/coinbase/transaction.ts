@@ -135,8 +135,9 @@ export class Transaction {
    */
   async sign(key: ethers.Wallet) {
     const signedPayload = await key!.signTransaction(this.rawTransaction());
+    this.model.signed_payload = signedPayload.slice(2);
     this.signed = true;
-    return signedPayload?.slice(2);
+    return this.model.signed_payload;
   }
 
   /**
