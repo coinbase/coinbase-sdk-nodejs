@@ -7,7 +7,7 @@ async function fundWallet() {
 
   // Fund the wallet with a faucet transaction.
   const faucetTransaction = await wallet.faucet();
-  console.log(`Faucet transaction successfully completed: ${faucetTransaction}`);
+  console.log(`Faucet transaction successfully completed: `, faucetTransaction);
 }
 
 fundWallet();
