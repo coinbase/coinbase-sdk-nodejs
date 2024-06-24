@@ -716,5 +716,22 @@ describe("WalletAddress", () => {
         await expect(address.createTrade(new Decimal(100), "eth", "usdc")).rejects.toThrow(Error);
       });
     });
+
+    describe(".setKey", () => {
+      it("should set the key successfully", () => {
+        key = ethers.Wallet.createRandom();
+        const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, undefined);
+        expect(() => {
+          newAddress.setKey(key);
+        }).not.toThrow(InternalError);
+      });
+      it("should not set the key successfully", () => {
+        key = ethers.Wallet.createRandom();
+        const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, key);
+        expect(() => {
+          newAddress.setKey(key);
+        }).toThrow(InternalError);
+      });
+    });
   });
 });

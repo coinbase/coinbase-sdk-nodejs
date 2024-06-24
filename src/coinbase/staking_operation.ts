@@ -28,6 +28,15 @@ export class StakingOperation {
   }
 
   /**
+   * Get the transactions associated with this staking operation.
+   *
+   * @returns The array of transactions.
+   */
+  public getTransactions(): Transaction[] {
+    return this.transactions;
+  }
+
+  /**
    * Sign the transactions in the StakingOperation object.
    *
    * @param key - The key used to sign the transactions.

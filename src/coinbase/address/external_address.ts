@@ -4,6 +4,8 @@ import { Coinbase } from "../coinbase";
 import Decimal from "decimal.js";
 import { Asset } from "../asset";
 import { StakingOperation } from "../staking_operation";
+import { FetchStakingRewardsRequestFormatEnum } from "../../client";
+import { StakingReward } from "../staking_reward";
 import { BalanceMap } from "../balance_map";
 import { Balance } from "../balance";
 import { FaucetTransaction } from "../faucet_transaction";
@@ -112,6 +114,31 @@ export class ExternalAddress extends Address {
   }
 
   /**
+   * Lists the staking rewards for the address.
+   *
+   * @param assetId - The asset ID.
+   * @param startTime - The start time.
+   * @param endTime - The end time.
+   * @param format - The format to return the rewards in. (usd, native). Defaults to usd.
+   * @returns The staking rewards.
+   */
+  public async stakingRewards(
+    assetId: string,
+    startTime: string,
+    endTime: string,
+    format = FetchStakingRewardsRequestFormatEnum.Usd,
+  ): Promise<StakingReward[]> {
+    return StakingReward.list(
+      Coinbase.normalizeNetwork(this.getNetworkId()),
+      assetId,
+      [this.getId()],
+      startTime,
+      endTime,
+      format,
+    );
+  }
+
+  /**
    * Validate if the operation is able to stake with the supplied input.
    *
    * @param amount - The amount of the asset to stake.
@@ -194,7 +221,7 @@ export class ExternalAddress extends Address {
   ): Promise<{ [key: string]: string }> {
     const request = {
       network_id: this.getNetworkId(),
-      asset_id: assetId,
+      asset_id: Asset.primaryDenomination(assetId),
       address_id: this.getId(),
       options: this.transformStakeOptions(options),
     };
@@ -240,7 +267,7 @@ export class ExternalAddress extends Address {
 
     const request = {
       network_id: this.getNetworkId(),
-      asset_id: assetId,
+      asset_id: Asset.primaryDenomination(assetId),
       address_id: this.getId(),
       action: action,
       options: options,
