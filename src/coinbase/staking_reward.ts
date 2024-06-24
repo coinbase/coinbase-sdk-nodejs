@@ -57,7 +57,7 @@ export class StakingReward {
     while (queue.length > 0) {
       const page = queue.shift();
       const request = {
-        network_id: networkId,
+        network_id: Coinbase.normalizeNetwork(networkId),
         asset_id: assetId,
         address_ids: addressIds,
         start_time: startTime,

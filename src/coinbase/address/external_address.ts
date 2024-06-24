@@ -129,7 +129,7 @@ export class ExternalAddress extends Address {
     format = FetchStakingRewardsRequestFormatEnum.Usd,
   ): Promise<StakingReward[]> {
     return StakingReward.list(
-      this.getNetworkId(),
+      Coinbase.normalizeNetwork(this.getNetworkId()),
       assetId,
       [this.getId()],
       startTime,
