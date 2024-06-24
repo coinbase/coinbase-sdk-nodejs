@@ -213,10 +213,7 @@ export type AddressAPIClient = {
    * @returns The transaction hash.
    * @throws {APIError} If the request fails.
    */
-  requestFaucetFunds(
-    walletId: string,
-    addressId: string,
-  ): Promise<{ data: { transaction_hash: string } }>;
+  requestFaucetFunds(walletId: string, addressId: string): AxiosPromise<FaucetTransaction>;
 
   /**
    * Get address by onchain address.

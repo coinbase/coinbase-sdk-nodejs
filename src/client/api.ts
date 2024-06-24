@@ -362,7 +362,7 @@ export interface CreateWalletRequestWallet {
     'use_server_signer'?: boolean;
 }
 /**
- * 
+ * The faucet transaction
  * @export
  * @interface FaucetTransaction
  */
@@ -373,6 +373,12 @@ export interface FaucetTransaction {
      * @memberof FaucetTransaction
      */
     'transaction_hash': string;
+    /**
+     * Link to the transaction on the blockchain explorer.
+     * @type {string}
+     * @memberof FaucetTransaction
+     */
+    'transaction_link': string;
 }
 /**
  * Features that can be enabled for a wallet

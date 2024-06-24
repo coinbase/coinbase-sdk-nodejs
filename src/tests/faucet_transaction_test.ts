@@ -4,6 +4,7 @@ describe("FaucetTransaction tests", () => {
   it("should create a new FaucetTransaction instance and return the transaction hash", () => {
     const faucetTransaction = new FaucetTransaction({
       transaction_hash: "abc",
+      transaction_link: "https://sepolia.basescan.org/tx/abc",
     });
 
     expect(faucetTransaction).toBeInstanceOf(FaucetTransaction);
