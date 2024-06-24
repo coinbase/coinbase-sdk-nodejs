@@ -13,6 +13,13 @@ describe("StakingOperation", () => {
     }).toThrow(Error);
   });
 
+  describe(".getTransactions", () => {
+    it("return the the array of transactions", () => {
+      const op = new StakingOperation(VALID_STAKING_OPERATION_MODEL);
+      expect(op.getTransactions().length).toEqual(1);
+    });
+  });
+
   describe(".sign", () => {
     let key;
     it("should sign the transactions successfully", async () => {

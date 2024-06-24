@@ -221,7 +221,7 @@ export class ExternalAddress extends Address {
   ): Promise<{ [key: string]: string }> {
     const request = {
       network_id: this.getNetworkId(),
-      asset_id: assetId,
+      asset_id: Asset.primaryDenomination(assetId),
       address_id: this.getId(),
       options: this.transformStakeOptions(options),
     };
@@ -267,7 +267,7 @@ export class ExternalAddress extends Address {
 
     const request = {
       network_id: this.getNetworkId(),
-      asset_id: assetId,
+      asset_id: Asset.primaryDenomination(assetId),
       address_id: this.getId(),
       action: action,
       options: options,
