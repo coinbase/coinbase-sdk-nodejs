@@ -70,7 +70,9 @@ export class User {
    * @returns the Wallet with the given ID
    */
   public async getWallet(wallet_id: string): Promise<Wallet> {
-    return await Wallet.fetch(wallet_id);
+    const wallet = await Wallet.fetch(wallet_id);
+    await wallet.listAddresses();
+    return wallet;
   }
 
   /**

@@ -331,11 +331,12 @@ describe("User Class", () => {
       const result = await user.getWallet(walletId);
       expect(result).toBeInstanceOf(Wallet);
       expect(result.getId()).toBe(walletId);
+      expect(result.getDefaultAddress()?.getId()).toBeDefined();
       const addresses = await result.listAddresses();
       expect(addresses.length).toBe(2);
       expect(result.canSign()).toBe(false);
       expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledTimes(1);
-      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(2);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledWith(walletId, 20);
       expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledWith(walletId);
     });

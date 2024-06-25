@@ -148,49 +148,6 @@ export class Wallet {
   }
 
   /**
-   * Waits until the ServerSigner has created a seed for the Wallet.
-   *
-   * @param walletId - The ID of the Wallet that is awaiting seed creation.
-   * @param intervalSeconds - The interval at which to poll the CDPService, in seconds.
-   * @param timeoutSeconds - The maximum amount of time to wait for the ServerSigner to create a seed, in seconds.
-   * @throws {APIError} if the API request to get a Wallet fails.
-   * @throws {Error} if the ServerSigner times out.
-   */
-  private async waitForSigner(
-    walletId: string,
-    intervalSeconds = 0.2,
-    timeoutSeconds = 20,
-  ): Promise<void> {
-    const startTime = Date.now();
-    while (Date.now() - startTime < timeoutSeconds * 1000) {
-      const response = await Coinbase.apiClients.wallet!.getWallet(walletId);
-      if (response?.data.server_signer_status === ServerSignerStatus.ACTIVE) {
-        return;
-      }
-      await delay(intervalSeconds);
-    }
-    throw new Error("Wallet creation timed out. Check status of your Server-Signer");
-  }
-
-  /**
-   * Sets the master node for the given seed, if valid. If the seed is undefined it will set the master node using a random seed.
-   *
-   * @param seed - The seed to use for the Wallet.
-   * @returns The master node for the given seed.
-   */
-  private setMasterNode(seed: string | undefined): HDKey | undefined {
-    if (seed === "") {
-      return undefined;
-    }
-    if (seed === undefined) {
-      seed = ethers.Wallet.createRandom().privateKey.slice(2);
-    }
-    this.validateSeed(seed);
-    this.seed = seed;
-    this.master = HDKey.fromMasterSeed(Buffer.from(seed, "hex"));
-  }
-
-  /**
    * Exports the Wallet's data to a WalletData object.
    *
    * @returns The Wallet's data.
@@ -201,29 +158,6 @@ export class Wallet {
       throw new InternalError("Cannot export Wallet without loaded seed");
     }
     return { walletId: this.getId()!, seed: this.seed };
-  }
-
-  /**
-   * Derives a key for an already registered Address in the Wallet.
-   *
-   * @param index - The index of the Address to derive.
-   * @throws {InternalError} - If the key derivation fails.
-   * @returns The derived key.
-   */
-  private deriveKey(index: number): HDKey {
-    if (!this.master) {
-      throw new InternalError("Cannot derive key for Wallet without seed loaded");
-    }
-    const [networkPrefix] = this.model.network_id.split("-");
-    // TODO: Push this logic to the backend.
-    if (!["base", "ethereum"].includes(networkPrefix)) {
-      throw new InternalError(`Unsupported network ID: ${this.model.network_id}`);
-    }
-    const derivedKey = this.master?.derive(this.addressPathPrefix + `/${index}`);
-    if (!derivedKey?.privateKey) {
-      throw new InternalError("Failed to derive key");
-    }
-    return derivedKey;
   }
 
   /**
@@ -253,48 +187,6 @@ export class Wallet {
     this.addresses.push(address);
 
     return address;
-  }
-
-  /**
-   * Creates an attestation for the Address currently being created.
-   *
-   * @param key - The key of the Wallet.
-   * @returns The attestation.
-   */
-  private createAttestation(key: HDKey): string {
-    if (!key.publicKey || !key.privateKey) {
-      /* istanbul ignore next */
-      throw InternalError;
-    }
-
-    const publicKey = convertStringToHex(key.publicKey);
-
-    const payload = JSON.stringify({
-      wallet_id: this.model.id,
-      public_key: publicKey,
-    });
-
-    const hashedPayload = crypto.createHash("sha256").update(payload).digest();
-    const signature = secp256k1.ecdsaSign(hashedPayload, key.privateKey);
-
-    const r = signature.signature.slice(0, 32);
-    const s = signature.signature.slice(32, 64);
-    const v = signature.recid + 27 + 4;
-
-    const newSignatureBuffer = Buffer.concat([Buffer.from([v]), r, s]);
-    const newSignatureHex = newSignatureBuffer.toString("hex");
-
-    return newSignatureHex;
-  }
-
-  /**
-   * Reloads the Wallet model with the latest data from the server.
-   *
-   * @throws {APIError} if the API request to get a Wallet fails.
-   */
-  private async reload(): Promise<void> {
-    const result = await Coinbase.apiClients.wallet!.getWallet(this.model.id!);
-    this.model = result?.data;
   }
 
   /**
@@ -697,5 +589,113 @@ export class Wallet {
     }
 
     return new WalletAddress(addressModel, ethWallet);
+  }
+
+  /**
+   * Waits until the ServerSigner has created a seed for the Wallet.
+   *
+   * @param walletId - The ID of the Wallet that is awaiting seed creation.
+   * @param intervalSeconds - The interval at which to poll the CDPService, in seconds.
+   * @param timeoutSeconds - The maximum amount of time to wait for the ServerSigner to create a seed, in seconds.
+   * @throws {APIError} if the API request to get a Wallet fails.
+   * @throws {Error} if the ServerSigner times out.
+   */
+  private async waitForSigner(
+    walletId: string,
+    intervalSeconds = 0.2,
+    timeoutSeconds = 20,
+  ): Promise<void> {
+    const startTime = Date.now();
+    while (Date.now() - startTime < timeoutSeconds * 1000) {
+      const response = await Coinbase.apiClients.wallet!.getWallet(walletId);
+      if (response?.data.server_signer_status === ServerSignerStatus.ACTIVE) {
+        return;
+      }
+      await delay(intervalSeconds);
+    }
+    throw new Error("Wallet creation timed out. Check status of your Server-Signer");
+  }
+
+  /**
+   * Sets the master node for the given seed, if valid. If the seed is undefined it will set the master node using a random seed.
+   *
+   * @param seed - The seed to use for the Wallet.
+   * @returns The master node for the given seed.
+   */
+  private setMasterNode(seed: string | undefined): HDKey | undefined {
+    if (seed === "") {
+      return undefined;
+    }
+    if (seed === undefined) {
+      seed = ethers.Wallet.createRandom().privateKey.slice(2);
+    }
+    this.validateSeed(seed);
+    this.seed = seed;
+    this.master = HDKey.fromMasterSeed(Buffer.from(seed, "hex"));
+  }
+
+  /**
+   * Derives a key for an already registered Address in the Wallet.
+   *
+   * @param index - The index of the Address to derive.
+   * @throws {InternalError} - If the key derivation fails.
+   * @returns The derived key.
+   */
+  private deriveKey(index: number): HDKey {
+    if (!this.master) {
+      throw new InternalError("Cannot derive key for Wallet without seed loaded");
+    }
+    const [networkPrefix] = this.model.network_id.split("-");
+    // TODO: Push this logic to the backend.
+    if (!["base", "ethereum"].includes(networkPrefix)) {
+      throw new InternalError(`Unsupported network ID: ${this.model.network_id}`);
+    }
+    const derivedKey = this.master?.derive(this.addressPathPrefix + `/${index}`);
+    if (!derivedKey?.privateKey) {
+      throw new InternalError("Failed to derive key");
+    }
+    return derivedKey;
+  }
+
+  /**
+   * Creates an attestation for the Address currently being created.
+   *
+   * @param key - The key of the Wallet.
+   * @returns The attestation.
+   */
+  private createAttestation(key: HDKey): string {
+    if (!key.publicKey || !key.privateKey) {
+      /* istanbul ignore next */
+      throw InternalError;
+    }
+
+    const publicKey = convertStringToHex(key.publicKey);
+
+    const payload = JSON.stringify({
+      wallet_id: this.model.id,
+      public_key: publicKey,
+    });
+
+    const hashedPayload = crypto.createHash("sha256").update(payload).digest();
+    const signature = secp256k1.ecdsaSign(hashedPayload, key.privateKey);
+
+    const r = signature.signature.slice(0, 32);
+    const s = signature.signature.slice(32, 64);
+    const v = signature.recid + 27 + 4;
+
+    const newSignatureBuffer = Buffer.concat([Buffer.from([v]), r, s]);
+    const newSignatureHex = newSignatureBuffer.toString("hex");
+
+    return newSignatureHex;
+  }
+
+  /**
+   * Reloads the Wallet model with the latest data from the server.
+   *
+   * @throws {APIError} if the API request to get a Wallet fails.
+   */
+  private async reload(): Promise<void> {
+    const result = await Coinbase.apiClients.wallet!.getWallet(this.model.id!);
+    this.model = result?.data;
   }
 }
