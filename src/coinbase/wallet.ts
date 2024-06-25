@@ -132,7 +132,7 @@ export class Wallet {
     if (Coinbase.useServerSigner) {
       return wallet;
     }
-    wallet.masterNode(seed);
+    wallet.setMasterNode(seed);
     return wallet;
   }
 
@@ -142,7 +142,7 @@ export class Wallet {
    * @param seed - The seed to use for the Wallet.
    * @returns The master node for the given seed.
    */
-  private masterNode(seed: string | undefined): HDKey | undefined {
+  private setMasterNode(seed: string | undefined): HDKey | undefined {
     if (seed === "") {
       return undefined;
     }
@@ -306,7 +306,7 @@ export class Wallet {
     if (this.master) {
       throw new InternalError("Seed is already set");
     }
-    this.masterNode(seed);
+    this.setMasterNode(seed);
 
     if (this.addresses.length < 1) {
       return;
