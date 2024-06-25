@@ -1,29 +1,29 @@
 import { HDKey } from "@scure/bip32";
 import * as crypto from "crypto";
-import * as fs from "fs";
+import Decimal from "decimal.js";
 import { ethers } from "ethers";
+import * as fs from "fs";
 import * as secp256k1 from "secp256k1";
 import { Address as AddressModel, Wallet as WalletModel } from "../client";
 import { Address } from "./address";
+import { WalletAddress } from "./address/wallet_address";
+import { Asset } from "./asset";
+import { Balance } from "./balance";
+import { BalanceMap } from "./balance_map";
 import { Coinbase } from "./coinbase";
 import { ArgumentError, InternalError } from "./errors";
+import { FaucetTransaction } from "./faucet_transaction";
+import { Trade } from "./trade";
 import { Transfer } from "./transfer";
 import {
   Amount,
+  CreateTransferOptions,
   SeedData,
-  WalletData,
   ServerSignerStatus,
   WalletCreateOptions,
-  CreateTransferOptions,
+  WalletData,
 } from "./types";
 import { convertStringToHex, delay } from "./utils";
-import { FaucetTransaction } from "./faucet_transaction";
-import { BalanceMap } from "./balance_map";
-import Decimal from "decimal.js";
-import { Balance } from "./balance";
-import { Trade } from "./trade";
-import { WalletAddress } from "./address/wallet_address";
-import { Asset } from "./asset";
 
 /**
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
@@ -53,6 +53,42 @@ export class Wallet {
     this.model = model;
     this.master = master;
     this.seed = seed;
+  }
+
+  /**
+   * Lists the Wallets belonging to the User.
+   *
+   * @param pageSize - The number of Wallets to return per page. Defaults to 10
+   * @param nextPageToken - The token for the next page of Wallets
+   * @returns An object containing the Wallets and the token for the next page
+   */
+  public static async listWallets(
+    pageSize: number = 10,
+    nextPageToken?: string,
+  ): Promise<{ wallets: Wallet[]; nextPageToken: string }> {
+    const walletList = await Coinbase.apiClients.wallet!.listWallets(
+      pageSize,
+      nextPageToken ? nextPageToken : undefined,
+    );
+    const wallets = await Promise.all(
+      walletList.data.data.map(async wallet => {
+        return await Wallet.init(wallet, "");
+      }),
+    );
+
+    return { wallets: wallets, nextPageToken: walletList.data.next_page };
+  }
+
+  /**
+   * Fetches a Wallet by its ID. The returned wallet can be immediately used for signing operations if backed by a server signer.
+   * If the wallet is not backed by a server signer, the wallet's seed will need to be set before it can be used for signing operations.
+   *
+   * @param wallet_id - The ID of the Wallet to fetch
+   * @returns The fetched Wallet
+   */
+  public static async fetch(wallet_id: string): Promise<Wallet> {
+    const response = await Coinbase.apiClients.wallet!.getWallet(wallet_id);
+    return Wallet.init(response.data!, "");
   }
 
   /**
@@ -91,6 +127,27 @@ export class Wallet {
   }
 
   /**
+   * Returns a new Wallet object. Do not use this method directly. Instead, use User.createWallet or User.importWallet.
+   *
+   * @constructs Wallet
+   * @param model - The underlying Wallet model object
+   * @param seed - The seed to use for the Wallet. Expects a 32-byte hexadecimal with no 0x prefix. If null or undefined, a new seed will be generated.
+   * If the empty string, no seed is generated, and the Wallet will be instantiated without a seed and its corresponding private keys.
+   * @throws {ArgumentError} If the model or client is not provided.
+   * @throws {InternalError} - If address derivation or caching fails.
+   * @throws {APIError} - If the request fails.
+   * @returns A promise that resolves with the new Wallet object.
+   */
+  public static async init(model: WalletModel, seed?: string | undefined): Promise<Wallet> {
+    const wallet = new Wallet(model, undefined, seed);
+    if (Coinbase.useServerSigner) {
+      return wallet;
+    }
+    wallet.setMasterNode(seed);
+    return wallet;
+  }
+
+  /**
    * Waits until the ServerSigner has created a seed for the Wallet.
    *
    * @param walletId - The ID of the Wallet that is awaiting seed creation.
@@ -116,28 +173,7 @@ export class Wallet {
   }
 
   /**
-   * Returns a new Wallet object. Do not use this method directly. Instead, use User.createWallet or User.importWallet.
-   *
-   * @constructs Wallet
-   * @param model - The underlying Wallet model object
-   * @param seed - The seed to use for the Wallet. Expects a 32-byte hexadecimal with no 0x prefix. If null or undefined, a new seed will be generated.
-   * If the empty string, no seed is generated, and the Wallet will be instantiated without a seed and its corresponding private keys.
-   * @throws {ArgumentError} If the model or client is not provided.
-   * @throws {InternalError} - If address derivation or caching fails.
-   * @throws {APIError} - If the request fails.
-   * @returns A promise that resolves with the new Wallet object.
-   */
-  public static async init(model: WalletModel, seed?: string | undefined): Promise<Wallet> {
-    const wallet = new Wallet(model, undefined, seed);
-    if (Coinbase.useServerSigner) {
-      return wallet;
-    }
-    wallet.setMasterNode(seed);
-    return wallet;
-  }
-
-  /**
-   * Returns the master node for the given seed.
+   * Sets the master node for the given seed, if valid. If the seed is undefined it will set the master node using a random seed.
    *
    * @param seed - The seed to use for the Wallet.
    * @returns The master node for the given seed.
@@ -152,7 +188,6 @@ export class Wallet {
     this.validateSeed(seed);
     this.seed = seed;
     this.master = HDKey.fromMasterSeed(Buffer.from(seed, "hex"));
-    return this.master;
   }
 
   /**
@@ -218,36 +253,6 @@ export class Wallet {
     this.addresses.push(address);
 
     return address;
-  }
-
-  /**
-   * Lists the Wallets belonging to the User.
-   *
-   * @param pageSize - The number of Wallets to return per page. Defaults to 10
-   * @param nextPageToken - The token for the next page of Wallets
-   * @returns An object containing the Wallets and the token for the next page
-   */
-  public static async listWallets(
-    pageSize: number = 10,
-    nextPageToken?: string,
-  ): Promise<{ wallets: Wallet[]; nextPageToken: string }> {
-    const walletList = await Coinbase.apiClients.wallet!.listWallets(
-      pageSize,
-      nextPageToken ? nextPageToken : undefined,
-    );
-    const walletsModels: WalletModel[] = [];
-
-    for (const wallet of walletList.data.data) {
-      walletsModels.push(wallet);
-    }
-
-    const wallets = await Promise.all(
-      walletsModels.map(async wallet => {
-        return await Wallet.init(wallet, "");
-      }),
-    );
-
-    return { wallets: wallets, nextPageToken: walletList.data.next_page };
   }
 
   /**
@@ -692,17 +697,5 @@ export class Wallet {
     }
 
     return new WalletAddress(addressModel, ethWallet);
-  }
-
-  /**
-   * Fetches a Wallet by its ID. The returned wallet can be immediately used for signing operations if backed by a server signer.
-   * If the wallet is not backed by a server signer, the wallet's seed will need to be set before it can be used for signing operations.
-   *
-   * @param wallet_id - The ID of the Wallet to fetch
-   * @returns The fetched Wallet
-   */
-  public static async fetch(wallet_id: string): Promise<Wallet> {
-    const response = await Coinbase.apiClients.wallet!.getWallet(wallet_id);
-    return Wallet.init(response.data!, "");
   }
 }

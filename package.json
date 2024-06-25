@@ -16,7 +16,6 @@
     "test": "npx jest --no-cache  --testMatch=**/*_test.ts",
     "test:dry-run": "npm install && npm ci && npm publish --dry-run",
     "test:e2e": "npx jest --no-cache --testMatch=**/e2e.ts --coverageThreshold '{}'",
-    "test:local": "npx jest --no-cache --testMatch=**/*_local.ts --coverageThreshold '{}'",
     "clean": "rm -rf dist/*",
     "build": "tsc",
     "prepack": "tsc",
