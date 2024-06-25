@@ -171,7 +171,7 @@ describe("Transaction", () => {
     });
 
     it("sets the signed payload", () => {
-      expect(transaction.getSignedPayload()).toEqual(signature);
+      expect(transaction.getSignedPayload().slice(2)).toEqual(signature);
     });
   });
 

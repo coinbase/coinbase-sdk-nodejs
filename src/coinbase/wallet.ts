@@ -1,5 +1,4 @@
 import { HDKey } from "@scure/bip32";
-import * as bip39 from "bip39";
 import * as crypto from "crypto";
 import * as fs from "fs";
 import { ethers } from "ethers";
@@ -37,10 +36,8 @@ export class Wallet {
   private master?: HDKey;
   private seed?: string;
   private addresses: WalletAddress[] = [];
-  private addressModels: AddressModel[] = [];
 
   private readonly addressPathPrefix = "m/44'/60'/0'/0";
-  private addressIndex = 0;
   static MAX_ADDRESSES = 20;
 
   /**
@@ -50,19 +47,12 @@ export class Wallet {
    * @param model - The wallet model object.
    * @param master - The HD master key.
    * @param seed - The seed to use for the Wallet. Expects a 32-byte hexadecimal with no 0x prefix.
-   * @param addressModels - The models of the addresses already registered with the Wallet.
    * @hideconstructor
    */
-  private constructor(
-    model: WalletModel,
-    master: HDKey | undefined,
-    seed: string | undefined,
-    addressModels: AddressModel[] = [],
-  ) {
+  private constructor(model: WalletModel, master: HDKey | undefined, seed: string | undefined) {
     this.model = model;
     this.master = master;
     this.seed = seed;
-    this.addressModels = addressModels;
   }
 
   /**
@@ -91,15 +81,12 @@ export class Wallet {
       },
     });
 
-    const wallet = await Wallet.init(result.data, undefined, []);
-
+    const wallet = await Wallet.init(result.data, undefined);
     if (Coinbase.useServerSigner) {
       await wallet.waitForSigner(wallet.getId()!, intervalSeconds, timeoutSeconds);
     }
 
     await wallet.createAddress();
-    await wallet.reload();
-
     return wallet;
   }
 
@@ -135,28 +122,37 @@ export class Wallet {
    * @param model - The underlying Wallet model object
    * @param seed - The seed to use for the Wallet. Expects a 32-byte hexadecimal with no 0x prefix. If null or undefined, a new seed will be generated.
    * If the empty string, no seed is generated, and the Wallet will be instantiated without a seed and its corresponding private keys.
-   * @param addressModels - The models of the addresses already registered with the Wallet. If not provided, the Wallet will derive the first default address.
    * @throws {ArgumentError} If the model or client is not provided.
    * @throws {InternalError} - If address derivation or caching fails.
    * @throws {APIError} - If the request fails.
    * @returns A promise that resolves with the new Wallet object.
    */
-  public static async init(
-    model: WalletModel,
-    seed?: string | undefined,
-    addressModels: AddressModel[] = [],
-  ): Promise<Wallet> {
-    this.validateSeedAndAddressModels(seed, addressModels);
-
+  public static async init(model: WalletModel, seed?: string | undefined): Promise<Wallet> {
+    const wallet = new Wallet(model, undefined, seed);
     if (Coinbase.useServerSigner) {
-      return new Wallet(model, undefined, undefined, addressModels);
+      return wallet;
     }
-
-    const seedAndMaster = this.getSeedAndMasterKey(seed);
-    const wallet = new Wallet(model, seedAndMaster.master, seedAndMaster.seed, addressModels);
-    wallet.deriveAddresses(addressModels);
-
+    wallet.masterNode(seed);
     return wallet;
+  }
+
+  /**
+   * Returns the master node for the given seed.
+   *
+   * @param seed - The seed to use for the Wallet.
+   * @returns The master node for the given seed.
+   */
+  private masterNode(seed: string | undefined): HDKey | undefined {
+    if (seed === "") {
+      return undefined;
+    }
+    if (seed === undefined) {
+      seed = ethers.Wallet.createRandom().privateKey.slice(2);
+    }
+    this.validateSeed(seed);
+    this.seed = seed;
+    this.master = HDKey.fromMasterSeed(Buffer.from(seed, "hex"));
+    return this.master;
   }
 
   /**
@@ -175,16 +171,20 @@ export class Wallet {
   /**
    * Derives a key for an already registered Address in the Wallet.
    *
+   * @param index - The index of the Address to derive.
    * @throws {InternalError} - If the key derivation fails.
    * @returns The derived key.
    */
-  private deriveKey(): HDKey {
+  private deriveKey(index: number): HDKey {
+    if (!this.master) {
+      throw new InternalError("Cannot derive key for Wallet without seed loaded");
+    }
     const [networkPrefix] = this.model.network_id.split("-");
     // TODO: Push this logic to the backend.
     if (!["base", "ethereum"].includes(networkPrefix)) {
       throw new InternalError(`Unsupported network ID: ${this.model.network_id}`);
     }
-    const derivedKey = this.master?.derive(this.addressPathPrefix + "/" + this.addressIndex++);
+    const derivedKey = this.master?.derive(this.addressPathPrefix + `/${index}`);
     if (!derivedKey?.privateKey) {
       throw new InternalError("Failed to derive key");
     }
@@ -200,7 +200,7 @@ export class Wallet {
   public async createAddress(): Promise<Address> {
     let payload, key;
     if (!Coinbase.useServerSigner) {
-      const hdKey = this.deriveKey();
+      const hdKey = this.deriveKey(this.addresses.length);
       const attestation = this.createAttestation(hdKey);
       const publicKey = convertStringToHex(hdKey.publicKey!);
       key = new ethers.Wallet(convertStringToHex(hdKey.privateKey!));
@@ -211,9 +211,43 @@ export class Wallet {
       };
     }
     const response = await Coinbase.apiClients.address!.createAddress(this.model.id!, payload);
+    if (!this.addresses.length || !Coinbase.useServerSigner) {
+      this.reload();
+    }
+    const address = new WalletAddress(response.data, key);
+    this.addresses.push(address);
 
-    this.cacheAddress(response!.data, key);
-    return new WalletAddress(response!.data, key);
+    return address;
+  }
+
+  /**
+   * Lists the Wallets belonging to the User.
+   *
+   * @param pageSize - The number of Wallets to return per page. Defaults to 10
+   * @param nextPageToken - The token for the next page of Wallets
+   * @returns An object containing the Wallets and the token for the next page
+   */
+  public static async listWallets(
+    pageSize: number = 10,
+    nextPageToken?: string,
+  ): Promise<{ wallets: Wallet[]; nextPageToken: string }> {
+    const walletList = await Coinbase.apiClients.wallet!.listWallets(
+      pageSize,
+      nextPageToken ? nextPageToken : undefined,
+    );
+    const walletsModels: WalletModel[] = [];
+
+    for (const wallet of walletList.data.data) {
+      walletsModels.push(wallet);
+    }
+
+    const wallets = await Promise.all(
+      walletsModels.map(async wallet => {
+        return await Wallet.init(wallet, "");
+      }),
+    );
+
+    return { wallets: wallets, nextPageToken: walletList.data.next_page };
   }
 
   /**
@@ -224,6 +258,7 @@ export class Wallet {
    */
   private createAttestation(key: HDKey): string {
     if (!key.publicKey || !key.privateKey) {
+      /* istanbul ignore next */
       throw InternalError;
     }
 
@@ -258,90 +293,35 @@ export class Wallet {
   }
 
   /**
-   * Derives an already registered Address in the Wallet.
+   * Set the seed for the Wallet.
    *
-   * @param addressMap - The map of registered Address IDs
-   * @param addressModel - The Address model
-   * @throws {InternalError} - If address derivation fails.
-   * @throws {APIError} - If the request fails.
+   * @param seed - The seed to use for the Wallet. Expects a 32-byte hexadecimal with no 0x prefix.
+   * @throws {ArgumentError} If the seed is empty.
+   * @throws {InternalError} If the seed is already set.
    */
-  private deriveAddress(addressMap: { [key: string]: boolean }, addressModel: AddressModel): void {
-    const doesMasterExist = this.master !== undefined;
-    const key = doesMasterExist
-      ? new ethers.Wallet(convertStringToHex(this.deriveKey().privateKey!))
-      : undefined;
-    if (key && !addressMap[key.address]) {
-      throw new InternalError("Invalid address");
+  public setSeed(seed: string) {
+    if (seed === undefined || seed === "") {
+      throw new ArgumentError("Seed must not be empty");
     }
-    this.cacheAddress(addressModel, key);
-  }
+    if (this.master) {
+      throw new InternalError("Seed is already set");
+    }
+    this.masterNode(seed);
 
-  /**
-   * Derives the registered Addresses in the Wallet.
-   *
-   * @param addresses - The models of the addresses already registered with the
-   */
-  private deriveAddresses(addresses: AddressModel[]): void {
-    if (addresses.length === 0) {
+    if (this.addresses.length < 1) {
       return;
     }
 
-    const addressMap = this.buildAddressMap(addresses);
-    for (const address of addresses) {
-      this.deriveAddress(addressMap, address);
-    }
-  }
-
-  /**
-   * Builds a Hash of the registered Addresses.
-   *
-   * @param addressModels - The models of the addresses already registered with the Wallet.
-   * @returns The Hash of registered Addresses
-   */
-  private buildAddressMap(addressModels: AddressModel[]): { [key: string]: boolean } {
-    const addressMap: { [key: string]: boolean } = {};
-
-    addressModels?.forEach(addressModel => {
-      addressMap[addressModel.address_id] = true;
+    this.addresses.forEach((address: WalletAddress, index: number) => {
+      const derivedKey = this.deriveKey(index);
+      const etherWallet = new ethers.Wallet(convertStringToHex(derivedKey.privateKey!));
+      if (etherWallet.address != address.getId()) {
+        throw new InternalError(
+          `Seed does not match wallet; cannot find address ${etherWallet.address}`,
+        );
+      }
+      address.setKey(etherWallet);
     });
-
-    return addressMap;
-  }
-
-  /**
-   * Caches an Address on the client-side and increments the address index.
-   *
-   * @param address - The AddressModel to cache.
-   * @param key - The ethers.js Wallet object the address uses for signing data.
-   * @throws {InternalError} If the address is not provided.
-   * @returns {void}
-   */
-  private cacheAddress(address: AddressModel, key?: ethers.Wallet): void {
-    this.addresses.push(new WalletAddress(address, key));
-  }
-
-  /**
-   * Returns the Wallet model.
-   *
-   * @param seed - The seed to use for the Wallet. Expects a 32-byte hexadecimal with no 0x prefix.
-   */
-  public setSeed(seed: string) {
-    if (this.master === undefined && (this.seed === undefined || this.seed === "")) {
-      this.master = HDKey.fromMasterSeed(Buffer.from(seed, "hex"));
-      this.addresses = [];
-      this.addressModels.map((addressModel: AddressModel) => {
-        const derivedKey = this.deriveKey();
-        const etherKey = new ethers.Wallet(convertStringToHex(derivedKey.privateKey!));
-        if (etherKey.address != addressModel.address_id) {
-          throw new InternalError(
-            `Seed does not match wallet; cannot find address ${etherKey.address}`,
-          );
-        }
-        this.cacheAddress(addressModel, etherKey);
-      });
-    } else {
-      throw new InternalError("Cannot set seed on Wallet with existing seed");
-    }
   }
 
   /**
@@ -361,8 +341,17 @@ export class Wallet {
    *
    * @returns The list of Addresses.
    */
-  public listAddresses(): Address[] {
-    return this.addresses;
+  public async listAddresses(): Promise<WalletAddress[]> {
+    const response = await Coinbase.apiClients.address!.listAddresses(
+      this.getId()!,
+      Wallet.MAX_ADDRESSES,
+    );
+
+    const addresses = response.data.data.map((address, index) => {
+      return this.buildWalletAddress(address, index);
+    });
+    this.addresses = addresses;
+    return addresses;
   }
 
   /**
@@ -425,14 +414,12 @@ export class Wallet {
    * @returns the ServerSigner Status.
    */
   public getServerSignerStatus(): ServerSignerStatus | undefined {
-    switch (this.model.server_signer_status) {
-      case ServerSignerStatus.PENDING:
-        return ServerSignerStatus.PENDING;
-      case ServerSignerStatus.ACTIVE:
-        return ServerSignerStatus.ACTIVE;
-      default:
-        return undefined;
-    }
+    const status: Record<string, ServerSignerStatus> = {
+      pending_seed_creation: ServerSignerStatus.PENDING,
+      active_seed: ServerSignerStatus.ACTIVE,
+    };
+
+    return this.model.server_signer_status ? status[this.model.server_signer_status] : undefined;
   }
 
   /**
@@ -498,7 +485,7 @@ export class Wallet {
    * @param filePath - The path of the file to load the seed from
    * @returns A string indicating the success of the operation
    */
-  public loadSeed(filePath: string): string {
+  public async loadSeed(filePath: string): Promise<string> {
     const existingSeedsInStore = this.getExistingSeeds(filePath);
     if (Object.keys(existingSeedsInStore).length === 0) {
       throw new ArgumentError(`File ${filePath} does not contain any seed data`);
@@ -513,12 +500,14 @@ export class Wallet {
     const seedData = existingSeedsInStore[this.getId()!];
     let seed = seedData.seed;
     if (!seed) {
+      /* istanbul ignore next */
       throw new ArgumentError("Seed data is malformed");
     }
 
     if (seedData.encrypted) {
       const sharedSecret = this.getEncryptionKey();
       if (!seedData.iv || !seedData.authTag) {
+        /* istanbul ignore next */
         throw new ArgumentError("Encrypted seed data is malformed");
       }
 
@@ -538,6 +527,7 @@ export class Wallet {
     }
 
     this.setSeed(seed);
+    await this.listAddresses();
 
     return `Successfully loaded seed for wallet ${this.getId()} from ${filePath}.`;
   }
@@ -625,56 +615,10 @@ export class Wallet {
    * Validates the seed and address models passed to the constructor.
    *
    * @param seed - The seed to use for the Wallet
-   * @param addressModels - The models of the addresses already registered with the Wallet
    */
-  private static validateSeedAndAddressModels(
-    seed: string | undefined,
-    addressModels: AddressModel[],
-  ): void {
+  private validateSeed(seed: string | undefined): void {
     if (seed && seed.length !== 64) {
       throw new ArgumentError("Seed must be 32 bytes");
-    }
-
-    if (addressModels.length > 0 && seed === undefined) {
-      throw new ArgumentError("Seed must be present if address models are provided");
-    }
-
-    if (addressModels.length === 0 && seed === "") {
-      throw new ArgumentError("Seed must not be empty if address models are not provided");
-    }
-  }
-
-  /**
-   * Returns the seed and master key.
-   *
-   * @param seed - The seed to use for the Wallet. The function will generate one if it is not provided.
-   * @returns The master key
-   */
-  private static getSeedAndMasterKey(seed: string | undefined): {
-    seed: string | undefined;
-    master: HDKey | undefined;
-  } {
-    switch (seed) {
-      case undefined: {
-        const mnemonic = bip39.generateMnemonic();
-        const seedBuffer = bip39.mnemonicToSeedSync(mnemonic).subarray(0, 32);
-        return {
-          seed: seedBuffer.toString("hex"),
-          master: HDKey.fromMasterSeed(seedBuffer),
-        };
-      }
-      case "": {
-        return {
-          seed: undefined,
-          master: undefined,
-        };
-      }
-      default: {
-        return {
-          seed: seed,
-          master: HDKey.fromMasterSeed(Buffer.from(seed, "hex")),
-        };
-      }
     }
   }
 
@@ -728,5 +672,37 @@ export class Wallet {
       publicKey,
     });
     return encryptionKey;
+  }
+
+  /**
+   * Returns a WalletAddress object for the given AddressModel.
+   *
+   * @param addressModel - The AddressModel to build the WalletAddress from.
+   * @param index - The index of the AddressModel.
+   * @returns The WalletAddress object.
+   */
+  private buildWalletAddress(addressModel: AddressModel, index: number): WalletAddress {
+    if (!this.master) {
+      return new WalletAddress(addressModel);
+    }
+    const key = this.deriveKey(index);
+    const ethWallet = new ethers.Wallet(convertStringToHex(key.privateKey!));
+    if (ethWallet.address != addressModel.address_id) {
+      throw new InternalError(`Seed does not match wallet`);
+    }
+
+    return new WalletAddress(addressModel, ethWallet);
+  }
+
+  /**
+   * Fetches a Wallet by its ID. The returned wallet can be immediately used for signing operations if backed by a server signer.
+   * If the wallet is not backed by a server signer, the wallet's seed will need to be set before it can be used for signing operations.
+   *
+   * @param wallet_id - The ID of the Wallet to fetch
+   * @returns The fetched Wallet
+   */
+  public static async fetch(wallet_id: string): Promise<Wallet> {
+    const response = await Coinbase.apiClients.wallet!.getWallet(wallet_id);
+    return Wallet.init(response.data!, "");
   }
 }

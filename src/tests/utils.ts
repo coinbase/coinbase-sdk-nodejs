@@ -26,6 +26,31 @@ export const getAddressFromHDKey = (hdKey: HDKey): string => {
   return new ethers.Wallet(convertStringToHex(hdKey.privateKey!)).address;
 };
 
+export const mockListAddress = (seed: string, count = 1) => {
+  const { wallet1PrivateKey, ...rest } = generateWalletFromSeed(seed, 3);
+
+  const addressList = Array.from({ length: count }, (_, i) => {
+    return {
+      address_id: rest[`address${i + 1}`],
+      network_id: Coinbase.networks.BaseSepolia,
+      public_key: wallet1PrivateKey,
+      wallet_id: randomUUID(),
+    };
+  });
+
+  Coinbase.apiClients.address!.listAddresses = mockFn(() => {
+    return {
+      data: {
+        data: addressList,
+        has_more: false,
+        next_page: "",
+        total_count: count,
+      },
+    };
+  });
+  return addressList;
+};
+
 export const walletId = randomUUID();
 export const transferId = randomUUID();
 

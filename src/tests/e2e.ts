@@ -60,9 +60,9 @@ describe("Coinbase SDK E2E Test", () => {
       console.log("Faucet request failed. Skipping...");
     }
     console.log("Listing wallet addresses...");
-    const addresses = userWallet.listAddresses();
+    const addresses = await userWallet.listAddresses();
     expect(addresses.length).toBeGreaterThan(0);
-    console.log(`Listed addresses: ${userWallet.listAddresses().join(", ")}`);
+    console.log(`Listed addresses: ${addresses.join(", ")}`);
 
     console.log("Fetching wallet balances...");
     const balances = await userWallet.listBalances();

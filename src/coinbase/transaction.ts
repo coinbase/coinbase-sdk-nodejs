@@ -137,7 +137,7 @@ export class Transaction {
     const signedPayload = await key!.signTransaction(this.rawTransaction());
     this.model.signed_payload = signedPayload;
     this.signed = true;
-    return this.model.signed_payload;
+    return signedPayload.slice(2);
   }
 
   /**

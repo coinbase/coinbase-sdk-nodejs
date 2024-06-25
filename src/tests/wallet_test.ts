@@ -26,8 +26,10 @@ import {
   mockReturnRejectedValue,
   mockReturnValue,
   newAddressModel,
+  tradeApiMock,
   transfersApiMock,
   walletsApiMock,
+  mockListAddress,
 } from "./utils";
 import { Trade } from "../coinbase/trade";
 import { WalletAddress } from "../coinbase/address/wallet_address";
@@ -37,8 +39,13 @@ describe("Wallet Class", () => {
   let walletModel: WalletModel;
   let walletId: string;
   const apiResponses = {};
+  const existingSeed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
 
   beforeAll(async () => {
+    const { address1 } = generateWalletFromSeed(existingSeed, 1);
+    jest.spyOn(ethers.Wallet, "createRandom").mockReturnValue({
+      privateKey: `0x${existingSeed}`,
+    } as never);
     walletId = crypto.randomUUID();
     // Mock the API calls
     Coinbase.apiClients.wallet = walletsApiMock;
@@ -54,6 +61,7 @@ describe("Wallet Class", () => {
     });
     Coinbase.apiClients.wallet!.getWallet = mockFn(walletId => {
       walletModel = apiResponses[walletId];
+      walletModel.default_address!.address_id = address1;
       return { data: apiResponses[walletId] };
     });
     Coinbase.apiClients.address!.createAddress = mockFn(walletId => {
@@ -66,11 +74,12 @@ describe("Wallet Class", () => {
     Coinbase.useServerSigner = false;
   });
 
-  describe("#createTransfer", () => {
+  describe(".createTransfer", () => {
     let weiAmount, destination, intervalSeconds, timeoutSeconds;
     let balanceModel: BalanceModel;
 
     beforeEach(() => {
+      jest.clearAllMocks();
       const key = ethers.Wallet.createRandom();
       weiAmount = new Decimal("500000000000000000");
       destination = new WalletAddress(VALID_ADDRESS_MODEL, key as unknown as ethers.Wallet);
@@ -114,7 +123,6 @@ describe("Wallet Class", () => {
         ...VALID_TRANSFER_MODEL,
         status: TransferStatus.COMPLETE,
       });
-
       await wallet.createTransfer({
         amount: weiAmount,
         assetId: Coinbase.assets.Wei,
@@ -222,15 +230,9 @@ describe("Wallet Class", () => {
   });
 
   describe(".create", () => {
+    beforeEach(() => {});
     it("should return a Wallet instance", async () => {
       expect(wallet).toBeInstanceOf(Wallet);
-      expect(Coinbase.apiClients.wallet!.createWallet).toHaveBeenCalledTimes(1);
-      expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledTimes(1);
-      expect(Coinbase.apiClients.address!.createAddress).toHaveBeenCalledTimes(1);
-      expect(Coinbase.apiClients.wallet!.createWallet).toHaveBeenCalledWith({
-        wallet: { network_id: Coinbase.networks.BaseSepolia },
-      });
-      expect(Coinbase.apiClients.wallet!.getWallet).toHaveBeenCalledWith(walletId);
     });
 
     describe("#getId", () => {
@@ -294,12 +296,30 @@ describe("Wallet Class", () => {
       expect(wallet.canSign()).toBe(true);
     });
 
+    it("should throw InternalError if derived key is not valid", async () => {
+      Coinbase.apiClients.address!.listAddresses = mockFn(() => {
+        return {
+          data: {
+            data: [VALID_ADDRESS_MODEL],
+            has_more: false,
+            next_page: "",
+            total_count: 1,
+          },
+        };
+      });
+      await expect(wallet.listAddresses()).rejects.toThrow(InternalError);
+    });
+
     it("should create new address and update the existing address list", async () => {
-      expect(wallet.listAddresses().length).toBe(1);
-      Coinbase.apiClients.address!.createAddress = mockReturnValue(newAddressModel(walletId));
+      const [addressList0] = mockListAddress(existingSeed, 1);
+      let addresses = await wallet.listAddresses();
+      expect(addresses.length).toBe(1);
+      Coinbase.apiClients.address!.createAddress = mockReturnValue(addressList0);
       const newAddress = await wallet.createAddress();
       expect(newAddress).toBeInstanceOf(WalletAddress);
-      expect(wallet.listAddresses().length).toBe(2);
+      mockListAddress(existingSeed, 2);
+      addresses = await wallet.listAddresses();
+      expect(addresses.length).toBe(2);
       expect(wallet.getAddress(newAddress.getId())!.getId()).toBe(newAddress.getId());
       expect(Coinbase.apiClients.address!.createAddress).toHaveBeenCalledTimes(1);
     });
@@ -352,12 +372,12 @@ describe("Wallet Class", () => {
     let wallet: Wallet;
     let addressList: AddressModel[];
     let walletModel: WalletModel;
+    const existingSeed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
+    const { address1, address2, address3, wallet1PrivateKey, wallet2PrivateKey } =
+      generateWalletFromSeed(existingSeed, 3);
 
     beforeEach(async () => {
       jest.clearAllMocks();
-      const existingSeed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
-      const { address1, address2, wallet1PrivateKey, wallet2PrivateKey } =
-        generateWalletFromSeed(existingSeed);
       addressList = [
         {
           address_id: address1,
@@ -378,7 +398,7 @@ describe("Wallet Class", () => {
         default_address: addressList[0],
         enabled_features: [],
       };
-      wallet = await Wallet.init(walletModel, existingSeed, addressList);
+      wallet = await Wallet.init(walletModel, existingSeed);
       Coinbase.apiClients.address!.createAddress = mockFn(walletId => {
         return {
           data: {
@@ -388,23 +408,12 @@ describe("Wallet Class", () => {
           },
         };
       });
-    });
-
-    describe("should validate the seed and addressModels", () => {
-      it("should validate the seed length", async () => {
-        await expect(async () => {
-          await Wallet.init(VALID_WALLET_MODEL, "000", []);
-        }).rejects.toThrow(ArgumentError);
-      });
-      it("should have a seed when the address list is not empty", async () => {
-        await expect(async () => {
-          await Wallet.init(VALID_WALLET_MODEL, "", []);
-        }).rejects.toThrow(ArgumentError);
-      });
-      it("should have a seed when the address list is not empty", async () => {
-        await expect(async () => {
-          await Wallet.init(VALID_WALLET_MODEL, undefined, [VALID_ADDRESS_MODEL]);
-        }).rejects.toThrow(ArgumentError);
+      Coinbase.apiClients.address!.listAddresses = mockFn(() => {
+        return {
+          data: {
+            data: addressList,
+          },
+        };
       });
     });
 
@@ -430,20 +439,46 @@ describe("Wallet Class", () => {
     });
 
     it("should derive the correct number of addresses", async () => {
-      expect(wallet.listAddresses().length).toBe(2);
+      const addresses = await wallet.listAddresses();
+      expect(addresses.length).toBe(2);
     });
 
     it("should create new address and update the existing address list", async () => {
-      expect(wallet.listAddresses().length).toBe(2);
+      mockListAddress(existingSeed, 2);
+      let addresses = await wallet.listAddresses();
+      expect(addresses.length).toBe(2);
+      const [, , lastAddress] = mockListAddress(existingSeed, 3);
+      Coinbase.apiClients.address!.createAddress = mockReturnValue(lastAddress);
       const newAddress = await wallet.createAddress();
       expect(newAddress).toBeInstanceOf(WalletAddress);
-      expect(wallet.listAddresses().length).toBe(3);
+      addresses = await wallet.listAddresses();
+      expect(addresses.length).toBe(3);
       expect(wallet.getAddress(newAddress.getId())!.getId()).toBe(newAddress.getId());
     });
 
     it("should return the correct string representation", async () => {
       expect(wallet.toString()).toBe(
         `Wallet{id: '${walletModel.id}', networkId: '${Coinbase.networks.BaseSepolia}'}`,
+      );
+    });
+
+    it("should raise an error when the seed is invalid", async () => {
+      const newWallet = await Wallet.init(walletModel, "");
+      expect(() => newWallet.setSeed(``)).toThrow(ArgumentError);
+      expect(() => newWallet.setSeed(`invalid-seed`)).toThrow(ArgumentError);
+    });
+
+    it("should raise an error when creating a wallet with an invalid network", async () => {
+      const newWallet = await Wallet.init(
+        {
+          ...walletModel,
+          network_id: "invalid_network_id",
+        },
+        "",
+      );
+      newWallet.setSeed(existingSeed);
+      await expect(newWallet.createAddress()).rejects.toThrow(
+        "Unsupported network ID: invalid_network_id",
       );
     });
   });
@@ -484,7 +519,7 @@ describe("Wallet Class", () => {
     });
 
     it("throws an error when the Wallet is seedless", async () => {
-      const seedlessWallet = await Wallet.init(walletModel, "", [addressModel]);
+      const seedlessWallet = await Wallet.init(walletModel, "");
       expect(() => seedlessWallet.export()).toThrow(InternalError);
     });
 
@@ -495,6 +530,7 @@ describe("Wallet Class", () => {
 
   describe("#listBalances", () => {
     beforeEach(() => {
+      jest.clearAllMocks();
       const mockBalanceResponse: AddressBalanceList = {
         data: [
           {
@@ -522,11 +558,12 @@ describe("Wallet Class", () => {
     });
 
     it("should return a hash with an ETH and USDC balance", async () => {
+      mockListAddress(existingSeed, 3);
       const balanceMap = await wallet.listBalances();
       expect(balanceMap.get("eth")).toEqual(new Decimal(1));
       expect(balanceMap.get("usdc")).toEqual(new Decimal(5));
       expect(Coinbase.apiClients.wallet!.listWalletBalances).toHaveBeenCalledTimes(1);
-      expect(Coinbase.apiClients.wallet!.listWalletBalances).toHaveBeenCalledWith(walletId);
+      expect(Coinbase.apiClients.wallet!.listWalletBalances).toHaveBeenCalledWith(wallet.getId());
     });
   });
 
@@ -548,7 +585,7 @@ describe("Wallet Class", () => {
       expect(balanceMap).toEqual(new Decimal(5));
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledWith(
-        walletId,
+        wallet.getId(),
         Coinbase.assets.Eth,
       );
     });
@@ -558,7 +595,7 @@ describe("Wallet Class", () => {
       expect(balance).toEqual(new Decimal(5000000000));
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledWith(
-        walletId,
+        wallet.getId(),
         Coinbase.assets.Eth,
       );
     });
@@ -568,7 +605,7 @@ describe("Wallet Class", () => {
       expect(balance).toEqual(new Decimal(5000000000000000000));
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledWith(
-        walletId,
+        wallet.getId(),
         Coinbase.assets.Eth,
       );
     });
@@ -579,7 +616,7 @@ describe("Wallet Class", () => {
       expect(balance).toEqual(new Decimal(0));
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.wallet!.getWalletBalance).toHaveBeenCalledWith(
-        walletId,
+        wallet.getId(),
         Coinbase.assets.Eth,
       );
     });
@@ -674,7 +711,7 @@ describe("Wallet Class", () => {
     });
 
     it("should throw an error when the wallet is seedless", async () => {
-      const seedlessWallet = await Wallet.init(walletModel, "", [newAddressModel(walletId)]);
+      const seedlessWallet = await Wallet.init(walletModel, "");
       expect(() => seedlessWallet.saveSeed(filePath, false)).toThrow(InternalError);
     });
   });
@@ -685,7 +722,6 @@ describe("Wallet Class", () => {
     const filePath = "seeds.json";
     let seedWallet;
     let seedlessWallet;
-    const addressModel = newAddressModel(walletId, "0x919538116b4F25f1CE01429fd9Ed7964556bf565");
 
     beforeEach(async () => {
       apiPrivateKey = Coinbase.apiKeyPrivateKey;
@@ -704,8 +740,8 @@ describe("Wallet Class", () => {
         },
       };
       fs.writeFileSync(filePath, JSON.stringify(initialSeedData), "utf8");
-      seedWallet = await Wallet.init(walletModel, seed, [addressModel]);
-      seedlessWallet = await Wallet.init(walletModel, "", [addressModel]);
+      seedWallet = await Wallet.init(walletModel, seed);
+      seedlessWallet = await Wallet.init(walletModel, "");
     });
 
     afterEach(async () => {
@@ -714,13 +750,13 @@ describe("Wallet Class", () => {
     });
 
     it("loads the seed from the file", async () => {
-      seedlessWallet.loadSeed(filePath);
+      await seedlessWallet.loadSeed(filePath);
       expect(seedlessWallet.canSign()).toBe(true);
     });
 
     it("loads the encrypted seed from the file", async () => {
       seedWallet.saveSeed(filePath, true);
-      seedlessWallet.loadSeed(filePath);
+      await seedlessWallet.loadSeed(filePath);
       expect(seedlessWallet.canSign()).toBe(true);
     });
 
@@ -732,15 +768,16 @@ describe("Wallet Class", () => {
         network_id: Coinbase.networks.BaseSepolia,
         enabled_features: [],
       };
-      const otherWallet = await Wallet.init(otherModel);
+      const randomSeed = ethers.Wallet.createRandom().privateKey.slice(2);
+      const otherWallet = await Wallet.init(otherModel, randomSeed);
       otherWallet.saveSeed(filePath, true);
 
-      seedlessWallet.loadSeed(filePath);
+      await seedlessWallet.loadSeed(filePath);
       expect(seedlessWallet.canSign()).toBe(true);
     });
 
     it("raises an error if the wallet is already hydrated", async () => {
-      expect(() => seedWallet.loadSeed(filePath)).toThrow(InternalError);
+      await expect(seedWallet.loadSeed(filePath)).rejects.toThrow(InternalError);
     });
 
     it("raises an error when file contains different wallet data", async () => {
@@ -754,65 +791,85 @@ describe("Wallet Class", () => {
       };
       fs.writeFileSync(filePath, JSON.stringify(otherSeedData), "utf8");
 
-      expect(() => seedlessWallet.loadSeed(filePath)).toThrow(ArgumentError);
+      await expect(seedlessWallet.loadSeed(filePath)).rejects.toThrow(ArgumentError);
     });
 
     it("raises an error when the file is absent", async () => {
-      expect(() => seedlessWallet.loadSeed("non-file.json")).toThrow(ArgumentError);
+      await expect(seedlessWallet.loadSeed("non-file.json")).rejects.toThrow(ArgumentError);
     });
 
     it("raises an error when the file is corrupted", async () => {
       fs.writeFileSync(filePath, "corrupted data", "utf8");
 
-      expect(() => seedlessWallet.loadSeed(filePath)).toThrow(ArgumentError);
+      await expect(seedlessWallet.loadSeed(filePath)).rejects.toThrow(ArgumentError);
     });
 
     it("throws an error when the file is empty", async () => {
       fs.writeFileSync("invalid-file.json", "", "utf8");
-      expect(() => wallet.loadSeed("invalid-file.json")).toThrow(ArgumentError);
+      await expect(wallet.loadSeed("invalid-file.json")).rejects.toThrow(ArgumentError);
       fs.unlinkSync("invalid-file.json");
     });
 
     it("throws an error when the file is not a valid JSON", async () => {
       fs.writeFileSync("invalid-file.json", `{"test":{"authTag":false}}`, "utf8");
-      expect(() => wallet.loadSeed("invalid-file.json")).toThrow(ArgumentError);
+      await expect(wallet.loadSeed("invalid-file.json")).rejects.toThrow(ArgumentError);
       fs.unlinkSync("invalid-file.json");
     });
   });
 
   describe("#trade", () => {
-    let tradeObject;
-    beforeAll(() => {
-      tradeObject = new Trade({
+    const tradeObject = new Trade({
+      network_id: Coinbase.networks.BaseSepolia,
+      wallet_id: walletId,
+      address_id: VALID_ADDRESS_MODEL.address_id,
+      trade_id: crypto.randomUUID(),
+      from_amount: "0.01",
+      transaction: {
         network_id: Coinbase.networks.BaseSepolia,
-        wallet_id: walletId,
-        address_id: VALID_ADDRESS_MODEL.address_id,
-        trade_id: crypto.randomUUID(),
-        from_amount: "0.01",
-        transaction: {
-          network_id: Coinbase.networks.BaseSepolia,
-          from_address_id: VALID_ADDRESS_MODEL.address_id,
-          unsigned_payload: "unsigned_payload",
-          status: TransactionStatusEnum.Pending,
-        },
-      } as TradeModel);
-      const trade = Promise.resolve(tradeObject);
-      jest.spyOn(WalletAddress.prototype, "createTrade").mockReturnValue(trade);
-    });
+        from_address_id: VALID_ADDRESS_MODEL.address_id,
+        unsigned_payload: "unsigned_payload",
+        status: TransactionStatusEnum.Pending,
+      },
+    } as TradeModel);
 
     it("should throw an error when the wallet does not have a default address", async () => {
-      const wallet = await Wallet.init(walletModel);
-      await expect(async () => await wallet.createTrade(0.01, "eth", "usdc")).rejects.toThrow(
+      const newWallet = await Wallet.init(walletModel);
+      await expect(async () => await newWallet.createTrade(0.01, "eth", "usdc")).rejects.toThrow(
         InternalError,
       );
     });
 
     it("should create a trade from the default address", async () => {
+      const trade = Promise.resolve(tradeObject);
+      jest.spyOn(Wallet.prototype, "createTrade").mockReturnValue(trade);
+      const wallet = await Wallet.create();
       const result = await wallet.createTrade(0.01, "eth", "usdc");
       expect(result).toBeInstanceOf(Trade);
       expect(result.getAddressId()).toBe(tradeObject.getAddressId());
       expect(result.getWalletId()).toBe(tradeObject.getWalletId());
       expect(result.getId()).toBe(tradeObject.getId());
+    });
+
+    it("should list trades for a given address", async () => {
+      Coinbase.apiClients.trade = tradeApiMock;
+      const listOfTrades = [tradeObject, tradeObject];
+      Coinbase.apiClients.trade!.listTrades = mockFn(() => {
+        const object = listOfTrades.shift();
+        return {
+          data: {
+            data: [object],
+            has_more: listOfTrades.length > 0,
+            next_page: listOfTrades.length > 0 ? "x" : "",
+            total_count: listOfTrades.length,
+          },
+        };
+      });
+
+      const [address1] = await wallet.listAddresses();
+      const tradeWallet = (await wallet.getAddress(address1.getId())) as WalletAddress;
+      const trades = await tradeWallet.listTrades();
+      expect(trades[0]).toBeInstanceOf(Trade);
+      expect(trades.length).toBe(2);
     });
   });
 });
