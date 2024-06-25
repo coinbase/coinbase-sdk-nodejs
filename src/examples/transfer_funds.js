@@ -10,8 +10,12 @@ async function transferFunds() {
 
   // Then, we can transfer 0.00001 ETH out of the Wallet to another Wallet.
   // The wallet object should have funds to create a transfer.
-  const transfer = await wallet.createTransfer(0.00001, Coinbase.assets.Eth, anotherWallet);
-  console.log(`Transfer successfully completed: ${transfer}`);
+  const transfer = await wallet.createTransfer({
+    amount: 0.00001,
+    assetId: Coinbase.assets.Eth,
+    destination: anotherWallet,
+  });
+  console.log(`Transfer successfully completed: `, transfer);
 }
 
 transferFunds();
