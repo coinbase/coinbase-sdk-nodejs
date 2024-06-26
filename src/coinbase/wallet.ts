@@ -70,11 +70,9 @@ export class Wallet {
       pageSize,
       nextPageToken ? nextPageToken : undefined,
     );
-    const wallets = await Promise.all(
-      walletList.data.data.map(async wallet => {
-        return await Wallet.init(wallet, "");
-      }),
-    );
+    const wallets = walletList.data.data.map(wallet => {
+      return Wallet.init(wallet, "");
+    });
 
     return { wallets: wallets, nextPageToken: walletList.data.next_page };
   }
