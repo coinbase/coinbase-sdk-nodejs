@@ -53,7 +53,6 @@ export class Asset {
       throw new InternalError("Invalid asset model");
     }
 
-    console.log(model);
     let decimals = model.decimals!;
     // TODO: Push this logic down to the backend.
     if (
