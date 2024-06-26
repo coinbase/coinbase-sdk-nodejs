@@ -441,6 +441,14 @@ describe("ExternalAddress", () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       const stakeableBalance = await address.stakeableBalance(Coinbase.assets.Eth);
       expect(stakeableBalance).toEqual(new Decimal("3"));
+      expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
+        address_id: address.getId(),
+        network_id: address.getNetworkId(),
+        asset_id: Coinbase.assets.Eth,
+        options: {
+          mode: StakeOptionsMode.DEFAULT,
+        },
+      });
     });
   });
 
@@ -449,6 +457,14 @@ describe("ExternalAddress", () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       const unstakeableBalance = await address.unstakeableBalance(Coinbase.assets.Eth);
       expect(unstakeableBalance).toEqual(new Decimal("2"));
+      expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
+        address_id: address.getId(),
+        network_id: address.getNetworkId(),
+        asset_id: Coinbase.assets.Eth,
+        options: {
+          mode: StakeOptionsMode.DEFAULT,
+        },
+      });
     });
   });
 
@@ -457,6 +473,14 @@ describe("ExternalAddress", () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       const claimableBalance = await address.claimableBalance(Coinbase.assets.Eth);
       expect(claimableBalance).toEqual(new Decimal("1"));
+      expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
+        address_id: address.getId(),
+        network_id: address.getNetworkId(),
+        asset_id: Coinbase.assets.Eth,
+        options: {
+          mode: StakeOptionsMode.DEFAULT,
+        },
+      });
     });
   });
 });
