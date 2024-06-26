@@ -137,6 +137,7 @@ export class Transaction {
     const signedPayload = await key!.signTransaction(this.rawTransaction());
     this.model.signed_payload = signedPayload;
     this.signed = true;
+    // Removes the '0x' prefix as required by the API.
     return signedPayload.slice(2);
   }
 
