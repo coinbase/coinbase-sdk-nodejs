@@ -115,7 +115,7 @@ describe("Wallet Class", () => {
         status: TransferStatus.COMPLETE,
       });
 
-      await wallet.createTransfer({
+      await wallet.send({
         amount: weiAmount,
         assetId: Coinbase.assets.Wei,
         destination,
@@ -133,7 +133,7 @@ describe("Wallet Class", () => {
         new APIError("Failed to create transfer"),
       );
       await expect(
-        wallet.createTransfer({
+        wallet.send({
           amount: weiAmount,
           assetId: Coinbase.assets.Wei,
           destination,
@@ -149,7 +149,7 @@ describe("Wallet Class", () => {
         new APIError("Failed to broadcast transfer"),
       );
       await expect(
-        wallet.createTransfer({
+        wallet.send({
           amount: weiAmount,
           assetId: Coinbase.assets.Wei,
           destination,
@@ -173,7 +173,7 @@ describe("Wallet Class", () => {
       timeoutSeconds = 0.000002;
 
       await expect(
-        wallet.createTransfer({
+        wallet.send({
           amount: weiAmount,
           assetId: Coinbase.assets.Wei,
           destination,
@@ -186,7 +186,7 @@ describe("Wallet Class", () => {
     it("should throw an ArgumentError if there are insufficient funds", async () => {
       const insufficientAmount = new Decimal("10000000000000000000");
       await expect(
-        wallet.createTransfer({
+        wallet.send({
           amount: insufficientAmount,
           assetId: Coinbase.assets.Wei,
           destination,
@@ -204,7 +204,7 @@ describe("Wallet Class", () => {
         status: TransferStatus.COMPLETE,
       });
 
-      await wallet.createTransfer({
+      await wallet.send({
         amount: weiAmount,
         assetId: Coinbase.assets.Wei,
         destination,
@@ -797,18 +797,18 @@ describe("Wallet Class", () => {
         },
       } as TradeModel);
       const trade = Promise.resolve(tradeObject);
-      jest.spyOn(WalletAddress.prototype, "createTrade").mockReturnValue(trade);
+      jest.spyOn(WalletAddress.prototype, "trade").mockReturnValue(trade);
     });
 
     it("should throw an error when the wallet does not have a default address", async () => {
       const wallet = await Wallet.init(walletModel);
-      await expect(async () => await wallet.createTrade(0.01, "eth", "usdc")).rejects.toThrow(
+      await expect(async () => await wallet.trade(0.01, "eth", "usdc")).rejects.toThrow(
         InternalError,
       );
     });
 
     it("should create a trade from the default address", async () => {
-      const result = await wallet.createTrade(0.01, "eth", "usdc");
+      const result = await wallet.trade(0.01, "eth", "usdc");
       expect(result).toBeInstanceOf(Trade);
       expect(result.getAddressId()).toBe(tradeObject.getAddressId());
       expect(result.getWalletId()).toBe(tradeObject.getWalletId());

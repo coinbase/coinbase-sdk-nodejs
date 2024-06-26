@@ -86,7 +86,7 @@ describe("Coinbase SDK E2E Test", () => {
     expect(unhydratedWallet.getId()).toBe(walletId);
 
     console.log("Transfering 0.000000001 ETH from default address to second address...");
-    const transfer = await unhydratedWallet.createTransfer({
+    const transfer = await unhydratedWallet.send({
       amount: 0.000000001,
       assetId: Coinbase.assets.Eth,
       destination: wallet,

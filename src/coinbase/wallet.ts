@@ -375,11 +375,11 @@ export class Wallet {
    * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
    * @returns The Trade object.
    */
-  public async createTrade(amount: Amount, fromAssetId: string, toAssetId: string): Promise<Trade> {
+  public async trade(amount: Amount, fromAssetId: string, toAssetId: string): Promise<Trade> {
     if (!this.getDefaultAddress()) {
       throw new InternalError("Default address not found");
     }
-    return await this.getDefaultAddress()!.createTrade(amount, fromAssetId, toAssetId);
+    return await this.getDefaultAddress()!.trade(amount, fromAssetId, toAssetId);
   }
 
   /**
@@ -593,7 +593,7 @@ export class Wallet {
    * @throws {APIError} if the API request to broadcast a Transfer fails.
    * @throws {Error} if the Transfer times out.
    */
-  public async createTransfer({
+  public async send({
     amount,
     assetId,
     destination,
@@ -603,7 +603,7 @@ export class Wallet {
     if (!this.getDefaultAddress()) {
       throw new InternalError("Default address not found");
     }
-    return await this.getDefaultAddress()!.createTransfer({
+    return await this.getDefaultAddress()!.send({
       amount,
       assetId,
       destination,

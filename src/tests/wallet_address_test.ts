@@ -243,7 +243,7 @@ describe("WalletAddress", () => {
         status: TransferStatus.COMPLETE,
       });
 
-      await address.createTransfer({
+      await address.send({
         amount: weiAmount,
         assetId: Coinbase.assets.Wei,
         destination,
@@ -261,7 +261,7 @@ describe("WalletAddress", () => {
         new APIError("Failed to create transfer"),
       );
       await expect(
-        address.createTransfer({
+        address.send({
           amount: weiAmount,
           assetId: Coinbase.assets.Wei,
           destination,
@@ -274,7 +274,7 @@ describe("WalletAddress", () => {
     it("should throw an InternalError if the address key is not provided", async () => {
       const addressWithoutKey = new WalletAddress(VALID_ADDRESS_MODEL, null!);
       await expect(
-        addressWithoutKey.createTransfer({
+        addressWithoutKey.send({
           amount: weiAmount,
           assetId: Coinbase.assets.Wei,
           destination,
@@ -302,7 +302,7 @@ describe("WalletAddress", () => {
         networkId: Coinbase.networks.BaseMainnet,
       });
       await expect(
-        address.createTransfer({
+        address.send({
           amount: weiAmount,
           assetId: Coinbase.assets.Wei,
           destination: invalidDestination,
@@ -318,7 +318,7 @@ describe("WalletAddress", () => {
         null!,
       );
       await expect(
-        address.createTransfer({
+        address.send({
           amount: weiAmount,
           assetId: Coinbase.assets.Wei,
           destination: invalidDestination,
@@ -334,7 +334,7 @@ describe("WalletAddress", () => {
         new APIError("Failed to broadcast transfer"),
       );
       await expect(
-        address.createTransfer({
+        address.send({
           amount: weiAmount,
           assetId: Coinbase.assets.Wei,
           destination,
@@ -358,7 +358,7 @@ describe("WalletAddress", () => {
       timeoutSeconds = 0.000002;
 
       await expect(
-        address.createTransfer({
+        address.send({
           amount: weiAmount,
           assetId: Coinbase.assets.Wei,
           destination,
@@ -371,7 +371,7 @@ describe("WalletAddress", () => {
     it("should throw an ArgumentError if there are insufficient funds", async () => {
       const insufficientAmount = new Decimal("10000000000000000000");
       await expect(
-        address.createTransfer({
+        address.send({
           amount: insufficientAmount,
           assetId: Coinbase.assets.Wei,
           destination,
@@ -389,7 +389,7 @@ describe("WalletAddress", () => {
         status: TransferStatus.COMPLETE,
       });
 
-      await address.createTransfer({
+      await address.send({
         amount: weiAmount,
         assetId: Coinbase.assets.Wei,
         destination,
@@ -554,7 +554,7 @@ describe("WalletAddress", () => {
 
       it("should return the broadcasted trade", async () => {
         Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
-        const result = await address.createTrade(amount, fromAssetId, toAssetId);
+        const result = await address.trade(amount, fromAssetId, toAssetId);
         const transaction = result.getTransaction();
         expect(transaction.getSignedPayload()).toEqual(signedPayload);
         expect(transaction.getStatus()).toEqual(TransactionStatus.BROADCAST);
@@ -572,7 +572,7 @@ describe("WalletAddress", () => {
 
       it("should sign the transaction with the key", async () => {
         Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
-        const result = await address.createTrade(amount, fromAssetId, toAssetId);
+        const result = await address.trade(amount, fromAssetId, toAssetId);
         const transaction = result.getTransaction();
         expect(transaction.sign).toHaveBeenCalledWith(key);
       });
@@ -586,7 +586,7 @@ describe("WalletAddress", () => {
 
         it("should return the broadcast trade", async () => {
           Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
-          await address.createTrade(amount, fromAssetId, toAssetId);
+          await address.trade(amount, fromAssetId, toAssetId);
           expect(Coinbase.apiClients.trade!.createTrade).toHaveBeenCalledWith(
             address.getWalletId(),
             address.getId(),
@@ -600,7 +600,7 @@ describe("WalletAddress", () => {
 
         it("should sign the transaction with the address key", async () => {
           Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
-          const result = await address.createTrade(amount, fromAssetId, toAssetId);
+          const result = await address.trade(amount, fromAssetId, toAssetId);
           const transaction = result.getTransaction();
           expect(transaction.sign).toHaveBeenCalledWith(key);
         });
@@ -615,7 +615,7 @@ describe("WalletAddress", () => {
 
         it("should return the broadcast trade", async () => {
           Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
-          await address.createTrade(amount, fromAssetId, toAssetId);
+          await address.trade(amount, fromAssetId, toAssetId);
           expect(Coinbase.apiClients.trade!.createTrade).toHaveBeenCalledWith(
             address.getWalletId(),
             address.getId(),
@@ -629,7 +629,7 @@ describe("WalletAddress", () => {
 
         it("should sign the transaction with the address key", async () => {
           Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
-          const result = await address.createTrade(amount, fromAssetId, toAssetId);
+          const result = await address.trade(amount, fromAssetId, toAssetId);
           const transaction = result.getTransaction();
           expect(transaction.sign).toHaveBeenCalledWith(key);
         });
@@ -646,7 +646,7 @@ describe("WalletAddress", () => {
 
         it("should return the broadcast trade", async () => {
           Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
-          await address.createTrade(amount, fromAssetId, toAssetId);
+          await address.trade(amount, fromAssetId, toAssetId);
           expect(Coinbase.apiClients.trade!.createTrade).toHaveBeenCalledWith(
             address.getWalletId(),
             address.getId(),
@@ -660,7 +660,7 @@ describe("WalletAddress", () => {
 
         it("should sign the transaction with the address key", async () => {
           Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
-          const result = await address.createTrade(amount, fromAssetId, toAssetId);
+          const result = await address.trade(amount, fromAssetId, toAssetId);
           const transaction = result.getTransaction();
           expect(transaction.sign).toHaveBeenCalledWith(key);
         });
@@ -679,7 +679,7 @@ describe("WalletAddress", () => {
         });
 
         it("should sign the trade transaction with the address key", async () => {
-          const trade = await address.createTrade(amount, fromAssetId, toAssetId);
+          const trade = await address.trade(amount, fromAssetId, toAssetId);
           const transaction = trade.getTransaction();
           expect(transaction.sign).toHaveBeenCalledWith(key);
         });
@@ -689,21 +689,19 @@ describe("WalletAddress", () => {
     describe("when the address cannot sign", () => {
       it("should raise an Error", async () => {
         const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, null!);
-        await expect(newAddress.createTrade(new Decimal(100), "eth", "usdc")).rejects.toThrow(
-          Error,
-        );
+        await expect(newAddress.trade(new Decimal(100), "eth", "usdc")).rejects.toThrow(Error);
       });
     });
 
     describe("when the to fromAssetId is unsupported", () => {
       it("should raise an ArgumentError", async () => {
-        await expect(address.createTrade(new Decimal(100), "XYZ", "eth")).rejects.toThrow(Error);
+        await expect(address.trade(new Decimal(100), "XYZ", "eth")).rejects.toThrow(Error);
       });
     });
 
     describe("when the to toAssetId is unsupported", () => {
       it("should raise an ArgumentError", async () => {
-        await expect(address.createTrade(new Decimal(100), "eth", "XYZ")).rejects.toThrow(Error);
+        await expect(address.trade(new Decimal(100), "eth", "XYZ")).rejects.toThrow(Error);
       });
     });
 
@@ -713,7 +711,7 @@ describe("WalletAddress", () => {
         Coinbase.apiClients.address!.getAddressBalance = mockReturnValue({ amount: "0" });
       });
       it("should raise an Error", async () => {
-        await expect(address.createTrade(new Decimal(100), "eth", "usdc")).rejects.toThrow(Error);
+        await expect(address.trade(new Decimal(100), "eth", "usdc")).rejects.toThrow(Error);
       });
     });
 

@@ -232,7 +232,7 @@ describe("User Class", () => {
       );
       await expect(unhydratedWallet.createAddress()).rejects.toThrow(InternalError);
       await expect(
-        unhydratedWallet.createTransfer({
+        unhydratedWallet.send({
           amount: new Decimal("500000000000000000"),
           assetId: Coinbase.assets.Eth,
           destination: address1,
