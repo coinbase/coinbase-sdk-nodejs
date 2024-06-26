@@ -36,7 +36,6 @@ export class User {
    */
   async createWallet(createWalletOptions: CreateWalletOptionsType = {}): Promise<Wallet> {
     const wallet = await Wallet.create(createWalletOptions);
-    await wallet.listAddresses();
     return wallet;
   }
 

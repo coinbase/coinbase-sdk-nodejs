@@ -181,7 +181,7 @@ export class Wallet {
     }
     const response = await Coinbase.apiClients.address!.createAddress(this.model.id!, payload);
     if (!this.addresses.length || !Coinbase.useServerSigner) {
-      this.reload();
+      await this.reload();
     }
     const address = new WalletAddress(response.data, key);
     this.addresses.push(address);
