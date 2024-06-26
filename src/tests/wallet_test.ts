@@ -66,7 +66,7 @@ describe("Wallet Class", () => {
     Coinbase.useServerSigner = false;
   });
 
-  describe("#createTransfer", () => {
+  describe(".send", () => {
     let weiAmount, destination, intervalSeconds, timeoutSeconds;
     let balanceModel: BalanceModel;
 
@@ -780,7 +780,7 @@ describe("Wallet Class", () => {
     });
   });
 
-  describe("#trade", () => {
+  describe(".trade", () => {
     let tradeObject;
     beforeAll(() => {
       tradeObject = new Trade({
