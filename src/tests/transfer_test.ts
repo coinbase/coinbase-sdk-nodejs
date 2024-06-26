@@ -3,7 +3,7 @@ import { Decimal } from "decimal.js";
 import { Transfer as TransferModel } from "../client/api";
 import { TransferStatus } from "../coinbase/types";
 import { Transfer } from "../coinbase/transfer";
-import { Coinbase } from "../coinbase";
+import { Coinbase } from "../coinbase/coinbase";
 import { WEI_PER_ETHER } from "../coinbase/constants";
 import { VALID_TRANSFER_MODEL, mockReturnValue, transfersApiMock } from "./utils";
 

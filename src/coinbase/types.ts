@@ -20,6 +20,13 @@ import {
   CreateTradeRequest,
   BroadcastTradeRequest,
   ServerSignerList,
+  BuildStakingOperationRequest,
+  StakingOperation as StakingOperationModel,
+  GetStakingContextRequest,
+  StakingContext as StakingContextModel,
+  FetchStakingRewardsRequest,
+  FetchStakingRewards200Response,
+  FaucetTransaction,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -206,10 +213,7 @@ export type AddressAPIClient = {
    * @returns The transaction hash.
    * @throws {APIError} If the request fails.
    */
-  requestFaucetFunds(
-    walletId: string,
-    addressId: string,
-  ): Promise<{ data: { transaction_hash: string } }>;
+  requestFaucetFunds(walletId: string, addressId: string): AxiosPromise<FaucetTransaction>;
 
   /**
    * Get address by onchain address.
@@ -275,7 +279,7 @@ export type AddressAPIClient = {
     options?: AxiosRequestConfig,
   ): AxiosPromise<AddressBalanceList>;
 
-  /*
+  /**
    * Create a new address scoped to the wallet.
    *
    * @param walletId - The ID of the wallet to create the address in.
@@ -291,6 +295,57 @@ export type AddressAPIClient = {
 };
 
 /**
+ * ExternalAddressAPIClient client type definition.
+ */
+export type ExternalAddressAPIClient = {
+  /**
+   * List all of the balances of an external address
+   *
+   * @param networkId - The ID of the blockchain network
+   * @param addressId - The ID of the address to fetch the balance for
+   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param options - Override http request option.
+   * @throws {APIError} If the request fails.
+   */
+  listExternalAddressBalances(
+    networkId: string,
+    addressId: string,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<AddressBalanceList>;
+
+  /**
+   * Get the balance of an asset in an external address
+   *
+   * @param networkId - The ID of the blockchain network
+   * @param addressId - The ID of the address to fetch the balance for
+   * @param assetId - The ID of the asset to fetch the balance for
+   * @param options - Override http request option.
+   * @throws {APIError} If the request fails.
+   */
+  getExternalAddressBalance(
+    networkId: string,
+    addressId: string,
+    assetId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<Balance>;
+
+  /**
+   * Request faucet funds to be sent to external address.
+   *
+   * @param networkId - The ID of the wallet the address belongs to.
+   * @param addressId - The onchain address of the address that is being fetched.
+   * @param options - Override http request option.
+   * @throws {APIError} If the request fails.
+   */
+  requestExternalFaucetFunds(
+    networkId: string,
+    addressId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<FaucetTransaction>;
+};
+
+/**
  * UserAPI client type definition.
  */
 export type UserAPIClient = {
@@ -302,6 +357,47 @@ export type UserAPIClient = {
    * @throws {APIError} If the request fails.
    */
   getCurrentUser(options?: AxiosRequestConfig): AxiosPromise<UserModel>;
+};
+
+export type StakeAPIClient = {
+  /**
+   * Build a new staking operation.
+   *
+   * @param buildStakingOperationRequest - The request to build a staking operation.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+  buildStakingOperation(
+    buildStakingOperationRequest: BuildStakingOperationRequest,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<StakingOperationModel>;
+
+  /**
+   * Get staking context for an address.
+   *
+   * @param getStakingContextRequest - The request to get the staking context for an address.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+  getStakingContext(
+    getStakingContextRequest: GetStakingContextRequest,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<StakingContextModel>;
+
+  /**
+   * Get the staking rewards for an address.
+   *
+   * @param fetchStakingRewardsRequest - The request to get the staking rewards for an address.
+   * @param limit - The amount of records to return in a single call.
+   * @param page - The batch of records for a given section in the response.
+   * @param options - Axios request options.
+   */
+  fetchStakingRewards(
+    fetchStakingRewardsRequest: FetchStakingRewardsRequest,
+    limit?: number,
+    page?: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<FetchStakingRewards200Response>;
 };
 
 /**
@@ -412,7 +508,9 @@ export type ApiClients = {
   transfer?: TransferAPIClient;
   trade?: TradeApiClients;
   serverSigner?: ServerSignerAPIClient;
+  stake?: StakeAPIClient;
   asset?: AssetAPIClient;
+  externalAddress?: ExternalAddressAPIClient;
 };
 
 /**
@@ -477,8 +575,8 @@ export enum ServerSignerStatus {
  */
 export type WalletCreateOptions = {
   networkId?: string;
-  intervalSeconds?: number;
   timeoutSeconds?: number;
+  intervalSeconds?: number;
 };
 
 /**
@@ -534,4 +632,45 @@ export type CoinbaseConfigureFromJsonOptions = {
    * The base path for the API.
    */
   basePath?: string;
+};
+
+/**
+ * CoinbaseExternalAddressStakeOptions type definition.
+ */
+export type CoinbaseExternalAddressStakeOptions = {
+  /**
+   * The mode type that you're trying to stake with.
+   * e.g.
+   */
+  mode?: StakeOptionsMode;
+
+  /**
+   * The amount to stake, unstake, or claim_stake for in a staking operation.
+   */
+  amount?: string;
+};
+
+/**
+ * StakeOptionsMode type definition.
+ */
+export enum StakeOptionsMode {
+  /**
+   * Defaults to the mode specific to the asset.
+   */
+  DEFAULT = "default",
+  /**
+   * Partial represents Partial Ethereumn Staking mode.
+   */
+  PARTIAL = "partial",
+}
+
+/**
+ * Options for creating a Transfer.
+ */
+export type CreateTransferOptions = {
+  amount: Amount;
+  assetId: string;
+  destination: Destination;
+  timeoutSeconds?: number;
+  intervalSeconds?: number;
 };

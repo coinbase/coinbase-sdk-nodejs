@@ -37,8 +37,7 @@ export class FaucetTransaction {
    * @returns {string} The link to the transaction on the blockchain explorer
    */
   public getTransactionLink(): string {
-    // TODO: Parameterize this by Network.
-    return `https://sepolia.basescan.org/tx/${this.getTransactionHash()}`;
+    return this.model.transaction_link;
   }
 
   /**

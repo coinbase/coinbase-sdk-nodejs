@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 import { Transaction as TransactionModel } from "../client/api";
 import { Transaction } from "./../coinbase/transaction";
+import { TransactionStatus } from "../coinbase/types";
 
 describe("Transaction", () => {
   let fromKey;
@@ -164,6 +165,14 @@ describe("Transaction", () => {
       expect(signature).not.toBeNull();
       expect(signature.length).toBeGreaterThan(0);
     });
+
+    it("sets the signed boolean", () => {
+      expect(transaction.isSigned()).toEqual(true);
+    });
+
+    it("sets the signed payload", () => {
+      expect(transaction.getSignedPayload().slice(2)).toEqual(signature);
+    });
   });
 
   describe("#getStatus", () => {
@@ -171,6 +180,54 @@ describe("Transaction", () => {
       model.status = "";
       const transaction = new Transaction(model);
       expect(transaction.getStatus()).toBeUndefined();
+    });
+
+    it("should return a pending status", () => {
+      model.status = TransactionStatus.PENDING;
+      const transaction = new Transaction(model);
+      expect(transaction.getStatus()).toEqual("pending");
+    });
+
+    it("should return a broadcast status", () => {
+      model.status = TransactionStatus.BROADCAST;
+      const transaction = new Transaction(model);
+      expect(transaction.getStatus()).toEqual("broadcast");
+    });
+
+    it("should return a complete status", () => {
+      model.status = TransactionStatus.COMPLETE;
+      const transaction = new Transaction(model);
+      expect(transaction.getStatus()).toEqual("complete");
+    });
+
+    it("should return a failed status", () => {
+      model.status = TransactionStatus.FAILED;
+      const transaction = new Transaction(model);
+      expect(transaction.getStatus()).toEqual("failed");
+    });
+  });
+
+  describe("#fromAddressId", () => {
+    it("should return the from address ID", () => {
+      expect(transaction.fromAddressId()).toEqual(fromAddressId);
+    });
+  });
+
+  describe("#isTerminalState", () => {
+    it("should not be in a terminal state", () => {
+      expect(transaction.isTerminalState()).toEqual(false);
+    });
+
+    it("should be in a terminal state", () => {
+      model.status = TransactionStatus.COMPLETE;
+      const transaction = new Transaction(model);
+      expect(transaction.isTerminalState()).toEqual(true);
+    });
+
+    it("should not be in a terminal state with an undefined status", () => {
+      model.status = "foo-status";
+      const transaction = new Transaction(model);
+      expect(transaction.isTerminalState()).toEqual(false);
     });
   });
 
