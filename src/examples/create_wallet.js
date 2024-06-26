@@ -12,7 +12,7 @@ async function createWallet() {
 
   // Wallets come with a single default address, accessible via getDefaultAddress:
   const address = await wallet.getDefaultAddress();
-  console.log(address);
+  console.log(address.toString());
 }
 
 createWallet();

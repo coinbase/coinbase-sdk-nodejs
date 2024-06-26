@@ -15,7 +15,7 @@ async function transferFunds() {
     assetId: Coinbase.assets.Eth,
     destination: anotherWallet,
   });
-  console.log(`Transfer successfully completed: `, transfer);
+  console.log(`Transfer successfully completed: `, transfer.toString());
 }
 
 transferFunds();
