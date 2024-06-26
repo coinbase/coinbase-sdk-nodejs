@@ -1,7 +1,4 @@
-import {
-  FetchStakingRewardsRequestFormatEnum,
-  StakingReward as StakingRewardModel,
-} from "../client";
+import { StakingRewardFormat, StakingReward as StakingRewardModel } from "../client";
 import Decimal from "decimal.js";
 import { Coinbase } from "./coinbase";
 import { Asset } from "./asset";
@@ -13,7 +10,7 @@ import { Amount } from "./types";
 export class StakingReward {
   private model: StakingRewardModel;
   private asset: Asset;
-  private format: FetchStakingRewardsRequestFormatEnum;
+  private format: StakingRewardFormat;
 
   /**
    * Creates the StakingReward object.
@@ -22,11 +19,7 @@ export class StakingReward {
    * @param asset - The asset for the staking reward.
    * @param format - The format to return the rewards in. (usd, native). Defaults to usd.
    */
-  constructor(
-    model: StakingRewardModel,
-    asset: Asset,
-    format: FetchStakingRewardsRequestFormatEnum,
-  ) {
+  constructor(model: StakingRewardModel, asset: Asset, format: StakingRewardFormat) {
     this.model = model;
     this.asset = asset;
     this.format = format;
@@ -49,7 +42,7 @@ export class StakingReward {
     addressIds: Array<string>,
     startTime: string,
     endTime: string,
-    format = FetchStakingRewardsRequestFormatEnum.Usd,
+    format = StakingRewardFormat.Usd,
   ): Promise<StakingReward[]> {
     const stakingRewards: StakingReward[] = [];
     const queue: string[] = [""];
@@ -92,7 +85,7 @@ export class StakingReward {
    * @returns The amount.
    */
   public amount(): Amount {
-    if (this.format == FetchStakingRewardsRequestFormatEnum.Usd) {
+    if (this.format == StakingRewardFormat.Usd) {
       return new Decimal(this.model.amount).div(new Decimal("100"));
     }
     return this.asset.fromAtomicAmount(new Decimal(this.model.amount)).toNumber();

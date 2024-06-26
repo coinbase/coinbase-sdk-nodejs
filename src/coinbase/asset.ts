@@ -55,7 +55,11 @@ export class Asset {
 
     let decimals = model.decimals!;
     // TODO: Push this logic down to the backend.
-    if (assetId && model.asset_id !== Coinbase.toAssetId(assetId)) {
+    if (
+      assetId &&
+      model.asset_id &&
+      Coinbase.toAssetId(model.asset_id) !== Coinbase.toAssetId(assetId)
+    ) {
       switch (assetId) {
         case "gwei":
           decimals = GWEI_DECIMALS;

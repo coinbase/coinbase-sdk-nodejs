@@ -28,6 +28,7 @@ import {
   newAddressModel,
   transfersApiMock,
   walletsApiMock,
+  getAssetMock,
 } from "./utils";
 import { Trade } from "../coinbase/trade";
 import { WalletAddress } from "../coinbase/address/wallet_address";
@@ -72,30 +73,22 @@ describe("Wallet Class", () => {
 
     beforeEach(() => {
       const key = ethers.Wallet.createRandom();
-      weiAmount = new Decimal("500000000000000000");
+      weiAmount = new Decimal("5");
       destination = new WalletAddress(VALID_ADDRESS_MODEL, key as unknown as ethers.Wallet);
       intervalSeconds = 0.2;
       timeoutSeconds = 10;
       Coinbase.apiClients.asset = assetsApiMock;
-      Coinbase.apiClients.asset!.getAsset = mockFn(request => {
-        const { asset_id, network_id } = request;
-        return {
-          data: {
-            amount: "1000000000000000000",
-            network_id,
-            asset_id,
-            contract_address: "0x",
-          },
-        };
-      });
+      Coinbase.apiClients.asset!.getAsset = getAssetMock();
 
       Coinbase.apiClients.address!.getAddressBalance = mockFn(request => {
         const { asset_id } = request;
         balanceModel = {
-          amount: "1000000000000000000",
+          amount: "5000000000000000000",
           asset: {
-            asset_id,
             network_id: Coinbase.networks.BaseSepolia,
+            asset_id,
+            decimals: 18,
+            contract_address: "0x",
           },
         };
         return { data: balanceModel };
