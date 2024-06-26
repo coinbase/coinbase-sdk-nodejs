@@ -27,9 +27,33 @@ describe("ExternalAddress", () => {
   );
   const STAKING_CONTEXT_MODEL: StakingContextModel = {
     context: {
-      stakeable_balance: "3000000000000000000",
-      unstakeable_balance: "2000000000000000000",
-      claimable_balance: "1000000000000000000",
+      stakeable_balance: {
+        amount: "3000000000000000000",
+        asset: {
+          asset_id: Coinbase.assets.Eth,
+          network_id: Coinbase.networks.BaseSepolia,
+          decimals: 18,
+          contract_address: "0x",
+        },
+      },
+      unstakeable_balance: {
+        amount: "2000000000000000000",
+        asset: {
+          asset_id: Coinbase.assets.Eth,
+          network_id: Coinbase.networks.BaseSepolia,
+          decimals: 18,
+          contract_address: "0x",
+        },
+      },
+      claimable_balance: {
+        amount: "1000000000000000000",
+        asset: {
+          asset_id: Coinbase.assets.Eth,
+          network_id: Coinbase.networks.BaseSepolia,
+          decimals: 18,
+          contract_address: "0x",
+        },
+      },
     },
   };
   const STAKING_OPERATION_MODEL: StakingOperationModel = {
@@ -416,7 +440,7 @@ describe("ExternalAddress", () => {
     it("should return the stakeable balance successfully", async () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       const stakeableBalance = await address.stakeableBalance(Coinbase.assets.Eth);
-      expect(stakeableBalance).toEqual("3");
+      expect(stakeableBalance).toEqual(new Decimal("3"));
     });
   });
 
@@ -424,7 +448,7 @@ describe("ExternalAddress", () => {
     it("should return the unstakeable balance successfully", async () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       const unstakeableBalance = await address.unstakeableBalance(Coinbase.assets.Eth);
-      expect(unstakeableBalance).toEqual("2");
+      expect(unstakeableBalance).toEqual(new Decimal("2"));
     });
   });
 
@@ -432,7 +456,7 @@ describe("ExternalAddress", () => {
     it("should return the claimable balance successfully", async () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       const claimableBalance = await address.claimableBalance(Coinbase.assets.Eth);
-      expect(claimableBalance).toEqual("1");
+      expect(claimableBalance).toEqual(new Decimal("1"));
     });
   });
 });

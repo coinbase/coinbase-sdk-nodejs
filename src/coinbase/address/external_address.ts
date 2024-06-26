@@ -4,7 +4,7 @@ import { Coinbase } from "../coinbase";
 import Decimal from "decimal.js";
 import { Asset } from "../asset";
 import { StakingOperation } from "../staking_operation";
-import { FetchStakingRewardsRequestFormatEnum } from "../../client";
+import { StakingRewardFormat } from "../../client";
 import { StakingReward } from "../staking_reward";
 import { BalanceMap } from "../balance_map";
 import { Balance } from "../balance";
@@ -78,7 +78,7 @@ export class ExternalAddress extends Address {
   public async stakeableBalance(
     asset_id: string,
     options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
-  ): Promise<string> {
+  ): Promise<Decimal> {
     const balances = await this.getStakingBalances(asset_id, options);
     return balances["stakeableBalance"];
   }
@@ -93,7 +93,7 @@ export class ExternalAddress extends Address {
   public async unstakeableBalance(
     asset_id: string,
     options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
-  ): Promise<string> {
+  ): Promise<Decimal> {
     const balances = await this.getStakingBalances(asset_id, options);
     return balances["unstakeableBalance"];
   }
@@ -108,7 +108,7 @@ export class ExternalAddress extends Address {
   public async claimableBalance(
     asset_id: string,
     options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
-  ): Promise<string> {
+  ): Promise<Decimal> {
     const balances = await this.getStakingBalances(asset_id, options);
     return balances["claimableBalance"];
   }
@@ -126,7 +126,7 @@ export class ExternalAddress extends Address {
     assetId: string,
     startTime: string,
     endTime: string,
-    format = FetchStakingRewardsRequestFormatEnum.Usd,
+    format = StakingRewardFormat.Usd,
   ): Promise<StakingReward[]> {
     return StakingReward.list(
       Coinbase.normalizeNetwork(this.getNetworkId()),
@@ -218,7 +218,7 @@ export class ExternalAddress extends Address {
   private async getStakingBalances(
     assetId: string,
     options: CoinbaseExternalAddressStakeOptions,
-  ): Promise<{ [key: string]: string }> {
+  ): Promise<{ [key: string]: Decimal }> {
     const request = {
       network_id: this.getNetworkId(),
       asset_id: Asset.primaryDenomination(assetId),
@@ -227,16 +227,20 @@ export class ExternalAddress extends Address {
     };
 
     const response = await Coinbase.apiClients.stake!.getStakingContext(request);
-    const { claimable_balance, stakeable_balance, unstakeable_balance } = response!.data.context;
-    const asset = await Asset.fetch(this.getNetworkId(), assetId);
 
     return {
-      claimableBalance: asset.fromAtomicAmount(new Decimal(claimable_balance)).toFixed().toString(),
-      stakeableBalance: asset.fromAtomicAmount(new Decimal(stakeable_balance)).toFixed().toString(),
-      unstakeableBalance: asset
-        .fromAtomicAmount(new Decimal(unstakeable_balance))
-        .toFixed()
-        .toString(),
+      stakeableBalance: Balance.fromModelAndAssetId(
+        response!.data.context.stakeable_balance,
+        assetId,
+      ).amount,
+      unstakeableBalance: Balance.fromModelAndAssetId(
+        response!.data.context.unstakeable_balance,
+        assetId,
+      ).amount,
+      claimableBalance: Balance.fromModelAndAssetId(
+        response!.data.context.claimable_balance,
+        assetId,
+      ).amount,
     };
   }
 
