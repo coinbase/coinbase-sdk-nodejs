@@ -261,17 +261,23 @@ export interface CreateAddressRequest {
  */
 export interface CreateServerSignerRequest {
     /**
-     * The ID of the server signer
+     * The ID of the server signer for the 1 of 1 server signer.
      * @type {string}
      * @memberof CreateServerSignerRequest
      */
-    'server_signer_id': string;
+    'server_signer_id'?: string;
     /**
-     * The enrollment data of the server signer. This will be the base64 encoded server-signer-id.
+     * The enrollment data of the server signer. This will be the base64 encoded server-signer-id for the 1 of 1 server signer.
      * @type {string}
      * @memberof CreateServerSignerRequest
      */
     'enrollment_data': string;
+    /**
+     * Whether the Server-Signer uses MPC.
+     * @type {boolean}
+     * @memberof CreateServerSignerRequest
+     */
+    'is_mpc': boolean;
 }
 /**
  * 
@@ -458,19 +464,13 @@ export interface FetchStakingRewardsRequest {
      */
     'end_time': string;
     /**
-     * The format in which the rewards are to be fetched i.e native or in equivalent USD
-     * @type {string}
+     * 
+     * @type {StakingRewardFormat}
      * @memberof FetchStakingRewardsRequest
      */
-    'format': FetchStakingRewardsRequestFormatEnum;
+    'format': StakingRewardFormat;
 }
 
-export const FetchStakingRewardsRequestFormatEnum = {
-    Usd: 'usd',
-    Native: 'native'
-} as const;
-
-export type FetchStakingRewardsRequestFormatEnum = typeof FetchStakingRewardsRequestFormatEnum[keyof typeof FetchStakingRewardsRequestFormatEnum];
 
 /**
  * 
@@ -529,23 +529,23 @@ export interface ModelError {
  */
 export interface PartialEthStakingContext {
     /**
-     * The balance that can be staked. This is typically the wallet balance in atomic units.
-     * @type {string}
+     * 
+     * @type {Balance}
      * @memberof PartialEthStakingContext
      */
-    'stakeable_balance': string;
+    'stakeable_balance': Balance;
     /**
-     * The total staked balance of the wallet that can be unstaked in atomic units.
-     * @type {string}
+     * 
+     * @type {Balance}
      * @memberof PartialEthStakingContext
      */
-    'unstakeable_balance': string;
+    'unstakeable_balance': Balance;
     /**
-     * The total unstaked balance that can be claimed in atomic units.
-     * @type {string}
+     * 
+     * @type {Balance}
      * @memberof PartialEthStakingContext
      */
-    'claimable_balance': string;
+    'claimable_balance': Balance;
 }
 /**
  * An event representing a seed creation.
@@ -615,6 +615,12 @@ export interface ServerSigner {
      * @memberof ServerSigner
      */
     'wallets'?: Array<string>;
+    /**
+     * Whether the Server-Signer uses MPC.
+     * @type {boolean}
+     * @memberof ServerSigner
+     */
+    'is_mpc': boolean;
 }
 /**
  * An event that is waiting to be processed by a Server-Signer.
@@ -867,6 +873,12 @@ export interface StakingReward {
      * @memberof StakingReward
      */
     'state': StakingRewardStateEnum;
+    /**
+     * 
+     * @type {StakingRewardFormat}
+     * @memberof StakingReward
+     */
+    'format': StakingRewardFormat;
 }
 
 export const StakingRewardStateEnum = {
@@ -875,6 +887,20 @@ export const StakingRewardStateEnum = {
 } as const;
 
 export type StakingRewardStateEnum = typeof StakingRewardStateEnum[keyof typeof StakingRewardStateEnum];
+
+/**
+ * The format in which the rewards are to be fetched i.e native or in equivalent USD
+ * @export
+ * @enum {string}
+ */
+
+export const StakingRewardFormat = {
+    Usd: 'usd',
+    Native: 'native'
+} as const;
+
+export type StakingRewardFormat = typeof StakingRewardFormat[keyof typeof StakingRewardFormat];
+
 
 /**
  * A trade of an asset to another asset
@@ -1026,6 +1052,7 @@ export interface Transaction {
 
 export const TransactionStatusEnum = {
     Pending: 'pending',
+    Signed: 'signed',
     Broadcast: 'broadcast',
     Complete: 'complete',
     Failed: 'failed'
