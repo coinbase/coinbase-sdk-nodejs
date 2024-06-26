@@ -80,7 +80,7 @@ export class ExternalAddress extends Address {
     options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<Decimal> {
     const balances = await this.getStakingBalances(asset_id, options);
-    return balances["stakeableBalance"];
+    return balances.stakeableBalance;
   }
 
   /**
@@ -95,7 +95,7 @@ export class ExternalAddress extends Address {
     options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<Decimal> {
     const balances = await this.getStakingBalances(asset_id, options);
-    return balances["unstakeableBalance"];
+    return balances.unstakeableBalance;
   }
 
   /**
@@ -110,7 +110,7 @@ export class ExternalAddress extends Address {
     options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<Decimal> {
     const balances = await this.getStakingBalances(asset_id, options);
-    return balances["claimableBalance"];
+    return balances.claimableBalance;
   }
 
   /**
