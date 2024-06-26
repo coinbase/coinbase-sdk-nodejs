@@ -213,7 +213,7 @@ export class Transfer {
    *
    * @returns The string representation of the Transfer.
    */
-  public async toString(): Promise<string> {
+  public toString(): string {
     return (
       `Transfer{transferId: '${this.getId()}', networkId: '${this.getNetworkId()}', ` +
       `fromAddressId: '${this.getFromAddressId()}', destinationAddressId: '${this.getDestinationAddressId()}', ` +

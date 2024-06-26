@@ -36,6 +36,7 @@ describe("Coinbase SDK E2E Test", () => {
 
     console.log("Creating new wallet...");
     const wallet = await user.createWallet();
+    expect(wallet.toString()).toBeDefined();
     expect(wallet?.getId()).toBeDefined();
     console.log(
       `Created new wallet with ID: ${wallet.getId()}, default address: ${wallet.getDefaultAddress()}`,
@@ -55,7 +56,8 @@ describe("Coinbase SDK E2E Test", () => {
     await userWallet.saveSeed("test_seed.json");
 
     try {
-      await userWallet.faucet();
+      const transaction = await userWallet.faucet();
+      expect(transaction.toString()).toBeDefined();
     } catch {
       console.log("Faucet request failed. Skipping...");
     }
@@ -91,6 +93,7 @@ describe("Coinbase SDK E2E Test", () => {
       assetId: Coinbase.assets.Eth,
       destination: wallet,
     });
+    expect(transfer.toString()).toBeDefined();
     expect(await transfer.getStatus()).toBe(TransferStatus.COMPLETE);
     console.log(`Transferred 1 Gwei from ${unhydratedWallet} to ${wallet}`);
 
