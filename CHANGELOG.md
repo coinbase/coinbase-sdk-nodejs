@@ -1,6 +1,6 @@
 # Coinbase Node.js SDK Changelog
 
-## [0.0.9] - 2024-06-24
+## [0.0.9] - 2024-06-26
 
 ### Added
 
@@ -8,6 +8,7 @@
 - Support external addresses for balance fetching and requesting faucet funds.
 - Support for building staking operations
 - Support for retrieving staking rewards information
+- Add support for listing address trades via address.listTrades
 
 ## [0.0.8] - 2024-06-18
 
