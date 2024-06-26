@@ -117,7 +117,7 @@ export class Wallet {
       },
     });
 
-    const wallet = await Wallet.init(result.data, undefined);
+    const wallet = Wallet.init(result.data, undefined);
     if (Coinbase.useServerSigner) {
       await wallet.waitForSigner(wallet.getId()!, intervalSeconds, timeoutSeconds);
     }
@@ -138,7 +138,7 @@ export class Wallet {
    * @throws {APIError} - If the request fails.
    * @returns A promise that resolves with the new Wallet object.
    */
-  public static async init(model: WalletModel, seed?: string | undefined): Promise<Wallet> {
+  public static init(model: WalletModel, seed?: string | undefined): Wallet {
     const wallet = new Wallet(model, undefined, seed);
     if (Coinbase.useServerSigner) {
       return wallet;

@@ -81,7 +81,7 @@ export class User {
    */
   public async importWallet(data: WalletData): Promise<Wallet> {
     const walletModel = await Coinbase.apiClients.wallet!.getWallet(data.walletId);
-    const wallet = await Wallet.init(walletModel.data, data.seed);
+    const wallet = Wallet.init(walletModel.data, data.seed);
     await wallet.listAddresses();
     return wallet;
   }

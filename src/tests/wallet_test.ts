@@ -398,7 +398,7 @@ describe("Wallet Class", () => {
         default_address: addressList[0],
         enabled_features: [],
       };
-      wallet = await Wallet.init(walletModel, existingSeed);
+      wallet = Wallet.init(walletModel, existingSeed);
       Coinbase.apiClients.address!.createAddress = mockFn(walletId => {
         return {
           data: {
@@ -418,7 +418,7 @@ describe("Wallet Class", () => {
     });
 
     it("should throw an error when the wallet does not have a default address", async () => {
-      const wallet = await Wallet.init({
+      const wallet = Wallet.init({
         id: walletId,
         network_id: Coinbase.networks.BaseSepolia,
         enabled_features: [],
@@ -463,13 +463,13 @@ describe("Wallet Class", () => {
     });
 
     it("should raise an error when the seed is invalid", async () => {
-      const newWallet = await Wallet.init(walletModel, "");
+      const newWallet = Wallet.init(walletModel, "");
       expect(() => newWallet.setSeed(``)).toThrow(ArgumentError);
       expect(() => newWallet.setSeed(`invalid-seed`)).toThrow(ArgumentError);
     });
 
     it("should raise an error when creating a wallet with an invalid network", async () => {
-      const newWallet = await Wallet.init(
+      const newWallet = Wallet.init(
         {
           ...walletModel,
           network_id: "invalid_network_id",
@@ -503,7 +503,7 @@ describe("Wallet Class", () => {
       Coinbase.apiClients.address!.getAddress = mockFn(() => {
         return { data: addressModel };
       });
-      seedWallet = await Wallet.init(walletModel, seed);
+      seedWallet = Wallet.init(walletModel, seed);
     });
 
     it("exports the Wallet data", () => {
@@ -514,12 +514,12 @@ describe("Wallet Class", () => {
 
     it("allows for re-creation of a Wallet", async () => {
       const walletData = seedWallet.export();
-      const newWallet = await Wallet.init(walletModel, walletData.seed);
+      const newWallet = Wallet.init(walletModel, walletData.seed);
       expect(newWallet).toBeInstanceOf(Wallet);
     });
 
     it("throws an error when the Wallet is seedless", async () => {
-      const seedlessWallet = await Wallet.init(walletModel, "");
+      const seedlessWallet = Wallet.init(walletModel, "");
       expect(() => seedlessWallet.export()).toThrow(InternalError);
     });
 
@@ -682,7 +682,7 @@ describe("Wallet Class", () => {
         publicKeyEncoding: { type: "spki", format: "pem" },
       }).privateKey;
       fs.writeFileSync(filePath, JSON.stringify({}), "utf8");
-      seedWallet = await Wallet.init(walletModel, seed);
+      seedWallet = Wallet.init(walletModel, seed);
     });
 
     afterEach(async () => {
@@ -711,7 +711,7 @@ describe("Wallet Class", () => {
     });
 
     it("should throw an error when the wallet is seedless", async () => {
-      const seedlessWallet = await Wallet.init(walletModel, "");
+      const seedlessWallet = Wallet.init(walletModel, "");
       expect(() => seedlessWallet.saveSeed(filePath, false)).toThrow(InternalError);
     });
   });
@@ -740,8 +740,8 @@ describe("Wallet Class", () => {
         },
       };
       fs.writeFileSync(filePath, JSON.stringify(initialSeedData), "utf8");
-      seedWallet = await Wallet.init(walletModel, seed);
-      seedlessWallet = await Wallet.init(walletModel, "");
+      seedWallet = Wallet.init(walletModel, seed);
+      seedlessWallet = Wallet.init(walletModel, "");
     });
 
     afterEach(async () => {
@@ -769,7 +769,7 @@ describe("Wallet Class", () => {
         enabled_features: [],
       };
       const randomSeed = ethers.Wallet.createRandom().privateKey.slice(2);
-      const otherWallet = await Wallet.init(otherModel, randomSeed);
+      const otherWallet = Wallet.init(otherModel, randomSeed);
       otherWallet.saveSeed(filePath, true);
 
       await seedlessWallet.loadSeed(filePath);
@@ -833,7 +833,7 @@ describe("Wallet Class", () => {
     } as TradeModel);
 
     it("should throw an error when the wallet does not have a default address", async () => {
-      const newWallet = await Wallet.init(walletModel);
+      const newWallet = Wallet.init(walletModel);
       await expect(async () => await newWallet.createTrade(0.01, "eth", "usdc")).rejects.toThrow(
         InternalError,
       );

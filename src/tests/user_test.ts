@@ -344,7 +344,7 @@ describe("User Class", () => {
 
   describe(".createWallet", () => {
     it("should create a Wallet", async () => {
-      const wallet = await Wallet.init(VALID_WALLET_MODEL, "");
+      const wallet = Wallet.init(VALID_WALLET_MODEL, "");
       jest.spyOn(Wallet, "create").mockReturnValue(Promise.resolve(wallet));
       const user = new User(mockUserModel);
       const result = await user.createWallet();
