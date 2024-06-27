@@ -124,6 +124,38 @@ export class WalletAddress extends Address {
    *
    * @returns The list of transfers.
    */
+  public async listTrades(): Promise<Trade[]> {
+    const trades: Trade[] = [];
+    const queue: string[] = [""];
+
+    while (queue.length > 0) {
+      const page = queue.shift();
+      const response = await Coinbase.apiClients.trade!.listTrades(
+        this.model.wallet_id,
+        this.model.address_id,
+        100,
+        page?.length ? page : undefined,
+      );
+
+      response.data.data.forEach(transferModel => {
+        trades.push(new Trade(transferModel));
+      });
+
+      if (response.data.has_more) {
+        if (response.data.next_page) {
+          queue.push(response.data.next_page);
+        }
+      }
+    }
+
+    return trades;
+  }
+
+  /**
+   * Returns all the transfers associated with the address.
+   *
+   * @returns The list of transfers.
+   */
   public async listTransfers(): Promise<Transfer[]> {
     const transfers: Transfer[] = [];
     const queue: string[] = [""];

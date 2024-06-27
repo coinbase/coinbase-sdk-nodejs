@@ -1,6 +1,6 @@
 import {
   FetchStakingRewards200Response,
-  FetchStakingRewardsRequestFormatEnum,
+  StakingRewardFormat,
   StakingRewardStateEnum,
 } from "../client";
 import { Coinbase } from "../coinbase/coinbase";
@@ -37,18 +37,21 @@ describe("StakingReward", () => {
         date: "2024-05-01",
         amount: "361",
         state: StakingRewardStateEnum.Pending,
+        format: StakingRewardFormat.Usd,
       },
       {
         address_id: address.getId(),
         date: "2024-05-02",
         amount: "203",
         state: StakingRewardStateEnum.Pending,
+        format: StakingRewardFormat.Usd,
       },
       {
         address_id: address.getId(),
         date: "2024-05-03",
         amount: "226",
         state: StakingRewardStateEnum.Pending,
+        format: StakingRewardFormat.Usd,
       },
     ],
     has_more: false,
@@ -84,7 +87,7 @@ describe("StakingReward", () => {
           address_ids: [address.getId()],
           start_time: startTime,
           end_time: endTime,
-          format: FetchStakingRewardsRequestFormatEnum.Usd,
+          format: StakingRewardFormat.Usd,
         },
         100,
         undefined,
@@ -114,7 +117,7 @@ describe("StakingReward", () => {
           address_ids: [address.getId()],
           start_time: startTime,
           end_time: endTime,
-          format: FetchStakingRewardsRequestFormatEnum.Usd,
+          format: StakingRewardFormat.Usd,
         },
         100,
         undefined,
@@ -130,9 +133,10 @@ describe("StakingReward", () => {
           date: "2024-05-03",
           amount: "226",
           state: StakingRewardStateEnum.Pending,
+          format: StakingRewardFormat.Usd,
         },
         asset,
-        FetchStakingRewardsRequestFormatEnum.Usd,
+        StakingRewardFormat.Usd,
       );
 
       const amount = reward.amount();
@@ -146,9 +150,10 @@ describe("StakingReward", () => {
           date: "2024-05-03",
           amount: "726030823305604",
           state: StakingRewardStateEnum.Pending,
+          format: StakingRewardFormat.Native,
         },
         asset,
-        FetchStakingRewardsRequestFormatEnum.Native,
+        StakingRewardFormat.Native,
       );
 
       const amount = reward.amount();
@@ -164,9 +169,10 @@ describe("StakingReward", () => {
           date: "2024-05-03",
           amount: "226",
           state: StakingRewardStateEnum.Pending,
+          format: StakingRewardFormat.Usd,
         },
         asset,
-        FetchStakingRewardsRequestFormatEnum.Usd,
+        StakingRewardFormat.Usd,
       );
 
       const date = reward.date();
@@ -182,9 +188,10 @@ describe("StakingReward", () => {
           date: "2024-05-03",
           amount: "226",
           state: StakingRewardStateEnum.Pending,
+          format: StakingRewardFormat.Usd,
         },
         asset,
-        FetchStakingRewardsRequestFormatEnum.Usd,
+        StakingRewardFormat.Usd,
       );
 
       const rewardStr = reward.toString();

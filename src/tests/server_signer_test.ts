@@ -12,6 +12,7 @@ describe("ServerSigner", () => {
   const model: ServerSignerModel = {
     server_signer_id: serverSignerId,
     wallets: wallets,
+    is_mpc: true,
   };
   const serverSignerList: ServerSignerList = {
     data: [model],
