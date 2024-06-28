@@ -228,7 +228,7 @@ export class ExternalAddress extends Address {
 
     const response = await Coinbase.apiClients.stake!.getStakingContext(request);
 
-    return {
+    const resp: { [key: string]: Decimal } = {
       stakeableBalance: Balance.fromModelAndAssetId(
         response!.data.context.stakeable_balance,
         assetId,
@@ -237,11 +237,17 @@ export class ExternalAddress extends Address {
         response!.data.context.unstakeable_balance,
         assetId,
       ).amount,
-      claimableBalance: Balance.fromModelAndAssetId(
+    };
+
+    // For implementations that support claimable balance
+    if ("claimable_balance" in response!.data.context) {
+      resp.claimableBalance = Balance.fromModelAndAssetId(
         response!.data.context.claimable_balance,
         assetId,
-      ).amount,
-    };
+      ).amount;
+    }
+
+    return resp;
   }
 
   /**

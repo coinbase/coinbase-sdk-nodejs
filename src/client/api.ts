@@ -368,6 +368,73 @@ export interface CreateWalletRequestWallet {
     'use_server_signer'?: boolean;
 }
 /**
+ * An Ethereum validator
+ * @export
+ * @interface EthereumValidator
+ */
+export interface EthereumValidator {
+    /**
+     * The index of the validator in the validator set
+     * @type {string}
+     * @memberof EthereumValidator
+     */
+    'index': string;
+    /**
+     * The status of the validator
+     * @type {string}
+     * @memberof EthereumValidator
+     */
+    'status': string;
+    /**
+     * The public key of the validator
+     * @type {string}
+     * @memberof EthereumValidator
+     */
+    'public_key': string;
+    /**
+     * The address to which the validator\'s rewards are sent.
+     * @type {string}
+     * @memberof EthereumValidator
+     */
+    'withdrawl_address': string;
+    /**
+     * Whether the validator has been slashed
+     * @type {boolean}
+     * @memberof EthereumValidator
+     */
+    'slashed': boolean;
+    /**
+     * The epoch at which the validator was activated
+     * @type {string}
+     * @memberof EthereumValidator
+     */
+    'activationEpoch': string;
+    /**
+     * The epoch at which the validator exited
+     * @type {string}
+     * @memberof EthereumValidator
+     */
+    'exitEpoch': string;
+    /**
+     * The epoch at which the validator can withdraw
+     * @type {string}
+     * @memberof EthereumValidator
+     */
+    'withdrawableEpoch': string;
+    /**
+     * 
+     * @type {Balance}
+     * @memberof EthereumValidator
+     */
+    'balance': Balance;
+    /**
+     * 
+     * @type {Balance}
+     * @memberof EthereumValidator
+     */
+    'effective_balance': Balance;
+}
+/**
  * The faucet transaction
  * @export
  * @interface FaucetTransaction
@@ -521,6 +588,31 @@ export interface ModelError {
      * @memberof ModelError
      */
     'message': string;
+}
+/**
+ * The native eth staking context
+ * @export
+ * @interface NativeEthStakingContext
+ */
+export interface NativeEthStakingContext {
+    /**
+     * 
+     * @type {Balance}
+     * @memberof NativeEthStakingContext
+     */
+    'stakeable_balance': Balance;
+    /**
+     * 
+     * @type {Balance}
+     * @memberof NativeEthStakingContext
+     */
+    'unstakeable_balance': Balance;
+    /**
+     * The list of validators owned by the customer
+     * @type {Array<EthereumValidator>}
+     * @memberof NativeEthStakingContext
+     */
+    'validators': Array<EthereumValidator>;
 }
 /**
  * The partial eth staking context
@@ -828,14 +920,26 @@ export interface StakingContext {
  * @type StakingContextContext
  * @export
  */
-export type StakingContextContext = PartialEthStakingContext;
+export type StakingContextContext = NativeEthStakingContext | PartialEthStakingContext;
 
 /**
- * An onchain transaction to help realize a staking action.
+ * A list of onchain transactions to help realize a staking action.
  * @export
  * @interface StakingOperation
  */
 export interface StakingOperation {
+    /**
+     * The unique ID of the staking operation
+     * @type {string}
+     * @memberof StakingOperation
+     */
+    'id': string;
+    /**
+     * The status of the staking operation
+     * @type {string}
+     * @memberof StakingOperation
+     */
+    'status': StakingOperationStatusEnum;
     /**
      * The transaction(s) that will execute the staking operation onchain
      * @type {Array<Transaction>}
@@ -843,6 +947,16 @@ export interface StakingOperation {
      */
     'transactions': Array<Transaction>;
 }
+
+export const StakingOperationStatusEnum = {
+    Initialized: 'initialized',
+    Pending: 'pending',
+    Complete: 'complete',
+    Failed: 'failed'
+} as const;
+
+export type StakingOperationStatusEnum = typeof StakingOperationStatusEnum[keyof typeof StakingOperationStatusEnum];
+
 /**
  * The staking rewards for an address
  * @export
@@ -3039,6 +3153,40 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Get the latest state of a staking operation
+         * @summary Get the latest state of a staking operation
+         * @param {string} stakingOperationId The ID of the staking operation
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getStakingOperation: async (stakingOperationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'stakingOperationId' is not null or undefined
+            assertParamExists('getStakingOperation', 'stakingOperationId', stakingOperationId)
+            const localVarPath = `/v1/staking_operations/{staking_operation_id}`
+                .replace(`{${"staking_operation_id"}}`, encodeURIComponent(String(stakingOperationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -3090,6 +3238,19 @@ export const StakeApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['StakeApi.getStakingContext']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * Get the latest state of a staking operation
+         * @summary Get the latest state of a staking operation
+         * @param {string} stakingOperationId The ID of the staking operation
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getStakingOperation(stakingOperationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<StakingOperation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getStakingOperation(stakingOperationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['StakeApi.getStakingOperation']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -3132,6 +3293,16 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
         getStakingContext(getStakingContextRequest: GetStakingContextRequest, options?: any): AxiosPromise<StakingContext> {
             return localVarFp.getStakingContext(getStakingContextRequest, options).then((request) => request(axios, basePath));
         },
+        /**
+         * Get the latest state of a staking operation
+         * @summary Get the latest state of a staking operation
+         * @param {string} stakingOperationId The ID of the staking operation
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getStakingOperation(stakingOperationId: string, options?: any): AxiosPromise<StakingOperation> {
+            return localVarFp.getStakingOperation(stakingOperationId, options).then((request) => request(axios, basePath));
+        },
     };
 };
 
@@ -3172,6 +3343,16 @@ export interface StakeApiInterface {
      * @memberof StakeApiInterface
      */
     getStakingContext(getStakingContextRequest: GetStakingContextRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingContext>;
+
+    /**
+     * Get the latest state of a staking operation
+     * @summary Get the latest state of a staking operation
+     * @param {string} stakingOperationId The ID of the staking operation
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApiInterface
+     */
+    getStakingOperation(stakingOperationId: string, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation>;
 
 }
 
@@ -3218,6 +3399,18 @@ export class StakeApi extends BaseAPI implements StakeApiInterface {
      */
     public getStakingContext(getStakingContextRequest: GetStakingContextRequest, options?: RawAxiosRequestConfig) {
         return StakeApiFp(this.configuration).getStakingContext(getStakingContextRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get the latest state of a staking operation
+     * @summary Get the latest state of a staking operation
+     * @param {string} stakingOperationId The ID of the staking operation
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApi
+     */
+    public getStakingOperation(stakingOperationId: string, options?: RawAxiosRequestConfig) {
+        return StakeApiFp(this.configuration).getStakingOperation(stakingOperationId, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

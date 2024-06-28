@@ -373,6 +373,18 @@ export type StakeAPIClient = {
   ): AxiosPromise<StakingOperationModel>;
 
   /**
+   * Get a staking operation.
+   *
+   * @param stakingOperationID - The ID of the staking operation to fetch.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+  getStakingOperation(
+    stakingOperationID: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<StakingOperationModel>;
+
+  /**
    * Get staking context for an address.
    *
    * @param getStakingContextRequest - The request to get the staking context for an address.
@@ -659,9 +671,14 @@ export enum StakeOptionsMode {
    */
   DEFAULT = "default",
   /**
-   * Partial represents Partial Ethereumn Staking mode.
+   * Partial represents Partial Ethereum Staking mode.
    */
   PARTIAL = "partial",
+
+  /**
+   * Native represents Native Ethereum Staking mode.
+   */
+  NATIVE = "native",
 }
 
 /**

@@ -1,6 +1,10 @@
 import { ethers } from "ethers";
-import { StakingOperation as StakingOperationModel } from "../client/api";
+import {
+  StakingOperation as StakingOperationModel,
+  StakingOperationStatusEnum,
+} from "../client/api";
 import { Transaction } from "./transaction";
+import { Coinbase } from "./coinbase";
 
 /**
  * A representation of a staking operation (stake, unstake, claim rewards, etc). It
@@ -22,9 +26,11 @@ export class StakingOperation {
     }
     this.model = model;
     this.transactions = [];
-    model.transactions.forEach(transaction => {
-      this.transactions.push(new Transaction(transaction));
-    });
+    if (model.transactions) {
+      model.transactions.forEach(transaction => {
+        this.transactions.push(new Transaction(transaction));
+      });
+    }
   }
 
   /**
@@ -34,6 +40,34 @@ export class StakingOperation {
    */
   public getTransactions(): Transaction[] {
     return this.transactions;
+  }
+
+  /**
+   * Get the status of the staking operation.
+   *
+   * @returns The status of the staking operation.
+   */
+  public getStatus(): StakingOperationStatusEnum {
+    return this.model.status;
+  }
+
+  /**
+   * Get the staking operation for the given ID.
+   *
+   * @returns The staking operation object.
+   */
+  public async get(): Promise<StakingOperationModel> {
+    const response = await Coinbase.apiClients.stake!.getStakingOperation(this.model.id);
+
+    this.model = response.data;
+
+    if (this.model.transactions) {
+      this.model.transactions.forEach(transaction => {
+        this.transactions.push(new Transaction(transaction));
+      });
+    }
+
+    return this.model;
   }
 
   /**
