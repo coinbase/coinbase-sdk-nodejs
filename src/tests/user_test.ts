@@ -80,6 +80,7 @@ describe("User Class", () => {
       Coinbase.apiClients.wallet = walletsApiMock;
       Coinbase.apiClients.wallet!.getWallet = mockReturnValue(mockWalletModel);
       Coinbase.apiClients.address = addressesApiMock;
+      Coinbase.apiClients.address!.listAddresses = mockReturnValue(mockAddressList);
       user = new User(mockUserModel);
       mockListAddress(seed, 2);
       importedWallet = await user.importWallet(walletData);
@@ -90,6 +91,12 @@ describe("User Class", () => {
 
     it("should import an exported wallet", async () => {
       expect(importedWallet.getId()).toBe(walletId);
+    });
+
+    it("should load the wallet addresses", async () => {
+      const [address] = await importedWallet.listAddresses();
+      expect(address.getId()).toBeDefined();
+      expect(importedWallet.getDefaultAddress()?.getId()).toEqual(address.getId());
     });
 
     it("should raise an error when walletId is not provided", async () => {
@@ -106,10 +113,6 @@ describe("User Class", () => {
           walletId: walletId,
         } as WalletData),
       ).rejects.toThrow(new InternalError("Seed must be provided"));
-    });
-
-    it("should load the wallet addresses", async () => {
-      expect(importedWallet.getDefaultAddress()!.getId()).toBe(mockAddressModel.address_id);
     });
 
     it("should contain the same seed when re-exported", async () => {

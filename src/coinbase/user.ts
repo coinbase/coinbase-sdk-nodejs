@@ -76,6 +76,8 @@ export class User {
    * Imports a Wallet belonging to a User.
    *
    * @param data - The Wallet data to import.
+   * @param data.walletId - The ID of the Wallet to import.
+   * @param data.seed - The seed to use for the Wallet.
    * @returns The imported Wallet.
    * @throws {ArgumentError} If the Wallet ID is not provided.
    * @throws {ArgumentError} If the seed is not provided.
