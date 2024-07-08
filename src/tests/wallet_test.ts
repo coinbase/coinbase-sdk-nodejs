@@ -31,6 +31,7 @@ import {
   walletsApiMock,
   mockListAddress,
   getAssetMock,
+  externalAddressApiMock,
 } from "./utils";
 import { Trade } from "../coinbase/trade";
 import { WalletAddress } from "../coinbase/address/wallet_address";
@@ -86,10 +87,11 @@ describe("Wallet Class", () => {
       destination = new WalletAddress(VALID_ADDRESS_MODEL, key as unknown as ethers.Wallet);
       intervalSeconds = 0.2;
       timeoutSeconds = 10;
+      Coinbase.apiClients.externalAddress = externalAddressApiMock;
       Coinbase.apiClients.asset = assetsApiMock;
       Coinbase.apiClients.asset!.getAsset = getAssetMock();
 
-      Coinbase.apiClients.address!.getAddressBalance = mockFn(request => {
+      Coinbase.apiClients.externalAddress.getExternalAddressBalance = mockFn(request => {
         const { asset_id } = request;
         balanceModel = {
           amount: "5000000000000000000",

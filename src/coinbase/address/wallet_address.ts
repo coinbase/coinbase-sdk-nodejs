@@ -1,16 +1,13 @@
 import { Decimal } from "decimal.js";
 import { ethers } from "ethers";
-import { Address } from "../address";
 import { Address as AddressModel } from "../../client";
+import { Address } from "../address";
 import { Asset } from "../asset";
-import { Balance } from "../balance";
-import { BalanceMap } from "../balance_map";
 import { Coinbase } from "../coinbase";
 import { ArgumentError, InternalError } from "../errors";
-import { FaucetTransaction } from "../faucet_transaction";
 import { Trade } from "../trade";
 import { Transfer } from "../transfer";
-import { Amount, Destination, TransferStatus, CreateTransferOptions } from "../types";
+import { Amount, CreateTransferOptions, Destination, TransferStatus } from "../types";
 import { delay } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
 
@@ -67,56 +64,6 @@ export class WalletAddress extends Address {
       throw new InternalError("Private key is already set");
     }
     this.key = key;
-  }
-
-  /**
-   * Returns the list of balances for the address.
-   *
-   * @returns The map from asset ID to balance.
-   */
-  public async listBalances(): Promise<BalanceMap> {
-    const response = await Coinbase.apiClients.address!.listAddressBalances(
-      this.model.wallet_id,
-      this.model.address_id,
-    );
-
-    return BalanceMap.fromBalances(response.data.data);
-  }
-
-  /**
-   * Returns the balance of the provided asset.
-   *
-   * @param assetId - The asset ID.
-   * @returns The balance of the asset.
-   */
-  async getBalance(assetId: string): Promise<Decimal> {
-    const response = await Coinbase.apiClients.address!.getAddressBalance(
-      this.model.wallet_id,
-      this.model.address_id,
-      Asset.primaryDenomination(assetId),
-    );
-
-    if (!response.data) {
-      return new Decimal(0);
-    }
-
-    return Balance.fromModelAndAssetId(response.data, assetId).amount;
-  }
-
-  /**
-   * Requests faucet funds for the address.
-   * Only supported on testnet networks.
-   *
-   * @returns The faucet transaction object.
-   * @throws {InternalError} If the request does not return a transaction hash.
-   * @throws {Error} If the request fails.
-   */
-  public async faucet(): Promise<FaucetTransaction> {
-    const response = await Coinbase.apiClients.address!.requestFaucetFunds(
-      this.model.wallet_id,
-      this.model.address_id,
-    );
-    return new FaucetTransaction(response.data);
   }
 
   /**

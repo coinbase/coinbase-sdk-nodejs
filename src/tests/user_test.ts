@@ -23,6 +23,7 @@ import {
   newAddressModel,
   mockListAddress,
   walletsApiMock,
+  externalAddressApiMock,
 } from "./utils";
 import Decimal from "decimal.js";
 import { FaucetTransaction } from "../coinbase/faucet_transaction";
@@ -253,9 +254,10 @@ describe("User Class", () => {
         next_page: "",
         total_count: 2,
       };
+      Coinbase.apiClients.externalAddress = externalAddressApiMock;
       Coinbase.apiClients.wallet!.getWalletBalance = mockReturnValue(mockWalletBalance);
       Coinbase.apiClients.wallet!.listWalletBalances = mockReturnValue(addressBalanceList);
-      Coinbase.apiClients.address!.requestFaucetFunds = mockReturnValue({
+      Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds = mockReturnValue({
         transaction_hash: generateRandomHash(8),
       });
 
