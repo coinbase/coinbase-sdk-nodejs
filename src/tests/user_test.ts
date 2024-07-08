@@ -92,6 +92,22 @@ describe("User Class", () => {
       expect(importedWallet.getId()).toBe(walletId);
     });
 
+    it("should raise an error when walletId is not provided", async () => {
+      expect(
+        Wallet.import({
+          seed: walletData.seed,
+        } as WalletData),
+      ).rejects.toThrow(new InternalError("Wallet ID must be provided"));
+    });
+
+    it("should raise an error when seed is not provided", async () => {
+      expect(
+        Wallet.import({
+          walletId: walletId,
+        } as WalletData),
+      ).rejects.toThrow(new InternalError("Seed must be provided"));
+    });
+
     it("should load the wallet addresses", async () => {
       expect(importedWallet.getDefaultAddress()!.getId()).toBe(mockAddressModel.address_id);
     });

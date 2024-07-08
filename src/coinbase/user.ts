@@ -1,5 +1,4 @@
 import { User as UserModel } from "./../client/api";
-import { Coinbase } from "./coinbase";
 import { WalletData } from "./types";
 import { Wallet } from "./wallet";
 
@@ -78,12 +77,12 @@ export class User {
    *
    * @param data - The Wallet data to import.
    * @returns The imported Wallet.
+   * @throws {ArgumentError} If the Wallet ID is not provided.
+   * @throws {ArgumentError} If the seed is not provided.
+   * @throws {APIError} If the request fails.
    */
   public async importWallet(data: WalletData): Promise<Wallet> {
-    const walletModel = await Coinbase.apiClients.wallet!.getWallet(data.walletId);
-    const wallet = Wallet.init(walletModel.data, data.seed);
-    await wallet.listAddresses();
-    return wallet;
+    return await Wallet.import(data);
   }
 
   /**
