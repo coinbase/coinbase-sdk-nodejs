@@ -49,8 +49,16 @@ npx jest ./src/coinbase/tests/wallet_test.ts
 ```
 To run e2e tests, run:
 
+In the root directory, create a .env file with the following configuration. Ensure to update the placeholders with your actual data:
 ```bash
-npm run test:dry-run && NAME="placeholder" PRIVATE_KEY="placeholder" WALLET_DATA="placeholder" && npm run test:e2e
+NAME=API_KEY_NAME
+PRIVATE_KEY=API_PRIVATE_KEY
+WALLET_DATA={ "WALLET_ID": { "seed": "", "encrypted": false, "authTag": "", "iv": "" } }
+```
+
+Then run the following commands:
+```bash
+npm run test:dry-run && npm run test:e2e
 ```
 
 ### Generating Documentation
