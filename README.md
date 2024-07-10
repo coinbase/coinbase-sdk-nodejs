@@ -1,5 +1,10 @@
 # Coinbase Node.js SDK
 
+[![NPM Package][npm]][npm-url]
+[![Build Size][build-size]][build-size-url]
+[![NPM Downloads][npm-downloads]][npmtrends-url]
+
+
 The Coinbase Node.js SDK enables the simple integration of crypto into your app. By calling Coinbase's Platform APIs, the SDK allows you to provision crypto wallets, send crypto into/out of those wallets, track wallet balances, and trade crypto from one asset into another.
 
 The SDK currently supports Customer-custodied Wallets on the Base Sepolia test network.
@@ -127,7 +132,7 @@ Next, view the default Address of your Wallet. You will need this default Addres
 
 ```typescript
 // A Wallet has a default Address.
-const address = await wallet.getDefaultAddress();
+const address = wallet.getDefaultAddress();
 console.log(`Address: ${address}`);
 ```
 
@@ -204,68 +209,17 @@ const importedWallet = await user.importWallet(data);
 To import Wallets that were persisted to your local file system using `saveSeed`, use the below code.
 
 ```typescript
-// The Wallet can be re-instantiated using the exported data.
-const w = await user.getWallet(w.getId());
-w.loadSeed(filePath);
+// Ensure your seed file path is updated
+const seedFilePath = "";
+const userWallet = await user.getWallet(wallet.getId());
+await userWallet.loadSeed(seedFilePath);
 ```
 
-## Development
 
-### Node.js Version
 
-Developing in this repository requires Node.js 18 or higher.
-
-### Set-up
-
-Clone the repo by running:
-
-```bash
-git clone git@github.com:coinbase/coinbase-sdk-nodejs.git
-```
-
-To install all dependencies, run:
-
-```bash
-npm install
-```
-
-### Linting
-
-To autocorrect all lint errors, run:
-
-```bash
-npm run lint-fix
-```
-
-To detect all lint errors, run:
-
-```bash
-npm run lint
-```
-
-### Testing
-
-To run all tests, run:
-
-```bash
-npm test
-```
-
-To run a specific test, run (for example):
-
-```bash
-npx jest ./src/coinbase/tests/wallet_test.ts
-```
-To run e2e tests, run:
-
-```bash
-npm run test:dry-run && NAME="placeholder" PRIVATE_KEY="placeholder" WALLET_DATA="placeholder" && npm run test:e2e
-```
-
-### Generating Documentation
-
-To generate documentation from the TypeDoc comments, run:
-
-```bash
-npm run docs
-```
+[npm]: https://img.shields.io/npm/v/@coinbase/coinbase-sdk
+[npm-url]: https://www.npmjs.com/package/@coinbase/coinbase-sdk
+[build-size]: https://badgen.net/bundlephobia/minzip/@coinbase/coinbase-sdk
+[build-size-url]: https://bundlephobia.com/result?p=@coinbase/coinbase-sdk
+[npmtrends-url]: https://www.npmtrends.com/@coinbase/coinbase-sdk
+[npm-downloads]: https://img.shields.io/npm/dw/@coinbase/coinbase-sdk
