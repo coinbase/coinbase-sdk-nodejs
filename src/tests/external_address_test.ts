@@ -16,7 +16,7 @@ import {
 } from "../client";
 import Decimal from "decimal.js";
 import { ExternalAddress } from "../coinbase/address/external_address";
-import { CoinbaseExternalAddressStakeOptions, StakeOptionsMode } from "../coinbase/types";
+import { StakeOptionsMode } from "../coinbase/types";
 import { StakingOperation } from "../coinbase/staking_operation";
 import { Asset } from "../coinbase/asset";
 
@@ -92,11 +92,10 @@ describe("ExternalAddress", () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       Coinbase.apiClients.stake!.buildStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
       Coinbase.apiClients.asset!.getAsset = getAssetMock();
-      const options: CoinbaseExternalAddressStakeOptions = { mode: StakeOptionsMode.PARTIAL };
       const op = await address.buildStakeOperation(
         new Decimal("0.0001"),
         Coinbase.assets.Eth,
-        options,
+        StakeOptionsMode.PARTIAL,
       );
 
       expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
@@ -437,7 +436,7 @@ describe("ExternalAddress", () => {
   });
 
   describe(".stakeableBalance", () => {
-    it("should return the stakeable balance successfully", async () => {
+    it("should return the stakeable balance successfully with default params", async () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       const stakeableBalance = await address.stakeableBalance(Coinbase.assets.Eth);
       expect(stakeableBalance).toEqual(new Decimal("3"));
@@ -450,10 +449,28 @@ describe("ExternalAddress", () => {
         },
       });
     });
+
+    it("should return the stakeable balance successfully in DEFAULT/PARTIAL mode", async () => {
+      Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
+      const stakeableBalance = await address.stakeableBalance(
+        Coinbase.assets.Eth,
+        StakeOptionsMode.PARTIAL,
+        {},
+      );
+      expect(stakeableBalance).toEqual(new Decimal("3"));
+      expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
+        address_id: address.getId(),
+        network_id: address.getNetworkId(),
+        asset_id: Coinbase.assets.Eth,
+        options: {
+          mode: StakeOptionsMode.PARTIAL,
+        },
+      });
+    });
   });
 
   describe(".unstakeableBalance", () => {
-    it("should return the unstakeable balance successfully", async () => {
+    it("should return the unstakeable balance successfully with default params", async () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       const unstakeableBalance = await address.unstakeableBalance(Coinbase.assets.Eth);
       expect(unstakeableBalance).toEqual(new Decimal("2"));
@@ -466,12 +483,48 @@ describe("ExternalAddress", () => {
         },
       });
     });
+
+    it("should return the unstakeable balance successfully in DEFAULT/PARTIAL mode", async () => {
+      Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
+      const unstakeableBalance = await address.unstakeableBalance(
+        Coinbase.assets.Eth,
+        StakeOptionsMode.PARTIAL,
+        {},
+      );
+      expect(unstakeableBalance).toEqual(new Decimal("2"));
+      expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
+        address_id: address.getId(),
+        network_id: address.getNetworkId(),
+        asset_id: Coinbase.assets.Eth,
+        options: {
+          mode: StakeOptionsMode.PARTIAL,
+        },
+      });
+    });
   });
 
   describe(".claimableBalance", () => {
-    it("should return the claimable balance successfully", async () => {
+    it("should return the claimable balance successfully with default params", async () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       const claimableBalance = await address.claimableBalance(Coinbase.assets.Eth);
+      expect(claimableBalance).toEqual(new Decimal("1"));
+      expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
+        address_id: address.getId(),
+        network_id: address.getNetworkId(),
+        asset_id: Coinbase.assets.Eth,
+        options: {
+          mode: StakeOptionsMode.DEFAULT,
+        },
+      });
+    });
+
+    it("should return the claimable balance successfully in DEFAULT/PARTIAL mode", async () => {
+      Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
+      const claimableBalance = await address.claimableBalance(
+        Coinbase.assets.Eth,
+        StakeOptionsMode.DEFAULT,
+        {},
+      );
       expect(claimableBalance).toEqual(new Decimal("1"));
       expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
         address_id: address.getId(),
