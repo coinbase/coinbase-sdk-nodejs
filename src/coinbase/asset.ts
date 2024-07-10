@@ -32,15 +32,6 @@ export class Asset {
   }
 
   /**
-   * Returns the Asset ID.
-   *
-   * @returns The Asset ID.
-   */
-  getAssetId(): string {
-    return this.assetId;
-  }
-
-  /**
    * Creates an Asset from an Asset Model.
    *
    * @param model - The Asset Model.
@@ -107,6 +98,15 @@ export class Asset {
   }
 
   /**
+   * Returns the primary denomination for the Asset.
+   *
+   * @returns The primary denomination for the Asset.
+   */
+  public primaryDenomination(): string {
+    return Asset.primaryDenomination(this.assetId);
+  }
+
+  /**
    * Converts the amount of the Asset from whole to atomic units.
    *
    * @param wholeAmount - The whole amount to convert to atomic units.
@@ -126,20 +126,20 @@ export class Asset {
   }
 
   /**
-   * Returns the primary denomination for the Asset.
-   *
-   * @returns The primary denomination for the Asset.
-   */
-  public primaryDenomination(): string {
-    return Asset.primaryDenomination(this.assetId);
-  }
-
-  /**
    * Returns a string representation of the Asset.
    *
    * @returns a string representation of the Asset
    */
   toString(): string {
     return `Asset{ networkId: ${this.networkId}, assetId: ${this.assetId}, contractAddress: ${this.contractAddress}, decimals: ${this.decimals} }`;
+  }
+
+  /**
+   * Returns the Asset ID.
+   *
+   * @returns The Asset ID.
+   */
+  getAssetId(): string {
+    return this.assetId;
   }
 }
