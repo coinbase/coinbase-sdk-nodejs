@@ -333,7 +333,7 @@ export type ExternalAddressAPIClient = {
   /**
    * Request faucet funds to be sent to external address.
    *
-   * @param networkId - The ID of the wallet the address belongs to.
+   * @param networkId - The ID of the blockchain network
    * @param addressId - The onchain address of the address that is being fetched.
    * @param options - Override http request option.
    * @throws {APIError} If the request fails.
@@ -635,22 +635,6 @@ export type CoinbaseConfigureFromJsonOptions = {
 };
 
 /**
- * CoinbaseExternalAddressStakeOptions type definition.
- */
-export type CoinbaseExternalAddressStakeOptions = {
-  /**
-   * The mode type that you're trying to stake with.
-   * e.g.
-   */
-  mode?: StakeOptionsMode;
-
-  /**
-   * The amount to stake, unstake, or claim_stake for in a staking operation.
-   */
-  amount?: string;
-};
-
-/**
  * StakeOptionsMode type definition.
  */
 export enum StakeOptionsMode {
@@ -659,7 +643,7 @@ export enum StakeOptionsMode {
    */
   DEFAULT = "default",
   /**
-   * Partial represents Partial Ethereumn Staking mode.
+   * Partial represents Partial Ethereum Staking mode.
    */
   PARTIAL = "partial",
 }
