@@ -242,7 +242,7 @@ export class ExternalAddress extends Address {
     const newOptions = this.copyOptions(options);
 
     if (mode) {
-      newOptions["mode"] = mode;
+      newOptions.mode = mode;
     }
 
     const request = {
@@ -297,8 +297,8 @@ export class ExternalAddress extends Address {
 
     const newOptions = this.copyOptions(options);
 
-    newOptions["mode"] = mode;
-    newOptions["amount"] = asset.toAtomicAmount(new Decimal(amount.toString())).toString();
+    newOptions.mode = mode;
+    newOptions.amount = asset.toAtomicAmount(new Decimal(amount.toString())).toString();
 
     const request = {
       network_id: this.getNetworkId(),
