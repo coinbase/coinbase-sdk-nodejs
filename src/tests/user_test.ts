@@ -140,10 +140,10 @@ describe("User Class", () => {
 
     it("should raise an error when the Wallet API call fails", async () => {
       Coinbase.apiClients.wallet!.listWallets = mockReturnRejectedValue(new Error("API Error"));
-      await expect(user.listWallets(10, "xyz")).rejects.toThrow(new Error("API Error"));
+      await expect(user.listWallets()).rejects.toThrow(new Error("API Error"));
       expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(0);
-      expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledWith(10, "xyz");
+      expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledWith(100, undefined);
     });
 
     it("should return an empty list of Wallets when the User has no Wallets", async () => {
@@ -153,8 +153,8 @@ describe("User Class", () => {
         next_page: "",
         total_count: 0,
       });
-      const result = await user.listWallets();
-      expect(result.wallets.length).toBe(0);
+      const wallets = await user.listWallets();
+      expect(wallets.length).toBe(0);
       expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(0);
     });
@@ -170,20 +170,19 @@ describe("User Class", () => {
         total_count: 1,
       });
       Coinbase.apiClients.address!.listAddresses = mockReturnValue(addressListModel);
-      const result = await user.listWallets();
-      expect(result.wallets[0]).toBeInstanceOf(Wallet);
-      expect(result.wallets.length).toBe(1);
-      expect(result.wallets[0].getId()).toBe(walletId);
-      const addresses = await result.wallets[0].listAddresses();
+      const wallets = await user.listWallets();
+      expect(wallets[0]).toBeInstanceOf(Wallet);
+      expect(wallets.length).toBe(1);
+      expect(wallets[0].getId()).toBe(walletId);
+      const addresses = await wallets[0].listAddresses();
       expect(addresses.length).toBe(2);
-      expect(result.nextPageToken).toBe("nextPageToken");
       expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledWith(
         walletId,
         Wallet.MAX_ADDRESSES,
       );
-      expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledWith(10, undefined);
+      expect(Coinbase.apiClients.wallet!.listWallets).toHaveBeenCalledWith(100, undefined);
     });
 
     it("should create Wallets when seed is provided", async () => {
@@ -194,8 +193,8 @@ describe("User Class", () => {
         total_count: 1,
       });
       Coinbase.apiClients.address!.listAddresses = mockReturnValue(addressListModel);
-      const result = await user.listWallets();
-      const unhydratedWallet = result.wallets[0];
+      const wallets = await user.listWallets();
+      const unhydratedWallet = wallets[0];
       expect(unhydratedWallet.canSign()).toBe(false);
       unhydratedWallet.setSeed(seed);
       expect(unhydratedWallet).toBeInstanceOf(Wallet);
@@ -213,8 +212,8 @@ describe("User Class", () => {
         total_count: 1,
       });
       Coinbase.apiClients.address!.listAddresses = mockReturnValue(mockAddressList);
-      const result = await user.listWallets();
-      const unhydratedWallet = result.wallets[0];
+      const wallets = await user.listWallets();
+      const unhydratedWallet = wallets[0];
       expect(() => unhydratedWallet.export()).toThrow(
         new InternalError("Cannot export Wallet without loaded seed"),
       );
@@ -259,8 +258,8 @@ describe("User Class", () => {
         transaction_hash: generateRandomHash(8),
       });
 
-      const result = await user.listWallets();
-      const wallet = result.wallets[0];
+      const wallets = await user.listWallets();
+      const wallet = wallets[0];
       expect(wallet.getId()).toBe(walletId);
       expect(wallet.canSign()).toBe(false);
       expect(wallet.getNetworkId()).toBe(Coinbase.networks.BaseSepolia);

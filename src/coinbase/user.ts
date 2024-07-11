@@ -50,15 +50,10 @@ export class User {
   /**
    * Lists the Wallets belonging to the User.
    *
-   * @param pageSize - The number of Wallets to return per page. Defaults to 10
-   * @param nextPageToken - The token for the next page of Wallets
-   * @returns An object containing the Wallets and the token for the next page
+   * @returns The list of Wallets.
    */
-  public async listWallets(
-    pageSize: number = 10,
-    nextPageToken?: string,
-  ): Promise<{ wallets: Wallet[]; nextPageToken: string }> {
-    return await Wallet.listWallets(pageSize, nextPageToken);
+  public async listWallets(): Promise<Wallet[]> {
+    return await Wallet.listWallets();
   }
 
   /**
