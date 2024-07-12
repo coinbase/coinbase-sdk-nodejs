@@ -90,6 +90,29 @@ export class Wallet {
   }
 
   /**
+   * Imports a Wallet for the given Wallet data.
+   *
+   * @param data - The Wallet data to import.
+   * @param data.walletId - The ID of the Wallet to import.
+   * @param data.seed - The seed to use for the Wallet.
+   * @returns The imported Wallet.
+   * @throws {ArgumentError} If the Wallet ID is not provided.
+   * @throws {ArgumentError} If the seed is not provided.
+   * @throws {APIError} If the request fails.
+   */
+  public static async import(data: WalletData): Promise<Wallet> {
+    if (!data.walletId) {
+      throw new ArgumentError("Wallet ID must be provided");
+    }
+    if (!data.seed) {
+      throw new ArgumentError("Seed must be provided");
+    }
+    const walletModel = await Coinbase.apiClients.wallet!.getWallet(data.walletId);
+    const wallet = Wallet.init(walletModel.data, data.seed);
+    return wallet;
+  }
+
+  /**
    * Returns a newly created Wallet object. Do not use this method directly.
    * Instead, use User.createWallet.
    *

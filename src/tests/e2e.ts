@@ -1,6 +1,6 @@
 import fs from "fs";
 import dotenv from "dotenv";
-import { Coinbase } from "../coinbase/coinbase";
+import { Coinbase, Wallet } from "../index";
 import { TransferStatus } from "../coinbase/types";
 
 describe("Coinbase SDK E2E Test", () => {
@@ -47,7 +47,7 @@ describe("Coinbase SDK E2E Test", () => {
     const walletId = Object.keys(seedFile)[0];
     const seed = seedFile[walletId].seed;
 
-    const userWallet = await user.importWallet({ seed, walletId });
+    const userWallet = await Wallet.import({ seed, walletId });
     expect(userWallet).toBeDefined();
     expect(userWallet.getId()).toBe(walletId);
     console.log(
