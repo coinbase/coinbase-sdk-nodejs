@@ -12,4 +12,10 @@ async function tradeAssets() {
   console.log(`Trade successfully completed: `, trade.toString());
 }
 
-tradeAssets();
+(async () => {
+  try {
+    await tradeAssets();
+  } catch (error) {
+    console.error("Error during trading assets", error);
+  }
+})();
