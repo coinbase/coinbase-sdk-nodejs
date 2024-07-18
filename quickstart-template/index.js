@@ -1,5 +1,6 @@
 import { Coinbase } from "@coinbase/coinbase-sdk";
 
+// Change this to the path of your API key file downloaded from CDP portal.
 let coinbase = Coinbase.configureFromJson({ filePath: "~/Downloads/cdp_api_key.json" });
 let user = await coinbase.getDefaultUser();
 
