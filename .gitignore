@@ -132,3 +132,7 @@ dist
 .pnp.*
 .DS_Store
 **/*_local*
+
+.idea
+
+quickstart-template/node_modules
