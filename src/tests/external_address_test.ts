@@ -4,9 +4,13 @@ import {
   externalAddressApiMock,
   generateRandomHash,
   getAssetMock,
+  mockEthereumValidator,
   mockReturnValue,
+  newAddressModel,
   stakeApiMock,
+  VALID_ACTIVE_VALIDATOR_LIST,
   VALID_ADDRESS_MODEL,
+  validatorApiMock,
 } from "./utils";
 import {
   AddressBalanceList,
@@ -19,19 +23,19 @@ import { ExternalAddress } from "../coinbase/address/external_address";
 import { StakeOptionsMode } from "../coinbase/types";
 import { StakingOperation } from "../coinbase/staking_operation";
 import { Asset } from "../coinbase/asset";
+import { randomUUID } from "crypto";
 
 describe("ExternalAddress", () => {
-  const address = new ExternalAddress(
-    VALID_ADDRESS_MODEL.network_id,
-    VALID_ADDRESS_MODEL.address_id,
-  );
+  const newAddress = newAddressModel("", randomUUID(), Coinbase.networks.EthereumHolesky);
+
+  const address = new ExternalAddress(newAddress.network_id, newAddress.address_id);
   const STAKING_CONTEXT_MODEL: StakingContextModel = {
     context: {
       stakeable_balance: {
         amount: "3000000000000000000",
         asset: {
           asset_id: Coinbase.assets.Eth,
-          network_id: Coinbase.networks.BaseSepolia,
+          network_id: Coinbase.networks.EthereumHolesky,
           decimals: 18,
           contract_address: "0x",
         },
@@ -40,7 +44,7 @@ describe("ExternalAddress", () => {
         amount: "2000000000000000000",
         asset: {
           asset_id: Coinbase.assets.Eth,
-          network_id: Coinbase.networks.BaseSepolia,
+          network_id: Coinbase.networks.EthereumHolesky,
           decimals: 18,
           contract_address: "0x",
         },
@@ -49,7 +53,7 @@ describe("ExternalAddress", () => {
         amount: "1000000000000000000",
         asset: {
           asset_id: Coinbase.assets.Eth,
-          network_id: Coinbase.networks.BaseSepolia,
+          network_id: Coinbase.networks.EthereumHolesky,
           decimals: 18,
           contract_address: "0x",
         },
@@ -57,6 +61,10 @@ describe("ExternalAddress", () => {
     },
   };
   const STAKING_OPERATION_MODEL: StakingOperationModel = {
+    id: randomUUID(),
+    network_id: Coinbase.networks.EthereumHolesky,
+    address_id: "0x1234567890",
+    status: "pending",
     transactions: [
       {
         from_address_id: address.getId(),
@@ -81,6 +89,7 @@ describe("ExternalAddress", () => {
   beforeAll(() => {
     Coinbase.apiClients.stake = stakeApiMock;
     Coinbase.apiClients.asset = assetsApiMock;
+    Coinbase.apiClients.validator = validatorApiMock;
   });
 
   beforeEach(() => {
@@ -285,6 +294,16 @@ describe("ExternalAddress", () => {
       });
       expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledTimes(0);
     });
+
+    it("should return an error for trying to claim stake for native eth", async () => {
+      await expect(
+        address.buildClaimStakeOperation(
+          new Decimal("0"),
+          Coinbase.assets.Eth,
+          StakeOptionsMode.NATIVE,
+        ),
+      ).rejects.toThrow(Error);
+    });
   });
 
   describe(".listBalances", () => {
@@ -295,7 +314,7 @@ describe("ExternalAddress", () => {
             amount: "1000000000000000000",
             asset: {
               asset_id: Coinbase.assets.Eth,
-              network_id: Coinbase.networks.BaseSepolia,
+              network_id: Coinbase.networks.EthereumHolesky,
               decimals: 18,
             },
           },
@@ -303,7 +322,7 @@ describe("ExternalAddress", () => {
             amount: "5000000",
             asset: {
               asset_id: "usdc",
-              network_id: Coinbase.networks.BaseSepolia,
+              network_id: Coinbase.networks.EthereumHolesky,
               decimals: 6,
             },
           },
@@ -355,7 +374,7 @@ describe("ExternalAddress", () => {
         amount: "5000000000000000000",
         asset: {
           asset_id: Coinbase.assets.Eth,
-          network_id: Coinbase.networks.BaseSepolia,
+          network_id: Coinbase.networks.EthereumHolesky,
           decimals: 18,
         },
       };
