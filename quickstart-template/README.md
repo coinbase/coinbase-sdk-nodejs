@@ -1,8 +1,8 @@
 ### Quickstart template for Platform SDK
 
-This is a template repository for quickly getting started with the Platform SDK. It provides a simple example of how to use the SDK to interact with the Platform APIs.
+This is a template repository for quickly getting started with the Platform SDK. It provides a simple example of how to use the SDK.
 
-To set up the template, install the dependencies and start
+To set up the template, run the following commands:
 ```bash
 npm install
 npm start
