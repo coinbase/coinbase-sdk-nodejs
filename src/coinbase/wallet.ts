@@ -31,14 +31,14 @@ import { convertStringToHex, delay } from "./utils";
  * list their balances, and transfer Assets to other Addresses. Wallets should be created through User.createWallet or User.importWallet.
  */
 export class Wallet {
-  private model: WalletModel;
+  static MAX_ADDRESSES = 20;
 
+  private model: WalletModel;
   private master?: HDKey;
   private seed?: string;
   private addresses: WalletAddress[] = [];
 
   private readonly addressPathPrefix = "m/44'/60'/0'/0";
-  static MAX_ADDRESSES = 20;
 
   /**
    * Private constructor to prevent direct instantiation outside of factory method. Use Wallet.init instead.
