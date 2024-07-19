@@ -23,6 +23,7 @@ import {
   tradeApiMock,
   transfersApiMock,
   walletsApiMock,
+  externalAddressApiMock,
 } from "./utils";
 import { ArgumentError } from "../coinbase/errors";
 import { Transfer } from "../coinbase/transfer";
@@ -40,10 +41,11 @@ describe("WalletAddress", () => {
   let key;
 
   beforeEach(() => {
-    Coinbase.apiClients.address = addressesApiMock;
+    Coinbase.apiClients.externalAddress = externalAddressApiMock;
     Coinbase.apiClients.asset = assetsApiMock;
+    Coinbase.apiClients.externalAddress = externalAddressApiMock;
     Coinbase.apiClients.asset.getAsset = getAssetMock();
-    Coinbase.apiClients.address!.getAddressBalance = mockFn(request => {
+    Coinbase.apiClients.externalAddress.getExternalAddressBalance = mockFn(request => {
       const [, , asset_id] = request;
       balanceModel = {
         amount: "1000000000000000000",
@@ -56,10 +58,10 @@ describe("WalletAddress", () => {
       };
       return { data: balanceModel };
     });
-    Coinbase.apiClients.address!.listAddressBalances = mockFn(() => {
+    Coinbase.apiClients.externalAddress.listExternalAddressBalances = mockFn(() => {
       return { data: VALID_ADDRESS_BALANCE_LIST };
     });
-    Coinbase.apiClients.address!.requestFaucetFunds = mockFn(() => {
+    Coinbase.apiClients.externalAddress.requestExternalFaucetFunds = mockFn(() => {
       return { data: { transaction_hash: transactionHash } };
     });
   });
@@ -88,27 +90,29 @@ describe("WalletAddress", () => {
     expect(balances.get(Coinbase.assets.Eth)).toEqual(new Decimal(1));
     expect(balances.get("usdc")).toEqual(new Decimal(5000));
     expect(balances.get("weth")).toEqual(new Decimal(3));
-    expect(Coinbase.apiClients.address!.listAddressBalances).toHaveBeenCalledWith(
-      address.getWalletId(),
+    expect(Coinbase.apiClients.externalAddress!.listExternalAddressBalances).toHaveBeenCalledWith(
+      address.getNetworkId(),
       address.getId(),
     );
-    expect(Coinbase.apiClients.address!.listAddressBalances).toHaveBeenCalledTimes(1);
+    expect(Coinbase.apiClients.externalAddress!.listExternalAddressBalances).toHaveBeenCalledTimes(
+      1,
+    );
   });
 
   it("should return the correct ETH balance", async () => {
     const ethBalance = await address.getBalance(Coinbase.assets.Eth);
     expect(ethBalance).toBeInstanceOf(Decimal);
     expect(ethBalance).toEqual(new Decimal(1));
-    expect(Coinbase.apiClients.address!.getAddressBalance).toHaveBeenCalledWith(
-      address.getWalletId(),
+    expect(Coinbase.apiClients.externalAddress!.getExternalAddressBalance).toHaveBeenCalledWith(
+      address.getNetworkId(),
       address.getId(),
       Coinbase.assets.Eth,
     );
-    expect(Coinbase.apiClients.address!.getAddressBalance).toHaveBeenCalledTimes(1);
+    expect(Coinbase.apiClients.externalAddress!.getExternalAddressBalance).toHaveBeenCalledTimes(1);
   });
 
   it("should return 0 balance when the response is empty", async () => {
-    Coinbase.apiClients.address!.getAddressBalance = mockReturnValue(null);
+    Coinbase.apiClients.externalAddress!.getExternalAddressBalance = mockReturnValue(null);
     const ethBalance = await address.getBalance(Coinbase.assets.Eth);
     expect(ethBalance).toBeInstanceOf(Decimal);
     expect(ethBalance).toEqual(new Decimal(0));
@@ -119,12 +123,12 @@ describe("WalletAddress", () => {
     const ethBalance = await address.getBalance(assetId);
     expect(ethBalance).toBeInstanceOf(Decimal);
     expect(ethBalance).toEqual(new Decimal("1000000000"));
-    expect(Coinbase.apiClients.address!.getAddressBalance).toHaveBeenCalledWith(
-      address.getWalletId(),
+    expect(Coinbase.apiClients.externalAddress!.getExternalAddressBalance).toHaveBeenCalledWith(
+      address.getNetworkId(),
       address.getId(),
       Coinbase.assets.Eth,
     );
-    expect(Coinbase.apiClients.address!.getAddressBalance).toHaveBeenCalledTimes(1);
+    expect(Coinbase.apiClients.externalAddress!.getExternalAddressBalance).toHaveBeenCalledTimes(1);
   });
 
   it("should return the correct Wei balance", async () => {
@@ -132,20 +136,24 @@ describe("WalletAddress", () => {
     const ethBalance = await address.getBalance(assetId);
     expect(ethBalance).toBeInstanceOf(Decimal);
     expect(ethBalance).toEqual(new Decimal("1000000000000000000"));
-    expect(Coinbase.apiClients.address!.getAddressBalance).toHaveBeenCalledWith(
-      address.getWalletId(),
+    expect(Coinbase.apiClients.externalAddress?.getExternalAddressBalance).toHaveBeenCalledWith(
+      address.getNetworkId(),
       address.getId(),
       Coinbase.assets.Eth,
     );
-    expect(Coinbase.apiClients.address!.getAddressBalance).toHaveBeenCalledTimes(1);
+    expect(Coinbase.apiClients.externalAddress?.getExternalAddressBalance).toHaveBeenCalledTimes(1);
   });
 
   it("should return an error for an unsupported asset", async () => {
     const getAddressBalance = mockReturnRejectedValue(new APIError(""));
     const assetId = "unsupported-asset";
-    Coinbase.apiClients.address!.getAddressBalance = getAddressBalance;
+    Coinbase.apiClients.externalAddress!.getExternalAddressBalance = getAddressBalance;
     await expect(address.getBalance(assetId)).rejects.toThrow(APIError);
-    expect(getAddressBalance).toHaveBeenCalledWith(address.getWalletId(), address.getId(), assetId);
+    expect(getAddressBalance).toHaveBeenCalledWith(
+      address.getNetworkId(),
+      address.getId(),
+      assetId,
+    );
     expect(getAddressBalance).toHaveBeenCalledTimes(1);
   });
 
@@ -163,37 +171,47 @@ describe("WalletAddress", () => {
     const faucetTransaction = await address.faucet();
     expect(faucetTransaction).toBeInstanceOf(FaucetTransaction);
     expect(faucetTransaction.getTransactionHash()).toBe(transactionHash);
-    expect(Coinbase.apiClients.address!.requestFaucetFunds).toHaveBeenCalledWith(
-      address.getWalletId(),
+    expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds).toHaveBeenCalledWith(
+      address.getNetworkId(),
       address.getId(),
     );
-    expect(Coinbase.apiClients.address!.requestFaucetFunds).toHaveBeenCalledTimes(1);
+    expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds).toHaveBeenCalledTimes(
+      1,
+    );
   });
 
   it("should throw an APIError when the request is unsuccessful", async () => {
-    Coinbase.apiClients.address!.requestFaucetFunds = mockReturnRejectedValue(new APIError(""));
+    Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds = mockReturnRejectedValue(
+      new APIError(""),
+    );
     await expect(address.faucet()).rejects.toThrow(APIError);
-    expect(Coinbase.apiClients.address!.requestFaucetFunds).toHaveBeenCalledWith(
-      address.getWalletId(),
+    expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds).toHaveBeenCalledWith(
+      address.getNetworkId(),
       address.getId(),
     );
-    expect(Coinbase.apiClients.address!.requestFaucetFunds).toHaveBeenCalledTimes(1);
+    expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds).toHaveBeenCalledTimes(
+      1,
+    );
   });
 
   it("should throw a FaucetLimitReachedError when the faucet limit is reached", async () => {
-    Coinbase.apiClients.address!.requestFaucetFunds = mockReturnRejectedValue(
+    Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds = mockReturnRejectedValue(
       new FaucetLimitReachedError(""),
     );
     await expect(address.faucet()).rejects.toThrow(FaucetLimitReachedError);
-    expect(Coinbase.apiClients.address!.requestFaucetFunds).toHaveBeenCalledTimes(1);
+    expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds).toHaveBeenCalledTimes(
+      1,
+    );
   });
 
   it("should throw an InternalError when the request fails unexpectedly", async () => {
-    Coinbase.apiClients.address!.requestFaucetFunds = mockReturnRejectedValue(
+    Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds = mockReturnRejectedValue(
       new InternalError(""),
     );
     await expect(address.faucet()).rejects.toThrow(InternalError);
-    expect(Coinbase.apiClients.address!.requestFaucetFunds).toHaveBeenCalledTimes(1);
+    expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds).toHaveBeenCalledTimes(
+      1,
+    );
   });
 
   it("should return the correct string representation", () => {
@@ -213,9 +231,10 @@ describe("WalletAddress", () => {
       timeoutSeconds = 10;
       walletId = crypto.randomUUID();
       id = crypto.randomUUID();
+      Coinbase.apiClients.externalAddress = externalAddressApiMock;
       Coinbase.apiClients.asset = assetsApiMock;
       Coinbase.apiClients.asset.getAsset = getAssetMock();
-      Coinbase.apiClients.address!.getAddressBalance = mockFn((...request) => {
+      Coinbase.apiClients.externalAddress.getExternalAddressBalance = mockFn((...request) => {
         const [, , asset_id] = request;
         balanceModel = {
           amount: "1000000000000000000",
@@ -641,7 +660,8 @@ describe("WalletAddress", () => {
           normalizedFromAssetId = "usdc";
           amount = new Decimal(5);
           balanceResponse = { amount: "5000000", asset: { asset_id: "usdc", decimals: 6 } };
-          Coinbase.apiClients.address!.getAddressBalance = mockReturnValue(balanceResponse);
+          Coinbase.apiClients.externalAddress!.getExternalAddressBalance =
+            mockReturnValue(balanceResponse);
         });
 
         it("should return the broadcast trade", async () => {
