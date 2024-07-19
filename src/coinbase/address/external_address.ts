@@ -138,7 +138,7 @@ export class ExternalAddress extends Address {
     assetId: string,
     startTime: string,
     endTime: string,
-    format = StakingRewardFormat.Usd,
+    format: StakingRewardFormat = StakingRewardFormat.Usd,
   ): Promise<StakingReward[]> {
     return StakingReward.list(
       Coinbase.normalizeNetwork(this.getNetworkId()),
@@ -216,6 +216,10 @@ export class ExternalAddress extends Address {
     mode: StakeOptionsMode,
     options: { [key: string]: string },
   ): Promise<void> {
+    if (assetId === "eth" && options.mode === StakeOptionsMode.NATIVE) {
+      throw new Error(`Claiming stake for ETH is not supported in native mode.`);
+    }
+
     const claimableBalance = new Decimal(await this.claimableBalance(assetId, mode, options));
 
     if (claimableBalance.lessThan(amount.toString())) {

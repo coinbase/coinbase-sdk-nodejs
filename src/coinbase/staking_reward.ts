@@ -42,7 +42,7 @@ export class StakingReward {
     addressIds: Array<string>,
     startTime: string,
     endTime: string,
-    format = StakingRewardFormat.Usd,
+    format: StakingRewardFormat = StakingRewardFormat.Usd,
   ): Promise<StakingReward[]> {
     const stakingRewards: StakingReward[] = [];
     const queue: string[] = [""];

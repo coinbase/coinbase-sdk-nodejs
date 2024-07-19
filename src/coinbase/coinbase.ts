@@ -9,6 +9,7 @@ import {
   TradesApiFactory,
   ServerSignersApiFactory,
   StakeApiFactory,
+  ValidatorsApiFactory,
   AssetsApiFactory,
   ExternalAddressesApiFactory,
 } from "../client";
@@ -33,6 +34,8 @@ export class Coinbase {
   static networks = {
     BaseSepolia: "base-sepolia",
     BaseMainnet: "base-mainnet",
+    EthereumMainnet: "ethereum-mainnet",
+    EthereumHolesky: "ethereum-holesky",
   };
 
   /**
@@ -109,6 +112,7 @@ export class Coinbase {
     Coinbase.apiClients.trade = TradesApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.serverSigner = ServerSignersApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.stake = StakeApiFactory(config, basePath, axiosInstance);
+    Coinbase.apiClients.validator = ValidatorsApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.asset = AssetsApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.externalAddress = ExternalAddressesApiFactory(
       config,
