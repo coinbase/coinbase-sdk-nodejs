@@ -1,4 +1,5 @@
-import globalAxios from "axios";
+import globalAxios, { AxiosError } from "axios";
+import axiosRetry from "axios-retry";
 import * as fs from "fs";
 import {
   User as UserModel,
@@ -74,6 +75,7 @@ export class Coinbase {
    * @param options.useServerSigner - Whether to use a Server-Signer or not.
    * @param options.debugging - If true, logs API requests and responses to the console.
    * @param options.basePath - The base path for the API.
+   * @param options.maxNetworkRetries - The maximum number of network retries for the API GET requests.
    * @throws {InternalError} If the configuration is invalid.
    * @throws {InvalidAPIKeyFormat} If not able to create JWT token.
    */
@@ -83,6 +85,7 @@ export class Coinbase {
     useServerSigner = false,
     debugging = false,
     basePath = BASE_PATH,
+    maxNetworkRetries = 3,
   }: CoinbaseOptions) {
     if (apiKeyName === "") {
       throw new InternalError("Invalid configuration: apiKeyName is empty");
@@ -95,6 +98,15 @@ export class Coinbase {
       basePath: basePath,
     });
     const axiosInstance = globalAxios.create();
+    axiosRetry(axiosInstance, {
+      retries: maxNetworkRetries,
+      retryCondition: (error: AxiosError) => {
+        return (
+          error.config?.method?.toUpperCase() === "GET" &&
+          (error.response?.status || 0) in [500, 502, 503, 504]
+        );
+      },
+    });
     registerAxiosInterceptors(
       axiosInstance,
       config => coinbaseAuthenticator.authenticateRequest(config, debugging),

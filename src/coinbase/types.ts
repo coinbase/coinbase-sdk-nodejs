@@ -607,6 +607,11 @@ export type CoinbaseOptions = {
    * The base path for the API.
    */
   basePath?: string;
+
+  /**
+   * The maximum number of network retries for the API GET requests.
+   */
+  maxNetworkRetries?: number;
 };
 
 /**
