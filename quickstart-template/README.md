@@ -8,4 +8,4 @@ npm install
 npm start
 ```
 
-This command will create a developer-custodial wallet, deposit testnet funds to it and perform perform a transfer to another wallet.
+This command will create a developer-custodial wallet, deposit testnet funds to it and perform a transfer to another wallet.
