@@ -140,10 +140,10 @@ export class StakingOperation {
    * @param key - The key used to sign the transactions.
    */
   public async sign(key: ethers.Wallet): Promise<void> {
-    this.transactions.forEach(tx => {
+    for (const tx of this.transactions) {
       if (!tx.isSigned()) {
-        tx.sign(key);
+        await tx.sign(key);
       }
-    });
+    }
   }
 }
