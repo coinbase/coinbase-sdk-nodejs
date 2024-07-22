@@ -198,4 +198,23 @@ describe("StakingReward", () => {
       expect(rewardStr).toEqual("StakingReward { amount: '2.26' }");
     });
   });
+
+  describe(".addressId", () => {
+    it("should return the onchain address of the StakingReward", () => {
+      const reward = new StakingReward(
+        {
+          address_id: address.getId(),
+          date: "2024-05-03",
+          amount: "226",
+          state: StakingRewardStateEnum.Pending,
+          format: StakingRewardFormat.Usd,
+        },
+        asset,
+        StakingRewardFormat.Usd,
+      );
+
+      const addressId = reward.addressId();
+      expect(addressId).toEqual(address.getId());
+    });
+  });
 });

@@ -101,6 +101,15 @@ export class StakingReward {
   }
 
   /**
+   * Returns the onchain address of the StakingReward.
+   *
+   * @returns The onchain address.
+   */
+  public addressId(): string {
+    return this.model.address_id;
+  }
+
+  /**
    * Print the Staking Reward as a string.
    *
    * @returns The string representation of the Staking Reward.
