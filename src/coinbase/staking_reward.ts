@@ -115,6 +115,6 @@ export class StakingReward {
    * @returns The string representation of the Staking Reward.
    */
   public toString(): string {
-    return `StakingReward { amount: '${this.amount().toString()}' }`;
+    return `StakingReward { date: '${this.date().toISOString()}' address: '${this.addressId()}' amount: '${this.amount().toString()}' }`;
   }
 }
