@@ -23,6 +23,7 @@ import {
   newAddressModel,
   mockListAddress,
   walletsApiMock,
+  externalAddressApiMock,
 } from "./utils";
 import Decimal from "decimal.js";
 import { FaucetTransaction } from "../coinbase/faucet_transaction";
@@ -80,6 +81,7 @@ describe("User Class", () => {
       Coinbase.apiClients.wallet = walletsApiMock;
       Coinbase.apiClients.wallet!.getWallet = mockReturnValue(mockWalletModel);
       Coinbase.apiClients.address = addressesApiMock;
+      Coinbase.apiClients.address!.listAddresses = mockReturnValue(mockAddressList);
       user = new User(mockUserModel);
       mockListAddress(seed, 2);
       importedWallet = await user.importWallet(walletData);
@@ -93,7 +95,25 @@ describe("User Class", () => {
     });
 
     it("should load the wallet addresses", async () => {
-      expect(importedWallet.getDefaultAddress()!.getId()).toBe(mockAddressModel.address_id);
+      const [address] = await importedWallet.listAddresses();
+      expect(address.getId()).toBeDefined();
+      expect(importedWallet.getDefaultAddress()?.getId()).toEqual(address.getId());
+    });
+
+    it("should raise an error when walletId is not provided", async () => {
+      expect(
+        Wallet.import({
+          seed: walletData.seed,
+        } as WalletData),
+      ).rejects.toThrow(new InternalError("Wallet ID must be provided"));
+    });
+
+    it("should raise an error when seed is not provided", async () => {
+      expect(
+        Wallet.import({
+          walletId: walletId,
+        } as WalletData),
+      ).rejects.toThrow(new InternalError("Seed must be provided"));
     });
 
     it("should contain the same seed when re-exported", async () => {
@@ -253,9 +273,10 @@ describe("User Class", () => {
         next_page: "",
         total_count: 2,
       };
+      Coinbase.apiClients.externalAddress = externalAddressApiMock;
       Coinbase.apiClients.wallet!.getWalletBalance = mockReturnValue(mockWalletBalance);
       Coinbase.apiClients.wallet!.listWalletBalances = mockReturnValue(addressBalanceList);
-      Coinbase.apiClients.address!.requestFaucetFunds = mockReturnValue({
+      Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds = mockReturnValue({
         transaction_hash: generateRandomHash(8),
       });
 

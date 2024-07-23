@@ -1,4 +1,4 @@
-import { Address } from "../coinbase/address";
+import { Address } from "../index";
 import { VALID_ADDRESS_MODEL } from "./utils";
 
 describe("Address", () => {

@@ -9,6 +9,7 @@ import {
   TradesApiFactory,
   ServerSignersApiFactory,
   StakeApiFactory,
+  ValidatorsApiFactory,
   AssetsApiFactory,
   ExternalAddressesApiFactory,
 } from "../client";
@@ -33,6 +34,8 @@ export class Coinbase {
   static networks = {
     BaseSepolia: "base-sepolia",
     BaseMainnet: "base-mainnet",
+    EthereumMainnet: "ethereum-mainnet",
+    EthereumHolesky: "ethereum-holesky",
   };
 
   /**
@@ -109,6 +112,7 @@ export class Coinbase {
     Coinbase.apiClients.trade = TradesApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.serverSigner = ServerSignersApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.stake = StakeApiFactory(config, basePath, axiosInstance);
+    Coinbase.apiClients.validator = ValidatorsApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.asset = AssetsApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.externalAddress = ExternalAddressesApiFactory(
       config,
@@ -169,17 +173,6 @@ export class Coinbase {
   }
 
   /**
-   * Returns User object for the default user.
-   *
-   * @returns The default user.
-   * @throws {APIError} If the request fails.
-   */
-  async getDefaultUser(): Promise<User> {
-    const userResponse = await Coinbase.apiClients.user!.getCurrentUser();
-    return new User(userResponse.data as UserModel);
-  }
-
-  /**
    * Converts a network symbol to a string, replacing underscores with hyphens.
    *
    * @param network - The network symbol to convert
@@ -197,5 +190,16 @@ export class Coinbase {
    */
   static toAssetId(asset: string): string {
     return asset.replace(/-/g, "_");
+  }
+
+  /**
+   * Returns User object for the default user.
+   *
+   * @returns The default user.
+   * @throws {APIError} If the request fails.
+   */
+  async getDefaultUser(): Promise<User> {
+    const userResponse = await Coinbase.apiClients.user!.getCurrentUser();
+    return new User(userResponse.data as UserModel);
   }
 }

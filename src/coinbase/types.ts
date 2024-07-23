@@ -27,6 +27,8 @@ import {
   FetchStakingRewardsRequest,
   FetchStakingRewards200Response,
   FaucetTransaction,
+  ValidatorList,
+  Validator,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -333,7 +335,7 @@ export type ExternalAddressAPIClient = {
   /**
    * Request faucet funds to be sent to external address.
    *
-   * @param networkId - The ID of the wallet the address belongs to.
+   * @param networkId - The ID of the blockchain network
    * @param addressId - The onchain address of the address that is being fetched.
    * @param options - Override http request option.
    * @throws {APIError} If the request fails.
@@ -373,6 +375,22 @@ export type StakeAPIClient = {
   ): AxiosPromise<StakingOperationModel>;
 
   /**
+   * Get a staking operation.
+   *
+   * @param networkId - The ID of the blockchain network
+   * @param addressId - The ID of the address the staking operation corresponds to.
+   * @param stakingOperationID - The ID of the staking operation to fetch.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+  getExternalStakingOperation(
+    networkId: string,
+    addressId: string,
+    stakingOperationID: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<StakingOperationModel>;
+
+  /**
    * Get staking context for an address.
    *
    * @param getStakingContextRequest - The request to get the staking context for an address.
@@ -398,6 +416,42 @@ export type StakeAPIClient = {
     page?: string,
     options?: AxiosRequestConfig,
   ): AxiosPromise<FetchStakingRewards200Response>;
+};
+
+export type ValidatorAPIClient = {
+  /**
+   * List the validators for a given network and asset.
+   *
+   * @param networkId - The ID of the blockchain network.
+   * @param assetId - The ID of the asset to fetch the validator for.
+   * @param status - The status to filter by.
+   * @param limit - The amount of records to return in a single call.
+   * @param page - The batch of records for a given section in the response.
+   * @param options - Axios request options.
+   */
+  listValidators(
+    networkId: string,
+    assetId: string,
+    status?: string,
+    limit?: number,
+    page?: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<ValidatorList>;
+
+  /**
+   * Get the validator for a given network, asset, and address.
+   *
+   * @param networkId - The ID of the blockchain network.
+   * @param assetId - The ID of the asset to fetch the validator for.
+   * @param id - The unique publicly identifiable id of the validator for which to fetch the data.
+   * @param options - Axios request options.
+   */
+  getValidator(
+    networkId: string,
+    assetId: string,
+    id: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<Validator>;
 };
 
 /**
@@ -509,6 +563,7 @@ export type ApiClients = {
   trade?: TradeApiClients;
   serverSigner?: ServerSignerAPIClient;
   stake?: StakeAPIClient;
+  validator?: ValidatorAPIClient;
   asset?: AssetAPIClient;
   externalAddress?: ExternalAddressAPIClient;
 };
@@ -635,22 +690,6 @@ export type CoinbaseConfigureFromJsonOptions = {
 };
 
 /**
- * CoinbaseExternalAddressStakeOptions type definition.
- */
-export type CoinbaseExternalAddressStakeOptions = {
-  /**
-   * The mode type that you're trying to stake with.
-   * e.g.
-   */
-  mode?: StakeOptionsMode;
-
-  /**
-   * The amount to stake, unstake, or claim_stake for in a staking operation.
-   */
-  amount?: string;
-};
-
-/**
  * StakeOptionsMode type definition.
  */
 export enum StakeOptionsMode {
@@ -659,9 +698,14 @@ export enum StakeOptionsMode {
    */
   DEFAULT = "default",
   /**
-   * Partial represents Partial Ethereumn Staking mode.
+   * Partial represents Partial Ethereum Staking mode.
    */
   PARTIAL = "partial",
+
+  /**
+   * Native represents Native Ethereum Staking mode.
+   */
+  NATIVE = "native",
 }
 
 /**

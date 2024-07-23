@@ -31,14 +31,14 @@ import { convertStringToHex, delay } from "./utils";
  * list their balances, and transfer Assets to other Addresses. Wallets should be created through User.createWallet or User.importWallet.
  */
 export class Wallet {
-  private model: WalletModel;
+  static MAX_ADDRESSES = 20;
 
+  private model: WalletModel;
   private master?: HDKey;
   private seed?: string;
   private addresses: WalletAddress[] = [];
 
   private readonly addressPathPrefix = "m/44'/60'/0'/0";
-  static MAX_ADDRESSES = 20;
 
   /**
    * Private constructor to prevent direct instantiation outside of factory method. Use Wallet.init instead.
@@ -87,6 +87,29 @@ export class Wallet {
   public static async fetch(wallet_id: string): Promise<Wallet> {
     const response = await Coinbase.apiClients.wallet!.getWallet(wallet_id);
     return Wallet.init(response.data!, "");
+  }
+
+  /**
+   * Imports a Wallet for the given Wallet data.
+   *
+   * @param data - The Wallet data to import.
+   * @param data.walletId - The ID of the Wallet to import.
+   * @param data.seed - The seed to use for the Wallet.
+   * @returns The imported Wallet.
+   * @throws {ArgumentError} If the Wallet ID is not provided.
+   * @throws {ArgumentError} If the seed is not provided.
+   * @throws {APIError} If the request fails.
+   */
+  public static async import(data: WalletData): Promise<Wallet> {
+    if (!data.walletId) {
+      throw new ArgumentError("Wallet ID must be provided");
+    }
+    if (!data.seed) {
+      throw new ArgumentError("Seed must be provided");
+    }
+    const walletModel = await Coinbase.apiClients.wallet!.getWallet(data.walletId);
+    const wallet = Wallet.init(walletModel.data, data.seed);
+    return wallet;
   }
 
   /**

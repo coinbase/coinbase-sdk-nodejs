@@ -9,8 +9,8 @@ import {
   getAssetMock,
   mockFn,
   mockReturnValue,
+  newAddressModel,
   stakeApiMock,
-  VALID_ADDRESS_MODEL,
 } from "./utils";
 import { StakingReward } from "../coinbase/staking_reward";
 import { ExternalAddress } from "../coinbase/address/external_address";
@@ -20,10 +20,8 @@ import Decimal from "decimal.js";
 describe("StakingReward", () => {
   const startTime = "2024-05-01T00:00:00Z";
   const endTime = "2024-05-21T00:00:00Z";
-  const address = new ExternalAddress(
-    VALID_ADDRESS_MODEL.network_id,
-    VALID_ADDRESS_MODEL.address_id,
-  );
+  const newAddress = newAddressModel("", "some-address-id", Coinbase.networks.EthereumHolesky);
+  const address = new ExternalAddress(newAddress.network_id, newAddress.address_id);
   const asset = Asset.fromModel({
     asset_id: Coinbase.assets.Eth,
     network_id: address.getNetworkId(),
@@ -195,7 +193,28 @@ describe("StakingReward", () => {
       );
 
       const rewardStr = reward.toString();
-      expect(rewardStr).toEqual("StakingReward { amount: '2.26' }");
+      expect(rewardStr).toEqual(
+        "StakingReward { date: '2024-05-03T00:00:00.000Z' address: 'some-address-id' amount: '2.26' }",
+      );
+    });
+  });
+
+  describe(".addressId", () => {
+    it("should return the onchain address of the StakingReward", () => {
+      const reward = new StakingReward(
+        {
+          address_id: address.getId(),
+          date: "2024-05-03",
+          amount: "226",
+          state: StakingRewardStateEnum.Pending,
+          format: StakingRewardFormat.Usd,
+        },
+        asset,
+        StakingRewardFormat.Usd,
+      );
+
+      const addressId = reward.addressId();
+      expect(addressId).toEqual(address.getId());
     });
   });
 });

@@ -368,6 +368,67 @@ export interface CreateWalletRequestWallet {
     'use_server_signer'?: boolean;
 }
 /**
+ * An Ethereum validator.
+ * @export
+ * @interface EthereumValidatorMetadata
+ */
+export interface EthereumValidatorMetadata {
+    /**
+     * The index of the validator in the validator set.
+     * @type {string}
+     * @memberof EthereumValidatorMetadata
+     */
+    'index': string;
+    /**
+     * The public key of the validator.
+     * @type {string}
+     * @memberof EthereumValidatorMetadata
+     */
+    'public_key': string;
+    /**
+     * The address to which the validator\'s rewards are sent.
+     * @type {string}
+     * @memberof EthereumValidatorMetadata
+     */
+    'withdrawl_address': string;
+    /**
+     * Whether the validator has been slashed.
+     * @type {boolean}
+     * @memberof EthereumValidatorMetadata
+     */
+    'slashed': boolean;
+    /**
+     * The epoch at which the validator was activated.
+     * @type {string}
+     * @memberof EthereumValidatorMetadata
+     */
+    'activationEpoch': string;
+    /**
+     * The epoch at which the validator exited.
+     * @type {string}
+     * @memberof EthereumValidatorMetadata
+     */
+    'exitEpoch': string;
+    /**
+     * The epoch at which the validator can withdraw.
+     * @type {string}
+     * @memberof EthereumValidatorMetadata
+     */
+    'withdrawableEpoch': string;
+    /**
+     * 
+     * @type {Balance}
+     * @memberof EthereumValidatorMetadata
+     */
+    'balance': Balance;
+    /**
+     * 
+     * @type {Balance}
+     * @memberof EthereumValidatorMetadata
+     */
+    'effective_balance': Balance;
+}
+/**
  * The faucet transaction
  * @export
  * @interface FaucetTransaction
@@ -523,7 +584,32 @@ export interface ModelError {
     'message': string;
 }
 /**
- * The partial eth staking context
+ * The native eth staking context.
+ * @export
+ * @interface NativeEthStakingContext
+ */
+export interface NativeEthStakingContext {
+    /**
+     * 
+     * @type {Balance}
+     * @memberof NativeEthStakingContext
+     */
+    'stakeable_balance': Balance;
+    /**
+     * 
+     * @type {Balance}
+     * @memberof NativeEthStakingContext
+     */
+    'unstakeable_balance': Balance;
+    /**
+     * 
+     * @type {Balance}
+     * @memberof NativeEthStakingContext
+     */
+    'claimable_balance': Balance;
+}
+/**
+ * The partial eth staking context.
  * @export
  * @interface PartialEthStakingContext
  */
@@ -812,6 +898,31 @@ export interface SignatureCreationEventResult {
 
 
 /**
+ * Signed voluntary exit message metadata to be provided to beacon chain to exit a validator.
+ * @export
+ * @interface SignedVoluntaryExitMessageMetadata
+ */
+export interface SignedVoluntaryExitMessageMetadata {
+    /**
+     * The public key of the validator associated with the exit message.
+     * @type {string}
+     * @memberof SignedVoluntaryExitMessageMetadata
+     */
+    'validator_pub_key': string;
+    /**
+     * The current fork version of the Ethereum beacon chain.
+     * @type {string}
+     * @memberof SignedVoluntaryExitMessageMetadata
+     */
+    'fork': string;
+    /**
+     * A base64 encoded version of a json string representing a voluntary exit message.
+     * @type {string}
+     * @memberof SignedVoluntaryExitMessageMetadata
+     */
+    'signed_voluntary_exit': string;
+}
+/**
  * Context needed to perform a staking operation
  * @export
  * @interface StakingContext
@@ -828,29 +939,75 @@ export interface StakingContext {
  * @type StakingContextContext
  * @export
  */
-export type StakingContextContext = PartialEthStakingContext;
+export type StakingContextContext = NativeEthStakingContext | PartialEthStakingContext;
 
 /**
- * An onchain transaction to help realize a staking action.
+ * A list of onchain transactions to help realize a staking action.
  * @export
  * @interface StakingOperation
  */
 export interface StakingOperation {
+    /**
+     * The unique ID of the staking operation.
+     * @type {string}
+     * @memberof StakingOperation
+     */
+    'id': string;
+    /**
+     * The ID of the blockchain network.
+     * @type {string}
+     * @memberof StakingOperation
+     */
+    'network_id': string;
+    /**
+     * The onchain address orchestrating the staking operation.
+     * @type {string}
+     * @memberof StakingOperation
+     */
+    'address_id': string;
+    /**
+     * The status of the staking operation
+     * @type {string}
+     * @memberof StakingOperation
+     */
+    'status': StakingOperationStatusEnum;
     /**
      * The transaction(s) that will execute the staking operation onchain
      * @type {Array<Transaction>}
      * @memberof StakingOperation
      */
     'transactions': Array<Transaction>;
+    /**
+     * 
+     * @type {StakingOperationMetadata}
+     * @memberof StakingOperation
+     */
+    'metadata'?: StakingOperationMetadata;
 }
+
+export const StakingOperationStatusEnum = {
+    Initialized: 'initialized',
+    Pending: 'pending',
+    Complete: 'complete',
+    Failed: 'failed'
+} as const;
+
+export type StakingOperationStatusEnum = typeof StakingOperationStatusEnum[keyof typeof StakingOperationStatusEnum];
+
 /**
- * The staking rewards for an address
+ * @type StakingOperationMetadata
+ * @export
+ */
+export type StakingOperationMetadata = Array<SignedVoluntaryExitMessageMetadata>;
+
+/**
+ * The staking rewards for an address.
  * @export
  * @interface StakingReward
  */
 export interface StakingReward {
     /**
-     * The onchain address for which the staking rewards are being fetched
+     * The onchain address for which the staking rewards are being fetched.
      * @type {string}
      * @memberof StakingReward
      */
@@ -868,7 +1025,7 @@ export interface StakingReward {
      */
     'amount': string;
     /**
-     * The state of the reward
+     * The state of the reward.
      * @type {string}
      * @memberof StakingReward
      */
@@ -1217,6 +1374,74 @@ export interface User {
      * @memberof User
      */
     'display_name'?: string;
+}
+/**
+ * A validator onchain.
+ * @export
+ * @interface Validator
+ */
+export interface Validator {
+    /**
+     * The publicly identifiable unique id of the validator. This can be the public key for Ethereum validators and maybe an address for some other network.
+     * @type {string}
+     * @memberof Validator
+     */
+    'validator_id': string;
+    /**
+     * The ID of the blockchain network to which the Validator belongs.
+     * @type {string}
+     * @memberof Validator
+     */
+    'network_id': string;
+    /**
+     * The ID of the asset that the validator helps stake.
+     * @type {string}
+     * @memberof Validator
+     */
+    'asset_id': string;
+    /**
+     * The status of the validator.
+     * @type {string}
+     * @memberof Validator
+     */
+    'status': string;
+    /**
+     * 
+     * @type {ValidatorDetails}
+     * @memberof Validator
+     */
+    'details'?: ValidatorDetails;
+}
+/**
+ * @type ValidatorDetails
+ * @export
+ */
+export type ValidatorDetails = EthereumValidatorMetadata;
+
+/**
+ * 
+ * @export
+ * @interface ValidatorList
+ */
+export interface ValidatorList {
+    /**
+     * 
+     * @type {Array<Validator>}
+     * @memberof ValidatorList
+     */
+    'data': Array<Validator>;
+    /**
+     * True if this list has another page of items after this one that can be fetched.
+     * @type {boolean}
+     * @memberof ValidatorList
+     */
+    'has_more': boolean;
+    /**
+     * The page token to be used to fetch the next page.
+     * @type {string}
+     * @memberof ValidatorList
+     */
+    'next_page': string;
 }
 /**
  * 
@@ -3004,6 +3229,48 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * Get the latest state of a staking operation
+         * @summary Get the latest state of a staking operation
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the staking operation for
+         * @param {string} stakingOperationId The ID of the staking operation
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getExternalStakingOperation: async (networkId: string, addressId: string, stakingOperationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('getExternalStakingOperation', 'networkId', networkId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('getExternalStakingOperation', 'addressId', addressId)
+            // verify required parameter 'stakingOperationId' is not null or undefined
+            assertParamExists('getExternalStakingOperation', 'stakingOperationId', stakingOperationId)
+            const localVarPath = `/v1/networks/{network_id}/addresses/{address_id}/staking_operations/{staking_operation_id}`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)))
+                .replace(`{${"staking_operation_id"}}`, encodeURIComponent(String(stakingOperationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Get staking context for an address
          * @summary Get staking context
          * @param {GetStakingContextRequest} getStakingContextRequest 
@@ -3078,6 +3345,21 @@ export const StakeApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Get the latest state of a staking operation
+         * @summary Get the latest state of a staking operation
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the staking operation for
+         * @param {string} stakingOperationId The ID of the staking operation
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getExternalStakingOperation(networkId: string, addressId: string, stakingOperationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<StakingOperation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getExternalStakingOperation(networkId, addressId, stakingOperationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['StakeApi.getExternalStakingOperation']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Get staking context for an address
          * @summary Get staking context
          * @param {GetStakingContextRequest} getStakingContextRequest 
@@ -3123,6 +3405,18 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.fetchStakingRewards(fetchStakingRewardsRequest, limit, page, options).then((request) => request(axios, basePath));
         },
         /**
+         * Get the latest state of a staking operation
+         * @summary Get the latest state of a staking operation
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the staking operation for
+         * @param {string} stakingOperationId The ID of the staking operation
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getExternalStakingOperation(networkId: string, addressId: string, stakingOperationId: string, options?: any): AxiosPromise<StakingOperation> {
+            return localVarFp.getExternalStakingOperation(networkId, addressId, stakingOperationId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Get staking context for an address
          * @summary Get staking context
          * @param {GetStakingContextRequest} getStakingContextRequest 
@@ -3162,6 +3456,18 @@ export interface StakeApiInterface {
      * @memberof StakeApiInterface
      */
     fetchStakingRewards(fetchStakingRewardsRequest: FetchStakingRewardsRequest, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<FetchStakingRewards200Response>;
+
+    /**
+     * Get the latest state of a staking operation
+     * @summary Get the latest state of a staking operation
+     * @param {string} networkId The ID of the blockchain network
+     * @param {string} addressId The ID of the address to fetch the staking operation for
+     * @param {string} stakingOperationId The ID of the staking operation
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApiInterface
+     */
+    getExternalStakingOperation(networkId: string, addressId: string, stakingOperationId: string, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation>;
 
     /**
      * Get staking context for an address
@@ -3206,6 +3512,20 @@ export class StakeApi extends BaseAPI implements StakeApiInterface {
      */
     public fetchStakingRewards(fetchStakingRewardsRequest: FetchStakingRewardsRequest, limit?: number, page?: string, options?: RawAxiosRequestConfig) {
         return StakeApiFp(this.configuration).fetchStakingRewards(fetchStakingRewardsRequest, limit, page, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get the latest state of a staking operation
+     * @summary Get the latest state of a staking operation
+     * @param {string} networkId The ID of the blockchain network
+     * @param {string} addressId The ID of the address to fetch the staking operation for
+     * @param {string} stakingOperationId The ID of the staking operation
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApi
+     */
+    public getExternalStakingOperation(networkId: string, addressId: string, stakingOperationId: string, options?: RawAxiosRequestConfig) {
+        return StakeApiFp(this.configuration).getExternalStakingOperation(networkId, addressId, stakingOperationId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -4234,6 +4554,262 @@ export class UsersApi extends BaseAPI implements UsersApiInterface {
      */
     public getCurrentUser(options?: RawAxiosRequestConfig) {
         return UsersApiFp(this.configuration).getCurrentUser(options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * ValidatorsApi - axios parameter creator
+ * @export
+ */
+export const ValidatorsApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Get a validator belonging to the user for a given network, asset and id.
+         * @summary Get a validator belonging to the CDP project
+         * @param {string} networkId The ID of the blockchain network.
+         * @param {string} assetId The symbol of the asset to get the validator for.
+         * @param {string} validatorId The unique id of the validator to fetch details for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getValidator: async (networkId: string, assetId: string, validatorId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('getValidator', 'networkId', networkId)
+            // verify required parameter 'assetId' is not null or undefined
+            assertParamExists('getValidator', 'assetId', assetId)
+            // verify required parameter 'validatorId' is not null or undefined
+            assertParamExists('getValidator', 'validatorId', validatorId)
+            const localVarPath = `/v1/networks/{network_id}/assets/{asset_id}/validators/{validator_id}`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"asset_id"}}`, encodeURIComponent(String(assetId)))
+                .replace(`{${"validator_id"}}`, encodeURIComponent(String(validatorId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * List validators belonging to the user for a given network and asset.
+         * @summary List validators belonging to the CDP project
+         * @param {string} networkId The ID of the blockchain network.
+         * @param {string} assetId The symbol of the asset to get the validators for.
+         * @param {string} [status] A filter to list validators based on a status.
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listValidators: async (networkId: string, assetId: string, status?: string, limit?: number, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('listValidators', 'networkId', networkId)
+            // verify required parameter 'assetId' is not null or undefined
+            assertParamExists('listValidators', 'assetId', assetId)
+            const localVarPath = `/v1/networks/{network_id}/assets/{asset_id}/validators`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"asset_id"}}`, encodeURIComponent(String(assetId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (status !== undefined) {
+                localVarQueryParameter['status'] = status;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * ValidatorsApi - functional programming interface
+ * @export
+ */
+export const ValidatorsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = ValidatorsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Get a validator belonging to the user for a given network, asset and id.
+         * @summary Get a validator belonging to the CDP project
+         * @param {string} networkId The ID of the blockchain network.
+         * @param {string} assetId The symbol of the asset to get the validator for.
+         * @param {string} validatorId The unique id of the validator to fetch details for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getValidator(networkId: string, assetId: string, validatorId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Validator>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getValidator(networkId, assetId, validatorId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ValidatorsApi.getValidator']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * List validators belonging to the user for a given network and asset.
+         * @summary List validators belonging to the CDP project
+         * @param {string} networkId The ID of the blockchain network.
+         * @param {string} assetId The symbol of the asset to get the validators for.
+         * @param {string} [status] A filter to list validators based on a status.
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listValidators(networkId: string, assetId: string, status?: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ValidatorList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listValidators(networkId, assetId, status, limit, page, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ValidatorsApi.listValidators']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * ValidatorsApi - factory interface
+ * @export
+ */
+export const ValidatorsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = ValidatorsApiFp(configuration)
+    return {
+        /**
+         * Get a validator belonging to the user for a given network, asset and id.
+         * @summary Get a validator belonging to the CDP project
+         * @param {string} networkId The ID of the blockchain network.
+         * @param {string} assetId The symbol of the asset to get the validator for.
+         * @param {string} validatorId The unique id of the validator to fetch details for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getValidator(networkId: string, assetId: string, validatorId: string, options?: any): AxiosPromise<Validator> {
+            return localVarFp.getValidator(networkId, assetId, validatorId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * List validators belonging to the user for a given network and asset.
+         * @summary List validators belonging to the CDP project
+         * @param {string} networkId The ID of the blockchain network.
+         * @param {string} assetId The symbol of the asset to get the validators for.
+         * @param {string} [status] A filter to list validators based on a status.
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listValidators(networkId: string, assetId: string, status?: string, limit?: number, page?: string, options?: any): AxiosPromise<ValidatorList> {
+            return localVarFp.listValidators(networkId, assetId, status, limit, page, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * ValidatorsApi - interface
+ * @export
+ * @interface ValidatorsApi
+ */
+export interface ValidatorsApiInterface {
+    /**
+     * Get a validator belonging to the user for a given network, asset and id.
+     * @summary Get a validator belonging to the CDP project
+     * @param {string} networkId The ID of the blockchain network.
+     * @param {string} assetId The symbol of the asset to get the validator for.
+     * @param {string} validatorId The unique id of the validator to fetch details for.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ValidatorsApiInterface
+     */
+    getValidator(networkId: string, assetId: string, validatorId: string, options?: RawAxiosRequestConfig): AxiosPromise<Validator>;
+
+    /**
+     * List validators belonging to the user for a given network and asset.
+     * @summary List validators belonging to the CDP project
+     * @param {string} networkId The ID of the blockchain network.
+     * @param {string} assetId The symbol of the asset to get the validators for.
+     * @param {string} [status] A filter to list validators based on a status.
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ValidatorsApiInterface
+     */
+    listValidators(networkId: string, assetId: string, status?: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<ValidatorList>;
+
+}
+
+/**
+ * ValidatorsApi - object-oriented interface
+ * @export
+ * @class ValidatorsApi
+ * @extends {BaseAPI}
+ */
+export class ValidatorsApi extends BaseAPI implements ValidatorsApiInterface {
+    /**
+     * Get a validator belonging to the user for a given network, asset and id.
+     * @summary Get a validator belonging to the CDP project
+     * @param {string} networkId The ID of the blockchain network.
+     * @param {string} assetId The symbol of the asset to get the validator for.
+     * @param {string} validatorId The unique id of the validator to fetch details for.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ValidatorsApi
+     */
+    public getValidator(networkId: string, assetId: string, validatorId: string, options?: RawAxiosRequestConfig) {
+        return ValidatorsApiFp(this.configuration).getValidator(networkId, assetId, validatorId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * List validators belonging to the user for a given network and asset.
+     * @summary List validators belonging to the CDP project
+     * @param {string} networkId The ID of the blockchain network.
+     * @param {string} assetId The symbol of the asset to get the validators for.
+     * @param {string} [status] A filter to list validators based on a status.
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ValidatorsApi
+     */
+    public listValidators(networkId: string, assetId: string, status?: string, limit?: number, page?: string, options?: RawAxiosRequestConfig) {
+        return ValidatorsApiFp(this.configuration).listValidators(networkId, assetId, status, limit, page, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

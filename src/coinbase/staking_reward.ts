@@ -42,7 +42,7 @@ export class StakingReward {
     addressIds: Array<string>,
     startTime: string,
     endTime: string,
-    format = StakingRewardFormat.Usd,
+    format: StakingRewardFormat = StakingRewardFormat.Usd,
   ): Promise<StakingReward[]> {
     const stakingRewards: StakingReward[] = [];
     const queue: string[] = [""];
@@ -101,11 +101,20 @@ export class StakingReward {
   }
 
   /**
+   * Returns the onchain address of the StakingReward.
+   *
+   * @returns The onchain address.
+   */
+  public addressId(): string {
+    return this.model.address_id;
+  }
+
+  /**
    * Print the Staking Reward as a string.
    *
    * @returns The string representation of the Staking Reward.
    */
   public toString(): string {
-    return `StakingReward { amount: '${this.amount().toString()}' }`;
+    return `StakingReward { date: '${this.date().toISOString()}' address: '${this.addressId()}' amount: '${this.amount().toString()}' }`;
   }
 }
