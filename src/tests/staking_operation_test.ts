@@ -119,5 +119,14 @@ describe("StakingOperation", () => {
         }),
       ).rejects.toThrow("Staking operation timed out");
     });
+
+    it("all getters should work", async () => {
+      const stakingOperation = new StakingOperation(VALID_STAKING_OPERATION_MODEL);
+      expect(stakingOperation.getID()).toBe("some-id");
+      expect(stakingOperation.getStatus()).toBe(StakingOperationStatusEnum.Pending);
+      expect(stakingOperation.isTerminalState()).toBe(false);
+      expect(stakingOperation.getTransactions().length).toBe(1);
+      expect(stakingOperation.getSignedVoluntaryExitMessages().length).toBe(0);
+    });
   });
 });

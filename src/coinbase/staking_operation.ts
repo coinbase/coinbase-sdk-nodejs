@@ -36,6 +36,15 @@ export class StakingOperation {
   }
 
   /**
+   * Get the staking operation ID.
+   *
+   * @returns The unique ID of the staking operation.
+   */
+  public getID(): string {
+    return this.model.id;
+  }
+
+  /**
    * Get the transactions associated with this staking operation.
    *
    * @returns The array of transactions.
