@@ -1,5 +1,17 @@
 # Coinbase Node.js SDK Changelog
 
+## [0.0.10] - 2024-07-23
+
+### Added
+
+- Add support for Dedicated ETH Staking for external addresses
+- Add support for listing validator details and fetch details of a specific validator
+
+### Changed
+- Improved accessibility for `StakingReward` and `StakingOperation` classes
+- Fixed a bug with `StakingOperation.sign` method, where we were not properly waiting on a Promise
+- Changed `buildStakeOperation`, `buildUnstakeOperation`, and `buildClaimRewardsOperation` to take `mode` as an explicit parameter optional parameter
+
 ## [0.0.9] - 2024-06-26
 
 ### Added
