@@ -249,6 +249,7 @@ describe("WalletAddress", () => {
       });
 
       Coinbase.apiClients.transfer = transfersApiMock;
+      Coinbase.useServerSigner = false;
     });
 
     it("should successfully create and complete a transfer", async () => {
@@ -301,6 +302,28 @@ describe("WalletAddress", () => {
           intervalSeconds,
         }),
       ).rejects.toThrow(InternalError);
+    });
+
+    it("it should successfully create and complete a transfer if using signer and key is not loaded", async () => {
+      Coinbase.apiClients.transfer!.createTransfer = mockReturnValue(VALID_TRANSFER_MODEL);
+      Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
+        ...VALID_TRANSFER_MODEL,
+        status: TransferStatus.COMPLETE,
+      });
+
+      Coinbase.useServerSigner = true;
+      const addressWithoutKey = new WalletAddress(VALID_ADDRESS_MODEL, null!);
+
+      await addressWithoutKey.createTransfer({
+        amount: weiAmount,
+        assetId: Coinbase.assets.Wei,
+        destination,
+        timeoutSeconds,
+        intervalSeconds,
+      });
+
+      expect(Coinbase.apiClients.transfer!.createTransfer).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.transfer!.getTransfer).toHaveBeenCalledTimes(1);
     });
 
     it("should throw an ArgumentError if the Wallet Network ID does not match the Address Network ID", async () => {
