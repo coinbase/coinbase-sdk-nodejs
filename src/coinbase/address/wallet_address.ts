@@ -180,9 +180,9 @@ export class WalletAddress extends Address {
     );
 
     let transfer = Transfer.fromModel(response.data);
-    const wallet = new ethers.Wallet(this.key!.privateKey);
 
     if (!Coinbase.useServerSigner) {
+      const wallet = new ethers.Wallet(this.key!.privateKey);
       const transaction = transfer.getTransaction();
       let signedPayload = await wallet!.signTransaction(transaction);
       signedPayload = signedPayload.slice(2);
