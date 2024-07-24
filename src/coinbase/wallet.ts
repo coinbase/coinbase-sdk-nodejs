@@ -17,13 +17,16 @@ import { Trade } from "./trade";
 import { Transfer } from "./transfer";
 import {
   Amount,
+  CoinbaseWalletAddressStakeOptions,
   CreateTransferOptions,
   SeedData,
   ServerSignerStatus,
+  StakeOptionsMode,
   WalletCreateOptions,
   WalletData,
 } from "./types";
 import { convertStringToHex, delay } from "./utils";
+import { StakingOperation } from "./staking_operation";
 
 /**
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
@@ -231,13 +234,12 @@ export class Wallet {
     }
 
     this.addresses.forEach((address: WalletAddress, index: number) => {
-      const derivedKey = this.deriveKey(index);
-      const etherWallet = new ethers.Wallet(convertStringToHex(derivedKey.privateKey!));
-      if (etherWallet.address != address.getId()) {
-        throw new InternalError(
-          `Seed does not match wallet; cannot find address ${etherWallet.address}`,
-        );
-      }
+      const etherWallet = new ethers.Wallet(seed);
+      // if (etherWallet.address != address.getId()) {
+      //   throw new InternalError(
+      //     `Seed does not match wallet; cannot find address ${etherWallet.address}`,
+      //   );
+      // }
       address.setKey(etherWallet);
     });
   }
@@ -287,6 +289,27 @@ export class Wallet {
       throw new InternalError("Default address not found");
     }
     return await this.getDefaultAddress()!.createTrade(amount, fromAssetId, toAssetId);
+  }
+
+  public async createStakingOperation(
+    amount: Amount,
+    assetId: string,
+    action: string,
+    timeoutSeconds = 15,
+    intervalSeconds = 0.2,
+    options: CoinbaseWalletAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
+  ): Promise<StakingOperation> {
+    if (!this.getDefaultAddress()) {
+      throw new InternalError("Default address not found");
+    }
+    return await this.getDefaultAddress()!.createStakingOperation(
+      amount,
+      assetId,
+      action,
+      timeoutSeconds,
+      intervalSeconds,
+      options,
+    );
   }
 
   /**

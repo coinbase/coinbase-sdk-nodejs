@@ -4,7 +4,10 @@ import { Coinbase } from "../coinbase";
 import Decimal from "decimal.js";
 import { Asset } from "../asset";
 import { StakingOperation } from "../staking_operation";
-import { StakingRewardFormat } from "../../client";
+import {
+  PartialEthStakingContext as PartialEthStakingContextModel,
+  StakingRewardFormat,
+} from "../../client";
 import { StakingReward } from "../staking_reward";
 import { BalanceMap } from "../balance_map";
 import { Balance } from "../balance";
@@ -258,19 +261,12 @@ export class ExternalAddress extends Address {
 
     const response = await Coinbase.apiClients.stake!.getStakingContext(request);
 
+    const balances = response!.data.context as PartialEthStakingContextModel;
+
     return {
-      stakeableBalance: Balance.fromModelAndAssetId(
-        response!.data.context.stakeable_balance,
-        assetId,
-      ).amount,
-      unstakeableBalance: Balance.fromModelAndAssetId(
-        response!.data.context.unstakeable_balance,
-        assetId,
-      ).amount,
-      claimableBalance: Balance.fromModelAndAssetId(
-        response!.data.context.claimable_balance,
-        assetId,
-      ).amount,
+      stakeableBalance: Balance.fromModelAndAssetId(balances.stakeable_balance, assetId).amount,
+      unstakeableBalance: Balance.fromModelAndAssetId(balances.unstakeable_balance, assetId).amount,
+      claimableBalance: Balance.fromModelAndAssetId(balances.claimable_balance, assetId).amount,
     };
   }
 

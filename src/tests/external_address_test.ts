@@ -17,12 +17,14 @@ import {
   Balance,
   StakingContext as StakingContextModel,
   StakingOperation as StakingOperationModel,
+  StakingOperationStatusEnum,
 } from "../client";
 import Decimal from "decimal.js";
 import { ExternalAddress } from "../coinbase/address/external_address";
 import { StakeOptionsMode } from "../coinbase/types";
 import { StakingOperation } from "../coinbase/staking_operation";
 import { Asset } from "../coinbase/asset";
+import { ethers } from "ethers";
 import { randomUUID } from "crypto";
 
 describe("ExternalAddress", () => {

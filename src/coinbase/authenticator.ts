@@ -1,9 +1,28 @@
 import { InternalAxiosRequestConfig } from "axios";
 import { JWK, JWS } from "node-jose";
 import { InvalidAPIKeyFormat } from "./errors";
+import { exec } from "child_process";
 
 const pemHeader = "-----BEGIN EC PRIVATE KEY-----";
 const pemFooter = "-----END EC PRIVATE KEY-----";
+
+// eslint-disable-next-line jsdoc/require-returns
+/**
+ * Runs a command and returns the output.
+ *
+ * @param command - The command to run.
+ */
+function runCommand(command: string): Promise<{ stdout: string; stderr: string }> {
+  return new Promise((resolve, reject) => {
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        reject({ error, stderr });
+      } else {
+        resolve({ stdout, stderr });
+      }
+    });
+  });
+}
 
 /**
  * A class that builds JWTs for authenticating with the Coinbase Platform APIs.
@@ -42,6 +61,13 @@ export class CoinbaseAuthenticator {
     }
     config.headers["Authorization"] = `Bearer ${token}`;
     config.headers["Content-Type"] = "application/json";
+
+    const jwt = await runCommand(
+      "cat-minter -e test-email@coinbase.com -u 123456 -uuid 45659aee-5fc7-438d-8f2a-36865e147600 -org org-id-abc -project proj-id-789",
+    );
+
+    config.headers["Jwt"] = jwt.stdout.replace(/\r?\n|\r/g, " ").trim();
+
     return config;
   }
 

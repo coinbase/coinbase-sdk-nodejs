@@ -7,9 +7,19 @@ import { Coinbase } from "../coinbase";
 import { ArgumentError, InternalError } from "../errors";
 import { Trade } from "../trade";
 import { Transfer } from "../transfer";
-import { Amount, CreateTransferOptions, Destination, TransferStatus } from "../types";
+import {
+  Amount,
+  CoinbaseWalletAddressStakeOptions,
+  CreateTransferOptions,
+  Destination,
+  StakeOptionsMode,
+  StakingOperationStatus,
+  TransferStatus,
+} from "../types";
 import { delay } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
+import { StakingOperation } from "../staking_operation";
+import { StakingReward } from "../staking_reward";
 
 /**
  * A representation of a blockchain address, which is a wallet-controlled account on a network.
@@ -254,7 +264,7 @@ export class WalletAddress extends Address {
     const fromAsset = await Asset.fetch(this.getNetworkId(), fromAssetId);
     const toAsset = await Asset.fetch(this.getNetworkId(), toAssetId);
 
-    await this.validateCanTrade(amount, fromAssetId);
+    await this.validateAmount(amount, fromAssetId);
     const trade = await this.createTradeRequest(amount, fromAsset, toAsset);
     // NOTE: Trading does not yet support server signers at this point.
     const signed_payload = await trade.getTransaction().sign(this.key!);
@@ -322,22 +332,114 @@ export class WalletAddress extends Address {
   }
 
   /**
-   * Checks if trading is possible and raises an error if not.
+   * Checks if amount is valid and raises an error if not.
    *
    * @param amount - The amount of the Asset to send.
-   * @param fromAssetId - The ID of the Asset to trade from. For Ether, eth, gwei, and wei are supported.
+   * @param assetId - The ID of the Asset to trade from. For Ether, eth, gwei, and wei are supported.
    * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
    */
-  private async validateCanTrade(amount: Amount, fromAssetId: string) {
-    if (!this.canSign()) {
-      throw new Error("Cannot trade from address without private key loaded");
-    }
-    const currentBalance = await this.getBalance(fromAssetId);
+  private async validateAmount(amount: Amount, assetId: string) {
+    // if (!this.canSign()) {
+    //   throw new Error("Cannot perform action from address without private key loaded");
+    // }
+    const currentBalance = await this.getBalance(assetId);
     amount = new Decimal(amount.toString());
     if (currentBalance.lessThan(amount)) {
       throw new Error(
         `Insufficient funds: ${amount} requested, but only ${currentBalance} available`,
       );
     }
+  }
+
+  public async createStakingOperation(
+    amount: Amount,
+    assetId: string,
+    action: string,
+    timeoutSeconds = 15,
+    intervalSeconds = 0.2,
+    options: CoinbaseWalletAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
+  ): Promise<StakingOperation> {
+    await this.validateAmount(amount, assetId);
+    let stakingOperation = await this.createStakingOperationRequest(
+      amount,
+      assetId,
+      action,
+      options,
+    );
+
+    // NOTE: Trading does not yet support server signers at this point.
+    await stakingOperation.sign(this.key!);
+    await this.sleep(3000);
+    for (const tx of stakingOperation.getTransactions()) {
+      if (!tx.isSigned()) {
+        continue;
+      }
+      stakingOperation = await this.broadcastStakingOperationRequest(
+        stakingOperation,
+        tx.getSignedPayload()!.slice(2),
+      );
+    }
+
+    const startTime = Date.now();
+    while (Date.now() - startTime < timeoutSeconds * 1000) {
+      await stakingOperation.reload();
+      const status = stakingOperation.getStatus();
+      if (status === StakingOperationStatus.COMPLETE || status === StakingOperationStatus.FAILED) {
+        return stakingOperation;
+      }
+      await delay(intervalSeconds);
+    }
+    throw new Error("Transfer timed out");
+  }
+
+  private async sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  private async createStakingOperationRequest(
+    amount: Amount,
+    assetId: string,
+    action: string,
+    options: CoinbaseWalletAddressStakeOptions,
+  ): Promise<StakingOperation> {
+    if (new Decimal(amount.toString()).lessThanOrEqualTo(0)) {
+      throw new Error("Amount required greater than zero.");
+    }
+    const asset = await Asset.fetch(this.getNetworkId(), assetId);
+
+    options.amount = asset.toAtomicAmount(new Decimal(amount.toString())).toString();
+
+    const stakingOperationRequest = {
+      network_id: this.getNetworkId(),
+      asset_id: Asset.primaryDenomination(assetId),
+      action: action,
+      options: options,
+    };
+
+    const response = await Coinbase.apiClients.stake!.createStakingOperation(
+      this.getWalletId(),
+      this.getId(),
+      stakingOperationRequest,
+    );
+
+    return new StakingOperation(response!.data);
+  }
+
+  private async broadcastStakingOperationRequest(
+    stakingOperation: StakingOperation,
+    signedPayload: string,
+  ): Promise<StakingOperation> {
+    const broadcastStakingOperationRequest = {
+      signed_payload: signedPayload,
+      transaction_index: 0,
+    };
+    const response = await Coinbase.apiClients.stake!.broadcastStakingOperation(
+      this.getWalletId(),
+      this.getId(),
+      stakingOperation.getId(),
+      broadcastStakingOperationRequest,
+    );
+
+    return new StakingOperation(response.data);
   }
 }

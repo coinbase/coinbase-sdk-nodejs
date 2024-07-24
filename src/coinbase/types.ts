@@ -27,6 +27,9 @@ import {
   FetchStakingRewardsRequest,
   FetchStakingRewards200Response,
   FaucetTransaction,
+  BroadcastStakingOperationRequest,
+  StakingOperation,
+  CreateStakingOperationRequest,
   ValidatorList,
   Validator,
 } from "./../client/api";
@@ -416,6 +419,28 @@ export type StakeAPIClient = {
     page?: string,
     options?: AxiosRequestConfig,
   ): AxiosPromise<FetchStakingRewards200Response>;
+
+  broadcastStakingOperation(
+    walletId: string,
+    addressId: string,
+    stakingOperationId: string,
+    broadcastStakingOperationRequest: BroadcastStakingOperationRequest,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<StakingOperationModel>;
+
+  createStakingOperation(
+    walletId: string,
+    addressId: string,
+    createStakingOperationRequest: CreateStakingOperationRequest,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<StakingOperationModel>;
+
+  getStakingOperation(
+    walletId: string,
+    addressId: string,
+    stakingOperationId: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<StakingOperationModel>;
 };
 
 export type ValidatorAPIClient = {
@@ -690,6 +715,38 @@ export type CoinbaseConfigureFromJsonOptions = {
 };
 
 /**
+ * CoinbaseExternalAddressStakeOptions type definition.
+ */
+export type CoinbaseExternalAddressStakeOptions = {
+  /**
+   * The mode type that you're trying to stake with.
+   * e.g.
+   */
+  mode?: StakeOptionsMode;
+
+  /**
+   * The amount to stake, unstake, or claim_stake for in a staking operation.
+   */
+  amount?: string;
+};
+
+/**
+ * CoinbaseWalletAddressStakeOptions type definition.
+ */
+export type CoinbaseWalletAddressStakeOptions = {
+  /**
+   * The mode type that you're trying to stake with.
+   * e.g.
+   */
+  mode?: StakeOptionsMode;
+
+  /**
+   * The amount to stake, unstake, or claim_stake for in a staking operation.
+   */
+  amount?: string;
+};
+
+/**
  * StakeOptionsMode type definition.
  */
 export enum StakeOptionsMode {
@@ -706,6 +763,13 @@ export enum StakeOptionsMode {
    * Native represents Native Ethereum Staking mode.
    */
   NATIVE = "native",
+}
+
+export enum StakingOperationStatus {
+  INITIALIZED = "initialized",
+  PENDING = "pending",
+  COMPLETE = "complete",
+  FAILED = "failed",
 }
 
 /**
