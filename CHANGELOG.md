@@ -1,5 +1,15 @@
 # Coinbase Node.js SDK Changelog
 
+## [0.0.12] - 2024-07-24
+
+### Changed
+- Expose `Validator` class
+
+## [0.0.11] - 2024-07-24
+
+### Changed
+- Fixed signer wallets signing flow
+
 ## [0.0.10] - 2024-07-23
 
 ### Added
