@@ -19,7 +19,6 @@ import {
 import { delay } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
 import { StakingOperation } from "../staking_operation";
-import { StakingReward } from "../staking_reward";
 
 /**
  * A representation of a blockchain address, which is a wallet-controlled account on a network.
@@ -339,9 +338,9 @@ export class WalletAddress extends Address {
    * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
    */
   private async validateAmount(amount: Amount, assetId: string) {
-    // if (!this.canSign()) {
-    //   throw new Error("Cannot perform action from address without private key loaded");
-    // }
+    if (!this.canSign()) {
+      throw new Error("Cannot trade from address without private key loaded");
+    }
     const currentBalance = await this.getBalance(assetId);
     amount = new Decimal(amount.toString());
     if (currentBalance.lessThan(amount)) {
@@ -436,7 +435,7 @@ export class WalletAddress extends Address {
     const response = await Coinbase.apiClients.stake!.broadcastStakingOperation(
       this.getWalletId(),
       this.getId(),
-      stakingOperation.getId(),
+      stakingOperation.getID(),
       broadcastStakingOperationRequest,
     );
 

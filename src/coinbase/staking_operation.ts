@@ -41,7 +41,7 @@ export class StakingOperation {
    *
    * @returns The Staking Operation ID.
    */
-  public getId(): string {
+  public getID(): string {
     return this.model.id;
   }
 
@@ -50,7 +50,7 @@ export class StakingOperation {
    *
    * @returns The Wallet ID.
    */
-  public getWalletId(): string | undefined {
+  public getWalletID(): string | undefined {
     return this.model.wallet_id;
   }
 
@@ -59,7 +59,7 @@ export class StakingOperation {
    *
    * @returns The Address ID.
    */
-  public getAddressId(): string {
+  public getAddressID(): string {
     return this.model.address_id;
   }
 
@@ -92,13 +92,13 @@ export class StakingOperation {
    * @throws {Error} if this function is called on a StakingOperation without a wallet ID.
    */
   public async reload(): Promise<void> {
-    if (this.getWalletId() === undefined) {
+    if (this.getWalletID() === undefined) {
       throw new Error("cannot reload staking operation without a wallet ID.");
     }
     const result = await Coinbase.apiClients.stake!.getStakingOperation(
-      this.getWalletId()!,
-      this.getAddressId(),
-      this.getId(),
+      this.getWalletID()!,
+      this.getAddressID(),
+      this.getID(),
     );
     this.model = result?.data;
     this.transactions = [];
@@ -133,15 +133,6 @@ export class StakingOperation {
     }
 
     return signedVoluntaryExitMessages;
-  }
-
-  /**
-   * Get the status of the staking operation.
-   *
-   * @returns The status of the staking operation.
-   */
-  public getStatus(): StakingOperationStatusEnum {
-    return this.model.status;
   }
 
   /**

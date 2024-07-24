@@ -12,7 +12,6 @@ import {
   Transfer as TransferModel,
   TransferStatusEnum,
   StakingOperation as StakingOperationModel,
-  StakingOperationStatusEnum,
   ValidatorList,
   Validator,
   StakingOperationStatusEnum,
