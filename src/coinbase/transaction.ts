@@ -156,6 +156,6 @@ export class Transaction {
    * @returns A string representation of the Transaction.
    */
   toString(): string {
-    return `Transaction { transactionHash: '${this.getTransactionHash()}', status: '${this.getStatus()}' }`;
+    return `Transaction { transactionHash: '${this.getTransactionHash()}', status: '${this.getStatus()}', unsignedPayload: '${this.getUnsignedPayload()}', signedPayload: ${this.getSignedPayload()}, transactionLink: ${this.getTransactionLink()} }`;
   }
 }

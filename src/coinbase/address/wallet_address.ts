@@ -1,15 +1,30 @@
 import { Decimal } from "decimal.js";
 import { ethers } from "ethers";
-import { Address as AddressModel } from "../../client";
+import {
+  Address as AddressModel,
+  PartialEthStakingContext as PartialEthStakingContextModel,
+  StakingRewardFormat,
+} from "../../client";
 import { Address } from "../address";
 import { Asset } from "../asset";
 import { Coinbase } from "../coinbase";
 import { ArgumentError, InternalError } from "../errors";
 import { Trade } from "../trade";
 import { Transfer } from "../transfer";
-import { Amount, CreateTransferOptions, Destination, TransferStatus } from "../types";
-import { delay } from "../utils";
+import {
+  Amount,
+  CoinbaseWalletAddressStakeOptions,
+  CreateTransferOptions,
+  Destination,
+  StakeOptionsMode,
+  StakingOperationStatus,
+  TransferStatus,
+} from "../types";
+import { delay, formatDate, getWeekBackDate } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
+import { StakingOperation } from "../staking_operation";
+import { Balance } from "../balance";
+import { StakingReward } from "../staking_reward";
 
 /**
  * A representation of a blockchain address, which is a wallet-controlled account on a network.
@@ -254,7 +269,7 @@ export class WalletAddress extends Address {
     const fromAsset = await Asset.fetch(this.getNetworkId(), fromAssetId);
     const toAsset = await Asset.fetch(this.getNetworkId(), toAssetId);
 
-    await this.validateCanTrade(amount, fromAssetId);
+    await this.validateAmount(amount, fromAssetId);
     const trade = await this.createTradeRequest(amount, fromAsset, toAsset);
     // NOTE: Trading does not yet support server signers at this point.
     const signed_payload = await trade.getTransaction().sign(this.key!);
@@ -322,22 +337,250 @@ export class WalletAddress extends Address {
   }
 
   /**
-   * Checks if trading is possible and raises an error if not.
+   * Checks if amount is valid and raises an error if not.
    *
    * @param amount - The amount of the Asset to send.
-   * @param fromAssetId - The ID of the Asset to trade from. For Ether, eth, gwei, and wei are supported.
+   * @param assetId - The ID of the Asset to trade from. For Ether, eth, gwei, and wei are supported.
    * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
    */
-  private async validateCanTrade(amount: Amount, fromAssetId: string) {
+  private async validateAmount(amount: Amount, assetId: string) {
     if (!this.canSign()) {
       throw new Error("Cannot trade from address without private key loaded");
     }
-    const currentBalance = await this.getBalance(fromAssetId);
+    const currentBalance = await this.getBalance(assetId);
     amount = new Decimal(amount.toString());
     if (currentBalance.lessThan(amount)) {
       throw new Error(
         `Insufficient funds: ${amount} requested, but only ${currentBalance} available`,
       );
     }
+  }
+
+  /**
+   * Creates a staking operation to stake, signs it, and broadcasts it on the blockchain.
+   *
+   * @param amount - The amount for the staking operation.
+   * @param assetId - The asset to the staking operation.
+   * @param action - The type of staking action to perform.
+   * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
+   * @param intervalSeconds - The amount to check each time for a successful broadcast.
+   * @param options - Additional options such as setting the mode for the staking action.
+   *
+   * @returns The staking operation after it's completed fully.
+   */
+  public async createStakingOperation(
+    amount: Amount,
+    assetId: string,
+    action: string,
+    timeoutSeconds = 60,
+    intervalSeconds = 0.2,
+    options: CoinbaseWalletAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
+  ): Promise<StakingOperation> {
+    await this.validateAmount(amount, assetId);
+    let stakingOperation = await this.createStakingOperationRequest(
+      amount,
+      assetId,
+      action,
+      options,
+    );
+
+    // NOTE: Staking does not yet support server signers at this point.
+    await stakingOperation.sign(this.key!);
+    for (const tx of stakingOperation.getTransactions()) {
+      if (!tx.isSigned()) {
+        continue;
+      }
+      stakingOperation = await this.broadcastStakingOperationRequest(
+        stakingOperation,
+        tx.getSignedPayload()!.slice(2),
+      );
+    }
+
+    const startTime = Date.now();
+    while (Date.now() - startTime < timeoutSeconds * 1000) {
+      await stakingOperation.reload();
+      const status = stakingOperation.getStatus();
+      if (status === StakingOperationStatus.COMPLETE || status === StakingOperationStatus.FAILED) {
+        return stakingOperation;
+      }
+      await delay(intervalSeconds);
+    }
+    throw new Error("Transfer timed out");
+  }
+
+  /**
+   * Get the stakeable balance for the supplied asset.
+   *
+   * @param asset_id - The asset to check the stakeable balance for.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options for getting the stakeable balance.
+   * @returns The stakeable balance.
+   */
+  public async stakeableBalance(
+    asset_id: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
+  ): Promise<Decimal> {
+    const balances = await this.getStakingBalances(asset_id, mode, options);
+    return balances.stakeableBalance;
+  }
+
+  /**
+   * Get the unstakeable balance for the supplied asset.
+   *
+   * @param asset_id - The asset to check the unstakeable balance for.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options for getting the unstakeable balance.
+   * @returns The unstakeable balance.
+   */
+  public async unstakeableBalance(
+    asset_id: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
+  ): Promise<Decimal> {
+    const balances = await this.getStakingBalances(asset_id, mode, options);
+    return balances.unstakeableBalance;
+  }
+
+  /**
+   * Get the claimable balance for the supplied asset.
+   *
+   * @param asset_id - The asset to check claimable balance for.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options for getting the claimable balance.
+   * @returns The claimable balance.
+   */
+  public async claimableBalance(
+    asset_id: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
+  ): Promise<Decimal> {
+    const balances = await this.getStakingBalances(asset_id, mode, options);
+    return balances.claimableBalance;
+  }
+
+  /**
+   * Get the different staking balance types for the supplied asset.
+   *
+   * @param assetId - The asset to lookup balances for.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options for the balance lookup.
+   * @private
+   * @returns The different balance types.
+   */
+  private async getStakingBalances(
+    assetId: string,
+    mode?: StakeOptionsMode,
+    options?: { [key: string]: string },
+  ): Promise<{ [key: string]: Decimal }> {
+    const newOptions = this.copyOptions(options);
+
+    if (mode) {
+      newOptions.mode = mode;
+    }
+
+    const request = {
+      network_id: this.getNetworkId(),
+      asset_id: Asset.primaryDenomination(assetId),
+      address_id: this.getId(),
+      options: newOptions,
+    };
+
+    const response = await Coinbase.apiClients.stake!.getStakingContext(request);
+
+    const balances = response!.data.context as PartialEthStakingContextModel;
+
+    return {
+      stakeableBalance: Balance.fromModelAndAssetId(balances.stakeable_balance, assetId).amount,
+      unstakeableBalance: Balance.fromModelAndAssetId(balances.unstakeable_balance, assetId).amount,
+      claimableBalance: Balance.fromModelAndAssetId(balances.claimable_balance, assetId).amount,
+    };
+  }
+
+  /**
+   * Create a shallow copy of given options.
+   *
+   * @param options - The supplied options to be copied
+   * @private
+   * @returns A copy of the options.
+   */
+  private copyOptions(options?: { [key: string]: string }): {
+    [key: string]: string;
+  } {
+    return { ...options };
+  }
+
+  /**
+   * Lists the staking rewards for the address.
+   *
+   * @param assetId - The asset ID.
+   * @param startTime - The start time.
+   * @param endTime - The end time.
+   * @param format - The format to return the rewards in. (usd, native). Defaults to usd.
+   * @returns The staking rewards.
+   */
+  public async stakingRewards(
+    assetId: string,
+    startTime = getWeekBackDate(new Date()),
+    endTime = formatDate(new Date()),
+    format: StakingRewardFormat = StakingRewardFormat.Usd,
+  ): Promise<StakingReward[]> {
+    console.log(endTime);
+    console.log(startTime);
+    return StakingReward.list(
+      Coinbase.normalizeNetwork(this.getNetworkId()),
+      assetId,
+      [this.getId()],
+      startTime,
+      endTime,
+      format,
+    );
+  }
+
+  private async createStakingOperationRequest(
+    amount: Amount,
+    assetId: string,
+    action: string,
+    options: CoinbaseWalletAddressStakeOptions,
+  ): Promise<StakingOperation> {
+    if (new Decimal(amount.toString()).lessThanOrEqualTo(0)) {
+      throw new Error("Amount required greater than zero.");
+    }
+    const asset = await Asset.fetch(this.getNetworkId(), assetId);
+
+    options.amount = asset.toAtomicAmount(new Decimal(amount.toString())).toString();
+
+    const stakingOperationRequest = {
+      network_id: this.getNetworkId(),
+      asset_id: Asset.primaryDenomination(assetId),
+      action: action,
+      options: options,
+    };
+
+    const response = await Coinbase.apiClients.stake!.createStakingOperation(
+      this.getWalletId(),
+      this.getId(),
+      stakingOperationRequest,
+    );
+
+    return new StakingOperation(response!.data);
+  }
+
+  private async broadcastStakingOperationRequest(
+    stakingOperation: StakingOperation,
+    signedPayload: string,
+  ): Promise<StakingOperation> {
+    const broadcastStakingOperationRequest = {
+      signed_payload: signedPayload,
+      transaction_index: 0,
+    };
+    const response = await Coinbase.apiClients.stake!.broadcastStakingOperation(
+      this.getWalletId(),
+      this.getId(),
+      stakingOperation.getID(),
+      broadcastStakingOperationRequest,
+    );
+
+    return new StakingOperation(response.data);
   }
 }

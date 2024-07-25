@@ -5,6 +5,7 @@ import {
 } from "../client/api";
 import { Transaction } from "./transaction";
 import { Coinbase } from "./coinbase";
+import { StakingOperationStatus } from "./types";
 import { delay } from "./utils";
 
 /**
@@ -36,12 +37,74 @@ export class StakingOperation {
   }
 
   /**
-   * Get the staking operation ID.
+   * Returns the Staking Operation ID.
    *
-   * @returns The unique ID of the staking operation.
+   * @returns The Staking Operation ID.
    */
   public getID(): string {
     return this.model.id;
+  }
+
+  /**
+   * Returns the Wallet ID if it exists.
+   *
+   * @returns The Wallet ID.
+   */
+  public getWalletID(): string | undefined {
+    return this.model.wallet_id;
+  }
+
+  /**
+   * Returns the Address ID.
+   *
+   * @returns The Address ID.
+   */
+  public getAddressID(): string {
+    return this.model.address_id;
+  }
+
+  /**
+   * Returns the Status of the StakingOperation.
+   *
+   * @returns The Status of the StakingOperation.
+   */
+  public getStatus(): StakingOperationStatus | undefined {
+    switch (this.model.status) {
+      case StakingOperationStatus.INITIALIZED:
+        return StakingOperationStatus.INITIALIZED;
+      case StakingOperationStatus.PENDING:
+        return StakingOperationStatus.PENDING;
+      case StakingOperationStatus.COMPLETE:
+        return StakingOperationStatus.COMPLETE;
+      case StakingOperationStatus.FAILED:
+        return StakingOperationStatus.FAILED;
+      default:
+        return undefined;
+    }
+  }
+
+  /**
+   * Reloads the StakingOperation model with the latest data from the server.
+   * If the StakingOperation object was created by an ExternalAddress then it will
+   * not have a wallet ID.
+   *
+   * @throws {APIError} if the API request to get the StakingOperation fails.
+   * @throws {Error} if this function is called on a StakingOperation without a wallet ID.
+   */
+  public async reload(): Promise<void> {
+    if (this.getWalletID() === undefined) {
+      throw new Error("cannot reload staking operation without a wallet ID.");
+    }
+    const result = await Coinbase.apiClients.stake!.getStakingOperation(
+      this.getWalletID()!,
+      this.getAddressID(),
+      this.getID(),
+    );
+    this.model = result?.data;
+    this.transactions = [];
+    result?.data.transactions.forEach(transaction => {
+      this.transactions.push(new Transaction(transaction));
+    });
   }
 
   /**
@@ -70,15 +133,6 @@ export class StakingOperation {
     }
 
     return signedVoluntaryExitMessages;
-  }
-
-  /**
-   * Get the status of the staking operation.
-   *
-   * @returns The status of the staking operation.
-   */
-  public getStatus(): StakingOperationStatusEnum {
-    return this.model.status;
   }
 
   /**
