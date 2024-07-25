@@ -2,7 +2,17 @@
 import * as crypto from "crypto";
 import { ethers } from "ethers";
 import { FaucetTransaction } from "../coinbase/faucet_transaction";
-import { Balance as BalanceModel, TransferList, Trade as TradeModel } from "../client";
+import {
+  Balance as BalanceModel,
+  TransferList,
+  Trade as TradeModel,
+  StakingOperation as StakingOperationModel,
+  StakingOperationStatusEnum,
+  StakingContext as StakingContextModel,
+  FetchStakingRewards200Response,
+  StakingRewardStateEnum,
+  StakingRewardFormat,
+} from "../client";
 import Decimal from "decimal.js";
 import { APIError, FaucetLimitReachedError } from "../coinbase/api_error";
 import { Coinbase } from "../coinbase/coinbase";
@@ -24,6 +34,7 @@ import {
   transfersApiMock,
   walletsApiMock,
   externalAddressApiMock,
+  stakeApiMock,
 } from "./utils";
 import { ArgumentError } from "../coinbase/errors";
 import { Transfer } from "../coinbase/transfer";
@@ -32,6 +43,10 @@ import { Trade } from "../coinbase/trade";
 import { Transaction } from "../coinbase/transaction";
 import { WalletAddress } from "../coinbase/address/wallet_address";
 import { Wallet } from "../coinbase/wallet";
+import { randomUUID } from "crypto";
+import { ExternalAddress } from "../coinbase/address/external_address";
+import { StakingOperation } from "../coinbase/staking_operation";
+import { StakingReward } from "../coinbase/staking_reward";
 
 // Test suite for the WalletAddress class
 describe("WalletAddress", () => {
@@ -218,6 +233,170 @@ describe("WalletAddress", () => {
     expect(address.toString()).toBe(
       `WalletAddress{ addressId: '${VALID_ADDRESS_MODEL.address_id}', networkId: '${VALID_ADDRESS_MODEL.network_id}', walletId: '${VALID_ADDRESS_MODEL.wallet_id}' }`,
     );
+  });
+
+  describe("#stakingOperation", () => {
+    key = ethers.Wallet.createRandom();
+    const newAddress = newAddressModel("", randomUUID(), Coinbase.networks.EthereumHolesky);
+    const walletAddress = new WalletAddress(newAddress, key as unknown as ethers.Wallet);
+
+    const BALANCE_MODEL: BalanceModel = {
+      amount: "3000000000000000000",
+      asset: {
+        network_id: Coinbase.networks.EthereumHolesky,
+        asset_id: Coinbase.assets.Eth,
+        decimals: 18,
+        contract_address: "0xtestcontract",
+      },
+    };
+
+    const STAKING_OPERATION_MODEL: StakingOperationModel = {
+      id: randomUUID(),
+      network_id: Coinbase.networks.EthereumHolesky,
+      address_id: newAddress.address_id,
+      status: StakingOperationStatusEnum.Complete,
+      transactions: [
+        {
+          from_address_id: newAddress.address_id,
+          network_id: Coinbase.networks.EthereumHolesky,
+          status: "pending",
+          unsigned_payload:
+            "7b2274797065223a22307832222c22636861696e4964223a22307834323638222c226e6f" +
+            "6e6365223a2230783137222c22746f223a22307861353534313664653564653631613061" +
+            "633161613839373061323830653034333838623164653462222c22676173223a22307833" +
+            "30643430222c226761735072696365223a6e756c6c2c226d61785072696f726974794665" +
+            "65506572476173223a223078323534306265343030222c226d6178466565506572476173" +
+            "223a223078326437313162383430222c2276616c7565223a223078356166333130376134" +
+            "303030222c22696e707574223a2230783361346236366631222c226163636573734c6973" +
+            "74223a5b5d2c2276223a22307830222c2272223a22307830222c2273223a22307830222c" +
+            "2279506172697479223a22307830222c2268617368223a22307839613034353830343332" +
+            "646630666334656139646164653561343836353433623831666239333833316430646239" +
+            "386263356436373834393339343866333432227d",
+        },
+      ],
+    };
+
+    const STAKING_CONTEXT_MODEL: StakingContextModel = {
+      context: {
+        stakeable_balance: {
+          amount: "3000000000000000000",
+          asset: {
+            asset_id: Coinbase.assets.Eth,
+            network_id: Coinbase.networks.EthereumHolesky,
+            decimals: 18,
+            contract_address: "0x",
+          },
+        },
+        unstakeable_balance: {
+          amount: "2000000000000000000",
+          asset: {
+            asset_id: Coinbase.assets.Eth,
+            network_id: Coinbase.networks.EthereumHolesky,
+            decimals: 18,
+            contract_address: "0x",
+          },
+        },
+        claimable_balance: {
+          amount: "1000000000000000000",
+          asset: {
+            asset_id: Coinbase.assets.Eth,
+            network_id: Coinbase.networks.EthereumHolesky,
+            decimals: 18,
+            contract_address: "0x",
+          },
+        },
+      },
+    };
+
+    const STAKING_REWARD_RESPONSE: FetchStakingRewards200Response = {
+      data: [
+        {
+          address_id: newAddress.address_id,
+          date: "2024-05-01",
+          amount: "361",
+          state: StakingRewardStateEnum.Pending,
+          format: StakingRewardFormat.Usd,
+        },
+        {
+          address_id: newAddress.address_id,
+          date: "2024-05-02",
+          amount: "203",
+          state: StakingRewardStateEnum.Pending,
+          format: StakingRewardFormat.Usd,
+        },
+        {
+          address_id: newAddress.address_id,
+          date: "2024-05-03",
+          amount: "226",
+          state: StakingRewardStateEnum.Pending,
+          format: StakingRewardFormat.Usd,
+        },
+      ],
+      has_more: false,
+      next_page: "",
+    };
+
+    beforeAll(() => {
+      Coinbase.apiClients.externalAddress = externalAddressApiMock;
+      Coinbase.apiClients.stake = stakeApiMock;
+      Coinbase.apiClients.asset = assetsApiMock;
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    describe(".createStakingOperation", () => {
+      it("should create a staking operation from the address", async () => {
+        STAKING_OPERATION_MODEL.wallet_id = newAddress.wallet_id;
+        Coinbase.apiClients.asset!.getAsset = getAssetMock();
+        Coinbase.apiClients.externalAddress!.getExternalAddressBalance =
+          mockReturnValue(BALANCE_MODEL);
+        Coinbase.apiClients.stake!.createStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
+        Coinbase.apiClients.stake!.broadcastStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
+        STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
+        Coinbase.apiClients.stake!.getStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
+
+        const op = await walletAddress.createStakingOperation(0.001, Coinbase.assets.Eth, "stake");
+
+        expect(op).toBeInstanceOf(StakingOperation);
+      });
+    });
+
+    describe(".stakeableBalance", () => {
+      it("should return the stakeable balance successfully with default params", async () => {
+        Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
+        const stakeableBalance = await walletAddress.stakeableBalance(Coinbase.assets.Eth);
+        expect(stakeableBalance).toEqual(new Decimal("3"));
+      });
+    });
+
+    describe(".unstakeableBalance", () => {
+      it("should return the unstakeableBalance balance successfully with default params", async () => {
+        Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
+        const stakeableBalance = await walletAddress.unstakeableBalance(Coinbase.assets.Eth);
+        expect(stakeableBalance).toEqual(new Decimal("2"));
+      });
+    });
+
+    describe(".claimableBalance", () => {
+      it("should return the claimableBalance balance successfully with default params", async () => {
+        Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
+        const stakeableBalance = await walletAddress.claimableBalance(Coinbase.assets.Eth);
+        expect(stakeableBalance).toEqual(new Decimal("1"));
+      });
+    });
+
+    describe(".stakingRewards", () => {
+      it("should successfully return staking rewards", async () => {
+        Coinbase.apiClients.stake!.fetchStakingRewards = mockReturnValue(STAKING_REWARD_RESPONSE);
+        Coinbase.apiClients.asset!.getAsset = getAssetMock();
+        const response = await walletAddress.stakingRewards(Coinbase.assets.Eth);
+        expect(response).toBeInstanceOf(Array<StakingReward>);
+      });
+    });
   });
 
   describe("#createTransfer", () => {

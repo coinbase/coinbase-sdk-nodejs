@@ -433,7 +433,7 @@ export class WalletAddress extends Address {
       }
       await delay(intervalSeconds);
     }
-    throw new Error("Transfer timed out");
+    throw new Error("Staking Operation timed out");
   }
 
   /**
@@ -553,8 +553,6 @@ export class WalletAddress extends Address {
     endTime = formatDate(new Date()),
     format: StakingRewardFormat = StakingRewardFormat.Usd,
   ): Promise<StakingReward[]> {
-    console.log(endTime);
-    console.log(startTime);
     return StakingReward.list(
       Coinbase.normalizeNetwork(this.getNetworkId()),
       assetId,
@@ -609,6 +607,6 @@ export class WalletAddress extends Address {
       broadcastStakingOperationRequest,
     );
 
-    return new StakingOperation(response.data);
+    return new StakingOperation(response!.data);
   }
 }

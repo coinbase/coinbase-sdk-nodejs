@@ -240,7 +240,7 @@ describe("Transaction", () => {
     it("returns the same value as toString", () => {
       const transaction = new Transaction(broadcastedModel);
       expect(transaction.toString()).toEqual(
-        `Transaction { transactionHash: '${transaction.getTransactionHash()}', status: 'broadcast' }`,
+        `Transaction { transactionHash: '${transaction.getTransactionHash()}', status: '${transaction.getStatus()}', unsignedPayload: '${transaction.getUnsignedPayload()}', signedPayload: ${transaction.getSignedPayload()}, transactionLink: ${transaction.getTransactionLink()} }`,
       );
     });
 
