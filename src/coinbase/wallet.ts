@@ -4,7 +4,7 @@ import Decimal from "decimal.js";
 import { ethers } from "ethers";
 import * as fs from "fs";
 import * as secp256k1 from "secp256k1";
-import { Address as AddressModel, Wallet as WalletModel } from "../client";
+import { Address as AddressModel, Wallet as WalletModel, StakingRewardFormat } from "../client";
 import { Address } from "./address";
 import { WalletAddress } from "./address/wallet_address";
 import { Asset } from "./asset";
@@ -27,6 +27,8 @@ import {
 } from "./types";
 import { convertStringToHex, delay } from "./utils";
 import { StakingOperation } from "./staking_operation";
+import { StakingReward } from "./staking_reward";
+import { formatDate, getWeekBackDate } from "../tests/utils";
 
 /**
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
@@ -234,12 +236,13 @@ export class Wallet {
     }
 
     this.addresses.forEach((address: WalletAddress, index: number) => {
-      const etherWallet = new ethers.Wallet(seed);
-      // if (etherWallet.address != address.getId()) {
-      //   throw new InternalError(
-      //     `Seed does not match wallet; cannot find address ${etherWallet.address}`,
-      //   );
-      // }
+      const derivedKey = this.deriveKey(index);
+      const etherWallet = new ethers.Wallet(convertStringToHex(derivedKey.privateKey!));
+      if (etherWallet.address != address.getId()) {
+        throw new InternalError(
+          `Seed does not match wallet; cannot find address ${etherWallet.address}`,
+        );
+      }
       address.setKey(etherWallet);
     });
   }
@@ -291,11 +294,101 @@ export class Wallet {
     return await this.getDefaultAddress()!.createTrade(amount, fromAssetId, toAssetId);
   }
 
+  /**
+   * Get the stakeable balance for the supplied asset.
+   *
+   * @param asset_id - The asset to check the stakeable balance for.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options for getting the stakeable balance.
+   * @returns The stakeable balance.
+   */
+  public async stakeableBalance(
+    asset_id: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
+  ): Promise<Decimal> {
+    if (!this.getDefaultAddress()) {
+      throw new InternalError("Default address not found");
+    }
+    return await this.getDefaultAddress()!.stakeableBalance(asset_id, mode, options);
+  }
+
+  /**
+   * Get the unstakeable balance for the supplied asset.
+   *
+   * @param asset_id - The asset to check the unstakeable balance for.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options for getting the unstakeable balance.
+   * @returns The unstakeable balance.
+   */
+  public async unstakeableBalance(
+    asset_id: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
+  ): Promise<Decimal> {
+    if (!this.getDefaultAddress()) {
+      throw new InternalError("Default address not found");
+    }
+    return await this.getDefaultAddress()!.unstakeableBalance(asset_id, mode, options);
+  }
+
+  /**
+   * Get the claimable balance for the supplied asset.
+   *
+   * @param asset_id - The asset to check claimable balance for.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options for getting the claimable balance.
+   * @returns The claimable balance.
+   */
+  public async claimableBalance(
+    asset_id: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
+  ): Promise<Decimal> {
+    if (!this.getDefaultAddress()) {
+      throw new InternalError("Default address not found");
+    }
+    return await this.getDefaultAddress()!.claimableBalance(asset_id, mode, options);
+  }
+
+  /**
+   * Lists the staking rewards for the address.
+   *
+   * @param assetId - The asset ID.
+   * @param startTime - The start time.
+   * @param endTime - The end time.
+   * @param format - The format to return the rewards in. (usd, native). Defaults to usd.
+   * @returns The staking rewards.
+   */
+  public async stakingRewards(
+    assetId: string,
+    startTime = getWeekBackDate(new Date()),
+    endTime = formatDate(new Date()),
+    format: StakingRewardFormat = StakingRewardFormat.Usd,
+  ): Promise<StakingReward[]> {
+    if (!this.getDefaultAddress()) {
+      throw new InternalError("Default address not found");
+    }
+    return await this.getDefaultAddress()!.stakingRewards(assetId, startTime, endTime, format);
+  }
+
+  /**
+   * Creates a staking operation to stake, signs it, and broadcasts it on the blockchain.
+   *
+   * @param amount - The amount for the staking operation.
+   * @param assetId - The asset to the staking operation.
+   * @param action - The type of staking action to perform.
+   * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
+   * @param intervalSeconds - The amount to check each time for a successful broadcast.
+   * @param options - Additional options such as setting the mode for the staking action.
+   *
+   * @returns The staking operation after it's completed fully.
+   */
   public async createStakingOperation(
     amount: Amount,
     assetId: string,
     action: string,
-    timeoutSeconds = 15,
+    timeoutSeconds = 60,
     intervalSeconds = 0.2,
     options: CoinbaseWalletAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<StakingOperation> {

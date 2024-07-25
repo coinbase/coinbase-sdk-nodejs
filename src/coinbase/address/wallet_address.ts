@@ -1,6 +1,10 @@
 import { Decimal } from "decimal.js";
 import { ethers } from "ethers";
-import { Address as AddressModel } from "../../client";
+import {
+  Address as AddressModel,
+  PartialEthStakingContext as PartialEthStakingContextModel,
+  StakingRewardFormat,
+} from "../../client";
 import { Address } from "../address";
 import { Asset } from "../asset";
 import { Coinbase } from "../coinbase";
@@ -19,6 +23,9 @@ import {
 import { delay } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
 import { StakingOperation } from "../staking_operation";
+import { Balance } from "../balance";
+import { StakingReward } from "../staking_reward";
+import { formatDate, getWeekBackDate } from "../../tests/utils";
 
 /**
  * A representation of a blockchain address, which is a wallet-controlled account on a network.
@@ -350,11 +357,23 @@ export class WalletAddress extends Address {
     }
   }
 
+  /**
+   * Creates a staking operation to stake, signs it, and broadcasts it on the blockchain.
+   *
+   * @param amount - The amount for the staking operation.
+   * @param assetId - The asset to the staking operation.
+   * @param action - The type of staking action to perform.
+   * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
+   * @param intervalSeconds - The amount to check each time for a successful broadcast.
+   * @param options - Additional options such as setting the mode for the staking action.
+   *
+   * @returns The staking operation after it's completed fully.
+   */
   public async createStakingOperation(
     amount: Amount,
     assetId: string,
     action: string,
-    timeoutSeconds = 15,
+    timeoutSeconds = 60,
     intervalSeconds = 0.2,
     options: CoinbaseWalletAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<StakingOperation> {
@@ -366,7 +385,7 @@ export class WalletAddress extends Address {
       options,
     );
 
-    // NOTE: Trading does not yet support server signers at this point.
+    // NOTE: Staking does not yet support server signers at this point.
     await stakingOperation.sign(this.key!);
     await this.sleep(3000);
     for (const tx of stakingOperation.getTransactions()) {
@@ -393,6 +412,135 @@ export class WalletAddress extends Address {
 
   private async sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Get the stakeable balance for the supplied asset.
+   *
+   * @param asset_id - The asset to check the stakeable balance for.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options for getting the stakeable balance.
+   * @returns The stakeable balance.
+   */
+  public async stakeableBalance(
+    asset_id: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
+  ): Promise<Decimal> {
+    const balances = await this.getStakingBalances(asset_id, mode, options);
+    return balances.stakeableBalance;
+  }
+
+  /**
+   * Get the unstakeable balance for the supplied asset.
+   *
+   * @param asset_id - The asset to check the unstakeable balance for.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options for getting the unstakeable balance.
+   * @returns The unstakeable balance.
+   */
+  public async unstakeableBalance(
+    asset_id: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
+  ): Promise<Decimal> {
+    const balances = await this.getStakingBalances(asset_id, mode, options);
+    return balances.unstakeableBalance;
+  }
+
+  /**
+   * Get the claimable balance for the supplied asset.
+   *
+   * @param asset_id - The asset to check claimable balance for.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options for getting the claimable balance.
+   * @returns The claimable balance.
+   */
+  public async claimableBalance(
+    asset_id: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
+  ): Promise<Decimal> {
+    const balances = await this.getStakingBalances(asset_id, mode, options);
+    return balances.claimableBalance;
+  }
+
+  /**
+   * Get the different staking balance types for the supplied asset.
+   *
+   * @param assetId - The asset to lookup balances for.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options for the balance lookup.
+   * @private
+   * @returns The different balance types.
+   */
+  private async getStakingBalances(
+    assetId: string,
+    mode?: StakeOptionsMode,
+    options?: { [key: string]: string },
+  ): Promise<{ [key: string]: Decimal }> {
+    const newOptions = this.copyOptions(options);
+
+    if (mode) {
+      newOptions.mode = mode;
+    }
+
+    const request = {
+      network_id: this.getNetworkId(),
+      asset_id: Asset.primaryDenomination(assetId),
+      address_id: this.getId(),
+      options: newOptions,
+    };
+
+    const response = await Coinbase.apiClients.stake!.getStakingContext(request);
+
+    const balances = response!.data.context as PartialEthStakingContextModel;
+
+    return {
+      stakeableBalance: Balance.fromModelAndAssetId(balances.stakeable_balance, assetId).amount,
+      unstakeableBalance: Balance.fromModelAndAssetId(balances.unstakeable_balance, assetId).amount,
+      claimableBalance: Balance.fromModelAndAssetId(balances.claimable_balance, assetId).amount,
+    };
+  }
+
+  /**
+   * Create a shallow copy of given options.
+   *
+   * @param options - The supplied options to be copied
+   * @private
+   * @returns A copy of the options.
+   */
+  private copyOptions(options?: { [key: string]: string }): {
+    [key: string]: string;
+  } {
+    return { ...options };
+  }
+
+  /**
+   * Lists the staking rewards for the address.
+   *
+   * @param assetId - The asset ID.
+   * @param startTime - The start time.
+   * @param endTime - The end time.
+   * @param format - The format to return the rewards in. (usd, native). Defaults to usd.
+   * @returns The staking rewards.
+   */
+  public async stakingRewards(
+    assetId: string,
+    startTime = getWeekBackDate(new Date()),
+    endTime = formatDate(new Date()),
+    format: StakingRewardFormat = StakingRewardFormat.Usd,
+  ): Promise<StakingReward[]> {
+    console.log(endTime);
+    console.log(startTime);
+    return StakingReward.list(
+      Coinbase.normalizeNetwork(this.getNetworkId()),
+      assetId,
+      [this.getId()],
+      startTime,
+      endTime,
+      format,
+    );
   }
 
   private async createStakingOperationRequest(

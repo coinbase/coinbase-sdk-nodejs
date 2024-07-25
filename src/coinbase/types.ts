@@ -28,7 +28,6 @@ import {
   FetchStakingRewards200Response,
   FaucetTransaction,
   BroadcastStakingOperationRequest,
-  StakingOperation,
   CreateStakingOperationRequest,
   ValidatorList,
   Validator,
