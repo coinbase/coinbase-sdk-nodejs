@@ -3,6 +3,7 @@ import { AxiosPromise, AxiosRequestConfig, RawAxiosRequestConfig } from "axios";
 import {
   Address as AddressModel,
   AddressList,
+  AddressBalanceHistoryList,
   AddressBalanceList,
   Balance,
   CreateAddressRequest,
@@ -280,6 +281,25 @@ export type AddressAPIClient = {
     page?: string,
     options?: AxiosRequestConfig,
   ): AxiosPromise<AddressBalanceList>;
+
+  /**
+   * Lists address balance history
+   *
+   * @param walletId - The ID of the wallet to fetch the balances for.
+   * @param addressId - The onchain address of the address that is being fetched.
+   * @param assetId - The symbol of the asset to fetch the balance for.
+   * @param page - A cursor for pagination across multiple pages of results. Do not include this parameter on the first call.
+   *  Use the next_page value returned in a previous response to request subsequent results.
+   * @param options - Override http request option.
+   * @throws {APIError}
+   */
+    listAddressBalanceHistory(
+      walletId: string,
+      addressId: string,
+      assetId: string,
+      page?: string,
+      options?: AxiosRequestConfig,
+    ): AxiosPromise<AddressBalanceHistoryList>;
 
   /**
    * Create a new address scoped to the wallet.

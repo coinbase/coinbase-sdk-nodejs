@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 import { Address as AddressModel } from "../../client";
 import { Address } from "../address";
 import { Asset } from "../asset";
+import { BalanceHistory } from "../balance_history";
 import { Coinbase } from "../coinbase";
 import { ArgumentError, InternalError } from "../errors";
 import { Trade } from "../trade";
@@ -96,6 +97,26 @@ export class WalletAddress extends Address {
     }
 
     return trades;
+  }
+
+  /**
+   * Returns the list of balance history for the address and asset.
+   *
+   * @returns The list of address balance history for asset ID.
+   */
+  public async listBalanceHistory(assetID: string): Promise<BalanceHistory[]> {
+    const response = await Coinbase.apiClients.address!.listAddressBalanceHistory(
+      this.getWalletId(),
+      this.getId(),
+      assetID,
+    );
+
+    const balanceHistory: BalanceHistory[] = [];
+
+    response.data.data.forEach(historyModel => {
+      balanceHistory.push(BalanceHistory.fromModel(historyModel));
+    });
+    return balanceHistory;
   }
 
   /**

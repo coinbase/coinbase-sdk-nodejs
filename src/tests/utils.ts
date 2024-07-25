@@ -410,6 +410,7 @@ export const addressesApiMock = {
   listAddresses: jest.fn(),
   getAddressBalance: jest.fn(),
   listAddressBalances: jest.fn(),
+  listAddressBalanceHistory: jest.fn(),
   createAddress: jest.fn(),
 };
 
