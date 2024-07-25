@@ -314,6 +314,7 @@ export class Wallet {
    * @param asset_id - The asset to check the stakeable balance for.
    * @param mode - The staking mode. Defaults to DEFAULT.
    * @param options - Additional options for getting the stakeable balance.
+   * @throws {Error} if the default address is not found.
    * @returns The stakeable balance.
    */
   public async stakeableBalance(
@@ -333,6 +334,7 @@ export class Wallet {
    * @param asset_id - The asset to check the unstakeable balance for.
    * @param mode - The staking mode. Defaults to DEFAULT.
    * @param options - Additional options for getting the unstakeable balance.
+   * @throws {Error} if the default address is not found.
    * @returns The unstakeable balance.
    */
   public async unstakeableBalance(
@@ -352,6 +354,7 @@ export class Wallet {
    * @param asset_id - The asset to check claimable balance for.
    * @param mode - The staking mode. Defaults to DEFAULT.
    * @param options - Additional options for getting the claimable balance.
+   * @throws {Error} if the default address is not found.
    * @returns The claimable balance.
    */
   public async claimableBalance(
@@ -372,6 +375,7 @@ export class Wallet {
    * @param startTime - The start time.
    * @param endTime - The end time.
    * @param format - The format to return the rewards in. (usd, native). Defaults to usd.
+   * @throws {Error} if the default address is not found.
    * @returns The staking rewards.
    */
   public async stakingRewards(
@@ -390,12 +394,12 @@ export class Wallet {
    * Creates a staking operation to stake, signs it, and broadcasts it on the blockchain.
    *
    * @param amount - The amount for the staking operation.
-   * @param assetId - The asset to the staking operation.
+   * @param assetId - The asset for the staking operation.
    * @param action - The type of staking action to perform.
    * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
    * @param intervalSeconds - The amount to check each time for a successful broadcast.
    * @param options - Additional options such as setting the mode for the staking action.
-   *
+   * @throws {Error} if the default address is not found.
    * @returns The staking operation after it's completed fully.
    */
   public async createStakingOperation(

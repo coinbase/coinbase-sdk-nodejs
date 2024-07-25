@@ -393,7 +393,6 @@ export class WalletAddress extends Address {
    * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
    * @param intervalSeconds - The amount to check each time for a successful broadcast.
    * @param options - Additional options such as setting the mode for the staking action.
-   *
    * @returns The staking operation after it's completed fully.
    */
   public async createStakingOperation(
@@ -563,6 +562,17 @@ export class WalletAddress extends Address {
     );
   }
 
+  /**
+   * A helper function that creates the staking operation.
+   *
+   * @param amount - The amount for the staking operation.
+   * @param assetId - The asset for the staking operation.
+   * @param action - The type of staking action to perform.
+   * @param options - Additional options such as setting the mode for the staking action.
+   * @private
+   * @throws {Error} if the amount is less than zero.
+   * @returns The created staking operation.
+   */
   private async createStakingOperationRequest(
     amount: Amount,
     assetId: string,
@@ -592,6 +602,14 @@ export class WalletAddress extends Address {
     return new StakingOperation(response!.data);
   }
 
+  /**
+   * A helper function that broadcasts the signed payload.
+   *
+   * @param stakingOperation - The staking operation related to the signed payload.
+   * @param signedPayload - The payload that's being broadcasted.
+   * @private
+   * @returns An updated staking operation with the broadcasted transaction.
+   */
   private async broadcastStakingOperationRequest(
     stakingOperation: StakingOperation,
     signedPayload: string,
