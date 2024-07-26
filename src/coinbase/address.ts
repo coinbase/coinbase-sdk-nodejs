@@ -4,6 +4,7 @@ import { Asset } from "./asset";
 import { Balance } from "./balance";
 import { BalanceMap } from "./balance_map";
 import { FaucetTransaction } from "./faucet_transaction";
+import { StakeOptionsMode } from "./types";
 
 /**
  * A representation of a blockchain address, which is a user-controlled account on a network.
@@ -76,6 +77,57 @@ export class Address {
   }
 
   /**
+   * Get the stakeable balance for the supplied asset.
+   *
+   * @param asset_id - The asset to check the stakeable balance for.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options for getting the stakeable balance.
+   * @returns The stakeable balance.
+   */
+  public async stakeableBalance(
+    asset_id: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
+  ): Promise<Decimal> {
+    const balances = await this.getStakingBalances(asset_id, mode, options);
+    return balances.stakeableBalance;
+  }
+
+  /**
+   * Get the unstakeable balance for the supplied asset.
+   *
+   * @param asset_id - The asset to check the unstakeable balance for.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options for getting the unstakeable balance.
+   * @returns The unstakeable balance.
+   */
+  public async unstakeableBalance(
+    asset_id: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
+  ): Promise<Decimal> {
+    const balances = await this.getStakingBalances(asset_id, mode, options);
+    return balances.unstakeableBalance;
+  }
+
+  /**
+   * Get the claimable balance for the supplied asset.
+   *
+   * @param asset_id - The asset to check claimable balance for.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options for getting the claimable balance.
+   * @returns The claimable balance.
+   */
+  public async claimableBalance(
+    asset_id: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
+  ): Promise<Decimal> {
+    const balances = await this.getStakingBalances(asset_id, mode, options);
+    return balances.claimableBalance;
+  }
+
+  /**
    * Requests faucet funds for the address.
    * Only supported on testnet networks.
    *
@@ -98,5 +150,63 @@ export class Address {
    */
   public toString(): string {
     return `Address { addressId: '${this.getId()}', networkId: '${this.getNetworkId()}' }`;
+  }
+
+  /**
+   * Create a shallow copy of given options.
+   *
+   * @param options - The supplied options to be copied
+   * @private
+   * @returns A copy of the options.
+   */
+  protected copyOptions(options?: { [key: string]: string }): {
+    [key: string]: string;
+  } {
+    return { ...options };
+  }
+
+  /**
+   * Get the different staking balance types for the supplied asset.
+   *
+   * @param assetId - The asset to lookup balances for.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options for the balance lookup.
+   * @private
+   * @returns The different balance types.
+   */
+  private async getStakingBalances(
+    assetId: string,
+    mode?: StakeOptionsMode,
+    options?: { [key: string]: string },
+  ): Promise<{ [key: string]: Decimal }> {
+    const newOptions = this.copyOptions(options);
+
+    if (mode) {
+      newOptions.mode = mode;
+    }
+
+    const request = {
+      network_id: this.getNetworkId(),
+      asset_id: Asset.primaryDenomination(assetId),
+      address_id: this.getId(),
+      options: newOptions,
+    };
+
+    const response = await Coinbase.apiClients.stake!.getStakingContext(request);
+
+    return {
+      stakeableBalance: Balance.fromModelAndAssetId(
+        response!.data.context.stakeable_balance,
+        assetId,
+      ).amount,
+      unstakeableBalance: Balance.fromModelAndAssetId(
+        response!.data.context.unstakeable_balance,
+        assetId,
+      ).amount,
+      claimableBalance: Balance.fromModelAndAssetId(
+        response!.data.context.claimable_balance,
+        assetId,
+      ).amount,
+    };
   }
 }
