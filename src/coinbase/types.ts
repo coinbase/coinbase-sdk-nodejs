@@ -769,6 +769,7 @@ export enum StakingOperationStatus {
   PENDING = "pending",
   COMPLETE = "complete",
   FAILED = "failed",
+  UNSPECIFIED = "unspecified",
 }
 
 /**
