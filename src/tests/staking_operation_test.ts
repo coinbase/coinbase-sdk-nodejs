@@ -9,6 +9,7 @@ import {
 import { ethers } from "ethers";
 import { StakingOperationStatusEnum } from "../client";
 import { Coinbase } from "../coinbase/coinbase";
+import { StakingOperationStatus } from "../coinbase/types";
 
 describe("StakingOperation", () => {
   beforeAll(() => {
@@ -127,6 +128,43 @@ describe("StakingOperation", () => {
       expect(stakingOperation.isTerminalState()).toBe(false);
       expect(stakingOperation.getTransactions().length).toBe(1);
       expect(stakingOperation.getSignedVoluntaryExitMessages().length).toBe(0);
+    });
+  });
+
+  describe(".getStatus", () => {
+    it("should return initialized status", async () => {
+      VALID_STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Initialized;
+      const op = new StakingOperation(VALID_STAKING_OPERATION_MODEL);
+      expect(op).toBeInstanceOf(StakingOperation);
+      expect(op.getStatus()).toEqual(StakingOperationStatus.INITIALIZED);
+    });
+
+    it("should return pending status", async () => {
+      VALID_STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Pending;
+      const op = new StakingOperation(VALID_STAKING_OPERATION_MODEL);
+      expect(op).toBeInstanceOf(StakingOperation);
+      expect(op.getStatus()).toEqual(StakingOperationStatus.PENDING);
+    });
+
+    it("should return complete status", async () => {
+      VALID_STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
+      const op = new StakingOperation(VALID_STAKING_OPERATION_MODEL);
+      expect(op).toBeInstanceOf(StakingOperation);
+      expect(op.getStatus()).toEqual(StakingOperationStatus.COMPLETE);
+    });
+
+    it("should return failed status", async () => {
+      VALID_STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Failed;
+      const op = new StakingOperation(VALID_STAKING_OPERATION_MODEL);
+      expect(op).toBeInstanceOf(StakingOperation);
+      expect(op.getStatus()).toEqual(StakingOperationStatus.FAILED);
+    });
+
+    it("should return unspecified status", async () => {
+      VALID_STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Unspecified;
+      const op = new StakingOperation(VALID_STAKING_OPERATION_MODEL);
+      expect(op).toBeInstanceOf(StakingOperation);
+      expect(op.getStatus()).toEqual(StakingOperationStatus.UNSPECIFIED);
     });
   });
 });
