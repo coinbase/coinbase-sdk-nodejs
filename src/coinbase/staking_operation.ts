@@ -64,22 +64,23 @@ export class StakingOperation {
   }
 
   /**
-   * Returns the Status of the StakingOperation.
+   * Returns the Status of the StakingOperation based on the internal
+   * StakingOperation model.
    *
    * @returns The Status of the StakingOperation.
    */
   public getStatus(): StakingOperationStatus | undefined {
     switch (this.model.status) {
-      case StakingOperationStatus.INITIALIZED:
+      case StakingOperationStatusEnum.Initialized:
         return StakingOperationStatus.INITIALIZED;
-      case StakingOperationStatus.PENDING:
+      case StakingOperationStatusEnum.Pending:
         return StakingOperationStatus.PENDING;
-      case StakingOperationStatus.COMPLETE:
+      case StakingOperationStatusEnum.Complete:
         return StakingOperationStatus.COMPLETE;
-      case StakingOperationStatus.FAILED:
+      case StakingOperationStatusEnum.Failed:
         return StakingOperationStatus.FAILED;
       default:
-        return undefined;
+        return StakingOperationStatus.UNSPECIFIED;
     }
   }
 
