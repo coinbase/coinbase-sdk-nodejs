@@ -6,9 +6,6 @@ import { Asset } from "../asset";
 import { StakingOperation } from "../staking_operation";
 import { StakingRewardFormat } from "../../client";
 import { StakingReward } from "../staking_reward";
-import { BalanceMap } from "../balance_map";
-import { Balance } from "../balance";
-import { FaucetTransaction } from "../faucet_transaction";
 
 /**
  * A representation of a blockchain Address, which is a user-controlled account on a Network. Addresses are used to
@@ -72,57 +69,6 @@ export class ExternalAddress extends Address {
   ): Promise<StakingOperation> {
     await this.validateCanClaimStake(amount, assetId, mode, options);
     return this.buildStakingOperation(amount, assetId, "claim_stake", mode, options);
-  }
-
-  /**
-   * Get the stakeable balance for the supplied asset.
-   *
-   * @param asset_id - The asset to check the stakeable balance for.
-   * @param mode - The staking mode. Defaults to DEFAULT.
-   * @param options - Additional options for getting the stakeable balance.
-   * @returns The stakeable balance.
-   */
-  public async stakeableBalance(
-    asset_id: string,
-    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
-    options: { [key: string]: string } = {},
-  ): Promise<Decimal> {
-    const balances = await this.getStakingBalances(asset_id, mode, options);
-    return balances.stakeableBalance;
-  }
-
-  /**
-   * Get the unstakeable balance for the supplied asset.
-   *
-   * @param asset_id - The asset to check the unstakeable balance for.
-   * @param mode - The staking mode. Defaults to DEFAULT.
-   * @param options - Additional options for getting the unstakeable balance.
-   * @returns The unstakeable balance.
-   */
-  public async unstakeableBalance(
-    asset_id: string,
-    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
-    options: { [key: string]: string } = {},
-  ): Promise<Decimal> {
-    const balances = await this.getStakingBalances(asset_id, mode, options);
-    return balances.unstakeableBalance;
-  }
-
-  /**
-   * Get the claimable balance for the supplied asset.
-   *
-   * @param asset_id - The asset to check claimable balance for.
-   * @param mode - The staking mode. Defaults to DEFAULT.
-   * @param options - Additional options for getting the claimable balance.
-   * @returns The claimable balance.
-   */
-  public async claimableBalance(
-    asset_id: string,
-    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
-    options: { [key: string]: string } = {},
-  ): Promise<Decimal> {
-    const balances = await this.getStakingBalances(asset_id, mode, options);
-    return balances.claimableBalance;
   }
 
   /**
@@ -216,7 +162,7 @@ export class ExternalAddress extends Address {
     mode: StakeOptionsMode,
     options: { [key: string]: string },
   ): Promise<void> {
-    if (assetId === "eth" && options.mode === StakeOptionsMode.NATIVE) {
+    if (assetId === "eth" && mode === StakeOptionsMode.NATIVE) {
       throw new Error(`Claiming stake for ETH is not supported in native mode.`);
     }
 
@@ -227,51 +173,6 @@ export class ExternalAddress extends Address {
         `Insufficient funds ${amount} requested to claim stake, only ${claimableBalance} available.`,
       );
     }
-  }
-
-  /**
-   * Get the different staking balance types for the supplied asset.
-   *
-   * @param assetId - The asset to lookup balances for.
-   * @param mode - The staking mode. Defaults to DEFAULT.
-   * @param options - Additional options for the balance lookup.
-   * @private
-   * @returns The different balance types.
-   */
-  private async getStakingBalances(
-    assetId: string,
-    mode?: StakeOptionsMode,
-    options?: { [key: string]: string },
-  ): Promise<{ [key: string]: Decimal }> {
-    const newOptions = this.copyOptions(options);
-
-    if (mode) {
-      newOptions.mode = mode;
-    }
-
-    const request = {
-      network_id: this.getNetworkId(),
-      asset_id: Asset.primaryDenomination(assetId),
-      address_id: this.getId(),
-      options: newOptions,
-    };
-
-    const response = await Coinbase.apiClients.stake!.getStakingContext(request);
-
-    return {
-      stakeableBalance: Balance.fromModelAndAssetId(
-        response!.data.context.stakeable_balance,
-        assetId,
-      ).amount,
-      unstakeableBalance: Balance.fromModelAndAssetId(
-        response!.data.context.unstakeable_balance,
-        assetId,
-      ).amount,
-      claimableBalance: Balance.fromModelAndAssetId(
-        response!.data.context.claimable_balance,
-        assetId,
-      ).amount,
-    };
   }
 
   /**
@@ -315,18 +216,5 @@ export class ExternalAddress extends Address {
     const response = await Coinbase.apiClients.stake!.buildStakingOperation(request);
 
     return new StakingOperation(response!.data);
-  }
-
-  /**
-   * Create a shallow copy of given options.
-   *
-   * @param options - The supplied options to be copied
-   * @private
-   * @returns A copy of the options.
-   */
-  private copyOptions(options?: { [key: string]: string }): {
-    [key: string]: string;
-  } {
-    return { ...options };
   }
 }

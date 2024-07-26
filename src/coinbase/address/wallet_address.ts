@@ -1,10 +1,6 @@
 import { Decimal } from "decimal.js";
 import { ethers } from "ethers";
-import {
-  Address as AddressModel,
-  PartialEthStakingContext as PartialEthStakingContextModel,
-  StakingRewardFormat,
-} from "../../client";
+import { Address as AddressModel, StakingRewardFormat } from "../../client";
 import { Address } from "../address";
 import { Asset } from "../asset";
 import { Coinbase } from "../coinbase";
@@ -23,7 +19,6 @@ import {
 import { delay, formatDate, getWeekBackDate } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
 import { StakingOperation } from "../staking_operation";
-import { Balance } from "../balance";
 import { StakingReward } from "../staking_reward";
 
 /**
@@ -407,108 +402,6 @@ export class WalletAddress extends Address {
       await delay(intervalSeconds);
     }
     throw new Error("Staking Operation timed out");
-  }
-
-  /**
-   * Get the stakeable balance for the supplied asset.
-   *
-   * @param asset_id - The asset to check the stakeable balance for.
-   * @param mode - The staking mode. Defaults to DEFAULT.
-   * @param options - Additional options for getting the stakeable balance.
-   * @returns The stakeable balance.
-   */
-  public async stakeableBalance(
-    asset_id: string,
-    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
-    options: { [key: string]: string } = {},
-  ): Promise<Decimal> {
-    const balances = await this.getStakingBalances(asset_id, mode, options);
-    return balances.stakeableBalance;
-  }
-
-  /**
-   * Get the unstakeable balance for the supplied asset.
-   *
-   * @param asset_id - The asset to check the unstakeable balance for.
-   * @param mode - The staking mode. Defaults to DEFAULT.
-   * @param options - Additional options for getting the unstakeable balance.
-   * @returns The unstakeable balance.
-   */
-  public async unstakeableBalance(
-    asset_id: string,
-    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
-    options: { [key: string]: string } = {},
-  ): Promise<Decimal> {
-    const balances = await this.getStakingBalances(asset_id, mode, options);
-    return balances.unstakeableBalance;
-  }
-
-  /**
-   * Get the claimable balance for the supplied asset.
-   *
-   * @param asset_id - The asset to check claimable balance for.
-   * @param mode - The staking mode. Defaults to DEFAULT.
-   * @param options - Additional options for getting the claimable balance.
-   * @returns The claimable balance.
-   */
-  public async claimableBalance(
-    asset_id: string,
-    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
-    options: { [key: string]: string } = {},
-  ): Promise<Decimal> {
-    const balances = await this.getStakingBalances(asset_id, mode, options);
-    return balances.claimableBalance;
-  }
-
-  /**
-   * Get the different staking balance types for the supplied asset.
-   *
-   * @param assetId - The asset to lookup balances for.
-   * @param mode - The staking mode. Defaults to DEFAULT.
-   * @param options - Additional options for the balance lookup.
-   * @private
-   * @returns The different balance types.
-   */
-  private async getStakingBalances(
-    assetId: string,
-    mode?: StakeOptionsMode,
-    options?: { [key: string]: string },
-  ): Promise<{ [key: string]: Decimal }> {
-    const newOptions = this.copyOptions(options);
-
-    if (mode) {
-      newOptions.mode = mode;
-    }
-
-    const request = {
-      network_id: this.getNetworkId(),
-      asset_id: Asset.primaryDenomination(assetId),
-      address_id: this.getId(),
-      options: newOptions,
-    };
-
-    const response = await Coinbase.apiClients.stake!.getStakingContext(request);
-
-    const balances = response!.data.context as PartialEthStakingContextModel;
-
-    return {
-      stakeableBalance: Balance.fromModelAndAssetId(balances.stakeable_balance, assetId).amount,
-      unstakeableBalance: Balance.fromModelAndAssetId(balances.unstakeable_balance, assetId).amount,
-      claimableBalance: Balance.fromModelAndAssetId(balances.claimable_balance, assetId).amount,
-    };
-  }
-
-  /**
-   * Create a shallow copy of given options.
-   *
-   * @param options - The supplied options to be copied
-   * @private
-   * @returns A copy of the options.
-   */
-  private copyOptions(options?: { [key: string]: string }): {
-    [key: string]: string;
-  } {
-    return { ...options };
   }
 
   /**

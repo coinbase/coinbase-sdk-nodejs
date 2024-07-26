@@ -15,8 +15,11 @@ import {
 import {
   AddressBalanceList,
   Balance,
+  FetchStakingRewards200Response,
   StakingContext as StakingContextModel,
   StakingOperation as StakingOperationModel,
+  StakingRewardFormat,
+  StakingRewardStateEnum,
 } from "../client";
 import Decimal from "decimal.js";
 import { ExternalAddress } from "../coinbase/address/external_address";
@@ -24,6 +27,7 @@ import { StakeOptionsMode } from "../coinbase/types";
 import { StakingOperation } from "../coinbase/staking_operation";
 import { Asset } from "../coinbase/asset";
 import { randomUUID } from "crypto";
+import { StakingReward } from "../coinbase/staking_reward";
 
 describe("ExternalAddress", () => {
   const newAddress = newAddressModel("", randomUUID(), Coinbase.networks.EthereumHolesky);
@@ -84,6 +88,35 @@ describe("ExternalAddress", () => {
           "386263356436373834393339343866333432227d",
       },
     ],
+  };
+  const startTime = "2024-05-01T00:00:00Z";
+  const endTime = "2024-05-21T00:00:00Z";
+  const STAKING_REWARD_RESPONSE: FetchStakingRewards200Response = {
+    data: [
+      {
+        address_id: address.getId(),
+        date: "2024-05-01",
+        amount: "361",
+        state: StakingRewardStateEnum.Pending,
+        format: StakingRewardFormat.Usd,
+      },
+      {
+        address_id: address.getId(),
+        date: "2024-05-02",
+        amount: "203",
+        state: StakingRewardStateEnum.Pending,
+        format: StakingRewardFormat.Usd,
+      },
+      {
+        address_id: address.getId(),
+        date: "2024-05-03",
+        amount: "226",
+        state: StakingRewardStateEnum.Pending,
+        format: StakingRewardFormat.Usd,
+      },
+    ],
+    has_more: false,
+    next_page: "",
   };
 
   beforeAll(() => {
@@ -303,6 +336,29 @@ describe("ExternalAddress", () => {
           StakeOptionsMode.NATIVE,
         ),
       ).rejects.toThrow(Error);
+    });
+  });
+
+  describe(".stakingRewards", () => {
+    it("should return staking rewards successfully", async () => {
+      Coinbase.apiClients.stake!.fetchStakingRewards = mockReturnValue(STAKING_REWARD_RESPONSE);
+      Coinbase.apiClients.asset!.getAsset = getAssetMock();
+      const response = await address.stakingRewards(Coinbase.assets.Eth, startTime, endTime);
+
+      expect(response).toBeInstanceOf(Array<StakingReward>);
+      expect(response.length).toEqual(3);
+      expect(Coinbase.apiClients.stake!.fetchStakingRewards).toHaveBeenCalledWith(
+        {
+          network_id: address.getNetworkId(),
+          asset_id: Coinbase.assets.Eth,
+          address_ids: [address.getId()],
+          start_time: startTime,
+          end_time: endTime,
+          format: StakingRewardFormat.Usd,
+        },
+        100,
+        undefined,
+      );
     });
   });
 
