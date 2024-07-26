@@ -413,13 +413,15 @@ export class WalletAddress extends Address {
 
     // NOTE: Staking does not yet support server signers at this point.
     await stakingOperation.sign(this.key!);
-    for (const tx of stakingOperation.getTransactions()) {
-      if (!tx.isSigned()) {
+    for (let i = 0; i < stakingOperation.getTransactions().length; i++) {
+      const transaction = stakingOperation.getTransactions()[0];
+      if (!transaction.isSigned()) {
         continue;
       }
       stakingOperation = await this.broadcastStakingOperationRequest(
         stakingOperation,
-        tx.getSignedPayload()!.slice(2),
+        transaction.getSignedPayload()!.slice(2),
+        i,
       );
     }
 
@@ -607,16 +609,18 @@ export class WalletAddress extends Address {
    *
    * @param stakingOperation - The staking operation related to the signed payload.
    * @param signedPayload - The payload that's being broadcasted.
+   * @param transactionIndex - The index of the transaction in the array from the staking operation.
    * @private
    * @returns An updated staking operation with the broadcasted transaction.
    */
   private async broadcastStakingOperationRequest(
     stakingOperation: StakingOperation,
     signedPayload: string,
+    transactionIndex: number,
   ): Promise<StakingOperation> {
     const broadcastStakingOperationRequest = {
       signed_payload: signedPayload,
-      transaction_index: 0,
+      transaction_index: transactionIndex,
     };
     const response = await Coinbase.apiClients.stake!.broadcastStakingOperation(
       this.getWalletId(),
