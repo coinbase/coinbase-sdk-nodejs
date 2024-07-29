@@ -88,18 +88,6 @@ describe("Wallet Class", () => {
   describe("#stakingOperation", () => {
     let walletModel: WalletModel;
     const addressID = "0xdeadbeef";
-    const address = newAddressModel(randomUUID(), addressID, Coinbase.networks.EthereumHolesky);
-
-    const BALANCE_MODEL: BalanceModel = {
-      amount: "3000000000000000000",
-      asset: {
-        network_id: address.network_id,
-        asset_id: Coinbase.assets.Eth,
-        decimals: 18,
-        contract_address: "0xtestcontract",
-      },
-    };
-
     const STAKING_OPERATION_MODEL: StakingOperationModel = {
       id: randomUUID(),
       network_id: Coinbase.networks.EthereumHolesky,
@@ -187,7 +175,6 @@ describe("Wallet Class", () => {
     };
 
     beforeAll(() => {
-      Coinbase.apiClients.externalAddress = externalAddressApiMock;
       Coinbase.apiClients.stake = stakeApiMock;
       Coinbase.apiClients.asset = assetsApiMock;
     });
@@ -196,13 +183,12 @@ describe("Wallet Class", () => {
       jest.clearAllMocks();
     });
 
-    describe(".createStakingOperation", () => {
+    describe(".createStake", () => {
       it("should create a staking operation from the default address", async () => {
         const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
         STAKING_OPERATION_MODEL.wallet_id = wallet.getId();
         Coinbase.apiClients.asset!.getAsset = getAssetMock();
-        Coinbase.apiClients.externalAddress!.getExternalAddressBalance =
-          mockReturnValue(BALANCE_MODEL);
+        Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
         Coinbase.apiClients.stake!.createStakingOperation =
           mockReturnValue(STAKING_OPERATION_MODEL);
         Coinbase.apiClients.stake!.broadcastStakingOperation =
@@ -210,7 +196,7 @@ describe("Wallet Class", () => {
         STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
         Coinbase.apiClients.stake!.getStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
 
-        const op = await wallet.createStakingOperation(0.001, Coinbase.assets.Eth, "stake");
+        const op = await wallet.createStake(0.001, Coinbase.assets.Eth);
 
         expect(op).toBeInstanceOf(StakingOperation);
       });
@@ -218,7 +204,7 @@ describe("Wallet Class", () => {
       it("should throw an error when the wallet does not have a default address", async () => {
         const newWallet = Wallet.init(walletModel);
         await expect(
-          async () => await newWallet.createStakingOperation(0.001, "eth", "stake"),
+          async () => await newWallet.createStake(0.001, Coinbase.assets.Eth),
         ).rejects.toThrow(InternalError);
       });
 
@@ -226,6 +212,58 @@ describe("Wallet Class", () => {
         const stakingOperation = new StakingOperation(STAKING_OPERATION_MODEL);
         STAKING_OPERATION_MODEL.wallet_id = undefined;
         await expect(async () => await stakingOperation.reload()).rejects.toThrow(Error);
+      });
+    });
+
+    describe(".createUnstake", () => {
+      it("should create a staking operation from the default address", async () => {
+        const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
+        STAKING_OPERATION_MODEL.wallet_id = wallet.getId();
+        Coinbase.apiClients.asset!.getAsset = getAssetMock();
+        Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
+        Coinbase.apiClients.stake!.createStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
+        Coinbase.apiClients.stake!.broadcastStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
+        STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
+        Coinbase.apiClients.stake!.getStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
+
+        const op = await wallet.createUnstake(0.001, Coinbase.assets.Eth);
+
+        expect(op).toBeInstanceOf(StakingOperation);
+      });
+
+      it("should throw an error when the wallet does not have a default address", async () => {
+        const newWallet = Wallet.init(walletModel);
+        await expect(
+          async () => await newWallet.createUnstake(0.001, Coinbase.assets.Eth),
+        ).rejects.toThrow(InternalError);
+      });
+    });
+
+    describe(".createClaimStake", () => {
+      it("should create a staking operation from the default address", async () => {
+        const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
+        STAKING_OPERATION_MODEL.wallet_id = wallet.getId();
+        Coinbase.apiClients.asset!.getAsset = getAssetMock();
+        Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
+        Coinbase.apiClients.stake!.createStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
+        Coinbase.apiClients.stake!.broadcastStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
+        STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
+        Coinbase.apiClients.stake!.getStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
+
+        const op = await wallet.createClaimStake(0.001, Coinbase.assets.Eth);
+
+        expect(op).toBeInstanceOf(StakingOperation);
+      });
+
+      it("should throw an error when the wallet does not have a default address", async () => {
+        const newWallet = Wallet.init(walletModel);
+        await expect(
+          async () => await newWallet.createClaimStake(0.001, Coinbase.assets.Eth),
+        ).rejects.toThrow(InternalError);
       });
     });
 
