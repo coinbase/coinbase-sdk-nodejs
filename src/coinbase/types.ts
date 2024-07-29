@@ -714,22 +714,6 @@ export type CoinbaseConfigureFromJsonOptions = {
 };
 
 /**
- * CoinbaseExternalAddressStakeOptions type definition.
- */
-export type CoinbaseExternalAddressStakeOptions = {
-  /**
-   * The mode type that you're trying to stake with.
-   * e.g.
-   */
-  mode?: StakeOptionsMode;
-
-  /**
-   * The amount to stake, unstake, or claim_stake for in a staking operation.
-   */
-  amount?: string;
-};
-
-/**
  * CoinbaseWalletAddressStakeOptions type definition.
  */
 export type CoinbaseWalletAddressStakeOptions = {
@@ -762,14 +746,6 @@ export enum StakeOptionsMode {
    * Native represents Native Ethereum Staking mode.
    */
   NATIVE = "native",
-}
-
-export enum StakingOperationStatus {
-  INITIALIZED = "initialized",
-  PENDING = "pending",
-  COMPLETE = "complete",
-  FAILED = "failed",
-  UNSPECIFIED = "unspecified",
 }
 
 /**

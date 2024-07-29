@@ -5,7 +5,6 @@ import {
 } from "../client/api";
 import { Transaction } from "./transaction";
 import { Coinbase } from "./coinbase";
-import { StakingOperationStatus } from "./types";
 import { delay } from "./utils";
 
 /**
@@ -64,24 +63,12 @@ export class StakingOperation {
   }
 
   /**
-   * Returns the Status of the StakingOperation based on the internal
-   * StakingOperation model.
+   * Get the status of the staking operation.
    *
-   * @returns The Status of the StakingOperation.
+   * @returns The status of the staking operation.
    */
-  public getStatus(): StakingOperationStatus | undefined {
-    switch (this.model.status) {
-      case StakingOperationStatusEnum.Initialized:
-        return StakingOperationStatus.INITIALIZED;
-      case StakingOperationStatusEnum.Pending:
-        return StakingOperationStatus.PENDING;
-      case StakingOperationStatusEnum.Complete:
-        return StakingOperationStatus.COMPLETE;
-      case StakingOperationStatusEnum.Failed:
-        return StakingOperationStatus.FAILED;
-      default:
-        return StakingOperationStatus.UNSPECIFIED;
-    }
+  public getStatus(): StakingOperationStatusEnum {
+    return this.model.status;
   }
 
   /**
