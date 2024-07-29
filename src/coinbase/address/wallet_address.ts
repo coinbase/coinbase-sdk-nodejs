@@ -1,6 +1,10 @@
 import { Decimal } from "decimal.js";
 import { ethers } from "ethers";
-import { Address as AddressModel, StakingRewardFormat } from "../../client";
+import {
+  Address as AddressModel,
+  StakingOperationStatusEnum,
+  StakingRewardFormat,
+} from "../../client";
 import { Address } from "../address";
 import { Asset } from "../asset";
 import { Coinbase } from "../coinbase";
@@ -13,7 +17,6 @@ import {
   CreateTransferOptions,
   Destination,
   StakeOptionsMode,
-  StakingOperationStatus,
   TransferStatus,
 } from "../types";
 import { delay, formatDate, getWeekBackDate } from "../utils";
@@ -479,7 +482,10 @@ export class WalletAddress extends Address {
     while (Date.now() - startTime < timeoutSeconds * 1000) {
       await stakingOperation.reload();
       const status = stakingOperation.getStatus();
-      if (status === StakingOperationStatus.COMPLETE || status === StakingOperationStatus.FAILED) {
+      if (
+        status === StakingOperationStatusEnum.Complete ||
+        status === StakingOperationStatusEnum.Failed
+      ) {
         return stakingOperation;
       }
       await delay(intervalSeconds);

@@ -6,6 +6,7 @@ import { Asset } from "../asset";
 import { StakingOperation } from "../staking_operation";
 import { StakingRewardFormat } from "../../client";
 import { StakingReward } from "../staking_reward";
+import { formatDate, getWeekBackDate } from "../utils";
 
 /**
  * A representation of a blockchain Address, which is a user-controlled account on a Network. Addresses are used to
@@ -82,8 +83,8 @@ export class ExternalAddress extends Address {
    */
   public async stakingRewards(
     assetId: string,
-    startTime: string,
-    endTime: string,
+    startTime = getWeekBackDate(new Date()),
+    endTime = formatDate(new Date()),
     format: StakingRewardFormat = StakingRewardFormat.Usd,
   ): Promise<StakingReward[]> {
     return StakingReward.list(
