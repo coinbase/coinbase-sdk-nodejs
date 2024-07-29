@@ -467,6 +467,10 @@ export class WalletAddress extends Address {
     timeoutSeconds: number,
     intervalSeconds: number,
   ): Promise<StakingOperation> {
+    if (new Decimal(amount.toString()).lessThanOrEqualTo(0)) {
+      throw new Error("Amount required greater than zero.");
+    }
+
     let stakingOperation = await this.createStakingOperationRequest(
       amount,
       assetId,
@@ -505,31 +509,6 @@ export class WalletAddress extends Address {
   }
 
   /**
-   * Lists the staking rewards for the address.
-   *
-   * @param assetId - The asset ID.
-   * @param startTime - The start time.
-   * @param endTime - The end time.
-   * @param format - The format to return the rewards in. (usd, native). Defaults to usd.
-   * @returns The staking rewards.
-   */
-  public async stakingRewards(
-    assetId: string,
-    startTime = getWeekBackDate(new Date()),
-    endTime = formatDate(new Date()),
-    format: StakingRewardFormat = StakingRewardFormat.Usd,
-  ): Promise<StakingReward[]> {
-    return StakingReward.list(
-      Coinbase.normalizeNetwork(this.getNetworkId()),
-      assetId,
-      [this.getId()],
-      startTime,
-      endTime,
-      format,
-    );
-  }
-
-  /**
    * A helper function that creates the staking operation.
    *
    * @param amount - The amount for the staking operation.
@@ -548,9 +527,6 @@ export class WalletAddress extends Address {
     mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
     options: { [key: string]: string } = {},
   ): Promise<StakingOperation> {
-    if (new Decimal(amount.toString()).lessThanOrEqualTo(0)) {
-      throw new Error("Amount required greater than zero.");
-    }
     const asset = await Asset.fetch(this.getNetworkId(), assetId);
 
     options.amount = asset.toAtomicAmount(new Decimal(amount.toString())).toString();

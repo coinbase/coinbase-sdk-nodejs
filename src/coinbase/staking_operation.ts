@@ -88,11 +88,15 @@ export class StakingOperation {
       this.getAddressID(),
       this.getID(),
     );
+
     this.model = result?.data;
-    this.transactions = [];
-    result?.data.transactions.forEach(transaction => {
-      this.transactions.push(new Transaction(transaction));
-    });
+    // only overwrite the transactions if the response is populated.
+    if (result?.data.transactions.length != 0) {
+      this.transactions = [];
+      result?.data.transactions.forEach(transaction => {
+        this.transactions.push(new Transaction(transaction));
+      });
+    }
   }
 
   /**
