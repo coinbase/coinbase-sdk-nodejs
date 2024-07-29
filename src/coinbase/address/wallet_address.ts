@@ -264,7 +264,7 @@ export class WalletAddress extends Address {
     const fromAsset = await Asset.fetch(this.getNetworkId(), fromAssetId);
     const toAsset = await Asset.fetch(this.getNetworkId(), toAssetId);
 
-    await this.validateAmount(amount, fromAssetId);
+    await this.validateCanTrade(amount, fromAssetId);
     const trade = await this.createTradeRequest(amount, fromAsset, toAsset);
     // NOTE: Trading does not yet support server signers at this point.
     const signed_payload = await trade.getTransaction().sign(this.key!);
@@ -332,23 +332,107 @@ export class WalletAddress extends Address {
   }
 
   /**
-   * Checks if amount is valid and raises an error if not.
+   * Checks if trading is possible and raises an error if not.
    *
    * @param amount - The amount of the Asset to send.
-   * @param assetId - The ID of the Asset to trade from. For Ether, eth, gwei, and wei are supported.
+   * @param fromAssetId - The ID of the Asset to trade from. For Ether, eth, gwei, and wei are supported.
    * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
    */
-  private async validateAmount(amount: Amount, assetId: string) {
+  private async validateCanTrade(amount: Amount, fromAssetId: string) {
     if (!this.canSign()) {
       throw new Error("Cannot trade from address without private key loaded");
     }
-    const currentBalance = await this.getBalance(assetId);
+    const currentBalance = await this.getBalance(fromAssetId);
     amount = new Decimal(amount.toString());
     if (currentBalance.lessThan(amount)) {
       throw new Error(
         `Insufficient funds: ${amount} requested, but only ${currentBalance} available`,
       );
     }
+  }
+
+  /**
+   * Creates a staking operation to stake.
+   *
+   * @param amount - The amount to stake.
+   * @param assetId - The asset to stake.
+   * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
+   * @param intervalSeconds - The amount to check each time for a successful broadcast.
+   * @param options - Additional options such as setting the mode for the staking action.
+   * @returns The staking operation after it's completed successfully.
+   */
+  public async createStake(
+    amount: Amount,
+    assetId: string,
+    timeoutSeconds = 60,
+    intervalSeconds = 0.2,
+    options: CoinbaseWalletAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
+  ): Promise<StakingOperation> {
+    await this.validateCanStake(amount, assetId, options.mode!, options);
+    return this.createStakingOperation(
+      amount,
+      assetId,
+      "stake",
+      timeoutSeconds,
+      intervalSeconds,
+      options,
+    );
+  }
+
+  /**
+   * Creates a staking operation to unstake.
+   *
+   * @param amount - The amount to unstake.
+   * @param assetId - The asset to unstake.
+   * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
+   * @param intervalSeconds - The amount to check each time for a successful broadcast.
+   * @param options - Additional options such as setting the mode for the staking action.
+   * @returns The staking operation after it's completed successfully.
+   */
+  public async createUnstake(
+    amount: Amount,
+    assetId: string,
+    timeoutSeconds = 60,
+    intervalSeconds = 0.2,
+    options: CoinbaseWalletAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
+  ): Promise<StakingOperation> {
+    await this.validateCanUnstake(amount, assetId, options.mode!, options);
+    return this.createStakingOperation(
+      amount,
+      assetId,
+      "unstake",
+      timeoutSeconds,
+      intervalSeconds,
+      options,
+    );
+  }
+
+  /**
+   * Creates a staking operation to claim stake.
+   *
+   * @param amount - The amount to claim stake.
+   * @param assetId - The asset to claim stake.
+   * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
+   * @param intervalSeconds - The amount to check each time for a successful broadcast.
+   * @param options - Additional options such as setting the mode for the staking action.
+   * @returns The staking operation after it's completed successfully.
+   */
+  public async createClaimStake(
+    amount: Amount,
+    assetId: string,
+    timeoutSeconds = 60,
+    intervalSeconds = 0.2,
+    options: CoinbaseWalletAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
+  ): Promise<StakingOperation> {
+    await this.validateCanClaimStake(amount, assetId, options.mode!, options);
+    return this.createStakingOperation(
+      amount,
+      assetId,
+      "claim_stake",
+      timeoutSeconds,
+      intervalSeconds,
+      options,
+    );
   }
 
   /**
@@ -362,7 +446,7 @@ export class WalletAddress extends Address {
    * @param options - Additional options such as setting the mode for the staking action.
    * @returns The staking operation after it's completed fully.
    */
-  public async createStakingOperation(
+  private async createStakingOperation(
     amount: Amount,
     assetId: string,
     action: string,
@@ -370,7 +454,6 @@ export class WalletAddress extends Address {
     intervalSeconds = 0.2,
     options: CoinbaseWalletAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<StakingOperation> {
-    await this.validateAmount(amount, assetId);
     let stakingOperation = await this.createStakingOperationRequest(
       amount,
       assetId,

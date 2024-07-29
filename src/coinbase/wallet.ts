@@ -380,17 +380,15 @@ export class Wallet {
    *
    * @param amount - The amount for the staking operation.
    * @param assetId - The asset for the staking operation.
-   * @param action - The type of staking action to perform.
    * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
    * @param intervalSeconds - The amount to check each time for a successful broadcast.
    * @param options - Additional options such as setting the mode for the staking action.
    * @throws {Error} if the default address is not found.
    * @returns The staking operation after it's completed fully.
    */
-  public async createStakingOperation(
+  public async createStake(
     amount: Amount,
     assetId: string,
-    action: string,
     timeoutSeconds = 60,
     intervalSeconds = 0.2,
     options: CoinbaseWalletAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
@@ -398,10 +396,69 @@ export class Wallet {
     if (!this.getDefaultAddress()) {
       throw new InternalError("Default address not found");
     }
-    return await this.getDefaultAddress()!.createStakingOperation(
+    return await this.getDefaultAddress()!.createStake(
       amount,
       assetId,
-      action,
+      timeoutSeconds,
+      intervalSeconds,
+      options,
+    );
+  }
+
+  /**
+   * Creates a staking operation to unstake, signs it, and broadcasts it on the blockchain.
+   *
+   * @param amount - The amount for the staking operation.
+   * @param assetId - The asset for the staking operation.
+   * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
+   * @param intervalSeconds - The amount to check each time for a successful broadcast.
+   * @param options - Additional options such as setting the mode for the staking action.
+   * @throws {Error} if the default address is not found.
+   * @returns The staking operation after it's completed successfully.
+   */
+  public async createUnstake(
+    amount: Amount,
+    assetId: string,
+    timeoutSeconds = 60,
+    intervalSeconds = 0.2,
+    options: CoinbaseWalletAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
+  ): Promise<StakingOperation> {
+    if (!this.getDefaultAddress()) {
+      throw new InternalError("Default address not found");
+    }
+    return await this.getDefaultAddress()!.createUnstake(
+      amount,
+      assetId,
+      timeoutSeconds,
+      intervalSeconds,
+      options,
+    );
+  }
+
+  /**
+   * Creates a staking operation to claim stake, signs it, and broadcasts it on the blockchain.
+   *
+   * @param amount - The amount for the staking operation.
+   * @param assetId - The asset for the staking operation.
+   * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
+   * @param intervalSeconds - The amount to check each time for a successful broadcast.
+   * @param options - Additional options such as setting the mode for the staking action.
+   * @throws {Error} if the default address is not found.
+   * @returns The staking operation after it's completed fully.
+   */
+  public async createClaimStake(
+    amount: Amount,
+    assetId: string,
+    timeoutSeconds = 60,
+    intervalSeconds = 0.2,
+    options: CoinbaseWalletAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
+  ): Promise<StakingOperation> {
+    if (!this.getDefaultAddress()) {
+      throw new InternalError("Default address not found");
+    }
+    return await this.getDefaultAddress()!.createClaimStake(
+      amount,
+      assetId,
       timeoutSeconds,
       intervalSeconds,
       options,

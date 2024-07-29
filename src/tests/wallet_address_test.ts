@@ -239,17 +239,6 @@ describe("WalletAddress", () => {
     key = ethers.Wallet.createRandom();
     const newAddress = newAddressModel("", randomUUID(), Coinbase.networks.EthereumHolesky);
     const walletAddress = new WalletAddress(newAddress, key as unknown as ethers.Wallet);
-
-    const BALANCE_MODEL: BalanceModel = {
-      amount: "3000000000000000000",
-      asset: {
-        network_id: Coinbase.networks.EthereumHolesky,
-        asset_id: Coinbase.assets.Eth,
-        decimals: 18,
-        contract_address: "0xtestcontract",
-      },
-    };
-
     const STAKING_OPERATION_MODEL: StakingOperationModel = {
       id: randomUUID(),
       network_id: Coinbase.networks.EthereumHolesky,
@@ -344,14 +333,13 @@ describe("WalletAddress", () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
+      STAKING_OPERATION_MODEL.wallet_id = newAddress.wallet_id;
     });
 
-    describe(".createStakingOperation", () => {
+    describe(".createStake", () => {
       it("should create a staking operation from the address", async () => {
-        STAKING_OPERATION_MODEL.wallet_id = newAddress.wallet_id;
         Coinbase.apiClients.asset!.getAsset = getAssetMock();
-        Coinbase.apiClients.externalAddress!.getExternalAddressBalance =
-          mockReturnValue(BALANCE_MODEL);
+        Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
         Coinbase.apiClients.stake!.createStakingOperation =
           mockReturnValue(STAKING_OPERATION_MODEL);
         Coinbase.apiClients.stake!.broadcastStakingOperation =
@@ -359,7 +347,50 @@ describe("WalletAddress", () => {
         STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
         Coinbase.apiClients.stake!.getStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
 
-        const op = await walletAddress.createStakingOperation(0.001, Coinbase.assets.Eth, "stake");
+        const op = await walletAddress.createStake(0.001, Coinbase.assets.Eth);
+
+        expect(op).toBeInstanceOf(StakingOperation);
+      });
+
+      it("should not create a staking operation from the address with zero amount", async () => {
+        Coinbase.apiClients.asset!.getAsset = getAssetMock();
+        Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
+
+        await expect(
+          async () => await walletAddress.createStake(0.0, Coinbase.assets.Eth),
+        ).rejects.toThrow(Error);
+      });
+    });
+
+    describe(".createUnstake", () => {
+      it("should create a staking operation from the address", async () => {
+        Coinbase.apiClients.asset!.getAsset = getAssetMock();
+        Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
+        Coinbase.apiClients.stake!.createStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
+        Coinbase.apiClients.stake!.broadcastStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
+        STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
+        Coinbase.apiClients.stake!.getStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
+
+        const op = await walletAddress.createUnstake(0.001, Coinbase.assets.Eth);
+
+        expect(op).toBeInstanceOf(StakingOperation);
+      });
+    });
+
+    describe(".createClaimStake", () => {
+      it("should create a staking operation from the address", async () => {
+        Coinbase.apiClients.asset!.getAsset = getAssetMock();
+        Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
+        Coinbase.apiClients.stake!.createStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
+        Coinbase.apiClients.stake!.broadcastStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
+        STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
+        Coinbase.apiClients.stake!.getStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
+
+        const op = await walletAddress.createClaimStake(0.001, Coinbase.assets.Eth);
 
         expect(op).toBeInstanceOf(StakingOperation);
       });
