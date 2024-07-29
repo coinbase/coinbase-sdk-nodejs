@@ -358,6 +358,22 @@ describe("WalletAddress", () => {
           async () => await walletAddress.createStake(0.0, Coinbase.assets.Eth),
         ).rejects.toThrow(Error);
       });
+
+      it("should create a staking operation from the address when broadcast returns empty transactions", async () => {
+        Coinbase.apiClients.asset!.getAsset = getAssetMock();
+        Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
+        Coinbase.apiClients.stake!.createStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
+        Coinbase.apiClients.stake!.broadcastStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
+        STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
+        STAKING_OPERATION_MODEL.transactions = [];
+        Coinbase.apiClients.stake!.getStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
+
+        const op = await walletAddress.createStake(0.001, Coinbase.assets.Eth);
+
+        expect(op).toBeInstanceOf(StakingOperation);
+      });
     });
 
     describe(".createUnstake", () => {

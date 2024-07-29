@@ -5,6 +5,9 @@ import { Balance } from "./balance";
 import { BalanceMap } from "./balance_map";
 import { FaucetTransaction } from "./faucet_transaction";
 import { Amount, StakeOptionsMode } from "./types";
+import { formatDate, getWeekBackDate } from "./utils";
+import { StakingRewardFormat } from "../client";
+import { StakingReward } from "./staking_reward";
 
 /**
  * A representation of a blockchain address, which is a user-controlled account on a network.
@@ -74,6 +77,31 @@ export class Address {
     }
 
     return Balance.fromModelAndAssetId(response.data, assetId).amount;
+  }
+
+  /**
+   * Lists the staking rewards for the address.
+   *
+   * @param assetId - The asset ID.
+   * @param startTime - The start time.
+   * @param endTime - The end time.
+   * @param format - The format to return the rewards in. (usd, native). Defaults to usd.
+   * @returns The staking rewards.
+   */
+  public async stakingRewards(
+    assetId: string,
+    startTime = getWeekBackDate(new Date()),
+    endTime = formatDate(new Date()),
+    format: StakingRewardFormat = StakingRewardFormat.Usd,
+  ): Promise<StakingReward[]> {
+    return StakingReward.list(
+      Coinbase.normalizeNetwork(this.getNetworkId()),
+      assetId,
+      [this.getId()],
+      startTime,
+      endTime,
+      format,
+    );
   }
 
   /**
