@@ -17,7 +17,6 @@ import { Trade } from "./trade";
 import { Transfer } from "./transfer";
 import {
   Amount,
-  CoinbaseWalletAddressStakeOptions,
   CreateTransferOptions,
   SeedData,
   ServerSignerStatus,
@@ -380,18 +379,20 @@ export class Wallet {
    *
    * @param amount - The amount for the staking operation.
    * @param assetId - The asset for the staking operation.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options such as setting the mode for the staking action.
    * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
    * @param intervalSeconds - The amount to check each time for a successful broadcast.
-   * @param options - Additional options such as setting the mode for the staking action.
    * @throws {Error} if the default address is not found.
    * @returns The staking operation after it's completed fully.
    */
   public async createStake(
     amount: Amount,
     assetId: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
     timeoutSeconds = 60,
     intervalSeconds = 0.2,
-    options: CoinbaseWalletAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<StakingOperation> {
     if (!this.getDefaultAddress()) {
       throw new InternalError("Default address not found");
@@ -399,9 +400,10 @@ export class Wallet {
     return await this.getDefaultAddress()!.createStake(
       amount,
       assetId,
+      mode,
+      options,
       timeoutSeconds,
       intervalSeconds,
-      options,
     );
   }
 
@@ -410,18 +412,20 @@ export class Wallet {
    *
    * @param amount - The amount for the staking operation.
    * @param assetId - The asset for the staking operation.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options such as setting the mode for the staking action.
    * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
    * @param intervalSeconds - The amount to check each time for a successful broadcast.
-   * @param options - Additional options such as setting the mode for the staking action.
    * @throws {Error} if the default address is not found.
    * @returns The staking operation after it's completed successfully.
    */
   public async createUnstake(
     amount: Amount,
     assetId: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
     timeoutSeconds = 60,
     intervalSeconds = 0.2,
-    options: CoinbaseWalletAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<StakingOperation> {
     if (!this.getDefaultAddress()) {
       throw new InternalError("Default address not found");
@@ -429,9 +433,10 @@ export class Wallet {
     return await this.getDefaultAddress()!.createUnstake(
       amount,
       assetId,
+      mode,
+      options,
       timeoutSeconds,
       intervalSeconds,
-      options,
     );
   }
 
@@ -440,18 +445,20 @@ export class Wallet {
    *
    * @param amount - The amount for the staking operation.
    * @param assetId - The asset for the staking operation.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options such as setting the mode for the staking action.
    * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
    * @param intervalSeconds - The amount to check each time for a successful broadcast.
-   * @param options - Additional options such as setting the mode for the staking action.
    * @throws {Error} if the default address is not found.
    * @returns The staking operation after it's completed fully.
    */
   public async createClaimStake(
     amount: Amount,
     assetId: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
     timeoutSeconds = 60,
     intervalSeconds = 0.2,
-    options: CoinbaseWalletAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<StakingOperation> {
     if (!this.getDefaultAddress()) {
       throw new InternalError("Default address not found");
@@ -459,9 +466,10 @@ export class Wallet {
     return await this.getDefaultAddress()!.createClaimStake(
       amount,
       assetId,
+      mode,
+      options,
       timeoutSeconds,
       intervalSeconds,
-      options,
     );
   }
 
