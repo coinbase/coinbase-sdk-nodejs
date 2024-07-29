@@ -387,26 +387,29 @@ export class WalletAddress extends Address {
    *
    * @param amount - The amount to stake.
    * @param assetId - The asset to stake.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options such as setting the mode for the staking action.
    * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
    * @param intervalSeconds - The amount to check each time for a successful broadcast.
-   * @param options - Additional options such as setting the mode for the staking action.
    * @returns The staking operation after it's completed successfully.
    */
   public async createStake(
     amount: Amount,
     assetId: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
     timeoutSeconds = 60,
     intervalSeconds = 0.2,
-    options: CoinbaseWalletAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<StakingOperation> {
-    await this.validateCanStake(amount, assetId, options.mode!, options);
+    await this.validateCanStake(amount, assetId, mode, options);
     return this.createStakingOperation(
       amount,
       assetId,
       "stake",
+      mode,
+      options,
       timeoutSeconds,
       intervalSeconds,
-      options,
     );
   }
 
@@ -415,26 +418,29 @@ export class WalletAddress extends Address {
    *
    * @param amount - The amount to unstake.
    * @param assetId - The asset to unstake.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options such as setting the mode for the staking action.
    * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
    * @param intervalSeconds - The amount to check each time for a successful broadcast.
-   * @param options - Additional options such as setting the mode for the staking action.
    * @returns The staking operation after it's completed successfully.
    */
   public async createUnstake(
     amount: Amount,
     assetId: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
     timeoutSeconds = 60,
     intervalSeconds = 0.2,
-    options: CoinbaseWalletAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<StakingOperation> {
-    await this.validateCanUnstake(amount, assetId, options.mode!, options);
+    await this.validateCanUnstake(amount, assetId, mode, options);
     return this.createStakingOperation(
       amount,
       assetId,
       "unstake",
+      mode,
+      options,
       timeoutSeconds,
       intervalSeconds,
-      options,
     );
   }
 
@@ -443,26 +449,29 @@ export class WalletAddress extends Address {
    *
    * @param amount - The amount to claim stake.
    * @param assetId - The asset to claim stake.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options such as setting the mode for the staking action.
    * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
    * @param intervalSeconds - The amount to check each time for a successful broadcast.
-   * @param options - Additional options such as setting the mode for the staking action.
    * @returns The staking operation after it's completed successfully.
    */
   public async createClaimStake(
     amount: Amount,
     assetId: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
     timeoutSeconds = 60,
     intervalSeconds = 0.2,
-    options: CoinbaseWalletAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
   ): Promise<StakingOperation> {
-    await this.validateCanClaimStake(amount, assetId, options.mode!, options);
+    await this.validateCanClaimStake(amount, assetId, mode, options);
     return this.createStakingOperation(
       amount,
       assetId,
       "claim_stake",
+      mode,
+      options,
       timeoutSeconds,
       intervalSeconds,
-      options,
     );
   }
 
@@ -472,23 +481,26 @@ export class WalletAddress extends Address {
    * @param amount - The amount for the staking operation.
    * @param assetId - The asset to the staking operation.
    * @param action - The type of staking action to perform.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options such as setting the mode for the staking action.
    * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
    * @param intervalSeconds - The amount to check each time for a successful broadcast.
-   * @param options - Additional options such as setting the mode for the staking action.
    * @returns The staking operation after it's completed fully.
    */
   private async createStakingOperation(
     amount: Amount,
     assetId: string,
     action: string,
-    timeoutSeconds = 60,
-    intervalSeconds = 0.2,
-    options: CoinbaseWalletAddressStakeOptions = { mode: StakeOptionsMode.DEFAULT },
+    mode: StakeOptionsMode,
+    options: { [key: string]: string },
+    timeoutSeconds: number,
+    intervalSeconds: number,
   ): Promise<StakingOperation> {
     let stakingOperation = await this.createStakingOperationRequest(
       amount,
       assetId,
       action,
+      mode,
       options,
     );
 
@@ -552,6 +564,7 @@ export class WalletAddress extends Address {
    * @param amount - The amount for the staking operation.
    * @param assetId - The asset for the staking operation.
    * @param action - The type of staking action to perform.
+   * @param mode - The staking mode. Defaults to DEFAULT.
    * @param options - Additional options such as setting the mode for the staking action.
    * @private
    * @throws {Error} if the amount is less than zero.
@@ -561,7 +574,8 @@ export class WalletAddress extends Address {
     amount: Amount,
     assetId: string,
     action: string,
-    options: CoinbaseWalletAddressStakeOptions,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
   ): Promise<StakingOperation> {
     if (new Decimal(amount.toString()).lessThanOrEqualTo(0)) {
       throw new Error("Amount required greater than zero.");
@@ -569,6 +583,7 @@ export class WalletAddress extends Address {
     const asset = await Asset.fetch(this.getNetworkId(), assetId);
 
     options.amount = asset.toAtomicAmount(new Decimal(amount.toString())).toString();
+    options.mode = mode ? mode : StakeOptionsMode.DEFAULT;
 
     const stakingOperationRequest = {
       network_id: this.getNetworkId(),

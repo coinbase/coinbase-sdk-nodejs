@@ -714,22 +714,6 @@ export type CoinbaseConfigureFromJsonOptions = {
 };
 
 /**
- * CoinbaseWalletAddressStakeOptions type definition.
- */
-export type CoinbaseWalletAddressStakeOptions = {
-  /**
-   * The mode type that you're trying to stake with.
-   * e.g.
-   */
-  mode?: StakeOptionsMode;
-
-  /**
-   * The amount to stake, unstake, or claim_stake for in a staking operation.
-   */
-  amount?: string;
-};
-
-/**
  * StakeOptionsMode type definition.
  */
 export enum StakeOptionsMode {

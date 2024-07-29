@@ -1,50 +1,48 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as crypto from "crypto";
+import { randomUUID } from "crypto";
 import { ethers } from "ethers";
 import { FaucetTransaction } from "../coinbase/faucet_transaction";
 import {
   Balance as BalanceModel,
-  TransferList,
-  Trade as TradeModel,
+  FetchStakingRewards200Response,
+  StakingContext as StakingContextModel,
   StakingOperation as StakingOperationModel,
   StakingOperationStatusEnum,
-  StakingContext as StakingContextModel,
-  FetchStakingRewards200Response,
-  StakingRewardStateEnum,
   StakingRewardFormat,
+  StakingRewardStateEnum,
+  Trade as TradeModel,
+  TransferList,
 } from "../client";
 import Decimal from "decimal.js";
 import { APIError, FaucetLimitReachedError } from "../coinbase/api_error";
 import { Coinbase } from "../coinbase/coinbase";
-import { InternalError } from "../coinbase/errors";
+import { ArgumentError, InternalError } from "../coinbase/errors";
 import {
-  VALID_ADDRESS_BALANCE_LIST,
-  VALID_ADDRESS_MODEL,
-  VALID_TRANSFER_MODEL,
-  VALID_WALLET_MODEL,
-  generateRandomHash,
-  getAssetMock,
   addressesApiMock,
   assetsApiMock,
+  externalAddressApiMock,
+  generateRandomHash,
+  getAssetMock,
   mockFn,
   mockReturnRejectedValue,
   mockReturnValue,
   newAddressModel,
+  stakeApiMock,
   tradeApiMock,
   transfersApiMock,
+  VALID_ADDRESS_BALANCE_LIST,
+  VALID_ADDRESS_MODEL,
+  VALID_TRANSFER_MODEL,
+  VALID_WALLET_MODEL,
   walletsApiMock,
-  externalAddressApiMock,
-  stakeApiMock,
 } from "./utils";
-import { ArgumentError } from "../coinbase/errors";
 import { Transfer } from "../coinbase/transfer";
-import { TransactionStatus, TransferStatus } from "../coinbase/types";
+import { StakeOptionsMode, TransactionStatus, TransferStatus } from "../coinbase/types";
 import { Trade } from "../coinbase/trade";
 import { Transaction } from "../coinbase/transaction";
 import { WalletAddress } from "../coinbase/address/wallet_address";
 import { Wallet } from "../coinbase/wallet";
-import { randomUUID } from "crypto";
-import { ExternalAddress } from "../coinbase/address/external_address";
 import { StakingOperation } from "../coinbase/staking_operation";
 import { StakingReward } from "../coinbase/staking_reward";
 
