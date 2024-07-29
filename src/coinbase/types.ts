@@ -718,3 +718,14 @@ export type CreateTransferOptions = {
   timeoutSeconds?: number;
   intervalSeconds?: number;
 };
+
+/**
+ * Options for creating a Trade.
+ */
+export type CreateTradeOptions = {
+  amount: Amount;
+  fromAssetId: string;
+  toAssetId: string;
+  timeoutSeconds?: number;
+  intervalSeconds?: number;
+};

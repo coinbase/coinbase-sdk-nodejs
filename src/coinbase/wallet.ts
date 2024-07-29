@@ -16,8 +16,8 @@ import { FaucetTransaction } from "./faucet_transaction";
 import { Trade } from "./trade";
 import { Transfer } from "./transfer";
 import {
-  Amount,
   CreateTransferOptions,
+  CreateTradeOptions,
   SeedData,
   ServerSignerStatus,
   WalletCreateOptions,
@@ -275,18 +275,33 @@ export class Wallet {
   /**
    *  Trades the given amount of the given Asset for another Asset. Currently only the default address is used to source the Trade
    *
-   * @param amount - The amount of the Asset to send.
-   * @param fromAssetId - The ID of the Asset to trade from.
-   * @param toAssetId - The ID of the Asset to trade to.
+   * @param options - The options to create the Trade.
+   * @param options.amount - The amount of the Asset to send.
+   * @param options.fromAssetId - The ID of the Asset to trade from.
+   * @param options.toAssetId - The ID of the Asset to trade to.
+   * @param options.timeoutSeconds - The maximum amount of time to wait for the Trade to complete, in seconds.
+   * @param options.intervalSeconds - The interval at which to poll the Network for Trade status, in seconds.
    * @throws {InternalError} If the default address is not found.
    * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
    * @returns The Trade object.
    */
-  public async createTrade(amount: Amount, fromAssetId: string, toAssetId: string): Promise<Trade> {
+  public async createTrade({
+    amount,
+    fromAssetId,
+    toAssetId,
+    timeoutSeconds = 10,
+    intervalSeconds = 0.2,
+  }: CreateTradeOptions): Promise<Trade> {
     if (!this.getDefaultAddress()) {
       throw new InternalError("Default address not found");
     }
-    return await this.getDefaultAddress()!.createTrade(amount, fromAssetId, toAssetId);
+    return await this.getDefaultAddress()!.createTrade({
+      amount: amount,
+      fromAssetId: fromAssetId,
+      toAssetId: toAssetId,
+      timeoutSeconds,
+      intervalSeconds,
+    });
   }
 
   /**
