@@ -73,31 +73,6 @@ export class ExternalAddress extends Address {
   }
 
   /**
-   * Lists the staking rewards for the address.
-   *
-   * @param assetId - The asset ID.
-   * @param startTime - The start time.
-   * @param endTime - The end time.
-   * @param format - The format to return the rewards in. (usd, native). Defaults to usd.
-   * @returns The staking rewards.
-   */
-  public async stakingRewards(
-    assetId: string,
-    startTime = getWeekBackDate(new Date()),
-    endTime = formatDate(new Date()),
-    format: StakingRewardFormat = StakingRewardFormat.Usd,
-  ): Promise<StakingReward[]> {
-    return StakingReward.list(
-      Coinbase.normalizeNetwork(this.getNetworkId()),
-      assetId,
-      [this.getId()],
-      startTime,
-      endTime,
-      format,
-    );
-  }
-
-  /**
    * Builds the staking operation based on the supplied input.
    *
    * @param amount - The amount for the staking operation.
