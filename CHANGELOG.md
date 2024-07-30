@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [0.0.13] - 2024-07-30
+
 ### Added
 
 - Support for trade with MPC Server-Signer
