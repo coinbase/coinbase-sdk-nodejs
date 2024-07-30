@@ -74,9 +74,9 @@ export class WalletAddress extends Address {
   }
 
   /**
-   * Returns all the transfers associated with the address.
+   * Returns all the trades associated with the address.
    *
-   * @returns The list of transfers.
+   * @returns The list of trades.
    */
   public async listTrades(): Promise<Trade[]> {
     const trades: Trade[] = [];
@@ -91,8 +91,8 @@ export class WalletAddress extends Address {
         page?.length ? page : undefined,
       );
 
-      response.data.data.forEach(transferModel => {
-        trades.push(new Trade(transferModel));
+      response.data.data.forEach(tradeModel => {
+        trades.push(new Trade(tradeModel));
       });
 
       if (response.data.has_more) {
@@ -252,14 +252,13 @@ export class WalletAddress extends Address {
    * Trades the given amount of the given Asset for another Asset. Only same-network Trades are supported.
    *
    * @param options = The options to create the Trade.
-   * @param options.amount - The amount of the Asset to send.
+   * @param options.amount - The amount of the From Asset to send.
    * @param options.fromAssetId - The ID of the Asset to trade from.
    * @param options.toAssetId - The ID of the Asset to trade to.
    * @param options.timeoutSeconds - The maximum amount of time to wait for the Trade to complete, in seconds.
    * @param options.intervalSeconds - The interval at which to poll the Network for Trade status, in seconds.
    * @returns The Trade object.
-   * @throws {APIError} if the API request to create a Trade fails.
-   * @throws {APIError} if the API request to broadcast a Trade fails.
+   * @throws {APIError} if the API request to create or broadcast a Trade fails.
    * @throws {Error} if the Trade times out.
    */
   public async createTrade({
@@ -364,7 +363,7 @@ export class WalletAddress extends Address {
    * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
    */
   private async validateCanTrade(amount: Amount, fromAssetId: string) {
-    if (!this.canSign()) {
+    if (!Coinbase.useServerSigner && !this.key) {
       throw new Error("Cannot trade from address without private key loaded");
     }
     const currentBalance = await this.getBalance(fromAssetId);
