@@ -1,5 +1,14 @@
 # Coinbase Node.js SDK Changelog
 
+## Unreleased
+
+## [0.0.13] - 2024-07-30
+
+### Added
+
+- Support for trade with MPC Server-Signer
+- `CreateTradeOptions` type
+
 ## [0.0.12] - 2024-07-24
 
 ### Changed

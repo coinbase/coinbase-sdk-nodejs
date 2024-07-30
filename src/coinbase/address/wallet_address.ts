@@ -7,7 +7,14 @@ import { Coinbase } from "../coinbase";
 import { ArgumentError, InternalError } from "../errors";
 import { Trade } from "../trade";
 import { Transfer } from "../transfer";
-import { Amount, CreateTransferOptions, Destination, TransferStatus } from "../types";
+import {
+  Amount,
+  CreateTransferOptions,
+  CreateTradeOptions,
+  Destination,
+  TransferStatus,
+  TransactionStatus,
+} from "../types";
 import { delay } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
 
@@ -67,9 +74,9 @@ export class WalletAddress extends Address {
   }
 
   /**
-   * Returns all the transfers associated with the address.
+   * Returns all the trades associated with the address.
    *
-   * @returns The list of transfers.
+   * @returns The list of trades.
    */
   public async listTrades(): Promise<Trade[]> {
     const trades: Trade[] = [];
@@ -84,8 +91,8 @@ export class WalletAddress extends Address {
         page?.length ? page : undefined,
       );
 
-      response.data.data.forEach(transferModel => {
-        trades.push(new Trade(transferModel));
+      response.data.data.forEach(tradeModel => {
+        trades.push(new Trade(tradeModel));
       });
 
       if (response.data.has_more) {
@@ -244,25 +251,52 @@ export class WalletAddress extends Address {
   /**
    * Trades the given amount of the given Asset for another Asset. Only same-network Trades are supported.
    *
-   * @param amount - The amount of the Asset to send.
-   * @param fromAssetId - The ID of the Asset to trade from.
-   * @param toAssetId - The ID of the Asset to trade to.
+   * @param options = The options to create the Trade.
+   * @param options.amount - The amount of the From Asset to send.
+   * @param options.fromAssetId - The ID of the Asset to trade from.
+   * @param options.toAssetId - The ID of the Asset to trade to.
+   * @param options.timeoutSeconds - The maximum amount of time to wait for the Trade to complete, in seconds.
+   * @param options.intervalSeconds - The interval at which to poll the Network for Trade status, in seconds.
    * @returns The Trade object.
-   * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
+   * @throws {APIError} if the API request to create or broadcast a Trade fails.
+   * @throws {Error} if the Trade times out.
    */
-  public async createTrade(amount: Amount, fromAssetId: string, toAssetId: string): Promise<Trade> {
+  public async createTrade({
+    amount,
+    fromAssetId,
+    toAssetId,
+    timeoutSeconds = 10,
+    intervalSeconds = 0.2,
+  }: CreateTradeOptions): Promise<Trade> {
     const fromAsset = await Asset.fetch(this.getNetworkId(), fromAssetId);
     const toAsset = await Asset.fetch(this.getNetworkId(), toAssetId);
 
     await this.validateCanTrade(amount, fromAssetId);
-    const trade = await this.createTradeRequest(amount, fromAsset, toAsset);
-    // NOTE: Trading does not yet support server signers at this point.
-    const signed_payload = await trade.getTransaction().sign(this.key!);
-    const approveTransactionSignedPayload = trade.getApproveTransaction()
-      ? await trade.getApproveTransaction()!.sign(this.key!)
-      : undefined;
+    let trade = await this.createTradeRequest(amount, fromAsset, toAsset);
 
-    return this.broadcastTradeRequest(trade, signed_payload, approveTransactionSignedPayload);
+    if (!Coinbase.useServerSigner) {
+      const signed_payload = await trade.getTransaction().sign(this.key!);
+      const approveTransactionSignedPayload = trade.getApproveTransaction()
+        ? await trade.getApproveTransaction()!.sign(this.key!)
+        : undefined;
+
+      trade = await this.broadcastTradeRequest(
+        trade,
+        signed_payload,
+        approveTransactionSignedPayload,
+      );
+    }
+
+    const startTime = Date.now();
+    while (Date.now() - startTime < timeoutSeconds * 1000) {
+      await trade.reload();
+      const status = trade.getStatus();
+      if (status === TransactionStatus.COMPLETE || status === TransactionStatus.FAILED) {
+        return trade;
+      }
+      await delay(intervalSeconds);
+    }
+    throw new Error("Trade timed out");
   }
 
   /**
@@ -329,7 +363,7 @@ export class WalletAddress extends Address {
    * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
    */
   private async validateCanTrade(amount: Amount, fromAssetId: string) {
-    if (!this.canSign()) {
+    if (!Coinbase.useServerSigner && !this.key) {
       throw new Error("Cannot trade from address without private key loaded");
     }
     const currentBalance = await this.getBalance(fromAssetId);
