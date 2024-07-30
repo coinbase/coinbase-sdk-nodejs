@@ -812,7 +812,7 @@ describe("Wallet Class", () => {
     });
   });
 
-  describe("#trade", () => {
+  describe("#createTrade", () => {
     const tradeObject = new Trade({
       network_id: Coinbase.networks.BaseSepolia,
       wallet_id: walletId,
@@ -829,16 +829,21 @@ describe("Wallet Class", () => {
 
     it("should throw an error when the wallet does not have a default address", async () => {
       const newWallet = Wallet.init(walletModel);
-      await expect(async () => await newWallet.createTrade(0.01, "eth", "usdc")).rejects.toThrow(
-        InternalError,
-      );
+      await expect(
+        async () =>
+          await newWallet.createTrade({ amount: 0.01, fromAssetId: "eth", toAssetId: "usdc" }),
+      ).rejects.toThrow(InternalError);
     });
 
     it("should create a trade from the default address", async () => {
       const trade = Promise.resolve(tradeObject);
       jest.spyOn(Wallet.prototype, "createTrade").mockReturnValue(trade);
       const wallet = await Wallet.create();
-      const result = await wallet.createTrade(0.01, "eth", "usdc");
+      const result = await wallet.createTrade({
+        amount: 0.01,
+        fromAssetId: "eth",
+        toAssetId: "usdc",
+      });
       expect(result).toBeInstanceOf(Trade);
       expect(result.getAddressId()).toBe(tradeObject.getAddressId());
       expect(result.getWalletId()).toBe(tradeObject.getWalletId());
