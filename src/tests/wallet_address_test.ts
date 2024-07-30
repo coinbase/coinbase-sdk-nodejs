@@ -90,6 +90,11 @@ describe("WalletAddress", () => {
     expect(address).toBeInstanceOf(WalletAddress);
   });
 
+  it("should initialize a new WalletAddress that can sign", () => {
+    expect(address).toBeInstanceOf(WalletAddress);
+    expect(address.canSign()).toEqual(true);
+  });
+
   it("should return the address ID", () => {
     expect(address.getId()).toBe(VALID_ADDRESS_MODEL.address_id);
   });
@@ -348,6 +353,22 @@ describe("WalletAddress", () => {
         const op = await walletAddress.createStake(0.001, Coinbase.assets.Eth);
 
         expect(op).toBeInstanceOf(StakingOperation);
+      });
+
+      it("should create a staking operation from the address but in failed status", async () => {
+        Coinbase.apiClients.asset!.getAsset = getAssetMock();
+        Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
+        Coinbase.apiClients.stake!.createStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
+        Coinbase.apiClients.stake!.broadcastStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
+        STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Failed;
+        Coinbase.apiClients.stake!.getStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
+
+        const op = await walletAddress.createStake(0.001, Coinbase.assets.Eth);
+
+        expect(op).toBeInstanceOf(StakingOperation);
+        expect(op.getStatus()).toEqual(StakingOperationStatusEnum.Failed);
       });
 
       it("should not create a staking operation from the address with zero amount", async () => {
