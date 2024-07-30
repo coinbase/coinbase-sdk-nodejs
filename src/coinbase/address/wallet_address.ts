@@ -1,10 +1,6 @@
 import { Decimal } from "decimal.js";
 import { ethers } from "ethers";
-import {
-  Address as AddressModel,
-  StakingOperationStatusEnum,
-  StakingRewardFormat,
-} from "../../client";
+import { Address as AddressModel, StakingOperationStatusEnum } from "../../client";
 import { Address } from "../address";
 import { Asset } from "../asset";
 import { Coinbase } from "../coinbase";
@@ -17,13 +13,12 @@ import {
   CreateTradeOptions,
   Destination,
   TransferStatus,
+  TransactionStatus,
   StakeOptionsMode,
-  TransferStatus,
 } from "../types";
-import { delay, formatDate, getWeekBackDate } from "../utils";
+import { delay } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
 import { StakingOperation } from "../staking_operation";
-import { StakingReward } from "../staking_reward";
 
 /**
  * A representation of a blockchain address, which is a wallet-controlled account on a network.
@@ -363,17 +358,17 @@ export class WalletAddress extends Address {
   }
 
   /**
-   * Checks if amount is valid and raises an error if not.
+   * Checks if trading is possible and raises an error if not.
    *
    * @param amount - The amount of the Asset to send.
-   * @param assetId - The ID of the Asset to trade from. For Ether, eth, gwei, and wei are supported.
+   * @param fromAssetId - The ID of the Asset to trade from. For Ether, eth, gwei, and wei are supported.
    * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
    */
   private async validateCanTrade(amount: Amount, fromAssetId: string) {
     if (!Coinbase.useServerSigner && !this.key) {
       throw new Error("Cannot trade from address without private key loaded");
     }
-    const currentBalance = await this.getBalance(assetId);
+    const currentBalance = await this.getBalance(fromAssetId);
     amount = new Decimal(amount.toString());
     if (currentBalance.lessThan(amount)) {
       throw new Error(
