@@ -4,9 +4,9 @@ import os from "os";
 import fs from "fs";
 import { parse } from "csv-parse";
 
-// CREATE RECEIVING WALLETS
+// Create receiving Wallets.
 async function createReceivingWallets(user) {
-  // Create 5 receiving wallets and only store wallet addresses
+  // Create 5 receiving Wallets and only store Wallet Addresses.
   const addresses = [];
 
   for (let i = 1; i <= 5; i++) {
@@ -15,45 +15,45 @@ async function createReceivingWallets(user) {
 
     let receivingAddress = receivingWallet.getDefaultAddress();
     console.log(`Default address for Wallet${i}: `, receivingAddress.getId());
-    addresses.push([receivingAddress.getId()]); // Storing address as an array
+    addresses.push([receivingAddress.getId()]); // Storing Address as an array.
   }
 
   return addresses;
 }
 
-// WRITE TO CSV FILE WITH RECEIVING WALLET ADDRESSES
+// Write to CSV file with receiving Wallet Addresses.
 async function writeReceivingAddressesToCsv(addresses) {
-  // Define CSV file
+  // Define CSV file.
   const csvWriter = createArrayCsvWriter({
     path: "wallet-array.csv",
     header: false,
   });
 
-  // Write wallet addresses to CSV file
+  // Write Wallet Addresses to CSV file.
   await csvWriter.writeRecords(addresses);
   console.log("The CSV file was written successfully without headers.");
 }
 
-// CREATE AND FUND A SENDING WALLET
+// Create and fund a sending Wallet.
 async function createAndFundSendingWallet(user) {
-  // Create sending wallet
+  // Create sending Wallet.
   let sendingWallet = await user.createWallet();
   console.log(`sendingWallet successfully created: `, sendingWallet.toString());
 
-  // Get sending wallet address
+  // Get sending Wallet Address.
   let sendingAddress = sendingWallet.getDefaultAddress();
   console.log(`Default address for sendingWallet: `, sendingAddress.toString());
 
-  // Fund sending wallet
+  // Fund sending Wallet.
   const faucetTransaction = await sendingWallet.faucet();
   console.log(`Faucet transaction successfully completed: `, faucetTransaction.toString());
 
   return sendingWallet;
 }
 
-// READ FROM CSV FILE AND SEND MASS PAYOUT
+// Read from CSV file and send mass payout.
 async function sendMassPayout(sendingWallet) {
-  // Define amount to send
+  // Define amount to send.
   const transferAmount = 0.000002;
   const assetId = Coinbase.assets.Eth;
 
@@ -67,7 +67,7 @@ async function sendMassPayout(sendingWallet) {
       if (address) {
         try {
           await sendingWallet.createTransfer({
-            // Send payment to each address in CSV
+            // Send payment to each Address in CSV.
             amount: transferAmount,
             assetId: assetId,
             destination: address,
@@ -87,8 +87,8 @@ async function sendMassPayout(sendingWallet) {
 
 (async () => {
   try {
-    // MANAGE CDP API KEY FOR COINBASE SDK
-    // Configure location to CDP API Key
+    // Manage CDP Api Key for Coinbase SDK.
+    // Configure location to CDP API Key.
     let coinbase = Coinbase.configureFromJson({
       filePath: `${os.homedir()}/Downloads/cdp_api_key.json`,
     });
