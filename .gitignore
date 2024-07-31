@@ -136,3 +136,4 @@ dist
 .idea
 
 quickstart-template/node_modules
+quickstart-template/wallet-array.csv
