@@ -278,6 +278,13 @@ export class Address {
    * @param assetId - The asset to lookup balances for.
    * @param mode - The staking mode. Defaults to DEFAULT.
    * @param options - Additional options for the balance lookup.
+   * Available options:
+   *
+   * A. Shared ETH Staking: None
+   *
+   * B. Dedicated ETH Staking:
+   *    1. validator_pub_keys (optional): List of validator public keys to retrieve staking balances for. Defaults to all validators.
+   *
    * @private
    * @returns The different balance types.
    */

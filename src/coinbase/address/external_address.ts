@@ -19,6 +19,15 @@ export class ExternalAddress extends Address {
    * @param assetId - The asset to stake.
    * @param mode - The staking mode. Defaults to DEFAULT.
    * @param options - Additional options for the stake operation.
+   * Available options:
+   *
+   * A. Shared ETH Staking: None
+   *
+   * B. Dedicated ETH Staking:
+   *    1. funding_address (optional): Ethereum address for funding the stake operation. Defaults to the address initiating the stake operation.
+   *    2. withdrawal_address (optional): Ethereum address for receiving rewards and withdrawal funds. Defaults to the address initiating the stake operation.
+   *    3. fee_recipient_address (optional): Ethereum address for receiving transaction fees. Defaults to the address initiating the stake operation.
+   *
    * @returns The stake operation.
    */
   public async buildStakeOperation(
@@ -38,6 +47,14 @@ export class ExternalAddress extends Address {
    * @param assetId - The asset to unstake.
    * @param mode - The staking mode. Defaults to DEFAULT.
    * @param options - Additional options for the unstake operation.
+   * Available options:
+   *
+   * A. Shared ETH Staking: None
+   *
+   * B. Dedicated ETH Staking:
+   *    1. immediate (optional): Set this to "true" to unstake immediately i.e. leverage "Coinbase managed unstake" process . Defaults to "false" i.e. "User managed unstake" process.
+   *    2. validator_pub_keys (optional): List of validator public keys to unstake. Defaults to validators being picked up on your behalf corresponding to the unstake amount.
+   *
    * @returns The unstake operation.
    */
   public async buildUnstakeOperation(
