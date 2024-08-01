@@ -58,23 +58,29 @@ export class Wallet {
   /**
    * Lists the Wallets belonging to the User.
    *
-   * @param pageSize - The number of Wallets to return per page. Defaults to 10
-   * @param nextPageToken - The token for the next page of Wallets
-   * @returns An object containing the Wallets and the token for the next page
+   * @returns The list of Wallets.
    */
-  public static async listWallets(
-    pageSize: number = 10,
-    nextPageToken?: string,
-  ): Promise<{ wallets: Wallet[]; nextPageToken: string }> {
-    const walletList = await Coinbase.apiClients.wallet!.listWallets(
-      pageSize,
-      nextPageToken ? nextPageToken : undefined,
-    );
-    const wallets = walletList.data.data.map(wallet => {
-      return Wallet.init(wallet, "");
-    });
+  public static async listWallets(): Promise<Wallet[]> {
+    const walletList: Wallet[] = [];
+    const queue: string[] = [""];
 
-    return { wallets: wallets, nextPageToken: walletList.data.next_page };
+    while (queue.length > 0) {
+      const page = queue.shift();
+      const response = await Coinbase.apiClients.wallet!.listWallets(100, page ? page : undefined);
+
+      const wallets = response.data.data;
+      for (const wallet of wallets) {
+        walletList.push(Wallet.init(wallet, ""));
+      }
+
+      if (response.data.has_more) {
+        if (response.data.next_page) {
+          queue.push(response.data.next_page);
+        }
+      }
+    }
+
+    return walletList;
   }
 
   /**
