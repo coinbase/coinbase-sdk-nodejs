@@ -27,6 +27,8 @@ import {
   FetchStakingRewardsRequest,
   FetchStakingRewards200Response,
   FaucetTransaction,
+  BroadcastStakingOperationRequest,
+  CreateStakingOperationRequest,
   ValidatorList,
   Validator,
 } from "./../client/api";
@@ -416,6 +418,28 @@ export type StakeAPIClient = {
     page?: string,
     options?: AxiosRequestConfig,
   ): AxiosPromise<FetchStakingRewards200Response>;
+
+  broadcastStakingOperation(
+    walletId: string,
+    addressId: string,
+    stakingOperationId: string,
+    broadcastStakingOperationRequest: BroadcastStakingOperationRequest,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<StakingOperationModel>;
+
+  createStakingOperation(
+    walletId: string,
+    addressId: string,
+    createStakingOperationRequest: CreateStakingOperationRequest,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<StakingOperationModel>;
+
+  getStakingOperation(
+    walletId: string,
+    addressId: string,
+    stakingOperationId: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<StakingOperationModel>;
 };
 
 export type ValidatorAPIClient = {
