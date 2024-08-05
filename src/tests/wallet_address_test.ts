@@ -9,6 +9,7 @@ import {
   StakingContext as StakingContextModel,
   StakingOperation as StakingOperationModel,
   StakingOperationStatusEnum,
+  TransactionStatusEnum,
   StakingRewardFormat,
   StakingRewardStateEnum,
   Trade as TradeModel,
@@ -505,7 +506,10 @@ describe("WalletAddress", () => {
       });
       Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
         ...VALID_TRANSFER_MODEL,
-        status: TransferStatus.COMPLETE,
+        transaction: {
+          ...VALID_TRANSFER_MODEL,
+          status: TransactionStatusEnum.Complete,
+        },
       });
 
       await address.createTransfer({
@@ -651,7 +655,10 @@ describe("WalletAddress", () => {
       Coinbase.apiClients.transfer!.createTransfer = mockReturnValue(VALID_TRANSFER_MODEL);
       Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
         ...VALID_TRANSFER_MODEL,
-        status: TransferStatus.COMPLETE,
+        transaction: {
+          ...VALID_TRANSFER_MODEL,
+          status: TransactionStatusEnum.Complete,
+        },
       });
 
       await address.createTransfer({
