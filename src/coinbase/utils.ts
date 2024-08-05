@@ -106,3 +106,30 @@ export function parseUnsignedPayload(payload: string): Record<string, any> {
 
   return parsedPayload;
 }
+
+/**
+ * Formats the input date to 'YYYY-MM-DD'
+ *
+ * @param date - The date to format.
+ *
+ * @returns a formated date of 'YYYY-MM-DD'
+ */
+export function formatDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based, so add 1
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}T00:00:00Z`;
+}
+
+/**
+ *
+ * Takes a date and subtracts a week from it. (7 days)
+ *
+ * @param date - The date to be formatted.
+ *
+ * @returns a formatted date that is one week ago.
+ */
+export function getWeekBackDate(date: Date): string {
+  date.setDate(date.getDate() - 7);
+  return formatDate(date);
+}

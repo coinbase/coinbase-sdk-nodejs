@@ -109,7 +109,7 @@ export class Transfer {
    * @returns The Unsigned Payload as a Hex string.
    */
   public getUnsignedPayload(): string {
-    return this.model.unsigned_payload;
+    return this.model.transaction.unsigned_payload;
   }
 
   /**
@@ -118,7 +118,7 @@ export class Transfer {
    * @returns The Signed Payload as a Hex string, or undefined if not yet available.
    */
   public getSignedPayload(): string | undefined {
-    return this.model.signed_payload;
+    return this.model.transaction.signed_payload;
   }
 
   /**
@@ -127,7 +127,7 @@ export class Transfer {
    * @returns The Transaction Hash as a Hex string, or undefined if not yet available.
    */
   public getTransactionHash(): string | undefined {
-    return this.model.transaction_hash;
+    return this.model.transaction.transaction_hash;
   }
 
   /**
@@ -171,7 +171,7 @@ export class Transfer {
    * @returns The Status of the Transfer.
    */
   public getStatus(): TransferStatus | undefined {
-    switch (this.model.status) {
+    switch (this.model.transaction.status) {
       case TransferStatus.PENDING:
         return TransferStatus.PENDING;
       case TransferStatus.BROADCAST:

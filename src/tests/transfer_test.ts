@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { Decimal } from "decimal.js";
-import { Transfer as TransferModel } from "../client/api";
+import { Transfer as TransferModel, TransactionStatusEnum } from "../client/api";
 import { TransferStatus } from "../coinbase/types";
 import { Transfer } from "../coinbase/transfer";
 import { Coinbase } from "../coinbase/coinbase";
@@ -91,7 +91,9 @@ describe("Transfer Class", () => {
 
   describe("#getUnsignedPayload", () => {
     it("should return the unsigned payload", () => {
-      expect(transfer.getUnsignedPayload()).toEqual(VALID_TRANSFER_MODEL.unsigned_payload);
+      expect(transfer.getUnsignedPayload()).toEqual(
+        VALID_TRANSFER_MODEL.transaction.unsigned_payload,
+      );
     });
   });
 
@@ -110,7 +112,7 @@ describe("Transfer Class", () => {
     });
 
     it("should return the signed payload when the transfer has been broadcast on chain", () => {
-      transferModel.signed_payload = signedPayload;
+      transferModel.transaction.signed_payload = signedPayload;
       transfer = Transfer.fromModel(transferModel);
       expect(transfer.getSignedPayload()).toEqual(signedPayload);
     });
@@ -118,11 +120,13 @@ describe("Transfer Class", () => {
 
   describe("#getTransactionHash", () => {
     it("should return undefined when the transfer has not been broadcast on chain", () => {
+      transferModel.transaction.transaction_hash = undefined;
+      transfer = Transfer.fromModel(transferModel);
       expect(transfer.getTransactionHash()).toBeUndefined();
     });
 
     it("should return the transaction hash when the transfer has been broadcast on chain", () => {
-      transferModel.transaction_hash = transactionHash;
+      transferModel.transaction.transaction_hash = transactionHash;
       transfer = Transfer.fromModel(transferModel);
       expect(transfer.getTransactionHash()).toEqual(transactionHash);
     });
@@ -131,7 +135,7 @@ describe("Transfer Class", () => {
   describe("#getTransactionLink", () => {
     it("should return the transaction link when the transaction hash is available", () => {
       expect(transfer.getTransactionLink()).toEqual(
-        `https://sepolia.basescan.org/tx/${transferModel.transaction_hash}`,
+        `https://sepolia.basescan.org/tx/${transferModel.transaction.transaction_hash}`,
       );
     });
   });
@@ -164,28 +168,28 @@ describe("Transfer Class", () => {
     });
 
     it("should return BROADCAST when the transaction has been broadcast but not included in a block", async () => {
-      transferModel.status = TransferStatus.BROADCAST;
+      transferModel.transaction.status = TransactionStatusEnum.Broadcast;
       transfer = Transfer.fromModel(transferModel);
       const status = transfer.getStatus();
       expect(status).toEqual(TransferStatus.BROADCAST);
     });
 
     it("should return COMPLETE when the transaction has confirmed", async () => {
-      transferModel.status = TransferStatus.COMPLETE;
+      transferModel.transaction.status = TransactionStatusEnum.Complete;
       transfer = Transfer.fromModel(transferModel);
       const status = transfer.getStatus();
       expect(status).toEqual(TransferStatus.COMPLETE);
     });
 
     it("should return FAILED when the transaction has failed", async () => {
-      transferModel.status = TransferStatus.FAILED;
+      transferModel.transaction.status = TransactionStatusEnum.Failed;
       transfer = Transfer.fromModel(transferModel);
       const status = transfer.getStatus();
       expect(status).toEqual(TransferStatus.FAILED);
     });
 
     it("should return undefined when the transaction does not exist", async () => {
-      transferModel.status = "" as TransferStatus;
+      transferModel.transaction.status = "" as TransactionStatusEnum;
       transfer = Transfer.fromModel(transferModel);
       const status = transfer.getStatus();
       expect(status).toEqual(undefined);
@@ -193,29 +197,39 @@ describe("Transfer Class", () => {
   });
 
   describe("#reload", () => {
-    it("should return PENDING when the trnasaction has not been created", async () => {
+    it("should return PENDING when the transaction has not been created", async () => {
       Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
         ...VALID_TRANSFER_MODEL,
-        status: TransferStatus.PENDING,
+        transaction: {
+          ...VALID_TRANSFER_MODEL,
+          status: TransactionStatusEnum.Pending,
+        },
       });
       await transfer.reload();
       expect(transfer.getStatus()).toEqual(TransferStatus.PENDING);
       expect(Coinbase.apiClients.transfer!.getTransfer).toHaveBeenCalledTimes(1);
     });
 
-    it("should return COMPLETE when the trnasaction is complete", async () => {
+    it("should return COMPLETE when the transaction is complete", async () => {
       Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
         ...VALID_TRANSFER_MODEL,
-        status: TransferStatus.COMPLETE,
+        transaction: {
+          ...VALID_TRANSFER_MODEL,
+          status: TransactionStatusEnum.Complete,
+        },
       });
       await transfer.reload();
       expect(transfer.getStatus()).toEqual(TransferStatus.COMPLETE);
       expect(Coinbase.apiClients.transfer!.getTransfer).toHaveBeenCalledTimes(1);
     });
 
-    it("should return FAILED when the trnasaction has failed", async () => {
+    it("should return FAILED when the transaction has failed", async () => {
       Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
         ...VALID_TRANSFER_MODEL,
+        transaction: {
+          ...VALID_TRANSFER_MODEL,
+          status: TransactionStatusEnum.Failed,
+        },
         status: TransferStatus.FAILED,
       });
       await transfer.reload();

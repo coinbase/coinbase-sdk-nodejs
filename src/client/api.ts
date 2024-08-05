@@ -169,6 +169,25 @@ export interface Balance {
 /**
  * 
  * @export
+ * @interface BroadcastStakingOperationRequest
+ */
+export interface BroadcastStakingOperationRequest {
+    /**
+     * The hex-encoded signed payload of the staking operation.
+     * @type {string}
+     * @memberof BroadcastStakingOperationRequest
+     */
+    'signed_payload': string;
+    /**
+     * The index in the transaction array of the staking operation.
+     * @type {number}
+     * @memberof BroadcastStakingOperationRequest
+     */
+    'transaction_index': number;
+}
+/**
+ * 
+ * @export
  * @interface BroadcastTradeRequest
  */
 export interface BroadcastTradeRequest {
@@ -236,6 +255,116 @@ export interface BuildStakingOperationRequest {
     'options': { [key: string]: string; };
 }
 /**
+ * Represents a single decoded event emitted by a smart contract
+ * @export
+ * @interface ContractEvent
+ */
+export interface ContractEvent {
+    /**
+     * The name of the blockchain network
+     * @type {string}
+     * @memberof ContractEvent
+     */
+    'network_name'?: string;
+    /**
+     * The name of the blockchain project or protocol
+     * @type {string}
+     * @memberof ContractEvent
+     */
+    'protocol_name'?: string;
+    /**
+     * The name of the specific contract within the project
+     * @type {string}
+     * @memberof ContractEvent
+     */
+    'contract_name'?: string;
+    /**
+     * The name of the event emitted by the contract
+     * @type {string}
+     * @memberof ContractEvent
+     */
+    'event_name'?: string;
+    /**
+     * The signature of the event, including parameter types
+     * @type {string}
+     * @memberof ContractEvent
+     */
+    'sig'?: string;
+    /**
+     * The first four bytes of the Keccak hash of the event signature
+     * @type {string}
+     * @memberof ContractEvent
+     */
+    'fourBytes'?: string;
+    /**
+     * The EVM address of the smart contract
+     * @type {string}
+     * @memberof ContractEvent
+     */
+    'contract_address'?: string;
+    /**
+     * The timestamp of the block in which the event was emitted
+     * @type {string}
+     * @memberof ContractEvent
+     */
+    'block_time'?: string;
+    /**
+     * The block number in which the event was emitted
+     * @type {number}
+     * @memberof ContractEvent
+     */
+    'block_height'?: number;
+    /**
+     * The transaction hash in which the event was emitted
+     * @type {string}
+     * @memberof ContractEvent
+     */
+    'tx_hash'?: string;
+    /**
+     * The index of the transaction within the block
+     * @type {number}
+     * @memberof ContractEvent
+     */
+    'tx_index'?: number;
+    /**
+     * The index of the event within the transaction
+     * @type {number}
+     * @memberof ContractEvent
+     */
+    'event_index'?: number;
+    /**
+     * The event data in a stringified format
+     * @type {string}
+     * @memberof ContractEvent
+     */
+    'data'?: string;
+}
+/**
+ * A list of contract events with pagination information
+ * @export
+ * @interface ContractEventList
+ */
+export interface ContractEventList {
+    /**
+     * An array of ContractEvent objects
+     * @type {Array<ContractEvent>}
+     * @memberof ContractEventList
+     */
+    'data': Array<ContractEvent>;
+    /**
+     * The page token to be used to fetch the next page
+     * @type {string}
+     * @memberof ContractEventList
+     */
+    'next_page': string;
+    /**
+     * True if this list has another page of items after this one that can be fetched
+     * @type {boolean}
+     * @memberof ContractEventList
+     */
+    'has_more': boolean;
+}
+/**
  * 
  * @export
  * @interface CreateAddressRequest
@@ -278,6 +407,37 @@ export interface CreateServerSignerRequest {
      * @memberof CreateServerSignerRequest
      */
     'is_mpc': boolean;
+}
+/**
+ * 
+ * @export
+ * @interface CreateStakingOperationRequest
+ */
+export interface CreateStakingOperationRequest {
+    /**
+     * The ID of the blockchain network.
+     * @type {string}
+     * @memberof CreateStakingOperationRequest
+     */
+    'network_id': string;
+    /**
+     * The ID of the asset being staked.
+     * @type {string}
+     * @memberof CreateStakingOperationRequest
+     */
+    'asset_id': string;
+    /**
+     * The type of staking operation.
+     * @type {string}
+     * @memberof CreateStakingOperationRequest
+     */
+    'action': string;
+    /**
+     * 
+     * @type {{ [key: string]: string; }}
+     * @memberof CreateStakingOperationRequest
+     */
+    'options': { [key: string]: string; };
 }
 /**
  * 
@@ -367,6 +527,39 @@ export interface CreateWalletRequestWallet {
      */
     'use_server_signer'?: boolean;
 }
+/**
+ * 
+ * @export
+ * @interface CreateWebhookRequest
+ */
+export interface CreateWebhookRequest {
+    /**
+     * The ID of the blockchain network
+     * @type {string}
+     * @memberof CreateWebhookRequest
+     */
+    'network_id': string;
+    /**
+     * 
+     * @type {WebhookEventType}
+     * @memberof CreateWebhookRequest
+     */
+    'event_type'?: WebhookEventType;
+    /**
+     * Webhook will monitor all events that matches any one of the event filters.
+     * @type {Array<WebhookEventFilter>}
+     * @memberof CreateWebhookRequest
+     */
+    'event_filters'?: Array<WebhookEventFilter>;
+    /**
+     * The URL to which the notifications will be sent
+     * @type {string}
+     * @memberof CreateWebhookRequest
+     */
+    'notification_uri': string;
+}
+
+
 /**
  * An Ethereum validator.
  * @export
@@ -954,6 +1147,12 @@ export interface StakingOperation {
      */
     'id': string;
     /**
+     * The ID of the wallet that owns the address.
+     * @type {string}
+     * @memberof StakingOperation
+     */
+    'wallet_id'?: string;
+    /**
      * The ID of the blockchain network.
      * @type {string}
      * @memberof StakingOperation
@@ -966,13 +1165,13 @@ export interface StakingOperation {
      */
     'address_id': string;
     /**
-     * The status of the staking operation
+     * The status of the staking operation.
      * @type {string}
      * @memberof StakingOperation
      */
     'status': StakingOperationStatusEnum;
     /**
-     * The transaction(s) that will execute the staking operation onchain
+     * The transaction(s) that will execute the staking operation onchain.
      * @type {Array<Transaction>}
      * @memberof StakingOperation
      */
@@ -989,7 +1188,8 @@ export const StakingOperationStatusEnum = {
     Initialized: 'initialized',
     Pending: 'pending',
     Complete: 'complete',
-    Failed: 'failed'
+    Failed: 'failed',
+    Unspecified: 'unspecified'
 } as const;
 
 export type StakingOperationStatusEnum = typeof StakingOperationStatusEnum[keyof typeof StakingOperationStatusEnum];
@@ -1290,41 +1490,7 @@ export interface Transfer {
      * @memberof Transfer
      */
     'transaction': Transaction;
-    /**
-     * The unsigned payload of the transfer. This is the payload that needs to be signed by the sender.
-     * @type {string}
-     * @memberof Transfer
-     */
-    'unsigned_payload': string;
-    /**
-     * The signed payload of the transfer. This is the payload that has been signed by the sender.
-     * @type {string}
-     * @memberof Transfer
-     */
-    'signed_payload'?: string;
-    /**
-     * The hash of the transfer transaction
-     * @type {string}
-     * @memberof Transfer
-     */
-    'transaction_hash'?: string;
-    /**
-     * The status of the transfer
-     * @type {string}
-     * @memberof Transfer
-     */
-    'status': TransferStatusEnum;
 }
-
-export const TransferStatusEnum = {
-    Pending: 'pending',
-    Broadcast: 'broadcast',
-    Complete: 'complete',
-    Failed: 'failed'
-} as const;
-
-export type TransferStatusEnum = typeof TransferStatusEnum[keyof typeof TransferStatusEnum];
-
 /**
  * 
  * @export
@@ -1356,6 +1522,39 @@ export interface TransferList {
      */
     'total_count': number;
 }
+/**
+ * 
+ * @export
+ * @interface UpdateWebhookRequest
+ */
+export interface UpdateWebhookRequest {
+    /**
+     * The ID of the blockchain network
+     * @type {string}
+     * @memberof UpdateWebhookRequest
+     */
+    'network_id'?: string;
+    /**
+     * 
+     * @type {WebhookEventType}
+     * @memberof UpdateWebhookRequest
+     */
+    'event_type': WebhookEventType;
+    /**
+     * Webhook will monitor all events that matches any one of the event filters.
+     * @type {Array<WebhookEventFilter>}
+     * @memberof UpdateWebhookRequest
+     */
+    'event_filters': Array<WebhookEventFilter>;
+    /**
+     * The Webhook uri that updates to
+     * @type {string}
+     * @memberof UpdateWebhookRequest
+     */
+    'notification_uri': string;
+}
+
+
 /**
  * 
  * @export
@@ -1518,6 +1717,122 @@ export interface WalletList {
      * @memberof WalletList
      */
     'total_count': number;
+}
+/**
+ * Webhook that is used for getting notifications when monitored events occur.
+ * @export
+ * @interface Webhook
+ */
+export interface Webhook {
+    /**
+     * Identifier of the webhook.
+     * @type {string}
+     * @memberof Webhook
+     */
+    'id'?: string;
+    /**
+     * The ID of the blockchain network
+     * @type {string}
+     * @memberof Webhook
+     */
+    'network_id'?: string;
+    /**
+     * 
+     * @type {WebhookEventType}
+     * @memberof Webhook
+     */
+    'event_type'?: WebhookEventType;
+    /**
+     * Webhook will monitor all events that matches any one of the event filters.
+     * @type {Array<WebhookEventFilter>}
+     * @memberof Webhook
+     */
+    'event_filters'?: Array<WebhookEventFilter>;
+    /**
+     * The URL to which the notifications will be sent.
+     * @type {string}
+     * @memberof Webhook
+     */
+    'notification_uri'?: string;
+    /**
+     * The date and time the webhook was created.
+     * @type {string}
+     * @memberof Webhook
+     */
+    'created_at'?: string;
+    /**
+     * The date and time the webhook was last updated.
+     * @type {string}
+     * @memberof Webhook
+     */
+    'updated_at'?: string;
+}
+
+
+/**
+ * The event_filter parameter specifies the criteria to filter events from the blockchain. It allows filtering events by contract address, sender address and receiver address. For a single event filter, not all of the properties need to be presented.
+ * @export
+ * @interface WebhookEventFilter
+ */
+export interface WebhookEventFilter {
+    /**
+     * The onchain contract address of the token being transferred.
+     * @type {string}
+     * @memberof WebhookEventFilter
+     */
+    'contract_address'?: string;
+    /**
+     * The onchain address of the sender.
+     * @type {string}
+     * @memberof WebhookEventFilter
+     */
+    'from_address'?: string;
+    /**
+     * The onchain address of the receiver.
+     * @type {string}
+     * @memberof WebhookEventFilter
+     */
+    'to_address'?: string;
+}
+/**
+ * 
+ * @export
+ * @enum {string}
+ */
+
+export const WebhookEventType = {
+    Unspecified: 'unspecified',
+    Erc20Transfer: 'erc20_transfer',
+    Erc721Transfer: 'erc721_transfer'
+} as const;
+
+export type WebhookEventType = typeof WebhookEventType[keyof typeof WebhookEventType];
+
+
+/**
+ * 
+ * @export
+ * @interface WebhookList
+ */
+export interface WebhookList {
+    /**
+     * 
+     * @type {Array<Webhook>}
+     * @memberof WebhookList
+     */
+    'data': Array<Webhook>;
+    /**
+     * True if this list has another page of items after this one that can be fetched.
+     * @type {boolean}
+     * @memberof WebhookList
+     */
+    'has_more'?: boolean;
+    /**
+     * The page token to be used to fetch the next page.
+     * @type {string}
+     * @memberof WebhookList
+     */
+    'next_page'?: string;
 }
 
 /**
@@ -2126,7 +2441,7 @@ export const AssetsApiAxiosParamCreator = function (configuration?: Configuratio
          * Get the asset for the specified asset ID.
          * @summary Get the asset for the specified asset ID.
          * @param {string} networkId The ID of the blockchain network
-         * @param {string} assetId The ID of the asset to fetch
+         * @param {string} assetId The ID of the asset to fetch. This could be a symbol or an ERC20 contract address.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2174,7 +2489,7 @@ export const AssetsApiFp = function(configuration?: Configuration) {
          * Get the asset for the specified asset ID.
          * @summary Get the asset for the specified asset ID.
          * @param {string} networkId The ID of the blockchain network
-         * @param {string} assetId The ID of the asset to fetch
+         * @param {string} assetId The ID of the asset to fetch. This could be a symbol or an ERC20 contract address.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2198,7 +2513,7 @@ export const AssetsApiFactory = function (configuration?: Configuration, basePat
          * Get the asset for the specified asset ID.
          * @summary Get the asset for the specified asset ID.
          * @param {string} networkId The ID of the blockchain network
-         * @param {string} assetId The ID of the asset to fetch
+         * @param {string} assetId The ID of the asset to fetch. This could be a symbol or an ERC20 contract address.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2218,7 +2533,7 @@ export interface AssetsApiInterface {
      * Get the asset for the specified asset ID.
      * @summary Get the asset for the specified asset ID.
      * @param {string} networkId The ID of the blockchain network
-     * @param {string} assetId The ID of the asset to fetch
+     * @param {string} assetId The ID of the asset to fetch. This could be a symbol or an ERC20 contract address.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AssetsApiInterface
@@ -2238,13 +2553,207 @@ export class AssetsApi extends BaseAPI implements AssetsApiInterface {
      * Get the asset for the specified asset ID.
      * @summary Get the asset for the specified asset ID.
      * @param {string} networkId The ID of the blockchain network
-     * @param {string} assetId The ID of the asset to fetch
+     * @param {string} assetId The ID of the asset to fetch. This could be a symbol or an ERC20 contract address.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AssetsApi
      */
     public getAsset(networkId: string, assetId: string, options?: RawAxiosRequestConfig) {
         return AssetsApiFp(this.configuration).getAsset(networkId, assetId, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * ContractEventsApi - axios parameter creator
+ * @export
+ */
+export const ContractEventsApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Retrieve events for a specific contract
+         * @summary Get contract events
+         * @param {string} networkId Unique identifier for the blockchain network
+         * @param {string} protocolName Case-sensitive name of the blockchain protocol
+         * @param {string} contractAddress EVM address of the smart contract (42 characters, including \&#39;0x\&#39;, in lowercase)
+         * @param {number} fromBlockHeight Lower bound of the block range to query (inclusive)
+         * @param {number} toBlockHeight Upper bound of the block range to query (inclusive)
+         * @param {string} [contractName] Case-sensitive name of the specific contract within the project
+         * @param {string} [eventName] Case-sensitive name of the event to filter for in the contract\&#39;s logs
+         * @param {string} [nextPage] Pagination token for retrieving the next set of results
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listContractEvents: async (networkId: string, protocolName: string, contractAddress: string, fromBlockHeight: number, toBlockHeight: number, contractName?: string, eventName?: string, nextPage?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('listContractEvents', 'networkId', networkId)
+            // verify required parameter 'protocolName' is not null or undefined
+            assertParamExists('listContractEvents', 'protocolName', protocolName)
+            // verify required parameter 'contractAddress' is not null or undefined
+            assertParamExists('listContractEvents', 'contractAddress', contractAddress)
+            // verify required parameter 'fromBlockHeight' is not null or undefined
+            assertParamExists('listContractEvents', 'fromBlockHeight', fromBlockHeight)
+            // verify required parameter 'toBlockHeight' is not null or undefined
+            assertParamExists('listContractEvents', 'toBlockHeight', toBlockHeight)
+            const localVarPath = `/v1/networks/{network_id}/smart_contracts/{contract_address}/events`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"contract_address"}}`, encodeURIComponent(String(contractAddress)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (protocolName !== undefined) {
+                localVarQueryParameter['protocol_name'] = protocolName;
+            }
+
+            if (contractName !== undefined) {
+                localVarQueryParameter['contract_name'] = contractName;
+            }
+
+            if (eventName !== undefined) {
+                localVarQueryParameter['event_name'] = eventName;
+            }
+
+            if (fromBlockHeight !== undefined) {
+                localVarQueryParameter['from_block_height'] = fromBlockHeight;
+            }
+
+            if (toBlockHeight !== undefined) {
+                localVarQueryParameter['to_block_height'] = toBlockHeight;
+            }
+
+            if (nextPage !== undefined) {
+                localVarQueryParameter['next_page'] = nextPage;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * ContractEventsApi - functional programming interface
+ * @export
+ */
+export const ContractEventsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = ContractEventsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Retrieve events for a specific contract
+         * @summary Get contract events
+         * @param {string} networkId Unique identifier for the blockchain network
+         * @param {string} protocolName Case-sensitive name of the blockchain protocol
+         * @param {string} contractAddress EVM address of the smart contract (42 characters, including \&#39;0x\&#39;, in lowercase)
+         * @param {number} fromBlockHeight Lower bound of the block range to query (inclusive)
+         * @param {number} toBlockHeight Upper bound of the block range to query (inclusive)
+         * @param {string} [contractName] Case-sensitive name of the specific contract within the project
+         * @param {string} [eventName] Case-sensitive name of the event to filter for in the contract\&#39;s logs
+         * @param {string} [nextPage] Pagination token for retrieving the next set of results
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listContractEvents(networkId: string, protocolName: string, contractAddress: string, fromBlockHeight: number, toBlockHeight: number, contractName?: string, eventName?: string, nextPage?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ContractEventList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listContractEvents(networkId, protocolName, contractAddress, fromBlockHeight, toBlockHeight, contractName, eventName, nextPage, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ContractEventsApi.listContractEvents']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * ContractEventsApi - factory interface
+ * @export
+ */
+export const ContractEventsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = ContractEventsApiFp(configuration)
+    return {
+        /**
+         * Retrieve events for a specific contract
+         * @summary Get contract events
+         * @param {string} networkId Unique identifier for the blockchain network
+         * @param {string} protocolName Case-sensitive name of the blockchain protocol
+         * @param {string} contractAddress EVM address of the smart contract (42 characters, including \&#39;0x\&#39;, in lowercase)
+         * @param {number} fromBlockHeight Lower bound of the block range to query (inclusive)
+         * @param {number} toBlockHeight Upper bound of the block range to query (inclusive)
+         * @param {string} [contractName] Case-sensitive name of the specific contract within the project
+         * @param {string} [eventName] Case-sensitive name of the event to filter for in the contract\&#39;s logs
+         * @param {string} [nextPage] Pagination token for retrieving the next set of results
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listContractEvents(networkId: string, protocolName: string, contractAddress: string, fromBlockHeight: number, toBlockHeight: number, contractName?: string, eventName?: string, nextPage?: string, options?: any): AxiosPromise<ContractEventList> {
+            return localVarFp.listContractEvents(networkId, protocolName, contractAddress, fromBlockHeight, toBlockHeight, contractName, eventName, nextPage, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * ContractEventsApi - interface
+ * @export
+ * @interface ContractEventsApi
+ */
+export interface ContractEventsApiInterface {
+    /**
+     * Retrieve events for a specific contract
+     * @summary Get contract events
+     * @param {string} networkId Unique identifier for the blockchain network
+     * @param {string} protocolName Case-sensitive name of the blockchain protocol
+     * @param {string} contractAddress EVM address of the smart contract (42 characters, including \&#39;0x\&#39;, in lowercase)
+     * @param {number} fromBlockHeight Lower bound of the block range to query (inclusive)
+     * @param {number} toBlockHeight Upper bound of the block range to query (inclusive)
+     * @param {string} [contractName] Case-sensitive name of the specific contract within the project
+     * @param {string} [eventName] Case-sensitive name of the event to filter for in the contract\&#39;s logs
+     * @param {string} [nextPage] Pagination token for retrieving the next set of results
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ContractEventsApiInterface
+     */
+    listContractEvents(networkId: string, protocolName: string, contractAddress: string, fromBlockHeight: number, toBlockHeight: number, contractName?: string, eventName?: string, nextPage?: string, options?: RawAxiosRequestConfig): AxiosPromise<ContractEventList>;
+
+}
+
+/**
+ * ContractEventsApi - object-oriented interface
+ * @export
+ * @class ContractEventsApi
+ * @extends {BaseAPI}
+ */
+export class ContractEventsApi extends BaseAPI implements ContractEventsApiInterface {
+    /**
+     * Retrieve events for a specific contract
+     * @summary Get contract events
+     * @param {string} networkId Unique identifier for the blockchain network
+     * @param {string} protocolName Case-sensitive name of the blockchain protocol
+     * @param {string} contractAddress EVM address of the smart contract (42 characters, including \&#39;0x\&#39;, in lowercase)
+     * @param {number} fromBlockHeight Lower bound of the block range to query (inclusive)
+     * @param {number} toBlockHeight Upper bound of the block range to query (inclusive)
+     * @param {string} [contractName] Case-sensitive name of the specific contract within the project
+     * @param {string} [eventName] Case-sensitive name of the event to filter for in the contract\&#39;s logs
+     * @param {string} [nextPage] Pagination token for retrieving the next set of results
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ContractEventsApi
+     */
+    public listContractEvents(networkId: string, protocolName: string, contractAddress: string, fromBlockHeight: number, toBlockHeight: number, contractName?: string, eventName?: string, nextPage?: string, options?: RawAxiosRequestConfig) {
+        return ContractEventsApiFp(this.configuration).listContractEvents(networkId, protocolName, contractAddress, fromBlockHeight, toBlockHeight, contractName, eventName, nextPage, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -3147,6 +3656,54 @@ export class ServerSignersApi extends BaseAPI implements ServerSignersApiInterfa
 export const StakeApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * Broadcast a staking operation.
+         * @summary Broadcast a staking operation
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address the staking operation belongs to.
+         * @param {string} stakingOperationId The ID of the staking operation to broadcast.
+         * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        broadcastStakingOperation: async (walletId: string, addressId: string, stakingOperationId: string, broadcastStakingOperationRequest: BroadcastStakingOperationRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'walletId' is not null or undefined
+            assertParamExists('broadcastStakingOperation', 'walletId', walletId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('broadcastStakingOperation', 'addressId', addressId)
+            // verify required parameter 'stakingOperationId' is not null or undefined
+            assertParamExists('broadcastStakingOperation', 'stakingOperationId', stakingOperationId)
+            // verify required parameter 'broadcastStakingOperationRequest' is not null or undefined
+            assertParamExists('broadcastStakingOperation', 'broadcastStakingOperationRequest', broadcastStakingOperationRequest)
+            const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/staking_operations/{staking_operation_id}/broadcast`
+                .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)))
+                .replace(`{${"staking_operation_id"}}`, encodeURIComponent(String(stakingOperationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(broadcastStakingOperationRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Build a new staking operation
          * @summary Build a new staking operation
          * @param {BuildStakingOperationRequest} buildStakingOperationRequest 
@@ -3176,6 +3733,50 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(buildStakingOperationRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Create a new staking operation.
+         * @summary Create a new staking operation for an address
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to create the staking operation for.
+         * @param {CreateStakingOperationRequest} createStakingOperationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createStakingOperation: async (walletId: string, addressId: string, createStakingOperationRequest: CreateStakingOperationRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'walletId' is not null or undefined
+            assertParamExists('createStakingOperation', 'walletId', walletId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('createStakingOperation', 'addressId', addressId)
+            // verify required parameter 'createStakingOperationRequest' is not null or undefined
+            assertParamExists('createStakingOperation', 'createStakingOperationRequest', createStakingOperationRequest)
+            const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/staking_operations`
+                .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createStakingOperationRequest, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -3306,6 +3907,48 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Get the latest state of a staking operation.
+         * @summary Get the latest state of a staking operation
+         * @param {string} walletId The ID of the wallet the address belongs to
+         * @param {string} addressId The ID of the address to fetch the staking operation for.
+         * @param {string} stakingOperationId The ID of the staking operation.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getStakingOperation: async (walletId: string, addressId: string, stakingOperationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'walletId' is not null or undefined
+            assertParamExists('getStakingOperation', 'walletId', walletId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('getStakingOperation', 'addressId', addressId)
+            // verify required parameter 'stakingOperationId' is not null or undefined
+            assertParamExists('getStakingOperation', 'stakingOperationId', stakingOperationId)
+            const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/staking_operations/{staking_operation_id}`
+                .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)))
+                .replace(`{${"staking_operation_id"}}`, encodeURIComponent(String(stakingOperationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -3317,6 +3960,22 @@ export const StakeApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = StakeApiAxiosParamCreator(configuration)
     return {
         /**
+         * Broadcast a staking operation.
+         * @summary Broadcast a staking operation
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address the staking operation belongs to.
+         * @param {string} stakingOperationId The ID of the staking operation to broadcast.
+         * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async broadcastStakingOperation(walletId: string, addressId: string, stakingOperationId: string, broadcastStakingOperationRequest: BroadcastStakingOperationRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<StakingOperation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.broadcastStakingOperation(walletId, addressId, stakingOperationId, broadcastStakingOperationRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['StakeApi.broadcastStakingOperation']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Build a new staking operation
          * @summary Build a new staking operation
          * @param {BuildStakingOperationRequest} buildStakingOperationRequest 
@@ -3327,6 +3986,21 @@ export const StakeApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.buildStakingOperation(buildStakingOperationRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['StakeApi.buildStakingOperation']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Create a new staking operation.
+         * @summary Create a new staking operation for an address
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to create the staking operation for.
+         * @param {CreateStakingOperationRequest} createStakingOperationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createStakingOperation(walletId: string, addressId: string, createStakingOperationRequest: CreateStakingOperationRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<StakingOperation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createStakingOperation(walletId, addressId, createStakingOperationRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['StakeApi.createStakingOperation']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -3372,6 +4046,21 @@ export const StakeApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['StakeApi.getStakingContext']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * Get the latest state of a staking operation.
+         * @summary Get the latest state of a staking operation
+         * @param {string} walletId The ID of the wallet the address belongs to
+         * @param {string} addressId The ID of the address to fetch the staking operation for.
+         * @param {string} stakingOperationId The ID of the staking operation.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getStakingOperation(walletId: string, addressId: string, stakingOperationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<StakingOperation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getStakingOperation(walletId, addressId, stakingOperationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['StakeApi.getStakingOperation']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -3383,6 +4072,19 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
     const localVarFp = StakeApiFp(configuration)
     return {
         /**
+         * Broadcast a staking operation.
+         * @summary Broadcast a staking operation
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address the staking operation belongs to.
+         * @param {string} stakingOperationId The ID of the staking operation to broadcast.
+         * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        broadcastStakingOperation(walletId: string, addressId: string, stakingOperationId: string, broadcastStakingOperationRequest: BroadcastStakingOperationRequest, options?: any): AxiosPromise<StakingOperation> {
+            return localVarFp.broadcastStakingOperation(walletId, addressId, stakingOperationId, broadcastStakingOperationRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Build a new staking operation
          * @summary Build a new staking operation
          * @param {BuildStakingOperationRequest} buildStakingOperationRequest 
@@ -3391,6 +4093,18 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
          */
         buildStakingOperation(buildStakingOperationRequest: BuildStakingOperationRequest, options?: any): AxiosPromise<StakingOperation> {
             return localVarFp.buildStakingOperation(buildStakingOperationRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Create a new staking operation.
+         * @summary Create a new staking operation for an address
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to create the staking operation for.
+         * @param {CreateStakingOperationRequest} createStakingOperationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createStakingOperation(walletId: string, addressId: string, createStakingOperationRequest: CreateStakingOperationRequest, options?: any): AxiosPromise<StakingOperation> {
+            return localVarFp.createStakingOperation(walletId, addressId, createStakingOperationRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * Fetch staking rewards for a list of addresses
@@ -3426,6 +4140,18 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
         getStakingContext(getStakingContextRequest: GetStakingContextRequest, options?: any): AxiosPromise<StakingContext> {
             return localVarFp.getStakingContext(getStakingContextRequest, options).then((request) => request(axios, basePath));
         },
+        /**
+         * Get the latest state of a staking operation.
+         * @summary Get the latest state of a staking operation
+         * @param {string} walletId The ID of the wallet the address belongs to
+         * @param {string} addressId The ID of the address to fetch the staking operation for.
+         * @param {string} stakingOperationId The ID of the staking operation.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getStakingOperation(walletId: string, addressId: string, stakingOperationId: string, options?: any): AxiosPromise<StakingOperation> {
+            return localVarFp.getStakingOperation(walletId, addressId, stakingOperationId, options).then((request) => request(axios, basePath));
+        },
     };
 };
 
@@ -3436,6 +4162,19 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
  */
 export interface StakeApiInterface {
     /**
+     * Broadcast a staking operation.
+     * @summary Broadcast a staking operation
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The ID of the address the staking operation belongs to.
+     * @param {string} stakingOperationId The ID of the staking operation to broadcast.
+     * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApiInterface
+     */
+    broadcastStakingOperation(walletId: string, addressId: string, stakingOperationId: string, broadcastStakingOperationRequest: BroadcastStakingOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation>;
+
+    /**
      * Build a new staking operation
      * @summary Build a new staking operation
      * @param {BuildStakingOperationRequest} buildStakingOperationRequest 
@@ -3444,6 +4183,18 @@ export interface StakeApiInterface {
      * @memberof StakeApiInterface
      */
     buildStakingOperation(buildStakingOperationRequest: BuildStakingOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation>;
+
+    /**
+     * Create a new staking operation.
+     * @summary Create a new staking operation for an address
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The ID of the address to create the staking operation for.
+     * @param {CreateStakingOperationRequest} createStakingOperationRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApiInterface
+     */
+    createStakingOperation(walletId: string, addressId: string, createStakingOperationRequest: CreateStakingOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation>;
 
     /**
      * Fetch staking rewards for a list of addresses
@@ -3479,6 +4230,18 @@ export interface StakeApiInterface {
      */
     getStakingContext(getStakingContextRequest: GetStakingContextRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingContext>;
 
+    /**
+     * Get the latest state of a staking operation.
+     * @summary Get the latest state of a staking operation
+     * @param {string} walletId The ID of the wallet the address belongs to
+     * @param {string} addressId The ID of the address to fetch the staking operation for.
+     * @param {string} stakingOperationId The ID of the staking operation.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApiInterface
+     */
+    getStakingOperation(walletId: string, addressId: string, stakingOperationId: string, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation>;
+
 }
 
 /**
@@ -3489,6 +4252,21 @@ export interface StakeApiInterface {
  */
 export class StakeApi extends BaseAPI implements StakeApiInterface {
     /**
+     * Broadcast a staking operation.
+     * @summary Broadcast a staking operation
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The ID of the address the staking operation belongs to.
+     * @param {string} stakingOperationId The ID of the staking operation to broadcast.
+     * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApi
+     */
+    public broadcastStakingOperation(walletId: string, addressId: string, stakingOperationId: string, broadcastStakingOperationRequest: BroadcastStakingOperationRequest, options?: RawAxiosRequestConfig) {
+        return StakeApiFp(this.configuration).broadcastStakingOperation(walletId, addressId, stakingOperationId, broadcastStakingOperationRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Build a new staking operation
      * @summary Build a new staking operation
      * @param {BuildStakingOperationRequest} buildStakingOperationRequest 
@@ -3498,6 +4276,20 @@ export class StakeApi extends BaseAPI implements StakeApiInterface {
      */
     public buildStakingOperation(buildStakingOperationRequest: BuildStakingOperationRequest, options?: RawAxiosRequestConfig) {
         return StakeApiFp(this.configuration).buildStakingOperation(buildStakingOperationRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Create a new staking operation.
+     * @summary Create a new staking operation for an address
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The ID of the address to create the staking operation for.
+     * @param {CreateStakingOperationRequest} createStakingOperationRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApi
+     */
+    public createStakingOperation(walletId: string, addressId: string, createStakingOperationRequest: CreateStakingOperationRequest, options?: RawAxiosRequestConfig) {
+        return StakeApiFp(this.configuration).createStakingOperation(walletId, addressId, createStakingOperationRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -3538,6 +4330,20 @@ export class StakeApi extends BaseAPI implements StakeApiInterface {
      */
     public getStakingContext(getStakingContextRequest: GetStakingContextRequest, options?: RawAxiosRequestConfig) {
         return StakeApiFp(this.configuration).getStakingContext(getStakingContextRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get the latest state of a staking operation.
+     * @summary Get the latest state of a staking operation
+     * @param {string} walletId The ID of the wallet the address belongs to
+     * @param {string} addressId The ID of the address to fetch the staking operation for.
+     * @param {string} stakingOperationId The ID of the staking operation.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApi
+     */
+    public getStakingOperation(walletId: string, addressId: string, stakingOperationId: string, options?: RawAxiosRequestConfig) {
+        return StakeApiFp(this.configuration).getStakingOperation(walletId, addressId, stakingOperationId, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -5270,6 +6076,387 @@ export class WalletsApi extends BaseAPI implements WalletsApiInterface {
      */
     public listWallets(limit?: number, page?: string, options?: RawAxiosRequestConfig) {
         return WalletsApiFp(this.configuration).listWallets(limit, page, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * WebhooksApi - axios parameter creator
+ * @export
+ */
+export const WebhooksApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Create a new webhook
+         * @summary Create a new webhook
+         * @param {CreateWebhookRequest} [createWebhookRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createWebhook: async (createWebhookRequest?: CreateWebhookRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/v1/webhooks`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createWebhookRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Delete a webhook
+         * @summary Delete a webhook
+         * @param {string} webhookId The Webhook uuid that needs to be deleted
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteWebhook: async (webhookId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'webhookId' is not null or undefined
+            assertParamExists('deleteWebhook', 'webhookId', webhookId)
+            const localVarPath = `/v1/webhooks/{webhook_id}`
+                .replace(`{${"webhook_id"}}`, encodeURIComponent(String(webhookId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * List webhooks, optionally filtered by event type.
+         * @summary List webhooks
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listWebhooks: async (limit?: number, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/v1/webhooks`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Update a webhook
+         * @summary Update a webhook
+         * @param {string} webhookId The Webhook id that needs to be updated
+         * @param {UpdateWebhookRequest} [updateWebhookRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateWebhook: async (webhookId: string, updateWebhookRequest?: UpdateWebhookRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'webhookId' is not null or undefined
+            assertParamExists('updateWebhook', 'webhookId', webhookId)
+            const localVarPath = `/v1/webhooks/{webhook_id}`
+                .replace(`{${"webhook_id"}}`, encodeURIComponent(String(webhookId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateWebhookRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * WebhooksApi - functional programming interface
+ * @export
+ */
+export const WebhooksApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = WebhooksApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Create a new webhook
+         * @summary Create a new webhook
+         * @param {CreateWebhookRequest} [createWebhookRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createWebhook(createWebhookRequest?: CreateWebhookRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Webhook>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createWebhook(createWebhookRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['WebhooksApi.createWebhook']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Delete a webhook
+         * @summary Delete a webhook
+         * @param {string} webhookId The Webhook uuid that needs to be deleted
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteWebhook(webhookId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteWebhook(webhookId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['WebhooksApi.deleteWebhook']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * List webhooks, optionally filtered by event type.
+         * @summary List webhooks
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listWebhooks(limit?: number, page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WebhookList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listWebhooks(limit, page, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['WebhooksApi.listWebhooks']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Update a webhook
+         * @summary Update a webhook
+         * @param {string} webhookId The Webhook id that needs to be updated
+         * @param {UpdateWebhookRequest} [updateWebhookRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateWebhook(webhookId: string, updateWebhookRequest?: UpdateWebhookRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Webhook>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateWebhook(webhookId, updateWebhookRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['WebhooksApi.updateWebhook']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * WebhooksApi - factory interface
+ * @export
+ */
+export const WebhooksApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = WebhooksApiFp(configuration)
+    return {
+        /**
+         * Create a new webhook
+         * @summary Create a new webhook
+         * @param {CreateWebhookRequest} [createWebhookRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createWebhook(createWebhookRequest?: CreateWebhookRequest, options?: any): AxiosPromise<Webhook> {
+            return localVarFp.createWebhook(createWebhookRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Delete a webhook
+         * @summary Delete a webhook
+         * @param {string} webhookId The Webhook uuid that needs to be deleted
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteWebhook(webhookId: string, options?: any): AxiosPromise<void> {
+            return localVarFp.deleteWebhook(webhookId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * List webhooks, optionally filtered by event type.
+         * @summary List webhooks
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listWebhooks(limit?: number, page?: string, options?: any): AxiosPromise<WebhookList> {
+            return localVarFp.listWebhooks(limit, page, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Update a webhook
+         * @summary Update a webhook
+         * @param {string} webhookId The Webhook id that needs to be updated
+         * @param {UpdateWebhookRequest} [updateWebhookRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateWebhook(webhookId: string, updateWebhookRequest?: UpdateWebhookRequest, options?: any): AxiosPromise<Webhook> {
+            return localVarFp.updateWebhook(webhookId, updateWebhookRequest, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * WebhooksApi - interface
+ * @export
+ * @interface WebhooksApi
+ */
+export interface WebhooksApiInterface {
+    /**
+     * Create a new webhook
+     * @summary Create a new webhook
+     * @param {CreateWebhookRequest} [createWebhookRequest] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WebhooksApiInterface
+     */
+    createWebhook(createWebhookRequest?: CreateWebhookRequest, options?: RawAxiosRequestConfig): AxiosPromise<Webhook>;
+
+    /**
+     * Delete a webhook
+     * @summary Delete a webhook
+     * @param {string} webhookId The Webhook uuid that needs to be deleted
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WebhooksApiInterface
+     */
+    deleteWebhook(webhookId: string, options?: RawAxiosRequestConfig): AxiosPromise<void>;
+
+    /**
+     * List webhooks, optionally filtered by event type.
+     * @summary List webhooks
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WebhooksApiInterface
+     */
+    listWebhooks(limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<WebhookList>;
+
+    /**
+     * Update a webhook
+     * @summary Update a webhook
+     * @param {string} webhookId The Webhook id that needs to be updated
+     * @param {UpdateWebhookRequest} [updateWebhookRequest] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WebhooksApiInterface
+     */
+    updateWebhook(webhookId: string, updateWebhookRequest?: UpdateWebhookRequest, options?: RawAxiosRequestConfig): AxiosPromise<Webhook>;
+
+}
+
+/**
+ * WebhooksApi - object-oriented interface
+ * @export
+ * @class WebhooksApi
+ * @extends {BaseAPI}
+ */
+export class WebhooksApi extends BaseAPI implements WebhooksApiInterface {
+    /**
+     * Create a new webhook
+     * @summary Create a new webhook
+     * @param {CreateWebhookRequest} [createWebhookRequest] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WebhooksApi
+     */
+    public createWebhook(createWebhookRequest?: CreateWebhookRequest, options?: RawAxiosRequestConfig) {
+        return WebhooksApiFp(this.configuration).createWebhook(createWebhookRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Delete a webhook
+     * @summary Delete a webhook
+     * @param {string} webhookId The Webhook uuid that needs to be deleted
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WebhooksApi
+     */
+    public deleteWebhook(webhookId: string, options?: RawAxiosRequestConfig) {
+        return WebhooksApiFp(this.configuration).deleteWebhook(webhookId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * List webhooks, optionally filtered by event type.
+     * @summary List webhooks
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WebhooksApi
+     */
+    public listWebhooks(limit?: number, page?: string, options?: RawAxiosRequestConfig) {
+        return WebhooksApiFp(this.configuration).listWebhooks(limit, page, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Update a webhook
+     * @summary Update a webhook
+     * @param {string} webhookId The Webhook id that needs to be updated
+     * @param {UpdateWebhookRequest} [updateWebhookRequest] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WebhooksApi
+     */
+    public updateWebhook(webhookId: string, updateWebhookRequest?: UpdateWebhookRequest, options?: RawAxiosRequestConfig) {
+        return WebhooksApiFp(this.configuration).updateWebhook(webhookId, updateWebhookRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

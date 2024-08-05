@@ -1,6 +1,6 @@
 import { Decimal } from "decimal.js";
 import { ethers } from "ethers";
-import { Address as AddressModel } from "../../client";
+import { Address as AddressModel, StakingOperationStatusEnum } from "../../client";
 import { Address } from "../address";
 import { Asset } from "../asset";
 import { Coinbase } from "../coinbase";
@@ -14,9 +14,11 @@ import {
   Destination,
   TransferStatus,
   TransactionStatus,
+  StakeOptionsMode,
 } from "../types";
 import { delay } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
+import { StakingOperation } from "../staking_operation";
 
 /**
  * A representation of a blockchain address, which is a wallet-controlled account on a network.
@@ -373,5 +375,228 @@ export class WalletAddress extends Address {
         `Insufficient funds: ${amount} requested, but only ${currentBalance} available`,
       );
     }
+  }
+
+  /**
+   * Creates a staking operation to stake.
+   *
+   * @param amount - The amount to stake.
+   * @param assetId - The asset to stake.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options such as setting the mode for the staking action.
+   * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
+   * @param intervalSeconds - The amount to check each time for a successful broadcast.
+   * @returns The staking operation after it's completed successfully.
+   */
+  public async createStake(
+    amount: Amount,
+    assetId: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
+    timeoutSeconds = 60,
+    intervalSeconds = 0.2,
+  ): Promise<StakingOperation> {
+    await this.validateCanStake(amount, assetId, mode, options);
+    return this.createStakingOperation(
+      amount,
+      assetId,
+      "stake",
+      mode,
+      options,
+      timeoutSeconds,
+      intervalSeconds,
+    );
+  }
+
+  /**
+   * Creates a staking operation to unstake.
+   *
+   * @param amount - The amount to unstake.
+   * @param assetId - The asset to unstake.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options such as setting the mode for the staking action.
+   * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
+   * @param intervalSeconds - The amount to check each time for a successful broadcast.
+   * @returns The staking operation after it's completed successfully.
+   */
+  public async createUnstake(
+    amount: Amount,
+    assetId: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
+    timeoutSeconds = 60,
+    intervalSeconds = 0.2,
+  ): Promise<StakingOperation> {
+    await this.validateCanUnstake(amount, assetId, mode, options);
+    return this.createStakingOperation(
+      amount,
+      assetId,
+      "unstake",
+      mode,
+      options,
+      timeoutSeconds,
+      intervalSeconds,
+    );
+  }
+
+  /**
+   * Creates a staking operation to claim stake.
+   *
+   * @param amount - The amount to claim stake.
+   * @param assetId - The asset to claim stake.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options such as setting the mode for the staking action.
+   * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
+   * @param intervalSeconds - The amount to check each time for a successful broadcast.
+   * @returns The staking operation after it's completed successfully.
+   */
+  public async createClaimStake(
+    amount: Amount,
+    assetId: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
+    timeoutSeconds = 60,
+    intervalSeconds = 0.2,
+  ): Promise<StakingOperation> {
+    await this.validateCanClaimStake(amount, assetId, mode, options);
+    return this.createStakingOperation(
+      amount,
+      assetId,
+      "claim_stake",
+      mode,
+      options,
+      timeoutSeconds,
+      intervalSeconds,
+    );
+  }
+
+  /**
+   * Creates a staking operation to stake, signs it, and broadcasts it on the blockchain.
+   *
+   * @param amount - The amount for the staking operation.
+   * @param assetId - The asset to the staking operation.
+   * @param action - The type of staking action to perform.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options such as setting the mode for the staking action.
+   * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
+   * @param intervalSeconds - The amount to check each time for a successful broadcast.
+   * @returns The staking operation after it's completed fully.
+   */
+  private async createStakingOperation(
+    amount: Amount,
+    assetId: string,
+    action: string,
+    mode: StakeOptionsMode,
+    options: { [key: string]: string },
+    timeoutSeconds: number,
+    intervalSeconds: number,
+  ): Promise<StakingOperation> {
+    if (new Decimal(amount.toString()).lessThanOrEqualTo(0)) {
+      throw new Error("Amount required greater than zero.");
+    }
+
+    let stakingOperation = await this.createStakingOperationRequest(
+      amount,
+      assetId,
+      action,
+      mode,
+      options,
+    );
+
+    // NOTE: Staking does not yet support server signers at this point.
+    await stakingOperation.sign(this.key!);
+    for (let i = 0; i < stakingOperation.getTransactions().length; i++) {
+      const transaction = stakingOperation.getTransactions()[0];
+      if (!transaction.isSigned()) {
+        continue;
+      }
+      stakingOperation = await this.broadcastStakingOperationRequest(
+        stakingOperation,
+        transaction.getSignedPayload()!.slice(2),
+        i,
+      );
+    }
+
+    const startTime = Date.now();
+    while (Date.now() - startTime < timeoutSeconds * 1000) {
+      await stakingOperation.reload();
+      const status = stakingOperation.getStatus();
+      if (
+        status === StakingOperationStatusEnum.Complete ||
+        status === StakingOperationStatusEnum.Failed
+      ) {
+        return stakingOperation;
+      }
+      await delay(intervalSeconds);
+    }
+    throw new Error("Staking Operation timed out");
+  }
+
+  /**
+   * A helper function that creates the staking operation.
+   *
+   * @param amount - The amount for the staking operation.
+   * @param assetId - The asset for the staking operation.
+   * @param action - The type of staking action to perform.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options such as setting the mode for the staking action.
+   * @private
+   * @throws {Error} if the amount is less than zero.
+   * @returns The created staking operation.
+   */
+  private async createStakingOperationRequest(
+    amount: Amount,
+    assetId: string,
+    action: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
+  ): Promise<StakingOperation> {
+    const asset = await Asset.fetch(this.getNetworkId(), assetId);
+
+    options.amount = asset.toAtomicAmount(new Decimal(amount.toString())).toString();
+    options.mode = mode ? mode : StakeOptionsMode.DEFAULT;
+
+    const stakingOperationRequest = {
+      network_id: this.getNetworkId(),
+      asset_id: Asset.primaryDenomination(assetId),
+      action: action,
+      options: options,
+    };
+
+    const response = await Coinbase.apiClients.stake!.createStakingOperation(
+      this.getWalletId(),
+      this.getId(),
+      stakingOperationRequest,
+    );
+
+    return new StakingOperation(response!.data);
+  }
+
+  /**
+   * A helper function that broadcasts the signed payload.
+   *
+   * @param stakingOperation - The staking operation related to the signed payload.
+   * @param signedPayload - The payload that's being broadcasted.
+   * @param transactionIndex - The index of the transaction in the array from the staking operation.
+   * @private
+   * @returns An updated staking operation with the broadcasted transaction.
+   */
+  private async broadcastStakingOperationRequest(
+    stakingOperation: StakingOperation,
+    signedPayload: string,
+    transactionIndex: number,
+  ): Promise<StakingOperation> {
+    const broadcastStakingOperationRequest = {
+      signed_payload: signedPayload,
+      transaction_index: transactionIndex,
+    };
+    const response = await Coinbase.apiClients.stake!.broadcastStakingOperation(
+      this.getWalletId(),
+      this.getId(),
+      stakingOperation.getID(),
+      broadcastStakingOperationRequest,
+    );
+
+    return new StakingOperation(response!.data);
   }
 }
