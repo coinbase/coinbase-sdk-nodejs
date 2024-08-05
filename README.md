@@ -56,7 +56,7 @@ npm install @coinbase/coinbase-sdk
 or
 
 ```bash
-yarn install @coinbase/coinbase-sdk
+yarn add @coinbase/coinbase-sdk
 ```
 
 ## Usage
