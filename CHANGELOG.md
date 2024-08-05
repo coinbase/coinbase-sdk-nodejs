@@ -1,8 +1,12 @@
 # Coinbase Node.js SDK Changelog
 
-## Unreleased
+## [0.0.14] - 2024-08-05
 
-## Changed
+### Added
+
+- Support for Shared ETH Staking for Wallet Addresses
+
+### Changed
 
 - `unsigned_payload`, `signed_payload`, `status`, and `transaction_hash` in-line fields on `Transfer` are deprecated in favor of those on `Transaction`
 
