@@ -373,7 +373,10 @@ describe("Wallet Class", () => {
       });
       Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
         ...VALID_TRANSFER_MODEL,
-        status: TransferStatus.COMPLETE,
+        transaction: {
+          ...VALID_TRANSFER_MODEL.transaction,
+          status: TransactionStatusEnum.Complete,
+        },
       });
       await wallet.createTransfer({
         amount: weiAmount,
@@ -461,7 +464,10 @@ describe("Wallet Class", () => {
       Coinbase.apiClients.transfer!.createTransfer = mockReturnValue(VALID_TRANSFER_MODEL);
       Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
         ...VALID_TRANSFER_MODEL,
-        status: TransferStatus.COMPLETE,
+        transaction: {
+          ...VALID_TRANSFER_MODEL,
+          status: TransactionStatusEnum.Complete,
+        },
       });
 
       await wallet.createTransfer({
