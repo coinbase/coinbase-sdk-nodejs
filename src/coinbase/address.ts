@@ -4,6 +4,7 @@ import { Asset } from "./asset";
 import { Balance } from "./balance";
 import { BalanceMap } from "./balance_map";
 import { FaucetTransaction } from "./faucet_transaction";
+import { HistoricalBalance } from "./historical_balance";
 import { Amount, StakeOptionsMode } from "./types";
 import { formatDate, getWeekBackDate } from "./utils";
 import { StakingRewardFormat } from "../client";
@@ -77,6 +78,41 @@ export class Address {
     }
 
     return Balance.fromModelAndAssetId(response.data, assetId).amount;
+  }
+
+  /**
+   * Returns the historical balance of the provided asset.
+   *
+   * @param assetId - The asset ID.
+   * @returns The list of historical balance of the asset.
+   */
+  public async listHistoricalBalance(assetId: string): Promise<HistoricalBalance[]> {
+    const historyList: HistoricalBalance[] = [];
+    const queue: string[] = [""];
+
+    while (queue.length > 0) {
+      const page = queue.shift();
+      const response = await Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance(
+        this.getNetworkId(),
+        this.getId(),
+        Asset.primaryDenomination(assetId),
+        100,
+        page ? page : undefined,
+      );
+
+      response.data.data.forEach(historicalBalanceModel => {
+        const historicalBalance = HistoricalBalance.fromModel(historicalBalanceModel);
+        historyList.push(historicalBalance);
+      });
+
+      if (response.data.has_more) {
+        if (response.data.next_page) {
+          queue.push(response.data.next_page);
+        }
+      }
+    }
+
+    return historyList;
   }
 
   /**

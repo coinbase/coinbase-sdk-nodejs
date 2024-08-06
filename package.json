@@ -4,7 +4,7 @@
   "license": "ISC",
   "description": "Coinbase Platform SDK",
   "repository": "https://github.com/coinbase/coinbase-sdk-nodejs",
-  "version": "0.0.14",
+  "version": "0.0.12",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -28,7 +28,6 @@
     "@scure/bip32": "^1.4.0",
     "axios": "^1.6.8",
     "axios-mock-adapter": "^1.22.0",
-    "axios-retry": "^4.4.1",
     "bip32": "^4.0.0",
     "bip39": "^3.1.0",
     "decimal.js": "^10.4.3",

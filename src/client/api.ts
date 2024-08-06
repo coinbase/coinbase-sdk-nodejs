@@ -24,7 +24,7 @@ import type { RequestArgs } from './base';
 import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerMap } from './base';
 
 /**
- * 
+ *
  * @export
  * @interface Address
  */
@@ -55,13 +55,13 @@ export interface Address {
     'address_id': string;
 }
 /**
- * 
+ *
  * @export
  * @interface AddressBalanceList
  */
 export interface AddressBalanceList {
     /**
-     * 
+     *
      * @type {Array<Balance>}
      * @memberof AddressBalanceList
      */
@@ -86,13 +86,13 @@ export interface AddressBalanceList {
     'total_count': number;
 }
 /**
- * 
+ *
  * @export
  * @interface AddressHistoricalBalanceList
  */
 export interface AddressHistoricalBalanceList {
     /**
-     * 
+     *
      * @type {Array<HistoricalBalance>}
      * @memberof AddressHistoricalBalanceList
      */
@@ -111,13 +111,13 @@ export interface AddressHistoricalBalanceList {
     'next_page': string;
 }
 /**
- * 
+ *
  * @export
  * @interface AddressList
  */
 export interface AddressList {
     /**
-     * 
+     *
      * @type {Array<Address>}
      * @memberof AddressList
      */
@@ -185,14 +185,14 @@ export interface Balance {
      */
     'amount': string;
     /**
-     * 
+     *
      * @type {Asset}
      * @memberof Balance
      */
     'asset': Asset;
 }
 /**
- * 
+ *
  * @export
  * @interface BroadcastStakingOperationRequest
  */
@@ -211,7 +211,7 @@ export interface BroadcastStakingOperationRequest {
     'transaction_index': number;
 }
 /**
- * 
+ *
  * @export
  * @interface BroadcastTradeRequest
  */
@@ -230,7 +230,7 @@ export interface BroadcastTradeRequest {
     'approve_transaction_signed_payload'?: string;
 }
 /**
- * 
+ *
  * @export
  * @interface BroadcastTransferRequest
  */
@@ -243,7 +243,7 @@ export interface BroadcastTransferRequest {
     'signed_payload': string;
 }
 /**
- * 
+ *
  * @export
  * @interface BuildStakingOperationRequest
  */
@@ -273,7 +273,7 @@ export interface BuildStakingOperationRequest {
      */
     'action': string;
     /**
-     * 
+     *
      * @type {{ [key: string]: string; }}
      * @memberof BuildStakingOperationRequest
      */
@@ -390,7 +390,7 @@ export interface ContractEventList {
     'has_more': boolean;
 }
 /**
- * 
+ *
  * @export
  * @interface CreateAddressRequest
  */
@@ -409,7 +409,7 @@ export interface CreateAddressRequest {
     'attestation'?: string;
 }
 /**
- * 
+ *
  * @export
  * @interface CreateServerSignerRequest
  */
@@ -434,7 +434,7 @@ export interface CreateServerSignerRequest {
     'is_mpc': boolean;
 }
 /**
- * 
+ *
  * @export
  * @interface CreateStakingOperationRequest
  */
@@ -458,14 +458,14 @@ export interface CreateStakingOperationRequest {
      */
     'action': string;
     /**
-     * 
+     *
      * @type {{ [key: string]: string; }}
      * @memberof CreateStakingOperationRequest
      */
     'options': { [key: string]: string; };
 }
 /**
- * 
+ *
  * @export
  * @interface CreateTradeRequest
  */
@@ -490,7 +490,7 @@ export interface CreateTradeRequest {
     'to_asset_id': string;
 }
 /**
- * 
+ *
  * @export
  * @interface CreateTransferRequest
  */
@@ -521,13 +521,13 @@ export interface CreateTransferRequest {
     'destination': string;
 }
 /**
- * 
+ *
  * @export
  * @interface CreateWalletRequest
  */
 export interface CreateWalletRequest {
     /**
-     * 
+     *
      * @type {CreateWalletRequestWallet}
      * @memberof CreateWalletRequest
      */
@@ -553,7 +553,7 @@ export interface CreateWalletRequestWallet {
     'use_server_signer'?: boolean;
 }
 /**
- * 
+ *
  * @export
  * @interface CreateWebhookRequest
  */
@@ -565,7 +565,7 @@ export interface CreateWebhookRequest {
      */
     'network_id': string;
     /**
-     * 
+     *
      * @type {WebhookEventType}
      * @memberof CreateWebhookRequest
      */
@@ -634,13 +634,13 @@ export interface EthereumValidatorMetadata {
      */
     'withdrawableEpoch': string;
     /**
-     * 
+     *
      * @type {Balance}
      * @memberof EthereumValidatorMetadata
      */
     'balance': Balance;
     /**
-     * 
+     *
      * @type {Balance}
      * @memberof EthereumValidatorMetadata
      */
@@ -682,13 +682,13 @@ export type Feature = typeof Feature[keyof typeof Feature];
 
 
 /**
- * 
+ *
  * @export
  * @interface FetchStakingRewards200Response
  */
 export interface FetchStakingRewards200Response {
     /**
-     * 
+     *
      * @type {Array<StakingReward>}
      * @memberof FetchStakingRewards200Response
      */
@@ -707,7 +707,7 @@ export interface FetchStakingRewards200Response {
     'next_page': string;
 }
 /**
- * 
+ *
  * @export
  * @interface FetchStakingRewardsRequest
  */
@@ -743,7 +743,7 @@ export interface FetchStakingRewardsRequest {
      */
     'end_time': string;
     /**
-     * 
+     *
      * @type {StakingRewardFormat}
      * @memberof FetchStakingRewardsRequest
      */
@@ -752,7 +752,7 @@ export interface FetchStakingRewardsRequest {
 
 
 /**
- * 
+ *
  * @export
  * @interface GetStakingContextRequest
  */
@@ -776,7 +776,7 @@ export interface GetStakingContextRequest {
      */
     'address_id': string;
     /**
-     * 
+     *
      * @type {{ [key: string]: string; }}
      * @memberof GetStakingContextRequest
      */
@@ -807,7 +807,7 @@ export interface HistoricalBalance {
      */
     'block_height': string;
     /**
-     * 
+     *
      * @type {Asset}
      * @memberof HistoricalBalance
      */
@@ -839,19 +839,19 @@ export interface ModelError {
  */
 export interface NativeEthStakingContext {
     /**
-     * 
+     *
      * @type {Balance}
      * @memberof NativeEthStakingContext
      */
     'stakeable_balance': Balance;
     /**
-     * 
+     *
      * @type {Balance}
      * @memberof NativeEthStakingContext
      */
     'unstakeable_balance': Balance;
     /**
-     * 
+     *
      * @type {Balance}
      * @memberof NativeEthStakingContext
      */
@@ -864,19 +864,19 @@ export interface NativeEthStakingContext {
  */
 export interface PartialEthStakingContext {
     /**
-     * 
+     *
      * @type {Balance}
      * @memberof PartialEthStakingContext
      */
     'stakeable_balance': Balance;
     /**
-     * 
+     *
      * @type {Balance}
      * @memberof PartialEthStakingContext
      */
     'unstakeable_balance': Balance;
     /**
-     * 
+     *
      * @type {Balance}
      * @memberof PartialEthStakingContext
      */
@@ -970,7 +970,7 @@ export interface ServerSignerEvent {
      */
     'server_signer_id': string;
     /**
-     * 
+     *
      * @type {ServerSignerEventEvent}
      * @memberof ServerSignerEvent
      */
@@ -983,13 +983,13 @@ export interface ServerSignerEvent {
 export type ServerSignerEventEvent = SeedCreationEvent | SignatureCreationEvent;
 
 /**
- * 
+ *
  * @export
  * @interface ServerSignerEventList
  */
 export interface ServerSignerEventList {
     /**
-     * 
+     *
      * @type {Array<ServerSignerEvent>}
      * @memberof ServerSignerEventList
      */
@@ -1014,13 +1014,13 @@ export interface ServerSignerEventList {
     'total_count': number;
 }
 /**
- * 
+ *
  * @export
  * @interface ServerSignerList
  */
 export interface ServerSignerList {
     /**
-     * 
+     *
      * @type {Array<ServerSigner>}
      * @memberof ServerSignerList
      */
@@ -1087,7 +1087,7 @@ export interface SignatureCreationEvent {
      */
     'signing_payload': string;
     /**
-     * 
+     *
      * @type {TransactionType}
      * @memberof SignatureCreationEvent
      */
@@ -1126,7 +1126,7 @@ export interface SignatureCreationEventResult {
      */
     'address_id': string;
     /**
-     * 
+     *
      * @type {TransactionType}
      * @memberof SignatureCreationEventResult
      */
@@ -1178,7 +1178,7 @@ export interface SignedVoluntaryExitMessageMetadata {
  */
 export interface StakingContext {
     /**
-     * 
+     *
      * @type {StakingContextContext}
      * @memberof StakingContext
      */
@@ -1233,7 +1233,7 @@ export interface StakingOperation {
      */
     'transactions': Array<Transaction>;
     /**
-     * 
+     *
      * @type {StakingOperationMetadata}
      * @memberof StakingOperation
      */
@@ -1287,7 +1287,7 @@ export interface StakingReward {
      */
     'state': StakingRewardStateEnum;
     /**
-     * 
+     *
      * @type {StakingRewardFormat}
      * @memberof StakingReward
      */
@@ -1352,7 +1352,7 @@ export interface Trade {
      */
     'from_amount': string;
     /**
-     * 
+     *
      * @type {Asset}
      * @memberof Trade
      */
@@ -1364,32 +1364,32 @@ export interface Trade {
      */
     'to_amount': string;
     /**
-     * 
+     *
      * @type {Asset}
      * @memberof Trade
      */
     'to_asset': Asset;
     /**
-     * 
+     *
      * @type {Transaction}
      * @memberof Trade
      */
     'transaction': Transaction;
     /**
-     * 
+     *
      * @type {Transaction}
      * @memberof Trade
      */
     'approve_transaction'?: Transaction;
 }
 /**
- * 
+ *
  * @export
  * @interface TradeList
  */
 export interface TradeList {
     /**
-     * 
+     *
      * @type {Array<Trade>}
      * @memberof TradeList
      */
@@ -1474,7 +1474,7 @@ export const TransactionStatusEnum = {
 export type TransactionStatusEnum = typeof TransactionStatusEnum[keyof typeof TransactionStatusEnum];
 
 /**
- * 
+ *
  * @export
  * @enum {string}
  */
@@ -1529,7 +1529,7 @@ export interface Transfer {
      */
     'asset_id': string;
     /**
-     * 
+     *
      * @type {Asset}
      * @memberof Transfer
      */
@@ -1541,54 +1541,20 @@ export interface Transfer {
      */
     'transfer_id': string;
     /**
-     * 
+     *
      * @type {Transaction}
      * @memberof Transfer
      */
     'transaction': Transaction;
-    /**
-     * The unsigned payload of the transfer. This is the payload that needs to be signed by the sender.
-     * @type {string}
-     * @memberof Transfer
-     */
-    'unsigned_payload': string;
-    /**
-     * The signed payload of the transfer. This is the payload that has been signed by the sender.
-     * @type {string}
-     * @memberof Transfer
-     */
-    'signed_payload'?: string;
-    /**
-     * The hash of the transfer transaction
-     * @type {string}
-     * @memberof Transfer
-     */
-    'transaction_hash'?: string;
-    /**
-     * The status of the transfer
-     * @type {string}
-     * @memberof Transfer
-     */
-    'status': TransferStatusEnum;
 }
-
-export const TransferStatusEnum = {
-    Pending: 'pending',
-    Broadcast: 'broadcast',
-    Complete: 'complete',
-    Failed: 'failed'
-} as const;
-
-export type TransferStatusEnum = typeof TransferStatusEnum[keyof typeof TransferStatusEnum];
-
 /**
- * 
+ *
  * @export
  * @interface TransferList
  */
 export interface TransferList {
     /**
-     * 
+     *
      * @type {Array<Transfer>}
      * @memberof TransferList
      */
@@ -1613,7 +1579,7 @@ export interface TransferList {
     'total_count': number;
 }
 /**
- * 
+ *
  * @export
  * @interface UpdateWebhookRequest
  */
@@ -1625,7 +1591,7 @@ export interface UpdateWebhookRequest {
      */
     'network_id'?: string;
     /**
-     * 
+     *
      * @type {WebhookEventType}
      * @memberof UpdateWebhookRequest
      */
@@ -1646,7 +1612,7 @@ export interface UpdateWebhookRequest {
 
 
 /**
- * 
+ *
  * @export
  * @interface User
  */
@@ -1658,7 +1624,7 @@ export interface User {
      */
     'id': string;
     /**
-     * 
+     *
      * @type {string}
      * @memberof User
      */
@@ -1695,7 +1661,7 @@ export interface Validator {
      */
     'status': string;
     /**
-     * 
+     *
      * @type {ValidatorDetails}
      * @memberof Validator
      */
@@ -1708,13 +1674,13 @@ export interface Validator {
 export type ValidatorDetails = EthereumValidatorMetadata;
 
 /**
- * 
+ *
  * @export
  * @interface ValidatorList
  */
 export interface ValidatorList {
     /**
-     * 
+     *
      * @type {Array<Validator>}
      * @memberof ValidatorList
      */
@@ -1733,7 +1699,7 @@ export interface ValidatorList {
     'next_page': string;
 }
 /**
- * 
+ *
  * @export
  * @interface Wallet
  */
@@ -1751,7 +1717,7 @@ export interface Wallet {
      */
     'network_id': string;
     /**
-     * 
+     *
      * @type {Address}
      * @memberof Wallet
      */
@@ -1784,7 +1750,7 @@ export type WalletServerSignerStatusEnum = typeof WalletServerSignerStatusEnum[k
  */
 export interface WalletList {
     /**
-     * 
+     *
      * @type {Array<Wallet>}
      * @memberof WalletList
      */
@@ -1827,7 +1793,7 @@ export interface Webhook {
      */
     'network_id'?: string;
     /**
-     * 
+     *
      * @type {WebhookEventType}
      * @memberof Webhook
      */
@@ -1885,7 +1851,7 @@ export interface WebhookEventFilter {
     'to_address'?: string;
 }
 /**
- * 
+ *
  * @export
  * @enum {string}
  */
@@ -1900,13 +1866,13 @@ export type WebhookEventType = typeof WebhookEventType[keyof typeof WebhookEvent
 
 
 /**
- * 
+ *
  * @export
  * @interface WebhookList
  */
 export interface WebhookList {
     /**
-     * 
+     *
      * @type {Array<Webhook>}
      * @memberof WebhookList
      */
@@ -1935,7 +1901,7 @@ export const AddressesApiAxiosParamCreator = function (configuration?: Configura
          * Create a new address scoped to the wallet.
          * @summary Create a new address
          * @param {string} walletId The ID of the wallet to create the address in.
-         * @param {CreateAddressRequest} [createAddressRequest] 
+         * @param {CreateAddressRequest} [createAddressRequest]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -1956,7 +1922,7 @@ export const AddressesApiAxiosParamCreator = function (configuration?: Configura
             const localVarQueryParameter = {} as any;
 
 
-    
+
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -1997,7 +1963,7 @@ export const AddressesApiAxiosParamCreator = function (configuration?: Configura
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2039,7 +2005,7 @@ export const AddressesApiAxiosParamCreator = function (configuration?: Configura
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2082,7 +2048,7 @@ export const AddressesApiAxiosParamCreator = function (configuration?: Configura
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2126,7 +2092,7 @@ export const AddressesApiAxiosParamCreator = function (configuration?: Configura
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2164,7 +2130,7 @@ export const AddressesApiAxiosParamCreator = function (configuration?: Configura
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2188,7 +2154,7 @@ export const AddressesApiFp = function(configuration?: Configuration) {
          * Create a new address scoped to the wallet.
          * @summary Create a new address
          * @param {string} walletId The ID of the wallet to create the address in.
-         * @param {CreateAddressRequest} [createAddressRequest] 
+         * @param {CreateAddressRequest} [createAddressRequest]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2285,7 +2251,7 @@ export const AddressesApiFactory = function (configuration?: Configuration, base
          * Create a new address scoped to the wallet.
          * @summary Create a new address
          * @param {string} walletId The ID of the wallet to create the address in.
-         * @param {CreateAddressRequest} [createAddressRequest] 
+         * @param {CreateAddressRequest} [createAddressRequest]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -2363,7 +2329,7 @@ export interface AddressesApiInterface {
      * Create a new address scoped to the wallet.
      * @summary Create a new address
      * @param {string} walletId The ID of the wallet to create the address in.
-     * @param {CreateAddressRequest} [createAddressRequest] 
+     * @param {CreateAddressRequest} [createAddressRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AddressesApiInterface
@@ -2441,7 +2407,7 @@ export class AddressesApi extends BaseAPI implements AddressesApiInterface {
      * Create a new address scoped to the wallet.
      * @summary Create a new address
      * @param {string} walletId The ID of the wallet to create the address in.
-     * @param {CreateAddressRequest} [createAddressRequest] 
+     * @param {CreateAddressRequest} [createAddressRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AddressesApi
@@ -2555,7 +2521,7 @@ export const AssetsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2725,7 +2691,7 @@ export const ContractEventsApiAxiosParamCreator = function (configuration?: Conf
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2887,7 +2853,7 @@ export const ExternalAddressesApiAxiosParamCreator = function (configuration?: C
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2939,7 +2905,7 @@ export const ExternalAddressesApiAxiosParamCreator = function (configuration?: C
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -2982,7 +2948,7 @@ export const ExternalAddressesApiAxiosParamCreator = function (configuration?: C
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3020,7 +2986,7 @@ export const ExternalAddressesApiAxiosParamCreator = function (configuration?: C
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3296,7 +3262,7 @@ export const ServerSignersApiAxiosParamCreator = function (configuration?: Confi
         /**
          * Create a new Server-Signer
          * @summary Create a new Server-Signer
-         * @param {CreateServerSignerRequest} [createServerSignerRequest] 
+         * @param {CreateServerSignerRequest} [createServerSignerRequest]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3314,7 +3280,7 @@ export const ServerSignersApiAxiosParamCreator = function (configuration?: Confi
             const localVarQueryParameter = {} as any;
 
 
-    
+
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -3351,7 +3317,7 @@ export const ServerSignersApiAxiosParamCreator = function (configuration?: Confi
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3395,7 +3361,7 @@ export const ServerSignersApiAxiosParamCreator = function (configuration?: Confi
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3435,7 +3401,7 @@ export const ServerSignersApiAxiosParamCreator = function (configuration?: Confi
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -3449,7 +3415,7 @@ export const ServerSignersApiAxiosParamCreator = function (configuration?: Confi
          * Submit the result of a server signer event
          * @summary Submit the result of a server signer event
          * @param {string} serverSignerId The ID of the server signer to submit the event result for
-         * @param {SeedCreationEventResult} [seedCreationEventResult] 
+         * @param {SeedCreationEventResult} [seedCreationEventResult]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3470,7 +3436,7 @@ export const ServerSignersApiAxiosParamCreator = function (configuration?: Confi
             const localVarQueryParameter = {} as any;
 
 
-    
+
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -3487,7 +3453,7 @@ export const ServerSignersApiAxiosParamCreator = function (configuration?: Confi
          * Submit the result of a server signer event
          * @summary Submit the result of a server signer event
          * @param {string} serverSignerId The ID of the server signer to submit the event result for
-         * @param {SignatureCreationEventResult} [signatureCreationEventResult] 
+         * @param {SignatureCreationEventResult} [signatureCreationEventResult]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3508,7 +3474,7 @@ export const ServerSignersApiAxiosParamCreator = function (configuration?: Confi
             const localVarQueryParameter = {} as any;
 
 
-    
+
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -3534,7 +3500,7 @@ export const ServerSignersApiFp = function(configuration?: Configuration) {
         /**
          * Create a new Server-Signer
          * @summary Create a new Server-Signer
-         * @param {CreateServerSignerRequest} [createServerSignerRequest] 
+         * @param {CreateServerSignerRequest} [createServerSignerRequest]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3590,7 +3556,7 @@ export const ServerSignersApiFp = function(configuration?: Configuration) {
          * Submit the result of a server signer event
          * @summary Submit the result of a server signer event
          * @param {string} serverSignerId The ID of the server signer to submit the event result for
-         * @param {SeedCreationEventResult} [seedCreationEventResult] 
+         * @param {SeedCreationEventResult} [seedCreationEventResult]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3604,7 +3570,7 @@ export const ServerSignersApiFp = function(configuration?: Configuration) {
          * Submit the result of a server signer event
          * @summary Submit the result of a server signer event
          * @param {string} serverSignerId The ID of the server signer to submit the event result for
-         * @param {SignatureCreationEventResult} [signatureCreationEventResult] 
+         * @param {SignatureCreationEventResult} [signatureCreationEventResult]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3627,7 +3593,7 @@ export const ServerSignersApiFactory = function (configuration?: Configuration, 
         /**
          * Create a new Server-Signer
          * @summary Create a new Server-Signer
-         * @param {CreateServerSignerRequest} [createServerSignerRequest] 
+         * @param {CreateServerSignerRequest} [createServerSignerRequest]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3671,7 +3637,7 @@ export const ServerSignersApiFactory = function (configuration?: Configuration, 
          * Submit the result of a server signer event
          * @summary Submit the result of a server signer event
          * @param {string} serverSignerId The ID of the server signer to submit the event result for
-         * @param {SeedCreationEventResult} [seedCreationEventResult] 
+         * @param {SeedCreationEventResult} [seedCreationEventResult]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3682,7 +3648,7 @@ export const ServerSignersApiFactory = function (configuration?: Configuration, 
          * Submit the result of a server signer event
          * @summary Submit the result of a server signer event
          * @param {string} serverSignerId The ID of the server signer to submit the event result for
-         * @param {SignatureCreationEventResult} [signatureCreationEventResult] 
+         * @param {SignatureCreationEventResult} [signatureCreationEventResult]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3701,7 +3667,7 @@ export interface ServerSignersApiInterface {
     /**
      * Create a new Server-Signer
      * @summary Create a new Server-Signer
-     * @param {CreateServerSignerRequest} [createServerSignerRequest] 
+     * @param {CreateServerSignerRequest} [createServerSignerRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ServerSignersApiInterface
@@ -3745,7 +3711,7 @@ export interface ServerSignersApiInterface {
      * Submit the result of a server signer event
      * @summary Submit the result of a server signer event
      * @param {string} serverSignerId The ID of the server signer to submit the event result for
-     * @param {SeedCreationEventResult} [seedCreationEventResult] 
+     * @param {SeedCreationEventResult} [seedCreationEventResult]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ServerSignersApiInterface
@@ -3756,7 +3722,7 @@ export interface ServerSignersApiInterface {
      * Submit the result of a server signer event
      * @summary Submit the result of a server signer event
      * @param {string} serverSignerId The ID of the server signer to submit the event result for
-     * @param {SignatureCreationEventResult} [signatureCreationEventResult] 
+     * @param {SignatureCreationEventResult} [signatureCreationEventResult]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ServerSignersApiInterface
@@ -3775,7 +3741,7 @@ export class ServerSignersApi extends BaseAPI implements ServerSignersApiInterfa
     /**
      * Create a new Server-Signer
      * @summary Create a new Server-Signer
-     * @param {CreateServerSignerRequest} [createServerSignerRequest] 
+     * @param {CreateServerSignerRequest} [createServerSignerRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ServerSignersApi
@@ -3827,7 +3793,7 @@ export class ServerSignersApi extends BaseAPI implements ServerSignersApiInterfa
      * Submit the result of a server signer event
      * @summary Submit the result of a server signer event
      * @param {string} serverSignerId The ID of the server signer to submit the event result for
-     * @param {SeedCreationEventResult} [seedCreationEventResult] 
+     * @param {SeedCreationEventResult} [seedCreationEventResult]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ServerSignersApi
@@ -3840,7 +3806,7 @@ export class ServerSignersApi extends BaseAPI implements ServerSignersApiInterfa
      * Submit the result of a server signer event
      * @summary Submit the result of a server signer event
      * @param {string} serverSignerId The ID of the server signer to submit the event result for
-     * @param {SignatureCreationEventResult} [signatureCreationEventResult] 
+     * @param {SignatureCreationEventResult} [signatureCreationEventResult]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ServerSignersApi
@@ -3864,7 +3830,7 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
          * @param {string} walletId The ID of the wallet the address belongs to.
          * @param {string} addressId The ID of the address the staking operation belongs to.
          * @param {string} stakingOperationId The ID of the staking operation to broadcast.
-         * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest 
+         * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3893,7 +3859,7 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
             const localVarQueryParameter = {} as any;
 
 
-    
+
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -3909,7 +3875,7 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Build a new staking operation
          * @summary Build a new staking operation
-         * @param {BuildStakingOperationRequest} buildStakingOperationRequest 
+         * @param {BuildStakingOperationRequest} buildStakingOperationRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3929,7 +3895,7 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
             const localVarQueryParameter = {} as any;
 
 
-    
+
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -3947,7 +3913,7 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
          * @summary Create a new staking operation for an address
          * @param {string} walletId The ID of the wallet the address belongs to.
          * @param {string} addressId The ID of the address to create the staking operation for.
-         * @param {CreateStakingOperationRequest} createStakingOperationRequest 
+         * @param {CreateStakingOperationRequest} createStakingOperationRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -3973,7 +3939,7 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
             const localVarQueryParameter = {} as any;
 
 
-    
+
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -3989,7 +3955,7 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Fetch staking rewards for a list of addresses
          * @summary Fetch staking rewards
-         * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest 
+         * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest
          * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
          * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
          * @param {*} [options] Override http request option.
@@ -4019,7 +3985,7 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
             }
 
 
-    
+
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -4064,7 +4030,7 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -4077,7 +4043,7 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Get staking context for an address
          * @summary Get staking context
-         * @param {GetStakingContextRequest} getStakingContextRequest 
+         * @param {GetStakingContextRequest} getStakingContextRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4097,7 +4063,7 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
             const localVarQueryParameter = {} as any;
 
 
-    
+
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -4142,7 +4108,7 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -4168,7 +4134,7 @@ export const StakeApiFp = function(configuration?: Configuration) {
          * @param {string} walletId The ID of the wallet the address belongs to.
          * @param {string} addressId The ID of the address the staking operation belongs to.
          * @param {string} stakingOperationId The ID of the staking operation to broadcast.
-         * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest 
+         * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4181,7 +4147,7 @@ export const StakeApiFp = function(configuration?: Configuration) {
         /**
          * Build a new staking operation
          * @summary Build a new staking operation
-         * @param {BuildStakingOperationRequest} buildStakingOperationRequest 
+         * @param {BuildStakingOperationRequest} buildStakingOperationRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4196,7 +4162,7 @@ export const StakeApiFp = function(configuration?: Configuration) {
          * @summary Create a new staking operation for an address
          * @param {string} walletId The ID of the wallet the address belongs to.
          * @param {string} addressId The ID of the address to create the staking operation for.
-         * @param {CreateStakingOperationRequest} createStakingOperationRequest 
+         * @param {CreateStakingOperationRequest} createStakingOperationRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4209,7 +4175,7 @@ export const StakeApiFp = function(configuration?: Configuration) {
         /**
          * Fetch staking rewards for a list of addresses
          * @summary Fetch staking rewards
-         * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest 
+         * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest
          * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
          * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
          * @param {*} [options] Override http request option.
@@ -4239,7 +4205,7 @@ export const StakeApiFp = function(configuration?: Configuration) {
         /**
          * Get staking context for an address
          * @summary Get staking context
-         * @param {GetStakingContextRequest} getStakingContextRequest 
+         * @param {GetStakingContextRequest} getStakingContextRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4280,7 +4246,7 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
          * @param {string} walletId The ID of the wallet the address belongs to.
          * @param {string} addressId The ID of the address the staking operation belongs to.
          * @param {string} stakingOperationId The ID of the staking operation to broadcast.
-         * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest 
+         * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4290,7 +4256,7 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
         /**
          * Build a new staking operation
          * @summary Build a new staking operation
-         * @param {BuildStakingOperationRequest} buildStakingOperationRequest 
+         * @param {BuildStakingOperationRequest} buildStakingOperationRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4302,7 +4268,7 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
          * @summary Create a new staking operation for an address
          * @param {string} walletId The ID of the wallet the address belongs to.
          * @param {string} addressId The ID of the address to create the staking operation for.
-         * @param {CreateStakingOperationRequest} createStakingOperationRequest 
+         * @param {CreateStakingOperationRequest} createStakingOperationRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4312,7 +4278,7 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
         /**
          * Fetch staking rewards for a list of addresses
          * @summary Fetch staking rewards
-         * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest 
+         * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest
          * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
          * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
          * @param {*} [options] Override http request option.
@@ -4336,7 +4302,7 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
         /**
          * Get staking context for an address
          * @summary Get staking context
-         * @param {GetStakingContextRequest} getStakingContextRequest 
+         * @param {GetStakingContextRequest} getStakingContextRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4370,7 +4336,7 @@ export interface StakeApiInterface {
      * @param {string} walletId The ID of the wallet the address belongs to.
      * @param {string} addressId The ID of the address the staking operation belongs to.
      * @param {string} stakingOperationId The ID of the staking operation to broadcast.
-     * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest 
+     * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StakeApiInterface
@@ -4380,7 +4346,7 @@ export interface StakeApiInterface {
     /**
      * Build a new staking operation
      * @summary Build a new staking operation
-     * @param {BuildStakingOperationRequest} buildStakingOperationRequest 
+     * @param {BuildStakingOperationRequest} buildStakingOperationRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StakeApiInterface
@@ -4392,7 +4358,7 @@ export interface StakeApiInterface {
      * @summary Create a new staking operation for an address
      * @param {string} walletId The ID of the wallet the address belongs to.
      * @param {string} addressId The ID of the address to create the staking operation for.
-     * @param {CreateStakingOperationRequest} createStakingOperationRequest 
+     * @param {CreateStakingOperationRequest} createStakingOperationRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StakeApiInterface
@@ -4402,7 +4368,7 @@ export interface StakeApiInterface {
     /**
      * Fetch staking rewards for a list of addresses
      * @summary Fetch staking rewards
-     * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest 
+     * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest
      * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
      * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
      * @param {*} [options] Override http request option.
@@ -4426,7 +4392,7 @@ export interface StakeApiInterface {
     /**
      * Get staking context for an address
      * @summary Get staking context
-     * @param {GetStakingContextRequest} getStakingContextRequest 
+     * @param {GetStakingContextRequest} getStakingContextRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StakeApiInterface
@@ -4460,7 +4426,7 @@ export class StakeApi extends BaseAPI implements StakeApiInterface {
      * @param {string} walletId The ID of the wallet the address belongs to.
      * @param {string} addressId The ID of the address the staking operation belongs to.
      * @param {string} stakingOperationId The ID of the staking operation to broadcast.
-     * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest 
+     * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StakeApi
@@ -4472,7 +4438,7 @@ export class StakeApi extends BaseAPI implements StakeApiInterface {
     /**
      * Build a new staking operation
      * @summary Build a new staking operation
-     * @param {BuildStakingOperationRequest} buildStakingOperationRequest 
+     * @param {BuildStakingOperationRequest} buildStakingOperationRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StakeApi
@@ -4486,7 +4452,7 @@ export class StakeApi extends BaseAPI implements StakeApiInterface {
      * @summary Create a new staking operation for an address
      * @param {string} walletId The ID of the wallet the address belongs to.
      * @param {string} addressId The ID of the address to create the staking operation for.
-     * @param {CreateStakingOperationRequest} createStakingOperationRequest 
+     * @param {CreateStakingOperationRequest} createStakingOperationRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StakeApi
@@ -4498,7 +4464,7 @@ export class StakeApi extends BaseAPI implements StakeApiInterface {
     /**
      * Fetch staking rewards for a list of addresses
      * @summary Fetch staking rewards
-     * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest 
+     * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest
      * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
      * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
      * @param {*} [options] Override http request option.
@@ -4526,7 +4492,7 @@ export class StakeApi extends BaseAPI implements StakeApiInterface {
     /**
      * Get staking context for an address
      * @summary Get staking context
-     * @param {GetStakingContextRequest} getStakingContextRequest 
+     * @param {GetStakingContextRequest} getStakingContextRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof StakeApi
@@ -4564,7 +4530,7 @@ export const TradesApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {string} walletId The ID of the wallet the address belongs to
          * @param {string} addressId The ID of the address the trade belongs to
          * @param {string} tradeId The ID of the trade to broadcast
-         * @param {BroadcastTradeRequest} broadcastTradeRequest 
+         * @param {BroadcastTradeRequest} broadcastTradeRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4593,7 +4559,7 @@ export const TradesApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarQueryParameter = {} as any;
 
 
-    
+
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -4611,7 +4577,7 @@ export const TradesApiAxiosParamCreator = function (configuration?: Configuratio
          * @summary Create a new trade for an address
          * @param {string} walletId The ID of the wallet the source address belongs to
          * @param {string} addressId The ID of the address to conduct the trade from
-         * @param {CreateTradeRequest} createTradeRequest 
+         * @param {CreateTradeRequest} createTradeRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4637,7 +4603,7 @@ export const TradesApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarQueryParameter = {} as any;
 
 
-    
+
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -4682,7 +4648,7 @@ export const TradesApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -4730,7 +4696,7 @@ export const TradesApiAxiosParamCreator = function (configuration?: Configuratio
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -4756,7 +4722,7 @@ export const TradesApiFp = function(configuration?: Configuration) {
          * @param {string} walletId The ID of the wallet the address belongs to
          * @param {string} addressId The ID of the address the trade belongs to
          * @param {string} tradeId The ID of the trade to broadcast
-         * @param {BroadcastTradeRequest} broadcastTradeRequest 
+         * @param {BroadcastTradeRequest} broadcastTradeRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4771,7 +4737,7 @@ export const TradesApiFp = function(configuration?: Configuration) {
          * @summary Create a new trade for an address
          * @param {string} walletId The ID of the wallet the source address belongs to
          * @param {string} addressId The ID of the address to conduct the trade from
-         * @param {CreateTradeRequest} createTradeRequest 
+         * @param {CreateTradeRequest} createTradeRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4828,7 +4794,7 @@ export const TradesApiFactory = function (configuration?: Configuration, basePat
          * @param {string} walletId The ID of the wallet the address belongs to
          * @param {string} addressId The ID of the address the trade belongs to
          * @param {string} tradeId The ID of the trade to broadcast
-         * @param {BroadcastTradeRequest} broadcastTradeRequest 
+         * @param {BroadcastTradeRequest} broadcastTradeRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4840,7 +4806,7 @@ export const TradesApiFactory = function (configuration?: Configuration, basePat
          * @summary Create a new trade for an address
          * @param {string} walletId The ID of the wallet the source address belongs to
          * @param {string} addressId The ID of the address to conduct the trade from
-         * @param {CreateTradeRequest} createTradeRequest 
+         * @param {CreateTradeRequest} createTradeRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -4887,7 +4853,7 @@ export interface TradesApiInterface {
      * @param {string} walletId The ID of the wallet the address belongs to
      * @param {string} addressId The ID of the address the trade belongs to
      * @param {string} tradeId The ID of the trade to broadcast
-     * @param {BroadcastTradeRequest} broadcastTradeRequest 
+     * @param {BroadcastTradeRequest} broadcastTradeRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof TradesApiInterface
@@ -4899,7 +4865,7 @@ export interface TradesApiInterface {
      * @summary Create a new trade for an address
      * @param {string} walletId The ID of the wallet the source address belongs to
      * @param {string} addressId The ID of the address to conduct the trade from
-     * @param {CreateTradeRequest} createTradeRequest 
+     * @param {CreateTradeRequest} createTradeRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof TradesApiInterface
@@ -4946,7 +4912,7 @@ export class TradesApi extends BaseAPI implements TradesApiInterface {
      * @param {string} walletId The ID of the wallet the address belongs to
      * @param {string} addressId The ID of the address the trade belongs to
      * @param {string} tradeId The ID of the trade to broadcast
-     * @param {BroadcastTradeRequest} broadcastTradeRequest 
+     * @param {BroadcastTradeRequest} broadcastTradeRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof TradesApi
@@ -4960,7 +4926,7 @@ export class TradesApi extends BaseAPI implements TradesApiInterface {
      * @summary Create a new trade for an address
      * @param {string} walletId The ID of the wallet the source address belongs to
      * @param {string} addressId The ID of the address to conduct the trade from
-     * @param {CreateTradeRequest} createTradeRequest 
+     * @param {CreateTradeRequest} createTradeRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof TradesApi
@@ -5013,7 +4979,7 @@ export const TransfersApiAxiosParamCreator = function (configuration?: Configura
          * @param {string} walletId The ID of the wallet the address belongs to
          * @param {string} addressId The ID of the address the transfer belongs to
          * @param {string} transferId The ID of the transfer to broadcast
-         * @param {BroadcastTransferRequest} broadcastTransferRequest 
+         * @param {BroadcastTransferRequest} broadcastTransferRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -5042,7 +5008,7 @@ export const TransfersApiAxiosParamCreator = function (configuration?: Configura
             const localVarQueryParameter = {} as any;
 
 
-    
+
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -5060,7 +5026,7 @@ export const TransfersApiAxiosParamCreator = function (configuration?: Configura
          * @summary Create a new transfer for an address
          * @param {string} walletId The ID of the wallet the source address belongs to
          * @param {string} addressId The ID of the address to transfer from
-         * @param {CreateTransferRequest} createTransferRequest 
+         * @param {CreateTransferRequest} createTransferRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -5086,7 +5052,7 @@ export const TransfersApiAxiosParamCreator = function (configuration?: Configura
             const localVarQueryParameter = {} as any;
 
 
-    
+
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -5131,7 +5097,7 @@ export const TransfersApiAxiosParamCreator = function (configuration?: Configura
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -5179,7 +5145,7 @@ export const TransfersApiAxiosParamCreator = function (configuration?: Configura
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -5205,7 +5171,7 @@ export const TransfersApiFp = function(configuration?: Configuration) {
          * @param {string} walletId The ID of the wallet the address belongs to
          * @param {string} addressId The ID of the address the transfer belongs to
          * @param {string} transferId The ID of the transfer to broadcast
-         * @param {BroadcastTransferRequest} broadcastTransferRequest 
+         * @param {BroadcastTransferRequest} broadcastTransferRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -5220,7 +5186,7 @@ export const TransfersApiFp = function(configuration?: Configuration) {
          * @summary Create a new transfer for an address
          * @param {string} walletId The ID of the wallet the source address belongs to
          * @param {string} addressId The ID of the address to transfer from
-         * @param {CreateTransferRequest} createTransferRequest 
+         * @param {CreateTransferRequest} createTransferRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -5277,7 +5243,7 @@ export const TransfersApiFactory = function (configuration?: Configuration, base
          * @param {string} walletId The ID of the wallet the address belongs to
          * @param {string} addressId The ID of the address the transfer belongs to
          * @param {string} transferId The ID of the transfer to broadcast
-         * @param {BroadcastTransferRequest} broadcastTransferRequest 
+         * @param {BroadcastTransferRequest} broadcastTransferRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -5289,7 +5255,7 @@ export const TransfersApiFactory = function (configuration?: Configuration, base
          * @summary Create a new transfer for an address
          * @param {string} walletId The ID of the wallet the source address belongs to
          * @param {string} addressId The ID of the address to transfer from
-         * @param {CreateTransferRequest} createTransferRequest 
+         * @param {CreateTransferRequest} createTransferRequest
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -5336,7 +5302,7 @@ export interface TransfersApiInterface {
      * @param {string} walletId The ID of the wallet the address belongs to
      * @param {string} addressId The ID of the address the transfer belongs to
      * @param {string} transferId The ID of the transfer to broadcast
-     * @param {BroadcastTransferRequest} broadcastTransferRequest 
+     * @param {BroadcastTransferRequest} broadcastTransferRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof TransfersApiInterface
@@ -5348,7 +5314,7 @@ export interface TransfersApiInterface {
      * @summary Create a new transfer for an address
      * @param {string} walletId The ID of the wallet the source address belongs to
      * @param {string} addressId The ID of the address to transfer from
-     * @param {CreateTransferRequest} createTransferRequest 
+     * @param {CreateTransferRequest} createTransferRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof TransfersApiInterface
@@ -5395,7 +5361,7 @@ export class TransfersApi extends BaseAPI implements TransfersApiInterface {
      * @param {string} walletId The ID of the wallet the address belongs to
      * @param {string} addressId The ID of the address the transfer belongs to
      * @param {string} transferId The ID of the transfer to broadcast
-     * @param {BroadcastTransferRequest} broadcastTransferRequest 
+     * @param {BroadcastTransferRequest} broadcastTransferRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof TransfersApi
@@ -5409,7 +5375,7 @@ export class TransfersApi extends BaseAPI implements TransfersApiInterface {
      * @summary Create a new transfer for an address
      * @param {string} walletId The ID of the wallet the source address belongs to
      * @param {string} addressId The ID of the address to transfer from
-     * @param {CreateTransferRequest} createTransferRequest 
+     * @param {CreateTransferRequest} createTransferRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof TransfersApi
@@ -5476,7 +5442,7 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -5606,7 +5572,7 @@ export const ValidatorsApiAxiosParamCreator = function (configuration?: Configur
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -5659,7 +5625,7 @@ export const ValidatorsApiAxiosParamCreator = function (configuration?: Configur
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -5833,7 +5799,7 @@ export const WalletsApiAxiosParamCreator = function (configuration?: Configurati
         /**
          * Create a new wallet scoped to the user.
          * @summary Create a new wallet
-         * @param {CreateWalletRequest} [createWalletRequest] 
+         * @param {CreateWalletRequest} [createWalletRequest]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -5851,7 +5817,7 @@ export const WalletsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
 
-    
+
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -5888,7 +5854,7 @@ export const WalletsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -5926,7 +5892,7 @@ export const WalletsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -5960,7 +5926,7 @@ export const WalletsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -6000,7 +5966,7 @@ export const WalletsApiAxiosParamCreator = function (configuration?: Configurati
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -6023,7 +5989,7 @@ export const WalletsApiFp = function(configuration?: Configuration) {
         /**
          * Create a new wallet scoped to the user.
          * @summary Create a new wallet
-         * @param {CreateWalletRequest} [createWalletRequest] 
+         * @param {CreateWalletRequest} [createWalletRequest]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -6100,7 +6066,7 @@ export const WalletsApiFactory = function (configuration?: Configuration, basePa
         /**
          * Create a new wallet scoped to the user.
          * @summary Create a new wallet
-         * @param {CreateWalletRequest} [createWalletRequest] 
+         * @param {CreateWalletRequest} [createWalletRequest]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -6161,7 +6127,7 @@ export interface WalletsApiInterface {
     /**
      * Create a new wallet scoped to the user.
      * @summary Create a new wallet
-     * @param {CreateWalletRequest} [createWalletRequest] 
+     * @param {CreateWalletRequest} [createWalletRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof WalletsApiInterface
@@ -6222,7 +6188,7 @@ export class WalletsApi extends BaseAPI implements WalletsApiInterface {
     /**
      * Create a new wallet scoped to the user.
      * @summary Create a new wallet
-     * @param {CreateWalletRequest} [createWalletRequest] 
+     * @param {CreateWalletRequest} [createWalletRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof WalletsApi
@@ -6293,7 +6259,7 @@ export const WebhooksApiAxiosParamCreator = function (configuration?: Configurat
         /**
          * Create a new webhook
          * @summary Create a new webhook
-         * @param {CreateWebhookRequest} [createWebhookRequest] 
+         * @param {CreateWebhookRequest} [createWebhookRequest]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -6311,7 +6277,7 @@ export const WebhooksApiAxiosParamCreator = function (configuration?: Configurat
             const localVarQueryParameter = {} as any;
 
 
-    
+
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -6348,7 +6314,7 @@ export const WebhooksApiAxiosParamCreator = function (configuration?: Configurat
             const localVarQueryParameter = {} as any;
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -6388,7 +6354,7 @@ export const WebhooksApiAxiosParamCreator = function (configuration?: Configurat
             }
 
 
-    
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -6402,7 +6368,7 @@ export const WebhooksApiAxiosParamCreator = function (configuration?: Configurat
          * Update a webhook
          * @summary Update a webhook
          * @param {string} webhookId The Webhook id that needs to be updated
-         * @param {UpdateWebhookRequest} [updateWebhookRequest] 
+         * @param {UpdateWebhookRequest} [updateWebhookRequest]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -6423,7 +6389,7 @@ export const WebhooksApiAxiosParamCreator = function (configuration?: Configurat
             const localVarQueryParameter = {} as any;
 
 
-    
+
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -6449,7 +6415,7 @@ export const WebhooksApiFp = function(configuration?: Configuration) {
         /**
          * Create a new webhook
          * @summary Create a new webhook
-         * @param {CreateWebhookRequest} [createWebhookRequest] 
+         * @param {CreateWebhookRequest} [createWebhookRequest]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -6490,7 +6456,7 @@ export const WebhooksApiFp = function(configuration?: Configuration) {
          * Update a webhook
          * @summary Update a webhook
          * @param {string} webhookId The Webhook id that needs to be updated
-         * @param {UpdateWebhookRequest} [updateWebhookRequest] 
+         * @param {UpdateWebhookRequest} [updateWebhookRequest]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -6513,7 +6479,7 @@ export const WebhooksApiFactory = function (configuration?: Configuration, baseP
         /**
          * Create a new webhook
          * @summary Create a new webhook
-         * @param {CreateWebhookRequest} [createWebhookRequest] 
+         * @param {CreateWebhookRequest} [createWebhookRequest]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -6545,7 +6511,7 @@ export const WebhooksApiFactory = function (configuration?: Configuration, baseP
          * Update a webhook
          * @summary Update a webhook
          * @param {string} webhookId The Webhook id that needs to be updated
-         * @param {UpdateWebhookRequest} [updateWebhookRequest] 
+         * @param {UpdateWebhookRequest} [updateWebhookRequest]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -6564,7 +6530,7 @@ export interface WebhooksApiInterface {
     /**
      * Create a new webhook
      * @summary Create a new webhook
-     * @param {CreateWebhookRequest} [createWebhookRequest] 
+     * @param {CreateWebhookRequest} [createWebhookRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof WebhooksApiInterface
@@ -6596,7 +6562,7 @@ export interface WebhooksApiInterface {
      * Update a webhook
      * @summary Update a webhook
      * @param {string} webhookId The Webhook id that needs to be updated
-     * @param {UpdateWebhookRequest} [updateWebhookRequest] 
+     * @param {UpdateWebhookRequest} [updateWebhookRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof WebhooksApiInterface
@@ -6615,7 +6581,7 @@ export class WebhooksApi extends BaseAPI implements WebhooksApiInterface {
     /**
      * Create a new webhook
      * @summary Create a new webhook
-     * @param {CreateWebhookRequest} [createWebhookRequest] 
+     * @param {CreateWebhookRequest} [createWebhookRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof WebhooksApi
@@ -6653,7 +6619,7 @@ export class WebhooksApi extends BaseAPI implements WebhooksApiInterface {
      * Update a webhook
      * @summary Update a webhook
      * @param {string} webhookId The Webhook id that needs to be updated
-     * @param {UpdateWebhookRequest} [updateWebhookRequest] 
+     * @param {UpdateWebhookRequest} [updateWebhookRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof WebhooksApi
