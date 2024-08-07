@@ -729,6 +729,70 @@ export interface FetchStakingRewardsRequest {
 /**
  * 
  * @export
+ * @interface FetchStakingBalancesRequest
+ */
+export interface FetchStakingBalancesRequest {
+    /**
+     * The ID of the blockchain network
+     * @type {string}
+     * @memberof FetchStakingBalancesRequest
+     */
+    'network_id': string;
+    /**
+     * The ID of the asset for which the staking balances are being fetched
+     * @type {string}
+     * @memberof FetchStakingBalancesRequest
+     */
+    'asset_id': string;
+    /**
+     * The onchain address for which the staking balances are being fetched
+     * @type {string}
+     * @memberof FetchStakingBalancesRequest
+     */
+    'address_id': string;
+    /**
+     * The start time of this reward period
+     * @type {string}
+     * @memberof FetchStakingBalancesRequest
+     */
+    'start_time': string;
+    /**
+     * The end time of this reward period
+     * @type {string}
+     * @memberof FetchStakingBalancesRequest
+     */
+    'end_time': string;
+}
+
+/**
+ * 
+ * @export
+ * @interface FetchStakingBalances200Response
+ */
+export interface FetchStakingBalances200Response {
+    /**
+     * 
+     * @type {Array<StakingBalance>}
+     * @memberof FetchStakingBalances200Response
+     */
+    'data': Array<StakingBalance>;
+    /**
+     * True if this list has another page of items after this one that can be fetched.
+     * @type {boolean}
+     * @memberof FetchStakingBalances200Response
+     */
+    'has_more': boolean;
+    /**
+     * The page token to be used to fetch the next page.
+     * @type {string}
+     * @memberof FetchStakingBalances200Response
+     */
+    'next_page': string;
+}
+
+/**
+ * 
+ * @export
  * @interface GetStakingContextRequest
  */
 export interface GetStakingContextRequest {
@@ -1258,6 +1322,50 @@ export const StakingRewardFormat = {
 
 export type StakingRewardFormat = typeof StakingRewardFormat[keyof typeof StakingRewardFormat];
 
+
+/**
+ * The staking balances for an address.
+ * @export
+ * @interface StakingBalance
+ */
+export interface StakingBalance {
+    /**
+     * The onchain address for which the staking balances are being fetched.
+     * @type {string}
+     * @memberof StakingBalance
+     */
+    'address_id': string;
+    /**
+     * The date of the staking balance in format \'YYYY-MM-DD\' in UTC.
+     * @type {string}
+     * @memberof StakingBalance
+     */
+    'date': string;
+    /**
+     * The bonded stake.
+     * @type {string}
+     * @memberof StakingBalance
+     */
+    'bonded_stake': string;
+    /**
+     * The unbonded stake.
+     * @type {string}
+     * @memberof StakingBalance
+     */
+    'unbonded_stake': string;
+    /**
+     * The total delegation received.
+     * @type {string}
+     * @memberof StakingBalance
+     */
+    'total_delegation': string;
+    /**
+     * The participate type of the given address.
+     * @type {string}
+     * @memberof StakingBalance
+     */
+    'participate_type': string;
+}
 
 /**
  * A trade of an asset to another asset
@@ -3823,6 +3931,52 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(fetchStakingRewardsRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Fetch staking balances for a given address
+         * @summary Fetch staking rewards
+         * @param {FetchStakingBalancesRequest} fetchStakingBalancesRequest 
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        fetchStakingBalances: async (fetchStakingBalancesRequest: FetchStakingBalancesRequest, limit?: number, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'fetchStakingBalancesRequest' is not null or undefined
+            assertParamExists('fetchStakingBalances', 'fetchStakingBalancesRequest', fetchStakingBalancesRequest)
+            const localVarPath = `/v1/stake/balances`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(fetchStakingBalancesRequest, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
