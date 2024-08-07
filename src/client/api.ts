@@ -1582,7 +1582,7 @@ export interface Transfer {
      * @type {string}
      * @memberof Transfer
      */
-    'unsigned_payload': string;
+    'unsigned_payload'?: string;
     /**
      * The signed payload of the transfer. This is the payload that has been signed by the sender.
      * @type {string}
@@ -1600,7 +1600,7 @@ export interface Transfer {
      * @type {string}
      * @memberof Transfer
      */
-    'status': TransferStatusEnum;
+    'status'?: TransferStatusEnum;
 }
 
 export const TransferStatusEnum = {
