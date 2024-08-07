@@ -429,7 +429,7 @@ export type StakeAPIClient = {
    * @param page - The batch of records for a given section in the response.
    * @param options - Axios request options.
    */
-    fetchStakingBalances(
+  fetchStakingBalances(
       fetchStakingBalancesRequest: FetchStakingBalancesRequest,
       limit?: number,
       page?: string,

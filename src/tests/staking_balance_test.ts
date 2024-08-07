@@ -31,17 +31,17 @@ describe("StakingBalance", () => {
       {
         address_id: address.getId(),
         date: "2024-05-01",
-        bonded_stake: "666",
-        unbonded_stake: "361",
-        total_delegation: "100",
+        bonded_stake: "32000000000000000000",
+        unbonded_stake: "1000000000000000000",
+        total_delegation: "2000000000000000000",
         participate_type: "validator",
       },
       {
         address_id: address.getId(),
         date: "2024-05-02",
-        bonded_stake: "667",
-        unbonded_stake: "362",
-        total_delegation: "101",
+        bonded_stake: "33000000000000000000",
+        unbonded_stake: "2000000000000000000",
+        total_delegation: "3000000000000000000",
         participate_type: "validator",
       },
     ],
@@ -99,7 +99,7 @@ describe("StakingBalance", () => {
         endTime,
       );
       expect(response).toBeInstanceOf(Array<StakingBalance>);
-      expect(response.length).toEqual(9);
+      expect(response.length).toEqual(6);
       expect(Coinbase.apiClients.stake!.fetchStakingBalances).toHaveBeenCalledWith(
         {
           network_id: address.getNetworkId(),
@@ -115,27 +115,27 @@ describe("StakingBalance", () => {
   });
 
   describe(".amount", () => {
-    it("should return the correct bonded stake amount", () => {
+    it("should return the correct stake amount", () => {
       const balance = new StakingBalance(
         {
           address_id: address.getId(),
           date: "2024-05-03",
-          bonded_stake: "226",
-          unbonded_stake: "1",
-          total_delegation: "0",
+          bonded_stake: "32000000000000000000",
+          unbonded_stake: "2000000000000000000",
+          total_delegation: "1000000000000000000",
           participate_type: "validator",
         },
         asset,
       );
 
       const bondedStake = balance.bondedStake();
-      expect(bondedStake).toEqual(new Decimal("226"));
+      expect(bondedStake).toEqual(32);
 
       const unbondedStake = balance.unbondedStake();
-      expect(unbondedStake).toEqual(new Decimal("1"));
+      expect(unbondedStake).toEqual(2);
 
       const totalDelegation = balance.totalDelegation();
-      expect(totalDelegation).toEqual(new Decimal("0"));
+      expect(totalDelegation).toEqual(1);
 
       const participateType = balance.participateType();
       expect(participateType).toEqual("validator");
@@ -167,9 +167,9 @@ describe("StakingBalance", () => {
         {
           address_id: address.getId(),
           date: "2024-05-03",
-          bonded_stake: "226",
-          unbonded_stake: "1",
-          total_delegation: "0",
+          bonded_stake: "32000000000000000000",
+          unbonded_stake: "2000000000000000000",
+          total_delegation: "1000000000000000000",
           participate_type: "validator",
         },
         asset,
@@ -177,7 +177,7 @@ describe("StakingBalance", () => {
 
       const balanceStr = balance.toString();
       expect(balanceStr).toEqual(
-        `StakingBalance { date: '2024-05-03' address: '${address.getId()}' bondedStake: '226' unbondedStake: '1' totalDelegation: '0' participateType: 'validator' }`,
+        `StakingBalance { date: '2024-05-03T00:00:00.000Z' address: '${address.getId()}' bondedStake: '32' unbondedStake: '2' totalDelegation: '1' participateType: 'validator' }`,
       );
     });
   });

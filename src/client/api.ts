@@ -4173,6 +4173,21 @@ export const StakeApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Fetch staking balance for given address
+         * @summary Fetch staking balances
+         * @param {FetchStakingBalancesRequest} fetchStakingBalancesRequest 
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async fetchStakingBalances(fetchStakingBalancesRequest: FetchStakingBalancesRequest, limit?: number, page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FetchStakingBalances200Response>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.fetchStakingBalances(fetchStakingBalancesRequest, limit, page, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['StakeApi.fetchStakingBalances']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Get the latest state of a staking operation
          * @summary Get the latest state of a staking operation
          * @param {string} networkId The ID of the blockchain network
@@ -4271,6 +4286,18 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
          */
         fetchStakingRewards(fetchStakingRewardsRequest: FetchStakingRewardsRequest, limit?: number, page?: string, options?: any): AxiosPromise<FetchStakingRewards200Response> {
             return localVarFp.fetchStakingRewards(fetchStakingRewardsRequest, limit, page, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Fetch staking balances for given address
+         * @summary Fetch staking balances
+         * @param {FetchStakingBalancesRequest} fetchStakingBalancesRequest 
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        fetchStakingBalances(fetchStakingBalancesRequest: FetchStakingBalancesRequest, limit?: number, page?: string, options?: any): AxiosPromise<FetchStakingBalances200Response> {
+            return localVarFp.fetchStakingBalances(fetchStakingBalancesRequest, limit, page, options).then((request) => request(axios, basePath));
         },
         /**
          * Get the latest state of a staking operation
