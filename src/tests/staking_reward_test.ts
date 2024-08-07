@@ -233,7 +233,7 @@ describe("StakingReward", () => {
 
       const rewardStr = reward.toString();
       expect(rewardStr).toEqual(
-        "StakingReward { date: '2024-05-03T00:00:00.000Z' address: 'some-address-id' amount: '2.26' usd_value: '2.26' conversion_price: '3000' conversion_date: '2024-05-03T00:00:00Z' }",
+        "StakingReward { date: '2024-05-03T00:00:00.000Z' address: 'some-address-id' amount: '2.26' usd_value: '2.26' conversion_price: '3000' conversion_time: '2024-05-03T00:00:00.000Z' }",
       );
     });
   });
