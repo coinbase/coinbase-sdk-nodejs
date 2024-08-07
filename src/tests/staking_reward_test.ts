@@ -158,7 +158,9 @@ describe("StakingReward", () => {
       );
 
       const amount = reward.amount();
+      const usdValue = reward.usdValue();
       expect(amount).toEqual(new Decimal("2.26"));
+      expect(usdValue).toEqual(new Decimal("2.26"));
     });
 
     it("should return the correct amount for native format", () => {
@@ -204,7 +206,9 @@ describe("StakingReward", () => {
       );
 
       const date = reward.date();
+      const conversionTime = reward.conversionTime();
       expect(date).toEqual(new Date("2024-05-03"));
+      expect(conversionTime).toEqual(new Date("2024-05-03T00:00:00Z"));
     });
   });
 
