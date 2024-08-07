@@ -311,6 +311,11 @@ describe("WalletAddress", () => {
           amount: "361",
           state: StakingRewardStateEnum.Pending,
           format: StakingRewardFormat.Usd,
+          usd_value: {
+            amount: "361",
+            conversion_price: "3000",
+            conversion_time: "2024-05-01T00:00:00Z",
+          },
         },
         {
           address_id: newAddress.address_id,
@@ -318,6 +323,11 @@ describe("WalletAddress", () => {
           amount: "203",
           state: StakingRewardStateEnum.Pending,
           format: StakingRewardFormat.Usd,
+          usd_value: {
+            amount: "203",
+            conversion_price: "3000",
+            conversion_time: "2024-05-02T00:00:00Z",
+          },
         },
         {
           address_id: newAddress.address_id,
@@ -325,6 +335,11 @@ describe("WalletAddress", () => {
           amount: "226",
           state: StakingRewardStateEnum.Pending,
           format: StakingRewardFormat.Usd,
+          usd_value: {
+            amount: "226",
+            conversion_price: "3000",
+            conversion_time: "2024-05-03T00:00:00Z",
+          },
         },
       ],
       has_more: false,
