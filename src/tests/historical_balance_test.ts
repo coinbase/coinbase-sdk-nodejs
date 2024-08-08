@@ -3,8 +3,8 @@ import { HistoricalBalance as HistoricalBalanceModel } from "../client";
 import { Decimal } from "decimal.js";
 import { Coinbase } from "../coinbase/coinbase";
 
-describe("Balance", () => {
-  describe(".fromModel", () => {
+describe("HistoricalBalance", () => {
+  describe("#fromModel", () => {
     const amount = new Decimal(1);
     const historyModel: HistoricalBalanceModel = {
       amount: "1000000000000000000",

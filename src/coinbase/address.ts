@@ -88,7 +88,11 @@ export class Address {
    * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
    * @returns The list of historical balance of the asset and next page token.
    */
-  public async listHistoricalBalance(assetId: string, limit?: number, page?: string): Promise<[HistoricalBalance[], string]> {
+  public async listHistoricalBalance(
+    assetId: string,
+    limit?: number,
+    page?: string,
+  ): Promise<[HistoricalBalance[], string]> {
     const historyList: HistoricalBalance[] = [];
 
     if (limit !== undefined) {
@@ -104,7 +108,7 @@ export class Address {
         historyList.push(historicalBalance);
       });
 
-      return [historyList, response.data.next_page]
+      return [historyList, response.data.next_page];
     }
 
     const queue: string[] = [""];
