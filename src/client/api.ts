@@ -1323,6 +1323,39 @@ export const StakingRewardFormat = {
 export type StakingRewardFormat = typeof StakingRewardFormat[keyof typeof StakingRewardFormat];
 
 
+
+/**
+ * The asset amount in detail
+ * @export
+ * @interface AssetAmount
+ */
+export interface AssetAmount {
+    /**
+     * Amount The amount of the asset in the most common denomination such as ETH, BTC, etc.
+     * @type {string}
+     * @memberof AssetAmount
+     */
+    amount: string;
+    /**
+     * Exp The number of decimals needed to convert from the raw numeric value to the most.
+     * @type {number}
+     * @memberof AssetAmount
+     */
+    exp: number;
+    /**
+     * RawNumeric The raw, unadulterated numeric value, such as Wei (in Ethereum) and Lamports (in Solana).
+     * @type {string}
+     * @memberof AssetAmount
+     */
+    raw_numeric: string;
+    /**
+     * Ticker The ticker of this asset (USD, ETH, SOL).
+     * @type {string}
+     * @memberof AssetAmount
+     */
+    ticker: string;
+}
+
 /**
  * The staking balances for an address.
  * @export
@@ -1343,22 +1376,22 @@ export interface StakingBalance {
     'date': string;
     /**
      * The bonded stake.
-     * @type {string}
+     * @type {AssetAmount}
      * @memberof StakingBalance
      */
-    'bonded_stake': string;
+    'bonded_stake': AssetAmount;
     /**
      * The unbonded stake.
-     * @type {string}
+     * @type {AssetAmount}
      * @memberof StakingBalance
      */
-    'unbonded_stake': string;
+    'unbonded_stake': AssetAmount;
     /**
      * The total delegation received.
-     * @type {string}
+     * @type {AssetAmount}
      * @memberof StakingBalance
      */
-    'total_delegation': string;
+    'total_delegation_received': AssetAmount;
     /**
      * The participate type of the given address.
      * @type {string}

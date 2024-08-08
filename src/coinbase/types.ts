@@ -430,11 +430,11 @@ export type StakeAPIClient = {
    * @param options - Axios request options.
    */
   fetchStakingBalances(
-      fetchStakingBalancesRequest: FetchStakingBalancesRequest,
-      limit?: number,
-      page?: string,
-      options?: AxiosRequestConfig,
-    ): AxiosPromise<FetchStakingBalances200Response>;
+    fetchStakingBalancesRequest: FetchStakingBalancesRequest,
+    limit?: number,
+    page?: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<FetchStakingBalances200Response>;
 
   broadcastStakingOperation(
     walletId: string,
