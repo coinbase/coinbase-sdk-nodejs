@@ -2,7 +2,7 @@ import Decimal from "decimal.js";
 import { HistoricalBalance as HistoricalBalanceModel } from "../client";
 import { Asset } from "./asset";
 
-/** A representation of a balance. */
+/** A representation of historical balance. */
 export class HistoricalBalance {
   public readonly amount: Decimal;
   public readonly blockHash: string;
@@ -15,6 +15,8 @@ export class HistoricalBalance {
    * @ignore
    * @param {Decimal} amount - The amount of the balance.
    * @param {string} assetId - The asset ID.
+   * @param {Decimal} blockHeight - The block height at which the balance was recorded.
+   * @param {string} blockHash - The block hash at which the balance was recorded
    * @hideconstructor
    */
   private constructor(amount: Decimal, blockHeight: Decimal, blockHash: string, asset: Asset) {
