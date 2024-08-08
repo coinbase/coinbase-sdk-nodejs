@@ -18,4 +18,10 @@ async function transferFunds() {
   console.log(`Transfer successfully completed: `, transfer.toString());
 }
 
-transferFunds();
+(async () => {
+  try {
+    await transferFunds();
+  } catch (error) {
+    console.error("Error during funds transfer", error);
+  }
+})();

@@ -10,4 +10,10 @@ async function fundWallet() {
   console.log(`Faucet transaction successfully completed: `, faucetTransaction.toString());
 }
 
-fundWallet();
+(async () => {
+  try {
+    await fundWallet();
+  } catch (error) {
+    console.error("Error during funding wallet", error);
+  }
+})();
