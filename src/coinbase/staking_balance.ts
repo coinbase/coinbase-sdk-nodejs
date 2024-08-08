@@ -1,8 +1,6 @@
-import { StakingBalance as StakingBalanceModel } from "../client";
-import Decimal from "decimal.js";
+import { AssetAmount as AssetAmountModel, StakingBalance as StakingBalanceModel } from "../client";
 import { Coinbase } from "./coinbase";
 import { Asset } from "./asset";
-import { Amount } from "./types";
 
 /**
  * A representation of a staking reward earned on a network for a given asset.
@@ -78,8 +76,8 @@ export class StakingBalance {
    *
    * @returns The amount.
    */
-  public bondedStake(): Amount {
-    return this.asset.fromAtomicAmount(new Decimal(this.model.bonded_stake)).toNumber();
+  public bondedStake(): AssetAmountModel {
+    return this.model.bonded_stake
   }
 
   /**
@@ -87,8 +85,8 @@ export class StakingBalance {
    *
    * @returns The amount.
    */
-  public unbondedStake(): Amount {
-    return this.asset.fromAtomicAmount(new Decimal(this.model.unbonded_stake)).toNumber();
+  public unbondedStake(): AssetAmountModel {
+    return this.model.unbonded_stake
   }
 
   /**
@@ -96,8 +94,8 @@ export class StakingBalance {
    *
    * @returns The amount.
    */
-  public totalDelegation(): Amount {
-    return this.asset.fromAtomicAmount(new Decimal(this.model.total_delegation)).toNumber();
+  public totalDelegation(): AssetAmountModel {
+    return this.model.total_delegation_received
   }
 
   /**

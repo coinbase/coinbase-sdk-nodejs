@@ -13,7 +13,7 @@ import {
 import { StakingBalance } from "../coinbase/staking_balance";
 import { ExternalAddress } from "../coinbase/address/external_address";
 import { Asset } from "../coinbase/asset";
-import Decimal from "decimal.js";
+import { AssetAmount } from "../coinbase/asset_amount";
 
 describe("StakingBalance", () => {
   const startTime = "2024-05-01T00:00:00Z";
@@ -26,22 +26,27 @@ describe("StakingBalance", () => {
     contract_address: "0x",
     decimals: 18,
   });
+
+  const bondedStake = new AssetAmount("3", "3000000000000000000", 18, "ETH");
+  const unbondedStake = new AssetAmount("2", "2000000000000000000", 18, "ETH");
+  const totalDelegation = new AssetAmount("1", "1000000000000000000", 18, "ETH");
+
   const STAKING_BALANCE_RESPONSE: FetchStakingBalances200Response = {
     data: [
       {
         address_id: address.getId(),
         date: "2024-05-01",
-        bonded_stake: "32000000000000000000",
-        unbonded_stake: "1000000000000000000",
-        total_delegation: "2000000000000000000",
+        bonded_stake: bondedStake,
+        unbonded_stake: unbondedStake,
+        total_delegation_received: totalDelegation,
         participate_type: "validator",
       },
       {
         address_id: address.getId(),
         date: "2024-05-02",
-        bonded_stake: "33000000000000000000",
-        unbonded_stake: "2000000000000000000",
-        total_delegation: "3000000000000000000",
+        bonded_stake: bondedStake,
+        unbonded_stake: unbondedStake,
+        total_delegation_received: totalDelegation,
         participate_type: "validator",
       },
     ],
@@ -120,22 +125,31 @@ describe("StakingBalance", () => {
         {
           address_id: address.getId(),
           date: "2024-05-03",
-          bonded_stake: "32000000000000000000",
-          unbonded_stake: "2000000000000000000",
-          total_delegation: "1000000000000000000",
+          bonded_stake: new AssetAmount("32", "32000000000000000000", 18, "ETH"),
+          unbonded_stake: new AssetAmount("2", "2000000000000000000", 18, "ETH"),
+          total_delegation_received: new AssetAmount("1", "1000000000000000000", 18, "ETH"),
           participate_type: "validator",
         },
         asset,
       );
 
-      const bondedStake = balance.bondedStake();
-      expect(bondedStake).toEqual(32);
+      const bondedStake = AssetAmount.fromModel(balance.bondedStake());
+      expect(bondedStake.getAmount()).toEqual("32");
+      expect(bondedStake.getRawNumeric()).toEqual("32000000000000000000");
+      expect(bondedStake.getExp()).toEqual(18);
+      expect(bondedStake.getTicker()).toEqual("ETH");
 
-      const unbondedStake = balance.unbondedStake();
-      expect(unbondedStake).toEqual(2);
+      const unbondedStake = AssetAmount.fromModel(balance.unbondedStake());
+      expect(unbondedStake.getAmount()).toEqual("2");
+      expect(unbondedStake.getRawNumeric()).toEqual("2000000000000000000");
+      expect(unbondedStake.getExp()).toEqual(18);
+      expect(unbondedStake.getTicker()).toEqual("ETH");
 
-      const totalDelegation = balance.totalDelegation();
-      expect(totalDelegation).toEqual(1);
+      const totalDelegation = AssetAmount.fromModel(balance.totalDelegation());
+      expect(totalDelegation.getAmount()).toEqual("1");
+      expect(totalDelegation.getRawNumeric()).toEqual("1000000000000000000");
+      expect(totalDelegation.getExp()).toEqual(18);
+      expect(totalDelegation.getTicker()).toEqual("ETH");
 
       const participateType = balance.participateType();
       expect(participateType).toEqual("validator");
@@ -148,9 +162,9 @@ describe("StakingBalance", () => {
         {
           address_id: address.getId(),
           date: "2024-05-03",
-          bonded_stake: "226",
-          unbonded_stake: "1",
-          total_delegation: "0",
+          bonded_stake: bondedStake,
+          unbonded_stake: unbondedStake,
+          total_delegation_received: totalDelegation,
           participate_type: "validator",
         },
         asset,
@@ -167,9 +181,9 @@ describe("StakingBalance", () => {
         {
           address_id: address.getId(),
           date: "2024-05-03",
-          bonded_stake: "32000000000000000000",
-          unbonded_stake: "2000000000000000000",
-          total_delegation: "1000000000000000000",
+          bonded_stake: bondedStake,
+          unbonded_stake: unbondedStake,
+          total_delegation_received: totalDelegation,
           participate_type: "validator",
         },
         asset,
@@ -177,7 +191,7 @@ describe("StakingBalance", () => {
 
       const balanceStr = balance.toString();
       expect(balanceStr).toEqual(
-        `StakingBalance { date: '2024-05-03T00:00:00.000Z' address: '${address.getId()}' bondedStake: '32' unbondedStake: '2' totalDelegation: '1' participateType: 'validator' }`,
+        `StakingBalance { date: '2024-05-03T00:00:00.000Z' address: '${address.getId()}' bondedStake: '{ amount: '${bondedStake.getAmount()}', raw_numeric: '${bondedStake.getRawNumeric()}', exp: ${bondedStake.getExp()}, ticker: '${bondedStake.getTicker()}' }' unbondedStake: '{ amount: '${unbondedStake.getAmount()}', raw_numeric: '${unbondedStake.getRawNumeric()}', exp: ${unbondedStake.getExp()}, ticker: '${unbondedStake.getTicker()}' }' totalDelegation: '{ amount: '${totalDelegation.getAmount()}', raw_numeric: '${totalDelegation.getRawNumeric()}', exp: ${totalDelegation.getExp()}, ticker: '${totalDelegation.getTicker()}' }' participateType: 'validator' }`,
       );
     });
   });
@@ -188,9 +202,9 @@ describe("StakingBalance", () => {
         {
           address_id: address.getId(),
           date: "2024-05-03",
-          bonded_stake: "226",
-          unbonded_stake: "1",
-          total_delegation: "0",
+          bonded_stake: bondedStake,
+          unbonded_stake: unbondedStake,
+          total_delegation_received: totalDelegation,
           participate_type: "validator",
         },
         asset,
