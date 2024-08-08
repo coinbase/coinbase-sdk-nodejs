@@ -1,4 +1,4 @@
-import { AssetAmount as AssetAmountModel, StakingBalance as StakingBalanceModel } from "../client";
+import { StakingBalance as StakingBalanceModel } from "../client";
 import { Coinbase } from "./coinbase";
 import { Asset } from "./asset";
 import { AssetAmount } from "./asset_amount";
