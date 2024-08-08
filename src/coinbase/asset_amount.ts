@@ -8,14 +8,14 @@ export class AssetAmount {
   public readonly exp: number;
 
   /**
-   * Public constructor for the AssetAmount class.
+   * constructor for the AssetAmount class.
    *
-   * @param amount - the amount
-   * @param raw_numeric - the raw numeric
-   * @param exp - the exp
-   * @param ticker - the ticker
+   * @param amount - The amount of the asset in the most common denomination such as ETH, BTC, etc.
+   * @param raw_numeric - The raw, unadulterated numeric value, such as Wei (in Ethereum) and Lamports (in Solana).
+   * @param exp - The number of decimals needed to convert from the raw numeric value to the most common denomination.
+   * @param ticker - The ticker of this asset (USD, ETH, SOL).
    */
-  public constructor(amount: string, raw_numeric: string, exp: number, ticker: string) {
+  constructor(amount: string, raw_numeric: string, exp: number, ticker: string) {
     this.amount = amount;
     this.ticker = ticker;
     this.raw_numeric = raw_numeric;
@@ -35,7 +35,7 @@ export class AssetAmount {
   /**
    * Returns the amount.
    *
-   * @returns {string} The amount.
+   * @returns {string} The amount of the asset in the most common denomination.
    * @memberof AssetAmount
    */
   public getAmount(): string {
@@ -45,7 +45,7 @@ export class AssetAmount {
   /**
    * Returns the ticker.
    *
-   * @returns {string} The ticker.
+   * @returns {string} The ticker (USD, ETH, SOL).
    * @memberof AssetAmount
    */
   public getTicker(): string {
@@ -55,7 +55,7 @@ export class AssetAmount {
   /**
    * Returns the raw numeric.
    *
-   * @returns {string} The raw numeric.
+   * @returns {string} The raw, unadulterated numeric value.
    * @memberof AssetAmount
    */
   public getRawNumeric(): string {
@@ -65,7 +65,7 @@ export class AssetAmount {
   /**
    * Returns the exp.
    *
-   * @returns {number} The exp.
+   * @returns {number} The number of decimals needed to convert from the raw numeric value to the most common denomination.
    * @memberof AssetAmount
    */
   public getExp(): number {
