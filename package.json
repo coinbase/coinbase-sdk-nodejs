@@ -3,7 +3,10 @@
   "author": "Coinbase Inc.",
   "license": "ISC",
   "description": "Coinbase Platform SDK",
-  "repository": "https://github.com/coinbase/coinbase-sdk-nodejs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coinbase/coinbase-sdk-nodejs.git"
+  },
   "version": "0.0.14",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -25,8 +28,9 @@
     "dist"
   ],
   "dependencies": {
+    "@coinbase/coinbase-sdk": "^0.0.14",
     "@scure/bip32": "^1.4.0",
-    "axios": "^1.6.8",
+    "axios": "^1.7.3",
     "axios-mock-adapter": "^1.22.0",
     "bip32": "^4.0.0",
     "bip39": "^3.1.0",
@@ -54,5 +58,14 @@
     "ts-node": "^10.9.2",
     "typedoc": "^0.25.13",
     "typescript": "^5.4.5"
-  }
+  },
+  "directories": {
+    "doc": "docs"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/coinbase/coinbase-sdk-nodejs/issues"
+  },
+  "homepage": "https://github.com/coinbase/coinbase-sdk-nodejs#readme",
+  "type": "module"
 }

@@ -14,9 +14,9 @@ export class HistoricalBalance {
    *
    * @ignore
    * @param {Decimal} amount - The amount of the balance.
-   * @param {string} assetId - The asset ID.
    * @param {Decimal} blockHeight - The block height at which the balance was recorded.
    * @param {string} blockHash - The block hash at which the balance was recorded
+   * @param {string} asset - The asset we want to fetch.
    * @hideconstructor
    */
   private constructor(amount: Decimal, blockHeight: Decimal, blockHash: string, asset: Asset) {
@@ -29,8 +29,8 @@ export class HistoricalBalance {
   /**
    * Converts a BalanceModel into a Balance object.
    *
-   * @param {BalanceModel} model - The balance model object.
-   * @returns {Balance} The Balance object.
+   * @param {HistoricalBalanceModel} model - The historical balance model object.
+   * @returns {HistoricalBalance} The HistoricalBalance object.
    */
   public static fromModel(model: HistoricalBalanceModel): HistoricalBalance {
     const asset = Asset.fromModel(model.asset);
