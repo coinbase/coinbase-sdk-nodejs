@@ -133,19 +133,20 @@ describe("StakingBalance", () => {
         asset,
       );
 
-      const bondedStake = AssetAmount.fromModel(balance.bondedStake());
+      const bondedStake = balance.bondedStake();
+    
       expect(bondedStake.getAmount()).toEqual("32");
       expect(bondedStake.getRawNumeric()).toEqual("32000000000000000000");
       expect(bondedStake.getExp()).toEqual(18);
       expect(bondedStake.getTicker()).toEqual("ETH");
 
-      const unbondedStake = AssetAmount.fromModel(balance.unbondedStake());
+      const unbondedStake = balance.unbondedStake();
       expect(unbondedStake.getAmount()).toEqual("2");
       expect(unbondedStake.getRawNumeric()).toEqual("2000000000000000000");
       expect(unbondedStake.getExp()).toEqual(18);
       expect(unbondedStake.getTicker()).toEqual("ETH");
 
-      const totalDelegation = AssetAmount.fromModel(balance.totalDelegation());
+      const totalDelegation = balance.totalDelegation();
       expect(totalDelegation.getAmount()).toEqual("1");
       expect(totalDelegation.getRawNumeric()).toEqual("1000000000000000000");
       expect(totalDelegation.getExp()).toEqual(18);
