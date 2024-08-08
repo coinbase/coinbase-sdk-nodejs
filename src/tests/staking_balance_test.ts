@@ -146,7 +146,7 @@ describe("StakingBalance", () => {
       expect(unbondedStake.getExp()).toEqual(18);
       expect(unbondedStake.getTicker()).toEqual("ETH");
 
-      const totalDelegation = balance.totalDelegation();
+      const totalDelegation = balance.totalDelegationReceived();
       expect(totalDelegation.getAmount()).toEqual("1");
       expect(totalDelegation.getRawNumeric()).toEqual("1000000000000000000");
       expect(totalDelegation.getExp()).toEqual(18);
@@ -192,7 +192,7 @@ describe("StakingBalance", () => {
 
       const balanceStr = balance.toString();
       expect(balanceStr).toEqual(
-        `StakingBalance { date: '2024-05-03T00:00:00.000Z' address: '${address.getId()}' bondedStake: '{ amount: '${bondedStake.getAmount()}', raw_numeric: '${bondedStake.getRawNumeric()}', exp: ${bondedStake.getExp()}, ticker: '${bondedStake.getTicker()}' }' unbondedStake: '{ amount: '${unbondedStake.getAmount()}', raw_numeric: '${unbondedStake.getRawNumeric()}', exp: ${unbondedStake.getExp()}, ticker: '${unbondedStake.getTicker()}' }' totalDelegation: '{ amount: '${totalDelegation.getAmount()}', raw_numeric: '${totalDelegation.getRawNumeric()}', exp: ${totalDelegation.getExp()}, ticker: '${totalDelegation.getTicker()}' }' participateType: 'validator' }`,
+        `StakingBalance { date: '2024-05-03T00:00:00.000Z' address: '${address.getId()}' bondedStake: '{ amount: '${bondedStake.getAmount()}', raw_numeric: '${bondedStake.getRawNumeric()}', exp: ${bondedStake.getExp()}, ticker: '${bondedStake.getTicker()}' }' unbondedStake: '{ amount: '${unbondedStake.getAmount()}', raw_numeric: '${unbondedStake.getRawNumeric()}', exp: ${unbondedStake.getExp()}, ticker: '${unbondedStake.getTicker()}' }' totalDelegationReceived: '{ amount: '${totalDelegation.getAmount()}', raw_numeric: '${totalDelegation.getRawNumeric()}', exp: ${totalDelegation.getExp()}, ticker: '${totalDelegation.getTicker()}' }' participateType: 'validator' }`,
       );
     });
   });

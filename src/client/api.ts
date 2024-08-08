@@ -751,13 +751,13 @@ export interface FetchStakingBalancesRequest {
      */
     'address_id': string;
     /**
-     * The start time of this reward period
+     * The start time of this staking balance period
      * @type {string}
      * @memberof FetchStakingBalancesRequest
      */
     'start_time': string;
     /**
-     * The end time of this reward period
+     * The end time of this staking balance period
      * @type {string}
      * @memberof FetchStakingBalancesRequest
      */
@@ -1331,25 +1331,25 @@ export type StakingRewardFormat = typeof StakingRewardFormat[keyof typeof Stakin
  */
 export interface AssetAmount {
     /**
-     * Amount The amount of the asset in the most common denomination such as ETH, BTC, etc.
+     * The amount of the asset in the most common denomination such as ETH, BTC, etc.
      * @type {string}
      * @memberof AssetAmount
      */
     amount: string;
     /**
-     * Exp The number of decimals needed to convert from the raw numeric value to the most.
+     * The number of decimals needed to convert from the raw numeric value to the most common denomination.
      * @type {number}
      * @memberof AssetAmount
      */
     exp: number;
     /**
-     * RawNumeric The raw, unadulterated numeric value, such as Wei (in Ethereum) and Lamports (in Solana).
+     * The raw, unadulterated numeric value, such as Wei (in Ethereum) and Lamports (in Solana).
      * @type {string}
      * @memberof AssetAmount
      */
     raw_numeric: string;
     /**
-     * Ticker The ticker of this asset (USD, ETH, SOL).
+     * The ticker of this asset (USD, ETH, SOL).
      * @type {string}
      * @memberof AssetAmount
      */
@@ -3972,7 +3972,7 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * Fetch staking balances for a given address
-         * @summary Fetch staking rewards
+         * @summary Fetch staking balances
          * @param {FetchStakingBalancesRequest} fetchStakingBalancesRequest 
          * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
          * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
@@ -4206,7 +4206,7 @@ export const StakeApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Fetch staking balance for given address
+         * Fetch staking balances for given address
          * @summary Fetch staking balances
          * @param {FetchStakingBalancesRequest} fetchStakingBalancesRequest 
          * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.

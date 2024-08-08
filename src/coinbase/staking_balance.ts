@@ -95,12 +95,12 @@ export class StakingBalance {
    *
    * @returns The amount.
    */
-  public totalDelegation(): AssetAmount {
+  public totalDelegationReceived(): AssetAmount {
     return AssetAmount.fromModel(this.model.total_delegation_received);
   }
 
   /**
-   * Returns the participate type of the StakingBalance.
+   * Returns the participate type of the address.
    *
    * @returns The participate type.
    */
@@ -132,6 +132,6 @@ export class StakingBalance {
    * @returns The string representation of the Staking Balance.
    */
   public toString(): string {
-    return `StakingBalance { date: '${this.date().toISOString()}' address: '${this.addressId()}' bondedStake: '${this.bondedStake().toString()}' unbondedStake: '${this.unbondedStake().toString()}' totalDelegation: '${this.totalDelegation().toString()}' participateType: '${this.participateType()}' }`;
+    return `StakingBalance { date: '${this.date().toISOString()}' address: '${this.addressId()}' bondedStake: '${this.bondedStake().toString()}' unbondedStake: '${this.unbondedStake().toString()}' totalDelegationReceived: '${this.totalDelegationReceived().toString()}' participateType: '${this.participateType()}' }`;
   }
 }
