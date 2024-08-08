@@ -1,6 +1,7 @@
 import { AssetAmount as AssetAmountModel, StakingBalance as StakingBalanceModel } from "../client";
 import { Coinbase } from "./coinbase";
 import { Asset } from "./asset";
+import { AssetAmount } from "./asset_amount";
 
 /**
  * A representation of a staking reward earned on a network for a given asset.
@@ -76,8 +77,8 @@ export class StakingBalance {
    *
    * @returns The amount.
    */
-  public bondedStake(): AssetAmountModel {
-    return this.model.bonded_stake
+  public bondedStake(): AssetAmount {
+    return AssetAmount.fromModel(this.model.bonded_stake);
   }
 
   /**
@@ -85,8 +86,8 @@ export class StakingBalance {
    *
    * @returns The amount.
    */
-  public unbondedStake(): AssetAmountModel {
-    return this.model.unbonded_stake
+  public unbondedStake(): AssetAmount {
+    return AssetAmount.fromModel(this.model.unbonded_stake);
   }
 
   /**
@@ -94,8 +95,8 @@ export class StakingBalance {
    *
    * @returns The amount.
    */
-  public totalDelegation(): AssetAmountModel {
-    return this.model.total_delegation_received
+  public totalDelegation(): AssetAmount {
+    return AssetAmount.fromModel(this.model.total_delegation_received);
   }
 
   /**
