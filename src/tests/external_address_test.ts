@@ -475,7 +475,7 @@ describe("ExternalAddress", () => {
     });
 
     it("should return results with USDC historical balance", async () => {
-      const history = await address.listHistoricalBalance(Coinbase.assets.Usdc);
+      const [history, nextPage] = await address.listHistoricalBalance(Coinbase.assets.Usdc);
       expect(history.length).toEqual(2);
       expect(history[0].amount).toEqual(new Decimal(1));
       expect(history[1].amount).toEqual(new Decimal(5));
@@ -489,6 +489,7 @@ describe("ExternalAddress", () => {
         100,
         undefined,
       );
+      expect(nextPage).toEqual("")
     });
 
     it("should return empty if no historical balance found", async () => {
@@ -497,7 +498,7 @@ describe("ExternalAddress", () => {
         has_more: false,
         next_page: "",
       });
-      const history = await address.listHistoricalBalance(Coinbase.assets.Usdc);
+      const [history, nextPage] = await address.listHistoricalBalance(Coinbase.assets.Usdc);
       expect(history.length).toEqual(0);
       expect(
         Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance,
@@ -509,6 +510,41 @@ describe("ExternalAddress", () => {
         100,
         undefined,
       );
+      expect(nextPage).toEqual("")
+    });
+
+    it("should return results with USDC historical balance and next page", async () => {
+      Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance = mockReturnValue({
+        data: [
+          {
+            amount: "5000000",
+            block_hash: "0x5c05a37dcb4910b22a775fc9480f8422d9d615ad7a6a0aa9d8778ff8cc300986",
+            block_height:"67890",
+            asset: {
+              asset_id: "usdc",
+              network_id: Coinbase.networks.EthereumHolesky,
+              decimals: 6,
+            },
+          },
+        ],
+        has_more: true,
+        next_page: "next page",
+      });
+
+      const [history, nextPage] = await address.listHistoricalBalance(Coinbase.assets.Usdc, 1);
+      expect(history.length).toEqual(1);
+      expect(history[0].amount).toEqual(new Decimal(5));
+      expect(
+        Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance,
+      ).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance).toHaveBeenCalledWith(
+        address.getNetworkId(),
+        address.getId(),
+        Coinbase.assets.Usdc,
+        1,
+        undefined,
+      );
+      expect(nextPage).toEqual("next page")
     });
   });
 

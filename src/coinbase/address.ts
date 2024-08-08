@@ -84,10 +84,29 @@ export class Address {
    * Returns the historical balance of the provided asset.
    *
    * @param assetId - The asset ID.
-   * @returns The list of historical balance of the asset.
+   * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @returns The list of historical balance of the asset and next page token.
    */
-  public async listHistoricalBalance(assetId: string): Promise<HistoricalBalance[]> {
+  public async listHistoricalBalance(assetId: string, limit?: number, page?: string): Promise<[HistoricalBalance[], string]> {
     const historyList: HistoricalBalance[] = [];
+
+    if (limit !== undefined) {
+      const response = await Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance(
+        this.getNetworkId(),
+        this.getId(),
+        Asset.primaryDenomination(assetId),
+        limit,
+        page ? page : undefined,
+      );
+      response.data.data.forEach(historicalBalanceModel => {
+        const historicalBalance = HistoricalBalance.fromModel(historicalBalanceModel);
+        historyList.push(historicalBalance);
+      });
+
+      return [historyList, response.data.next_page]
+    }
+
     const queue: string[] = [""];
 
     while (queue.length > 0) {
@@ -112,7 +131,7 @@ export class Address {
       }
     }
 
-    return historyList;
+    return [historyList, ""];
   }
 
   /**
