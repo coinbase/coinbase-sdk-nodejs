@@ -1,5 +1,11 @@
 # Coinbase Node.js SDK Changelog
 
+## [0.0.15] 
+
+### Added 
+
+- USD value conversion details to the StakingReward object
+
 ## [0.0.14] - 2024-08-05
 
 ### Added

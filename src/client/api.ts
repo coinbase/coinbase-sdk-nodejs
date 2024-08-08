@@ -113,6 +113,31 @@ export interface AddressHistoricalBalanceList {
 /**
  *
  * @export
+ * @interface AddressHistoricalBalanceList
+ */
+export interface AddressHistoricalBalanceList {
+    /**
+     * 
+     * @type {Array<HistoricalBalance>}
+     * @memberof AddressHistoricalBalanceList
+     */
+    'data': Array<HistoricalBalance>;
+    /**
+     * True if this list has another page of items after this one that can be fetched.
+     * @type {boolean}
+     * @memberof AddressHistoricalBalanceList
+     */
+    'has_more': boolean;
+    /**
+     * The page token to be used to fetch the next page.
+     * @type {string}
+     * @memberof AddressHistoricalBalanceList
+     */
+    'next_page': string;
+}
+/**
+ * 
+ * @export
  * @interface AddressList
  */
 export interface AddressList {
@@ -807,7 +832,11 @@ export interface HistoricalBalance {
      */
     'block_height': string;
     /**
+<<<<<<< HEAD
      *
+=======
+     * 
+>>>>>>> d0b08ae9e1c2b4c289fcc76952dd02d734648637
      * @type {Asset}
      * @memberof HistoricalBalance
      */
@@ -1292,6 +1321,12 @@ export interface StakingReward {
      * @memberof StakingReward
      */
     'format': StakingRewardFormat;
+    /**
+     * 
+     * @type {StakingRewardUSDValue}
+     * @memberof StakingReward
+     */
+    'usd_value': StakingRewardUSDValue;
 }
 
 export const StakingRewardStateEnum = {
@@ -1315,6 +1350,31 @@ export const StakingRewardFormat = {
 export type StakingRewardFormat = typeof StakingRewardFormat[keyof typeof StakingRewardFormat];
 
 
+/**
+ * The USD value of the reward
+ * @export
+ * @interface StakingRewardUSDValue
+ */
+export interface StakingRewardUSDValue {
+    /**
+     * The value of the reward in USD
+     * @type {string}
+     * @memberof StakingRewardUSDValue
+     */
+    'amount': string;
+    /**
+     * The conversion price from native currency to USD
+     * @type {string}
+     * @memberof StakingRewardUSDValue
+     */
+    'conversion_price': string;
+    /**
+     * The time of the conversion in UTC.
+     * @type {string}
+     * @memberof StakingRewardUSDValue
+     */
+    'conversion_time': string;
+}
 /**
  * A trade of an asset to another asset
  * @export
@@ -1546,7 +1606,41 @@ export interface Transfer {
      * @memberof Transfer
      */
     'transaction': Transaction;
+    /**
+     * The unsigned payload of the transfer. This is the payload that needs to be signed by the sender.
+     * @type {string}
+     * @memberof Transfer
+     */
+    'unsigned_payload'?: string;
+    /**
+     * The signed payload of the transfer. This is the payload that has been signed by the sender.
+     * @type {string}
+     * @memberof Transfer
+     */
+    'signed_payload'?: string;
+    /**
+     * The hash of the transfer transaction
+     * @type {string}
+     * @memberof Transfer
+     */
+    'transaction_hash'?: string;
+    /**
+     * The status of the transfer
+     * @type {string}
+     * @memberof Transfer
+     */
+    'status'?: TransferStatusEnum;
 }
+
+export const TransferStatusEnum = {
+    Pending: 'pending',
+    Broadcast: 'broadcast',
+    Complete: 'complete',
+    Failed: 'failed'
+} as const;
+
+export type TransferStatusEnum = typeof TransferStatusEnum[keyof typeof TransferStatusEnum];
+
 /**
  *
  * @export
@@ -2906,6 +3000,58 @@ export const ExternalAddressesApiAxiosParamCreator = function (configuration?: C
 
 
 
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * List the historical balance of an asset in a specific address.
+         * @summary Get address balance history for asset
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the historical balance for.
+         * @param {string} assetId The symbol of the asset to fetch the historical balance for.
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listAddressHistoricalBalance: async (networkId: string, addressId: string, assetId: string, limit?: number, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('listAddressHistoricalBalance', 'networkId', networkId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('listAddressHistoricalBalance', 'addressId', addressId)
+            // verify required parameter 'assetId' is not null or undefined
+            assertParamExists('listAddressHistoricalBalance', 'assetId', assetId)
+            const localVarPath = `/v1/networks/{network_id}/addresses/{address_id}/balance_history/{asset_id}`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)))
+                .replace(`{${"asset_id"}}`, encodeURIComponent(String(assetId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+
+    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
