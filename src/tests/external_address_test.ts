@@ -475,7 +475,7 @@ describe("ExternalAddress", () => {
     });
 
     it("should return results with USDC historical balance", async () => {
-      const [history, nextPage] = await address.listHistoricalBalance(Coinbase.assets.Usdc);
+      const [history, nextPage] = await address.listHistoricalBalances(Coinbase.assets.Usdc);
       expect(history.length).toEqual(2);
       expect(history[0].amount).toEqual(new Decimal(1));
       expect(history[1].amount).toEqual(new Decimal(5));
@@ -498,7 +498,7 @@ describe("ExternalAddress", () => {
         has_more: false,
         next_page: "",
       });
-      const [history, nextPage] = await address.listHistoricalBalance(Coinbase.assets.Usdc);
+      const [history, nextPage] = await address.listHistoricalBalances(Coinbase.assets.Usdc);
       expect(history.length).toEqual(0);
       expect(
         Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance,
@@ -531,7 +531,7 @@ describe("ExternalAddress", () => {
         next_page: "next page",
       });
 
-      const [history, nextPage] = await address.listHistoricalBalance(Coinbase.assets.Usdc, 1);
+      const [history, nextPage] = await address.listHistoricalBalances(Coinbase.assets.Usdc, 1);
       expect(history.length).toEqual(1);
       expect(history[0].amount).toEqual(new Decimal(5));
       expect(

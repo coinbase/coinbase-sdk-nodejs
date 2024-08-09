@@ -83,14 +83,14 @@ export class Address {
   }
 
   /**
-   * Returns the historical balance of the provided asset.
+   * Returns the historical balances of the provided asset.
    *
    * @param assetId - The asset ID.
    * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
    * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
    * @returns The list of historical balance of the asset and next page token.
    */
-  public async listHistoricalBalance(
+  public async listHistoricalBalances(
     assetId: string,
     limit?: number,
     page?: string,
