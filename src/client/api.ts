@@ -22,6 +22,7 @@ import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObj
 import type { RequestArgs } from './base';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerMap } from './base';
+import { start } from 'repl';
 
 /**
  * 
@@ -723,45 +724,6 @@ export interface FetchStakingRewardsRequest {
      * @memberof FetchStakingRewardsRequest
      */
     'format': StakingRewardFormat;
-}
-
-
-/**
- * 
- * @export
- * @interface FetchHistoricalStakingBalancesRequest
- */
-export interface FetchHistoricalStakingBalancesRequest {
-    /**
-     * The ID of the blockchain network
-     * @type {string}
-     * @memberof FetchHistoricalStakingBalancesRequest
-     */
-    'network_id': string;
-    /**
-     * The ID of the asset for which the staking balances are being fetched
-     * @type {string}
-     * @memberof FetchHistoricalStakingBalancesRequest
-     */
-    'asset_id': string;
-    /**
-     * The onchain address for which the staking balances are being fetched
-     * @type {string}
-     * @memberof FetchHistoricalStakingBalancesRequest
-     */
-    'address': string;
-    /**
-     * The start time of this staking balance period
-     * @type {string}
-     * @memberof FetchHistoricalStakingBalancesRequest
-     */
-    'start_time': string;
-    /**
-     * The end time of this staking balance period
-     * @type {string}
-     * @memberof FetchHistoricalStakingBalancesRequest
-     */
-    'end_time': string;
 }
 
 /**
@@ -3940,9 +3902,18 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        fetchHistoricalStakingBalances: async (FetchHistoricalStakingBalancesRequest: FetchHistoricalStakingBalancesRequest, limit?: number, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'FetchHistoricalStakingBalancesRequest' is not null or undefined
-            assertParamExists('fetchHistoricalStakingBalances', 'FetchHistoricalStakingBalancesRequest', FetchHistoricalStakingBalancesRequest)
+        fetchHistoricalStakingBalances: async (address: string, networkId: string, assetId: string, startTime: string, endTime: string, limit?: number, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('fetchHistoricalStakingBalances', 'networkId', networkId)
+            // verify required parameter 'address' is not null or undefined
+            assertParamExists('fetchHistoricalStakingBalances', 'address', address)
+            // verify required parameter 'assetId' is not null or undefined
+            assertParamExists('fetchHistoricalStakingBalances', 'assetId', assetId)
+            // verify required parameter 'startTime' is not null or undefined
+            assertParamExists('fetchHistoricalStakingBalances', 'startTime', startTime)
+            // verify required parameter 'endTime' is not null or undefined
+            assertParamExists('fetchHistoricalStakingBalances', 'endTime', endTime)
+
             const localVarPath = `/v1/stake/balances`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -3955,6 +3926,12 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            localVarQueryParameter['address'] = address;
+            localVarQueryParameter['networkId'] = networkId;
+            localVarQueryParameter['assetId'] = assetId;
+            localVarQueryParameter['startTime'] = startTime;
+            localVarQueryParameter['endTime'] = endTime
+
             if (limit !== undefined) {
                 localVarQueryParameter['limit'] = limit;
             }
@@ -3963,14 +3940,12 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
                 localVarQueryParameter['page'] = page;
             }
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(FetchHistoricalStakingBalancesRequest, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(null, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -4169,14 +4144,18 @@ export const StakeApiFp = function(configuration?: Configuration) {
         /**
          * Fetch historical staking balances for given address
          * @summary Fetch historical staking balances
-         * @param {FetchHistoricalStakingBalancesRequest} FetchHistoricalStakingBalancesRequest 
+         * @param {string} address The address to fetch historical staking balances for
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} assetId The ID of the asset
+         * @param {string} startTime The start time of the staking balances
+         * @param {string} endTime The end time of the staking balances 
          * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
          * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async fetchHistoricalStakingBalances(FetchHistoricalStakingBalancesRequest: FetchHistoricalStakingBalancesRequest, limit?: number, page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FetchHistoricalStakingBalances200Response>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.fetchHistoricalStakingBalances(FetchHistoricalStakingBalancesRequest, limit, page, options);
+        async fetchHistoricalStakingBalances(address: string, networkId: string, assetId: string, startTime: string, endTime: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FetchHistoricalStakingBalances200Response>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.fetchHistoricalStakingBalances(address, networkId, assetId, startTime, endTime, limit, page, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['StakeApi.fetchHistoricalStakingBalances']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -4290,8 +4269,8 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        fetchHistoricalStakingBalances(FetchHistoricalStakingBalancesRequest: FetchHistoricalStakingBalancesRequest, limit?: number, page?: string, options?: any): AxiosPromise<FetchHistoricalStakingBalances200Response> {
-            return localVarFp.fetchHistoricalStakingBalances(FetchHistoricalStakingBalancesRequest, limit, page, options).then((request) => request(axios, basePath));
+        fetchHistoricalStakingBalances(address: string, networkId: string, assetId: string, startTime: string, endTime: string, limit?: number, page?: string, options?: any): AxiosPromise<FetchHistoricalStakingBalances200Response> {
+            return localVarFp.fetchHistoricalStakingBalances(address, networkId, assetId, startTime, endTime, limit, page, options).then((request) => request(axios, basePath));
         },
         /**
          * Get the latest state of a staking operation

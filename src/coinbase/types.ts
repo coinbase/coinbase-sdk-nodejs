@@ -26,7 +26,6 @@ import {
   StakingContext as StakingContextModel,
   FetchStakingRewardsRequest,
   FetchStakingRewards200Response,
-  FetchHistoricalStakingBalancesRequest,
   FetchHistoricalStakingBalances200Response,
   FaucetTransaction,
   BroadcastStakingOperationRequest,
@@ -430,7 +429,11 @@ export type StakeAPIClient = {
    * @param options - Axios request options.
    */
   fetchHistoricalStakingBalances(
-    FetchHistoricalStakingBalancesRequest: FetchHistoricalStakingBalancesRequest,
+    address: string,
+    networkId: string,
+    assetId: string,
+    startTime: string,
+    endTime: string,
     limit?: number,
     page?: string,
     options?: AxiosRequestConfig,
