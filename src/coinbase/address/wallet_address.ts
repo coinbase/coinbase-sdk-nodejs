@@ -253,7 +253,7 @@ export class WalletAddress extends Address {
   /**
    * Trades the given amount of the given Asset for another Asset. Only same-network Trades are supported.
    *
-   * @param options = The options to create the Trade.
+   * @param options - The options to create the Trade.
    * @param options.amount - The amount of the From Asset to send.
    * @param options.fromAssetId - The ID of the Asset to trade from.
    * @param options.toAssetId - The ID of the Asset to trade to.
@@ -384,6 +384,13 @@ export class WalletAddress extends Address {
    * @param assetId - The asset to stake.
    * @param mode - The staking mode. Defaults to DEFAULT.
    * @param options - Additional options such as setting the mode for the staking action.
+   * Available options:
+   * A. Shared ETH Staking: None
+   * B. Dedicated ETH Staking:
+   *    1. funding_address (optional): Ethereum address for funding the stake operation. Defaults to the address initiating the stake operation.
+   *    2. withdrawal_address (optional): Ethereum address for receiving rewards and withdrawal funds. Defaults to the address initiating the stake operation.
+   *    3. fee_recipient_address (optional): Ethereum address for receiving transaction fees. Defaults to the address initiating the stake operation.
+   *
    * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
    * @param intervalSeconds - The amount to check each time for a successful broadcast.
    * @returns The staking operation after it's completed successfully.
@@ -415,6 +422,12 @@ export class WalletAddress extends Address {
    * @param assetId - The asset to unstake.
    * @param mode - The staking mode. Defaults to DEFAULT.
    * @param options - Additional options such as setting the mode for the staking action.
+   * Available options:
+   * A. Shared ETH Staking: None
+   * B. Dedicated ETH Staking:
+   *    1. immediate (optional): Set this to "true" to unstake immediately i.e. leverage "Coinbase managed unstake" process . Defaults to "false" i.e. "User managed unstake" process.
+   *    2. validator_pub_keys (optional): List of validator public keys to unstake. Defaults to validators being picked up on your behalf corresponding to the unstake amount.
+   *
    * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
    * @param intervalSeconds - The amount to check each time for a successful broadcast.
    * @returns The staking operation after it's completed successfully.
