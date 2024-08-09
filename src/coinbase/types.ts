@@ -335,7 +335,7 @@ export type ExternalAddressAPIClient = {
     options?: RawAxiosRequestConfig,
   ): AxiosPromise<Balance>;
 
-    /**
+  /**
    * List the historical balance of an asset in a specific address.
    *
    * @summary Get address balance history for asset
@@ -347,14 +347,14 @@ export type ExternalAddressAPIClient = {
    * @param options - Override http request option.
    * @throws {RequiredError}
    */
-    listAddressHistoricalBalance(
-      networkId: string,
-      addressId: string,
-      assetId: string,
-      limit?: number,
-      page?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<AddressHistoricalBalanceList>;
+  listAddressHistoricalBalance(
+    networkId: string,
+    addressId: string,
+    assetId: string,
+    limit?: number,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<AddressHistoricalBalanceList>;
 
   /**
    * Request faucet funds to be sent to external address.
