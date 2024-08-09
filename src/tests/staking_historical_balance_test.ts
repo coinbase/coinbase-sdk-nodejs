@@ -126,7 +126,6 @@ describe("StakingBalance", () => {
           unbonded_balance: new AssetAmount("2", "2000000000000000000", 18, "ETH"),
           participant_type: "validator",
         },
-        asset,
       );
 
       const bondedStake = balance.bondedStake();
@@ -157,7 +156,6 @@ describe("StakingBalance", () => {
           unbonded_balance: unbondedBalance,
           participant_type: "validator",
         },
-        asset,
       );
 
       const date = balance.date();
@@ -175,7 +173,6 @@ describe("StakingBalance", () => {
           unbonded_balance: unbondedBalance,
           participant_type: "validator",
         },
-        asset,
       );
 
       const balanceStr = balance.toString();
@@ -195,7 +192,6 @@ describe("StakingBalance", () => {
           unbonded_balance: unbondedBalance,
           participant_type: "validator",
         },
-        asset,
       );
 
       const addressId = balance.addressId();
