@@ -115,7 +115,7 @@ export class Address {
 
     const queue: string[] = [""];
 
-    while (queue.length > 0 && history.length < Address.MAX_BALANCE_HISTORY) {
+    while (queue.length > 0 && historyList.length < Address.MAX_BALANCE_HISTORY) {
       const page = queue.shift();
       const response = await Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance(
         this.getNetworkId(),
