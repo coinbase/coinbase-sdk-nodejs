@@ -51,7 +51,7 @@ export class StakingBalance {
         end_time: endTime,
       };
 
-      const response = await Coinbase.apiClients.stake!.fetchStakingBalances(
+      const response = await Coinbase.apiClients.stake!.fetchHistoricalStakingBalances(
         request,
         100,
         page?.length ? page : undefined,
