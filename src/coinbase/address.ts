@@ -12,6 +12,7 @@ import { StakingReward } from "./staking_reward";
 /**
  * A representation of a blockchain address, which is a user-controlled account on a network.
  */
+// test
 export class Address {
   protected networkId: string;
   protected id: string;
