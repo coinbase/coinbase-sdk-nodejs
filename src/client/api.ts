@@ -1381,23 +1381,17 @@ export interface StakingBalance {
      */
     'bonded_stake': AssetAmount;
     /**
-     * The unbonded stake.
+     * The unbonded balance.
      * @type {AssetAmount}
      * @memberof StakingBalance
      */
-    'unbonded_stake': AssetAmount;
+    'unbonded_balance': AssetAmount;
     /**
-     * The total delegation received.
-     * @type {AssetAmount}
-     * @memberof StakingBalance
-     */
-    'total_delegation_received': AssetAmount;
-    /**
-     * The participate type of the given address.
+     * The participant type of the given address.
      * @type {string}
      * @memberof StakingBalance
      */
-    'participate_type': string;
+    'participant_type': string;
 }
 
 /**
