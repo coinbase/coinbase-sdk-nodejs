@@ -77,13 +77,11 @@ describe("StakingBalance", () => {
       expect(response).toBeInstanceOf(Array<StakingBalance>);
       expect(response.length).toEqual(2);
       expect(Coinbase.apiClients.stake!.fetchHistoricalStakingBalances).toHaveBeenCalledWith(
-        {
-          network_id: address.getNetworkId(),
-          asset_id: Coinbase.assets.Eth,
-          address: address.getId(),
-          start_time: startTime,
-          end_time: endTime,
-        },
+        address.getId(),
+        address.getNetworkId(),
+        Coinbase.assets.Eth,
+        startTime,
+        endTime,
         100,
         undefined,
       );
@@ -106,13 +104,11 @@ describe("StakingBalance", () => {
       expect(response).toBeInstanceOf(Array<StakingBalance>);
       expect(response.length).toEqual(6);
       expect(Coinbase.apiClients.stake!.fetchHistoricalStakingBalances).toHaveBeenCalledWith(
-        {
-          network_id: address.getNetworkId(),
-          asset_id: Coinbase.assets.Eth,
-          address: address.getId(),
-          start_time: startTime,
-          end_time: endTime,
-        },
+        address.getId(),
+        address.getNetworkId(),
+        Coinbase.assets.Eth,
+        startTime,
+        endTime,
         100,
         undefined,
       );

@@ -39,16 +39,13 @@ export class StakingBalance {
 
     while (queue.length > 0) {
       const page = queue.shift();
-      const request = {
-        network_id: Coinbase.normalizeNetwork(networkId),
-        asset_id: assetId,
-        address: address,
-        start_time: startTime,
-        end_time: endTime,
-      };
 
       const response = await Coinbase.apiClients.stake!.fetchHistoricalStakingBalances(
-        request,
+        address,
+        networkId,
+        assetId,
+        startTime,
+        endTime,
         100,
         page?.length ? page : undefined,
       );
