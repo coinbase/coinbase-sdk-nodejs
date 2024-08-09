@@ -1,6 +1,5 @@
 import { StakingBalance as StakingBalanceModel } from "../client";
 import { Coinbase } from "./coinbase";
-import { Asset } from "./asset";
 import { AssetAmount } from "./asset_amount";
 
 /**
@@ -53,7 +52,6 @@ export class StakingBalance {
         100,
         page?.length ? page : undefined,
       );
-      const asset = await Asset.fetch(networkId, assetId);
 
       response.data.data.forEach(stakingBalance => {
         stakingBalances.push(new StakingBalance(stakingBalance));
