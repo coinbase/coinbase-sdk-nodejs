@@ -12,35 +12,38 @@ import {
 } from "./utils";
 import { StakingBalance } from "../coinbase/staking_balance";
 import { ExternalAddress } from "../coinbase/address/external_address";
-import { Asset } from "../coinbase/asset";
-import { AssetAmount } from "../coinbase/asset_amount";
 
 describe("StakingBalance", () => {
   const startTime = "2024-05-01T00:00:00Z";
   const endTime = "2024-05-21T00:00:00Z";
   const newAddress = newAddressModel("", "some-address-id", Coinbase.networks.EthereumHolesky);
   const address = new ExternalAddress(newAddress.network_id, newAddress.address_id);
-  const asset = Asset.fromModel({
+  const asset = {
     asset_id: Coinbase.assets.Eth,
     network_id: address.getNetworkId(),
-    contract_address: "0x",
     decimals: 18,
-  });
+  };
 
-  const bondedStake = new AssetAmount("3", "3000000000000000000", 18, "ETH");
-  const unbondedBalance = new AssetAmount("2", "2000000000000000000", 18, "ETH");
+  const bondedStake = {
+    amount: "32000000000000000000",
+    asset: asset,
+  }; 
+  const unbondedBalance = {
+    amount: "2000000000000000000",
+    asset: asset,
+  };
 
   const STAKING_BALANCE_RESPONSE: FetchHistoricalStakingBalances200Response = {
     data: [
       {
-        address_id: address.getId(),
+        address: address.getId(),
         date: "2024-05-01",
         bonded_stake: bondedStake,
         unbonded_balance: unbondedBalance,
         participant_type: "validator",
       },
       {
-        address_id: address.getId(),
+        address: address.getId(),
         date: "2024-05-02",
         bonded_stake: bondedStake,
         unbonded_balance: unbondedBalance,
@@ -77,7 +80,7 @@ describe("StakingBalance", () => {
         {
           network_id: address.getNetworkId(),
           asset_id: Coinbase.assets.Eth,
-          address_id: address.getId(),
+          address: address.getId(),
           start_time: startTime,
           end_time: endTime,
         },
@@ -106,7 +109,7 @@ describe("StakingBalance", () => {
         {
           network_id: address.getNetworkId(),
           asset_id: Coinbase.assets.Eth,
-          address_id: address.getId(),
+          address: address.getId(),
           start_time: startTime,
           end_time: endTime,
         },
@@ -116,41 +119,11 @@ describe("StakingBalance", () => {
     });
   });
 
-  describe(".amount", () => {
-    it("should return the correct stake amount", () => {
-      const balance = new StakingBalance(
-        {
-          address_id: address.getId(),
-          date: "2024-05-03",
-          bonded_stake: new AssetAmount("32", "32000000000000000000", 18, "ETH"),
-          unbonded_balance: new AssetAmount("2", "2000000000000000000", 18, "ETH"),
-          participant_type: "validator",
-        },
-      );
-
-      const bondedStake = balance.bondedStake();
-    
-      expect(bondedStake.getAmount()).toEqual("32");
-      expect(bondedStake.getRawNumeric()).toEqual("32000000000000000000");
-      expect(bondedStake.getExp()).toEqual(18);
-      expect(bondedStake.getTicker()).toEqual("ETH");
-
-      const unbondedBalance = balance.unbondedBalance();
-      expect(unbondedBalance.getAmount()).toEqual("2");
-      expect(unbondedBalance.getRawNumeric()).toEqual("2000000000000000000");
-      expect(unbondedBalance.getExp()).toEqual(18);
-      expect(unbondedBalance.getTicker()).toEqual("ETH");
-
-      const participantType = balance.participantType();
-      expect(participantType).toEqual("validator");
-    });
-  });
-
   describe(".date", () => {
     it("should return the correct date", () => {
       const balance = new StakingBalance(
         {
-          address_id: address.getId(),
+          address: address.getId(),
           date: "2024-05-03",
           bonded_stake: bondedStake,
           unbonded_balance: unbondedBalance,
@@ -167,7 +140,7 @@ describe("StakingBalance", () => {
     it("should return the string representation of a staking balance", () => {
       const balance = new StakingBalance(
         {
-          address_id: address.getId(),
+          address: address.getId(),
           date: "2024-05-03",
           bonded_stake: bondedStake,
           unbonded_balance: unbondedBalance,
@@ -177,7 +150,7 @@ describe("StakingBalance", () => {
 
       const balanceStr = balance.toString();
       expect(balanceStr).toEqual(
-        `StakingBalance { date: '2024-05-03T00:00:00.000Z' address: '${address.getId()}' bondedStake: '{ amount: '${bondedStake.getAmount()}', raw_numeric: '${bondedStake.getRawNumeric()}', exp: ${bondedStake.getExp()}, ticker: '${bondedStake.getTicker()}' }' unbondedBalance: '{ amount: '${unbondedBalance.getAmount()}', raw_numeric: '${unbondedBalance.getRawNumeric()}', exp: ${unbondedBalance.getExp()}, ticker: '${unbondedBalance.getTicker()}' }' participantType: 'validator' }`,
+        "StakingBalance { date: '2024-05-03T00:00:00.000Z' address: 'some-address-id' bondedStake: 'Balance { amount: '32' asset: 'Asset{ networkId: ethereum-holesky, assetId: eth, contractAddress: undefined, decimals: 18 }' }' unbondedBalance: 'Balance { amount: '2' asset: 'Asset{ networkId: ethereum-holesky, assetId: eth, contractAddress: undefined, decimals: 18 }' }' participantType: 'validator' }",
       );
     });
   });
@@ -186,7 +159,7 @@ describe("StakingBalance", () => {
     it("should return the onchain address of the StakingBalance", () => {
       const balance = new StakingBalance(
         {
-          address_id: address.getId(),
+          address: address.getId(),
           date: "2024-05-03",
           bonded_stake: bondedStake,
           unbonded_balance: unbondedBalance,
@@ -194,7 +167,7 @@ describe("StakingBalance", () => {
         },
       );
 
-      const addressId = balance.addressId();
+      const addressId = balance.address();
       expect(addressId).toEqual(address.getId());
     });
   });

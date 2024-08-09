@@ -52,4 +52,13 @@ export class Balance {
       asset,
     );
   }
+
+  /**
+   * Print the Balance as a string.
+   *
+   * @returns The string representation of the Balance.
+   */
+  public toString(): string {
+    return `Balance { amount: '${this.amount}' asset: '${this.asset?.toString()}' }`;
+  }
 }
