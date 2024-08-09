@@ -1,6 +1,6 @@
 import { Decimal } from "decimal.js";
 import { ethers } from "ethers";
-import { Address as AddressModel, StakingOperationStatusEnum } from "../../client";
+import { Address as AddressModel } from "../../client";
 import { Address } from "../address";
 import { Asset } from "../asset";
 import { Coinbase } from "../coinbase";
@@ -243,7 +243,7 @@ export class WalletAddress extends Address {
   /**
    * Trades the given amount of the given Asset for another Asset. Only same-network Trades are supported.
    *
-   * @param options = The options to create the Trade.
+   * @param options - = The options to create the Trade.
    * @param options.amount - The amount of the From Asset to send.
    * @param options.fromAssetId - The ID of the Asset to trade from.
    * @param options.toAssetId - The ID of the Asset to trade to.
@@ -493,32 +493,34 @@ export class WalletAddress extends Address {
       options,
     );
 
-    // NOTE: Staking does not yet support server signers at this point.
-    await stakingOperation.sign(this.key!);
-    for (let i = 0; i < stakingOperation.getTransactions().length; i++) {
-      const transaction = stakingOperation.getTransactions()[0];
-      if (!transaction.isSigned()) {
-        continue;
-      }
-      stakingOperation = await this.broadcastStakingOperationRequest(
-        stakingOperation,
-        transaction.getSignedPayload()!.slice(2),
-        i,
-      );
-    }
-
     const startTime = Date.now();
-    while (Date.now() - startTime < timeoutSeconds * 1000) {
+
+    // Loop until the staking operation is complete.
+    while (!stakingOperation.isTerminalState() && Date.now() - startTime < timeoutSeconds * 1000) {
+      // Loop through any unsigned transactions that are available, sign and broadcast them.
+      for (let i = 0; i < stakingOperation.getTransactions().length; i++) {
+        const transaction = stakingOperation.getTransactions()[i];
+
+        if (!transaction.isSigned()) {
+          await transaction.sign(this.key!);
+
+          stakingOperation = await this.broadcastStakingOperationRequest(
+            stakingOperation,
+            transaction.getSignedPayload()!.slice(2),
+            i,
+          );
+        }
+      }
+
       await stakingOperation.reload();
-      const status = stakingOperation.getStatus();
-      if (
-        status === StakingOperationStatusEnum.Complete ||
-        status === StakingOperationStatusEnum.Failed
-      ) {
+
+      if (stakingOperation.isTerminalState()) {
         return stakingOperation;
       }
+
       await delay(intervalSeconds);
     }
+
     throw new Error("Staking Operation timed out");
   }
 
