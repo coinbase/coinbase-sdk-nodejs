@@ -1,6 +1,6 @@
 import { StakingBalance as StakingBalanceModel } from "../client";
+import { Balance } from "./balance";
 import { Coinbase } from "./coinbase";
-import { AssetAmount } from "./asset_amount";
 
 /**
  * A representation of a staking reward earned on a network for a given asset.
@@ -22,7 +22,7 @@ export class StakingBalance {
    *
    * @param networkId - The network ID.
    * @param assetId - The asset ID.
-   * @param addressId - The address ID.
+   * @param address - The address ID.
    * @param startTime - The start time.
    * @param endTime - The end time.
    * @returns The staking balances.
@@ -30,7 +30,7 @@ export class StakingBalance {
   public static async list(
     networkId: string,
     assetId: string,
-    addressId: string,
+    address: string,
     startTime: string,
     endTime: string,
   ): Promise<StakingBalance[]> {
@@ -42,7 +42,7 @@ export class StakingBalance {
       const request = {
         network_id: Coinbase.normalizeNetwork(networkId),
         asset_id: assetId,
-        address_id: addressId,
+        address: address,
         start_time: startTime,
         end_time: endTime,
       };
@@ -70,19 +70,19 @@ export class StakingBalance {
   /**
    * Returns the bonded stake amount of the StakingBalance.
    *
-   * @returns The amount.
+   * @returns The Balance.
    */
-  public bondedStake(): AssetAmount {
-    return AssetAmount.fromModel(this.model.bonded_stake);
+  public bondedStake(): Balance {
+    return Balance.fromModel(this.model.bonded_stake);
   }
 
   /**
    * Returns the unbonded stake amount of the StakingBalance.
    *
-   * @returns The amount.
+   * @returns The Balance.
    */
-  public unbondedBalance(): AssetAmount {
-    return AssetAmount.fromModel(this.model.unbonded_balance);
+  public unbondedBalance(): Balance {
+    return Balance.fromModel(this.model.unbonded_balance);
   }
 
   /**
@@ -108,8 +108,8 @@ export class StakingBalance {
    *
    * @returns The onchain address.
    */
-  public addressId(): string {
-    return this.model.address_id;
+  public address(): string {
+    return this.model.address;
   }
 
   /**
@@ -118,6 +118,6 @@ export class StakingBalance {
    * @returns The string representation of the Staking Balance.
    */
   public toString(): string {
-    return `StakingBalance { date: '${this.date().toISOString()}' address: '${this.addressId()}' bondedStake: '${this.bondedStake().toString()}' unbondedBalance: '${this.unbondedBalance().toString()}' participantType: '${this.participantType()}' }`;
+    return `StakingBalance { date: '${this.date().toISOString()}' address: '${this.address()}' bondedStake: '${this.bondedStake().toString()}' unbondedBalance: '${this.unbondedBalance().toString()}' participantType: '${this.participantType()}' }`;
   }
 }

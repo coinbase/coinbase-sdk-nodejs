@@ -749,7 +749,7 @@ export interface FetchHistoricalStakingBalancesRequest {
      * @type {string}
      * @memberof FetchHistoricalStakingBalancesRequest
      */
-    'address_id': string;
+    'address': string;
     /**
      * The start time of this staking balance period
      * @type {string}
@@ -1323,39 +1323,6 @@ export const StakingRewardFormat = {
 export type StakingRewardFormat = typeof StakingRewardFormat[keyof typeof StakingRewardFormat];
 
 
-
-/**
- * The asset amount in detail
- * @export
- * @interface AssetAmount
- */
-export interface AssetAmount {
-    /**
-     * The amount of the asset in the most common denomination such as ETH, BTC, etc.
-     * @type {string}
-     * @memberof AssetAmount
-     */
-    amount: string;
-    /**
-     * The number of decimals needed to convert from the raw numeric value to the most common denomination.
-     * @type {number}
-     * @memberof AssetAmount
-     */
-    exp: number;
-    /**
-     * The raw, unadulterated numeric value, such as Wei (in Ethereum) and Lamports (in Solana).
-     * @type {string}
-     * @memberof AssetAmount
-     */
-    raw_numeric: string;
-    /**
-     * The ticker of this asset (USD, ETH, SOL).
-     * @type {string}
-     * @memberof AssetAmount
-     */
-    ticker: string;
-}
-
 /**
  * The staking balances for an address.
  * @export
@@ -1367,7 +1334,7 @@ export interface StakingBalance {
      * @type {string}
      * @memberof StakingBalance
      */
-    'address_id': string;
+    'address': string;
     /**
      * The date of the staking balance in format \'YYYY-MM-DD\' in UTC.
      * @type {string}
@@ -1376,16 +1343,16 @@ export interface StakingBalance {
     'date': string;
     /**
      * The bonded stake.
-     * @type {AssetAmount}
+     * @type {Balance}
      * @memberof StakingBalance
      */
-    'bonded_stake': AssetAmount;
+    'bonded_stake': Balance;
     /**
      * The unbonded balance.
-     * @type {AssetAmount}
+     * @type {Balance}
      * @memberof StakingBalance
      */
-    'unbonded_balance': AssetAmount;
+    'unbonded_balance': Balance;
     /**
      * The participant type of the given address.
      * @type {string}
