@@ -109,6 +109,13 @@ export class StakingOperation {
   }
 
   /**
+   *
+   */
+  public toString(): string {
+    return JSON.stringify(this.model, null, 2);
+  }
+
+  /**
    * Get signed voluntary exit messages for native eth unstaking
    *
    * @returns The signed voluntary exit messages for a native eth unstaking operation.
@@ -133,6 +140,24 @@ export class StakingOperation {
    * @returns Whether the Staking operation is in a terminal State
    */
   isTerminalState(): boolean {
+    return this.isComplete() || this.isFailed();
+  }
+
+  /**
+   * Returns whether the Staking operation is in a failed state.
+   *
+   * @returns Whether the Staking operation is in a failed state.
+   */
+  isFailed(): boolean {
+    return this.getStatus() === StakingOperationStatusEnum.Failed;
+  }
+
+  /**
+   * Returns whether the Staking operation is in a complete state.
+   *
+   * @returns Whether the Staking operation is in a complete state.
+   */
+  isComplete(): boolean {
     return this.getStatus() === StakingOperationStatusEnum.Complete;
   }
 
