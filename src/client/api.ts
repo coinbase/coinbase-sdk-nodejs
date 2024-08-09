@@ -22,7 +22,6 @@ import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObj
 import type { RequestArgs } from './base';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerMap } from './base';
-import { start } from 'repl';
 
 /**
  * 
@@ -3896,7 +3895,11 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Fetch historical staking balances for a given address
          * @summary Fetch historical staking balances
-         * @param {FetchHistoricalStakingBalancesRequest} FetchHistoricalStakingBalancesRequest 
+         * @param {string} address The one address to fetch the historical staking balances for
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} assetId The ID of the asset
+         * @param {string} startTime The start time of the staking balances period
+         * @param {string} endTime The end time of the stake balances period
          * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
          * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
          * @param {*} [options] Override http request option.
@@ -4263,7 +4266,11 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
         /**
          * Fetch historical staking balances for given address
          * @summary Fetch historical staking balances
-         * @param {FetchHistoricalStakingBalancesRequest} FetchHistoricalStakingBalancesRequest 
+         * @param {string} address The onchain addresses for which the staking balances are being fetched
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} assetId The ID of the asset
+         * @param {string} startTime The start time of the staking balances period
+         * @param {string} endTime The end time of the staking balances period
          * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
          * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
          * @param {*} [options] Override http request option.
