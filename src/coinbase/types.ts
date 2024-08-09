@@ -613,6 +613,17 @@ export enum TransactionStatus {
 }
 
 /**
+ * Sponsored Send status type definition.
+ */
+export enum SponsoredSendStatus {
+  PENDING = "pending",
+  SIGNED = "signed",
+  SUBMITTED = "submitted",
+  COMPLETE = "complete",
+  FAILED = "failed",
+}
+
+/**
  * The Wallet Data type definition.
  * The data required to recreate a Wallet.
  */
@@ -746,6 +757,7 @@ export type CreateTransferOptions = {
   destination: Destination;
   timeoutSeconds?: number;
   intervalSeconds?: number;
+  gasless?: boolean;
 };
 
 /**

@@ -519,6 +519,12 @@ export interface CreateTransferRequest {
      * @memberof CreateTransferRequest
      */
     'destination': string;
+    /**
+     * Whether the transfer uses sponsored gas
+     * @type {boolean}
+     * @memberof CreateTransferRequest
+     */
+    'gasless'?: boolean;
 }
 /**
  * 
@@ -833,56 +839,6 @@ export interface ModelError {
     'message': string;
 }
 /**
- * The native eth staking context.
- * @export
- * @interface NativeEthStakingContext
- */
-export interface NativeEthStakingContext {
-    /**
-     * 
-     * @type {Balance}
-     * @memberof NativeEthStakingContext
-     */
-    'stakeable_balance': Balance;
-    /**
-     * 
-     * @type {Balance}
-     * @memberof NativeEthStakingContext
-     */
-    'unstakeable_balance': Balance;
-    /**
-     * 
-     * @type {Balance}
-     * @memberof NativeEthStakingContext
-     */
-    'claimable_balance': Balance;
-}
-/**
- * The partial eth staking context.
- * @export
- * @interface PartialEthStakingContext
- */
-export interface PartialEthStakingContext {
-    /**
-     * 
-     * @type {Balance}
-     * @memberof PartialEthStakingContext
-     */
-    'stakeable_balance': Balance;
-    /**
-     * 
-     * @type {Balance}
-     * @memberof PartialEthStakingContext
-     */
-    'unstakeable_balance': Balance;
-    /**
-     * 
-     * @type {Balance}
-     * @memberof PartialEthStakingContext
-     */
-    'claimable_balance': Balance;
-}
-/**
  * An event representing a seed creation.
  * @export
  * @interface SeedCreationEvent
@@ -1172,6 +1128,66 @@ export interface SignedVoluntaryExitMessageMetadata {
     'signed_voluntary_exit': string;
 }
 /**
+ * An onchain sponsored gasless send.
+ * @export
+ * @interface SponsoredSend
+ */
+export interface SponsoredSend {
+    /**
+     * The onchain address of the recipient
+     * @type {string}
+     * @memberof SponsoredSend
+     */
+    'to_address_id': string;
+    /**
+     * The raw typed data for the sponsored send
+     * @type {string}
+     * @memberof SponsoredSend
+     */
+    'raw_typed_data': string;
+    /**
+     * The typed data hash for the sponsored send. This is the typed data hash that needs to be signed by the sender.
+     * @type {string}
+     * @memberof SponsoredSend
+     */
+    'typed_data_hash': string;
+    /**
+     * The signed hash of the sponsored send typed data.
+     * @type {string}
+     * @memberof SponsoredSend
+     */
+    'signature'?: string;
+    /**
+     * The hash of the onchain sponsored send transaction
+     * @type {string}
+     * @memberof SponsoredSend
+     */
+    'transaction_hash'?: string;
+    /**
+     * The link to view the transaction on a block explorer. This is optional and may not be present for all transactions.
+     * @type {string}
+     * @memberof SponsoredSend
+     */
+    'transaction_link'?: string;
+    /**
+     * The status of the sponsored send
+     * @type {string}
+     * @memberof SponsoredSend
+     */
+    'status': SponsoredSendStatusEnum;
+}
+
+export const SponsoredSendStatusEnum = {
+    Pending: 'pending',
+    Signed: 'signed',
+    Submitted: 'submitted',
+    Complete: 'complete',
+    Failed: 'failed'
+} as const;
+
+export type SponsoredSendStatusEnum = typeof SponsoredSendStatusEnum[keyof typeof SponsoredSendStatusEnum];
+
+/**
  * Context needed to perform a staking operation
  * @export
  * @interface StakingContext
@@ -1185,11 +1201,30 @@ export interface StakingContext {
     'context': StakingContextContext;
 }
 /**
- * @type StakingContextContext
+ * 
  * @export
+ * @interface StakingContextContext
  */
-export type StakingContextContext = NativeEthStakingContext | PartialEthStakingContext;
-
+export interface StakingContextContext {
+    /**
+     * 
+     * @type {Balance}
+     * @memberof StakingContextContext
+     */
+    'stakeable_balance': Balance;
+    /**
+     * 
+     * @type {Balance}
+     * @memberof StakingContextContext
+     */
+    'unstakeable_balance': Balance;
+    /**
+     * 
+     * @type {Balance}
+     * @memberof StakingContextContext
+     */
+    'claimable_balance': Balance;
+}
 /**
  * A list of onchain transactions to help realize a staking action.
  * @export
@@ -1576,7 +1611,13 @@ export interface Transfer {
      * @type {Transaction}
      * @memberof Transfer
      */
-    'transaction': Transaction;
+    'transaction'?: Transaction;
+    /**
+     * 
+     * @type {SponsoredSend}
+     * @memberof Transfer
+     */
+    'sponsored_send'?: SponsoredSend;
     /**
      * The unsigned payload of the transfer. This is the payload that needs to be signed by the sender.
      * @type {string}
@@ -1601,6 +1642,12 @@ export interface Transfer {
      * @memberof Transfer
      */
     'status'?: TransferStatusEnum;
+    /**
+     * Whether the transfer uses sponsored gas
+     * @type {boolean}
+     * @memberof Transfer
+     */
+    'gasless': boolean;
 }
 
 export const TransferStatusEnum = {
