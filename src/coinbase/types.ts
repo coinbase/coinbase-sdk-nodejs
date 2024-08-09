@@ -326,6 +326,7 @@ export type ExternalAddressAPIClient = {
    * @param assetId - The ID of the asset to fetch the balance for
    * @param options - Override http request option.
    * @throws {APIError} If the request fails.
+   * test
    */
   getExternalAddressBalance(
     networkId: string,
