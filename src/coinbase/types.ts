@@ -26,6 +26,8 @@ import {
   StakingContext as StakingContextModel,
   FetchStakingRewardsRequest,
   FetchStakingRewards200Response,
+  FetchHistoricalStakingBalancesRequest,
+  FetchHistoricalStakingBalances200Response,
   FaucetTransaction,
   BroadcastStakingOperationRequest,
   CreateStakingOperationRequest,
@@ -418,6 +420,21 @@ export type StakeAPIClient = {
     page?: string,
     options?: AxiosRequestConfig,
   ): AxiosPromise<FetchStakingRewards200Response>;
+
+  /**
+   * Get the staking balances for an address.
+   *
+   * @param FetchHistoricalStakingBalancesRequest - The request to get the staking balances for an address.
+   * @param limit - The amount of records to return in a single call.
+   * @param page - The batch of records for a given section in the response.
+   * @param options - Axios request options.
+   */
+  fetchHistoricalStakingBalances(
+    FetchHistoricalStakingBalancesRequest: FetchHistoricalStakingBalancesRequest,
+    limit?: number,
+    page?: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<FetchHistoricalStakingBalances200Response>;
 
   broadcastStakingOperation(
     walletId: string,
