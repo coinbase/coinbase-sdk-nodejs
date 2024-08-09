@@ -36,6 +36,11 @@ describe("StakingReward", () => {
         amount: "361",
         state: StakingRewardStateEnum.Pending,
         format: StakingRewardFormat.Usd,
+        usd_value: {
+          amount: "361",
+          conversion_price: "3000",
+          conversion_time: "2024-05-01T00:00:00Z",
+        },
       },
       {
         address_id: address.getId(),
@@ -43,6 +48,11 @@ describe("StakingReward", () => {
         amount: "203",
         state: StakingRewardStateEnum.Pending,
         format: StakingRewardFormat.Usd,
+        usd_value: {
+          amount: "203",
+          conversion_price: "3000",
+          conversion_time: "2024-05-02T00:00:00Z",
+        },
       },
       {
         address_id: address.getId(),
@@ -50,6 +60,11 @@ describe("StakingReward", () => {
         amount: "226",
         state: StakingRewardStateEnum.Pending,
         format: StakingRewardFormat.Usd,
+        usd_value: {
+          amount: "226",
+          conversion_price: "3000",
+          conversion_time: "2024-05-03T00:00:00Z",
+        },
       },
     ],
     has_more: false,
@@ -132,13 +147,20 @@ describe("StakingReward", () => {
           amount: "226",
           state: StakingRewardStateEnum.Pending,
           format: StakingRewardFormat.Usd,
+          usd_value: {
+            amount: "226",
+            conversion_price: "3000",
+            conversion_time: "2024-05-03T00:00:00Z",
+          },
         },
         asset,
         StakingRewardFormat.Usd,
       );
 
       const amount = reward.amount();
+      const usdValue = reward.usdValue();
       expect(amount).toEqual(new Decimal("2.26"));
+      expect(usdValue).toEqual(new Decimal("2.26"));
     });
 
     it("should return the correct amount for native format", () => {
@@ -149,6 +171,11 @@ describe("StakingReward", () => {
           amount: "726030823305604",
           state: StakingRewardStateEnum.Pending,
           format: StakingRewardFormat.Native,
+          usd_value: {
+            amount: "179",
+            conversion_price: "2461.63",
+            conversion_time: "2024-05-02T00:00:00Z",
+          },
         },
         asset,
         StakingRewardFormat.Native,
@@ -168,13 +195,20 @@ describe("StakingReward", () => {
           amount: "226",
           state: StakingRewardStateEnum.Pending,
           format: StakingRewardFormat.Usd,
+          usd_value: {
+            amount: "226",
+            conversion_price: "3000",
+            conversion_time: "2024-05-03T00:00:00Z",
+          },
         },
         asset,
         StakingRewardFormat.Usd,
       );
 
       const date = reward.date();
+      const conversionTime = reward.conversionTime();
       expect(date).toEqual(new Date("2024-05-03"));
+      expect(conversionTime).toEqual(new Date("2024-05-03T00:00:00Z"));
     });
   });
 
@@ -187,6 +221,11 @@ describe("StakingReward", () => {
           amount: "226",
           state: StakingRewardStateEnum.Pending,
           format: StakingRewardFormat.Usd,
+          usd_value: {
+            amount: "226",
+            conversion_price: "3000",
+            conversion_time: "2024-05-03T00:00:00Z",
+          },
         },
         asset,
         StakingRewardFormat.Usd,
@@ -194,7 +233,7 @@ describe("StakingReward", () => {
 
       const rewardStr = reward.toString();
       expect(rewardStr).toEqual(
-        "StakingReward { date: '2024-05-03T00:00:00.000Z' address: 'some-address-id' amount: '2.26' }",
+        "StakingReward { date: '2024-05-03T00:00:00.000Z' address: 'some-address-id' amount: '2.26' usd_value: '2.26' conversion_price: '3000' conversion_time: '2024-05-03T00:00:00.000Z' }",
       );
     });
   });
@@ -208,6 +247,11 @@ describe("StakingReward", () => {
           amount: "226",
           state: StakingRewardStateEnum.Pending,
           format: StakingRewardFormat.Usd,
+          usd_value: {
+            amount: "226",
+            conversion_price: "3000",
+            conversion_time: "2024-05-03T00:00:00Z",
+          },
         },
         asset,
         StakingRewardFormat.Usd,
