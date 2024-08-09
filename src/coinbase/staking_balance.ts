@@ -8,17 +8,14 @@ import { AssetAmount } from "./asset_amount";
  */
 export class StakingBalance {
   private model: StakingBalanceModel;
-  private asset: Asset;
 
   /**
    * Creates the StakingBalance object.
    *
    * @param model - The underlying staking balance object.
-   * @param asset - The asset for the staking reward.
    */
-  constructor(model: StakingBalanceModel, asset: Asset) {
+  constructor(model: StakingBalanceModel) {
     this.model = model;
-    this.asset = asset;
   }
 
   /**
@@ -59,7 +56,7 @@ export class StakingBalance {
       const asset = await Asset.fetch(networkId, assetId);
 
       response.data.data.forEach(stakingBalance => {
-        stakingBalances.push(new StakingBalance(stakingBalance, asset));
+        stakingBalances.push(new StakingBalance(stakingBalance));
       });
 
       if (response.data.has_more) {
