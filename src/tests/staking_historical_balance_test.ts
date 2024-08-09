@@ -1,5 +1,5 @@
 import {
-  FetchStakingBalances200Response,
+  FetchHistoricalStakingBalances200Response,
 } from "../client";
 import { Coinbase } from "../coinbase/coinbase";
 import {
@@ -30,7 +30,7 @@ describe("StakingBalance", () => {
   const bondedStake = new AssetAmount("3", "3000000000000000000", 18, "ETH");
   const unbondedBalance = new AssetAmount("2", "2000000000000000000", 18, "ETH");
 
-  const STAKING_BALANCE_RESPONSE: FetchStakingBalances200Response = {
+  const STAKING_BALANCE_RESPONSE: FetchHistoricalStakingBalances200Response = {
     data: [
       {
         address_id: address.getId(),
@@ -62,7 +62,7 @@ describe("StakingBalance", () => {
 
   describe(".list", () => {
     it("should successfully return staking balances", async () => {
-      Coinbase.apiClients.stake!.fetchStakingBalances = mockReturnValue(STAKING_BALANCE_RESPONSE);
+      Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockReturnValue(STAKING_BALANCE_RESPONSE);
       Coinbase.apiClients.asset!.getAsset = getAssetMock();
       const response = await StakingBalance.list(
         address.getNetworkId(),
@@ -73,7 +73,7 @@ describe("StakingBalance", () => {
       );
       expect(response).toBeInstanceOf(Array<StakingBalance>);
       expect(response.length).toEqual(2);
-      expect(Coinbase.apiClients.stake!.fetchStakingBalances).toHaveBeenCalledWith(
+      expect(Coinbase.apiClients.stake!.fetchHistoricalStakingBalances).toHaveBeenCalledWith(
         {
           network_id: address.getNetworkId(),
           asset_id: Coinbase.assets.Eth,
@@ -87,7 +87,7 @@ describe("StakingBalance", () => {
     });
     it("should successfully return staking balances for multiple pages", async () => {
       const pages = ["abc", "def"];
-      Coinbase.apiClients.stake!.fetchStakingBalances = mockFn(() => {
+      Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockFn(() => {
         STAKING_BALANCE_RESPONSE.next_page = pages.shift() as string;
         STAKING_BALANCE_RESPONSE.has_more = !!STAKING_BALANCE_RESPONSE.next_page;
         return { data: STAKING_BALANCE_RESPONSE };
@@ -102,7 +102,7 @@ describe("StakingBalance", () => {
       );
       expect(response).toBeInstanceOf(Array<StakingBalance>);
       expect(response.length).toEqual(6);
-      expect(Coinbase.apiClients.stake!.fetchStakingBalances).toHaveBeenCalledWith(
+      expect(Coinbase.apiClients.stake!.fetchHistoricalStakingBalances).toHaveBeenCalledWith(
         {
           network_id: address.getNetworkId(),
           asset_id: Coinbase.assets.Eth,
