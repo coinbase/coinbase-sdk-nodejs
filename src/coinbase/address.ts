@@ -14,6 +14,8 @@ import { StakingReward } from "./staking_reward";
  * A representation of a blockchain address, which is a user-controlled account on a network.
  */
 export class Address {
+  private static MAX_BALANCE_HISTORY = 1000;
+
   protected networkId: string;
   protected id: string;
 
@@ -113,7 +115,7 @@ export class Address {
 
     const queue: string[] = [""];
 
-    while (queue.length > 0) {
+    while (queue.length > 0 && history.length < Address.MAX_BALANCE_HISTORY) {
       const page = queue.shift();
       const response = await Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance(
         this.getNetworkId(),
