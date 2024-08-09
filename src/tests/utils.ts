@@ -413,7 +413,7 @@ export const transfersApiMock = {
   getTransfer: jest.fn(),
   listTransfers: jest.fn(),
 };
-
+// test
 export const stakeApiMock = {
   buildStakingOperation: jest.fn(),
   getExternalStakingOperation: jest.fn(),
