@@ -10,6 +10,7 @@ import {
   externalAddressApiMock,
 } from "./utils";
 import Decimal from "decimal.js";
+import { randomUUID } from "crypto";
 
 describe("Address", () => {
   const newAddress = newAddressModel("", randomUUID(), Coinbase.networks.EthereumHolesky);
