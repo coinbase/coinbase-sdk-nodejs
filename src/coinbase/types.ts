@@ -35,6 +35,7 @@ import {
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
+import { HistoricalBalance } from "./historical_balance"
 
 export type AssetAPIClient = {
   /**
@@ -780,3 +781,11 @@ export type CreateTradeOptions = {
   timeoutSeconds?: number;
   intervalSeconds?: number;
 };
+
+/**
+ * Result of ListHistoricalBalances.
+ */
+export type ListHistoricalBalancesResult = {
+  historicalBalances: HistoricalBalance[],
+  nextPageToken: string,
+}

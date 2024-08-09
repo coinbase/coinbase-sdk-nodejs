@@ -5,7 +5,7 @@ import { Balance } from "./balance";
 import { BalanceMap } from "./balance_map";
 import { FaucetTransaction } from "./faucet_transaction";
 import { HistoricalBalance } from "./historical_balance";
-import { Amount, StakeOptionsMode } from "./types";
+import { Amount, StakeOptionsMode, ListHistoricalBalancesResult } from "./types";
 import { formatDate, getWeekBackDate } from "./utils";
 import { StakingRewardFormat } from "../client";
 import { StakingReward } from "./staking_reward";
@@ -94,7 +94,7 @@ export class Address {
     assetId: string,
     limit?: number,
     page?: string,
-  ): Promise<[HistoricalBalance[], string]> {
+  ): Promise<ListHistoricalBalancesResult> {
     const historyList: HistoricalBalance[] = [];
 
     if (limit !== undefined) {
@@ -105,16 +105,19 @@ export class Address {
         limit,
         page ? page : undefined,
       );
+
       response.data.data.forEach(historicalBalanceModel => {
         const historicalBalance = HistoricalBalance.fromModel(historicalBalanceModel);
         historyList.push(historicalBalance);
       });
 
-      return [historyList, response.data.next_page];
+      return {
+        historicalBalances: historyList,
+        nextPageToken: response.data.next_page,
+      };
     }
 
     const queue: string[] = [""];
-
     while (queue.length > 0 && historyList.length < Address.MAX_HISTORICAL_BALANCE) {
       const page = queue.shift();
       const response = await Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance(
@@ -137,7 +140,10 @@ export class Address {
       }
     }
 
-    return [historyList, ""];
+    return {
+      historicalBalances: historyList,
+      nextPageToken: "",
+    };
   }
 
   /**

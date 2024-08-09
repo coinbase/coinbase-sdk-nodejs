@@ -1,10 +1,21 @@
+import { Coinbase } from "../coinbase/coinbase";
 import { Address } from "../index";
-import { VALID_ADDRESS_MODEL } from "./utils";
 import {
   AddressHistoricalBalanceList,
 } from "../client";
+import {
+  VALID_ADDRESS_MODEL,
+  mockReturnValue,
+  newAddressModel,
+  externalAddressApiMock,
+} from "./utils";
+import Decimal from "decimal.js";
 
 describe("Address", () => {
+  const newAddress = newAddressModel("", randomUUID(), Coinbase.networks.EthereumHolesky);
+
+  const address = new Address(newAddress.network_id, newAddress.address_id);
+
   describe(".getNetworkId", () => {
     it("should get the network ID", () => {
       const address = new Address(VALID_ADDRESS_MODEL.network_id, VALID_ADDRESS_MODEL.address_id);
@@ -60,10 +71,10 @@ describe("Address", () => {
     });
 
     it("should return results with USDC historical balance", async () => {
-      const [history, nextPage] = await address.listHistoricalBalances(Coinbase.assets.Usdc);
-      expect(history.length).toEqual(2);
-      expect(history[0].amount).toEqual(new Decimal(1));
-      expect(history[1].amount).toEqual(new Decimal(5));
+      const historicalBalancesResult = await address.listHistoricalBalances(Coinbase.assets.Usdc);
+      expect(historicalBalancesResult.historicalBalances.length).toEqual(2);
+      expect(historicalBalancesResult.historicalBalances[0].amount).toEqual(new Decimal(1));
+      expect(historicalBalancesResult.historicalBalances[1].amount).toEqual(new Decimal(5));
       expect(
         Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance,
       ).toHaveBeenCalledTimes(1);
@@ -74,7 +85,7 @@ describe("Address", () => {
         100,
         undefined,
       );
-      expect(nextPage).toEqual("")
+      expect(historicalBalancesResult.nextPageToken).toEqual("")
     });
 
     it("should return empty if no historical balance found", async () => {
@@ -83,8 +94,8 @@ describe("Address", () => {
         has_more: false,
         next_page: "",
       });
-      const [history, nextPage] = await address.listHistoricalBalances(Coinbase.assets.Usdc);
-      expect(history.length).toEqual(0);
+      const historicalBalancesResult = await address.listHistoricalBalances(Coinbase.assets.Usdc);
+      expect(historicalBalancesResult.historicalBalances.length).toEqual(0);
       expect(
         Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance,
       ).toHaveBeenCalledTimes(1);
@@ -95,7 +106,7 @@ describe("Address", () => {
         100,
         undefined,
       );
-      expect(nextPage).toEqual("")
+      expect(historicalBalancesResult.nextPageToken).toEqual("")
     });
 
     it("should return results with USDC historical balance and next page", async () => {
@@ -116,9 +127,9 @@ describe("Address", () => {
         next_page: "next page",
       });
 
-      const [history, nextPage] = await address.listHistoricalBalances(Coinbase.assets.Usdc, 1);
-      expect(history.length).toEqual(1);
-      expect(history[0].amount).toEqual(new Decimal(5));
+      const historicalBalancesResult = await address.listHistoricalBalances(Coinbase.assets.Usdc, 1);
+      expect(historicalBalancesResult.historicalBalances.length).toEqual(1);
+      expect(historicalBalancesResult.historicalBalances[0].amount).toEqual(new Decimal(5));
       expect(
         Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance,
       ).toHaveBeenCalledTimes(1);
@@ -129,7 +140,7 @@ describe("Address", () => {
         1,
         undefined,
       );
-      expect(nextPage).toEqual("next page")
+      expect(historicalBalancesResult.nextPageToken).toEqual("next page")
     });
   });
 
