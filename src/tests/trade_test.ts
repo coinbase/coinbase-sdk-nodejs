@@ -1,6 +1,6 @@
 import { Decimal } from "decimal.js";
 import { randomUUID } from "crypto"
-import { ethers } from "ethers";
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { Transaction as CoinbaseTransaction, Trade as TradeModel } from "../client/api";
 import { Transaction } from "../coinbase/transaction";
 import { Coinbase } from "./../coinbase/coinbase";
@@ -31,7 +31,9 @@ describe("Trade", () => {
     trade;
 
   beforeEach(() => {
-    fromKey = ethers.Wallet.createRandom();
+    const randomAccount = () => privateKeyToAccount(generatePrivateKey())
+    
+    fromKey = randomAccount();
     networkId = "base-sepolia";
     walletId = randomUUID();
     addressId = fromKey.address;
@@ -41,7 +43,7 @@ describe("Trade", () => {
     usdcAsset = { network_id: networkId, asset_id: "usdc", decimals: 6 };
     ethAmount = fromAmount.div(new Decimal(Math.pow(10, ethAsset.decimals)));
     usdcAmount = toAmount.div(new Decimal(Math.pow(10, usdcAsset.decimals)));
-    tradeId = ethers.Wallet.createRandom().address;
+    tradeId = randomAccount().address;
     unsignedPayload =
       "7b2274797065223a22307832222c22636861696e4964223a2230783134613334222c226e6f6e63" +
       "65223a22307830222c22746f223a22307834643965346633663464316138623566346637623166" +

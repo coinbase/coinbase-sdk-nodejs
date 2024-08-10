@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import * as viem from "viem";
 import { SponsoredSend as SponsoredSendModel } from "../client/api";
 import { SponsoredSendStatus } from "./types";
 
@@ -27,8 +27,8 @@ export class SponsoredSend {
    *
    * @returns The Keccak256 hash of the typed data.
    */
-  getTypedDataHash(): string {
-    return this.model.typed_data_hash;
+  getTypedDataHash(): viem.Hex {
+    return this.model.typed_data_hash as viem.Hex;
   }
 
   /**
@@ -46,9 +46,8 @@ export class SponsoredSend {
    * @param key - The key to sign the Sponsored Send with
    * @returns The hex-encoded signature
    */
-  async sign(key: ethers.Wallet) {
-    ethers.toBeArray;
-    const signature = key.signingKey.sign(ethers.getBytes(this.getTypedDataHash())).serialized;
+  async sign(key: viem.LocalAccount) {
+    const signature = await key.sign!({ hash: this.getTypedDataHash() });
     this.model.signature = signature;
     return signature;
   }

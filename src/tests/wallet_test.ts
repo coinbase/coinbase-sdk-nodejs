@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import crypto, { randomUUID } from "crypto";
 import Decimal from "decimal.js";
-import { ethers } from "ethers";
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { APIError } from "../coinbase/api_error";
 import { Coinbase } from "../coinbase/coinbase";
 import { ArgumentError, InternalError } from "../coinbase/errors";
@@ -59,9 +59,6 @@ describe("Wallet Class", () => {
 
   beforeAll(async () => {
     const { address1 } = generateWalletFromSeed(existingSeed, 1);
-    jest.spyOn(ethers.Wallet, "createRandom").mockReturnValue({
-      privateKey: `0x${existingSeed}`,
-    } as never);
     walletId = crypto.randomUUID();
     // Mock the API calls
     Coinbase.apiClients.wallet = walletsApiMock;
@@ -504,9 +501,9 @@ describe("Wallet Class", () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      const key = ethers.Wallet.createRandom();
+      const key = privateKeyToAccount(generatePrivateKey());
       weiAmount = new Decimal("5");
-      destination = new WalletAddress(VALID_ADDRESS_MODEL, key as unknown as ethers.Wallet);
+      destination = new WalletAddress(VALID_ADDRESS_MODEL, key);
       intervalSeconds = 0.2;
       timeoutSeconds = 10;
       Coinbase.apiClients.externalAddress = externalAddressApiMock;
@@ -1168,7 +1165,7 @@ describe("Wallet Class", () => {
         network_id: Coinbase.networks.BaseSepolia,
         feature_set: {} as FeatureSet,
       };
-      const randomSeed = ethers.Wallet.createRandom().privateKey.slice(2);
+      const randomSeed = generatePrivateKey().slice(2);
       const otherWallet = Wallet.init(otherModel, randomSeed);
       otherWallet.saveSeed(filePath, true);
 
