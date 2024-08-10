@@ -7,7 +7,7 @@ import {
   VALID_NATIVE_ETH_UNSTAKE_OPERATION_MODEL,
   VALID_STAKING_OPERATION_MODEL,
 } from "./utils";
-import { ethers } from "ethers";
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { StakingOperationStatusEnum, TransactionStatusEnum } from "../client";
 import { Coinbase } from "../coinbase/coinbase";
 
@@ -61,7 +61,7 @@ describe("StakingOperation", () => {
   describe(".sign", () => {
     let key;
     it("should sign the transactions successfully", async () => {
-      key = ethers.Wallet.createRandom();
+      key = privateKeyToAccount(generatePrivateKey());
       const op = new StakingOperation(VALID_STAKING_OPERATION_MODEL);
       expect(async () => {
         await op.sign(key);

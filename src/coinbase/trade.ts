@@ -1,5 +1,5 @@
 import { Decimal } from "decimal.js";
-import { ethers } from "ethers";
+import * as viem from "viem";
 import { Trade as CoinbaseTrade } from "../client/api";
 import { Coinbase } from "./coinbase";
 import { InternalError, NotSignedError, TimeoutError } from "./errors";
@@ -132,7 +132,7 @@ export class Trade {
    *
    * @param key - The key to sign the Transfer with
    */
-  public async sign(key: ethers.Wallet): Promise<void> {
+  public async sign(key: viem.LocalAccount): Promise<void> {
     if (this.getApproveTransaction()) {
       await this.getApproveTransaction()!.sign(key);
     }

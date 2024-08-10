@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as crypto from "crypto";
 import { randomUUID } from "crypto";
-import { ethers } from "ethers";
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { FaucetTransaction } from "../coinbase/faucet_transaction";
 import {
   Balance as BalanceModel,
@@ -84,8 +84,8 @@ describe("WalletAddress", () => {
   });
 
   beforeEach(() => {
-    key = ethers.Wallet.createRandom();
-    address = new WalletAddress(VALID_ADDRESS_MODEL, key as unknown as ethers.Wallet);
+    key = privateKeyToAccount(generatePrivateKey());
+    address = new WalletAddress(VALID_ADDRESS_MODEL, key);
 
     jest.clearAllMocks();
   });
@@ -184,7 +184,7 @@ describe("WalletAddress", () => {
   });
 
   it("should throw an InternalError when model is not provided", () => {
-    expect(() => new WalletAddress(null!, key as unknown as ethers.Wallet)).toThrow(
+    expect(() => new WalletAddress(null!, key)).toThrow(
       `Address model cannot be empty`,
     );
   });
@@ -259,9 +259,9 @@ describe("WalletAddress", () => {
   });
 
   describe("#stakingOperation", () => {
-    key = ethers.Wallet.createRandom();
+    key = privateKeyToAccount(generatePrivateKey());
     const newAddress = newAddressModel("", randomUUID(), Coinbase.networks.EthereumHolesky);
-    const walletAddress = new WalletAddress(newAddress, key as unknown as ethers.Wallet);
+    const walletAddress = new WalletAddress(newAddress, key);
     const STAKING_OPERATION_MODEL: StakingOperationModel = {
       id: randomUUID(),
       network_id: Coinbase.networks.EthereumHolesky,
@@ -580,7 +580,7 @@ describe("WalletAddress", () => {
 
     beforeEach(() => {
       weiAmount = new Decimal("500000000000000000");
-      destination = new WalletAddress(VALID_ADDRESS_MODEL, key as unknown as ethers.Wallet);
+      destination = new WalletAddress(VALID_ADDRESS_MODEL, key);
       walletId = crypto.randomUUID();
       id = crypto.randomUUID();
       Coinbase.apiClients.externalAddress = externalAddressApiMock;
@@ -1067,14 +1067,14 @@ describe("WalletAddress", () => {
 
     describe(".setKey", () => {
       it("should set the key successfully", () => {
-        key = ethers.Wallet.createRandom();
+        key = privateKeyToAccount(generatePrivateKey());
         const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, undefined);
         expect(() => {
           newAddress.setKey(key);
         }).not.toThrow(InternalError);
       });
       it("should not set the key successfully", () => {
-        key = ethers.Wallet.createRandom();
+        key = privateKeyToAccount(generatePrivateKey());
         const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, key);
         expect(() => {
           newAddress.setKey(key);

@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosInstance } from "axios";
 import { Decimal } from "decimal.js";
-import { ethers } from "ethers";
+import { generatePrivateKey, hdKeyToAccount, privateKeyToAccount } from "viem/accounts";
+import { parseUnits } from "viem";
 import { randomUUID } from "crypto";
 import {
   Configuration,
@@ -28,7 +29,7 @@ export const mockReturnValue = data => jest.fn().mockResolvedValue({ data });
 export const mockReturnRejectedValue = data => jest.fn().mockRejectedValue(data);
 
 export const getAddressFromHDKey = (hdKey: HDKey): string => {
-  return new ethers.Wallet(convertStringToHex(hdKey.privateKey!)).address;
+  return hdKeyToAccount(hdKey).address;
 };
 
 export const mockListAddress = (seed: string, count = 1) => {
@@ -87,7 +88,7 @@ export const newAddressModel = (
   network_id: string = Coinbase.networks.BaseSepolia,
   index: number = 0,
 ): AddressModel => {
-  const ethAddress = ethers.Wallet.createRandom();
+  const ethAddress = privateKeyToAccount(generatePrivateKey());
 
   return {
     address_id: address_id ? address_id : ethAddress.address,
@@ -141,10 +142,10 @@ export const VALID_TRANSFER_MODEL: TransferModel = {
     transaction_link: "https://sepolia.basescan.org/tx/0xdeadbeef",
     status: "pending",
   },
-  address_id: ethers.Wallet.createRandom().address,
+  address_id: privateKeyToAccount(generatePrivateKey()).address,
   destination: "0x4D9E4F3f4D1A8B5F4f7b1F5b5C7b8d6b2B3b1b0b",
   asset_id: Coinbase.assets.Eth,
-  amount: new Decimal(ethers.parseUnits("100", 18).toString()).toString(),
+  amount: new Decimal(parseUnits("100", 18).toString()).toString(),
   gasless: false,
 };
 
@@ -166,10 +167,10 @@ export const VALID_TRANSFER_SPONSORED_SEND_MODEL: TransferModel = {
     transaction_link: "https://sepolia.basescan.org/tx/0xdeadbeef",
     status: "pending",
   },
-  address_id: ethers.Wallet.createRandom().address,
+  address_id: privateKeyToAccount(generatePrivateKey()).address,
   destination: "0x4D9E4F3f4D1A8B5F4f7b1F5b5C7b8d6b2B3b1b0b",
   asset_id: Coinbase.assets.Eth,
-  amount: new Decimal(ethers.parseUnits("100", 18).toString()).toString(),
+  amount: new Decimal(parseUnits("100", 18).toString()).toString(),
   gasless: false,
 };
 

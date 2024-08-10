@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import * as viem from "viem";
 import {
   StakingOperation as StakingOperationModel,
   StakingOperationStatusEnum,
@@ -247,7 +247,7 @@ export class StakingOperation {
    *
    * @param key - The key used to sign the transactions.
    */
-  public async sign(key: ethers.Wallet): Promise<void> {
+  public async sign(key: viem.LocalAccount): Promise<void> {
     for (const tx of this.transactions) {
       if (!tx.isSigned()) {
         await tx.sign(key);

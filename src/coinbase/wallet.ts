@@ -1,7 +1,8 @@
 import { HDKey } from "@scure/bip32";
 import * as crypto from "crypto";
 import Decimal from "decimal.js";
-import { ethers } from "ethers";
+import { toHex } from "viem";
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import * as fs from "fs";
 import * as secp256k1 from "secp256k1";
 import { Address as AddressModel, Wallet as WalletModel, StakingRewardFormat } from "../client";
@@ -214,7 +215,7 @@ export class Wallet {
       const hdKey = this.deriveKey(addressIndex);
       const attestation = this.createAttestation(hdKey);
       const publicKey = convertStringToHex(hdKey.publicKey!);
-      key = new ethers.Wallet(convertStringToHex(hdKey.privateKey!));
+      key = privateKeyToAccount(toHex(hdKey.privateKey!));
 
       payload = {
         public_key: publicKey,
@@ -254,13 +255,13 @@ export class Wallet {
 
     this.addresses.forEach((address: WalletAddress, index: number) => {
       const derivedKey = this.deriveKey(index);
-      const etherWallet = new ethers.Wallet(convertStringToHex(derivedKey.privateKey!));
-      if (etherWallet.address != address.getId()) {
+      const account = privateKeyToAccount(toHex(derivedKey.privateKey!));
+      if (account.address != address.getId()) {
         throw new InternalError(
-          `Seed does not match wallet; cannot find address ${etherWallet.address}`,
+          `Seed does not match wallet; cannot find address ${account.address}`,
         );
       }
-      address.setKey(etherWallet);
+      address.setKey(account);
     });
   }
 
@@ -841,7 +842,7 @@ export class Wallet {
       return new WalletAddress(addressModel);
     }
     const key = this.deriveKey(index);
-    const ethWallet = new ethers.Wallet(convertStringToHex(key.privateKey!));
+    const ethWallet = privateKeyToAccount(toHex(key.privateKey!));
     if (ethWallet.address != addressModel.address_id) {
       throw new InternalError(`Seed does not match wallet`);
     }
@@ -885,7 +886,7 @@ export class Wallet {
       return undefined;
     }
     if (seed === undefined) {
-      seed = ethers.Wallet.createRandom().privateKey.slice(2);
+      seed = generatePrivateKey().slice(2);
     }
     this.validateSeed(seed);
     this.seed = seed;

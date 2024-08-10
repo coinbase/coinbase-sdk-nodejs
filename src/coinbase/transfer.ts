@@ -4,7 +4,7 @@ import { Transaction } from "./transaction";
 import { SponsoredSend } from "./sponsored_send";
 import { Coinbase } from "./coinbase";
 import { Transfer as TransferModel } from "../client/api";
-import { ethers } from "ethers";
+import * as viem from "viem";
 import { delay } from "./utils";
 import { InternalError, TimeoutError } from "./errors";
 
@@ -116,10 +116,10 @@ export class Transfer {
   /**
    * Returns the Transaction of the Transfer.
    *
-   * @returns The ethers.js Transaction object.
+   * @returns The Viem Transaction object.
    * @throws (InvalidUnsignedPayload) If the Unsigned Payload is invalid.
    */
-  public getRawTransaction(): ethers.Transaction | undefined {
+  public getRawTransaction(): viem.Transaction | undefined {
     if (!this.getTransaction()) return undefined;
     return this.getTransaction()!.rawTransaction();
   }
@@ -131,7 +131,7 @@ export class Transfer {
    * @param key - The key to sign the Transfer with
    * @returns The hex-encoded signed payload
    */
-  async sign(key: ethers.Wallet): Promise<string> {
+  async sign(key: viem.LocalAccount): Promise<string> {
     return this.getSendTransactionDelegate()!.sign(key);
   }
 

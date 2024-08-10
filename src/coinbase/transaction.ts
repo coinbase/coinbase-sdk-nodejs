@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import * as viem from "viem";
 import { Transaction as TransactionModel } from "../client/api";
 import { TransactionStatus } from "./types";
 import { parseUnsignedPayload } from "./utils";
@@ -8,7 +8,7 @@ import { parseUnsignedPayload } from "./utils";
  */
 export class Transaction {
   private model: TransactionModel;
-  private raw?: ethers.Transaction;
+  private raw?: viem.Transaction;
 
   /**
    * Transactions should be constructed via higher level abstractions like Trade or Transfer.
@@ -114,23 +114,23 @@ export class Transaction {
    * Returns the underlying raw transaction.
    *
    * @throws {InvalidUnsignedPayload} If the Unsigned Payload is invalid.
-   * @returns The ethers.js Transaction object
+   * @returns The Viem Transaction object
    */
-  rawTransaction(): ethers.Transaction {
+  rawTransaction(): viem.Transaction {
     if (this.raw) {
       return this.raw;
     }
     const parsedPayload = parseUnsignedPayload(this.getUnsignedPayload());
-    const transaction = new ethers.Transaction();
-    transaction.chainId = BigInt(parsedPayload.chainId);
-    transaction.nonce = BigInt(parsedPayload.nonce);
+    const transaction = {} as viem.Transaction;
+    transaction.chainId = Number(parsedPayload.chainId);
+    transaction.nonce = Number(parsedPayload.nonce);
     transaction.maxPriorityFeePerGas = BigInt(parsedPayload.maxPriorityFeePerGas);
     transaction.maxFeePerGas = BigInt(parsedPayload.maxFeePerGas);
     // TODO: Handle multiple currencies.
-    transaction.gasLimit = BigInt(parsedPayload.gas);
+    transaction.gas = BigInt(parsedPayload.gas);
     transaction.to = parsedPayload.to;
     transaction.value = BigInt(parsedPayload.value);
-    transaction.data = parsedPayload.input;
+    transaction.input = parsedPayload.input;
 
     this.raw = transaction;
     return this.raw;
@@ -142,8 +142,8 @@ export class Transaction {
    * @param key - The key to sign the transaction with
    * @returns The hex-encoded signed payload
    */
-  async sign(key: ethers.Wallet) {
-    const signedPayload = await key!.signTransaction(this.rawTransaction());
+  async sign(key: viem.LocalAccount): Promise<string> {
+    const signedPayload = await key.signTransaction(this.rawTransaction());
     this.model.signed_payload = signedPayload;
     // Removes the '0x' prefix as required by the API.
     return signedPayload.slice(2);

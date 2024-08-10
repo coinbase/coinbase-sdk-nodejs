@@ -1,4 +1,5 @@
-import { ethers } from "ethers";
+import * as viem from "viem";
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { Decimal } from "decimal.js";
 import {
   Transfer as TransferModel,
@@ -21,7 +22,7 @@ import {
 import { TimeoutError } from "../coinbase/errors";
 import { APIError } from "../coinbase/api_error";
 
-const amount = new Decimal(ethers.parseUnits("100", 18).toString());
+const amount = new Decimal(viem.parseUnits("100", 18).toString());
 const ethAmount = amount.div(Math.pow(10, 18));
 const signedPayload =
   "02f86b83014a3401830f4240830f4350825208946cd01c0f55ce9e0bf78f5e90f72b4345b" +
@@ -138,11 +139,6 @@ describe("Transfer Class", () => {
   });
 
   describe("#getRawTransaction", () => {
-    it("should return the Transfer raw transaction", () => {
-      const rawTransaction = transfer.getRawTransaction();
-      expect(rawTransaction).toBeInstanceOf(ethers.Transaction);
-    });
-
     it("should return undefined when using sponsored sends", () => {
       const transfer = Transfer.fromModel(VALID_TRANSFER_SPONSORED_SEND_MODEL);
       const rawTransaction = transfer.getRawTransaction();
@@ -358,7 +354,7 @@ describe("Transfer Class", () => {
   });
 
   describe("#sign", () => {
-    let signingKey: any = ethers.Wallet.createRandom();
+    let signingKey = privateKeyToAccount(generatePrivateKey());
     it("should return the signature", async () => {
       const transfer = Transfer.fromModel({
         ...VALID_TRANSFER_MODEL,
