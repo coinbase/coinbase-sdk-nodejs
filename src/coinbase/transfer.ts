@@ -1,12 +1,13 @@
 import { Decimal } from "decimal.js";
+import * as viem from "viem";
 import { TransactionStatus, SponsoredSendStatus, TransferStatus } from "./types";
 import { Transaction } from "./transaction";
 import { SponsoredSend } from "./sponsored_send";
 import { Coinbase } from "./coinbase";
 import { Transfer as TransferModel } from "../client/api";
-import { ethers } from "ethers";
 import { delay } from "./utils";
 import { InternalError, TimeoutError } from "./errors";
+import { parseUnsignedPayload } from "./utils";
 
 /**
  * A representation of a Transfer, which moves an Amount of an Asset from
@@ -15,6 +16,7 @@ import { InternalError, TimeoutError } from "./errors";
  */
 export class Transfer {
   private model: TransferModel;
+  private transaction?: viem.Transaction;
 
   /**
    * Private constructor to prevent direct instantiation outside of the factory methods.
@@ -131,8 +133,8 @@ export class Transfer {
    * @param key - The key to sign the Transfer with
    * @returns The hex-encoded signed payload
    */
-  async sign(key: ethers.Wallet): Promise<string> {
-    return this.getSendTransactionDelegate()!.sign(key);
+  async sign(account: viem.LocalAccount): Promise<string> {
+    return this.getSendTransactionDelegate()!.sign(account);
   }
 
   /**

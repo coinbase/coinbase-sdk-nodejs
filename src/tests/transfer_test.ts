@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import * as viem from "viem";
 import { Decimal } from "decimal.js";
 import {
   Transfer as TransferModel,

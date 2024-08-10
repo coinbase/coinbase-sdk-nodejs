@@ -9,11 +9,10 @@ import {
   VALID_WALLET_MODEL,
   addressesApiMock,
   generateRandomHash,
-  mockReturnRejectedValue,
   mockReturnValue,
   walletsApiMock,
 } from "./utils";
-import { ethers } from "ethers";
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import path from "path";
 import MockAdapter from "axios-mock-adapter";
 import axios from "axios";
@@ -89,7 +88,7 @@ describe("Coinbase tests", () => {
         wallet: walletsApiMock,
         address: addressesApiMock,
       };
-      const ethAddress = ethers.Wallet.createRandom();
+      const ethAddress = privateKeyToAccount(generatePrivateKey());
 
       walletId = randomUUID();
       publicKey = ethAddress.publicKey;

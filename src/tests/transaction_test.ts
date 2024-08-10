@@ -1,7 +1,8 @@
-import { ethers } from "ethers";
 import { Transaction as TransactionModel } from "../client/api";
 import { Transaction } from "./../coinbase/transaction";
 import { TransactionStatus } from "../coinbase/types";
+import { Transaction as Transaction_viem } from "viem";
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
 describe("Transaction", () => {
   let fromKey;
@@ -15,7 +16,7 @@ describe("Transaction", () => {
   let transaction;
 
   beforeEach(() => {
-    fromKey = ethers.Wallet.createRandom();
+    fromKey = privateKeyToAccount(generatePrivateKey());
     fromAddressId = fromKey.address;
     toAddressId = "0x4D9E4F3f4D1A8B5F4f7b1F5b5C7b8d6b2B3b1b0b";
     unsignedPayload =
@@ -90,15 +91,12 @@ describe("Transaction", () => {
     });
   });
 
-  describe("#getRawTransaction", () => {
-    let raw: ethers.Transaction, rawPayload;
+  describe("#rawTransaction", () => {
+    let raw: Transaction_viem, rawPayload;
 
     beforeEach(() => {
       raw = transaction.rawTransaction();
       rawPayload = JSON.parse(Buffer.from(unsignedPayload, "hex").toString());
-    });
-    it("should return the raw transaction", () => {
-      expect(raw).toBeInstanceOf(ethers.Transaction);
     });
 
     it("should return the correct value", () => {
@@ -106,7 +104,7 @@ describe("Transaction", () => {
     });
 
     it("should return the chain ID", () => {
-      expect(raw.chainId).toEqual(BigInt(rawPayload.chainId));
+      expect(raw.chainId).toEqual(Number(rawPayload.chainId));
     });
 
     it("should return the correct destination address", () => {
@@ -118,7 +116,7 @@ describe("Transaction", () => {
     });
 
     it("should return the correct gas limit", () => {
-      expect(raw.gasLimit).toEqual(BigInt(rawPayload.gas));
+      expect(raw.gas).toEqual(BigInt(rawPayload.gas));
     });
 
     it("should return the correct max priority fee per gas", () => {
@@ -130,7 +128,7 @@ describe("Transaction", () => {
     });
 
     it("should return the correct input", () => {
-      expect(raw.data).toEqual(rawPayload.input);
+      expect(raw.input).toEqual(rawPayload.input);
     });
 
     it("should return the same raw transaction when called multiple times", () => {

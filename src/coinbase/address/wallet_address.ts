@@ -1,5 +1,5 @@
 import { Decimal } from "decimal.js";
-import { ethers } from "ethers";
+import * as viem from "viem";
 import { Address as AddressModel } from "../../client";
 import { Address } from "../address";
 import { Asset } from "../asset";
@@ -25,7 +25,7 @@ import { StakingOperation } from "../staking_operation";
  */
 export class WalletAddress extends Address {
   private model: AddressModel;
-  private key?: ethers.Wallet;
+  private key?: viem.LocalAccount;
 
   /**
    * Initializes a new Wallet Address instance.
@@ -34,7 +34,7 @@ export class WalletAddress extends Address {
    * @param key - The ethers.js SigningKey the Address uses to sign data.
    * @throws {InternalError} If the address model is empty.
    */
-  constructor(model: AddressModel, key?: ethers.Wallet) {
+  constructor(model: AddressModel, key?: viem.LocalAccount) {
     if (!model) {
       throw new InternalError("Address model cannot be empty");
     }
@@ -65,10 +65,10 @@ export class WalletAddress extends Address {
   /**
    * Sets the private key.
    *
-   * @param key - The ethers.js SigningKey the Address uses to sign data.
+   * @param key - The viem LocalAccount the Address uses to sign data.
    * @throws {InternalError} If the private key is already set.
    */
-  public setKey(key: ethers.Wallet) {
+  public setKey(key: viem.LocalAccount) {
     if (this.key !== undefined) {
       throw new InternalError("Private key is already set");
     }
@@ -204,23 +204,24 @@ export class WalletAddress extends Address {
       return transfer;
     }
 
-    await transfer.sign(this.getSigner());
+    await transfer.sign(this.signer);
     await transfer.broadcast();
 
     return transfer;
   }
 
   /**
-   * Gets a signer for the private key.
+   * Gets the wallet address' signer. If the private key is not loaded, an error is thrown.
    *
    * @returns The signer for the private key.
    * @throws {InternalError} If the private key is not loaded.
    */
-  private getSigner(): ethers.Wallet {
+  private get signer(): viem.LocalAccount {
     if (!this.key) {
       throw new InternalError("Cannot sign without a private key");
     }
-    return new ethers.Wallet(this.key.privateKey);
+
+    return this.key;
   }
 
   /**
