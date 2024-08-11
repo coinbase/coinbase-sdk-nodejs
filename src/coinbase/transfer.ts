@@ -119,7 +119,7 @@ export class Transfer {
    * @returns The Viem Transaction object.
    * @throws (InvalidUnsignedPayload) If the Unsigned Payload is invalid.
    */
-  public getRawTransaction(): viem.Transaction | undefined {
+  public getRawTransaction(): viem.TransactionSerializable | undefined {
     if (!this.getTransaction()) return undefined;
     return this.getTransaction()!.rawTransaction();
   }
