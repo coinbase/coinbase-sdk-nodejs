@@ -16,7 +16,7 @@ import { parseUnsignedPayload } from "./utils";
  */
 export class Transfer {
   private model: TransferModel;
-  private transaction?: viem.Transaction;
+  private transaction?: viem.TransactionSerializable;
 
   /**
    * Private constructor to prevent direct instantiation outside of the factory methods.
@@ -121,8 +121,9 @@ export class Transfer {
    * @returns The ethers.js Transaction object.
    * @throws (InvalidUnsignedPayload) If the Unsigned Payload is invalid.
    */
-  public getRawTransaction(): ethers.Transaction | undefined {
+  public getRawTransaction(): viem.TransactionSerializable | undefined {
     if (!this.getTransaction()) return undefined;
+
     return this.getTransaction()!.rawTransaction();
   }
 

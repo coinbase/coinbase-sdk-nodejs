@@ -8,7 +8,7 @@ import { parseUnsignedPayload } from "./utils";
  */
 export class Transaction {
   private model: TransactionModel;
-  private raw?: viem.Transaction;
+  private raw?: viem.TransactionSerializable;
 
   /**
    * Transactions should be constructed via higher level abstractions like Trade or Transfer.
@@ -116,21 +116,22 @@ export class Transaction {
    * @throws {InvalidUnsignedPayload} If the Unsigned Payload is invalid.
    * @returns The ethers.js Transaction object
    */
-  rawTransaction(): viem.Transaction {
+  rawTransaction(): viem.TransactionSerializable {
     if (this.raw) {
       return this.raw;
     }
     const parsedPayload = parseUnsignedPayload(this.getUnsignedPayload());
-    const transaction = {} as viem.Transaction;
-    transaction.chainId = Number(parsedPayload.chainId);
-    transaction.nonce = Number(parsedPayload.nonce);
-    transaction.maxPriorityFeePerGas = BigInt(parsedPayload.maxPriorityFeePerGas);
-    transaction.maxFeePerGas = BigInt(parsedPayload.maxFeePerGas);
-    // TODO: Handle multiple currencies.
-    transaction.gas = BigInt(parsedPayload.gas);
-    transaction.to = parsedPayload.to;
-    transaction.value = BigInt(parsedPayload.value);
-    transaction.input = parsedPayload.input;
+    const transaction: viem.TransactionSerializable = {
+      chainId: Number(parsedPayload.chainId),
+      data: parsedPayload.input,
+      nonce: Number(parsedPayload.nonce),
+      maxPriorityFeePerGas: BigInt(parsedPayload.maxPriorityFeePerGas),
+      maxFeePerGas: BigInt(parsedPayload.maxFeePerGas),
+      // TODO: Handle multiple currencies.
+      gas: BigInt(parsedPayload.gas),
+      to: parsedPayload.to,
+      value: BigInt(parsedPayload.value),
+    };
 
     this.raw = transaction;
     return this.raw;

@@ -1,7 +1,7 @@
 import { Transaction as TransactionModel } from "../client/api";
 import { Transaction } from "./../coinbase/transaction";
 import { TransactionStatus } from "../coinbase/types";
-import { Transaction as Transaction_viem } from "viem";
+import { TransactionSerializable } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
 describe("Transaction", () => {
@@ -92,7 +92,7 @@ describe("Transaction", () => {
   });
 
   describe("#rawTransaction", () => {
-    let raw: Transaction_viem, rawPayload;
+    let raw: TransactionSerializable, rawPayload;
 
     beforeEach(() => {
       raw = transaction.rawTransaction();
@@ -128,7 +128,7 @@ describe("Transaction", () => {
     });
 
     it("should return the correct input", () => {
-      expect(raw.input).toEqual(rawPayload.input);
+      expect(raw.data).toEqual(rawPayload.input);
     });
 
     it("should return the same raw transaction when called multiple times", () => {
