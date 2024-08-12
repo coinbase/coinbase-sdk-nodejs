@@ -3917,7 +3917,9 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
             // verify required parameter 'endTime' is not null or undefined
             assertParamExists('fetchHistoricalStakingBalances', 'endTime', endTime)
 
-            const localVarPath = `/v1/stake/balances`;
+            const localVarPath = `/v1/networks/{network_id}/addresses/{address_id}/stake/balances`
+            .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+            .replace(`{${"address_id"}}`, encodeURIComponent(String(address)))
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -3929,11 +3931,9 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            localVarQueryParameter['address'] = address;
-            localVarQueryParameter['networkId'] = networkId;
-            localVarQueryParameter['assetId'] = assetId;
-            localVarQueryParameter['startTime'] = startTime;
-            localVarQueryParameter['endTime'] = endTime
+            localVarQueryParameter['asset_id'] = assetId;
+            localVarQueryParameter['start_time'] = startTime;
+            localVarQueryParameter['end_time'] = endTime
 
             if (limit !== undefined) {
                 localVarQueryParameter['limit'] = limit;
