@@ -8,6 +8,7 @@ import { Amount, StakeOptionsMode } from "./types";
 import { formatDate, getWeekBackDate } from "./utils";
 import { StakingRewardFormat } from "../client";
 import { StakingReward } from "./staking_reward";
+import { StakingBalance } from "./staking_balance";
 
 /**
  * A representation of a blockchain address, which is a user-controlled account on a network.
@@ -101,6 +102,28 @@ export class Address {
       startTime,
       endTime,
       format,
+    );
+  }
+
+   /**
+   * Lists the historical staking balances for the address.
+   *
+   * @param assetId - The asset ID.
+   * @param startTime - The start time.
+   * @param endTime - The end time.
+   * @returns The staking balances.
+   */
+   public async historicalStakingBalances(
+    assetId: string,
+    startTime = getWeekBackDate(new Date()),
+    endTime = formatDate(new Date()),
+  ): Promise<StakingBalance[]> {
+    return StakingBalance.list(
+      Coinbase.normalizeNetwork(this.getNetworkId()),
+      assetId,
+      this.getId(),
+      startTime,
+      endTime,
     );
   }
 
