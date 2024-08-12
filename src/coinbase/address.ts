@@ -5,7 +5,12 @@ import { Balance } from "./balance";
 import { BalanceMap } from "./balance_map";
 import { FaucetTransaction } from "./faucet_transaction";
 import { HistoricalBalance } from "./historical_balance";
-import { Amount, StakeOptionsMode, ListHistoricalBalancesResult } from "./types";
+import {
+  Amount,
+  StakeOptionsMode,
+  ListHistoricalBalancesResult,
+  ListHistoricalBalancesOptions
+} from "./types";
 import { formatDate, getWeekBackDate } from "./utils";
 import { StakingRewardFormat } from "../client";
 import { StakingReward } from "./staking_reward";
@@ -90,11 +95,11 @@ export class Address {
    * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
    * @returns The list of historical balance of the asset and next page token.
    */
-  public async listHistoricalBalances(
+  public async listHistoricalBalances({
     assetId: string,
     limit?: number,
     page?: string,
-  ): Promise<ListHistoricalBalancesResult> {
+  }: ListHistoricalBalancesOptions): Promise<ListHistoricalBalancesResult> {
     const historyList: HistoricalBalance[] = [];
 
     if (limit !== undefined) {
