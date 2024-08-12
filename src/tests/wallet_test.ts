@@ -46,7 +46,6 @@ import { WalletAddress } from "../coinbase/address/wallet_address";
 import { StakingOperation } from "../coinbase/staking_operation";
 import { StakingReward } from "../coinbase/staking_reward";
 import { StakingBalance } from "../coinbase/staking_balance";
-import { mock } from "node:test";
 
 describe("Wallet Class", () => {
   let wallet: Wallet;

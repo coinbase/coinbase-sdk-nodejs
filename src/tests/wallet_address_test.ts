@@ -522,7 +522,6 @@ describe("WalletAddress", () => {
         Coinbase.apiClients.asset!.getAsset = getAssetMock();
         const response = await walletAddress.historicalStakingBalances(Coinbase.assets.Eth);
         expect(response).toBeInstanceOf(Array<StakingBalance>);
-        expect(response).toBeInstanceOf(Array<StakingBalance>);
         expect(response.length).toEqual(2);
         expect(response[0].bondedStake().amount).toEqual(new Decimal("32"));
         expect(response[0].bondedStake().asset?.assetId).toEqual(Coinbase.assets.Eth);
