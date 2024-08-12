@@ -154,6 +154,14 @@ const transfer = await wallet.createTransfer({ amount: 0.00001, assetId: Coinbas
 ```
 
 
+### Gasless USDC Transfers
+
+To transfer USDC without needing to hold ETH for gas, you can use the `createTransfer` method with the `gasless` option set to `true`.
+```typescript
+const transfer = await wallet.createTransfer({ amount: 0.00001, assetId: Coinbase.assets.Usdc, destination: anotherWallet, gasless: true });
+```
+
+
 ### Trading Funds
 
 ```typescript

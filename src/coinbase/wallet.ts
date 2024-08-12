@@ -702,6 +702,7 @@ export class Wallet {
    * @param options.destination - The destination of the transfer. If a Wallet, sends to the Wallet's default address. If a String, interprets it as the address ID.
    * @param options.timeoutSeconds - The maximum amount of time to wait for the Transfer to complete, in seconds.
    * @param options.intervalSeconds - The interval at which to poll the Network for Transfer status, in seconds.
+   * @param options.gasless - Whether the Transfer should be gasless. Defaults to false.
    * @returns The hash of the Transfer transaction.
    * @throws {APIError} if the API request to create a Transfer fails.
    * @throws {APIError} if the API request to broadcast a Transfer fails.
@@ -713,6 +714,7 @@ export class Wallet {
     destination,
     timeoutSeconds = 10,
     intervalSeconds = 0.2,
+    gasless = false,
   }: CreateTransferOptions): Promise<Transfer> {
     if (!this.getDefaultAddress()) {
       throw new InternalError("Default address not found");
@@ -723,6 +725,7 @@ export class Wallet {
       destination,
       timeoutSeconds,
       intervalSeconds,
+      gasless,
     });
   }
 
