@@ -119,6 +119,7 @@ export class Wallet {
     }
     const walletModel = await Coinbase.apiClients.wallet!.getWallet(data.walletId);
     const wallet = Wallet.init(walletModel.data, data.seed);
+    await wallet.listAddresses();
     return wallet;
   }
 
