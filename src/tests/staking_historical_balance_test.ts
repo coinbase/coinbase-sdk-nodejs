@@ -26,11 +26,11 @@ describe("StakingBalance", () => {
   };
 
   const bondedStake = {
-    amount: "32000000000000000000",
+    amount: "32",
     asset: asset,
   }; 
   const unbondedBalance = {
-    amount: "2000000000000000000",
+    amount: "2",
     asset: asset,
   };
 
