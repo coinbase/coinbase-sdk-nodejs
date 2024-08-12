@@ -88,6 +88,31 @@ export interface AddressBalanceList {
 /**
  * 
  * @export
+ * @interface AddressHistoricalBalanceList
+ */
+export interface AddressHistoricalBalanceList {
+    /**
+     * 
+     * @type {Array<HistoricalBalance>}
+     * @memberof AddressHistoricalBalanceList
+     */
+    'data': Array<HistoricalBalance>;
+    /**
+     * True if this list has another page of items after this one that can be fetched.
+     * @type {boolean}
+     * @memberof AddressHistoricalBalanceList
+     */
+    'has_more': boolean;
+    /**
+     * The page token to be used to fetch the next page.
+     * @type {string}
+     * @memberof AddressHistoricalBalanceList
+     */
+    'next_page': string;
+}
+/**
+ * 
+ * @export
  * @interface AddressList
  */
 export interface AddressList {
@@ -494,6 +519,12 @@ export interface CreateTransferRequest {
      * @memberof CreateTransferRequest
      */
     'destination': string;
+    /**
+     * Whether the transfer uses sponsored gas
+     * @type {boolean}
+     * @memberof CreateTransferRequest
+     */
+    'gasless'?: boolean;
 }
 /**
  * 
@@ -783,6 +814,37 @@ export interface GetStakingContextRequest {
     'options': { [key: string]: string; };
 }
 /**
+ * The balance of an asset onchain at a particular block
+ * @export
+ * @interface HistoricalBalance
+ */
+export interface HistoricalBalance {
+    /**
+     * The amount in the atomic units of the asset
+     * @type {string}
+     * @memberof HistoricalBalance
+     */
+    'amount': string;
+    /**
+     * The hash of the block at which the balance was recorded
+     * @type {string}
+     * @memberof HistoricalBalance
+     */
+    'block_hash': string;
+    /**
+     * The block height at which the balance was recorded
+     * @type {string}
+     * @memberof HistoricalBalance
+     */
+    'block_height': string;
+    /**
+     * 
+     * @type {Asset}
+     * @memberof HistoricalBalance
+     */
+    'asset': Asset;
+}
+/**
  * An error response from the Coinbase Developer Platform API
  * @export
  * @interface ModelError
@@ -800,56 +862,6 @@ export interface ModelError {
      * @memberof ModelError
      */
     'message': string;
-}
-/**
- * The native eth staking context.
- * @export
- * @interface NativeEthStakingContext
- */
-export interface NativeEthStakingContext {
-    /**
-     * 
-     * @type {Balance}
-     * @memberof NativeEthStakingContext
-     */
-    'stakeable_balance': Balance;
-    /**
-     * 
-     * @type {Balance}
-     * @memberof NativeEthStakingContext
-     */
-    'unstakeable_balance': Balance;
-    /**
-     * 
-     * @type {Balance}
-     * @memberof NativeEthStakingContext
-     */
-    'claimable_balance': Balance;
-}
-/**
- * The partial eth staking context.
- * @export
- * @interface PartialEthStakingContext
- */
-export interface PartialEthStakingContext {
-    /**
-     * 
-     * @type {Balance}
-     * @memberof PartialEthStakingContext
-     */
-    'stakeable_balance': Balance;
-    /**
-     * 
-     * @type {Balance}
-     * @memberof PartialEthStakingContext
-     */
-    'unstakeable_balance': Balance;
-    /**
-     * 
-     * @type {Balance}
-     * @memberof PartialEthStakingContext
-     */
-    'claimable_balance': Balance;
 }
 /**
  * An event representing a seed creation.
@@ -1141,6 +1153,66 @@ export interface SignedVoluntaryExitMessageMetadata {
     'signed_voluntary_exit': string;
 }
 /**
+ * An onchain sponsored gasless send.
+ * @export
+ * @interface SponsoredSend
+ */
+export interface SponsoredSend {
+    /**
+     * The onchain address of the recipient
+     * @type {string}
+     * @memberof SponsoredSend
+     */
+    'to_address_id': string;
+    /**
+     * The raw typed data for the sponsored send
+     * @type {string}
+     * @memberof SponsoredSend
+     */
+    'raw_typed_data': string;
+    /**
+     * The typed data hash for the sponsored send. This is the typed data hash that needs to be signed by the sender.
+     * @type {string}
+     * @memberof SponsoredSend
+     */
+    'typed_data_hash': string;
+    /**
+     * The signed hash of the sponsored send typed data.
+     * @type {string}
+     * @memberof SponsoredSend
+     */
+    'signature'?: string;
+    /**
+     * The hash of the onchain sponsored send transaction
+     * @type {string}
+     * @memberof SponsoredSend
+     */
+    'transaction_hash'?: string;
+    /**
+     * The link to view the transaction on a block explorer. This is optional and may not be present for all transactions.
+     * @type {string}
+     * @memberof SponsoredSend
+     */
+    'transaction_link'?: string;
+    /**
+     * The status of the sponsored send
+     * @type {string}
+     * @memberof SponsoredSend
+     */
+    'status': SponsoredSendStatusEnum;
+}
+
+export const SponsoredSendStatusEnum = {
+    Pending: 'pending',
+    Signed: 'signed',
+    Submitted: 'submitted',
+    Complete: 'complete',
+    Failed: 'failed'
+} as const;
+
+export type SponsoredSendStatusEnum = typeof SponsoredSendStatusEnum[keyof typeof SponsoredSendStatusEnum];
+
+/**
  * Context needed to perform a staking operation
  * @export
  * @interface StakingContext
@@ -1154,11 +1226,30 @@ export interface StakingContext {
     'context': StakingContextContext;
 }
 /**
- * @type StakingContextContext
+ * 
  * @export
+ * @interface StakingContextContext
  */
-export type StakingContextContext = NativeEthStakingContext | PartialEthStakingContext;
-
+export interface StakingContextContext {
+    /**
+     * 
+     * @type {Balance}
+     * @memberof StakingContextContext
+     */
+    'stakeable_balance': Balance;
+    /**
+     * 
+     * @type {Balance}
+     * @memberof StakingContextContext
+     */
+    'unstakeable_balance': Balance;
+    /**
+     * 
+     * @type {Balance}
+     * @memberof StakingContextContext
+     */
+    'claimable_balance': Balance;
+}
 /**
  * A list of onchain transactions to help realize a staking action.
  * @export
@@ -1261,6 +1352,12 @@ export interface StakingReward {
      * @memberof StakingReward
      */
     'format': StakingRewardFormat;
+    /**
+     * 
+     * @type {StakingRewardUSDValue}
+     * @memberof StakingReward
+     */
+    'usd_value': StakingRewardUSDValue;
 }
 
 export const StakingRewardStateEnum = {
@@ -1284,6 +1381,31 @@ export const StakingRewardFormat = {
 export type StakingRewardFormat = typeof StakingRewardFormat[keyof typeof StakingRewardFormat];
 
 
+/**
+ * The USD value of the reward
+ * @export
+ * @interface StakingRewardUSDValue
+ */
+export interface StakingRewardUSDValue {
+    /**
+     * The value of the reward in USD
+     * @type {string}
+     * @memberof StakingRewardUSDValue
+     */
+    'amount': string;
+    /**
+     * The conversion price from native currency to USD
+     * @type {string}
+     * @memberof StakingRewardUSDValue
+     */
+    'conversion_price': string;
+    /**
+     * The time of the conversion in UTC.
+     * @type {string}
+     * @memberof StakingRewardUSDValue
+     */
+    'conversion_time': string;
+}
 /**
  * The staking balances for an address.
  * @export
@@ -1552,8 +1674,54 @@ export interface Transfer {
      * @type {Transaction}
      * @memberof Transfer
      */
-    'transaction': Transaction;
+    'transaction'?: Transaction;
+    /**
+     * 
+     * @type {SponsoredSend}
+     * @memberof Transfer
+     */
+    'sponsored_send'?: SponsoredSend;
+    /**
+     * The unsigned payload of the transfer. This is the payload that needs to be signed by the sender.
+     * @type {string}
+     * @memberof Transfer
+     */
+    'unsigned_payload'?: string;
+    /**
+     * The signed payload of the transfer. This is the payload that has been signed by the sender.
+     * @type {string}
+     * @memberof Transfer
+     */
+    'signed_payload'?: string;
+    /**
+     * The hash of the transfer transaction
+     * @type {string}
+     * @memberof Transfer
+     */
+    'transaction_hash'?: string;
+    /**
+     * The status of the transfer
+     * @type {string}
+     * @memberof Transfer
+     */
+    'status'?: TransferStatusEnum;
+    /**
+     * Whether the transfer uses sponsored gas
+     * @type {boolean}
+     * @memberof Transfer
+     */
+    'gasless': boolean;
 }
+
+export const TransferStatusEnum = {
+    Pending: 'pending',
+    Broadcast: 'broadcast',
+    Complete: 'complete',
+    Failed: 'failed'
+} as const;
+
+export type TransferStatusEnum = typeof TransferStatusEnum[keyof typeof TransferStatusEnum];
+
 /**
  * 
  * @export
@@ -2871,6 +3039,58 @@ export const ExternalAddressesApiAxiosParamCreator = function (configuration?: C
             };
         },
         /**
+         * List the historical balance of an asset in a specific address.
+         * @summary Get address balance history for asset
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the historical balance for.
+         * @param {string} assetId The symbol of the asset to fetch the historical balance for.
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listAddressHistoricalBalance: async (networkId: string, addressId: string, assetId: string, limit?: number, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('listAddressHistoricalBalance', 'networkId', networkId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('listAddressHistoricalBalance', 'addressId', addressId)
+            // verify required parameter 'assetId' is not null or undefined
+            assertParamExists('listAddressHistoricalBalance', 'assetId', assetId)
+            const localVarPath = `/v1/networks/{network_id}/addresses/{address_id}/balance_history/{asset_id}`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)))
+                .replace(`{${"asset_id"}}`, encodeURIComponent(String(assetId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * List all of the balances of an external address
          * @summary Get the balances of an external address
          * @param {string} networkId The ID of the blockchain network
@@ -2977,6 +3197,23 @@ export const ExternalAddressesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * List the historical balance of an asset in a specific address.
+         * @summary Get address balance history for asset
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the historical balance for.
+         * @param {string} assetId The symbol of the asset to fetch the historical balance for.
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listAddressHistoricalBalance(networkId: string, addressId: string, assetId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AddressHistoricalBalanceList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listAddressHistoricalBalance(networkId, addressId, assetId, limit, page, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ExternalAddressesApi.listAddressHistoricalBalance']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * List all of the balances of an external address
          * @summary Get the balances of an external address
          * @param {string} networkId The ID of the blockchain network
@@ -3028,6 +3265,20 @@ export const ExternalAddressesApiFactory = function (configuration?: Configurati
             return localVarFp.getExternalAddressBalance(networkId, addressId, assetId, options).then((request) => request(axios, basePath));
         },
         /**
+         * List the historical balance of an asset in a specific address.
+         * @summary Get address balance history for asset
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the historical balance for.
+         * @param {string} assetId The symbol of the asset to fetch the historical balance for.
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listAddressHistoricalBalance(networkId: string, addressId: string, assetId: string, limit?: number, page?: string, options?: any): AxiosPromise<AddressHistoricalBalanceList> {
+            return localVarFp.listAddressHistoricalBalance(networkId, addressId, assetId, limit, page, options).then((request) => request(axios, basePath));
+        },
+        /**
          * List all of the balances of an external address
          * @summary Get the balances of an external address
          * @param {string} networkId The ID of the blockchain network
@@ -3070,6 +3321,20 @@ export interface ExternalAddressesApiInterface {
      * @memberof ExternalAddressesApiInterface
      */
     getExternalAddressBalance(networkId: string, addressId: string, assetId: string, options?: RawAxiosRequestConfig): AxiosPromise<Balance>;
+
+    /**
+     * List the historical balance of an asset in a specific address.
+     * @summary Get address balance history for asset
+     * @param {string} networkId The ID of the blockchain network
+     * @param {string} addressId The ID of the address to fetch the historical balance for.
+     * @param {string} assetId The symbol of the asset to fetch the historical balance for.
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExternalAddressesApiInterface
+     */
+    listAddressHistoricalBalance(networkId: string, addressId: string, assetId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<AddressHistoricalBalanceList>;
 
     /**
      * List all of the balances of an external address
@@ -3115,6 +3380,22 @@ export class ExternalAddressesApi extends BaseAPI implements ExternalAddressesAp
      */
     public getExternalAddressBalance(networkId: string, addressId: string, assetId: string, options?: RawAxiosRequestConfig) {
         return ExternalAddressesApiFp(this.configuration).getExternalAddressBalance(networkId, addressId, assetId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * List the historical balance of an asset in a specific address.
+     * @summary Get address balance history for asset
+     * @param {string} networkId The ID of the blockchain network
+     * @param {string} addressId The ID of the address to fetch the historical balance for.
+     * @param {string} assetId The symbol of the asset to fetch the historical balance for.
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExternalAddressesApi
+     */
+    public listAddressHistoricalBalance(networkId: string, addressId: string, assetId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig) {
+        return ExternalAddressesApiFp(this.configuration).listAddressHistoricalBalance(networkId, addressId, assetId, limit, page, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

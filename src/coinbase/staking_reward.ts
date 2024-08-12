@@ -110,11 +110,38 @@ export class StakingReward {
   }
 
   /**
+   * Returns the USD value of the StakingReward.
+   *
+   * @returns The USD value.
+   */
+  public usdValue(): Amount {
+    return new Decimal(this.model.usd_value.amount).div(new Decimal("100"));
+  }
+
+  /**
+   * Returns the conversion price of the StakingReward in USD.
+   *
+   * @returns The conversion price.
+   */
+  public conversionPrice(): Amount {
+    return new Decimal(this.model.usd_value.conversion_price);
+  }
+
+  /**
+   * Returns the time of calculating the conversion price.
+   *
+   * @returns The conversion time.
+   */
+  public conversionTime(): Date {
+    return new Date(this.model.usd_value.conversion_time);
+  }
+
+  /**
    * Print the Staking Reward as a string.
    *
    * @returns The string representation of the Staking Reward.
    */
   public toString(): string {
-    return `StakingReward { date: '${this.date().toISOString()}' address: '${this.addressId()}' amount: '${this.amount().toString()}' }`;
+    return `StakingReward { date: '${this.date().toISOString()}' address: '${this.addressId()}' amount: '${this.amount().toString()}' usd_value: '${this.usdValue().toString()}' conversion_price: '${this.conversionPrice().toString()}' conversion_time: '${this.conversionTime().toISOString()}' }`;
   }
 }
