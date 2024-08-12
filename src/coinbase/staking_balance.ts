@@ -3,7 +3,7 @@ import { Balance } from "./balance";
 import { Coinbase } from "./coinbase";
 
 /**
- * A representation of a staking balance earned on a network for a given asset.
+ * A representation of the staking balance for a given asset on a specific date.
  */
 export class StakingBalance {
   private model: StakingBalanceModel;
