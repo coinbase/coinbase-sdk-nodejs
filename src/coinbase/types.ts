@@ -798,9 +798,9 @@ export type CreateTradeOptions = {
  * Options for listing historical balances of an address.
  */
 export type ListHistoricalBalancesOptions = {
-  assetId: string,
-  limit?: number,
-  page?: string,
+  assetId: string;
+  limit?: number;
+  page?: string;
 }
 
 /**

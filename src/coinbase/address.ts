@@ -9,7 +9,7 @@ import {
   Amount,
   StakeOptionsMode,
   ListHistoricalBalancesResult,
-  ListHistoricalBalancesOptions
+  ListHistoricalBalancesOptions,
 } from "./types";
 import { formatDate, getWeekBackDate } from "./utils";
 import { StakingRewardFormat } from "../client";
@@ -90,16 +90,17 @@ export class Address {
   /**
    * Returns the historical balances of the provided asset.
    *
-   * @param assetId - The asset ID.
-   * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param options - The options to list historical balances.
+   * @param options.assetId - The asset ID.
+   * @param options.limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param options.page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
    * @returns The list of historical balance of the asset and next page token.
    */
   public async listHistoricalBalances({
-    assetId: string,
-    limit?: number,
-    page?: string,
-  }: ListHistoricalBalancesOptions): Promise<ListHistoricalBalancesResult> {
+    assetId,
+    limit,
+    page,
+  }: ListHistoricalBalancesOptions) : Promise<ListHistoricalBalancesResult> {
     const historyList: HistoricalBalance[] = [];
 
     if (limit !== undefined) {
