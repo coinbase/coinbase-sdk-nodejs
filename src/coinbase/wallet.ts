@@ -28,6 +28,7 @@ import {
 import { convertStringToHex, delay, formatDate, getWeekBackDate } from "./utils";
 import { StakingOperation } from "./staking_operation";
 import { StakingReward } from "./staking_reward";
+import { StakingBalance } from "./staking_balance";
 
 /**
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
@@ -395,6 +396,26 @@ export class Wallet {
       throw new InternalError("Default address not found");
     }
     return await this.getDefaultAddress()!.stakingRewards(assetId, startTime, endTime, format);
+  }
+
+  /**
+   * Lists the historical staking balances for the address.
+   *
+   * @param assetId - The asset ID.
+   * @param startTime - The start time.
+   * @param endTime - The end time.
+   * @throws {Error} if the default address is not found.
+   * @returns The staking balances.
+   */
+  public async historicalStakingBalances(
+    assetId: string,
+    startTime = getWeekBackDate(new Date()),
+    endTime = formatDate(new Date()),
+  ): Promise<StakingBalance[]> {
+    if (!this.getDefaultAddress()) {
+      throw new InternalError("Default address not found");
+    }
+    return await this.getDefaultAddress()!.historicalStakingBalances(assetId, startTime, endTime);
   }
 
   /**

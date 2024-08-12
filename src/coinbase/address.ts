@@ -105,7 +105,7 @@ export class Address {
     );
   }
 
-   /**
+  /**
    * Lists the historical staking balances for the address.
    *
    * @param assetId - The asset ID.
@@ -113,7 +113,7 @@ export class Address {
    * @param endTime - The end time.
    * @returns The staking balances.
    */
-   public async historicalStakingBalances(
+  public async historicalStakingBalances(
     assetId: string,
     startTime = getWeekBackDate(new Date()),
     endTime = formatDate(new Date()),

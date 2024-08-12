@@ -6,6 +6,7 @@ import { FaucetTransaction } from "../coinbase/faucet_transaction";
 import {
   Balance as BalanceModel,
   FetchStakingRewards200Response,
+  FetchHistoricalStakingBalances200Response,
   StakingContext as StakingContextModel,
   StakingOperation as StakingOperationModel,
   StakingOperationStatusEnum,
@@ -46,6 +47,7 @@ import { WalletAddress } from "../coinbase/address/wallet_address";
 import { Wallet } from "../coinbase/wallet";
 import { StakingOperation } from "../coinbase/staking_operation";
 import { StakingReward } from "../coinbase/staking_reward";
+import { StakingBalance } from "../coinbase/staking_balance";
 
 // Test suite for the WalletAddress class
 describe("WalletAddress", () => {
@@ -329,6 +331,55 @@ describe("WalletAddress", () => {
       next_page: "",
     };
 
+    const HISTORICAL_STAKING_BALANCE_RESPONSE: FetchHistoricalStakingBalances200Response = {
+      data: [
+        {
+          address: newAddress.address_id,
+          date: "2024-05-01",
+          bonded_stake: {
+            amount: "32",
+            asset: {
+              asset_id: Coinbase.assets.Eth,
+              network_id: Coinbase.networks.EthereumHolesky,
+              decimals: 18,
+            },
+          },
+          unbonded_balance: {
+            amount: "2",
+            asset: {
+              asset_id: Coinbase.assets.Eth,
+              network_id: Coinbase.networks.EthereumHolesky,
+              decimals: 18,
+            },
+          },
+          participant_type: "validator",
+        },
+        {
+          address: newAddress.address_id,
+          date: "2024-05-02",
+          bonded_stake: {
+            amount: "34",
+            asset: {
+              asset_id: Coinbase.assets.Eth,
+              network_id: Coinbase.networks.EthereumHolesky,
+              decimals: 18,
+            },
+          },
+          unbonded_balance: {
+            amount: "3",
+            asset: {
+              asset_id: Coinbase.assets.Eth,
+              network_id: Coinbase.networks.EthereumHolesky,
+              decimals: 18,
+            },
+          },
+          participant_type: "validator",
+        }
+      ],
+      has_more: false,
+      next_page: "",
+    };
+
     beforeAll(() => {
       Coinbase.apiClients.externalAddress = externalAddressApiMock;
       Coinbase.apiClients.stake = stakeApiMock;
@@ -462,6 +513,25 @@ describe("WalletAddress", () => {
         Coinbase.apiClients.asset!.getAsset = getAssetMock();
         const response = await walletAddress.stakingRewards(Coinbase.assets.Eth);
         expect(response).toBeInstanceOf(Array<StakingReward>);
+      });
+    });
+
+    describe(".historicalStakingBalances", () => {
+      it("should successfully return historical staking balances", async () => {
+        Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockReturnValue(HISTORICAL_STAKING_BALANCE_RESPONSE);
+        Coinbase.apiClients.asset!.getAsset = getAssetMock();
+        const response = await walletAddress.historicalStakingBalances(Coinbase.assets.Eth);
+        expect(response).toBeInstanceOf(Array<StakingBalance>);
+        expect(response).toBeInstanceOf(Array<StakingBalance>);
+        expect(response.length).toEqual(2);
+        expect(response[0].bondedStake().amount).toEqual(new Decimal("32"));
+        expect(response[0].bondedStake().asset?.assetId).toEqual(Coinbase.assets.Eth);
+        expect(response[0].bondedStake().asset?.decimals).toEqual(18);
+        expect(response[0].bondedStake().asset?.networkId).toEqual(Coinbase.networks.EthereumHolesky);
+        expect(response[0].unbondedBalance().amount).toEqual(new Decimal("2"));
+        expect(response[0].unbondedBalance().asset?.assetId).toEqual(Coinbase.assets.Eth);
+        expect(response[0].unbondedBalance().asset?.decimals).toEqual(18);
+        expect(response[0].unbondedBalance().asset?.networkId).toEqual(Coinbase.networks.EthereumHolesky);
       });
     });
   });
