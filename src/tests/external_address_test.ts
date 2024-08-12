@@ -136,7 +136,7 @@ describe("ExternalAddress", () => {
     next_page: "",
   };
 
-  const HISTORICAL_STAKING_BALANCE_RESPONSE: FetchHistoricalStakingBalances200Response = {
+  const HISTORICAL_STAKING_BALANCES_RESPONSE: FetchHistoricalStakingBalances200Response = {
     data: [
       {
         address: address.getId(),
@@ -430,7 +430,7 @@ describe("ExternalAddress", () => {
 
   describe(".historicalStakingBalances", () => {
     it("should return staking balances successfully", async () => {
-      Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockReturnValue(HISTORICAL_STAKING_BALANCE_RESPONSE);
+      Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockReturnValue(HISTORICAL_STAKING_BALANCES_RESPONSE);
       Coinbase.apiClients.asset!.getAsset = getAssetMock();
       const response = await address.historicalStakingBalances(Coinbase.assets.Eth, startTime, endTime);
 

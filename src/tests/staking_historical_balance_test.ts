@@ -34,7 +34,7 @@ describe("StakingBalance", () => {
     asset: asset,
   };
 
-  const STAKING_BALANCE_RESPONSE: FetchHistoricalStakingBalances200Response = {
+  const HISTORICAL_STAKING_BALANCES_RESPONSE: FetchHistoricalStakingBalances200Response = {
     data: [
       {
         address: address.getId(),
@@ -66,7 +66,7 @@ describe("StakingBalance", () => {
 
   describe(".list", () => {
     it("should successfully return staking balances", async () => {
-      Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockReturnValue(STAKING_BALANCE_RESPONSE);
+      Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockReturnValue(HISTORICAL_STAKING_BALANCES_RESPONSE);
       Coinbase.apiClients.asset!.getAsset = getAssetMock();
       const response = await StakingBalance.list(
         address.getNetworkId(),
@@ -90,9 +90,9 @@ describe("StakingBalance", () => {
     it("should successfully return staking balances for multiple pages", async () => {
       const pages = ["abc", "def"];
       Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockFn(() => {
-        STAKING_BALANCE_RESPONSE.next_page = pages.shift() as string;
-        STAKING_BALANCE_RESPONSE.has_more = !!STAKING_BALANCE_RESPONSE.next_page;
-        return { data: STAKING_BALANCE_RESPONSE };
+        HISTORICAL_STAKING_BALANCES_RESPONSE.next_page = pages.shift() as string;
+        HISTORICAL_STAKING_BALANCES_RESPONSE.has_more = !!HISTORICAL_STAKING_BALANCES_RESPONSE.next_page;
+        return { data: HISTORICAL_STAKING_BALANCES_RESPONSE };
       });
       Coinbase.apiClients.asset!.getAsset = getAssetMock();
       const response = await StakingBalance.list(
