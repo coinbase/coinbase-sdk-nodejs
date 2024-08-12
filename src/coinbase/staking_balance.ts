@@ -3,7 +3,7 @@ import { Balance } from "./balance";
 import { Coinbase } from "./coinbase";
 
 /**
- * A representation of a staking reward earned on a network for a given asset.
+ * A representation of a staking balance earned on a network for a given asset.
  */
 export class StakingBalance {
   private model: StakingBalanceModel;
@@ -70,7 +70,7 @@ export class StakingBalance {
    * @returns The Balance.
    */
   public bondedStake(): Balance {
-    return Balance.fromModel(this.model.bonded_stake);
+    return Balance.fromModelWithAmountInWholeUnits(this.model.bonded_stake);
   }
 
   /**
@@ -79,7 +79,7 @@ export class StakingBalance {
    * @returns The Balance.
    */
   public unbondedBalance(): Balance {
-    return Balance.fromModel(this.model.unbonded_balance);
+    return Balance.fromModelWithAmountInWholeUnits(this.model.unbonded_balance);
   }
 
   /**
