@@ -1,5 +1,11 @@
 # Coinbase Node.js SDK Changelog
 
+## [0.0.15] - 2024-08-12
+
+### Changed
+
+- Fixed `Wallet` address hydration for `Wallet.import`
+
 ## [0.0.14] - 2024-08-05
 
 ### Added
