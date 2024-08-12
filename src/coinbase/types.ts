@@ -4,6 +4,7 @@ import {
   Address as AddressModel,
   AddressList,
   AddressBalanceList,
+  AddressHistoricalBalanceList,
   Balance,
   CreateAddressRequest,
   CreateWalletRequest,
@@ -34,6 +35,7 @@ import {
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
+import { HistoricalBalance } from "./historical_balance";
 
 export type AssetAPIClient = {
   /**
@@ -333,6 +335,27 @@ export type ExternalAddressAPIClient = {
     assetId: string,
     options?: RawAxiosRequestConfig,
   ): AxiosPromise<Balance>;
+
+  /**
+   * List the historical balance of an asset in a specific address.
+   *
+   * @summary Get address balance history for asset
+   * @param networkId - The ID of the blockchain network
+   * @param addressId - The ID of the address to fetch the historical balance for.
+   * @param assetId - The symbol of the asset to fetch the historical balance for.
+   * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param options - Override http request option.
+   * @throws {RequiredError}
+   */
+  listAddressHistoricalBalance(
+    networkId: string,
+    addressId: string,
+    assetId: string,
+    limit?: number,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<AddressHistoricalBalanceList>;
 
   /**
    * Request faucet funds to be sent to external address.
@@ -769,4 +792,21 @@ export type CreateTradeOptions = {
   toAssetId: string;
   timeoutSeconds?: number;
   intervalSeconds?: number;
+};
+
+/**
+ * Options for listing historical balances of an address.
+ */
+export type ListHistoricalBalancesOptions = {
+  assetId: string;
+  limit?: number;
+  page?: string;
+};
+
+/**
+ * Result of ListHistoricalBalances.
+ */
+export type ListHistoricalBalancesResult = {
+  historicalBalances: HistoricalBalance[];
+  nextPageToken: string;
 };
