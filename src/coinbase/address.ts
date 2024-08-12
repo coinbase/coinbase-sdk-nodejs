@@ -100,7 +100,7 @@ export class Address {
     assetId,
     limit,
     page,
-  }: ListHistoricalBalancesOptions) : Promise<ListHistoricalBalancesResult> {
+  }: ListHistoricalBalancesOptions): Promise<ListHistoricalBalancesResult> {
     const historyList: HistoricalBalance[] = [];
 
     if (limit !== undefined) {

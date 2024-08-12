@@ -801,7 +801,7 @@ export type ListHistoricalBalancesOptions = {
   assetId: string;
   limit?: number;
   page?: string;
-}
+};
 
 /**
  * Result of ListHistoricalBalances.
