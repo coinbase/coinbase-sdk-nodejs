@@ -4176,7 +4176,7 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * Fetch historical staking balances for a given address
          * @summary Fetch historical staking balances
-         * @param {string} address The one address to fetch the historical staking balances for
+         * @param {string} address The address to fetch the historical staking balances for
          * @param {string} networkId The ID of the blockchain network
          * @param {string} assetId The ID of the asset
          * @param {string} startTime The start time of the staking balances period

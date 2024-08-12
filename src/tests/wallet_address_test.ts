@@ -346,7 +346,7 @@ describe("WalletAddress", () => {
       next_page: "",
     };
 
-    const HISTORICAL_STAKING_BALANCE_RESPONSE: FetchHistoricalStakingBalances200Response = {
+    const HISTORICAL_STAKING_BALANCES_RESPONSE: FetchHistoricalStakingBalances200Response = {
       data: [
         {
           address: newAddress.address_id,
@@ -533,7 +533,7 @@ describe("WalletAddress", () => {
 
     describe(".historicalStakingBalances", () => {
       it("should successfully return historical staking balances", async () => {
-        Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockReturnValue(HISTORICAL_STAKING_BALANCE_RESPONSE);
+        Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockReturnValue(HISTORICAL_STAKING_BALANCES_RESPONSE);
         Coinbase.apiClients.asset!.getAsset = getAssetMock();
         const response = await walletAddress.historicalStakingBalances(Coinbase.assets.Eth);
         expect(response).toBeInstanceOf(Array<StakingBalance>);
