@@ -460,6 +460,7 @@ export const externalAddressApiMock = {
   listExternalAddressBalances: jest.fn(),
   getExternalAddressBalance: jest.fn(),
   requestExternalFaucetFunds: jest.fn(),
+  listAddressHistoricalBalance: jest.fn(),
 };
 
 export const serverSignersApiMock = {

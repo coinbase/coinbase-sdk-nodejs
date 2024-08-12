@@ -4,7 +4,13 @@ import { Asset } from "./asset";
 import { Balance } from "./balance";
 import { BalanceMap } from "./balance_map";
 import { FaucetTransaction } from "./faucet_transaction";
-import { Amount, StakeOptionsMode } from "./types";
+import { HistoricalBalance } from "./historical_balance";
+import {
+  Amount,
+  StakeOptionsMode,
+  ListHistoricalBalancesResult,
+  ListHistoricalBalancesOptions,
+} from "./types";
 import { formatDate, getWeekBackDate } from "./utils";
 import { StakingRewardFormat } from "../client";
 import { StakingReward } from "./staking_reward";
@@ -14,6 +20,8 @@ import { StakingBalance } from "./staking_balance";
  * A representation of a blockchain address, which is a user-controlled account on a network.
  */
 export class Address {
+  private static MAX_HISTORICAL_BALANCE = 1000;
+
   protected networkId: string;
   protected id: string;
 
@@ -78,6 +86,71 @@ export class Address {
     }
 
     return Balance.fromModelAndAssetId(response.data, assetId).amount;
+  }
+
+  /**
+   * Returns the historical balances of the provided asset.
+   *
+   * @param options - The options to list historical balances.
+   * @param options.assetId - The asset ID.
+   * @param options.limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param options.page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @returns The list of historical balance of the asset and next page token.
+   */
+  public async listHistoricalBalances({
+    assetId,
+    limit,
+    page,
+  }: ListHistoricalBalancesOptions): Promise<ListHistoricalBalancesResult> {
+    const historyList: HistoricalBalance[] = [];
+
+    if (limit !== undefined) {
+      const response = await Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance(
+        this.getNetworkId(),
+        this.getId(),
+        Asset.primaryDenomination(assetId),
+        limit,
+        page ? page : undefined,
+      );
+
+      response.data.data.forEach(historicalBalanceModel => {
+        const historicalBalance = HistoricalBalance.fromModel(historicalBalanceModel);
+        historyList.push(historicalBalance);
+      });
+
+      return {
+        historicalBalances: historyList,
+        nextPageToken: response.data.next_page,
+      };
+    }
+
+    const queue: string[] = [""];
+    while (queue.length > 0 && historyList.length < Address.MAX_HISTORICAL_BALANCE) {
+      const page = queue.shift();
+      const response = await Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance(
+        this.getNetworkId(),
+        this.getId(),
+        Asset.primaryDenomination(assetId),
+        100,
+        page ? page : undefined,
+      );
+
+      response.data.data.forEach(historicalBalanceModel => {
+        const historicalBalance = HistoricalBalance.fromModel(historicalBalanceModel);
+        historyList.push(historicalBalance);
+      });
+
+      if (response.data.has_more) {
+        if (response.data.next_page) {
+          queue.push(response.data.next_page);
+        }
+      }
+    }
+
+    return {
+      historicalBalances: historyList,
+      nextPageToken: "",
+    };
   }
 
   /**
