@@ -139,6 +139,32 @@ export const VALID_TRANSFER_MODEL: TransferModel = {
   destination: "0x4D9E4F3f4D1A8B5F4f7b1F5b5C7b8d6b2B3b1b0b",
   asset_id: Coinbase.assets.Eth,
   amount: new Decimal(ethers.parseUnits("100", 18).toString()).toString(),
+  gasless: false,
+};
+
+export const VALID_TRANSFER_SPONSORED_SEND_MODEL: TransferModel = {
+  transfer_id: transferId,
+  network_id: Coinbase.networks.BaseSepolia,
+  wallet_id: walletId,
+  asset: {
+    asset_id: Coinbase.assets.Usdc,
+    network_id: Coinbase.networks.BaseSepolia,
+    decimals: 18,
+    contract_address: "0xusdc",
+  },
+  sponsored_send: {
+    to_address_id: "0xdeadbeef",
+    raw_typed_data: "0xhash",
+    typed_data_hash: "0x7523946e17c0b8090ee18c84d6f9a8d63bab4d579a6507f0998dde0791891823",
+    transaction_hash: "0xdeadbeef",
+    transaction_link: "https://sepolia.basescan.org/tx/0xdeadbeef",
+    status: "pending",
+  },
+  address_id: ethers.Wallet.createRandom().address,
+  destination: "0x4D9E4F3f4D1A8B5F4f7b1F5b5C7b8d6b2B3b1b0b",
+  asset_id: Coinbase.assets.Eth,
+  amount: new Decimal(ethers.parseUnits("100", 18).toString()).toString(),
+  gasless: false,
 };
 
 export const VALID_STAKING_OPERATION_MODEL: StakingOperationModel = {

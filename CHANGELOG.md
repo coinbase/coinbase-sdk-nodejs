@@ -5,6 +5,7 @@
 ### Added 
 
 - USD value conversion details to the StakingReward object
+- Gasless USDC Sends
 
 ## [0.0.14] - 2024-08-05
 

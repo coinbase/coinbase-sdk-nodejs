@@ -97,3 +97,23 @@ export class InvalidUnsignedPayload extends Error {
     }
   }
 }
+
+/**
+ * AlreadySignedError is thrown when a resource is already signed.
+ */
+export class AlreadySignedError extends Error {
+  static DEFAULT_MESSAGE = "Resource already signed";
+
+  /**
+   * Initializes a new AlreadySignedError instance.
+   *
+   * @param message - The error message.
+   */
+  constructor(message: string = AlreadySignedError.DEFAULT_MESSAGE) {
+    super(message);
+    this.name = "AlreadySignedError";
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, AlreadySignedError);
+    }
+  }
+}
