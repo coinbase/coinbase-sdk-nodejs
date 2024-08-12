@@ -364,7 +364,7 @@ describe("Transfer Class", () => {
         },
       });
       const signature = await transfer.sign(signingKey);
-      expect(signature).toEqual(transfer.getTransaction()!.getSignature()!.slice(2));
+      expect(signature).toEqual(transfer.getTransaction()!.getSignature()!);
     });
   });
 

@@ -86,9 +86,10 @@ export class Transaction {
    */
   isTerminalState(): boolean {
     const status = this.getStatus();
-    return !status
-      ? false
-      : [TransactionStatus.COMPLETE, TransactionStatus.FAILED].includes(status);
+
+    if (!status) return false;
+
+    return [TransactionStatus.COMPLETE, TransactionStatus.FAILED].includes(status);
   }
 
   /**
@@ -145,7 +146,7 @@ export class Transaction {
    * @returns The Signed Payload
    */
   getSignature(): string | undefined {
-    return this.getSignedPayload();
+    return this.getSignedPayload()?.slice(2);
   }
 
   /**
@@ -154,7 +155,7 @@ export class Transaction {
    * @returns if the transaction has been signed.
    */
   isSigned(): boolean {
-    return this.getSignature() ? true : false;
+    return !!this.getSignature();
   }
 
   /**

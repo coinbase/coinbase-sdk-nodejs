@@ -213,7 +213,7 @@ export class Transfer {
       throw new Error("Cannot broadcast unsigned Transfer");
 
     const broadcastTransferRequest = {
-      signed_payload: this.getSendTransactionDelegate()!.getSignature()!.slice(2),
+      signed_payload: this.getSendTransactionDelegate()!.getSignature()!,
     };
 
     const response = await Coinbase.apiClients.transfer!.broadcastTransfer(

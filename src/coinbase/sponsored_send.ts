@@ -34,7 +34,7 @@ export class SponsoredSend {
   /**
    * Returns the signature of the typed data.
    *
-   * @returns The Keccak256 hash of the typed data.
+   * @returns The hash of the typed data signature.
    */
   getSignature(): string | undefined {
     return this.model.signature;
@@ -50,8 +50,7 @@ export class SponsoredSend {
     ethers.toBeArray;
     const signature = key.signingKey.sign(ethers.getBytes(this.getTypedDataHash())).serialized;
     this.model.signature = signature;
-    // Removes the '0x' prefix as required by the API.
-    return signature.slice(2);
+    return signature;
   }
 
   /**
@@ -60,7 +59,7 @@ export class SponsoredSend {
    * @returns if the Sponsored Send has been signed.
    */
   isSigned(): boolean {
-    return this.getSignature() ? true : false;
+    return !!this.getSignature();
   }
 
   /**
@@ -92,9 +91,10 @@ export class SponsoredSend {
    */
   isTerminalState(): boolean {
     const status = this.getStatus();
-    return !status
-      ? false
-      : [SponsoredSendStatus.COMPLETE, SponsoredSendStatus.FAILED].includes(status);
+
+    if (!status) return false;
+
+    return [SponsoredSendStatus.COMPLETE, SponsoredSendStatus.FAILED].includes(status);
   }
 
   /**

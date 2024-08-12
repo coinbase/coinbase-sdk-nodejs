@@ -121,7 +121,7 @@ describe("SponsoredSend", () => {
     });
 
     it("sets the signature", () => {
-      expect(sponsoredSend.getSignature().slice(2)).toEqual(signature);
+      expect(sponsoredSend.getSignature()).toEqual(signature);
     });
   });
 
