@@ -5,6 +5,7 @@
 ### Added
 
 - USD value conversion details to the StakingReward object
+- Gasless USDC Sends
 - Add Function listHistoricalBalances for Adress for fetching historical balances for an asset
 
 ## [0.0.14] - 2024-08-05
