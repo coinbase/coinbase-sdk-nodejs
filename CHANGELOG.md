@@ -4,7 +4,7 @@
 
 ### Added
 
-- Add Function listHistoricalBalances for Adress for fetching historical balances for an asset
+- Add Function `listHistoricalBalances` for `Address` for fetching historical balances for an asset
 
 ## [0.0.15]
 

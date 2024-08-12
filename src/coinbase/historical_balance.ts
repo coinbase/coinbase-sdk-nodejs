@@ -27,7 +27,7 @@ export class HistoricalBalance {
   }
 
   /**
-   * Converts a BalanceModel into a Balance object.
+   * Converts a HistoricalBalanceModel into a HistoricalBalance object.
    *
    * @param {HistoricalBalanceModel} model - The historical balance model object.
    * @returns {HistoricalBalance} The HistoricalBalance object.

@@ -20,11 +20,11 @@ describe("HistoricalBalance", () => {
 
     const historicalBalance = HistoricalBalance.fromModel(historyModel);
 
-    it("returns a new Balance object with the correct amount", () => {
+    it("returns a new HistoricalBalance object with the correct amount", () => {
       expect(historicalBalance.amount).toEqual(amount);
     });
 
-    it("returns a new Balance object with the correct asset_id", () => {
+    it("returns a new HistoricalBalance object with the correct asset_id", () => {
       expect(historicalBalance.asset.assetId).toBe(Coinbase.assets.Eth);
     });
   });
