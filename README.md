@@ -190,13 +190,14 @@ await store(data);
 For convenience during testing, we provide a `saveSeed` method that stores the wallet's seed in your local file system. This is an insecure method of storing wallet seeds and should only be used for development purposes.
 
 ```typescript
-wallet.saveSeed(wallet);
+const seedFilePath = "";
+wallet.saveSeed(seedFilePath);
 ```
 
 To encrypt the saved data, set encrypt to true. Note that your CDP API key also serves as the encryption key for the data persisted locally. To re-instantiate wallets with encrypted data, ensure that your SDK is configured with the same API key when invoking `saveSeed` and `loadSeed`.
 
 ```typescript
-wallet.saveSeed(wallet, true);
+wallet.saveSeed(seedFilePath, true);
 ```
 
 The below code demonstrates how to re-instantiate a Wallet from the data export.
@@ -209,8 +210,6 @@ const importedWallet = await user.importWallet(data);
 To import Wallets that were persisted to your local file system using `saveSeed`, use the below code.
 
 ```typescript
-// Ensure your seed file path is updated
-const seedFilePath = "";
 const userWallet = await user.getWallet(wallet.getId());
 await userWallet.loadSeed(seedFilePath);
 ```

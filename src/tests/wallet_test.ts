@@ -784,6 +784,13 @@ describe("Wallet Class", () => {
     it("should return true for canSign when the wallet is initialized with a seed", () => {
       expect(wallet.canSign()).toBe(true);
     });
+
+    it("should be able to be imported", async () => {
+      const walletData = seedWallet.export();
+      const importedWallet = await Wallet.import(walletData);
+      expect(importedWallet).toBeInstanceOf(Wallet);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe("#listBalances", () => {
@@ -974,7 +981,7 @@ describe("Wallet Class", () => {
     });
   });
 
-  describe(".loadSeed", () => {
+  describe("#loadSeed", () => {
     const seed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
     let apiPrivateKey;
     const filePath = "seeds.json";
