@@ -94,7 +94,7 @@ export class Webhook {
   public toString(): string {
     return (
       `Webhook { id: '${this.getId()}', network_id: '${this.getNetworkId()}', ` +
-      `event_type: '${this.getEventType()}', event_filter: '${this.getEventFilters} }`
+      `event_type: '${this.getEventType()}', event_filter: '${this.getEventFilters()} }`
     );
   }
 }
