@@ -617,6 +617,7 @@ export type ApiClients = {
   validator?: ValidatorAPIClient;
   asset?: AssetAPIClient;
   externalAddress?: ExternalAddressAPIClient;
+  webhook?:WebhookApiClient;
 };
 
 /**
@@ -815,7 +816,7 @@ export type ListHistoricalBalancesResult = {
   nextPageToken: string;
 };
 
-export interface WebhooksApiClients {
+export interface WebhookApiClient {
   /**
    * Create a new webhook
    * @summary Create a new webhook
