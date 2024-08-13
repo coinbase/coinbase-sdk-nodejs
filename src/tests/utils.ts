@@ -98,7 +98,14 @@ export const VALID_ADDRESS_MODEL = newAddressModel(randomUUID());
 export const VALID_WALLET_MODEL: WalletModel = {
   id: randomUUID(),
   network_id: Coinbase.networks.BaseSepolia,
-  enabled_features: [],
+  feature_set: {
+    stake: false,
+    trade: false,
+    transfer: false,
+    faucet: false,
+    server_signer: false,
+    gasless_send: false,
+  },
   default_address: {
     wallet_id: walletId,
     address_id: "0xdeadbeef",
@@ -175,7 +182,8 @@ export const VALID_STAKING_OPERATION_MODEL: StakingOperationModel = {
   transactions: [
     {
       network_id: Coinbase.networks.EthereumHolesky,
-      from_address_id: "0xdeadbeef",
+      from_address_id: "dummy-from-address-id",
+      to_address_id: "dummy-to-address-id",
       unsigned_payload:
         "7b2274797065223a22307832222c22636861696e4964223a2230783134613334222c226e6f6e63" +
         "65223a22307830222c22746f223a22307834643965346633663464316138623566346637623166" +
@@ -187,7 +195,7 @@ export const VALID_STAKING_OPERATION_MODEL: StakingOperationModel = {
         "2c2273223a22307830222c2279506172697479223a22307830222c2268617368223a2230783664" +
         "633334306534643663323633653363396561396135656438646561346332383966613861363966" +
         "3031653635393462333732386230386138323335333433227d",
-      transaction_hash: "0xdeadbeef",
+      transaction_hash: "dummy-transaction-hash",
       transaction_link: "https://sepolia.basescan.org/tx/0xdeadbeef",
       status: "pending",
     },

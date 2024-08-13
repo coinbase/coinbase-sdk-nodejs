@@ -80,6 +80,15 @@ export class Transaction {
   }
 
   /**
+   * Returns the To Address ID for the Transaction.
+   *
+   * @returns The To Address ID
+   */
+  toAddressId(): string {
+    return this.model.to_address_id || "";
+  }
+
+  /**
    * Returns whether the Transaction is in a terminal State.
    *
    * @returns Whether the Transaction is in a terminal State

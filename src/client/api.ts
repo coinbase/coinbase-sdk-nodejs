@@ -672,21 +672,73 @@ export interface FaucetTransaction {
     'transaction_link': string;
 }
 /**
- * Features that can be enabled for a wallet
+ * 
  * @export
- * @enum {string}
+ * @interface FeatureSet
  */
-
-export const Feature = {
-    Transfer: 'transfer',
-    Trade: 'trade',
-    Faucet: 'faucet',
-    ServerSigner: 'server_signer'
-} as const;
-
-export type Feature = typeof Feature[keyof typeof Feature];
-
-
+export interface FeatureSet {
+    /**
+     * Whether the network supports a faucet
+     * @type {boolean}
+     * @memberof FeatureSet
+     */
+    'faucet': boolean;
+    /**
+     * Whether the network supports Server-Signers
+     * @type {boolean}
+     * @memberof FeatureSet
+     */
+    'server_signer': boolean;
+    /**
+     * Whether the network supports transfers
+     * @type {boolean}
+     * @memberof FeatureSet
+     */
+    'transfer': boolean;
+    /**
+     * Whether the network supports trading
+     * @type {boolean}
+     * @memberof FeatureSet
+     */
+    'trade': boolean;
+    /**
+     * Whether the network supports staking
+     * @type {boolean}
+     * @memberof FeatureSet
+     */
+    'stake': boolean;
+    /**
+     * Whether the network supports gasless sends
+     * @type {boolean}
+     * @memberof FeatureSet
+     */
+    'gasless_send': boolean;
+}
+/**
+ * 
+ * @export
+ * @interface FetchHistoricalStakingBalances200Response
+ */
+export interface FetchHistoricalStakingBalances200Response {
+    /**
+     * 
+     * @type {Array<StakingBalance>}
+     * @memberof FetchHistoricalStakingBalances200Response
+     */
+    'data': Array<StakingBalance>;
+    /**
+     * True if this list has another page of items after this one that can be fetched.
+     * @type {boolean}
+     * @memberof FetchHistoricalStakingBalances200Response
+     */
+    'has_more': boolean;
+    /**
+     * The page token to be used to fetch the next page.
+     * @type {string}
+     * @memberof FetchHistoricalStakingBalances200Response
+     */
+    'next_page': string;
+}
 /**
  * 
  * @export
@@ -838,6 +890,79 @@ export interface ModelError {
      */
     'message': string;
 }
+/**
+ * 
+ * @export
+ * @interface Network
+ */
+export interface Network {
+    /**
+     * 
+     * @type {NetworkIdentifier}
+     * @memberof Network
+     */
+    'id': NetworkIdentifier;
+    /**
+     * The human-readable name of the blockchain network
+     * @type {string}
+     * @memberof Network
+     */
+    'display_name': string;
+    /**
+     * The chain ID of the blockchain network
+     * @type {number}
+     * @memberof Network
+     */
+    'chain_id': number;
+    /**
+     * The protocol family of the blockchain network
+     * @type {string}
+     * @memberof Network
+     */
+    'protocol_family': NetworkProtocolFamilyEnum;
+    /**
+     * Whether the network is a testnet or not
+     * @type {boolean}
+     * @memberof Network
+     */
+    'is_testnet': boolean;
+    /**
+     * 
+     * @type {Asset}
+     * @memberof Network
+     */
+    'native_asset': Asset;
+    /**
+     * 
+     * @type {FeatureSet}
+     * @memberof Network
+     */
+    'feature_set': FeatureSet;
+}
+
+export const NetworkProtocolFamilyEnum = {
+    Evm: 'evm'
+} as const;
+
+export type NetworkProtocolFamilyEnum = typeof NetworkProtocolFamilyEnum[keyof typeof NetworkProtocolFamilyEnum];
+
+/**
+ * The ID of the blockchain network. This is unique across all networks, and takes the form of `<blockchain>-<network>`.
+ * @export
+ * @enum {string}
+ */
+
+export const NetworkIdentifier = {
+    BaseSepolia: 'base-sepolia',
+    BaseMainnet: 'base-mainnet',
+    EthereumHolesky: 'ethereum-holesky',
+    EthereumMainnet: 'ethereum-mainnet',
+    PolygonMainnet: 'polygon-mainnet'
+} as const;
+
+export type NetworkIdentifier = typeof NetworkIdentifier[keyof typeof NetworkIdentifier];
+
+
 /**
  * An event representing a seed creation.
  * @export
@@ -1188,6 +1313,43 @@ export const SponsoredSendStatusEnum = {
 export type SponsoredSendStatusEnum = typeof SponsoredSendStatusEnum[keyof typeof SponsoredSendStatusEnum];
 
 /**
+ * The staking balances for an address.
+ * @export
+ * @interface StakingBalance
+ */
+export interface StakingBalance {
+    /**
+     * The onchain address for which the staking balances are being fetched.
+     * @type {string}
+     * @memberof StakingBalance
+     */
+    'address': string;
+    /**
+     * The date of the staking balance in format \'YYYY-MM-DD\' in UTC.
+     * @type {string}
+     * @memberof StakingBalance
+     */
+    'date': string;
+    /**
+     * 
+     * @type {Balance}
+     * @memberof StakingBalance
+     */
+    'bonded_stake': Balance;
+    /**
+     * 
+     * @type {Balance}
+     * @memberof StakingBalance
+     */
+    'unbonded_balance': Balance;
+    /**
+     * The type of staking participation.
+     * @type {string}
+     * @memberof StakingBalance
+     */
+    'participant_type': string;
+}
+/**
  * Context needed to perform a staking operation
  * @export
  * @interface StakingContext
@@ -1486,17 +1648,23 @@ export interface TradeList {
  */
 export interface Transaction {
     /**
-     * The ID of the blockchain network
+     * The ID of the blockchain network.
      * @type {string}
      * @memberof Transaction
      */
     'network_id': string;
     /**
-     * The onchain address of the sender
+     * The onchain address of the sender.
      * @type {string}
      * @memberof Transaction
      */
     'from_address_id': string;
+    /**
+     * The onchain address of the recipient.
+     * @type {string}
+     * @memberof Transaction
+     */
+    'to_address_id'?: string;
     /**
      * The unsigned payload of the transaction. This is the payload that needs to be signed by the sender.
      * @type {string}
@@ -1510,7 +1678,7 @@ export interface Transaction {
      */
     'signed_payload'?: string;
     /**
-     * The hash of the transaction
+     * The hash of the transaction.
      * @type {string}
      * @memberof Transaction
      */
@@ -1522,7 +1690,7 @@ export interface Transaction {
      */
     'transaction_link'?: string;
     /**
-     * The status of the transaction
+     * The status of the transaction.
      * @type {string}
      * @memberof Transaction
      */
@@ -1835,11 +2003,11 @@ export interface Wallet {
      */
     'default_address'?: Address;
     /**
-     * The features enabled for the wallet
-     * @type {Array<Feature>}
+     * 
+     * @type {FeatureSet}
      * @memberof Wallet
      */
-    'enabled_features': Array<Feature>;
+    'feature_set': FeatureSet;
     /**
      * The status of the Server-Signer for the wallet if present.
      * @type {string}
@@ -3366,6 +3534,132 @@ export class ExternalAddressesApi extends BaseAPI implements ExternalAddressesAp
 
 
 /**
+ * NetworksApi - axios parameter creator
+ * @export
+ */
+export const NetworksApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Get network
+         * @summary Get network by ID
+         * @param {string} networkId The ID of the network to fetch.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getNetwork: async (networkId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('getNetwork', 'networkId', networkId)
+            const localVarPath = `/v1/networks/{network_id}`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * NetworksApi - functional programming interface
+ * @export
+ */
+export const NetworksApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = NetworksApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Get network
+         * @summary Get network by ID
+         * @param {string} networkId The ID of the network to fetch.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getNetwork(networkId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Network>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getNetwork(networkId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['NetworksApi.getNetwork']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * NetworksApi - factory interface
+ * @export
+ */
+export const NetworksApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = NetworksApiFp(configuration)
+    return {
+        /**
+         * Get network
+         * @summary Get network by ID
+         * @param {string} networkId The ID of the network to fetch.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getNetwork(networkId: string, options?: any): AxiosPromise<Network> {
+            return localVarFp.getNetwork(networkId, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * NetworksApi - interface
+ * @export
+ * @interface NetworksApi
+ */
+export interface NetworksApiInterface {
+    /**
+     * Get network
+     * @summary Get network by ID
+     * @param {string} networkId The ID of the network to fetch.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof NetworksApiInterface
+     */
+    getNetwork(networkId: string, options?: RawAxiosRequestConfig): AxiosPromise<Network>;
+
+}
+
+/**
+ * NetworksApi - object-oriented interface
+ * @export
+ * @class NetworksApi
+ * @extends {BaseAPI}
+ */
+export class NetworksApi extends BaseAPI implements NetworksApiInterface {
+    /**
+     * Get network
+     * @summary Get network by ID
+     * @param {string} networkId The ID of the network to fetch.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof NetworksApi
+     */
+    public getNetwork(networkId: string, options?: RawAxiosRequestConfig) {
+        return NetworksApiFp(this.configuration).getNetwork(networkId, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
  * ServerSignersApi - axios parameter creator
  * @export
  */
@@ -4065,6 +4359,79 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * Fetch historical staking balances for given address.
+         * @summary Fetch historical staking balances
+         * @param {string} networkId The ID of the blockchain network.
+         * @param {string} assetId The ID of the asset for which the historical staking balances are being fetched.
+         * @param {string} addressId The onchain address for which the historical staking balances are being fetched.
+         * @param {string} startTime The start time of this historical staking balance period.
+         * @param {string} endTime The end time of this historical staking balance period.
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        fetchHistoricalStakingBalances: async (networkId: string, assetId: string, addressId: string, startTime: string, endTime: string, limit?: number, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('fetchHistoricalStakingBalances', 'networkId', networkId)
+            // verify required parameter 'assetId' is not null or undefined
+            assertParamExists('fetchHistoricalStakingBalances', 'assetId', assetId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('fetchHistoricalStakingBalances', 'addressId', addressId)
+            // verify required parameter 'startTime' is not null or undefined
+            assertParamExists('fetchHistoricalStakingBalances', 'startTime', startTime)
+            // verify required parameter 'endTime' is not null or undefined
+            assertParamExists('fetchHistoricalStakingBalances', 'endTime', endTime)
+            const localVarPath = `/v1/networks/{network_id}/addresses/{address_id}/stake/balances`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (assetId !== undefined) {
+                localVarQueryParameter['asset_id'] = assetId;
+            }
+
+            if (startTime !== undefined) {
+                localVarQueryParameter['start_time'] = (startTime as any instanceof Date) ?
+                    (startTime as any).toISOString() :
+                    startTime;
+            }
+
+            if (endTime !== undefined) {
+                localVarQueryParameter['end_time'] = (endTime as any instanceof Date) ?
+                    (endTime as any).toISOString() :
+                    endTime;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Fetch staking rewards for a list of addresses
          * @summary Fetch staking rewards
          * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest 
@@ -4285,6 +4652,25 @@ export const StakeApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Fetch historical staking balances for given address.
+         * @summary Fetch historical staking balances
+         * @param {string} networkId The ID of the blockchain network.
+         * @param {string} assetId The ID of the asset for which the historical staking balances are being fetched.
+         * @param {string} addressId The onchain address for which the historical staking balances are being fetched.
+         * @param {string} startTime The start time of this historical staking balance period.
+         * @param {string} endTime The end time of this historical staking balance period.
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async fetchHistoricalStakingBalances(networkId: string, assetId: string, addressId: string, startTime: string, endTime: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FetchHistoricalStakingBalances200Response>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.fetchHistoricalStakingBalances(networkId, assetId, addressId, startTime, endTime, limit, page, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['StakeApi.fetchHistoricalStakingBalances']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Fetch staking rewards for a list of addresses
          * @summary Fetch staking rewards
          * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest 
@@ -4388,6 +4774,22 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.createStakingOperation(walletId, addressId, createStakingOperationRequest, options).then((request) => request(axios, basePath));
         },
         /**
+         * Fetch historical staking balances for given address.
+         * @summary Fetch historical staking balances
+         * @param {string} networkId The ID of the blockchain network.
+         * @param {string} assetId The ID of the asset for which the historical staking balances are being fetched.
+         * @param {string} addressId The onchain address for which the historical staking balances are being fetched.
+         * @param {string} startTime The start time of this historical staking balance period.
+         * @param {string} endTime The end time of this historical staking balance period.
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        fetchHistoricalStakingBalances(networkId: string, assetId: string, addressId: string, startTime: string, endTime: string, limit?: number, page?: string, options?: any): AxiosPromise<FetchHistoricalStakingBalances200Response> {
+            return localVarFp.fetchHistoricalStakingBalances(networkId, assetId, addressId, startTime, endTime, limit, page, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Fetch staking rewards for a list of addresses
          * @summary Fetch staking rewards
          * @param {FetchStakingRewardsRequest} fetchStakingRewardsRequest 
@@ -4476,6 +4878,22 @@ export interface StakeApiInterface {
      * @memberof StakeApiInterface
      */
     createStakingOperation(walletId: string, addressId: string, createStakingOperationRequest: CreateStakingOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation>;
+
+    /**
+     * Fetch historical staking balances for given address.
+     * @summary Fetch historical staking balances
+     * @param {string} networkId The ID of the blockchain network.
+     * @param {string} assetId The ID of the asset for which the historical staking balances are being fetched.
+     * @param {string} addressId The onchain address for which the historical staking balances are being fetched.
+     * @param {string} startTime The start time of this historical staking balance period.
+     * @param {string} endTime The end time of this historical staking balance period.
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApiInterface
+     */
+    fetchHistoricalStakingBalances(networkId: string, assetId: string, addressId: string, startTime: string, endTime: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<FetchHistoricalStakingBalances200Response>;
 
     /**
      * Fetch staking rewards for a list of addresses
@@ -4571,6 +4989,24 @@ export class StakeApi extends BaseAPI implements StakeApiInterface {
      */
     public createStakingOperation(walletId: string, addressId: string, createStakingOperationRequest: CreateStakingOperationRequest, options?: RawAxiosRequestConfig) {
         return StakeApiFp(this.configuration).createStakingOperation(walletId, addressId, createStakingOperationRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Fetch historical staking balances for given address.
+     * @summary Fetch historical staking balances
+     * @param {string} networkId The ID of the blockchain network.
+     * @param {string} assetId The ID of the asset for which the historical staking balances are being fetched.
+     * @param {string} addressId The onchain address for which the historical staking balances are being fetched.
+     * @param {string} startTime The start time of this historical staking balance period.
+     * @param {string} endTime The end time of this historical staking balance period.
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApi
+     */
+    public fetchHistoricalStakingBalances(networkId: string, assetId: string, addressId: string, startTime: string, endTime: string, limit?: number, page?: string, options?: RawAxiosRequestConfig) {
+        return StakeApiFp(this.configuration).fetchHistoricalStakingBalances(networkId, assetId, addressId, startTime, endTime, limit, page, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

@@ -34,6 +34,9 @@ describe("StakingOperation", () => {
     it("return the the array of transactions", () => {
       const op = new StakingOperation(VALID_STAKING_OPERATION_MODEL);
       expect(op.getTransactions().length).toEqual(1);
+      expect(op.getTransactions()[0].toAddressId()).toEqual("dummy-to-address-id");
+      expect(op.getTransactions()[0].fromAddressId()).toEqual("dummy-from-address-id");
+      expect(op.getTransactions()[0].getTransactionHash()).toEqual("dummy-transaction-hash");
       expect(op.getStatus()).toEqual(StakingOperationStatusEnum.Pending);
     });
   });

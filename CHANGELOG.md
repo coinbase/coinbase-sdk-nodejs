@@ -1,10 +1,11 @@
 # Coinbase Node.js SDK Changelog
 
-## [0.0.16]
+## [Unreleased]
 
 ### Added
 
 - Add Function `listHistoricalBalances` for `Address` for fetching historical balances for an asset
+- Add toAddressId() method to Transaction class
 
 ## [0.0.15]
 

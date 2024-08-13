@@ -76,7 +76,14 @@ describe("User Class", () => {
         id: walletId,
         network_id: Coinbase.networks.BaseSepolia,
         default_address: mockAddressModel,
-        enabled_features: [],
+        feature_set: {
+          stake: false,
+          trade: false,
+          transfer: false,
+          faucet: false,
+          server_signer: false,
+          gasless_send: false,
+        },
       };
       Coinbase.apiClients.wallet = walletsApiMock;
       Coinbase.apiClients.wallet!.getWallet = mockReturnValue(mockWalletModel);
@@ -142,7 +149,14 @@ describe("User Class", () => {
         id: walletId,
         network_id: Coinbase.networks.BaseSepolia,
         default_address: addressModel1,
-        enabled_features: [],
+        feature_set: {
+          stake: false,
+          trade: false,
+          transfer: false,
+          faucet: false,
+          server_signer: false,
+          gasless_send: false,
+        },
       };
       addressListModel = {
         data: [addressModel1, addressModel2],
@@ -319,7 +333,14 @@ describe("User Class", () => {
         id: walletId,
         network_id: Coinbase.networks.BaseSepolia,
         default_address: addressModel1,
-        enabled_features: [],
+        feature_set: {
+          stake: false,
+          trade: false,
+          transfer: false,
+          faucet: false,
+          server_signer: false,
+          gasless_send: false,
+        },
       };
       addressListModel = {
         data: [addressModel1, addressModel2],

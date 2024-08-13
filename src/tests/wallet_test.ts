@@ -669,7 +669,14 @@ describe("Wallet Class", () => {
         id: walletId,
         network_id: Coinbase.networks.BaseSepolia,
         default_address: addressList[0],
-        enabled_features: [],
+        feature_set: {
+          stake: false,
+          trade: false,
+          transfer: false,
+          faucet: false,
+          server_signer: false,
+          gasless_send: false,
+        },
       };
       wallet = Wallet.init(walletModel, existingSeed);
       Coinbase.apiClients.address!.createAddress = mockFn(walletId => {
@@ -694,7 +701,14 @@ describe("Wallet Class", () => {
       const wallet = Wallet.init({
         id: walletId,
         network_id: Coinbase.networks.BaseSepolia,
-        enabled_features: [],
+        feature_set: {
+          stake: false,
+          trade: false,
+          transfer: false,
+          faucet: false,
+          server_signer: false,
+          gasless_send: false,
+        },
       });
       await expect(async () => await wallet.faucet()).rejects.toThrow(InternalError);
     });
@@ -770,7 +784,14 @@ describe("Wallet Class", () => {
         id: walletId,
         network_id: Coinbase.networks.BaseSepolia,
         default_address: addressModel,
-        enabled_features: [],
+        feature_set: {
+          stake: false,
+          trade: false,
+          transfer: false,
+          faucet: false,
+          server_signer: false,
+          gasless_send: false,
+        },
       };
       Coinbase.apiClients.address = addressesApiMock;
       Coinbase.apiClients.address!.getAddress = mockFn(() => {
@@ -1039,7 +1060,14 @@ describe("Wallet Class", () => {
       const otherModel = {
         id: crypto.randomUUID(),
         network_id: Coinbase.networks.BaseSepolia,
-        enabled_features: [],
+        feature_set: {
+          stake: false,
+          trade: false,
+          transfer: false,
+          faucet: false,
+          server_signer: false,
+          gasless_send: false,
+        },
       };
       const randomSeed = ethers.Wallet.createRandom().privateKey.slice(2);
       const otherWallet = Wallet.init(otherModel, randomSeed);
