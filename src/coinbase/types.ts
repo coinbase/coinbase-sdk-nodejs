@@ -617,7 +617,7 @@ export type ApiClients = {
   validator?: ValidatorAPIClient;
   asset?: AssetAPIClient;
   externalAddress?: ExternalAddressAPIClient;
-  webhook?:WebhookApiClient;
+  webhook?: WebhookApiClient;
 };
 
 /**

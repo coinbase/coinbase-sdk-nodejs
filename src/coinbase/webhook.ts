@@ -74,7 +74,7 @@ export class Webhook {
       event_filters: event_filters,
     })
 
-    return new Webhook(result);
+    return new Webhook(result.data);
   }
 
 //   public static init(model: WebhookModel): Webhook {
