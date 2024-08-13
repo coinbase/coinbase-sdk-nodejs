@@ -32,6 +32,10 @@ import {
   CreateStakingOperationRequest,
   ValidatorList,
   Validator,
+  Webhook as WebhookModel,
+  WebhookList,
+  CreateWebhookRequest,
+  UpdateWebhookRequest,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -810,3 +814,43 @@ export type ListHistoricalBalancesResult = {
   historicalBalances: HistoricalBalance[];
   nextPageToken: string;
 };
+
+export interface WebhooksApiClients {
+  /**
+   * Create a new webhook
+   * @summary Create a new webhook
+   * @param {CreateWebhookRequest} [createWebhookRequest] 
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   */
+  createWebhook(createWebhookRequest?: CreateWebhookRequest, options?: RawAxiosRequestConfig): AxiosPromise<WebhookModel>;
+
+  /**
+   * Delete a webhook
+   * @summary Delete a webhook
+   * @param {string} webhookId The Webhook uuid that needs to be deleted
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   */
+  deleteWebhook(webhookId: string, options?: RawAxiosRequestConfig): AxiosPromise<void>;
+
+  /**
+   * List webhooks, optionally filtered by event type.
+   * @summary List webhooks
+   * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   */
+  listWebhooks(limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<WebhookList>;
+
+  /**
+   * Update a webhook
+   * @summary Update a webhook
+   * @param {string} webhookId The Webhook id that needs to be updated
+   * @param {UpdateWebhookRequest} [updateWebhookRequest] 
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   */
+  updateWebhook(webhookId: string, updateWebhookRequest?: UpdateWebhookRequest, options?: RawAxiosRequestConfig): AxiosPromise<WebhookModel>;
+}
