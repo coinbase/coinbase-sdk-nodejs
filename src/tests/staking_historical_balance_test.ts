@@ -64,7 +64,7 @@ describe("StakingBalance", () => {
     jest.clearAllMocks();
   });
 
-  describe(".list", () => {
+  describe("#list", () => {
     it("should successfully return staking balances", async () => {
       Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockReturnValue(HISTORICAL_STAKING_BALANCES_RESPONSE);
       Coinbase.apiClients.asset!.getAsset = getAssetMock();

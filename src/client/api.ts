@@ -4547,7 +4547,7 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
         /**
          * Fetch historical staking balances for given address
          * @summary Fetch historical staking balances
-         * @param {string} address The onchain addresses for which the staking balances are being fetched
+         * @param {string} address The onchain address for which the staking balances are being fetched
          * @param {string} networkId The ID of the blockchain network
          * @param {string} assetId The ID of the asset
          * @param {string} startTime The start time of the staking balances period
