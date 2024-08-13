@@ -445,6 +445,7 @@ export const stakeApiMock = {
   getExternalStakingOperation: jest.fn(),
   getStakingContext: jest.fn(),
   fetchStakingRewards: jest.fn(),
+  fetchHistoricalStakingBalances: jest.fn(),
   broadcastStakingOperation: jest.fn(),
   createStakingOperation: jest.fn(),
   getStakingOperation: jest.fn(),

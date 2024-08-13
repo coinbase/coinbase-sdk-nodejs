@@ -17,4 +17,5 @@ export * from "./coinbase/address/external_address";
 export * from "./coinbase/address/wallet_address";
 export * from "./coinbase/staking_operation";
 export * from "./coinbase/staking_reward";
+export * from "./coinbase/staking_balance";
 export * from "./coinbase/validator";
