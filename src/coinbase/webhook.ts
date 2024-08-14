@@ -9,63 +9,6 @@ import { InternalError } from "./errors";
 export class Webhook {
   private model: WebhookModel | null;
 
-    /**
-   * Creates a new webhook for a specified network.
-   *
-   * @param networkId - The network ID for which the webhook is created.
-   * @param notification_uri - The URI where notifications should be sent.
-   * @param event_type - The type of event for the webhook.
-   * @param event_filters - Filters applied to the events that determine which specific events trigger the webhook.
-   * @returns A promise that resolves to a new instance of Webhook.
-   */
-    public static async create(
-        networkId,
-        notification_uri,
-        event_type,
-        event_filters,
-      ): Promise<Webhook> {
-        const result = await Coinbase.apiClients.webhook!.createWebhook({
-          network_id: networkId,
-          notification_uri: notification_uri,
-          event_type: event_type,
-          event_filters: event_filters,
-        });
-    
-        return new Webhook(result.data);
-      }
-    
-      /**
-       * Enumerates the webhooks.
-       * The result is an array that contains all webhooks.
-       *
-       * @returns A promise that resolves to an array of Webhook instances.
-       */
-      public static async list(): Promise<Webhook[]> {
-        const webhookList: Webhook[] = [];
-        const queue: string[] = [""];
-    
-        while (queue.length > 0) {
-          const page = queue.shift();
-          const response = await Coinbase.apiClients.webhook!.listWebhooks(
-            100,
-            page ? page : undefined,
-          );
-    
-          const webhooks = response.data.data;
-          for (const w of webhooks) {
-            webhookList.push(new Webhook(w));
-          }
-    
-          if (response.data.has_more) {
-            if (response.data.next_page) {
-              queue.push(response.data.next_page);
-            }
-          }
-        }
-    
-        return webhookList;
-      }
-      
   /**
    * Initializes a new Webhook object.
    *
@@ -77,6 +20,63 @@ export class Webhook {
       throw new InternalError("Webhook model cannot be empty");
     }
     this.model = model;
+  }
+
+  /**
+   * Creates a new webhook for a specified network.
+   *
+   * @param networkId - The network ID for which the webhook is created.
+   * @param notification_uri - The URI where notifications should be sent.
+   * @param event_type - The type of event for the webhook.
+   * @param event_filters - Filters applied to the events that determine which specific events trigger the webhook.
+   * @returns A promise that resolves to a new instance of Webhook.
+   */
+  public static async create(
+    networkId,
+    notification_uri,
+    event_type,
+    event_filters,
+  ): Promise<Webhook> {
+    const result = await Coinbase.apiClients.webhook!.createWebhook({
+      network_id: networkId,
+      notification_uri: notification_uri,
+      event_type: event_type,
+      event_filters: event_filters,
+    });
+
+    return new Webhook(result.data);
+  }
+
+  /**
+   * Enumerates the webhooks.
+   * The result is an array that contains all webhooks.
+   *
+   * @returns A promise that resolves to an array of Webhook instances.
+   */
+  public static async list(): Promise<Webhook[]> {
+    const webhookList: Webhook[] = [];
+    const queue: string[] = [""];
+
+    while (queue.length > 0) {
+      const page = queue.shift();
+      const response = await Coinbase.apiClients.webhook!.listWebhooks(
+        100,
+        page ? page : undefined,
+      );
+
+      const webhooks = response.data.data;
+      for (const w of webhooks) {
+        webhookList.push(new Webhook(w));
+      }
+
+      if (response.data.has_more) {
+        if (response.data.next_page) {
+          queue.push(response.data.next_page);
+        }
+      }
+    }
+
+    return webhookList;
   }
 
   /**
