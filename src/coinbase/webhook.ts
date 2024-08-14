@@ -3,7 +3,7 @@ import { Coinbase } from "./coinbase";
 import { InternalError } from "./errors";
 
 /**
- * A representation of a Webhook, 
+ * A representation of a Webhook,
  * which provides methods to create, list, update, and delete webhooks that are used to receive notifications of specific events.
  */
 export class Webhook {
@@ -104,7 +104,10 @@ export class Webhook {
 
     while (queue.length > 0) {
       const page = queue.shift();
-      const response = await Coinbase.apiClients.webhook!.listWebhooks(100, page ? page : undefined);
+      const response = await Coinbase.apiClients.webhook!.listWebhooks(
+        100,
+        page ? page : undefined,
+      );
 
       const webhooks = response.data.data;
       for (const w of webhooks) {

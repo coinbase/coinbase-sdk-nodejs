@@ -13,7 +13,7 @@ import {
   ValidatorsApiFactory,
   AssetsApiFactory,
   ExternalAddressesApiFactory,
-  WebhooksApiFactory
+  WebhooksApiFactory,
 } from "../client";
 import { BASE_PATH } from "./../client/base";
 import { Configuration } from "./../client/configuration";
