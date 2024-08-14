@@ -18,8 +18,10 @@ import {
   StakingOperationStatusEnum,
   StakingContext as StakingContextModel,
   FetchStakingRewards200Response,
+  FetchHistoricalStakingBalances200Response,
   StakingRewardStateEnum,
   StakingRewardFormat,
+  FeatureSet,
 } from "./../client";
 import {
   VALID_ADDRESS_MODEL,
@@ -44,6 +46,7 @@ import { Trade } from "../coinbase/trade";
 import { WalletAddress } from "../coinbase/address/wallet_address";
 import { StakingOperation } from "../coinbase/staking_operation";
 import { StakingReward } from "../coinbase/staking_reward";
+import { StakingBalance } from "../coinbase/staking_balance";
 
 describe("Wallet Class", () => {
   let wallet: Wallet;
@@ -154,6 +157,11 @@ describe("Wallet Class", () => {
           amount: "361",
           state: StakingRewardStateEnum.Pending,
           format: StakingRewardFormat.Usd,
+          usd_value: {
+            amount: "361",
+            conversion_price: "3000",
+            conversion_time: "2024-05-01T00:00:00Z",
+          },
         },
         {
           address_id: addressID,
@@ -161,6 +169,11 @@ describe("Wallet Class", () => {
           amount: "203",
           state: StakingRewardStateEnum.Pending,
           format: StakingRewardFormat.Usd,
+          usd_value: {
+            amount: "203",
+            conversion_price: "3000",
+            conversion_time: "2024-05-02T00:00:00Z",
+          },
         },
         {
           address_id: addressID,
@@ -168,6 +181,60 @@ describe("Wallet Class", () => {
           amount: "226",
           state: StakingRewardStateEnum.Pending,
           format: StakingRewardFormat.Usd,
+          usd_value: {
+            amount: "226",
+            conversion_price: "3000",
+            conversion_time: "2024-05-03T00:00:00Z",
+          },
+        },
+      ],
+      has_more: false,
+      next_page: "",
+    };
+
+    const HISTORICAL_STAKING_BALANCES_RESPONSE: FetchHistoricalStakingBalances200Response = {
+      data: [
+        {
+          address: addressID,
+          date: "2024-05-01",
+          bonded_stake: {
+            amount: "32",
+            asset: {
+              asset_id: Coinbase.assets.Eth,
+              network_id: Coinbase.networks.EthereumHolesky,
+              decimals: 18,
+            },
+          },
+          unbonded_balance: {
+            amount: "2",
+            asset: {
+              asset_id: Coinbase.assets.Eth,
+              network_id: Coinbase.networks.EthereumHolesky,
+              decimals: 18,
+            },
+          },
+          participant_type: "validator",
+        },
+        {
+          address: addressID,
+          date: "2024-05-02",
+          bonded_stake: {
+            amount: "32",
+            asset: {
+              asset_id: Coinbase.assets.Eth,
+              network_id: Coinbase.networks.EthereumHolesky,
+              decimals: 18,
+            },
+          },
+          unbonded_balance: {
+            amount: "2",
+            asset: {
+              asset_id: Coinbase.assets.Eth,
+              network_id: Coinbase.networks.EthereumHolesky,
+              decimals: 18,
+            },
+          },
+          participant_type: "validator",
         },
       ],
       has_more: false,
@@ -329,6 +396,38 @@ describe("Wallet Class", () => {
         Coinbase.apiClients.asset!.getAsset = getAssetMock();
         const response = await wallet.stakingRewards(Coinbase.assets.Eth);
         expect(response).toBeInstanceOf(Array<StakingReward>);
+      });
+    });
+
+    describe(".historicalStakingBalances", () => {
+      it("should throw an error when the wallet does not have a default address", async () => {
+        const newWallet = Wallet.init(walletModel);
+        await expect(
+          async () => await newWallet.historicalStakingBalances(Coinbase.assets.Eth),
+        ).rejects.toThrow(InternalError);
+      });
+
+      it("should successfully return historical staking balances", async () => {
+        const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
+        Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockReturnValue(
+          HISTORICAL_STAKING_BALANCES_RESPONSE,
+        );
+        Coinbase.apiClients.asset!.getAsset = getAssetMock();
+        const response = await wallet.historicalStakingBalances(Coinbase.assets.Eth);
+        expect(response).toBeInstanceOf(Array<StakingBalance>);
+        expect(response.length).toEqual(2);
+        expect(response[0].bondedStake().amount).toEqual(new Decimal("32"));
+        expect(response[0].bondedStake().asset?.assetId).toEqual("eth");
+        expect(response[0].bondedStake().asset?.decimals).toEqual(18);
+        expect(response[0].bondedStake().asset?.networkId).toEqual(
+          Coinbase.networks.EthereumHolesky,
+        );
+        expect(response[0].unbondedBalance().amount).toEqual(new Decimal("2"));
+        expect(response[0].unbondedBalance().asset?.assetId).toEqual("eth");
+        expect(response[0].unbondedBalance().asset?.decimals).toEqual(18);
+        expect(response[0].unbondedBalance().asset?.networkId).toEqual(
+          Coinbase.networks.EthereumHolesky,
+        );
       });
     });
   });
@@ -654,7 +753,7 @@ describe("Wallet Class", () => {
         id: walletId,
         network_id: Coinbase.networks.BaseSepolia,
         default_address: addressList[0],
-        enabled_features: [],
+        feature_set: {} as FeatureSet,
       };
       wallet = Wallet.init(walletModel, existingSeed);
       Coinbase.apiClients.address!.createAddress = mockFn(walletId => {
@@ -679,7 +778,7 @@ describe("Wallet Class", () => {
       const wallet = Wallet.init({
         id: walletId,
         network_id: Coinbase.networks.BaseSepolia,
-        enabled_features: [],
+        feature_set: {} as FeatureSet,
       });
       await expect(async () => await wallet.faucet()).rejects.toThrow(InternalError);
     });
@@ -755,7 +854,7 @@ describe("Wallet Class", () => {
         id: walletId,
         network_id: Coinbase.networks.BaseSepolia,
         default_address: addressModel,
-        enabled_features: [],
+        feature_set: {} as FeatureSet,
       };
       Coinbase.apiClients.address = addressesApiMock;
       Coinbase.apiClients.address!.getAddress = mockFn(() => {
@@ -1031,7 +1130,7 @@ describe("Wallet Class", () => {
       const otherModel = {
         id: crypto.randomUUID(),
         network_id: Coinbase.networks.BaseSepolia,
-        enabled_features: [],
+        feature_set: {} as FeatureSet,
       };
       const randomSeed = ethers.Wallet.createRandom().privateKey.slice(2);
       const otherWallet = Wallet.init(otherModel, randomSeed);

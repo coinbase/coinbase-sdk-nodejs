@@ -48,6 +48,7 @@ describe("Transaction", () => {
       transaction_hash: transactionHash,
       transaction_link: `https://sepolia.basescan.org/tx/${transactionHash}`,
     } as TransactionModel;
+
     transaction = new Transaction(model);
   });
 
@@ -61,13 +62,13 @@ describe("Transaction", () => {
     });
   });
 
-  describe("#unsignedPayload", () => {
+  describe("#getUnsignedPayload", () => {
     it("returns the unsigned payload", () => {
       expect(transaction.getUnsignedPayload()).toEqual(unsignedPayload);
     });
   });
 
-  describe("#signedPayload", () => {
+  describe("#getSignedPayload", () => {
     it("should return undefined when the transaction has not been broadcast on chain", () => {
       expect(transaction.getSignedPayload()).toBeUndefined();
     });
@@ -78,7 +79,7 @@ describe("Transaction", () => {
     });
   });
 
-  describe("#transactionHash", () => {
+  describe("#getTransactionHash", () => {
     it("should return undefined when the transaction has not been broadcast on chain", () => {
       expect(transaction.getTransactionHash()).toBeUndefined();
     });
@@ -89,7 +90,7 @@ describe("Transaction", () => {
     });
   });
 
-  describe("#rawTransaction", () => {
+  describe("#getRawTransaction", () => {
     let raw: ethers.Transaction, rawPayload;
 
     beforeEach(() => {

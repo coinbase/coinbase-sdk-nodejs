@@ -16,6 +16,7 @@ import {
   AddressBalanceList,
   Balance,
   FetchStakingRewards200Response,
+  FetchHistoricalStakingBalances200Response,
   StakingContext as StakingContextModel,
   StakingOperation as StakingOperationModel,
   StakingRewardFormat,
@@ -28,6 +29,7 @@ import { StakingOperation } from "../coinbase/staking_operation";
 import { Asset } from "../coinbase/asset";
 import { randomUUID } from "crypto";
 import { StakingReward } from "../coinbase/staking_reward";
+import { StakingBalance } from "../coinbase/staking_balance";
 
 describe("ExternalAddress", () => {
   const newAddress = newAddressModel("", randomUUID(), Coinbase.networks.EthereumHolesky);
@@ -99,6 +101,11 @@ describe("ExternalAddress", () => {
         amount: "361",
         state: StakingRewardStateEnum.Pending,
         format: StakingRewardFormat.Usd,
+        usd_value: {
+          amount: "361",
+          conversion_price: "3000",
+          conversion_time: "2024-05-01T00:00:00Z",
+        },
       },
       {
         address_id: address.getId(),
@@ -106,6 +113,11 @@ describe("ExternalAddress", () => {
         amount: "203",
         state: StakingRewardStateEnum.Pending,
         format: StakingRewardFormat.Usd,
+        usd_value: {
+          amount: "203",
+          conversion_price: "3000",
+          conversion_time: "2024-05-02T00:00:00Z",
+        },
       },
       {
         address_id: address.getId(),
@@ -113,6 +125,60 @@ describe("ExternalAddress", () => {
         amount: "226",
         state: StakingRewardStateEnum.Pending,
         format: StakingRewardFormat.Usd,
+        usd_value: {
+          amount: "226",
+          conversion_price: "3000",
+          conversion_time: "2024-05-03T00:00:00Z",
+        },
+      },
+    ],
+    has_more: false,
+    next_page: "",
+  };
+
+  const HISTORICAL_STAKING_BALANCES_RESPONSE: FetchHistoricalStakingBalances200Response = {
+    data: [
+      {
+        address: address.getId(),
+        date: "2024-05-01",
+        bonded_stake: {
+          amount: "32",
+          asset: {
+            asset_id: Coinbase.assets.Eth,
+            network_id: address.getNetworkId(),
+            decimals: 18,
+          },
+        },
+        unbonded_balance: {
+          amount: "2",
+          asset: {
+            asset_id: Coinbase.assets.Eth,
+            network_id: address.getNetworkId(),
+            decimals: 18,
+          },
+        },
+        participant_type: "validator",
+      },
+      {
+        address: address.getId(),
+        date: "2024-05-02",
+        bonded_stake: {
+          amount: "33",
+          asset: {
+            asset_id: Coinbase.assets.Eth,
+            network_id: address.getNetworkId(),
+            decimals: 18,
+          },
+        },
+        unbonded_balance: {
+          amount: "3",
+          asset: {
+            asset_id: Coinbase.assets.Eth,
+            network_id: address.getNetworkId(),
+            decimals: 18,
+          },
+        },
+        participant_type: "validator",
       },
     ],
     has_more: false,
@@ -356,6 +422,32 @@ describe("ExternalAddress", () => {
           end_time: endTime,
           format: StakingRewardFormat.Usd,
         },
+        100,
+        undefined,
+      );
+    });
+  });
+
+  describe(".historicalStakingBalances", () => {
+    it("should return staking balances successfully", async () => {
+      Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockReturnValue(
+        HISTORICAL_STAKING_BALANCES_RESPONSE,
+      );
+      Coinbase.apiClients.asset!.getAsset = getAssetMock();
+      const response = await address.historicalStakingBalances(
+        Coinbase.assets.Eth,
+        startTime,
+        endTime,
+      );
+
+      expect(response).toBeInstanceOf(Array<StakingBalance>);
+      expect(response.length).toEqual(2);
+      expect(Coinbase.apiClients.stake!.fetchHistoricalStakingBalances).toHaveBeenCalledWith(
+        address.getId(),
+        address.getNetworkId(),
+        Coinbase.assets.Eth,
+        startTime,
+        endTime,
         100,
         undefined,
       );

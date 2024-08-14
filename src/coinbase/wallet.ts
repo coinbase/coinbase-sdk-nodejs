@@ -28,6 +28,7 @@ import {
 import { convertStringToHex, delay, formatDate, getWeekBackDate } from "./utils";
 import { StakingOperation } from "./staking_operation";
 import { StakingReward } from "./staking_reward";
+import { StakingBalance } from "./staking_balance";
 
 /**
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
@@ -398,6 +399,26 @@ export class Wallet {
   }
 
   /**
+   * Lists the historical staking balances for the address.
+   *
+   * @param assetId - The asset ID.
+   * @param startTime - The start time.
+   * @param endTime - The end time.
+   * @throws {Error} if the default address is not found.
+   * @returns The staking balances.
+   */
+  public async historicalStakingBalances(
+    assetId: string,
+    startTime = getWeekBackDate(new Date()),
+    endTime = formatDate(new Date()),
+  ): Promise<StakingBalance[]> {
+    if (!this.getDefaultAddress()) {
+      throw new InternalError("Default address not found");
+    }
+    return await this.getDefaultAddress()!.historicalStakingBalances(assetId, startTime, endTime);
+  }
+
+  /**
    * Creates a staking operation to stake, signs it, and broadcasts it on the blockchain.
    *
    * @param amount - The amount for the staking operation.
@@ -703,6 +724,7 @@ export class Wallet {
    * @param options.destination - The destination of the transfer. If a Wallet, sends to the Wallet's default address. If a String, interprets it as the address ID.
    * @param options.timeoutSeconds - The maximum amount of time to wait for the Transfer to complete, in seconds.
    * @param options.intervalSeconds - The interval at which to poll the Network for Transfer status, in seconds.
+   * @param options.gasless - Whether the Transfer should be gasless. Defaults to false.
    * @returns The hash of the Transfer transaction.
    * @throws {APIError} if the API request to create a Transfer fails.
    * @throws {APIError} if the API request to broadcast a Transfer fails.
@@ -714,6 +736,7 @@ export class Wallet {
     destination,
     timeoutSeconds = 10,
     intervalSeconds = 0.2,
+    gasless = false,
   }: CreateTransferOptions): Promise<Transfer> {
     if (!this.getDefaultAddress()) {
       throw new InternalError("Default address not found");
@@ -724,6 +747,7 @@ export class Wallet {
       destination,
       timeoutSeconds,
       intervalSeconds,
+      gasless,
     });
   }
 

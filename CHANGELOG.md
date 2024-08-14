@@ -1,5 +1,15 @@
 # Coinbase Node.js SDK Changelog
 
+## [0.0.16] - 2024-08-14
+
+### Added
+
+- Add Function `listHistoricalBalances` for `Address` for fetching historical balances for an asset
+- Support for retrieving historical staking balances information
+- USD value conversion details to the StakingReward object
+- Gasless USDC Sends
+- Support for Etherum-Mainnet and Polygon-Mainnet
+
 ## [0.0.15] - 2024-08-12
 
 ### Changed

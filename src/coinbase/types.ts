@@ -4,6 +4,7 @@ import {
   Address as AddressModel,
   AddressList,
   AddressBalanceList,
+  AddressHistoricalBalanceList,
   Balance,
   CreateAddressRequest,
   CreateWalletRequest,
@@ -26,6 +27,7 @@ import {
   StakingContext as StakingContextModel,
   FetchStakingRewardsRequest,
   FetchStakingRewards200Response,
+  FetchHistoricalStakingBalances200Response,
   FaucetTransaction,
   BroadcastStakingOperationRequest,
   CreateStakingOperationRequest,
@@ -34,6 +36,7 @@ import {
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
+import { HistoricalBalance } from "./historical_balance";
 
 export type AssetAPIClient = {
   /**
@@ -335,6 +338,27 @@ export type ExternalAddressAPIClient = {
   ): AxiosPromise<Balance>;
 
   /**
+   * List the historical balance of an asset in a specific address.
+   *
+   * @summary Get address balance history for asset
+   * @param networkId - The ID of the blockchain network
+   * @param addressId - The ID of the address to fetch the historical balance for.
+   * @param assetId - The symbol of the asset to fetch the historical balance for.
+   * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param options - Override http request option.
+   * @throws {RequiredError}
+   */
+  listAddressHistoricalBalance(
+    networkId: string,
+    addressId: string,
+    assetId: string,
+    limit?: number,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<AddressHistoricalBalanceList>;
+
+  /**
    * Request faucet funds to be sent to external address.
    *
    * @param networkId - The ID of the blockchain network
@@ -418,6 +442,29 @@ export type StakeAPIClient = {
     page?: string,
     options?: AxiosRequestConfig,
   ): AxiosPromise<FetchStakingRewards200Response>;
+
+  /**
+   * Get the staking balances for an address.
+   *
+   * @param address - The onchain address to fetch the staking balances for.
+   * @param networkId - The ID of the blockchain network.
+   * @param assetId - The ID of the asset to fetch the staking balances for.
+   * @param startTime - The start time of the staking balances.
+   * @param endTime - The end time of the staking balances.
+   * @param limit - The amount of records to return in a single call.
+   * @param page - The batch of records for a given section in the response.
+   * @param options - Axios request options.
+   */
+  fetchHistoricalStakingBalances(
+    address: string,
+    networkId: string,
+    assetId: string,
+    startTime: string,
+    endTime: string,
+    limit?: number,
+    page?: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<FetchHistoricalStakingBalances200Response>;
 
   broadcastStakingOperation(
     walletId: string,
@@ -613,6 +660,17 @@ export enum TransactionStatus {
 }
 
 /**
+ * Sponsored Send status type definition.
+ */
+export enum SponsoredSendStatus {
+  PENDING = "pending",
+  SIGNED = "signed",
+  SUBMITTED = "submitted",
+  COMPLETE = "complete",
+  FAILED = "failed",
+}
+
+/**
  * The Wallet Data type definition.
  * The data required to recreate a Wallet.
  */
@@ -746,6 +804,7 @@ export type CreateTransferOptions = {
   destination: Destination;
   timeoutSeconds?: number;
   intervalSeconds?: number;
+  gasless?: boolean;
 };
 
 /**
@@ -757,4 +816,21 @@ export type CreateTradeOptions = {
   toAssetId: string;
   timeoutSeconds?: number;
   intervalSeconds?: number;
+};
+
+/**
+ * Options for listing historical balances of an address.
+ */
+export type ListHistoricalBalancesOptions = {
+  assetId: string;
+  limit?: number;
+  page?: string;
+};
+
+/**
+ * Result of ListHistoricalBalances.
+ */
+export type ListHistoricalBalancesResult = {
+  historicalBalances: HistoricalBalance[];
+  nextPageToken: string;
 };

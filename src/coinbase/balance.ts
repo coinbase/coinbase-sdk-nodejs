@@ -52,4 +52,24 @@ export class Balance {
       asset,
     );
   }
+
+  /**
+   * Converts a BalanceModel of which the amount is in the most common denomination such as ETH, BTC, etc.
+   *
+   * @param {BalanceModel} model - The balance model object.
+   * @returns {Balance} The Balance object.
+   */
+  public static fromModelWithAmountInWholeUnits(model: BalanceModel): Balance {
+    const asset = Asset.fromModel(model.asset);
+    return new Balance(new Decimal(model.amount), asset.getAssetId(), asset);
+  }
+
+  /**
+   * Print the Balance as a string.
+   *
+   * @returns The string representation of the Balance.
+   */
+  public toString(): string {
+    return `Balance { amount: '${this.amount}' asset: '${this.asset?.toString()}' }`;
+  }
 }

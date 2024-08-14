@@ -9,7 +9,6 @@ import { parseUnsignedPayload } from "./utils";
 export class Transaction {
   private model: TransactionModel;
   private raw?: ethers.Transaction;
-  private signed: boolean | undefined;
 
   /**
    * Transactions should be constructed via higher level abstractions like Trade or Transfer.
@@ -87,9 +86,10 @@ export class Transaction {
    */
   isTerminalState(): boolean {
     const status = this.getStatus();
-    return !status
-      ? false
-      : [TransactionStatus.COMPLETE, TransactionStatus.FAILED].includes(status);
+
+    if (!status) return false;
+
+    return [TransactionStatus.COMPLETE, TransactionStatus.FAILED].includes(status);
   }
 
   /**
@@ -136,9 +136,17 @@ export class Transaction {
   async sign(key: ethers.Wallet) {
     const signedPayload = await key!.signTransaction(this.rawTransaction());
     this.model.signed_payload = signedPayload;
-    this.signed = true;
     // Removes the '0x' prefix as required by the API.
     return signedPayload.slice(2);
+  }
+
+  /**
+   * Returns the Signed Payload of the Transaction.
+   *
+   * @returns The Signed Payload
+   */
+  getSignature(): string | undefined {
+    return this.getSignedPayload()?.slice(2);
   }
 
   /**
@@ -146,8 +154,8 @@ export class Transaction {
    *
    * @returns if the transaction has been signed.
    */
-  isSigned(): boolean | undefined {
-    return this.signed;
+  isSigned(): boolean {
+    return !!this.getSignature();
   }
 
   /**
