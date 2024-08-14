@@ -434,14 +434,14 @@ export class Wallet {
     limit,
     page,
   }: ListHistoricalBalancesOptions): Promise<ListHistoricalBalancesResult> {
-      if (!this.getDefaultAddress()) {
-        throw new InternalError("Default address not found");
-      }
-      return await this.getDefaultAddress()!.listHistoricalBalances({
-        assetId: assetId,
-        limit: limit,
-        page: page,
-      });
+    if (!this.getDefaultAddress()) {
+      throw new InternalError("Default address not found");
+    }
+    return await this.getDefaultAddress()!.listHistoricalBalances({
+      assetId: assetId,
+      limit: limit,
+      page: page,
+    });
   }
 
   /**
