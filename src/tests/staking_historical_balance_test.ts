@@ -1,6 +1,4 @@
-import {
-  FetchHistoricalStakingBalances200Response,
-} from "../client";
+import { FetchHistoricalStakingBalances200Response } from "../client";
 import { Coinbase } from "../coinbase/coinbase";
 import {
   assetsApiMock,
@@ -28,7 +26,7 @@ describe("StakingBalance", () => {
   const bondedStake = {
     amount: "32",
     asset: asset,
-  }; 
+  };
   const unbondedBalance = {
     amount: "2",
     asset: asset,
@@ -66,7 +64,9 @@ describe("StakingBalance", () => {
 
   describe("#list", () => {
     it("should successfully return staking balances", async () => {
-      Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockReturnValue(HISTORICAL_STAKING_BALANCES_RESPONSE);
+      Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockReturnValue(
+        HISTORICAL_STAKING_BALANCES_RESPONSE,
+      );
       Coinbase.apiClients.asset!.getAsset = getAssetMock();
       const response = await StakingBalance.list(
         address.getNetworkId(),
@@ -91,7 +91,8 @@ describe("StakingBalance", () => {
       const pages = ["abc", "def"];
       Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockFn(() => {
         HISTORICAL_STAKING_BALANCES_RESPONSE.next_page = pages.shift() as string;
-        HISTORICAL_STAKING_BALANCES_RESPONSE.has_more = !!HISTORICAL_STAKING_BALANCES_RESPONSE.next_page;
+        HISTORICAL_STAKING_BALANCES_RESPONSE.has_more =
+          !!HISTORICAL_STAKING_BALANCES_RESPONSE.next_page;
         return { data: HISTORICAL_STAKING_BALANCES_RESPONSE };
       });
       Coinbase.apiClients.asset!.getAsset = getAssetMock();
@@ -118,15 +119,13 @@ describe("StakingBalance", () => {
 
   describe(".date", () => {
     it("should return the correct date", () => {
-      const balance = new StakingBalance(
-        {
-          address: address.getId(),
-          date: "2024-05-03",
-          bonded_stake: bondedStake,
-          unbonded_balance: unbondedBalance,
-          participant_type: "validator",
-        }
-      );
+      const balance = new StakingBalance({
+        address: address.getId(),
+        date: "2024-05-03",
+        bonded_stake: bondedStake,
+        unbonded_balance: unbondedBalance,
+        participant_type: "validator",
+      });
 
       const date = balance.date();
       expect(date).toEqual(new Date("2024-05-03"));
@@ -135,15 +134,13 @@ describe("StakingBalance", () => {
 
   describe(".toString", () => {
     it("should return the string representation of a staking balance", () => {
-      const balance = new StakingBalance(
-        {
-          address: address.getId(),
-          date: "2024-05-03",
-          bonded_stake: bondedStake,
-          unbonded_balance: unbondedBalance,
-          participant_type: "validator",
-        }
-      );
+      const balance = new StakingBalance({
+        address: address.getId(),
+        date: "2024-05-03",
+        bonded_stake: bondedStake,
+        unbonded_balance: unbondedBalance,
+        participant_type: "validator",
+      });
 
       const balanceStr = balance.toString();
       expect(balanceStr).toEqual(
@@ -154,15 +151,13 @@ describe("StakingBalance", () => {
 
   describe(".addressId", () => {
     it("should return the onchain address of the StakingBalance", () => {
-      const balance = new StakingBalance(
-        {
-          address: address.getId(),
-          date: "2024-05-03",
-          bonded_stake: bondedStake,
-          unbonded_balance: unbondedBalance,
-          participant_type: "validator",
-        }
-      );
+      const balance = new StakingBalance({
+        address: address.getId(),
+        date: "2024-05-03",
+        bonded_stake: bondedStake,
+        unbonded_balance: unbondedBalance,
+        participant_type: "validator",
+      });
 
       const addressId = balance.address();
       expect(addressId).toEqual(address.getId());

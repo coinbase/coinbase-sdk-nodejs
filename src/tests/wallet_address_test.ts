@@ -389,7 +389,7 @@ describe("WalletAddress", () => {
             },
           },
           participant_type: "validator",
-        }
+        },
       ],
       has_more: false,
       next_page: "",
@@ -533,7 +533,9 @@ describe("WalletAddress", () => {
 
     describe(".historicalStakingBalances", () => {
       it("should successfully return historical staking balances", async () => {
-        Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockReturnValue(HISTORICAL_STAKING_BALANCES_RESPONSE);
+        Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockReturnValue(
+          HISTORICAL_STAKING_BALANCES_RESPONSE,
+        );
         Coinbase.apiClients.asset!.getAsset = getAssetMock();
         const response = await walletAddress.historicalStakingBalances(Coinbase.assets.Eth);
         expect(response).toBeInstanceOf(Array<StakingBalance>);
@@ -541,11 +543,15 @@ describe("WalletAddress", () => {
         expect(response[0].bondedStake().amount).toEqual(new Decimal("32"));
         expect(response[0].bondedStake().asset?.assetId).toEqual(Coinbase.assets.Eth);
         expect(response[0].bondedStake().asset?.decimals).toEqual(18);
-        expect(response[0].bondedStake().asset?.networkId).toEqual(Coinbase.networks.EthereumHolesky);
+        expect(response[0].bondedStake().asset?.networkId).toEqual(
+          Coinbase.networks.EthereumHolesky,
+        );
         expect(response[0].unbondedBalance().amount).toEqual(new Decimal("2"));
         expect(response[0].unbondedBalance().asset?.assetId).toEqual(Coinbase.assets.Eth);
         expect(response[0].unbondedBalance().asset?.decimals).toEqual(18);
-        expect(response[0].unbondedBalance().asset?.networkId).toEqual(Coinbase.networks.EthereumHolesky);
+        expect(response[0].unbondedBalance().asset?.networkId).toEqual(
+          Coinbase.networks.EthereumHolesky,
+        );
       });
     });
   });
