@@ -898,7 +898,7 @@ export class Wallet {
     }
     const [networkPrefix] = this.model.network_id.split("-");
     // TODO: Push this logic to the backend.
-    if (!["base", "ethereum"].includes(networkPrefix)) {
+    if (!["base", "ethereum", "polygon"].includes(networkPrefix)) {
       throw new InternalError(`Unsupported network ID: ${this.model.network_id}`);
     }
     const derivedKey = this.master?.derive(this.addressPathPrefix + `/${index}`);
