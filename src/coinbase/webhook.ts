@@ -1,23 +1,10 @@
-import { Decimal } from "decimal.js";
 import { Webhook as WebhookModel, WebhookEventType, WebhookEventFilter } from "../client/api";
 import { Coinbase } from "./coinbase";
 import { InternalError } from "./errors";
-import { delay } from "./utils";
 
-/**
- * A representation of a Trade, which trades an amount of an Asset to another Asset on a Network.
- * The fee is assumed to be paid in the native Asset of the Network.
- */
 export class Webhook {
-  private model: WebhookModel;
+  private model: WebhookModel | null;
 
-  /**
-   * Trades should be created through Wallet.trade or Address.trade.
-   *
-   * @class
-   * @param model - The underlying Trade object.
-   * @throws {InternalError} - If the Trade model is empty.
-   */
   constructor(model: WebhookModel) {
     if (!model) {
       throw new InternalError("Webhook model cannot be empty");
@@ -25,40 +12,24 @@ export class Webhook {
     this.model = model;
   }
 
-  /**
-   * Returns the Trade ID.
-   *
-   * @returns The Trade ID.
-   */
   public getId(): string | undefined {
-    return this.model.id;
+    return this.model?.id;
   }
 
-  /**
-   * Returns the Network ID of the Trade.
-   *
-   * @returns The Network ID.
-   */
   public getNetworkId(): string | undefined {
-    return this.model.network_id;
+    return this.model?.network_id;
   }
 
-  /**
-   * Returns the Wallet ID of the Trade.
-   *
-   * @returns The Wallet ID.
-   */
+  public getNotificationURI(): string | undefined {
+    return this.model?.notification_uri;
+  }
+
   public getEventType(): WebhookEventType | undefined {
-    return this.model.event_type;
+    return this.model?.event_type;
   }
 
-  /**
-   * Returns the Address ID of the Trade.
-   *
-   * @returns The Address ID.
-   */
   public getEventFilters(): Array<WebhookEventFilter> | undefined {
-    return this.model.event_filters;
+    return this.model?.event_filters
   }
 
   public static async create(
@@ -77,24 +48,58 @@ export class Webhook {
     return new Webhook(result.data);
   }
 
-//   public static init(model: WebhookModel): Webhook {
-//     const webhook = new Webhook(model);
-//     if (Coinbase.useServerSigner) {
-//       return wallet;
-//     }
-//     wallet.setMasterNode(seed);
-//     return wallet;
-//   }
+  public static async list(): Promise<Webhook[]> {
+    const webhookList: Webhook[] = [];
+    const queue: string[] = [""];
+
+    while (queue.length > 0) {
+      const page = queue.shift();
+      const response = await Coinbase.apiClients.webhook!.listWebhooks(100, page ? page : undefined);
+
+      const webhooks = response.data.data;
+      for (const w of webhooks) {
+        webhookList.push(new Webhook(w));
+      }
+
+      if (response.data.has_more) {
+        if (response.data.next_page) {
+          queue.push(response.data.next_page);
+        }
+      }
+    }
+
+    return webhookList;
+  }
+
+  public async update(notification_uri): Promise<Webhook> {
+    const result = await Coinbase.apiClients.webhook!.updateWebhook(this.getId()!, {
+        network_id: this.getNetworkId(),
+        notification_uri: notification_uri,
+        event_type: this.getEventType()!,
+        event_filters: this.getEventFilters()!,
+    })
+
+    this.model = result.data;
+
+    return this;
+  }
+
+  public async delete() {
+    const result = await Coinbase.apiClients.webhook!.deleteWebhook(this.getId()!)
+
+    this.model = null;
+  }
 
   /**
-   * Returns a String representation of the Trade.
+   * Returns a String representation of the Webhook.
    *
-   * @returns A String representation of the Trade.
+   * @returns A String representation of the Webhook.
    */
   public toString(): string {
     return (
       `Webhook { id: '${this.getId()}', network_id: '${this.getNetworkId()}', ` +
-      `event_type: '${this.getEventType()}', event_filter: '${this.getEventFilters()} }`
+      `event_type: '${this.getEventType()}', event_filter: '${JSON.stringify(this.getEventFilters())} ` + 
+      `notification_uri: '${this.getNotificationURI()} }`
     );
   }
 }
