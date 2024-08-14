@@ -7,6 +7,7 @@ import {
   Balance as BalanceModel,
   User as UserModel,
   Wallet as WalletModel,
+  FeatureSet,
 } from "./../client/api";
 import { Coinbase } from "./../coinbase/coinbase";
 import { WalletData } from "./../coinbase/types";
@@ -76,7 +77,7 @@ describe("User Class", () => {
         id: walletId,
         network_id: Coinbase.networks.BaseSepolia,
         default_address: mockAddressModel,
-        enabled_features: [],
+        feature_set: {} as FeatureSet,
       };
       Coinbase.apiClients.wallet = walletsApiMock;
       Coinbase.apiClients.wallet!.getWallet = mockReturnValue(mockWalletModel);
@@ -142,7 +143,7 @@ describe("User Class", () => {
         id: walletId,
         network_id: Coinbase.networks.BaseSepolia,
         default_address: addressModel1,
-        enabled_features: [],
+        feature_set: {} as FeatureSet,
       };
       addressListModel = {
         data: [addressModel1, addressModel2],
@@ -319,7 +320,7 @@ describe("User Class", () => {
         id: walletId,
         network_id: Coinbase.networks.BaseSepolia,
         default_address: addressModel1,
-        enabled_features: [],
+        feature_set: {} as FeatureSet,
       };
       addressListModel = {
         data: [addressModel1, addressModel2],

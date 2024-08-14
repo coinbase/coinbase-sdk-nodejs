@@ -21,6 +21,7 @@ import {
   FetchHistoricalStakingBalances200Response,
   StakingRewardStateEnum,
   StakingRewardFormat,
+  FeatureSet,
 } from "./../client";
 import {
   VALID_ADDRESS_MODEL,
@@ -752,7 +753,7 @@ describe("Wallet Class", () => {
         id: walletId,
         network_id: Coinbase.networks.BaseSepolia,
         default_address: addressList[0],
-        enabled_features: [],
+        feature_set: {} as FeatureSet,
       };
       wallet = Wallet.init(walletModel, existingSeed);
       Coinbase.apiClients.address!.createAddress = mockFn(walletId => {
@@ -777,7 +778,7 @@ describe("Wallet Class", () => {
       const wallet = Wallet.init({
         id: walletId,
         network_id: Coinbase.networks.BaseSepolia,
-        enabled_features: [],
+        feature_set: {} as FeatureSet,
       });
       await expect(async () => await wallet.faucet()).rejects.toThrow(InternalError);
     });
@@ -853,7 +854,7 @@ describe("Wallet Class", () => {
         id: walletId,
         network_id: Coinbase.networks.BaseSepolia,
         default_address: addressModel,
-        enabled_features: [],
+        feature_set: {} as FeatureSet,
       };
       Coinbase.apiClients.address = addressesApiMock;
       Coinbase.apiClients.address!.getAddress = mockFn(() => {
@@ -1129,7 +1130,7 @@ describe("Wallet Class", () => {
       const otherModel = {
         id: crypto.randomUUID(),
         network_id: Coinbase.networks.BaseSepolia,
-        enabled_features: [],
+        feature_set: {} as FeatureSet,
       };
       const randomSeed = ethers.Wallet.createRandom().privateKey.slice(2);
       const otherWallet = Wallet.init(otherModel, randomSeed);

@@ -14,6 +14,7 @@ import {
   ValidatorList,
   Validator,
   StakingOperationStatusEnum,
+  FeatureSet,
 } from "../client";
 import { BASE_PATH } from "../client/base";
 import { Coinbase } from "../coinbase/coinbase";
@@ -98,7 +99,7 @@ export const VALID_ADDRESS_MODEL = newAddressModel(randomUUID());
 export const VALID_WALLET_MODEL: WalletModel = {
   id: randomUUID(),
   network_id: Coinbase.networks.BaseSepolia,
-  enabled_features: [],
+  feature_set: {} as FeatureSet,
   default_address: {
     wallet_id: walletId,
     address_id: "0xdeadbeef",
