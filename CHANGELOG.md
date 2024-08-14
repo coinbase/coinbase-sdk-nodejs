@@ -1,5 +1,7 @@
 # Coinbase Node.js SDK Changelog
 
+## Unreleased
+
 ## [0.0.16] - 2024-08-14
 
 ### Added
@@ -8,6 +10,7 @@
 - Support for retrieving historical staking balances information
 - USD value conversion details to the StakingReward object
 - Gasless USDC Sends
+- Support for Etherum-Mainnet and Polygon-Mainnet
 
 ## [0.0.14] - 2024-08-05
 
