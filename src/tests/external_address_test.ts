@@ -430,9 +430,15 @@ describe("ExternalAddress", () => {
 
   describe(".historicalStakingBalances", () => {
     it("should return staking balances successfully", async () => {
-      Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockReturnValue(HISTORICAL_STAKING_BALANCES_RESPONSE);
+      Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockReturnValue(
+        HISTORICAL_STAKING_BALANCES_RESPONSE,
+      );
       Coinbase.apiClients.asset!.getAsset = getAssetMock();
-      const response = await address.historicalStakingBalances(Coinbase.assets.Eth, startTime, endTime);
+      const response = await address.historicalStakingBalances(
+        Coinbase.assets.Eth,
+        startTime,
+        endTime,
+      );
 
       expect(response).toBeInstanceOf(Array<StakingBalance>);
       expect(response.length).toEqual(2);
