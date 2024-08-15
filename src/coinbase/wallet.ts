@@ -421,7 +421,7 @@ export class Wallet {
   }
 
   /**
-   * Lists the historical balances for the default address of wallet.
+   * Lists the historical balances for a given asset belonging to the default address of the wallet.
    *
    * @param options - The options to list historical balances.
    * @param options.assetId - The asset ID.
