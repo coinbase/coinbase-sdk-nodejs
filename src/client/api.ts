@@ -1439,7 +1439,6 @@ export interface StakingOperation {
 
 export const StakingOperationStatusEnum = {
     Initialized: 'initialized',
-    Pending: 'pending',
     Complete: 'complete',
     Failed: 'failed',
     Unspecified: 'unspecified'

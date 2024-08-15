@@ -4,12 +4,9 @@ import {
   externalAddressApiMock,
   generateRandomHash,
   getAssetMock,
-  mockEthereumValidator,
   mockReturnValue,
   newAddressModel,
   stakeApiMock,
-  VALID_ACTIVE_VALIDATOR_LIST,
-  VALID_ADDRESS_MODEL,
   validatorApiMock,
 } from "./utils";
 import {
@@ -21,6 +18,7 @@ import {
   StakingOperation as StakingOperationModel,
   StakingRewardFormat,
   StakingRewardStateEnum,
+  StakingOperationStatusEnum,
 } from "../client";
 import Decimal from "decimal.js";
 import { ExternalAddress } from "../coinbase/address/external_address";
@@ -70,7 +68,7 @@ describe("ExternalAddress", () => {
     id: randomUUID(),
     network_id: Coinbase.networks.EthereumHolesky,
     address_id: "0x1234567890",
-    status: "pending",
+    status: StakingOperationStatusEnum.Initialized,
     transactions: [
       {
         from_address_id: address.getId(),
