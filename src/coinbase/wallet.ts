@@ -204,7 +204,9 @@ export class Wallet {
   public async createAddress(): Promise<Address> {
     let payload, key;
     if (!Coinbase.useServerSigner) {
-      const hdKey = this.deriveKey(this.addresses.length);
+      // TODO: Coordinate this value with concurrent calls to createAddress.
+      const addressIndex = this.addresses.length;
+      const hdKey = this.deriveKey(addressIndex);
       const attestation = this.createAttestation(hdKey);
       const publicKey = convertStringToHex(hdKey.publicKey!);
       key = new ethers.Wallet(convertStringToHex(hdKey.privateKey!));
@@ -212,6 +214,7 @@ export class Wallet {
       payload = {
         public_key: publicKey,
         attestation: attestation,
+        address_index: addressIndex,
       };
     }
     const response = await Coinbase.apiClients.address!.createAddress(this.model.id!, payload);
