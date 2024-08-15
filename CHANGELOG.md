@@ -1,10 +1,12 @@
 # Coinbase Node.js SDK Changelog
 
-## [0.1.0]
+## Unreleased
 
 ### Added
 
 - Add historical_balances function for wallet: listing historical balances for default address of the wallet.
+- Add toAddressId() method to Transaction class
+- Remove "pending" status from StakingOperationStatusEnum
 
 ## [0.0.16] - 2024-08-14
 
