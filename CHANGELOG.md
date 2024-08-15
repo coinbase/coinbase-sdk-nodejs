@@ -1,5 +1,11 @@
 # Coinbase Node.js SDK Changelog
 
+## [0.1.0]
+
+### Added
+
+- Add historical_balances function for wallet: listing historical balances for default address of the wallet.
+
 ## [0.0.16] - 2024-08-14
 
 ### Added

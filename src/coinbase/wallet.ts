@@ -19,6 +19,8 @@ import {
   Amount,
   CreateTransferOptions,
   CreateTradeOptions,
+  ListHistoricalBalancesOptions,
+  ListHistoricalBalancesResult,
   SeedData,
   ServerSignerStatus,
   StakeOptionsMode,
@@ -416,6 +418,30 @@ export class Wallet {
       throw new InternalError("Default address not found");
     }
     return await this.getDefaultAddress()!.historicalStakingBalances(assetId, startTime, endTime);
+  }
+
+  /**
+   * Lists the historical balances for a given asset belonging to the default address of the wallet.
+   *
+   * @param options - The options to list historical balances.
+   * @param options.assetId - The asset ID.
+   * @param options.limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param options.page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @returns The list of historical balance of the asset and next page token.
+   */
+  public async listHistoricalBalances({
+    assetId,
+    limit,
+    page,
+  }: ListHistoricalBalancesOptions): Promise<ListHistoricalBalancesResult> {
+    if (!this.getDefaultAddress()) {
+      throw new InternalError("Default address not found");
+    }
+    return await this.getDefaultAddress()!.listHistoricalBalances({
+      assetId: assetId,
+      limit: limit,
+      page: page,
+    });
   }
 
   /**
