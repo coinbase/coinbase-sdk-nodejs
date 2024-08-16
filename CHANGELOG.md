@@ -7,6 +7,7 @@
 - Add historical_balances function for wallet: listing historical balances for default address of the wallet.
 - Add toAddressId() method to Transaction class
 - Remove "pending" status from StakingOperationStatusEnum
+- Add validator status enum
 
 ## [0.0.16] - 2024-08-14
 
