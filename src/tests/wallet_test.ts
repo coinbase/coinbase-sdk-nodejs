@@ -466,13 +466,14 @@ describe("Wallet Class", () => {
         mockHistoricalBalanceResponse,
       );
     });
-    
+
     it("should throw an error when the wallet does not have a default address", async () => {
       const newWallet = Wallet.init(walletModel);
       await expect(
-        async () => await newWallet.listHistoricalBalances({
-          assetId: Coinbase.assets.Usdc,
-        }),
+        async () =>
+          await newWallet.listHistoricalBalances({
+            assetId: Coinbase.assets.Usdc,
+          }),
       ).rejects.toThrow(InternalError);
     });
 

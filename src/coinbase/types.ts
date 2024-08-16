@@ -33,6 +33,7 @@ import {
   CreateStakingOperationRequest,
   ValidatorList,
   Validator,
+  ContractEventList,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -623,6 +624,35 @@ export type ServerSignerAPIClient = {
 };
 
 /**
+ * ExternalSmartContractAPIClient client type definition.
+ */
+export type ExternalSmartContractAPIClient = {
+  /**
+   * List events for a specific contract
+   *
+   * @param networkId - Unique identifier for the blockchain network
+   * @param contractAddress - EVM address of the smart contract (42 characters, including '0x', in lowercase)
+   * @param protocolName - Case-sensitive name of the blockchain protocol
+   * @param contractName - Case-sensitive name of the specific contract within the project
+   * @param eventName - Case-sensitive name of the event to filter for in the contract's logs
+   * @param fromBlockHeight - Lower bound of the block range to query (inclusive)
+   * @param toBlockHeight - Upper bound of the block range to query (inclusive)
+   * @param nextPage - Pagination token for retrieving the next set of results
+   * @throws {APIError} If the request fails.
+   */
+  listContractEvents(
+    networkId: string,
+    contractAddress: string,
+    protocolName: string,
+    contractName: string,
+    eventName: string,
+    fromBlockHeight: number,
+    toBlockHeight: number,
+    nextPage?: string,
+  ): AxiosPromise<ContractEventList>;
+};
+
+/**
  * API clients type definition for the Coinbase SDK.
  * Represents the set of API clients available in the SDK.
  */
@@ -637,6 +667,7 @@ export type ApiClients = {
   validator?: ValidatorAPIClient;
   asset?: AssetAPIClient;
   externalAddress?: ExternalAddressAPIClient;
+  smartContract?: ExternalSmartContractAPIClient;
 };
 
 /**

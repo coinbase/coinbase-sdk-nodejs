@@ -290,79 +290,79 @@ export interface ContractEvent {
      * @type {string}
      * @memberof ContractEvent
      */
-    'network_name'?: string;
+    'network_id': string;
     /**
      * The name of the blockchain project or protocol
      * @type {string}
      * @memberof ContractEvent
      */
-    'protocol_name'?: string;
+    'protocol_name': string;
     /**
      * The name of the specific contract within the project
      * @type {string}
      * @memberof ContractEvent
      */
-    'contract_name'?: string;
+    'contract_name': string;
     /**
      * The name of the event emitted by the contract
      * @type {string}
      * @memberof ContractEvent
      */
-    'event_name'?: string;
+    'event_name': string;
     /**
      * The signature of the event, including parameter types
      * @type {string}
      * @memberof ContractEvent
      */
-    'sig'?: string;
+    'sig': string;
     /**
      * The first four bytes of the Keccak hash of the event signature
      * @type {string}
      * @memberof ContractEvent
      */
-    'fourBytes'?: string;
+    'four_bytes': string;
     /**
      * The EVM address of the smart contract
      * @type {string}
      * @memberof ContractEvent
      */
-    'contract_address'?: string;
+    'contract_address': string;
     /**
      * The timestamp of the block in which the event was emitted
      * @type {string}
      * @memberof ContractEvent
      */
-    'block_time'?: string;
+    'block_time': string;
     /**
      * The block number in which the event was emitted
      * @type {number}
      * @memberof ContractEvent
      */
-    'block_height'?: number;
+    'block_height': number;
     /**
      * The transaction hash in which the event was emitted
      * @type {string}
      * @memberof ContractEvent
      */
-    'tx_hash'?: string;
+    'tx_hash': string;
     /**
      * The index of the transaction within the block
      * @type {number}
      * @memberof ContractEvent
      */
-    'tx_index'?: number;
+    'tx_index': number;
     /**
      * The index of the event within the transaction
      * @type {number}
      * @memberof ContractEvent
      */
-    'event_index'?: number;
+    'event_index': number;
     /**
      * The event data in a stringified format
      * @type {string}
      * @memberof ContractEvent
      */
-    'data'?: string;
+    'data': string;
 }
 /**
  * A list of contract events with pagination information
@@ -2912,21 +2912,25 @@ export const ContractEventsApiAxiosParamCreator = function (configuration?: Conf
          * @param {string} networkId Unique identifier for the blockchain network
          * @param {string} protocolName Case-sensitive name of the blockchain protocol
          * @param {string} contractAddress EVM address of the smart contract (42 characters, including \&#39;0x\&#39;, in lowercase)
+         * @param {string} contractName Case-sensitive name of the specific contract within the project
+         * @param {string} eventName Case-sensitive name of the event to filter for in the contract\&#39;s logs
          * @param {number} fromBlockHeight Lower bound of the block range to query (inclusive)
          * @param {number} toBlockHeight Upper bound of the block range to query (inclusive)
-         * @param {string} [contractName] Case-sensitive name of the specific contract within the project
-         * @param {string} [eventName] Case-sensitive name of the event to filter for in the contract\&#39;s logs
          * @param {string} [nextPage] Pagination token for retrieving the next set of results
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listContractEvents: async (networkId: string, protocolName: string, contractAddress: string, fromBlockHeight: number, toBlockHeight: number, contractName?: string, eventName?: string, nextPage?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listContractEvents: async (networkId: string, protocolName: string, contractAddress: string, contractName: string, eventName: string, fromBlockHeight: number, toBlockHeight: number, nextPage?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'networkId' is not null or undefined
             assertParamExists('listContractEvents', 'networkId', networkId)
             // verify required parameter 'protocolName' is not null or undefined
             assertParamExists('listContractEvents', 'protocolName', protocolName)
             // verify required parameter 'contractAddress' is not null or undefined
             assertParamExists('listContractEvents', 'contractAddress', contractAddress)
+            // verify required parameter 'contractName' is not null or undefined
+            assertParamExists('listContractEvents', 'contractName', contractName)
+            // verify required parameter 'eventName' is not null or undefined
+            assertParamExists('listContractEvents', 'eventName', eventName)
             // verify required parameter 'fromBlockHeight' is not null or undefined
             assertParamExists('listContractEvents', 'fromBlockHeight', fromBlockHeight)
             // verify required parameter 'toBlockHeight' is not null or undefined
@@ -2996,16 +3000,16 @@ export const ContractEventsApiFp = function(configuration?: Configuration) {
          * @param {string} networkId Unique identifier for the blockchain network
          * @param {string} protocolName Case-sensitive name of the blockchain protocol
          * @param {string} contractAddress EVM address of the smart contract (42 characters, including \&#39;0x\&#39;, in lowercase)
+         * @param {string} contractName Case-sensitive name of the specific contract within the project
+         * @param {string} eventName Case-sensitive name of the event to filter for in the contract\&#39;s logs
          * @param {number} fromBlockHeight Lower bound of the block range to query (inclusive)
          * @param {number} toBlockHeight Upper bound of the block range to query (inclusive)
-         * @param {string} [contractName] Case-sensitive name of the specific contract within the project
-         * @param {string} [eventName] Case-sensitive name of the event to filter for in the contract\&#39;s logs
          * @param {string} [nextPage] Pagination token for retrieving the next set of results
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listContractEvents(networkId: string, protocolName: string, contractAddress: string, fromBlockHeight: number, toBlockHeight: number, contractName?: string, eventName?: string, nextPage?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ContractEventList>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listContractEvents(networkId, protocolName, contractAddress, fromBlockHeight, toBlockHeight, contractName, eventName, nextPage, options);
+        async listContractEvents(networkId: string, protocolName: string, contractAddress: string, contractName: string, eventName: string, fromBlockHeight: number, toBlockHeight: number, nextPage?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ContractEventList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listContractEvents(networkId, protocolName, contractAddress, contractName, eventName, fromBlockHeight, toBlockHeight, nextPage, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ContractEventsApi.listContractEvents']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -3026,16 +3030,16 @@ export const ContractEventsApiFactory = function (configuration?: Configuration,
          * @param {string} networkId Unique identifier for the blockchain network
          * @param {string} protocolName Case-sensitive name of the blockchain protocol
          * @param {string} contractAddress EVM address of the smart contract (42 characters, including \&#39;0x\&#39;, in lowercase)
+         * @param {string} contractName Case-sensitive name of the specific contract within the project
+         * @param {string} eventName Case-sensitive name of the event to filter for in the contract\&#39;s logs
          * @param {number} fromBlockHeight Lower bound of the block range to query (inclusive)
          * @param {number} toBlockHeight Upper bound of the block range to query (inclusive)
-         * @param {string} [contractName] Case-sensitive name of the specific contract within the project
-         * @param {string} [eventName] Case-sensitive name of the event to filter for in the contract\&#39;s logs
          * @param {string} [nextPage] Pagination token for retrieving the next set of results
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listContractEvents(networkId: string, protocolName: string, contractAddress: string, fromBlockHeight: number, toBlockHeight: number, contractName?: string, eventName?: string, nextPage?: string, options?: any): AxiosPromise<ContractEventList> {
-            return localVarFp.listContractEvents(networkId, protocolName, contractAddress, fromBlockHeight, toBlockHeight, contractName, eventName, nextPage, options).then((request) => request(axios, basePath));
+        listContractEvents(networkId: string, protocolName: string, contractAddress: string, contractName: string, eventName: string, fromBlockHeight: number, toBlockHeight: number, nextPage?: string, options?: any): AxiosPromise<ContractEventList> {
+            return localVarFp.listContractEvents(networkId, protocolName, contractAddress, contractName, eventName, fromBlockHeight, toBlockHeight, nextPage, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -3052,16 +3056,16 @@ export interface ContractEventsApiInterface {
      * @param {string} networkId Unique identifier for the blockchain network
      * @param {string} protocolName Case-sensitive name of the blockchain protocol
      * @param {string} contractAddress EVM address of the smart contract (42 characters, including \&#39;0x\&#39;, in lowercase)
+     * @param {string} contractName Case-sensitive name of the specific contract within the project
+     * @param {string} eventName Case-sensitive name of the event to filter for in the contract\&#39;s logs
      * @param {number} fromBlockHeight Lower bound of the block range to query (inclusive)
      * @param {number} toBlockHeight Upper bound of the block range to query (inclusive)
-     * @param {string} [contractName] Case-sensitive name of the specific contract within the project
-     * @param {string} [eventName] Case-sensitive name of the event to filter for in the contract\&#39;s logs
      * @param {string} [nextPage] Pagination token for retrieving the next set of results
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ContractEventsApiInterface
      */
-    listContractEvents(networkId: string, protocolName: string, contractAddress: string, fromBlockHeight: number, toBlockHeight: number, contractName?: string, eventName?: string, nextPage?: string, options?: RawAxiosRequestConfig): AxiosPromise<ContractEventList>;
+    listContractEvents(networkId: string, protocolName: string, contractAddress: string, contractName: string, eventName: string, fromBlockHeight: number, toBlockHeight: number, nextPage?: string, options?: RawAxiosRequestConfig): AxiosPromise<ContractEventList>;
 
 }
 
@@ -3078,17 +3082,17 @@ export class ContractEventsApi extends BaseAPI implements ContractEventsApiInter
      * @param {string} networkId Unique identifier for the blockchain network
      * @param {string} protocolName Case-sensitive name of the blockchain protocol
      * @param {string} contractAddress EVM address of the smart contract (42 characters, including \&#39;0x\&#39;, in lowercase)
+     * @param {string} contractName Case-sensitive name of the specific contract within the project
+     * @param {string} eventName Case-sensitive name of the event to filter for in the contract\&#39;s logs
      * @param {number} fromBlockHeight Lower bound of the block range to query (inclusive)
      * @param {number} toBlockHeight Upper bound of the block range to query (inclusive)
-     * @param {string} [contractName] Case-sensitive name of the specific contract within the project
-     * @param {string} [eventName] Case-sensitive name of the event to filter for in the contract\&#39;s logs
      * @param {string} [nextPage] Pagination token for retrieving the next set of results
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ContractEventsApi
      */
-    public listContractEvents(networkId: string, protocolName: string, contractAddress: string, fromBlockHeight: number, toBlockHeight: number, contractName?: string, eventName?: string, nextPage?: string, options?: RawAxiosRequestConfig) {
-        return ContractEventsApiFp(this.configuration).listContractEvents(networkId, protocolName, contractAddress, fromBlockHeight, toBlockHeight, contractName, eventName, nextPage, options).then((request) => request(this.axios, this.basePath));
+    public listContractEvents(networkId: string, protocolName: string, contractAddress: string, contractName: string, eventName: string, fromBlockHeight: number, toBlockHeight: number, nextPage?: string, options?: RawAxiosRequestConfig) {
+        return ContractEventsApiFp(this.configuration).listContractEvents(networkId, protocolName, contractAddress, contractName, eventName, fromBlockHeight, toBlockHeight, nextPage, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
