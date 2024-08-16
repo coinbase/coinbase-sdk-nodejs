@@ -6,6 +6,7 @@ import {
   VALID_ACTIVE_VALIDATOR_LIST,
   validatorApiMock,
 } from "./utils";
+import { ValidatorStatus } from "../client";
 
 describe("Validator", () => {
   beforeAll(() => {
@@ -18,7 +19,7 @@ describe("Validator", () => {
   });
 
   describe("constructor", () => {
-    const validatorModel = mockEthereumValidator("100", "active_ongoing", "0xpublic_key_1");
+    const validatorModel = mockEthereumValidator("100", ValidatorStatus.Active, "0xpublic_key_1");
     const validator = new Validator(validatorModel);
     it("initializes a new Validator", () => {
       expect(validator).toBeInstanceOf(Validator);
@@ -35,27 +36,27 @@ describe("Validator", () => {
     const validators = await Validator.list(
       Coinbase.networks.EthereumHolesky,
       Coinbase.assets.Eth,
-      "active_ongoing",
+      ValidatorStatus.Active,
     );
 
     expect(Coinbase.apiClients.validator!.listValidators).toHaveBeenCalledWith(
       Coinbase.networks.EthereumHolesky,
       Coinbase.assets.Eth,
-      "active_ongoing",
+      ValidatorStatus.Active,
     );
 
     expect(validators.length).toEqual(3);
     expect(validators[0].getValidatorId()).toEqual("0xpublic_key_1");
-    expect(validators[0].getStatus()).toEqual("active_ongoing");
+    expect(validators[0].getStatus()).toEqual(ValidatorStatus.Active);
     expect(validators[1].getValidatorId()).toEqual("0xpublic_key_2");
-    expect(validators[1].getStatus()).toEqual("active_ongoing");
+    expect(validators[1].getStatus()).toEqual(ValidatorStatus.Active);
     expect(validators[2].getValidatorId()).toEqual("0xpublic_key_3");
-    expect(validators[2].getStatus()).toEqual("active_ongoing");
+    expect(validators[2].getStatus()).toEqual(ValidatorStatus.Active);
   });
 
   it("should return a validator for ethereum holesky and eth asset", async () => {
     Coinbase.apiClients.validator!.getValidator = mockReturnValue(
-      mockEthereumValidator("100", "active_exiting", "0x123"),
+      mockEthereumValidator("100", ValidatorStatus.Exiting, "0x123"),
     );
 
     const validator = await Validator.fetch(
@@ -71,7 +72,7 @@ describe("Validator", () => {
     );
 
     expect(validator.getValidatorId()).toEqual("0x123");
-    expect(validator.getStatus()).toEqual("active_exiting");
-    expect(validator.toString()).toEqual("Id: 0x123 Status: active_exiting");
+    expect(validator.getStatus()).toEqual(ValidatorStatus.Exiting);
+    expect(validator.toString()).toEqual("Id: 0x123, Status: active_exiting");
   });
 });

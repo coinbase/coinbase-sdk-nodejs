@@ -33,10 +33,7 @@ import {
   CreateStakingOperationRequest,
   ValidatorList,
   Validator,
-  Webhook as WebhookModel,
-  WebhookList,
-  CreateWebhookRequest,
-  UpdateWebhookRequest,
+  ValidatorStatus,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -507,7 +504,7 @@ export type ValidatorAPIClient = {
   listValidators(
     networkId: string,
     assetId: string,
-    status?: string,
+    status?: ValidatorStatus,
     limit?: number,
     page?: string,
     options?: AxiosRequestConfig,

@@ -1946,11 +1946,11 @@ export interface Validator {
      */
     'asset_id': string;
     /**
-     * The status of the validator.
-     * @type {string}
+     * 
+     * @type {ValidatorStatus}
      * @memberof Validator
      */
-    'status': string;
+    'status': ValidatorStatus;
     /**
      * 
      * @type {ValidatorDetails}
@@ -1958,6 +1958,8 @@ export interface Validator {
      */
     'details'?: ValidatorDetails;
 }
+
+
 /**
  * @type ValidatorDetails
  * @export
@@ -1989,6 +1991,31 @@ export interface ValidatorList {
      */
     'next_page': string;
 }
+/**
+ * The status of the validator.
+ * @export
+ * @enum {string}
+ */
+
+export const ValidatorStatus = {
+    EthereumValidatorStatusUnspecified: 'ethereum_validator_status_unspecified',
+    Provisioning: 'provisioning',
+    Provisioned: 'provisioned',
+    Deposited: 'deposited',
+    PendingActivation: 'pending_activation',
+    Active: 'active',
+    Exiting: 'exiting',
+    Exited: 'exited',
+    WithdrawalAvailable: 'withdrawal_available',
+    WithdrawalComplete: 'withdrawal_complete',
+    ActiveSlashed: 'active_slashed',
+    ExitedSlashed: 'exited_slashed',
+    Reaped: 'reaped'
+} as const;
+
+export type ValidatorStatus = typeof ValidatorStatus[keyof typeof ValidatorStatus];
+
+
 /**
  * 
  * @export
@@ -6150,13 +6177,13 @@ export const ValidatorsApiAxiosParamCreator = function (configuration?: Configur
          * @summary List validators belonging to the CDP project
          * @param {string} networkId The ID of the blockchain network.
          * @param {string} assetId The symbol of the asset to get the validators for.
-         * @param {string} [status] A filter to list validators based on a status.
+         * @param {ValidatorStatus} [status] A filter to list validators based on a status.
          * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
          * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listValidators: async (networkId: string, assetId: string, status?: string, limit?: number, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listValidators: async (networkId: string, assetId: string, status?: ValidatorStatus, limit?: number, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'networkId' is not null or undefined
             assertParamExists('listValidators', 'networkId', networkId)
             // verify required parameter 'assetId' is not null or undefined
@@ -6228,13 +6255,13 @@ export const ValidatorsApiFp = function(configuration?: Configuration) {
          * @summary List validators belonging to the CDP project
          * @param {string} networkId The ID of the blockchain network.
          * @param {string} assetId The symbol of the asset to get the validators for.
-         * @param {string} [status] A filter to list validators based on a status.
+         * @param {ValidatorStatus} [status] A filter to list validators based on a status.
          * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
          * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listValidators(networkId: string, assetId: string, status?: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ValidatorList>> {
+        async listValidators(networkId: string, assetId: string, status?: ValidatorStatus, limit?: number, page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ValidatorList>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.listValidators(networkId, assetId, status, limit, page, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ValidatorsApi.listValidators']?.[localVarOperationServerIndex]?.url;
@@ -6267,13 +6294,13 @@ export const ValidatorsApiFactory = function (configuration?: Configuration, bas
          * @summary List validators belonging to the CDP project
          * @param {string} networkId The ID of the blockchain network.
          * @param {string} assetId The symbol of the asset to get the validators for.
-         * @param {string} [status] A filter to list validators based on a status.
+         * @param {ValidatorStatus} [status] A filter to list validators based on a status.
          * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
          * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listValidators(networkId: string, assetId: string, status?: string, limit?: number, page?: string, options?: any): AxiosPromise<ValidatorList> {
+        listValidators(networkId: string, assetId: string, status?: ValidatorStatus, limit?: number, page?: string, options?: any): AxiosPromise<ValidatorList> {
             return localVarFp.listValidators(networkId, assetId, status, limit, page, options).then((request) => request(axios, basePath));
         },
     };
@@ -6302,14 +6329,14 @@ export interface ValidatorsApiInterface {
      * @summary List validators belonging to the CDP project
      * @param {string} networkId The ID of the blockchain network.
      * @param {string} assetId The symbol of the asset to get the validators for.
-     * @param {string} [status] A filter to list validators based on a status.
+     * @param {ValidatorStatus} [status] A filter to list validators based on a status.
      * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
      * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ValidatorsApiInterface
      */
-    listValidators(networkId: string, assetId: string, status?: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<ValidatorList>;
+    listValidators(networkId: string, assetId: string, status?: ValidatorStatus, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<ValidatorList>;
 
 }
 
@@ -6339,14 +6366,14 @@ export class ValidatorsApi extends BaseAPI implements ValidatorsApiInterface {
      * @summary List validators belonging to the CDP project
      * @param {string} networkId The ID of the blockchain network.
      * @param {string} assetId The symbol of the asset to get the validators for.
-     * @param {string} [status] A filter to list validators based on a status.
+     * @param {ValidatorStatus} [status] A filter to list validators based on a status.
      * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
      * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ValidatorsApi
      */
-    public listValidators(networkId: string, assetId: string, status?: string, limit?: number, page?: string, options?: RawAxiosRequestConfig) {
+    public listValidators(networkId: string, assetId: string, status?: ValidatorStatus, limit?: number, page?: string, options?: RawAxiosRequestConfig) {
         return ValidatorsApiFp(this.configuration).listValidators(networkId, assetId, status, limit, page, options).then((request) => request(this.axios, this.basePath));
     }
 }

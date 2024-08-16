@@ -1,5 +1,5 @@
 import { Coinbase } from "./coinbase";
-import { Validator as ValidatorModel } from "../client/api";
+import { Validator as ValidatorModel, ValidatorStatus } from "../client/api";
 import { InternalError } from "./errors";
 
 /**
@@ -34,7 +34,7 @@ export class Validator {
   public static async list(
     networkId: string,
     assetId: string,
-    status?: string,
+    status?: ValidatorStatus,
   ): Promise<Validator[]> {
     const validators: Validator[] = [];
 
