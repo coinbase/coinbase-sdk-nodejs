@@ -19,3 +19,4 @@ export * from "./coinbase/staking_operation";
 export * from "./coinbase/staking_reward";
 export * from "./coinbase/staking_balance";
 export * from "./coinbase/validator";
+export * from "./coinbase/smart_contract";
