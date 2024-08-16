@@ -12,11 +12,12 @@
 - Remove user concept from the SDK
 - Remove "pending" status from StakingOperationStatusEnum
 - Add staking operation class helper methods like `isTerminalState`, `isFailedState` and `isCompleteState`.
+- Add validator status enum
 
 ### Changed
 
 - Update `reload()` method to work with both External and Wallet address.
-- Update `createStakingOperation` logic to make sure we only pull in newer unsigned txs from the server.   
+- Update `createStakingOperation` logic to make sure we only pull in newer unsigned txs from the server.
   This is especially important for External Address use-case where tx signing and broadcast status is maintained on client side, and we risk overwriting the existing txs.
 - Increase default timeout for `createStakingOperation` to 10 min.
 
