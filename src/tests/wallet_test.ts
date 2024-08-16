@@ -466,7 +466,7 @@ describe("Wallet Class", () => {
         mockHistoricalBalanceResponse,
       );
     });
-    
+
     it("should throw an error when the wallet does not have a default address", async () => {
       const newWallet = Wallet.init(walletModel);
       await expect(
@@ -798,12 +798,14 @@ describe("Wallet Class", () => {
           network_id: Coinbase.networks.BaseSepolia,
           public_key: wallet1PrivateKey,
           wallet_id: walletId,
+          index: 0,
         },
         {
           address_id: address2,
           network_id: Coinbase.networks.BaseSepolia,
           public_key: wallet2PrivateKey,
           wallet_id: walletId,
+          index: 1,
         },
       ];
       walletModel = {

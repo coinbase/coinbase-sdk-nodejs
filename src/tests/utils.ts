@@ -83,6 +83,7 @@ export const newAddressModel = (
   walletId: string,
   address_id: string = "",
   network_id: string = Coinbase.networks.BaseSepolia,
+  index: number = 0,
 ): AddressModel => {
   const ethAddress = ethers.Wallet.createRandom();
 
@@ -91,6 +92,7 @@ export const newAddressModel = (
     network_id: network_id ? network_id : Coinbase.networks.BaseSepolia,
     public_key: ethAddress.publicKey,
     wallet_id: walletId,
+    index,
   };
 };
 
@@ -105,6 +107,7 @@ export const VALID_WALLET_MODEL: WalletModel = {
     address_id: "0xdeadbeef",
     public_key: "0x1234567890",
     network_id: Coinbase.networks.BaseSepolia,
+    index: 0,
   },
 };
 
