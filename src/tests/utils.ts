@@ -473,3 +473,7 @@ export const externalAddressApiMock = {
 export const serverSignersApiMock = {
   listServerSigners: jest.fn(),
 };
+
+export const smartContractApiMock = {
+  listContractEvents: jest.fn(),
+};
