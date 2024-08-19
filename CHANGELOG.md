@@ -7,6 +7,13 @@
 - Add historical_balances function for wallet: listing historical balances for default address of the wallet.
 - Add toAddressId() method to Transaction class
 - Remove "pending" status from StakingOperationStatusEnum
+- Add staking operation class helper methods like `isTerminalState`, `isFailedState` and `isCompleteState`.
+
+### Changed
+
+- Update `reload()` method to work with both External and Wallet address.
+- Update `createStakingOperation` logic to make sure we only pull in newer unsigned txs from the server.   
+  This is especially important for External Address use-case where tx signing and broadcast status is maintained on client side, and we risk overwriting the existing txs.
 
 ## [0.0.16] - 2024-08-14
 
@@ -16,7 +23,7 @@
 - Support for retrieving historical staking balances information
 - USD value conversion details to the StakingReward object
 - Gasless USDC Sends
-- Support for Etherum-Mainnet and Polygon-Mainnet
+- Support for Ethereum-Mainnet and Polygon-Mainnet
 
 ## [0.0.15] - 2024-08-12
 

@@ -15,6 +15,7 @@ import {
   Validator,
   StakingOperationStatusEnum,
   FeatureSet,
+  TransactionStatusEnum,
 } from "../client";
 import { BASE_PATH } from "../client/base";
 import { Coinbase } from "../coinbase/coinbase";
@@ -194,7 +195,7 @@ export const VALID_STAKING_OPERATION_MODEL: StakingOperationModel = {
         "3031653635393462333732386230386138323335333433227d",
       transaction_hash: "0xdummy-transaction-hash",
       transaction_link: "https://sepolia.basescan.org/tx/0xdeadbeef",
-      status: "pending",
+      status: TransactionStatusEnum.Pending,
     },
   ],
 };

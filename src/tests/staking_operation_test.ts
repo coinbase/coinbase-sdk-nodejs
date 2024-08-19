@@ -7,7 +7,7 @@ import {
   VALID_STAKING_OPERATION_MODEL,
 } from "./utils";
 import { ethers } from "ethers";
-import { StakingOperationStatusEnum } from "../client";
+import { StakingOperationStatusEnum, TransactionStatusEnum } from "../client";
 import { Coinbase } from "../coinbase/coinbase";
 
 describe("StakingOperation", () => {
@@ -24,10 +24,17 @@ describe("StakingOperation", () => {
     const op = new StakingOperation(VALID_STAKING_OPERATION_MODEL);
     expect(op).toBeInstanceOf(StakingOperation);
   });
+
   it("should raise an error when initialized with a model of a different type", () => {
     expect(() => {
       new StakingOperation(null!);
     }).toThrow(Error);
+  });
+
+  it("should return a string representation with id, status, network_id, and address_id", () => {
+    const op = new StakingOperation(VALID_STAKING_OPERATION_MODEL);
+    const expectedString = `StakingOperation { id: ${op.getID()}, status: ${op.getStatus()}, network_id: ${op.getNetworkID()}, address_id: ${op.getAddressID()} }`;
+    expect(op.toString()).toEqual(expectedString);
   });
 
   describe(".getTransactions", () => {
@@ -57,25 +64,6 @@ describe("StakingOperation", () => {
       expect(async () => {
         await op.sign(key);
       }).not.toThrow(Error);
-    });
-  });
-
-  describe(".fetch", () => {
-    it("should fetch the staking operation successfully", async () => {
-      Coinbase.apiClients.stake!.getExternalStakingOperation = mockReturnValue(
-        VALID_STAKING_OPERATION_MODEL,
-      );
-
-      const op = new StakingOperation(VALID_STAKING_OPERATION_MODEL);
-      const updatedStakeOp = await op.fetch();
-
-      expect(Coinbase.apiClients.stake!.getExternalStakingOperation).toHaveBeenCalledWith(
-        Coinbase.networks.EthereumHolesky,
-        "some-address-id",
-        "some-id",
-      );
-
-      expect(updatedStakeOp.transactions?.length).toEqual(1);
     });
   });
 
@@ -130,6 +118,86 @@ describe("StakingOperation", () => {
       expect(stakingOperation.isTerminalState()).toBe(false);
       expect(stakingOperation.getTransactions().length).toBe(1);
       expect(stakingOperation.getSignedVoluntaryExitMessages().length).toBe(0);
+    });
+  });
+
+  describe("StakingOperation.loadTransactionsFromModel", () => {
+    it("should not add duplicate transactions", () => {
+      // Step 1: Set up a staking operation object with 2 unsigned transactions
+      const modelWithInitialTransactions = {
+        ...VALID_STAKING_OPERATION_MODEL,
+        transactions: [
+          {
+            network_id: Coinbase.networks.EthereumHolesky,
+            from_address_id: "dummy-from-address-id",
+            to_address_id: "dummy-to-address-id",
+            unsigned_payload: "payload1",
+            transaction_hash: "0xdummy-transaction-hash",
+            transaction_link: "https://sepolia.basescan.org/tx/0xdeadbeef",
+            status: TransactionStatusEnum.Pending,
+          },
+          {
+            network_id: Coinbase.networks.EthereumHolesky,
+            from_address_id: "dummy-from-address-id",
+            to_address_id: "dummy-to-address-id",
+            unsigned_payload: "payload2",
+            transaction_hash: "0xdummy-transaction-hash",
+            transaction_link: "https://sepolia.basescan.org/tx/0xdeadbeef",
+            status: TransactionStatusEnum.Pending,
+          },
+          {
+            network_id: Coinbase.networks.EthereumHolesky,
+            from_address_id: "dummy-from-address-id",
+            to_address_id: "dummy-to-address-id",
+            unsigned_payload: "payload3",
+            transaction_hash: "0xdummy-transaction-hash",
+            transaction_link: "https://sepolia.basescan.org/tx/0xdeadbeef",
+            status: TransactionStatusEnum.Pending,
+          },
+        ],
+      };
+
+      const op = new StakingOperation(modelWithInitialTransactions);
+
+      // Step 2: Mark payload1 and payload2 as signed
+      op.getTransactions()
+        .slice(0, 2)
+        .forEach(tx => {
+          tx.sign = jest.fn().mockResolvedValue(true);
+          tx.isSigned = jest.fn().mockReturnValue(true);
+        });
+
+      // Step 3: Call reload and add two new transactions (payload4 and payload5)
+      op["model"].transactions.push(
+        {
+          network_id: Coinbase.networks.EthereumHolesky,
+          from_address_id: "dummy-from-address-id",
+          to_address_id: "dummy-to-address-id",
+          unsigned_payload: "payload4",
+          transaction_hash: "0xdummy-transaction-hash",
+          transaction_link: "https://sepolia.basescan.org/tx/0xdeadbeef",
+          status: TransactionStatusEnum.Pending,
+        },
+        {
+          network_id: Coinbase.networks.EthereumHolesky,
+          from_address_id: "dummy-from-address-id",
+          to_address_id: "dummy-to-address-id",
+          unsigned_payload: "payload5",
+          transaction_hash: "0xdummy-transaction-hash",
+          transaction_link: "https://sepolia.basescan.org/tx/0xdeadbeef",
+          status: TransactionStatusEnum.Pending,
+        },
+      );
+
+      op["loadTransactionsFromModel"]();
+
+      // Step 4: Ensure the final state has 5 transactions, with payload1 and payload2 still signed, and payload3, payload4, and payload5 unsigned
+      expect(op.getTransactions().length).toEqual(5);
+      expect(op.getTransactions()[0].isSigned()).toBe(true);
+      expect(op.getTransactions()[1].isSigned()).toBe(true);
+      expect(op.getTransactions()[2].isSigned()).toBe(false);
+      expect(op.getTransactions()[3].isSigned()).toBe(false);
+      expect(op.getTransactions()[4].isSigned()).toBe(false);
     });
   });
 });

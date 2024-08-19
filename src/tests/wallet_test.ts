@@ -276,6 +276,13 @@ describe("Wallet Class", () => {
         ).rejects.toThrow(InternalError);
       });
 
+      it("should throw an error when wait is called on wallet address based staking operation", async () => {
+        const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
+        const op = await wallet.createStake(0.001, Coinbase.assets.Eth);
+        expect(op).toBeInstanceOf(StakingOperation);
+        await expect(async () => await op.wait()).rejects.toThrow(Error);
+      });
+
       it("should fail when reloading without a wallet id", async () => {
         const stakingOperation = new StakingOperation(STAKING_OPERATION_MODEL);
         STAKING_OPERATION_MODEL.wallet_id = undefined;

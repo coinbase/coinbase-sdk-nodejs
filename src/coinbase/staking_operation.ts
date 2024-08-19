@@ -13,7 +13,7 @@ import { delay } from "./utils";
  */
 export class StakingOperation {
   private model: StakingOperationModel;
-  private transactions: Transaction[];
+  private readonly transactions: Transaction[];
 
   /**
    * Creates a StakingOperation object.
@@ -28,12 +28,7 @@ export class StakingOperation {
 
     this.model = model;
     this.transactions = [];
-
-    if (model.transactions) {
-      model.transactions.forEach(transaction => {
-        this.transactions.push(new Transaction(transaction));
-      });
-    }
+    this.loadTransactionsFromModel();
   }
 
   /**
@@ -73,31 +68,48 @@ export class StakingOperation {
   }
 
   /**
-   * Reloads the StakingOperation model with the latest data from the server.
-   * If the StakingOperation object was created by an ExternalAddress then it will
-   * not have a wallet ID.
+   * Returns the Network ID.
    *
-   * @throws {APIError} if the API request to get the StakingOperation fails.
-   * @throws {Error} if this function is called on a StakingOperation without a wallet ID.
+   * @returns The Network ID.
    */
-  public async reload(): Promise<void> {
-    if (this.getWalletID() === undefined) {
-      throw new Error("cannot reload staking operation without a wallet ID.");
-    }
-    const result = await Coinbase.apiClients.stake!.getStakingOperation(
-      this.getWalletID()!,
-      this.getAddressID(),
-      this.getID(),
-    );
+  public getNetworkID(): string {
+    return this.model.network_id;
+  }
 
-    this.model = result?.data;
-    // only overwrite the transactions if the response is populated.
-    if (result?.data.transactions.length != 0) {
-      this.transactions = [];
-      result?.data.transactions.forEach(transaction => {
-        this.transactions.push(new Transaction(transaction));
-      });
-    }
+  /**
+   * Return a human-readable string representation of the StakingOperation object.
+   *
+   * @returns The string representation of the StakingOperation object.
+   */
+  public toString(): string {
+    return `StakingOperation { id: ${this.getID()}, status: ${this.getStatus()}, network_id: ${this.getNetworkID()}, address_id: ${this.getAddressID()} }`;
+  }
+
+  /**
+   * Returns whether the Staking operation is in a terminal State.
+   *
+   * @returns Whether the Staking operation is in a terminal State
+   */
+  isTerminalState(): boolean {
+    return this.isCompleteState() || this.isFailedState();
+  }
+
+  /**
+   * Returns whether the Staking operation is in a failed state.
+   *
+   * @returns Whether the Staking operation is in a failed state.
+   */
+  isFailedState(): boolean {
+    return this.getStatus() === StakingOperationStatusEnum.Failed;
+  }
+
+  /**
+   * Returns whether the Staking operation is in a complete state.
+   *
+   * @returns Whether the Staking operation is in a complete state.
+   */
+  isCompleteState(): boolean {
+    return this.getStatus() === StakingOperationStatusEnum.Complete;
   }
 
   /**
@@ -129,12 +141,33 @@ export class StakingOperation {
   }
 
   /**
-   * Returns whether the Staking operation is in a terminal State.
+   * Reloads the StakingOperation model with the latest data from the server.
+   * If the StakingOperation object was created by an ExternalAddress then it will
+   * not have a wallet ID.
    *
-   * @returns Whether the Staking operation is in a terminal State
+   * @throws {APIError} if the API request to get the StakingOperation fails.
+   * @throws {Error} if this function is called on a StakingOperation without a wallet ID.
    */
-  isTerminalState(): boolean {
-    return this.getStatus() === StakingOperationStatusEnum.Complete;
+  public async reload(): Promise<void> {
+    if (this.getWalletID() === undefined) {
+      const result = await Coinbase.apiClients.stake!.getExternalStakingOperation(
+        this.getNetworkID(),
+        this.getAddressID(),
+        this.getID(),
+      );
+
+      this.model = result.data;
+    } else if (this.getWalletID() != undefined && this.getWalletID() != "") {
+      const result = await Coinbase.apiClients.stake!.getStakingOperation(
+        this.getWalletID()!,
+        this.getAddressID(),
+        this.getID(),
+      );
+
+      this.model = result.data;
+    }
+
+    this.loadTransactionsFromModel();
   }
 
   /**
@@ -150,9 +183,13 @@ export class StakingOperation {
     intervalSeconds = 5,
     timeoutSeconds = 3600,
   } = {}): Promise<StakingOperationModel> {
+    if (this.getWalletID() != undefined) {
+      throw new Error("cannot wait on staking operation for wallet address.");
+    }
+
     const startTime = Date.now();
     while (Date.now() - startTime < timeoutSeconds * 1000) {
-      await this.fetch();
+      await this.reload();
       if (this.isTerminalState()) {
         return this.model;
       }
@@ -170,22 +207,33 @@ export class StakingOperation {
   /**
    * Get the staking operation for the given ID.
    *
+   * @param networkId - The network ID.
+   * @param addressId - The address ID.
+   * @param id - The staking operation ID.
+   * @param walletId - The wallet ID of the staking operation.
    * @returns The staking operation object.
    */
-  public async fetch(): Promise<StakingOperationModel> {
-    const response = await Coinbase.apiClients.stake!.getExternalStakingOperation(
-      this.model.network_id,
-      this.model.address_id,
-      this.model.id,
-    );
+  public async fetch(
+    networkId: string,
+    addressId: string,
+    id: string,
+    walletId?: string,
+  ): Promise<StakingOperationModel> {
+    if (this.getWalletID() === undefined) {
+      const result = await Coinbase.apiClients.stake!.getExternalStakingOperation(
+        networkId,
+        addressId,
+        id,
+      );
 
-    this.model = response.data;
+      this.model = result.data;
+    } else if (this.getWalletID() != undefined && this.getWalletID() != "") {
+      const result = await Coinbase.apiClients.stake!.getStakingOperation(walletId!, addressId, id);
 
-    if (this.model.transactions) {
-      this.model.transactions.forEach(transaction => {
-        this.transactions.push(new Transaction(transaction));
-      });
+      this.model = result.data;
     }
+
+    this.loadTransactionsFromModel();
 
     return this.model;
   }
@@ -200,6 +248,32 @@ export class StakingOperation {
       if (!tx.isSigned()) {
         await tx.sign(key);
       }
+    }
+  }
+
+  /**
+   * loadTransactionsFromModel loads new unsigned transactions from the model into the transactions array.
+   * Note: For External Address model since tx signing and broadcast status happens by the end user and not our backend
+   * we need to be careful to not overwrite the transactions array with the response from the API. Ex: End user could have used
+   * stakingOperation.sign() method to sign the transactions, and we should not overwrite them with the response from the API.
+   * This however is ok to do so for the Wallet Address model since the transactions are signed and broadcasted by our backend.
+   * This method attempts to be safe for both address models, and only adds newly created unsigned transactions that are not
+   *  already in the transactions array.
+   */
+  private loadTransactionsFromModel() {
+    // Only overwrite the transactions if the response is populated.
+    if (this.model.transactions && this.model.transactions.length > 0) {
+      // Create a set of existing unsigned payloads to avoid duplicates.
+      const existingUnsignedPayloads = new Set(
+        this.transactions.map(tx => tx.getUnsignedPayload()),
+      );
+
+      // Add transactions that are not already in the transactions array.
+      this.model.transactions.forEach(transaction => {
+        if (!existingUnsignedPayloads.has(transaction.unsigned_payload)) {
+          this.transactions.push(new Transaction(transaction));
+        }
+      });
     }
   }
 }
