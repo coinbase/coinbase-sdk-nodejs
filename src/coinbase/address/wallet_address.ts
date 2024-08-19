@@ -76,6 +76,15 @@ export class WalletAddress extends Address {
   }
 
   /**
+   * Returns whether the Address has a private key backing it to sign transactions.
+   *
+   * @returns Whether the Address has a private key backing it to sign transactions.
+   */
+  public canSign(): boolean {
+    return !!this.key;
+  }
+
+  /**
    * Returns all the trades associated with the address.
    *
    * @returns The list of trades.
@@ -185,7 +194,7 @@ export class WalletAddress extends Address {
       gasless: gasless,
     };
 
-    let response = await Coinbase.apiClients.transfer!.createTransfer(
+    const response = await Coinbase.apiClients.transfer!.createTransfer(
       this.getWalletId(),
       this.getId(),
       createTransferRequest,
@@ -213,37 +222,9 @@ export class WalletAddress extends Address {
   }
 
   /**
-   * Returns the address and network ID of the given destination.
-   *
-   * @param destination - The destination to get the address and network ID of.
-   * @returns The address and network ID of the destination.
-   */
-  private getDestinationAddressAndNetwork(destination: Destination): [string, string] {
-    if (typeof destination !== "string" && destination.getNetworkId() !== this.getNetworkId()) {
-      throw new ArgumentError("Transfer must be on the same Network");
-    }
-    if (destination instanceof WalletClass) {
-      return [destination.getDefaultAddress()!.getId(), destination.getNetworkId()];
-    }
-    if (destination instanceof Address) {
-      return [destination.getId(), destination.getNetworkId()];
-    }
-    return [destination, this.getNetworkId()];
-  }
-
-  /**
-   * Returns whether the Address has a private key backing it to sign transactions.
-   *
-   * @returns Whether the Address has a private key backing it to sign transactions.
-   */
-  public canSign(): boolean {
-    return !!this.key;
-  }
-
-  /**
    * Trades the given amount of the given Asset for another Asset. Only same-network Trades are supported.
    *
-   * @param options = The options to create the Trade.
+   * @param options - The options to create the Trade.
    * @param options.amount - The amount of the From Asset to send.
    * @param options.fromAssetId - The ID of the Asset to trade from.
    * @param options.toAssetId - The ID of the Asset to trade to.
@@ -289,82 +270,6 @@ export class WalletAddress extends Address {
       await delay(intervalSeconds);
     }
     throw new Error("Trade timed out");
-  }
-
-  /**
-   * Creates a trade model for the specified amount and assets.
-   *
-   * @param amount - The amount of the Asset to send.
-   * @param fromAsset - The Asset to trade from.
-   * @param toAsset - The Asset to trade to.
-   * @returns A promise that resolves to a Trade object representing the new trade.
-   */
-  private async createTradeRequest(
-    amount: Amount,
-    fromAsset: Asset,
-    toAsset: Asset,
-  ): Promise<Trade> {
-    const tradeRequestPayload = {
-      amount: fromAsset.toAtomicAmount(new Decimal(amount.toString())).toString(),
-      from_asset_id: fromAsset.primaryDenomination(),
-      to_asset_id: toAsset.primaryDenomination(),
-    };
-    const tradeModel = await Coinbase.apiClients.trade!.createTrade(
-      this.getWalletId(),
-      this.getId(),
-      tradeRequestPayload,
-    );
-    return new Trade(tradeModel?.data);
-  }
-
-  /**
-   * Broadcasts a trade using the provided signed payloads.
-   *
-   * @param trade - The Trade object representing the trade.
-   * @param signedPayload - The signed payload of the trade.
-   * @param approveTransactionPayload - The signed payload of the approval transaction, if any.
-   * @returns A promise that resolves to a Trade object representing the broadcasted trade.
-   */
-  private async broadcastTradeRequest(
-    trade: Trade,
-    signedPayload: string,
-    approveTransactionPayload?: string,
-  ): Promise<Trade> {
-    const broadcastTradeRequestPayload = {
-      signed_payload: signedPayload,
-      approve_transaction_signed_payload: approveTransactionPayload
-        ? approveTransactionPayload
-        : undefined,
-    };
-
-    const response = await Coinbase.apiClients.trade!.broadcastTrade(
-      this.getWalletId(),
-      this.getId(),
-      trade.getId(),
-      broadcastTradeRequestPayload,
-    );
-
-    return new Trade(response.data);
-  }
-
-  /**
-   * Checks if trading is possible and raises an error if not.
-   *
-   * @param amount - The amount of the Asset to send.
-   * @param fromAssetId - The ID of the Asset to trade from. For Ether, eth, gwei, and wei are supported.
-   * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
-   */
-  private async validateCanTrade(amount: Amount, fromAssetId: string) {
-    if (!Coinbase.useServerSigner && !this.key) {
-      throw new Error("Cannot trade from address without private key loaded");
-    }
-    const currentBalance = await this.getBalance(fromAssetId);
-    amount = new Decimal(amount.toString());
-    if (currentBalance.lessThan(amount)) {
-      throw new Error(
-        `Insufficient funds: ${amount} requested, but only ${currentBalance} available`,
-      );
-    }
   }
 
   /**
@@ -461,6 +366,101 @@ export class WalletAddress extends Address {
   }
 
   /**
+   * Returns the address and network ID of the given destination.
+   *
+   * @param destination - The destination to get the address and network ID of.
+   * @returns The address and network ID of the destination.
+   */
+  private getDestinationAddressAndNetwork(destination: Destination): [string, string] {
+    if (typeof destination !== "string" && destination.getNetworkId() !== this.getNetworkId()) {
+      throw new ArgumentError("Transfer must be on the same Network");
+    }
+    if (destination instanceof WalletClass) {
+      return [destination.getDefaultAddress()!.getId(), destination.getNetworkId()];
+    }
+    if (destination instanceof Address) {
+      return [destination.getId(), destination.getNetworkId()];
+    }
+    return [destination, this.getNetworkId()];
+  }
+
+  /**
+   * Creates a trade model for the specified amount and assets.
+   *
+   * @param amount - The amount of the Asset to send.
+   * @param fromAsset - The Asset to trade from.
+   * @param toAsset - The Asset to trade to.
+   * @returns A promise that resolves to a Trade object representing the new trade.
+   */
+  private async createTradeRequest(
+    amount: Amount,
+    fromAsset: Asset,
+    toAsset: Asset,
+  ): Promise<Trade> {
+    const tradeRequestPayload = {
+      amount: fromAsset.toAtomicAmount(new Decimal(amount.toString())).toString(),
+      from_asset_id: fromAsset.primaryDenomination(),
+      to_asset_id: toAsset.primaryDenomination(),
+    };
+    const tradeModel = await Coinbase.apiClients.trade!.createTrade(
+      this.getWalletId(),
+      this.getId(),
+      tradeRequestPayload,
+    );
+    return new Trade(tradeModel?.data);
+  }
+
+  /**
+   * Broadcasts a trade using the provided signed payloads.
+   *
+   * @param trade - The Trade object representing the trade.
+   * @param signedPayload - The signed payload of the trade.
+   * @param approveTransactionPayload - The signed payload of the approval transaction, if any.
+   * @returns A promise that resolves to a Trade object representing the broadcasted trade.
+   */
+  private async broadcastTradeRequest(
+    trade: Trade,
+    signedPayload: string,
+    approveTransactionPayload?: string,
+  ): Promise<Trade> {
+    const broadcastTradeRequestPayload = {
+      signed_payload: signedPayload,
+      approve_transaction_signed_payload: approveTransactionPayload
+        ? approveTransactionPayload
+        : undefined,
+    };
+
+    const response = await Coinbase.apiClients.trade!.broadcastTrade(
+      this.getWalletId(),
+      this.getId(),
+      trade.getId(),
+      broadcastTradeRequestPayload,
+    );
+
+    return new Trade(response.data);
+  }
+
+  /**
+   * Checks if trading is possible and raises an error if not.
+   *
+   * @param amount - The amount of the Asset to send.
+   * @param fromAssetId - The ID of the Asset to trade from. For Ether, eth, gwei, and wei are supported.
+   * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
+   */
+  private async validateCanTrade(amount: Amount, fromAssetId: string) {
+    if (!Coinbase.useServerSigner && !this.key) {
+      throw new Error("Cannot trade from address without private key loaded");
+    }
+    const currentBalance = await this.getBalance(fromAssetId);
+    amount = new Decimal(amount.toString());
+    if (currentBalance.lessThan(amount)) {
+      throw new Error(
+        `Insufficient funds: ${amount} requested, but only ${currentBalance} available`,
+      );
+    }
+  }
+
+  /**
    * Creates a staking operation to stake, signs it, and broadcasts it on the blockchain.
    *
    * @param amount - The amount for the staking operation.
@@ -470,6 +470,8 @@ export class WalletAddress extends Address {
    * @param options - Additional options such as setting the mode for the staking action.
    * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
    * @param intervalSeconds - The amount to check each time for a successful broadcast.
+   * @throws {APIError} if the API request to create or broadcast staking operation fails.
+   * @throws {Error} if the amount is less than zero.
    * @returns The staking operation after it's completed fully.
    */
   private async createStakingOperation(
@@ -501,7 +503,7 @@ export class WalletAddress extends Address {
         continue;
       }
       stakingOperation = await this.broadcastStakingOperationRequest(
-        stakingOperation,
+        stakingOperation.getID(),
         transaction.getSignedPayload()!.slice(2),
         i,
       );
@@ -531,7 +533,7 @@ export class WalletAddress extends Address {
    * @param mode - The staking mode. Defaults to DEFAULT.
    * @param options - Additional options such as setting the mode for the staking action.
    * @private
-   * @throws {Error} if the amount is less than zero.
+   * @throws {APIError} if the API request to create staking operation fails.
    * @returns The created staking operation.
    */
   private async createStakingOperationRequest(
@@ -565,14 +567,14 @@ export class WalletAddress extends Address {
   /**
    * A helper function that broadcasts the signed payload.
    *
-   * @param stakingOperation - The staking operation related to the signed payload.
+   * @param stakingOperationID - The staking operation related to the signed payload.
    * @param signedPayload - The payload that's being broadcasted.
    * @param transactionIndex - The index of the transaction in the array from the staking operation.
    * @private
    * @returns An updated staking operation with the broadcasted transaction.
    */
   private async broadcastStakingOperationRequest(
-    stakingOperation: StakingOperation,
+    stakingOperationID: string,
     signedPayload: string,
     transactionIndex: number,
   ): Promise<StakingOperation> {
@@ -580,13 +582,14 @@ export class WalletAddress extends Address {
       signed_payload: signedPayload,
       transaction_index: transactionIndex,
     };
+
     const response = await Coinbase.apiClients.stake!.broadcastStakingOperation(
       this.getWalletId(),
       this.getId(),
-      stakingOperation.getID(),
+      stakingOperationID,
       broadcastStakingOperationRequest,
     );
 
-    return new StakingOperation(response!.data);
+    return new StakingOperation(response.data);
   }
 }

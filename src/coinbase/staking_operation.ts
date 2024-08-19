@@ -8,7 +8,7 @@ import { Coinbase } from "./coinbase";
 import { delay } from "./utils";
 
 /**
- * A representation of a staking operation (stake, unstake, claim rewards, etc). It
+ * A representation of a staking operation (stake, unstake, claim stake, etc.). It
  * may have multiple steps with some being transactions to sign, and others to wait.
  */
 export class StakingOperation {
@@ -25,6 +25,7 @@ export class StakingOperation {
     if (!model) {
       throw new Error("Invalid model type");
     }
+
     this.model = model;
     this.transactions = [];
 
@@ -45,6 +46,15 @@ export class StakingOperation {
   }
 
   /**
+   * Get the status of the staking operation.
+   *
+   * @returns The status of the staking operation.
+   */
+  public getStatus(): StakingOperationStatusEnum {
+    return this.model.status;
+  }
+
+  /**
    * Returns the Wallet ID if it exists.
    *
    * @returns The Wallet ID.
@@ -60,15 +70,6 @@ export class StakingOperation {
    */
   public getAddressID(): string {
     return this.model.address_id;
-  }
-
-  /**
-   * Get the status of the staking operation.
-   *
-   * @returns The status of the staking operation.
-   */
-  public getStatus(): StakingOperationStatusEnum {
-    return this.model.status;
   }
 
   /**
