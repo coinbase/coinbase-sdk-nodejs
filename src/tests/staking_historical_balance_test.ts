@@ -10,7 +10,6 @@ import {
 } from "./utils";
 import { StakingBalance } from "../coinbase/staking_balance";
 import { ExternalAddress } from "../coinbase/address/external_address";
-import { Asset } from "../coinbase/asset";
 
 describe("StakingBalance", () => {
   const startTime = "2024-05-01T00:00:00Z";
