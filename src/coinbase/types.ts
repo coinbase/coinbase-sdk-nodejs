@@ -448,7 +448,7 @@ export type StakeAPIClient = {
    *
    * @param networkId - The ID of the blockchain network.
    * @param assetId - The ID of the asset to fetch the staking balances for.
-   * @param address - The onchain address to fetch the staking balances for.
+   * @param addressId - The onchain address to fetch the staking balances for.
    * @param startTime - The start time of the staking balances.
    * @param endTime - The end time of the staking balances.
    * @param limit - The amount of records to return in a single call.
@@ -458,7 +458,7 @@ export type StakeAPIClient = {
   fetchHistoricalStakingBalances(
     networkId: string,
     assetId: string,
-    address: string,
+    addressId: string,
     startTime: string,
     endTime: string,
     limit?: number,
