@@ -41,9 +41,9 @@ export class StakingBalance {
       const page = queue.shift();
 
       const response = await Coinbase.apiClients.stake!.fetchHistoricalStakingBalances(
-        address,
         networkId,
         assetId,
+        address,
         startTime,
         endTime,
         100,
