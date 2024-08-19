@@ -143,7 +143,7 @@ describe("StakingBalance", () => {
 
       const balanceStr = balance.toString();
       expect(balanceStr).toEqual(
-        "StakingBalance { date: '2024-05-03T00:00:00.000Z' address: 'some-address-id' bondedStake: 'Balance { amount: '32' asset: 'Asset{ networkId: ethereum-holesky, assetId: eth, contractAddress: undefined, decimals: 18 }' }' unbondedBalance: 'Balance { amount: '2' asset: 'Asset{ networkId: ethereum-holesky, assetId: eth, contractAddress: undefined, decimals: 18 }' }' participantType: 'validator' }",
+        "StakingBalance { date: '2024-05-03T00:00:00.000Z' address: 'some-address-id' bondedStake: '32 ETH' unbondedBalance: '2 ETH' participantType: 'validator' }",
       );
     });
   });
