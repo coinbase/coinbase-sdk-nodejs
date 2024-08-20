@@ -34,6 +34,10 @@ import {
   ValidatorList,
   Validator,
   ValidatorStatus,
+  Webhook as WebhookModel,
+  WebhookList,
+  CreateWebhookRequest,
+  UpdateWebhookRequest,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
