@@ -36,6 +36,9 @@ import { StakingBalance } from "./staking_balance";
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
  * each of which can hold a balance of one or more Assets. Wallets can create new Addresses, list their addresses,
  * list their balances, and transfer Assets to other Addresses. Wallets should be created through User.createWallet or User.importWallet.
+ * Wallets should be created using `Wallet.create`, imported using `Wallet.import`, or fetched using `Wallet.fetch`.
+ * Existing wallets can be imported with a seed using `Wallet.import`.
+ * Wallets backed by a Server Signer can be fetched with `Wallet.fetch` and used for signing operations immediately.
  */
 export class Wallet {
   static MAX_ADDRESSES = 20;
@@ -63,7 +66,7 @@ export class Wallet {
   }
 
   /**
-   * Lists the Wallets belonging to the User.
+   * Lists the Wallets belonging to the CDP Project.
    *
    * @returns The list of Wallets.
    */
@@ -127,13 +130,12 @@ export class Wallet {
   }
 
   /**
-   * Returns a newly created Wallet object. Do not use this method directly.
-   * Instead, use User.createWallet.
+   * Returns a newly created Wallet object.
    *
    * @constructs Wallet
    * @param options - The options to create the Wallet.
    * @param options.networkId - the ID of the blockchain network. Defaults to 'base-sepolia'.
-   * @param options.intervalSeconds - The interval at which to poll the CDPService, in seconds.
+   * @param options.intervalSeconds - The interval at which to poll the backend, in seconds.
    * @param options.timeoutSeconds - The maximum amount of time to wait for the ServerSigner to create a seed, in seconds.
    * @throws {ArgumentError} If the model or client is not provided.
    * @throws {InternalError} - If address derivation or caching fails.
@@ -162,7 +164,10 @@ export class Wallet {
   }
 
   /**
-   * Returns a new Wallet object. Do not use this method directly. Instead, use User.createWallet or User.importWallet.
+   * Returns a new Wallet object. Do not use this method directly. Instead, use one of:
+   * - Wallet.create (Create a new Wallet),
+   * - Wallet.import (Import a Wallet with seed),
+   * - Wallet.fetch (fetch a Wallet by ID w/o seed, useful for server signer wallets).
    *
    * @constructs Wallet
    * @param model - The underlying Wallet model object

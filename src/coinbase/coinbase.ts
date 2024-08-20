@@ -2,8 +2,6 @@ import globalAxios, { AxiosError } from "axios";
 import axiosRetry from "axios-retry";
 import * as fs from "fs";
 import {
-  User as UserModel,
-  UsersApiFactory,
   TransfersApiFactory,
   AddressesApiFactory,
   WalletsApiFactory,
@@ -21,7 +19,6 @@ import { Configuration } from "./../client/configuration";
 import { CoinbaseAuthenticator } from "./authenticator";
 import { InternalError, InvalidAPIKeyFormat, InvalidConfiguration } from "./errors";
 import { ApiClients, CoinbaseConfigureFromJsonOptions, CoinbaseOptions } from "./types";
-import { User } from "./user";
 import { logApiResponse, registerAxiosInterceptors } from "./utils";
 import * as os from "os";
 
@@ -119,7 +116,6 @@ export class Coinbase {
       response => logApiResponse(response, debugging),
     );
 
-    Coinbase.apiClients.user = UsersApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.wallet = WalletsApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.address = AddressesApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.transfer = TransfersApiFactory(config, basePath, axiosInstance);
@@ -205,16 +201,5 @@ export class Coinbase {
    */
   static toAssetId(asset: string): string {
     return asset.replace(/-/g, "_");
-  }
-
-  /**
-   * Returns User object for the default user.
-   *
-   * @returns The default user.
-   * @throws {APIError} If the request fails.
-   */
-  async getDefaultUser(): Promise<User> {
-    const userResponse = await Coinbase.apiClients.user!.getCurrentUser();
-    return new User(userResponse.data as UserModel);
   }
 }
