@@ -626,7 +626,7 @@ export interface EthereumValidatorMetadata {
      * @type {string}
      * @memberof EthereumValidatorMetadata
      */
-    'withdrawl_address': string;
+    'withdrawal_address': string;
     /**
      * Whether the validator has been slashed.
      * @type {boolean}
