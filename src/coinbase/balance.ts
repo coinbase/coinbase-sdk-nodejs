@@ -63,13 +63,4 @@ export class Balance {
     const asset = Asset.fromModel(model.asset);
     return new Balance(new Decimal(model.amount), asset.getAssetId(), asset);
   }
-
-  /**
-   * Print the Balance as a string.
-   *
-   * @returns The string representation of the Balance.
-   */
-  public toString(): string {
-    return `Balance { amount: '${this.amount}' asset: '${this.asset?.toString()}' }`;
-  }
 }
