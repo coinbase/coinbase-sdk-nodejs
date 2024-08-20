@@ -3,7 +3,6 @@ import { ethers } from "ethers";
 import { Transaction as CoinbaseTransaction, Trade as TradeModel } from "../client/api";
 import { Transaction } from "../coinbase/transaction";
 import { Coinbase } from "./../coinbase/coinbase";
-import { ATOMIC_UNITS_PER_USDC, WEI_PER_ETHER } from "./../coinbase/constants";
 import { Trade } from "./../coinbase/trade";
 import { TransactionStatus } from "./../coinbase/types";
 import { mockReturnValue } from "./utils";
@@ -35,8 +34,10 @@ describe("Trade", () => {
     addressId = fromKey.address;
     fromAmount = new Decimal(100);
     toAmount = new Decimal(100000);
-    ethAmount = fromAmount.div(new Decimal(WEI_PER_ETHER));
-    usdcAmount = toAmount.div(new Decimal(ATOMIC_UNITS_PER_USDC));
+    ethAsset = { network_id: networkId, asset_id: "eth", decimals: 18 };
+    usdcAsset = { network_id: networkId, asset_id: "usdc", decimals: 6 };
+    ethAmount = fromAmount.div(new Decimal(Math.pow(10, ethAsset.decimals)));
+    usdcAmount = toAmount.div(new Decimal(Math.pow(10, usdcAsset.decimals)));
     tradeId = ethers.Wallet.createRandom().address;
     unsignedPayload =
       "7b2274797065223a22307832222c22636861696e4964223a2230783134613334222c226e6f6e63" +
@@ -49,8 +50,6 @@ describe("Trade", () => {
       "2c2273223a22307830222c2279506172697479223a22307830222c2268617368223a2230783664" +
       "633334306534643663323633653363396561396135656438646561346332383966613861363966" +
       "3031653635393462333732386230386138323335333433227d";
-    ethAsset = { network_id: networkId, asset_id: "eth", decimals: 18 };
-    usdcAsset = { network_id: networkId, asset_id: "usdc", decimals: 6 };
     transactionModel = {
       status: "pending",
       from_address_id: addressId,
@@ -194,14 +193,14 @@ describe("Trade", () => {
       await trade.reload();
       expect(trade.getTransaction().getStatus()).toBe(TransactionStatus.COMPLETE);
       expect(trade.getToAmount()).toEqual(
-        new Decimal(500000000).div(new Decimal(ATOMIC_UNITS_PER_USDC)),
+        new Decimal(500000000).div(new Decimal(Math.pow(10, usdcAsset.decimals)))
       );
     });
     it("should update properties on the trade", async () => {
       expect(trade.getToAmount()).toEqual(usdcAmount);
       await trade.reload();
       expect(trade.getToAmount()).toEqual(
-        new Decimal(updatedModel.to_amount).div(new Decimal(ATOMIC_UNITS_PER_USDC)),
+        new Decimal(updatedModel.to_amount).div(new Decimal(Math.pow(10, usdcAsset.decimals)))
       );
     });
   });

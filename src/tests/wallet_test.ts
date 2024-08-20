@@ -658,7 +658,8 @@ describe("Wallet Class", () => {
 
     describe("#getNetworkId", () => {
       let wallet;
-      let network_id = Coinbase.networks.BaseMainnet;
+      let network_id;
+      let createWalletParams;
 
       beforeEach(async () => {
         Coinbase.apiClients.wallet = walletsApiMock;
@@ -674,27 +675,27 @@ describe("Wallet Class", () => {
           server_signer_status: ServerSignerStatus.ACTIVE,
         });
         Coinbase.apiClients.address!.createAddress = mockReturnValue(newAddressModel(walletId));
-        const createWalletParams =
-          network_id === Coinbase.networks.BaseMainnet
-            ? {
-                networkId: network_id,
-              }
-            : undefined;
+
         wallet = await Wallet.create(createWalletParams);
       });
 
       describe("when a network is specified", () => {
         beforeAll(() => {
           network_id = Coinbase.networks.BaseMainnet;
+          createWalletParams = { networkId: network_id };
         });
+
         it("it creates a wallet scoped to the specified network", () => {
           expect(wallet.getNetworkId()).toBe(Coinbase.networks.BaseMainnet);
         });
       });
+
       describe("when no network is specified", () => {
         beforeAll(() => {
           network_id = Coinbase.networks.BaseSepolia;
+          createWalletParams = {};
         });
+
         it("it creates a wallet scoped to the default network", () => {
           expect(wallet.getNetworkId()).toBe(Coinbase.networks.BaseSepolia);
         });

@@ -10,7 +10,6 @@ import { Transfer } from "../coinbase/transfer";
 import { SponsoredSend } from "../coinbase/sponsored_send";
 import { Transaction } from "../coinbase/transaction";
 import { Coinbase } from "../coinbase/coinbase";
-import { WEI_PER_ETHER } from "../coinbase/constants";
 import {
   VALID_TRANSFER_MODEL,
   VALID_TRANSFER_SPONSORED_SEND_MODEL,
@@ -21,7 +20,7 @@ import {
 import { APIError } from "../coinbase/api_error";
 
 const amount = new Decimal(ethers.parseUnits("100", 18).toString());
-const ethAmount = amount.div(WEI_PER_ETHER);
+const ethAmount = amount.div(Math.pow(10, 18));
 const signedPayload =
   "02f86b83014a3401830f4240830f4350825208946cd01c0f55ce9e0bf78f5e90f72b4345b" +
   "16d515d0280c001a0566afb8ab09129b3f5b666c3a1e4a7e92ae12bbee8c75b4c6e0c46f6" +

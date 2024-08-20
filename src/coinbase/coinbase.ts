@@ -14,6 +14,7 @@ import {
   AssetsApiFactory,
   ExternalAddressesApiFactory,
   WebhooksApiFactory,
+  NetworkIdentifier,
 } from "../client";
 import { BASE_PATH } from "./../client/base";
 import { Configuration } from "./../client/configuration";
@@ -29,16 +30,16 @@ import * as os from "os";
  */
 export class Coinbase {
   /**
-   * The list of supported networks.
+   * The map of supported networks to network ID. Generated from the OpenAPI spec.
    *
    * @constant
+   *
+   * @example
+   * ```typescript
+   * Coinbase.networks.BaseMainnet
+   * ```
    */
-  static networks = {
-    BaseSepolia: "base-sepolia",
-    BaseMainnet: "base-mainnet",
-    EthereumMainnet: "ethereum-mainnet",
-    EthereumHolesky: "ethereum-holesky",
-  };
+  static networks = NetworkIdentifier;
 
   /**
    * The list of supported assets.

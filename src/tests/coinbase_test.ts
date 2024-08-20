@@ -3,6 +3,7 @@ import * as fs from "fs";
 import { randomUUID } from "crypto";
 import { APIError } from "../coinbase/api_error";
 import { Coinbase } from "../index";
+import { NetworkIdentifier } from "../client";
 import {
   VALID_WALLET_MODEL,
   addressesApiMock,
@@ -20,6 +21,16 @@ import axios from "axios";
 const PATH_PREFIX = "./src/tests/config";
 
 describe("Coinbase tests", () => {
+  describe('.networks', () => {
+    it('returns a map of networks that match the api generated NetworkIdentifier', () => {
+      expect(Coinbase.networks).toEqual(NetworkIdentifier);
+    });
+
+    it('returns the network ID when selecting a specific network', () => {
+      expect(Coinbase.networks.BaseSepolia).toEqual('base-sepolia');
+    });
+  });
+
   it("should throw an error if the API key name or private key is empty", () => {
     expect(() => new Coinbase({ apiKeyName: "", privateKey: "test" })).toThrow(
       "Invalid configuration: apiKeyName is empty",
