@@ -21,13 +21,13 @@ import axios from "axios";
 const PATH_PREFIX = "./src/tests/config";
 
 describe("Coinbase tests", () => {
-  describe('.networks', () => {
-    it('returns a map of networks that match the api generated NetworkIdentifier', () => {
+  describe(".networks", () => {
+    it("returns a map of networks that match the api generated NetworkIdentifier", () => {
       expect(Coinbase.networks).toEqual(NetworkIdentifier);
     });
 
-    it('returns the network ID when selecting a specific network', () => {
-      expect(Coinbase.networks.BaseSepolia).toEqual('base-sepolia');
+    it("returns the network ID when selecting a specific network", () => {
+      expect(Coinbase.networks.BaseSepolia).toEqual("base-sepolia");
     });
   });
 

@@ -42,7 +42,7 @@ nvm use node
 
 Optional: Initialize the npm
 
-This command initializes a new npm project with default settings and configures it to use ES modules by setting the type field to "module" in the package.json file. 
+This command initializes a new npm project with default settings and configures it to use ES modules by setting the type field to "module" in the package.json file.
 
 ```bash
 npm init -y; npm pkg set type="module"
@@ -68,13 +68,13 @@ yarn add @coinbase/coinbase-sdk
 CommonJs:
 
 ```javascript
-const { Coinbase } = require("@coinbase/coinbase-sdk");
+const { Coinbase, Wallet } = require("@coinbase/coinbase-sdk");
 ```
 
 ES modules:
 
 ```typescript
-import { Coinbase } from "@coinbase/coinbase-sdk";
+import { Coinbase, Wallet } from "@coinbase/coinbase-sdk";
 ```
 
 To start, [create a CDP API Key](https://portal.cdp.coinbase.com/access/api). Then, initialize the Platform SDK by passing your API Key name and API Key's private key via the `Coinbase` constructor:
@@ -98,34 +98,38 @@ Another way to initialize the SDK is by sourcing the API key from the json file 
 const coinbase = Coinbase.configureFromJson({ filePath: "path/to/your/api-key.json" });
 ```
 
-This will allow you to authenticate with the Platform APIs and get access to the default `User`.
+This will allow you to authenticate with the Platform APIs.
 
 CommonJs:
 
 ```javascript
-const { Coinbase } = require("@coinbase/coinbase-sdk");
+const { Coinbase, Wallet } = require("@coinbase/coinbase-sdk");
 const coinbase = Coinbase.configureFromJson("path/to/your/api-key.json");
-coinbase.getDefaultUser().then(user => {
-  console.log(user);
+
+// List all Wallets for the CDP Project.
+Wallet.listWallets().then(wallets => {
+  console.log(wallets);
 });
 ```
 
 Or using ES modules and async/await:
 
 ```typescript
-import { Coinbase } from "@coinbase/coinbase-sdk";
+import { Coinbase, Wallet } from "@coinbase/coinbase-sdk";
 const coinbase = Coinbase.configureFromJson("path/to/your/api-key.json");
-const user = await coinbase.getDefaultUser();
-console.log(user);
+
+// List all Wallets for the CDP Project.
+const wallets = await Wallet.listWallets();
+console.log(wallets);
 ```
 
 ### Wallets, Addresses, and Transfers
 
-Now, create a Wallet from the User. Wallets are created with a single default Address.
+Now, create a Wallet which will default to the Base Sepolia testnet network (if not specified).
 
 ```typescript
 // Create a Wallet with one Address by default.
-const wallet = await user.createWallet();
+const wallet = await Wallet.create();
 ```
 
 Next, view the default Address of your Wallet. You will need this default Address in order to fund the Wallet for your first Transfer.
@@ -149,7 +153,7 @@ console.log(`Faucet transaction: ${faucetTransaction}`);
 ```typescript
 // Create a new Wallet to transfer funds to.
 // Then, we can transfer 0.00001 ETH out of the Wallet to another Wallet.
-const anotherWallet = await user.createWallet();
+const anotherWallet = await Wallet.create();
 const transfer = await wallet.createTransfer({ amount: 0.00001, assetId: Coinbase.assets.Eth, destination: anotherWallet });
 ```
 
@@ -166,7 +170,7 @@ const transfer = await wallet.createTransfer({ amount: 0.00001, assetId: Coinbas
 
 ```typescript
 // Create a Wallet on `base-mainnet` to trade assets with.
-let mainnetWallet = await user.createWallet({ networkId: Coinbase.networks.BaseMainnet });
+let mainnetWallet = await Wallet.create({ networkId: Coinbase.networks.BaseMainnet });
 
 console.log(`Wallet successfully created: ${mainnetWallet}`);
 
@@ -212,13 +216,13 @@ The below code demonstrates how to re-instantiate a Wallet from the data export.
 
 ```typescript
 // The Wallet can be re-instantiated using the exported data.
-const importedWallet = await user.importWallet(data);
+const importedWallet = await Wallet.import(data);
 ```
 
 To import Wallets that were persisted to your local file system using `saveSeed`, use the below code.
 
 ```typescript
-const userWallet = await user.getWallet(wallet.getId());
+const userWallet = await Wallet.fetch(wallet.getId());
 await userWallet.loadSeed(seedFilePath);
 ```
 

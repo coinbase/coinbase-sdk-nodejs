@@ -1,16 +1,16 @@
-import { Coinbase } from "@coinbase/coinbase-sdk";
+import { Coinbase, Wallet } from "@coinbase/coinbase-sdk";
 import { createArrayCsvWriter } from "csv-writer";
 import os from "os";
 import fs from "fs";
 import { parse } from "csv-parse";
 
 // Create receiving Wallets.
-async function createReceivingWallets(user) {
+async function createReceivingWallets() {
   // Create 5 receiving Wallets and only store Wallet Addresses.
   const addresses = [];
 
   for (let i = 1; i <= 5; i++) {
-    let receivingWallet = await user.createWallet();
+    let receivingWallet = await Wallet.create();
     console.log(`Receiving Wallet${i} successfully created: `, receivingWallet.toString());
 
     let receivingAddress = receivingWallet.getDefaultAddress();
@@ -35,9 +35,9 @@ async function writeReceivingAddressesToCsv(addresses) {
 }
 
 // Create and fund a sending Wallet.
-async function createAndFundSendingWallet(user) {
+async function createAndFundSendingWallet() {
   // Create sending Wallet.
-  let sendingWallet = await user.createWallet();
+  let sendingWallet = await Wallet.create();
   console.log(`sendingWallet successfully created: `, sendingWallet.toString());
 
   // Get sending Wallet Address.
@@ -93,10 +93,9 @@ async function sendMassPayout(sendingWallet) {
       filePath: `${os.homedir()}/Downloads/cdp_api_key.json`,
     });
 
-    const user = await coinbase.getDefaultUser();
-    const addresses = await createReceivingWallets(user);
+    const addresses = await createReceivingWallets();
     await writeReceivingAddressesToCsv(addresses);
-    const sendingWallet = await createAndFundSendingWallet(user);
+    const sendingWallet = await createAndFundSendingWallet();
     await sendMassPayout(sendingWallet);
   } catch (error) {
     console.error(`Error in sending mass payout: `, error);
