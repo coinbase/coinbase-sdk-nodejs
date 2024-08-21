@@ -70,7 +70,7 @@ describe("Address", () => {
       );
     });
 
-    it("should return results with USDC historical balance", async () => {
+    it("should return results with USDC historical balance with limit", async () => {
       const historicalBalancesResult = await address.listHistoricalBalances({
         assetId: Coinbase.assets.Usdc,
       });
@@ -88,6 +88,29 @@ describe("Address", () => {
         Coinbase.assets.Usdc,
         100,
         undefined,
+      );
+      expect(historicalBalancesResult.nextPageToken).toEqual("");
+    });
+
+    it("should return results with USDC historical balance with page", async () => {
+      const historicalBalancesResult = await address.listHistoricalBalances({
+        assetId: Coinbase.assets.Usdc,
+        page: "page_token",
+      });
+      expect(historicalBalancesResult.historicalBalances.length).toEqual(2);
+      expect(historicalBalancesResult.historicalBalances[0].amount).toEqual(new Decimal(1));
+      expect(historicalBalancesResult.historicalBalances[1].amount).toEqual(new Decimal(5));
+      expect(
+        Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance,
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance,
+      ).toHaveBeenCalledWith(
+        address.getNetworkId(),
+        address.getId(),
+        Coinbase.assets.Usdc,
+        undefined,
+        "page_token",
       );
       expect(historicalBalancesResult.nextPageToken).toEqual("");
     });
