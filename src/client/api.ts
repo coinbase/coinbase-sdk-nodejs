@@ -950,12 +950,6 @@ export interface Network {
      * @memberof Network
      */
     'feature_set': FeatureSet;
-    /**
-     * The BIP44 path prefix for the network
-     * @type {string}
-     * @memberof Network
-     */
-    'address_path_prefix'?: string;
 }
 
 export const NetworkProtocolFamilyEnum = {
@@ -2004,6 +1998,7 @@ export interface ValidatorList {
  */
 
 export const ValidatorStatus = {
+    Unknown: 'unknown',
     Provisioning: 'provisioning',
     Provisioned: 'provisioned',
     Deposited: 'deposited',
