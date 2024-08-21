@@ -5,6 +5,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
+    "resolveJsonModule": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
     "skipLibCheck": true,

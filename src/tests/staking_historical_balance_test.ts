@@ -10,7 +10,6 @@ import {
 } from "./utils";
 import { StakingBalance } from "../coinbase/staking_balance";
 import { ExternalAddress } from "../coinbase/address/external_address";
-import { Asset } from "../coinbase/asset";
 
 describe("StakingBalance", () => {
   const startTime = "2024-05-01T00:00:00Z";
@@ -78,9 +77,9 @@ describe("StakingBalance", () => {
       expect(response).toBeInstanceOf(Array<StakingBalance>);
       expect(response.length).toEqual(2);
       expect(Coinbase.apiClients.stake!.fetchHistoricalStakingBalances).toHaveBeenCalledWith(
-        address.getId(),
         address.getNetworkId(),
         Coinbase.assets.Eth,
+        address.getId(),
         startTime,
         endTime,
         100,
@@ -106,9 +105,9 @@ describe("StakingBalance", () => {
       expect(response).toBeInstanceOf(Array<StakingBalance>);
       expect(response.length).toEqual(6);
       expect(Coinbase.apiClients.stake!.fetchHistoricalStakingBalances).toHaveBeenCalledWith(
-        address.getId(),
         address.getNetworkId(),
         Coinbase.assets.Eth,
+        address.getId(),
         startTime,
         endTime,
         100,
@@ -144,7 +143,7 @@ describe("StakingBalance", () => {
 
       const balanceStr = balance.toString();
       expect(balanceStr).toEqual(
-        "StakingBalance { date: '2024-05-03T00:00:00.000Z' address: 'some-address-id' bondedStake: 'Balance { amount: '32' asset: 'Asset{ networkId: ethereum-holesky, assetId: eth, contractAddress: undefined, decimals: 18 }' }' unbondedBalance: 'Balance { amount: '2' asset: 'Asset{ networkId: ethereum-holesky, assetId: eth, contractAddress: undefined, decimals: 18 }' }' participantType: 'validator' }",
+        "StakingBalance { date: '2024-05-03T00:00:00.000Z' address: 'some-address-id' bondedStake: '32 ETH' unbondedBalance: '2 ETH' participantType: 'validator' }",
       );
     });
   });

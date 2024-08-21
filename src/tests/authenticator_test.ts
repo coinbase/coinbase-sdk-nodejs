@@ -44,6 +44,12 @@ describe("Authenticator tests", () => {
     expect(token?.length).toBeGreaterThan(100);
   });
 
+  it("includes a correlation context header", async () => {
+    const config = await authenticator.authenticateRequest(VALID_CONFIG, true);
+    const correlationContext = config.headers["Correlation-Context"] as string;
+    expect(correlationContext).toContain(",sdk_language=typescript");
+  });
+
   it("invalid pem key should raise an InvalidAPIKeyFormat error", async () => {
     const invalidAuthenticator = new CoinbaseAuthenticator("test-key", "-----BEGIN EC KEY-----\n");
     expect(invalidAuthenticator.authenticateRequest(VALID_CONFIG)).rejects.toThrow();

@@ -1,6 +1,7 @@
 import { InternalAxiosRequestConfig } from "axios";
 import { JWK, JWS } from "node-jose";
 import { InvalidAPIKeyFormat } from "./errors";
+import { version } from "../../package.json";
 
 const pemHeader = "-----BEGIN EC PRIVATE KEY-----";
 const pemFooter = "-----END EC PRIVATE KEY-----";
@@ -42,6 +43,7 @@ export class CoinbaseAuthenticator {
     }
     config.headers["Authorization"] = `Bearer ${token}`;
     config.headers["Content-Type"] = "application/json";
+    config.headers["Correlation-Context"] = this.getCorrelationData();
     return config;
   }
 
@@ -127,5 +129,21 @@ export class CoinbaseAuthenticator {
     }
 
     return result;
+  }
+
+  /**
+   * Returns encoded correlation data including the SDK version and language.
+   *
+   * @returns {string} Encoded correlation data.
+   */
+  private getCorrelationData(): string {
+    const data = {
+      sdk_version: version,
+      sdk_language: "typescript",
+    };
+
+    return Object.keys(data)
+      .map(key => `${key}=${encodeURIComponent(data[key])}`)
+      .join(",");
   }
 }
