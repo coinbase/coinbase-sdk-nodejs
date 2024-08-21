@@ -10,4 +10,8 @@ let wallet = await Wallet.create({ networkId: Coinbase.networks.BaseMainnet });
  * Trade 0.00001 ETH to USDC.
  */
 let trade = await wallet.createTrade(0.00001, Coinbase.assets.Eth, Coinbase.assets.Usdc);
+
+// Wait for the trade to complete or fail on-chain.
+await trade.wait();
+
 console.log(`Trade successfully completed: `, trade.toString());

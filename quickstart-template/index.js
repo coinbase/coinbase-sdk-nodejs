@@ -23,4 +23,7 @@ const transfer = await wallet.createTransfer({
   destination: anotherWallet,
 });
 
+// Wait for the transfer to complete or fail on-chain.
+await transfer.wait();
+
 console.log(`Transfer successfully completed: `, transfer.toString());

@@ -20,6 +20,12 @@
   This is especially important for External Address use-case where tx signing and broadcast status is maintained on client side, and we risk overwriting the existing txs.
 - Increase default timeout for `createStakingOperation` to 10 min.
 
+### Changed
+- The `createTransfer` and `createTrade` functions no longer wait for the transactions to confirm or
+  fail on-chain.
+  - Now they return a `Transfer` and `Trade` object respectively, which support the `wait`
+    function, e.g. `await transfer.wait()`.
+
 ## [0.0.16] - 2024-08-14
 
 ### Added

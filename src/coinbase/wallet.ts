@@ -295,35 +295,22 @@ export class Wallet {
   }
 
   /**
-   *  Trades the given amount of the given Asset for another Asset. Currently only the default address is used to source the Trade
+   *  Trades the given amount of the given Asset for another Asset.
+   *  Currently only the default address is used to source the Trade.
    *
    * @param options - The options to create the Trade.
    * @param options.amount - The amount of the Asset to send.
    * @param options.fromAssetId - The ID of the Asset to trade from.
    * @param options.toAssetId - The ID of the Asset to trade to.
-   * @param options.timeoutSeconds - The maximum amount of time to wait for the Trade to complete, in seconds.
-   * @param options.intervalSeconds - The interval at which to poll the Network for Trade status, in seconds.
    * @throws {InternalError} If the default address is not found.
    * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
-   * @returns The Trade object.
+   * @returns The created Trade object.
    */
-  public async createTrade({
-    amount,
-    fromAssetId,
-    toAssetId,
-    timeoutSeconds = 10,
-    intervalSeconds = 0.2,
-  }: CreateTradeOptions): Promise<Trade> {
+  public async createTrade(options: CreateTradeOptions): Promise<Trade> {
     if (!this.getDefaultAddress()) {
       throw new InternalError("Default address not found");
     }
-    return await this.getDefaultAddress()!.createTrade({
-      amount: amount,
-      fromAssetId: fromAssetId,
-      toAssetId: toAssetId,
-      timeoutSeconds,
-      intervalSeconds,
-    });
+    return await this.getDefaultAddress()!.createTrade(options);
   }
 
   /**
@@ -756,33 +743,17 @@ export class Wallet {
    * @param options.amount - The amount of the Asset to send.
    * @param options.assetId - The ID of the Asset to send.
    * @param options.destination - The destination of the transfer. If a Wallet, sends to the Wallet's default address. If a String, interprets it as the address ID.
-   * @param options.timeoutSeconds - The maximum amount of time to wait for the Transfer to complete, in seconds.
-   * @param options.intervalSeconds - The interval at which to poll the Network for Transfer status, in seconds.
    * @param options.gasless - Whether the Transfer should be gasless. Defaults to false.
-   * @returns The hash of the Transfer transaction.
+   * @returns The created Transfer object.
    * @throws {APIError} if the API request to create a Transfer fails.
    * @throws {APIError} if the API request to broadcast a Transfer fails.
-   * @throws {Error} if the Transfer times out.
    */
-  public async createTransfer({
-    amount,
-    assetId,
-    destination,
-    timeoutSeconds = 10,
-    intervalSeconds = 0.2,
-    gasless = false,
-  }: CreateTransferOptions): Promise<Transfer> {
+  public async createTransfer(options: CreateTransferOptions): Promise<Transfer> {
     if (!this.getDefaultAddress()) {
       throw new InternalError("Default address not found");
     }
-    return await this.getDefaultAddress()!.createTransfer({
-      amount,
-      assetId,
-      destination,
-      timeoutSeconds,
-      intervalSeconds,
-      gasless,
-    });
+
+    return await this.getDefaultAddress()!.createTransfer(options);
   }
 
   /**

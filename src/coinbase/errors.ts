@@ -1,5 +1,5 @@
 /**
- * InvalidaAPIKeyFormat error is thrown when the API key format is invalid.
+ * InvalidAPIKeyFormat error is thrown when the API key format is invalid.
  */
 export class InvalidAPIKeyFormat extends Error {
   static DEFAULT_MESSAGE = "Invalid API key format";
@@ -14,6 +14,24 @@ export class InvalidAPIKeyFormat extends Error {
     this.name = "InvalidAPIKeyFormat";
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, InvalidAPIKeyFormat);
+    }
+  }
+}
+
+/**
+ * TimeoutError is thrown when an operation times out.
+ */
+export class TimeoutError extends Error {
+  /**
+   * Initializes a new TimeoutError instance.
+   *
+   * @param message - The error message.
+   */
+  constructor(message: string = "Timeout Error") {
+    super(message);
+    this.name = "TimeoutError";
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, TimeoutError);
     }
   }
 }
@@ -94,6 +112,24 @@ export class InvalidUnsignedPayload extends Error {
     this.name = "InvalidUnsignedPayload";
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, InvalidUnsignedPayload);
+    }
+  }
+}
+
+/**
+ * NotSignedError is thrown when a resource is not signed.
+ */
+export class NotSignedError extends Error {
+  /**
+   * Initializes a new NotSignedError instance.
+   *
+   * @param message - The error message.
+   */
+  constructor(message: string = "Resource not signed") {
+    super(message);
+    this.name = "NotSignedError";
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, NotSignedError);
     }
   }
 }

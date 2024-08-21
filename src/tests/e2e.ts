@@ -89,6 +89,9 @@ describe("Coinbase SDK E2E Test", () => {
       assetId: Coinbase.assets.Eth,
       destination: wallet,
     });
+
+    await transfer.wait();
+
     expect(transfer.toString()).toBeDefined();
     expect(await transfer.getStatus()).toBe(TransferStatus.COMPLETE);
     console.log(`Transferred 1 Gwei from ${unhydratedWallet} to ${wallet}`);

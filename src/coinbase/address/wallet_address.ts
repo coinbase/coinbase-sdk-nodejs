@@ -149,26 +149,24 @@ export class WalletAddress extends Address {
   }
 
   /**
-   * Transfers the given amount of the given Asset to the given address. Only same-Network Transfers are supported.
+   * Transfers the given amount of the given Asset to the given address.
+   * Only same-Network Transfers are supported.
+   * This returns a `Transfer` object that has been signed and broadcasted, you
+   * can wait for this to land on-chain (or fail) by calling `transfer.wait()`.
    *
    * @param options - The options to create the Transfer.
    * @param options.amount - The amount of the Asset to send.
    * @param options.assetId - The ID of the Asset to send. For Ether, Coinbase.assets.Eth, Coinbase.assets.Gwei, and Coinbase.assets.Wei supported.
    * @param options.destination - The destination of the transfer. If a Wallet, sends to the Wallet's default address. If a String, interprets it as the address ID.
-   * @param options.timeoutSeconds - The maximum amount of time to wait for the Transfer to complete, in seconds.
-   * @param options.intervalSeconds - The interval at which to poll the Network for Transfer status, in seconds.
    * @param options.gasless - Whether the Transfer should be gasless. Defaults to false.
    * @returns The transfer object.
    * @throws {APIError} if the API request to create a Transfer fails.
    * @throws {APIError} if the API request to broadcast a Transfer fails.
-   * @throws {Error} if the Transfer times out.
    */
   public async createTransfer({
     amount,
     assetId,
     destination,
-    timeoutSeconds = 10,
-    intervalSeconds = 0.2,
     gasless = false,
   }: CreateTransferOptions): Promise<Transfer> {
     if (!Coinbase.useServerSigner && !this.key) {
@@ -200,25 +198,29 @@ export class WalletAddress extends Address {
       createTransferRequest,
     );
 
-    let transfer = Transfer.fromModel(response.data);
+    const transfer = Transfer.fromModel(response.data);
 
-    if (!Coinbase.useServerSigner) {
-      const wallet = new ethers.Wallet(this.key!.privateKey);
-      await transfer.sign(wallet);
-
-      transfer = await transfer.broadcast();
+    if (Coinbase.useServerSigner) {
+      return transfer;
     }
 
-    const startTime = Date.now();
-    while (Date.now() - startTime < timeoutSeconds * 1000) {
-      await transfer.reload();
-      const status = transfer.getStatus();
-      if (status === TransferStatus.COMPLETE || status === TransferStatus.FAILED) {
-        return transfer;
-      }
-      await delay(intervalSeconds);
+    await transfer.sign(this.getSigner());
+    await transfer.broadcast();
+
+    return transfer;
+  }
+
+  /**
+   * Gets a signer for the private key.
+   *
+   * @returns The signer for the private key.
+   * @throws {InternalError} If the private key is not loaded.
+   */
+  private getSigner(): ethers.Wallet {
+    if (!this.key) {
+      throw new InternalError("Cannot sign without a private key");
     }
-    throw new Error("Transfer timed out");
+    return new ethers.Wallet(this.key.privateKey);
   }
 
   /**
@@ -228,48 +230,26 @@ export class WalletAddress extends Address {
    * @param options.amount - The amount of the From Asset to send.
    * @param options.fromAssetId - The ID of the Asset to trade from.
    * @param options.toAssetId - The ID of the Asset to trade to.
-   * @param options.timeoutSeconds - The maximum amount of time to wait for the Trade to complete, in seconds.
-   * @param options.intervalSeconds - The interval at which to poll the Network for Trade status, in seconds.
    * @returns The Trade object.
    * @throws {APIError} if the API request to create or broadcast a Trade fails.
    * @throws {Error} if the Trade times out.
    */
-  public async createTrade({
-    amount,
-    fromAssetId,
-    toAssetId,
-    timeoutSeconds = 10,
-    intervalSeconds = 0.2,
-  }: CreateTradeOptions): Promise<Trade> {
+  public async createTrade({ amount, fromAssetId, toAssetId }: CreateTradeOptions): Promise<Trade> {
     const fromAsset = await Asset.fetch(this.getNetworkId(), fromAssetId);
     const toAsset = await Asset.fetch(this.getNetworkId(), toAssetId);
 
     await this.validateCanTrade(amount, fromAssetId);
-    let trade = await this.createTradeRequest(amount, fromAsset, toAsset);
 
-    if (!Coinbase.useServerSigner) {
-      const signed_payload = await trade.getTransaction().sign(this.key!);
-      const approveTransactionSignedPayload = trade.getApproveTransaction()
-        ? await trade.getApproveTransaction()!.sign(this.key!)
-        : undefined;
+    const trade = await this.createTradeRequest(amount, fromAsset, toAsset);
 
-      trade = await this.broadcastTradeRequest(
-        trade,
-        signed_payload,
-        approveTransactionSignedPayload,
-      );
+    if (Coinbase.useServerSigner) {
+      return trade;
     }
 
-    const startTime = Date.now();
-    while (Date.now() - startTime < timeoutSeconds * 1000) {
-      await trade.reload();
-      const status = trade.getStatus();
-      if (status === TransactionStatus.COMPLETE || status === TransactionStatus.FAILED) {
-        return trade;
-      }
-      await delay(intervalSeconds);
-    }
-    throw new Error("Trade timed out");
+    await trade.sign(this.getSigner());
+    await trade.broadcast();
+
+    return trade;
   }
 
   /**
@@ -408,36 +388,6 @@ export class WalletAddress extends Address {
       tradeRequestPayload,
     );
     return new Trade(tradeModel?.data);
-  }
-
-  /**
-   * Broadcasts a trade using the provided signed payloads.
-   *
-   * @param trade - The Trade object representing the trade.
-   * @param signedPayload - The signed payload of the trade.
-   * @param approveTransactionPayload - The signed payload of the approval transaction, if any.
-   * @returns A promise that resolves to a Trade object representing the broadcasted trade.
-   */
-  private async broadcastTradeRequest(
-    trade: Trade,
-    signedPayload: string,
-    approveTransactionPayload?: string,
-  ): Promise<Trade> {
-    const broadcastTradeRequestPayload = {
-      signed_payload: signedPayload,
-      approve_transaction_signed_payload: approveTransactionPayload
-        ? approveTransactionPayload
-        : undefined,
-    };
-
-    const response = await Coinbase.apiClients.trade!.broadcastTrade(
-      this.getWalletId(),
-      this.getId(),
-      trade.getId(),
-      broadcastTradeRequestPayload,
-    );
-
-    return new Trade(response.data);
   }
 
   /**

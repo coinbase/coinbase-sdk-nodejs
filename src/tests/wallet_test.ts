@@ -6,6 +6,7 @@ import { APIError } from "../coinbase/api_error";
 import { Coinbase } from "../coinbase/coinbase";
 import { ArgumentError, InternalError } from "../coinbase/errors";
 import { Wallet } from "../coinbase/wallet";
+import { Transfer } from "../coinbase/transfer";
 import { ServerSignerStatus, StakeOptionsMode, TransferStatus } from "../coinbase/types";
 import {
   AddressBalanceList,
@@ -529,31 +530,27 @@ describe("Wallet Class", () => {
       Coinbase.apiClients.transfer = transfersApiMock;
     });
 
-    it("should successfully create and complete a transfer", async () => {
+    it("should successfully create a transfer", async () => {
       Coinbase.apiClients.transfer!.createTransfer = mockReturnValue(VALID_TRANSFER_MODEL);
       Coinbase.apiClients.transfer!.broadcastTransfer = mockReturnValue({
         transaction_hash: "0x6c087c1676e8269dd81e0777244584d0cbfd39b6997b3477242a008fa9349e11",
         ...VALID_TRANSFER_MODEL,
       });
-      Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
-        ...VALID_TRANSFER_MODEL,
-        transaction: {
-          ...VALID_TRANSFER_MODEL.transaction,
-          status: TransactionStatusEnum.Complete,
-        },
-      });
-      await wallet.createTransfer({
+
+      const transfer = await wallet.createTransfer({
         amount: weiAmount,
         assetId: Coinbase.assets.Wei,
         destination,
-        timeoutSeconds,
-        intervalSeconds,
       });
 
       expect(Coinbase.apiClients.transfer!.createTransfer).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.transfer!.broadcastTransfer).toHaveBeenCalledTimes(1);
-      expect(Coinbase.apiClients.transfer!.getTransfer).toHaveBeenCalledTimes(1);
+
+      expect(transfer).toBeInstanceOf(Transfer);
+      expect(transfer.getId()).toBe(VALID_TRANSFER_MODEL.transfer_id);
     });
+
+    // TODO: Returns the transfer.
 
     it("should throw an APIError if the createTransfer API call fails", async () => {
       Coinbase.apiClients.transfer!.createTransfer = mockReturnRejectedValue(
@@ -586,30 +583,6 @@ describe("Wallet Class", () => {
       ).rejects.toThrow(APIError);
     });
 
-    it("should throw an Error if the transfer times out", async () => {
-      Coinbase.apiClients.transfer!.createTransfer = mockReturnValue(VALID_TRANSFER_MODEL);
-      Coinbase.apiClients.transfer!.broadcastTransfer = mockReturnValue({
-        transaction_hash: "0x6c087c1676e8269dd81e0777244584d0cbfd39b6997b3477242a008fa9349e11",
-        ...VALID_TRANSFER_MODEL,
-      });
-      Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
-        ...VALID_TRANSFER_MODEL,
-        status: TransferStatus.BROADCAST,
-      });
-      intervalSeconds = 0.000002;
-      timeoutSeconds = 0.000002;
-
-      await expect(
-        wallet.createTransfer({
-          amount: weiAmount,
-          assetId: Coinbase.assets.Wei,
-          destination,
-          timeoutSeconds,
-          intervalSeconds,
-        }),
-      ).rejects.toThrow("Transfer timed out");
-    });
-
     it("should throw an ArgumentError if there are insufficient funds", async () => {
       const insufficientAmount = new Decimal("10000000000000000000");
       await expect(
@@ -623,18 +596,11 @@ describe("Wallet Class", () => {
       ).rejects.toThrow(ArgumentError);
     });
 
-    it("should successfully create and complete a transfer when using server signer", async () => {
+    it("should successfully create a transfer when using server signer", async () => {
       Coinbase.useServerSigner = true;
       Coinbase.apiClients.transfer!.createTransfer = mockReturnValue(VALID_TRANSFER_MODEL);
-      Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
-        ...VALID_TRANSFER_MODEL,
-        transaction: {
-          ...VALID_TRANSFER_MODEL,
-          status: TransactionStatusEnum.Complete,
-        },
-      });
 
-      await wallet.createTransfer({
+      const transfer = await wallet.createTransfer({
         amount: weiAmount,
         assetId: Coinbase.assets.Wei,
         destination,
@@ -643,7 +609,9 @@ describe("Wallet Class", () => {
       });
 
       expect(Coinbase.apiClients.transfer!.createTransfer).toHaveBeenCalledTimes(1);
-      expect(Coinbase.apiClients.transfer!.getTransfer).toHaveBeenCalledTimes(1);
+
+      expect(transfer).toBeInstanceOf(Transfer);
+      expect(transfer.getId()).toBe(VALID_TRANSFER_MODEL.transfer_id);
     });
 
     afterEach(() => {
