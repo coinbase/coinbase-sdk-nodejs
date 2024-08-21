@@ -33,6 +33,7 @@ import {
   CreateStakingOperationRequest,
   ValidatorList,
   Validator,
+  ValidatorStatus as APIValidatorStatus,
   Webhook as WebhookModel,
   WebhookList,
   CreateWebhookRequest,
@@ -507,7 +508,7 @@ export type ValidatorAPIClient = {
   listValidators(
     networkId: string,
     assetId: string,
-    status?: ValidatorStatus,
+    status?: APIValidatorStatus,
     limit?: number,
     page?: string,
     options?: AxiosRequestConfig,
@@ -676,19 +677,19 @@ export enum SponsoredSendStatus {
 }
 
 export enum ValidatorStatus {
-  Unknown = "unknown",
-  Provisioning = "provisioning",
-  Provisioned = "provisioned",
-  Deposited = "deposited",
-  PendingActivation = "pending_activation",
-  Active = "active",
-  Exiting = "exiting",
-  Exited = "exited",
-  WithdrawalAvailable = "withdrawal_available",
-  WithdrawalComplete = "withdrawal_complete",
-  ActiveSlashed = "active_slashed",
-  ExitedSlashed = "exited_slashed",
-  Reaped = "reaped",
+  UNKNOWN = "unknown",
+  PROVISIONING = "provisioning",
+  PROVISIONED = "provisioned",
+  DEPOSITED = "deposited",
+  PENDING_ACTIVATION = "pending_activation",
+  ACTIVE = "active",
+  EXITING = "exiting",
+  EXITED = "exited",
+  WITHDRAWAL_AVAILABLE = "withdrawal_available",
+  WITHDRAWAL_COMPLETE = "withdrawal_complete",
+  ACTIVE_SLASHED = "active_slashed",
+  EXITED_SLASHED = "exited_slashed",
+  REAPED = "reaped",
 }
 
 /**
