@@ -33,7 +33,7 @@ describe("StakingOperation", () => {
 
   it("should return a string representation with id, status, network_id, and address_id", () => {
     const op = new StakingOperation(VALID_STAKING_OPERATION_MODEL);
-    const expectedString = `StakingOperation { id: ${op.getID()}, status: ${op.getStatus()}, network_id: ${op.getNetworkID()}, address_id: ${op.getAddressID()} }`;
+    const expectedString = `StakingOperation { id: some-id status: initialized network_id: ethereum-holesky address_id: some-address-id }`;
     expect(op.toString()).toEqual(expectedString);
   });
 
@@ -64,6 +64,73 @@ describe("StakingOperation", () => {
       expect(async () => {
         await op.sign(key);
       }).not.toThrow(Error);
+    });
+  });
+
+  describe("StakingOperation.fetch", () => {
+    const networkId = "dummy-network-id";
+    const addressId = "dummy-address-id";
+    const stakingOperationId = "dummy-staking-operation-id";
+    const walletId = "dummy-wallet-id";
+
+    const mockStakingOperationModel = {
+      id: stakingOperationId,
+      status: StakingOperationStatusEnum.Initialized,
+      network_id: networkId,
+      address_id: addressId,
+      transactions: [],
+    };
+
+    it("should fetch staking operation without walletId", async () => {
+      Coinbase.apiClients.stake!.getExternalStakingOperation = jest.fn().mockResolvedValue({
+        data: mockStakingOperationModel,
+      });
+
+      const stakingOperation = await StakingOperation.fetch(
+        networkId,
+        addressId,
+        stakingOperationId,
+      );
+
+      expect(Coinbase.apiClients.stake!.getExternalStakingOperation).toHaveBeenCalledWith(
+        networkId,
+        addressId,
+        stakingOperationId,
+      );
+
+      expect(stakingOperation.getID()).toBe(stakingOperationId);
+      expect(stakingOperation.getStatus()).toBe(StakingOperationStatusEnum.Initialized);
+      expect(stakingOperation.getNetworkID()).toBe(networkId);
+      expect(stakingOperation.getAddressID()).toBe(addressId);
+    });
+
+    it("should fetch staking operation with walletId", async () => {
+      Coinbase.apiClients.stake!.getStakingOperation = jest.fn().mockResolvedValue({
+        data: mockStakingOperationModel,
+      });
+
+      const stakingOperation = await StakingOperation.fetch(
+        networkId,
+        addressId,
+        stakingOperationId,
+        walletId,
+      );
+
+      expect(Coinbase.apiClients.stake!.getStakingOperation).toHaveBeenCalledWith(
+        walletId,
+        addressId,
+        stakingOperationId,
+      );
+      expect(stakingOperation.getID()).toBe(stakingOperationId);
+      expect(stakingOperation.getStatus()).toBe(StakingOperationStatusEnum.Initialized);
+      expect(stakingOperation.getNetworkID()).toBe(networkId);
+      expect(stakingOperation.getAddressID()).toBe(addressId);
+    });
+
+    it("should throw an error if walletId is empty", async () => {
+      await expect(
+        StakingOperation.fetch(networkId, addressId, stakingOperationId, ""),
+      ).rejects.toThrow("Invalid wallet ID");
     });
   });
 
@@ -115,6 +182,7 @@ describe("StakingOperation", () => {
       const stakingOperation = new StakingOperation(VALID_STAKING_OPERATION_MODEL);
       expect(stakingOperation.getID()).toBe("some-id");
       expect(stakingOperation.getStatus()).toBe(StakingOperationStatusEnum.Initialized);
+      expect(stakingOperation.getNetworkID()).toBe(Coinbase.networks.EthereumHolesky);
       expect(stakingOperation.isTerminalState()).toBe(false);
       expect(stakingOperation.getTransactions().length).toBe(1);
       expect(stakingOperation.getSignedVoluntaryExitMessages().length).toBe(0);

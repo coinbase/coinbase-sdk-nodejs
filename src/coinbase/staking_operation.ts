@@ -32,6 +32,40 @@ export class StakingOperation {
   }
 
   /**
+   * Get the staking operation for the given ID.
+   *
+   * @param networkId - The network ID.
+   * @param addressId - The address ID.
+   * @param id - The staking operation ID.
+   * @param walletId - The wallet ID of the staking operation.
+   * @throws {Error} If the wallet id is defined but empty.
+   *
+   * @returns The staking operation object.
+   */
+  public static async fetch(
+    networkId: string,
+    addressId: string,
+    id: string,
+    walletId?: string,
+  ): Promise<StakingOperation> {
+    if (walletId === undefined) {
+      const result = await Coinbase.apiClients.stake!.getExternalStakingOperation(
+        networkId,
+        addressId,
+        id,
+      );
+
+      return new StakingOperation(result.data);
+    } else if (walletId != undefined && walletId != "") {
+      const result = await Coinbase.apiClients.stake!.getStakingOperation(walletId!, addressId, id);
+
+      return new StakingOperation(result.data);
+    } else {
+      throw new Error("Invalid wallet ID");
+    }
+  }
+
+  /**
    * Returns the Staking Operation ID.
    *
    * @returns The Staking Operation ID.
@@ -82,7 +116,7 @@ export class StakingOperation {
    * @returns The string representation of the StakingOperation object.
    */
   public toString(): string {
-    return `StakingOperation { id: ${this.getID()}, status: ${this.getStatus()}, network_id: ${this.getNetworkID()}, address_id: ${this.getAddressID()} }`;
+    return `StakingOperation { id: ${this.getID()} status: ${this.getStatus()} network_id: ${this.getNetworkID()} address_id: ${this.getAddressID()} }`;
   }
 
   /**
@@ -202,40 +236,6 @@ export class StakingOperation {
     }
 
     throw new Error("Staking operation timed out");
-  }
-
-  /**
-   * Get the staking operation for the given ID.
-   *
-   * @param networkId - The network ID.
-   * @param addressId - The address ID.
-   * @param id - The staking operation ID.
-   * @param walletId - The wallet ID of the staking operation.
-   * @returns The staking operation object.
-   */
-  public async fetch(
-    networkId: string,
-    addressId: string,
-    id: string,
-    walletId?: string,
-  ): Promise<StakingOperationModel> {
-    if (this.getWalletID() === undefined) {
-      const result = await Coinbase.apiClients.stake!.getExternalStakingOperation(
-        networkId,
-        addressId,
-        id,
-      );
-
-      this.model = result.data;
-    } else if (this.getWalletID() != undefined && this.getWalletID() != "") {
-      const result = await Coinbase.apiClients.stake!.getStakingOperation(walletId!, addressId, id);
-
-      this.model = result.data;
-    }
-
-    this.loadTransactionsFromModel();
-
-    return this.model;
   }
 
   /**
