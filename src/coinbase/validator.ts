@@ -1,5 +1,6 @@
 import { Coinbase } from "./coinbase";
-import { Validator as ValidatorModel, ValidatorStatus } from "../client/api";
+import { Validator as ValidatorModel, ValidatorStatus as APIValidatorStatus } from "../client/api";
+import { ValidatorStatus } from "./types";
 import { InternalError } from "./errors";
 
 /**
@@ -37,7 +38,6 @@ export class Validator {
     status?: ValidatorStatus,
   ): Promise<Validator[]> {
     const validators: Validator[] = [];
-
     const response = await Coinbase.apiClients.validator!.listValidators(
       networkId,
       assetId,
@@ -81,7 +81,36 @@ export class Validator {
    * @returns The Validator status.
    */
   public getStatus(): string {
-    return this.model.status;
+    switch (this.model.status) {
+      case ValidatorStatus.Unknown:
+        return APIValidatorStatus.Unknown;
+      case ValidatorStatus.Provisioning:
+        return APIValidatorStatus.Provisioning;
+      case ValidatorStatus.Provisioned:
+        return APIValidatorStatus.Provisioned;
+      case ValidatorStatus.Deposited:
+        return APIValidatorStatus.Deposited;
+      case ValidatorStatus.PendingActivation:
+        return APIValidatorStatus.PendingActivation;
+      case ValidatorStatus.Active:
+        return APIValidatorStatus.Active;
+      case ValidatorStatus.Exiting:
+        return APIValidatorStatus.Exiting;
+      case ValidatorStatus.Exited:
+        return APIValidatorStatus.Exited;
+      case ValidatorStatus.WithdrawalAvailable:
+        return APIValidatorStatus.WithdrawalAvailable;
+      case ValidatorStatus.WithdrawalComplete:
+        return APIValidatorStatus.WithdrawalComplete;
+      case ValidatorStatus.ActiveSlashed:
+        return APIValidatorStatus.ActiveSlashed;
+      case ValidatorStatus.ExitedSlashed:
+        return APIValidatorStatus.ExitedSlashed;
+      case ValidatorStatus.Reaped:
+        return APIValidatorStatus.Reaped;
+      default:
+        return APIValidatorStatus.Unknown;
+    }
   }
 
   /**

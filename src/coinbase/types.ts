@@ -33,7 +33,6 @@ import {
   CreateStakingOperationRequest,
   ValidatorList,
   Validator,
-  ValidatorStatus,
   Webhook as WebhookModel,
   WebhookList,
   CreateWebhookRequest,
@@ -674,6 +673,22 @@ export enum SponsoredSendStatus {
   SUBMITTED = "submitted",
   COMPLETE = "complete",
   FAILED = "failed",
+}
+
+export enum ValidatorStatus {
+  Unknown = "unknown",
+  Provisioning = "provisioning",
+  Provisioned = "provisioned",
+  Deposited = "deposited",
+  PendingActivation = "pending_activation",
+  Active = "active",
+  Exiting = "exiting",
+  Exited = "exited",
+  WithdrawalAvailable = "withdrawal_available",
+  WithdrawalComplete = "withdrawal_complete",
+  ActiveSlashed = "active_slashed",
+  ExitedSlashed = "exited_slashed",
+  Reaped = "reaped",
 }
 
 /**
