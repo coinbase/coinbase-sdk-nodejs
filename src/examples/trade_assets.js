@@ -13,6 +13,10 @@ async function tradeAssets() {
     fromAssetId: Coinbase.assets.Eth,
     toAssetId: Coinbase.assets.Usdc,
   });
+
+  // Wait for the trade to complete or fail on-chain.
+  await trade.wait();
+
   console.log(`Trade successfully completed: `, trade.toString());
 }
 

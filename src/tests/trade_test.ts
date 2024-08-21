@@ -1,8 +1,10 @@
 import { Decimal } from "decimal.js";
+import { randomUUID } from "crypto"
 import { ethers } from "ethers";
 import { Transaction as CoinbaseTransaction, Trade as TradeModel } from "../client/api";
 import { Transaction } from "../coinbase/transaction";
 import { Coinbase } from "./../coinbase/coinbase";
+import { NotSignedError } from "../coinbase/errors";
 import { Trade } from "./../coinbase/trade";
 import { TransactionStatus } from "./../coinbase/types";
 import { mockReturnValue } from "./utils";
@@ -21,6 +23,7 @@ describe("Trade", () => {
     ethAsset,
     usdcAsset,
     transactionModel,
+    approveTransactionModel,
     fromAsset,
     toAsset,
     model,
@@ -30,7 +33,7 @@ describe("Trade", () => {
   beforeEach(() => {
     fromKey = ethers.Wallet.createRandom();
     networkId = "base-sepolia";
-    walletId = ethers.Wallet.createRandom().address;
+    walletId = randomUUID();
     addressId = fromKey.address;
     fromAmount = new Decimal(100);
     toAmount = new Decimal(100000);
@@ -67,6 +70,7 @@ describe("Trade", () => {
       to_amount: toAmount.toString(),
       trade_id: tradeId,
       transaction: transactionModel,
+      approve_transaction: approveTransactionModel,
     } as TradeModel;
     tradesApi = {
       getTrade: jest.fn().mockResolvedValue({ data: model }),
@@ -169,6 +173,136 @@ describe("Trade", () => {
     });
   });
 
+  describe("#sign", () => {
+    beforeEach(async () => await trade.sign(fromKey));
+
+    it("signs the transfer transaction", async () => {
+      expect(trade.getTransaction().isSigned()).toBe(true);
+    });
+
+    describe("when there is an approve transaction", () => {
+      beforeAll(() => {
+        approveTransactionModel = {
+          status: "pending",
+          from_address_id: addressId,
+          unsigned_payload: unsignedPayload,
+        } as CoinbaseTransaction;
+      });
+      afterAll(() => approveTransactionModel = null);
+
+      it("signs the approve transaction", async () => {
+        expect(trade.getApproveTransaction().isSigned()).toBe(true);
+      });
+
+      it("signs the transfer transaction", async () => {
+        expect(trade.getTransaction().isSigned()).toBe(true);
+      });
+    });
+  });
+
+  describe("#broadcast!", () => {
+    let broadcastedTradeModel,
+      broadcastedTransactionModel,
+      broadcastedApproveTransactionModel,
+      signedPayload;
+
+    beforeEach(async () => {
+      signedPayload =
+        "02f87683014a34808459682f008459682f00825208944d9e4f3f4d1a8b5f4f7b1f5b5c7b8d6b2b3b1b0b89056bc75e2d6310000080c001a07ae1f4655628ac1b226d60a6243aed786a2d36241ffc0f306159674755f4bd9ca050cd207fdfa6944e2b165775e2ca625b474d1eb40fda0f03f4ca9e286eae3cbe";
+
+      broadcastedTransactionModel = {
+        ...transactionModel,
+        status: "broadcast",
+        signed_payload: signedPayload,
+      } as unknown as TradeModel;
+
+      broadcastedTradeModel = {
+        ...model,
+        transaction: broadcastedTransactionModel,
+        approve_transaction: broadcastedApproveTransactionModel,
+      } as unknown as TradeModel;
+
+      Coinbase.apiClients.trade!.broadcastTrade = mockReturnValue(broadcastedTradeModel);
+
+      model.transaction.signed_payload = signedPayload;
+
+      trade = new Trade(model);
+    });
+
+    it("broadcasts the trade with the signed tx payload", async () => {
+      await trade.broadcast()
+
+      expect(Coinbase.apiClients.trade!.broadcastTrade).toHaveBeenCalledWith(
+        walletId,
+        addressId,
+        tradeId,
+        {
+          signed_payload: signedPayload.slice(2),
+          approve_transaction_signed_payload: undefined
+        }
+      );
+    });
+
+    it("returns the broadcasted trade", async () => {
+      const broadcastedTrade = await trade.broadcast()
+
+      expect(broadcastedTrade).toBeInstanceOf(Trade);
+      expect(broadcastedTrade).toBe(trade);
+      expect(trade.getStatus()).toBe(TransactionStatus.BROADCAST);
+    });
+
+    describe("when the transaction is not signed", () => {
+      beforeEach(async () => {
+        model.transaction.signed_payload = undefined;
+
+        trade = new Trade(model);
+      });
+
+      it("raises a not signed error", async () => {
+        expect(trade.broadcast()).rejects.toThrow(NotSignedError);
+      });
+    });
+
+    describe("when the trade has an approve transaction", () => {
+      beforeAll(() => {
+        approveTransactionModel = {
+          status: "pending",
+          from_address_id: addressId,
+          unsigned_payload: unsignedPayload,
+          signed_payload: signedPayload, // TODO: use diff signed payload
+        } as CoinbaseTransaction;
+      });
+      afterAll(() => approveTransactionModel = null);
+
+      it("broadcasts the trade with the signed tx and approve tx payloads", async () => {
+        await trade.broadcast()
+
+        expect(Coinbase.apiClients.trade!.broadcastTrade).toHaveBeenCalledWith(
+          walletId,
+          addressId,
+          tradeId,
+          {
+            signed_payload: signedPayload.slice(2),
+            approve_transaction_signed_payload: signedPayload.slice(2),
+          }
+        );
+        expect(trade.getStatus()).toBe(TransactionStatus.BROADCAST);
+      });
+
+      describe("when the approve transaction is not signed", () => {
+        beforeEach(async () => {
+          model.approve_transaction.signed_payload = undefined;
+
+          trade = new Trade(model);
+        });
+
+        it("raises an error", async () => {
+          expect(trade.broadcast()).rejects.toThrow(NotSignedError);
+        });
+      });
+    });
+  });
+
   describe("#reload", () => {
     let trade, updatedModel;
     beforeEach(() => {
@@ -216,7 +350,9 @@ describe("Trade", () => {
         .mockResolvedValueOnce({ data: model })
         .mockResolvedValueOnce({ data: updatedModel });
       const trade = new Trade(model);
+
       await trade.wait();
+
       expect(trade.getStatus()).toBe(TransactionStatus.COMPLETE);
     });
 
