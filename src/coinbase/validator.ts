@@ -90,6 +90,6 @@ export class Validator {
    * @returns The string representation of the Validator.
    */
   public toString(): string {
-    return `Id: ${this.getValidatorId()}, Status: ${this.getStatus()}`;
+    return `Id: ${this.getValidatorId()} Status: ${this.getStatus()}`;
   }
 }

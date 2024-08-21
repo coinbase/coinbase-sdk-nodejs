@@ -72,6 +72,6 @@ describe("Validator", () => {
 
     expect(validator.getValidatorId()).toEqual("0x123");
     expect(validator.getStatus()).toEqual("active_exiting");
-    expect(validator.toString()).toEqual("Id: 0x123, Status: active_exiting");
+    expect(validator.toString()).toEqual("Id: 0x123 Status: active_exiting");
   });
 });
