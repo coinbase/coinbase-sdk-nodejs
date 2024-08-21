@@ -256,7 +256,7 @@ export class StakingOperation {
    * Note: For External Address model since tx signing and broadcast status happens by the end user and not our backend
    * we need to be careful to not overwrite the transactions array with the response from the API. Ex: End user could have used
    * stakingOperation.sign() method to sign the transactions, and we should not overwrite them with the response from the API.
-   * This however is ok to do so for the Wallet Address model since the transactions are signed and broadcasted by our backend.
+   * This however is ok to do so for the Wallet Address model since the transactions states are maintained by our backend.
    * This method attempts to be safe for both address models, and only adds newly created unsigned transactions that are not
    *  already in the transactions array.
    */
