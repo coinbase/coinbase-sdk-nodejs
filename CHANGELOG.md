@@ -12,6 +12,7 @@
 - Remove user concept from the SDK
 - Remove "pending" status from StakingOperationStatusEnum
 - Add staking operation class helper methods like `isTerminalState`, `isFailedState` and `isCompleteState`.
+- Add validator status enum
 
 ### Changed
 

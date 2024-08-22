@@ -13,6 +13,7 @@ import {
   StakingOperation as StakingOperationModel,
   ValidatorList,
   Validator,
+  ValidatorStatus,
   StakingOperationStatusEnum,
   FeatureSet,
   TransactionStatusEnum,
@@ -298,7 +299,7 @@ export const VALID_ADDRESS_BALANCE_LIST: AddressBalanceList = {
  */
 export function mockEthereumValidator(
   index: string,
-  status: string,
+  status: ValidatorStatus,
   public_key: string,
 ): Validator {
   return {
@@ -334,9 +335,9 @@ export function mockEthereumValidator(
 
 export const VALID_ACTIVE_VALIDATOR_LIST: ValidatorList = {
   data: [
-    mockEthereumValidator("100", "active_ongoing", "0xpublic_key_1"),
-    mockEthereumValidator("200", "active_ongoing", "0xpublic_key_2"),
-    mockEthereumValidator("300", "active_ongoing", "0xpublic_key_3"),
+    mockEthereumValidator("100", ValidatorStatus.Active, "0xpublic_key_1"),
+    mockEthereumValidator("200", ValidatorStatus.Active, "0xpublic_key_2"),
+    mockEthereumValidator("300", ValidatorStatus.Active, "0xpublic_key_3"),
   ],
   has_more: false,
   next_page: "",
@@ -344,9 +345,9 @@ export const VALID_ACTIVE_VALIDATOR_LIST: ValidatorList = {
 
 export const VALID_EXITING_VALIDATOR_LIST: ValidatorList = {
   data: [
-    mockEthereumValidator("400", "active_exiting", "0xpublic_key_4"),
-    mockEthereumValidator("500", "active_exiting", "0xpublic_key_5"),
-    mockEthereumValidator("600", "active_exiting", "0xpublic_key_6"),
+    mockEthereumValidator("400", ValidatorStatus.Exiting, "0xpublic_key_4"),
+    mockEthereumValidator("500", ValidatorStatus.Exiting, "0xpublic_key_5"),
+    mockEthereumValidator("600", ValidatorStatus.Exiting, "0xpublic_key_6"),
   ],
   has_more: false,
   next_page: "",

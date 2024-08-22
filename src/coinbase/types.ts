@@ -33,6 +33,7 @@ import {
   CreateStakingOperationRequest,
   ValidatorList,
   Validator,
+  ValidatorStatus as APIValidatorStatus,
   Webhook as WebhookModel,
   WebhookList,
   CreateWebhookRequest,
@@ -507,7 +508,7 @@ export type ValidatorAPIClient = {
   listValidators(
     networkId: string,
     assetId: string,
-    status?: string,
+    status?: APIValidatorStatus,
     limit?: number,
     page?: string,
     options?: AxiosRequestConfig,
@@ -673,6 +674,26 @@ export enum SponsoredSendStatus {
   SUBMITTED = "submitted",
   COMPLETE = "complete",
   FAILED = "failed",
+}
+
+/**
+ * Validator status type definition.
+ * Represents the various states a validator can be in.
+ */
+export enum ValidatorStatus {
+  UNKNOWN = "unknown",
+  PROVISIONING = "provisioning",
+  PROVISIONED = "provisioned",
+  DEPOSITED = "deposited",
+  PENDING_ACTIVATION = "pending_activation",
+  ACTIVE = "active",
+  EXITING = "exiting",
+  EXITED = "exited",
+  WITHDRAWAL_AVAILABLE = "withdrawal_available",
+  WITHDRAWAL_COMPLETE = "withdrawal_complete",
+  ACTIVE_SLASHED = "active_slashed",
+  EXITED_SLASHED = "exited_slashed",
+  REAPED = "reaped",
 }
 
 /**

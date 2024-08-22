@@ -1,5 +1,6 @@
 import { Coinbase } from "./coinbase";
-import { Validator as ValidatorModel } from "../client/api";
+import { Validator as ValidatorModel, ValidatorStatus as APIValidatorStatus } from "../client/api";
+import { ValidatorStatus } from "./types";
 import { InternalError } from "./errors";
 
 /**
@@ -34,14 +35,13 @@ export class Validator {
   public static async list(
     networkId: string,
     assetId: string,
-    status?: string,
+    status?: ValidatorStatus,
   ): Promise<Validator[]> {
     const validators: Validator[] = [];
-
     const response = await Coinbase.apiClients.validator!.listValidators(
       networkId,
       assetId,
-      status,
+      Validator.getAPIValidatorStatus(status),
     );
 
     response.data.data.forEach(validator => {
@@ -65,6 +65,45 @@ export class Validator {
 
     return new Validator(response.data);
   }
+  /**
+   * Returns the Validator status.
+   *
+   * @param status - The API Validator status.
+   * @returns The Validator status.
+   */
+  private static getAPIValidatorStatus(status?: ValidatorStatus): APIValidatorStatus {
+    /* istanbul ignore next */
+    switch (status) {
+      case ValidatorStatus.UNKNOWN:
+        return APIValidatorStatus.Unknown;
+      case ValidatorStatus.PROVISIONING:
+        return APIValidatorStatus.Provisioning;
+      case ValidatorStatus.PROVISIONED:
+        return APIValidatorStatus.Provisioned;
+      case ValidatorStatus.DEPOSITED:
+        return APIValidatorStatus.Deposited;
+      case ValidatorStatus.PENDING_ACTIVATION:
+        return APIValidatorStatus.PendingActivation;
+      case ValidatorStatus.ACTIVE:
+        return APIValidatorStatus.Active;
+      case ValidatorStatus.EXITING:
+        return APIValidatorStatus.Exiting;
+      case ValidatorStatus.EXITED:
+        return APIValidatorStatus.Exited;
+      case ValidatorStatus.WITHDRAWAL_AVAILABLE:
+        return APIValidatorStatus.WithdrawalAvailable;
+      case ValidatorStatus.WITHDRAWAL_COMPLETE:
+        return APIValidatorStatus.WithdrawalComplete;
+      case ValidatorStatus.ACTIVE_SLASHED:
+        return APIValidatorStatus.ActiveSlashed;
+      case ValidatorStatus.EXITED_SLASHED:
+        return APIValidatorStatus.ExitedSlashed;
+      case ValidatorStatus.REAPED:
+        return APIValidatorStatus.Reaped;
+      default:
+        return APIValidatorStatus.Unknown;
+    }
+  }
 
   /**
    * Returns the Validator ID.
@@ -81,9 +120,37 @@ export class Validator {
    * @returns The Validator status.
    */
   public getStatus(): string {
-    return this.model.status;
+    switch (this.model.status) {
+      case APIValidatorStatus.Unknown:
+        return ValidatorStatus.UNKNOWN;
+      case APIValidatorStatus.Provisioning:
+        return ValidatorStatus.PROVISIONING;
+      case APIValidatorStatus.Provisioned:
+        return ValidatorStatus.PROVISIONED;
+      case APIValidatorStatus.Deposited:
+        return ValidatorStatus.DEPOSITED;
+      case APIValidatorStatus.PendingActivation:
+        return ValidatorStatus.PENDING_ACTIVATION;
+      case APIValidatorStatus.Active:
+        return ValidatorStatus.ACTIVE;
+      case APIValidatorStatus.Exiting:
+        return ValidatorStatus.EXITING;
+      case APIValidatorStatus.Exited:
+        return ValidatorStatus.EXITED;
+      case APIValidatorStatus.WithdrawalAvailable:
+        return ValidatorStatus.WITHDRAWAL_AVAILABLE;
+      case APIValidatorStatus.WithdrawalComplete:
+        return ValidatorStatus.WITHDRAWAL_COMPLETE;
+      case APIValidatorStatus.ActiveSlashed:
+        return ValidatorStatus.ACTIVE_SLASHED;
+      case APIValidatorStatus.ExitedSlashed:
+        return ValidatorStatus.EXITED_SLASHED;
+      case APIValidatorStatus.Reaped:
+        return ValidatorStatus.REAPED;
+      default:
+        return ValidatorStatus.UNKNOWN;
+    }
   }
-
   /**
    * Returns the string representation of the Validator.
    *
