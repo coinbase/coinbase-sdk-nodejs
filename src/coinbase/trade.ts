@@ -1,7 +1,8 @@
 import { Decimal } from "decimal.js";
+import { ethers } from "ethers";
 import { Trade as CoinbaseTrade } from "../client/api";
 import { Coinbase } from "./coinbase";
-import { InternalError } from "./errors";
+import { InternalError, NotSignedError, TimeoutError } from "./errors";
 import { Transaction } from "./transaction";
 import { TransactionStatus } from "./types";
 import { delay } from "./utils";
@@ -126,6 +127,53 @@ export class Trade {
   }
 
   /**
+   * Signs the Trade with the provided key.
+   * This signs the transfer transaction and will sign the approval transaction if present.
+   *
+   * @param key - The key to sign the Transfer with
+   */
+  public async sign(key: ethers.Wallet): Promise<void> {
+    if (this.getApproveTransaction()) {
+      await this.getApproveTransaction()!.sign(key);
+    }
+
+    await this.getTransaction().sign(key);
+  }
+
+  /**
+   * Broadcasts the Trade to the Network.
+   *
+   * @returns The Trade object
+   * @throws {APIError} if the API request to broadcast a Trade fails.
+   */
+  public async broadcast(): Promise<Trade> {
+    const tx = this.getTransaction();
+    const approveTx = this.getApproveTransaction();
+
+    if (!tx.isSigned()) {
+      throw new NotSignedError("Cannot broadcast Trade with unsigned transaction");
+    }
+
+    if (approveTx && !approveTx.isSigned()) {
+      throw new NotSignedError("Cannot broadcast Trade with unsigned approve transaction");
+    }
+
+    const response = await Coinbase.apiClients.trade!.broadcastTrade(
+      this.getWalletId(),
+      tx.fromAddressId(),
+      this.getId(),
+      {
+        signed_payload: tx.getSignature()!,
+        approve_transaction_signed_payload: approveTx ? approveTx.getSignature() : undefined,
+      },
+    );
+
+    this.resetModel(response.data);
+
+    return this;
+  }
+
+  /**
    * Returns the status of the Trade.
    *
    * @returns The status.
@@ -135,8 +183,8 @@ export class Trade {
   }
 
   /**
-   * Waits until the Trade is completed or failed by polling the Network at the given interval. Raises a
-   * Error if the Trade takes longer than the given timeout.
+   * Waits until the Trade is completed or failed by polling the Network at the given interval.
+   * Raises an error if the Trade takes longer than the given timeout.
    *
    * @param options - The options to configure the wait function.
    * @param options.intervalSeconds - The interval at which to poll the Network, in seconds
@@ -147,17 +195,18 @@ export class Trade {
    */
   public async wait({ intervalSeconds = 0.2, timeoutSeconds = 10 } = {}): Promise<Trade> {
     const startTime = Date.now();
+
     while (Date.now() - startTime < timeoutSeconds * 1000) {
       await this.reload();
+
       if (this.getTransaction().isTerminalState()) {
         return this;
       }
-      if (Date.now() - startTime > timeoutSeconds * 1000) {
-        throw new Error("Trade timed out");
-      }
+
       await delay(intervalSeconds);
     }
-    throw new Error("Trade timed out");
+
+    throw new TimeoutError("Trade timed out");
   }
 
   /**
@@ -171,14 +220,8 @@ export class Trade {
       this.getAddressId(),
       this.getId(),
     );
-    this.model = result?.data;
 
-    this.transaction = new Transaction(this.model.transaction);
-    this.approveTransaction = this.model.approve_transaction
-      ? new Transaction(this.model.approve_transaction)
-      : undefined;
-
-    return this;
+    return this.resetModel(result?.data);
   }
 
   /**
@@ -193,5 +236,22 @@ export class Trade {
       `to_asset_id: '${this.getToAssetId()}', from_amount: '${this.getFromAmount()}', ` +
       `to_amount: '${this.getToAmount()}', status: '${this.getStatus()}' }`
     );
+  }
+
+  /**
+   * Resets the trade model with the specified data from the server.
+   *
+   * @param model - The Trade model
+   * @returns The updated Trade object
+   */
+  private resetModel(model: CoinbaseTrade): Trade {
+    this.model = model;
+
+    this.transaction = new Transaction(this.model.transaction);
+    this.approveTransaction = this.model.approve_transaction
+      ? new Transaction(this.model.approve_transaction)
+      : undefined;
+
+    return this;
   }
 }

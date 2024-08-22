@@ -66,12 +66,15 @@ async function sendMassPayout(sendingWallet) {
       const address = row[0];
       if (address) {
         try {
-          await sendingWallet.createTransfer({
+          const transfer = await sendingWallet.createTransfer({
             // Send payment to each Address in CSV.
             amount: transferAmount,
             assetId: assetId,
             destination: address,
           });
+
+          await transfer.wait();
+
           console.log(`Transfer to ${address} successful`);
         } catch (error) {
           console.error(`Error transferring to ${address}: `, error);

@@ -5,7 +5,8 @@ import { SponsoredSend } from "./sponsored_send";
 import { Coinbase } from "./coinbase";
 import { Transfer as TransferModel } from "../client/api";
 import { ethers } from "ethers";
-import { InternalError } from "./errors";
+import { delay } from "./utils";
+import { InternalError, TimeoutError } from "./errors";
 
 /**
  * A representation of a Transfer, which moves an Amount of an Asset from
@@ -224,6 +225,36 @@ export class Transfer {
     );
 
     return Transfer.fromModel(response.data);
+  }
+
+  /**
+   * Waits for the Transfer to be confirmed on the Network or fail on chain.
+   * Waits until the Transfer is completed or failed on-chain by polling at the given interval.
+   * Raises an error if the Trade takes longer than the given timeout.
+   *
+   * @param options - The options to configure the wait function.
+   * @param options.intervalSeconds - The interval to check the status of the Transfer.
+   * @param options.timeoutSeconds - The maximum time to wait for the Transfer to be confirmed.
+   *
+   * @returns The Transfer object in a terminal state.
+   * @throws {Error} if the Transfer times out.
+   */
+  public async wait({ intervalSeconds = 0.2, timeoutSeconds = 10 } = {}): Promise<Transfer> {
+    const startTime = Date.now();
+
+    while (Date.now() - startTime < timeoutSeconds * 1000) {
+      await this.reload();
+
+      // If the Transfer is in a terminal state, return the Transfer.
+      const status = this.getStatus();
+      if (status === TransferStatus.COMPLETE || status === TransferStatus.FAILED) {
+        return this;
+      }
+
+      await delay(intervalSeconds);
+    }
+
+    throw new TimeoutError("Transfer timed out");
   }
 
   /**
