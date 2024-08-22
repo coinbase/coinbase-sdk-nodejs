@@ -31,7 +31,7 @@ describe("Validator", () => {
     });
   });
 
-  describe("getStatus", () => {
+  describe(".getStatus", () => {
     const testCases = [
       { input: APIValidatorStatus.Unknown, expected: ValidatorStatus.UNKNOWN },
       { input: APIValidatorStatus.Provisioning, expected: ValidatorStatus.PROVISIONING },
@@ -64,7 +64,7 @@ describe("Validator", () => {
     });
   });
 
-  describe("getAPIValidatorStatus", () => {
+  describe("#getAPIValidatorStatus", () => {
     const testCases = [
       { input: ValidatorStatus.UNKNOWN, expected: APIValidatorStatus.Unknown },
       { input: ValidatorStatus.PROVISIONING, expected: APIValidatorStatus.Provisioning },

@@ -676,6 +676,10 @@ export enum SponsoredSendStatus {
   FAILED = "failed",
 }
 
+/**
+ * Validator status type definition.
+ * Represents the various states a validator can be in.
+ */
 export enum ValidatorStatus {
   UNKNOWN = "unknown",
   PROVISIONING = "provisioning",
