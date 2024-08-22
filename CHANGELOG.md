@@ -4,8 +4,12 @@
 
 ### Added
 
-- Add historical_balances function for wallet: listing historical balances for default address of the wallet.
+- Add `listHistoricalBalances` wallet method, that lists the historical balances for the wallet's default address.
 - Add toAddressId() method to Transaction class
+
+### Removed
+
+- Remove user concept from the SDK
 - Remove "pending" status from StakingOperationStatusEnum
 - Add staking operation class helper methods like `isTerminalState`, `isFailedState` and `isCompleteState`.
 

@@ -12,7 +12,6 @@ export * from "./coinbase/trade";
 export * from "./coinbase/transaction";
 export * from "./coinbase/transfer";
 export * from "./coinbase/types";
-export * from "./coinbase/user";
 export * from "./coinbase/address/external_address";
 export * from "./coinbase/address/wallet_address";
 export * from "./coinbase/staking_operation";

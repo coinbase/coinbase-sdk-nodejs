@@ -193,14 +193,14 @@ describe("Trade", () => {
       await trade.reload();
       expect(trade.getTransaction().getStatus()).toBe(TransactionStatus.COMPLETE);
       expect(trade.getToAmount()).toEqual(
-        new Decimal(500000000).div(new Decimal(Math.pow(10, usdcAsset.decimals)))
+        new Decimal(500000000).div(new Decimal(Math.pow(10, usdcAsset.decimals))),
       );
     });
     it("should update properties on the trade", async () => {
       expect(trade.getToAmount()).toEqual(usdcAmount);
       await trade.reload();
       expect(trade.getToAmount()).toEqual(
-        new Decimal(updatedModel.to_amount).div(new Decimal(Math.pow(10, usdcAsset.decimals)))
+        new Decimal(updatedModel.to_amount).div(new Decimal(Math.pow(10, usdcAsset.decimals))),
       );
     });
   });
