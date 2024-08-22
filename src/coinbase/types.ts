@@ -33,6 +33,12 @@ import {
   CreateStakingOperationRequest,
   ValidatorList,
   Validator,
+  ValidatorStatus as APIValidatorStatus,
+  Webhook as WebhookModel,
+  WebhookList,
+  CreateWebhookRequest,
+  UpdateWebhookRequest,
+  ContractEventList,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -446,9 +452,9 @@ export type StakeAPIClient = {
   /**
    * Get the staking balances for an address.
    *
-   * @param address - The onchain address to fetch the staking balances for.
    * @param networkId - The ID of the blockchain network.
    * @param assetId - The ID of the asset to fetch the staking balances for.
+   * @param addressId - The onchain address to fetch the staking balances for.
    * @param startTime - The start time of the staking balances.
    * @param endTime - The end time of the staking balances.
    * @param limit - The amount of records to return in a single call.
@@ -456,9 +462,9 @@ export type StakeAPIClient = {
    * @param options - Axios request options.
    */
   fetchHistoricalStakingBalances(
-    address: string,
     networkId: string,
     assetId: string,
+    addressId: string,
     startTime: string,
     endTime: string,
     limit?: number,
@@ -503,7 +509,7 @@ export type ValidatorAPIClient = {
   listValidators(
     networkId: string,
     assetId: string,
-    status?: string,
+    status?: APIValidatorStatus,
     limit?: number,
     page?: string,
     options?: AxiosRequestConfig,
@@ -623,6 +629,35 @@ export type ServerSignerAPIClient = {
 };
 
 /**
+ * ExternalSmartContractAPIClient client type definition.
+ */
+export type ExternalSmartContractAPIClient = {
+  /**
+   * List events for a specific contract
+   *
+   * @param networkId - Unique identifier for the blockchain network
+   * @param protocolName - Case-sensitive name of the blockchain protocol
+   * @param contractAddress - EVM address of the smart contract (42 characters, including '0x', in lowercase)
+   * @param contractName - Case-sensitive name of the specific contract within the project
+   * @param eventName - Case-sensitive name of the event to filter for in the contract's logs
+   * @param fromBlockHeight - Lower bound of the block range to query (inclusive)
+   * @param toBlockHeight - Upper bound of the block range to query (inclusive)
+   * @param nextPage - Pagination token for retrieving the next set of results
+   * @throws {APIError} If the request fails.
+   */
+  listContractEvents(
+    networkId: string,
+    protocolName: string,
+    contractAddress: string,
+    contractName: string,
+    eventName: string,
+    fromBlockHeight: number,
+    toBlockHeight: number,
+    nextPage?: string,
+  ): AxiosPromise<ContractEventList>;
+};
+
+/**
  * API clients type definition for the Coinbase SDK.
  * Represents the set of API clients available in the SDK.
  */
@@ -637,6 +672,8 @@ export type ApiClients = {
   validator?: ValidatorAPIClient;
   asset?: AssetAPIClient;
   externalAddress?: ExternalAddressAPIClient;
+  webhook?: WebhookApiClient;
+  smartContract?: ExternalSmartContractAPIClient;
 };
 
 /**
@@ -668,6 +705,26 @@ export enum SponsoredSendStatus {
   SUBMITTED = "submitted",
   COMPLETE = "complete",
   FAILED = "failed",
+}
+
+/**
+ * Validator status type definition.
+ * Represents the various states a validator can be in.
+ */
+export enum ValidatorStatus {
+  UNKNOWN = "unknown",
+  PROVISIONING = "provisioning",
+  PROVISIONED = "provisioned",
+  DEPOSITED = "deposited",
+  PENDING_ACTIVATION = "pending_activation",
+  ACTIVE = "active",
+  EXITING = "exiting",
+  EXITED = "exited",
+  WITHDRAWAL_AVAILABLE = "withdrawal_available",
+  WITHDRAWAL_COMPLETE = "withdrawal_complete",
+  ACTIVE_SLASHED = "active_slashed",
+  EXITED_SLASHED = "exited_slashed",
+  REAPED = "reaped",
 }
 
 /**
@@ -834,3 +891,58 @@ export type ListHistoricalBalancesResult = {
   historicalBalances: HistoricalBalance[];
   nextPageToken: string;
 };
+
+export interface WebhookApiClient {
+  /**
+   * Create a new webhook
+   *
+   * @summary Create a new webhook
+   * @param {CreateWebhookRequest} [createWebhookRequest]
+   * @param {*} [options] - Override http request option.
+   * @throws {RequiredError}
+   */
+  createWebhook(
+    createWebhookRequest?: CreateWebhookRequest,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<WebhookModel>;
+
+  /**
+   * Delete a webhook
+   *
+   * @summary Delete a webhook
+   * @param {string} webhookId - The Webhook uuid that needs to be deleted
+   * @param {*} [options] - Override http request option.
+   * @throws {RequiredError}
+   */
+  deleteWebhook(webhookId: string, options?: RawAxiosRequestConfig): AxiosPromise<void>;
+
+  /**
+   * List webhooks, optionally filtered by event type.
+   *
+   * @summary List webhooks
+   * @param {number} [limit] - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param {string} [page] - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param {*} [options] - Override http request option.
+   * @throws {RequiredError}
+   */
+  listWebhooks(
+    limit?: number,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<WebhookList>;
+
+  /**
+   * Update a webhook
+   *
+   * @summary Update a webhook
+   * @param {string} webhookId - The Webhook id that needs to be updated
+   * @param {UpdateWebhookRequest} [updateWebhookRequest]
+   * @param {*} [options] - Override http request option.
+   * @throws {RequiredError}
+   */
+  updateWebhook(
+    webhookId: string,
+    updateWebhookRequest?: UpdateWebhookRequest,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<WebhookModel>;
+}

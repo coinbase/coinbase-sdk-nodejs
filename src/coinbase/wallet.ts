@@ -19,6 +19,8 @@ import {
   Amount,
   CreateTransferOptions,
   CreateTradeOptions,
+  ListHistoricalBalancesOptions,
+  ListHistoricalBalancesResult,
   SeedData,
   ServerSignerStatus,
   StakeOptionsMode,
@@ -34,6 +36,9 @@ import { StakingBalance } from "./staking_balance";
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
  * each of which can hold a balance of one or more Assets. Wallets can create new Addresses, list their addresses,
  * list their balances, and transfer Assets to other Addresses. Wallets should be created through User.createWallet or User.importWallet.
+ * Wallets should be created using `Wallet.create`, imported using `Wallet.import`, or fetched using `Wallet.fetch`.
+ * Existing wallets can be imported with a seed using `Wallet.import`.
+ * Wallets backed by a Server Signer can be fetched with `Wallet.fetch` and used for signing operations immediately.
  */
 export class Wallet {
   static MAX_ADDRESSES = 20;
@@ -61,7 +66,7 @@ export class Wallet {
   }
 
   /**
-   * Lists the Wallets belonging to the User.
+   * Lists the Wallets belonging to the CDP Project.
    *
    * @returns The list of Wallets.
    */
@@ -125,13 +130,12 @@ export class Wallet {
   }
 
   /**
-   * Returns a newly created Wallet object. Do not use this method directly.
-   * Instead, use User.createWallet.
+   * Returns a newly created Wallet object.
    *
    * @constructs Wallet
    * @param options - The options to create the Wallet.
    * @param options.networkId - the ID of the blockchain network. Defaults to 'base-sepolia'.
-   * @param options.intervalSeconds - The interval at which to poll the CDPService, in seconds.
+   * @param options.intervalSeconds - The interval at which to poll the backend, in seconds.
    * @param options.timeoutSeconds - The maximum amount of time to wait for the ServerSigner to create a seed, in seconds.
    * @throws {ArgumentError} If the model or client is not provided.
    * @throws {InternalError} - If address derivation or caching fails.
@@ -160,7 +164,10 @@ export class Wallet {
   }
 
   /**
-   * Returns a new Wallet object. Do not use this method directly. Instead, use User.createWallet or User.importWallet.
+   * Returns a new Wallet object. Do not use this method directly. Instead, use one of:
+   * - Wallet.create (Create a new Wallet),
+   * - Wallet.import (Import a Wallet with seed),
+   * - Wallet.fetch (fetch a Wallet by ID w/o seed, useful for server signer wallets).
    *
    * @constructs Wallet
    * @param model - The underlying Wallet model object
@@ -202,7 +209,9 @@ export class Wallet {
   public async createAddress(): Promise<Address> {
     let payload, key;
     if (!Coinbase.useServerSigner) {
-      const hdKey = this.deriveKey(this.addresses.length);
+      // TODO: Coordinate this value with concurrent calls to createAddress.
+      const addressIndex = this.addresses.length;
+      const hdKey = this.deriveKey(addressIndex);
       const attestation = this.createAttestation(hdKey);
       const publicKey = convertStringToHex(hdKey.publicKey!);
       key = new ethers.Wallet(convertStringToHex(hdKey.privateKey!));
@@ -210,6 +219,7 @@ export class Wallet {
       payload = {
         public_key: publicKey,
         attestation: attestation,
+        address_index: addressIndex,
       };
     }
     const response = await Coinbase.apiClients.address!.createAddress(this.model.id!, payload);
@@ -285,35 +295,22 @@ export class Wallet {
   }
 
   /**
-   *  Trades the given amount of the given Asset for another Asset. Currently only the default address is used to source the Trade
+   *  Trades the given amount of the given Asset for another Asset.
+   *  Currently only the default address is used to source the Trade.
    *
    * @param options - The options to create the Trade.
    * @param options.amount - The amount of the Asset to send.
    * @param options.fromAssetId - The ID of the Asset to trade from.
    * @param options.toAssetId - The ID of the Asset to trade to.
-   * @param options.timeoutSeconds - The maximum amount of time to wait for the Trade to complete, in seconds.
-   * @param options.intervalSeconds - The interval at which to poll the Network for Trade status, in seconds.
    * @throws {InternalError} If the default address is not found.
    * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
-   * @returns The Trade object.
+   * @returns The created Trade object.
    */
-  public async createTrade({
-    amount,
-    fromAssetId,
-    toAssetId,
-    timeoutSeconds = 10,
-    intervalSeconds = 0.2,
-  }: CreateTradeOptions): Promise<Trade> {
+  public async createTrade(options: CreateTradeOptions): Promise<Trade> {
     if (!this.getDefaultAddress()) {
       throw new InternalError("Default address not found");
     }
-    return await this.getDefaultAddress()!.createTrade({
-      amount: amount,
-      fromAssetId: fromAssetId,
-      toAssetId: toAssetId,
-      timeoutSeconds,
-      intervalSeconds,
-    });
+    return await this.getDefaultAddress()!.createTrade(options);
   }
 
   /**
@@ -416,6 +413,30 @@ export class Wallet {
       throw new InternalError("Default address not found");
     }
     return await this.getDefaultAddress()!.historicalStakingBalances(assetId, startTime, endTime);
+  }
+
+  /**
+   * Lists the historical balances for a given asset belonging to the default address of the wallet.
+   *
+   * @param options - The options to list historical balances.
+   * @param options.assetId - The asset ID.
+   * @param options.limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param options.page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @returns The list of historical balance of the asset and next page token.
+   */
+  public async listHistoricalBalances({
+    assetId,
+    limit,
+    page,
+  }: ListHistoricalBalancesOptions): Promise<ListHistoricalBalancesResult> {
+    if (!this.getDefaultAddress()) {
+      throw new InternalError("Default address not found");
+    }
+    return await this.getDefaultAddress()!.listHistoricalBalances({
+      assetId: assetId,
+      limit: limit,
+      page: page,
+    });
   }
 
   /**
@@ -722,33 +743,17 @@ export class Wallet {
    * @param options.amount - The amount of the Asset to send.
    * @param options.assetId - The ID of the Asset to send.
    * @param options.destination - The destination of the transfer. If a Wallet, sends to the Wallet's default address. If a String, interprets it as the address ID.
-   * @param options.timeoutSeconds - The maximum amount of time to wait for the Transfer to complete, in seconds.
-   * @param options.intervalSeconds - The interval at which to poll the Network for Transfer status, in seconds.
    * @param options.gasless - Whether the Transfer should be gasless. Defaults to false.
-   * @returns The hash of the Transfer transaction.
+   * @returns The created Transfer object.
    * @throws {APIError} if the API request to create a Transfer fails.
    * @throws {APIError} if the API request to broadcast a Transfer fails.
-   * @throws {Error} if the Transfer times out.
    */
-  public async createTransfer({
-    amount,
-    assetId,
-    destination,
-    timeoutSeconds = 10,
-    intervalSeconds = 0.2,
-    gasless = false,
-  }: CreateTransferOptions): Promise<Transfer> {
+  public async createTransfer(options: CreateTransferOptions): Promise<Transfer> {
     if (!this.getDefaultAddress()) {
       throw new InternalError("Default address not found");
     }
-    return await this.getDefaultAddress()!.createTransfer({
-      amount,
-      assetId,
-      destination,
-      timeoutSeconds,
-      intervalSeconds,
-      gasless,
-    });
+
+    return await this.getDefaultAddress()!.createTransfer(options);
   }
 
   /**
@@ -898,8 +903,11 @@ export class Wallet {
       throw new InternalError("Cannot derive key for Wallet without seed loaded");
     }
     const [networkPrefix] = this.model.network_id.split("-");
-    // TODO: Push this logic to the backend.
-    if (!["base", "ethereum"].includes(networkPrefix)) {
+    /**
+     * TODO: Push this logic to the backend.
+     * TODO: Add unit tests for `#createAddress`.
+     */
+    if (!["base", "ethereum", "polygon"].includes(networkPrefix)) {
       throw new InternalError(`Unsupported network ID: ${this.model.network_id}`);
     }
     const derivedKey = this.master?.derive(this.addressPathPrefix + `/${index}`);

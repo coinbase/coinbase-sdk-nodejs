@@ -15,6 +15,8 @@ import {
   Validator,
   StakingOperationStatusEnum,
   FeatureSet,
+  TransactionStatusEnum,
+  ValidatorStatus,
 } from "../client";
 import { BASE_PATH } from "../client/base";
 import { Coinbase } from "../coinbase/coinbase";
@@ -83,6 +85,7 @@ export const newAddressModel = (
   walletId: string,
   address_id: string = "",
   network_id: string = Coinbase.networks.BaseSepolia,
+  index: number = 0,
 ): AddressModel => {
   const ethAddress = ethers.Wallet.createRandom();
 
@@ -91,6 +94,7 @@ export const newAddressModel = (
     network_id: network_id ? network_id : Coinbase.networks.BaseSepolia,
     public_key: ethAddress.publicKey,
     wallet_id: walletId,
+    index,
   };
 };
 
@@ -105,6 +109,7 @@ export const VALID_WALLET_MODEL: WalletModel = {
     address_id: "0xdeadbeef",
     public_key: "0x1234567890",
     network_id: Coinbase.networks.BaseSepolia,
+    index: 0,
   },
 };
 
@@ -172,11 +177,12 @@ export const VALID_STAKING_OPERATION_MODEL: StakingOperationModel = {
   id: "some-id",
   network_id: Coinbase.networks.EthereumHolesky,
   address_id: "some-address-id",
-  status: "pending",
+  status: StakingOperationStatusEnum.Initialized,
   transactions: [
     {
       network_id: Coinbase.networks.EthereumHolesky,
-      from_address_id: "0xdeadbeef",
+      from_address_id: "dummy-from-address-id",
+      to_address_id: "dummy-to-address-id",
       unsigned_payload:
         "7b2274797065223a22307832222c22636861696e4964223a2230783134613334222c226e6f6e63" +
         "65223a22307830222c22746f223a22307834643965346633663464316138623566346637623166" +
@@ -188,9 +194,9 @@ export const VALID_STAKING_OPERATION_MODEL: StakingOperationModel = {
         "2c2273223a22307830222c2279506172697479223a22307830222c2268617368223a2230783664" +
         "633334306534643663323633653363396561396135656438646561346332383966613861363966" +
         "3031653635393462333732386230386138323335333433227d",
-      transaction_hash: "0xdeadbeef",
+      transaction_hash: "0xdummy-transaction-hash",
       transaction_link: "https://sepolia.basescan.org/tx/0xdeadbeef",
-      status: "pending",
+      status: TransactionStatusEnum.Pending,
     },
   ],
 };
@@ -293,7 +299,7 @@ export const VALID_ADDRESS_BALANCE_LIST: AddressBalanceList = {
  */
 export function mockEthereumValidator(
   index: string,
-  status: string,
+  status: ValidatorStatus,
   public_key: string,
 ): Validator {
   return {
@@ -329,9 +335,9 @@ export function mockEthereumValidator(
 
 export const VALID_ACTIVE_VALIDATOR_LIST: ValidatorList = {
   data: [
-    mockEthereumValidator("100", "active_ongoing", "0xpublic_key_1"),
-    mockEthereumValidator("200", "active_ongoing", "0xpublic_key_2"),
-    mockEthereumValidator("300", "active_ongoing", "0xpublic_key_3"),
+    mockEthereumValidator("100", ValidatorStatus.Active, "0xpublic_key_1"),
+    mockEthereumValidator("200", ValidatorStatus.Active, "0xpublic_key_2"),
+    mockEthereumValidator("300", ValidatorStatus.Active, "0xpublic_key_3"),
   ],
   has_more: false,
   next_page: "",
@@ -339,9 +345,9 @@ export const VALID_ACTIVE_VALIDATOR_LIST: ValidatorList = {
 
 export const VALID_EXITING_VALIDATOR_LIST: ValidatorList = {
   data: [
-    mockEthereumValidator("400", "active_exiting", "0xpublic_key_4"),
-    mockEthereumValidator("500", "active_exiting", "0xpublic_key_5"),
-    mockEthereumValidator("600", "active_exiting", "0xpublic_key_6"),
+    mockEthereumValidator("400", ValidatorStatus.Exiting, "0xpublic_key_4"),
+    mockEthereumValidator("500", ValidatorStatus.Exiting, "0xpublic_key_5"),
+    mockEthereumValidator("600", ValidatorStatus.Exiting, "0xpublic_key_6"),
   ],
   has_more: false,
   next_page: "",
@@ -466,4 +472,8 @@ export const externalAddressApiMock = {
 
 export const serverSignersApiMock = {
   listServerSigners: jest.fn(),
+};
+
+export const smartContractApiMock = {
+  listContractEvents: jest.fn(),
 };

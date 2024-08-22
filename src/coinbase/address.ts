@@ -104,12 +104,12 @@ export class Address {
   }: ListHistoricalBalancesOptions): Promise<ListHistoricalBalancesResult> {
     const historyList: HistoricalBalance[] = [];
 
-    if (limit !== undefined) {
+    if (limit !== undefined || page !== undefined) {
       const response = await Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance(
         this.getNetworkId(),
         this.getId(),
         Asset.primaryDenomination(assetId),
-        limit,
+        limit ? limit : undefined,
         page ? page : undefined,
       );
 

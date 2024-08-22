@@ -29,13 +29,9 @@ describe("Coinbase SDK E2E Test", () => {
   });
 
   it("should be able to interact with the Coinbase SDK", async () => {
-    console.log("Fetching default user...");
-    const user = await coinbase.getDefaultUser();
-    expect(user.getId()).toBeDefined();
-    console.log(`Fetched default user with ID: ${user.getId()}`);
-
     console.log("Creating new wallet...");
-    const wallet = await user.createWallet();
+    const wallet = await Wallet.create();
+
     expect(wallet.toString()).toBeDefined();
     expect(wallet?.getId()).toBeDefined();
     console.log(
@@ -47,27 +43,27 @@ describe("Coinbase SDK E2E Test", () => {
     const walletId = Object.keys(seedFile)[0];
     const seed = seedFile[walletId].seed;
 
-    const userWallet = await Wallet.import({ seed, walletId });
-    expect(userWallet).toBeDefined();
-    expect(userWallet.getId()).toBe(walletId);
+    const importedWallet = await Wallet.import({ seed, walletId });
+    expect(importedWallet).toBeDefined();
+    expect(importedWallet.getId()).toBe(walletId);
     console.log(
-      `Imported wallet with ID: ${userWallet.getId()}, default address: ${userWallet.getDefaultAddress()}`,
+      `Imported wallet with ID: ${importedWallet.getId()}, default address: ${importedWallet.getDefaultAddress()}`,
     );
-    await userWallet.saveSeed("test_seed.json");
+    await importedWallet.saveSeed("test_seed.json");
 
     try {
-      const transaction = await userWallet.faucet();
+      const transaction = await importedWallet.faucet();
       expect(transaction.toString()).toBeDefined();
     } catch {
       console.log("Faucet request failed. Skipping...");
     }
     console.log("Listing wallet addresses...");
-    const addresses = await userWallet.listAddresses();
+    const addresses = await importedWallet.listAddresses();
     expect(addresses.length).toBeGreaterThan(0);
     console.log(`Listed addresses: ${addresses.join(", ")}`);
 
     console.log("Fetching wallet balances...");
-    const balances = await userWallet.listBalances();
+    const balances = await importedWallet.listBalances();
     expect(Array.from([...balances.keys()]).length).toBeGreaterThan(0);
     console.log(`Fetched balances: ${balances.toString()}`);
 
@@ -81,7 +77,7 @@ describe("Coinbase SDK E2E Test", () => {
     expect(fs.existsSync("test_seed.json")).toBe(true);
     console.log("Saved seed to test_seed.json");
 
-    const unhydratedWallet = await user.getWallet(walletId);
+    const unhydratedWallet = await Wallet.fetch(walletId);
     expect(unhydratedWallet.canSign()).toBe(false);
     await unhydratedWallet.loadSeed("test_seed.json");
     expect(unhydratedWallet.canSign()).toBe(true);
@@ -93,6 +89,9 @@ describe("Coinbase SDK E2E Test", () => {
       assetId: Coinbase.assets.Eth,
       destination: wallet,
     });
+
+    await transfer.wait();
+
     expect(transfer.toString()).toBeDefined();
     expect(await transfer.getStatus()).toBe(TransferStatus.COMPLETE);
     console.log(`Transferred 1 Gwei from ${unhydratedWallet} to ${wallet}`);

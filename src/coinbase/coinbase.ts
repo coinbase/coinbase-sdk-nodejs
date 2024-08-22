@@ -2,8 +2,6 @@ import globalAxios, { AxiosError } from "axios";
 import axiosRetry from "axios-retry";
 import * as fs from "fs";
 import {
-  User as UserModel,
-  UsersApiFactory,
   TransfersApiFactory,
   AddressesApiFactory,
   WalletsApiFactory,
@@ -13,13 +11,15 @@ import {
   ValidatorsApiFactory,
   AssetsApiFactory,
   ExternalAddressesApiFactory,
+  WebhooksApiFactory,
+  NetworkIdentifier,
+  ContractEventsApiFactory,
 } from "../client";
 import { BASE_PATH } from "./../client/base";
 import { Configuration } from "./../client/configuration";
 import { CoinbaseAuthenticator } from "./authenticator";
 import { InternalError, InvalidAPIKeyFormat, InvalidConfiguration } from "./errors";
 import { ApiClients, CoinbaseConfigureFromJsonOptions, CoinbaseOptions } from "./types";
-import { User } from "./user";
 import { logApiResponse, registerAxiosInterceptors } from "./utils";
 import * as os from "os";
 
@@ -28,16 +28,16 @@ import * as os from "os";
  */
 export class Coinbase {
   /**
-   * The list of supported networks.
+   * The map of supported networks to network ID. Generated from the OpenAPI spec.
    *
    * @constant
+   *
+   * @example
+   * ```typescript
+   * Coinbase.networks.BaseMainnet
+   * ```
    */
-  static networks = {
-    BaseSepolia: "base-sepolia",
-    BaseMainnet: "base-mainnet",
-    EthereumMainnet: "ethereum-mainnet",
-    EthereumHolesky: "ethereum-holesky",
-  };
+  static networks = NetworkIdentifier;
 
   /**
    * The list of supported assets.
@@ -117,7 +117,6 @@ export class Coinbase {
       response => logApiResponse(response, debugging),
     );
 
-    Coinbase.apiClients.user = UsersApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.wallet = WalletsApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.address = AddressesApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.transfer = TransfersApiFactory(config, basePath, axiosInstance);
@@ -126,11 +125,13 @@ export class Coinbase {
     Coinbase.apiClients.stake = StakeApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.validator = ValidatorsApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.asset = AssetsApiFactory(config, basePath, axiosInstance);
+    Coinbase.apiClients.webhook = WebhooksApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.externalAddress = ExternalAddressesApiFactory(
       config,
       basePath,
       axiosInstance,
     );
+    Coinbase.apiClients.smartContract = ContractEventsApiFactory(config, basePath, axiosInstance);
     Coinbase.apiKeyPrivateKey = privateKey;
     Coinbase.useServerSigner = useServerSigner;
   }
@@ -202,16 +203,5 @@ export class Coinbase {
    */
   static toAssetId(asset: string): string {
     return asset.replace(/-/g, "_");
-  }
-
-  /**
-   * Returns User object for the default user.
-   *
-   * @returns The default user.
-   * @throws {APIError} If the request fails.
-   */
-  async getDefaultUser(): Promise<User> {
-    const userResponse = await Coinbase.apiClients.user!.getCurrentUser();
-    return new User(userResponse.data as UserModel);
   }
 }

@@ -3,13 +3,14 @@ import * as fs from "fs";
 import { randomUUID } from "crypto";
 import { APIError } from "../coinbase/api_error";
 import { Coinbase } from "../index";
+import { Wallet } from "../coinbase/wallet";
+import { NetworkIdentifier } from "../client";
 import {
   VALID_WALLET_MODEL,
   addressesApiMock,
   generateRandomHash,
   mockReturnRejectedValue,
   mockReturnValue,
-  usersApiMock,
   walletsApiMock,
 } from "./utils";
 import { ethers } from "ethers";
@@ -20,6 +21,16 @@ import axios from "axios";
 const PATH_PREFIX = "./src/tests/config";
 
 describe("Coinbase tests", () => {
+  describe(".networks", () => {
+    it("returns a map of networks that match the api generated NetworkIdentifier", () => {
+      expect(Coinbase.networks).toEqual(NetworkIdentifier);
+    });
+
+    it("returns the network ID when selecting a specific network", () => {
+      expect(Coinbase.networks.BaseSepolia).toEqual("base-sepolia");
+    });
+  });
+
   it("should throw an error if the API key name or private key is empty", () => {
     expect(() => new Coinbase({ apiKeyName: "", privateKey: "test" })).toThrow(
       "Invalid configuration: apiKeyName is empty",
@@ -66,7 +77,7 @@ describe("Coinbase tests", () => {
   });
 
   describe("should able to interact with the API", () => {
-    let user, walletId, publicKey, addressId, transactionHash;
+    let walletId, publicKey, addressId, transactionHash;
     const cbInstance = Coinbase.configureFromJson({
       filePath: `${PATH_PREFIX}/test_api_key.json`,
       debugging: true,
@@ -75,7 +86,6 @@ describe("Coinbase tests", () => {
     beforeEach(async () => {
       jest.clearAllMocks();
       Coinbase.apiClients = {
-        user: usersApiMock,
         wallet: walletsApiMock,
         address: addressesApiMock,
       };
@@ -97,7 +107,6 @@ describe("Coinbase tests", () => {
         },
       };
 
-      Coinbase.apiClients.user!.getCurrentUser = mockReturnValue({ id: 123 });
       Coinbase.apiClients.wallet!.createWallet = mockReturnValue(walletModel);
       Coinbase.apiClients.wallet!.getWallet = mockReturnValue(walletModel);
       Coinbase.apiClients.address!.requestFaucetFunds = mockReturnValue({
@@ -106,15 +115,12 @@ describe("Coinbase tests", () => {
       Coinbase.apiClients.address!.createAddress = mockReturnValue(
         VALID_WALLET_MODEL.default_address,
       );
-
-      user = await cbInstance.getDefaultUser();
     });
 
-    it("should return the correct user ID", async () => {
-      expect(user.getId()).toBe(123);
-      expect(user.toString()).toBe("User{ userId: 123 }");
-      expect(Coinbase.apiClients.user!.getCurrentUser).toHaveBeenCalledWith();
-      expect(usersApiMock.getCurrentUser).toHaveBeenCalledTimes(1);
+    it("enables interaction with the API clients", async () => {
+      const wallet = await Wallet.create({ networkId: NetworkIdentifier.BaseSepolia });
+
+      expect(wallet.getId()).toEqual(walletId);
     });
   });
 });
@@ -122,12 +128,12 @@ describe("Coinbase tests", () => {
 describe("Axios Interceptors", () => {
   it("should raise an error if the user is not found", async () => {
     const mock = new MockAdapter(axios);
-    mock.onGet("/v1/users/me").reply(401, "unauthorized");
+    mock.onGet("/v1/wallets").reply(401, "unauthorized");
     const cbInstance = Coinbase.configureFromJson({
       filePath: `${PATH_PREFIX}/test_api_key.json`,
       debugging: true,
     });
 
-    await expect(cbInstance.getDefaultUser()).rejects.toThrow(APIError);
+    await expect(Wallet.listWallets()).rejects.toThrow(APIError);
   });
 });

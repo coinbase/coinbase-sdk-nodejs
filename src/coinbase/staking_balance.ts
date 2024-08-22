@@ -22,7 +22,7 @@ export class StakingBalance {
    *
    * @param networkId - The network ID.
    * @param assetId - The asset ID.
-   * @param address - The address ID.
+   * @param addressId - The address ID.
    * @param startTime - The start time.
    * @param endTime - The end time.
    * @returns The staking balances.
@@ -30,7 +30,7 @@ export class StakingBalance {
   public static async list(
     networkId: string,
     assetId: string,
-    address: string,
+    addressId: string,
     startTime: string,
     endTime: string,
   ): Promise<StakingBalance[]> {
@@ -41,9 +41,9 @@ export class StakingBalance {
       const page = queue.shift();
 
       const response = await Coinbase.apiClients.stake!.fetchHistoricalStakingBalances(
-        address,
         networkId,
         assetId,
+        addressId,
         startTime,
         endTime,
         100,
@@ -115,6 +115,6 @@ export class StakingBalance {
    * @returns The string representation of the Staking Balance.
    */
   public toString(): string {
-    return `StakingBalance { date: '${this.date().toISOString()}' address: '${this.address()}' bondedStake: '${this.bondedStake().toString()}' unbondedBalance: '${this.unbondedBalance().toString()}' participantType: '${this.participantType()}' }`;
+    return `StakingBalance { date: '${this.date().toISOString()}' address: '${this.address()}' bondedStake: '${this.bondedStake().amount} ${this.bondedStake().asset?.assetId?.toUpperCase()}' unbondedBalance: '${this.unbondedBalance().amount} ${this.unbondedBalance().asset?.assetId?.toUpperCase()}' participantType: '${this.participantType()}' }`;
   }
 }

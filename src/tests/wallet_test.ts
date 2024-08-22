@@ -6,9 +6,11 @@ import { APIError } from "../coinbase/api_error";
 import { Coinbase } from "../coinbase/coinbase";
 import { ArgumentError, InternalError } from "../coinbase/errors";
 import { Wallet } from "../coinbase/wallet";
+import { Transfer } from "../coinbase/transfer";
 import { ServerSignerStatus, StakeOptionsMode, TransferStatus } from "../coinbase/types";
 import {
   AddressBalanceList,
+  AddressHistoricalBalanceList,
   Address as AddressModel,
   Balance as BalanceModel,
   TransactionStatusEnum,
@@ -275,6 +277,13 @@ describe("Wallet Class", () => {
         ).rejects.toThrow(InternalError);
       });
 
+      it("should throw an error when wait is called on wallet address based staking operation", async () => {
+        const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
+        const op = await wallet.createStake(0.001, Coinbase.assets.Eth);
+        expect(op).toBeInstanceOf(StakingOperation);
+        await expect(async () => await op.wait()).rejects.toThrow(Error);
+      });
+
       it("should fail when reloading without a wallet id", async () => {
         const stakingOperation = new StakingOperation(STAKING_OPERATION_MODEL);
         STAKING_OPERATION_MODEL.wallet_id = undefined;
@@ -432,6 +441,63 @@ describe("Wallet Class", () => {
     });
   });
 
+  describe(".listHistoricalBalances", () => {
+    beforeEach(() => {
+      const mockHistoricalBalanceResponse: AddressHistoricalBalanceList = {
+        data: [
+          {
+            amount: "1000000",
+            block_hash: "0x0dadd465fb063ceb78babbb30abbc6bfc0730d0c57a53e8f6dc778dafcea568f",
+            block_height: "12345",
+            asset: {
+              asset_id: "usdc",
+              network_id: Coinbase.networks.EthereumHolesky,
+              decimals: 6,
+            },
+          },
+          {
+            amount: "5000000",
+            block_hash: "0x5c05a37dcb4910b22a775fc9480f8422d9d615ad7a6a0aa9d8778ff8cc300986",
+            block_height: "67890",
+            asset: {
+              asset_id: "usdc",
+              network_id: Coinbase.networks.EthereumHolesky,
+              decimals: 6,
+            },
+          },
+        ],
+        has_more: false,
+        next_page: "",
+      };
+      Coinbase.apiClients.externalAddress = externalAddressApiMock;
+      Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance = mockReturnValue(
+        mockHistoricalBalanceResponse,
+      );
+    });
+
+    it("should throw an error when the wallet does not have a default address", async () => {
+      const newWallet = Wallet.init(walletModel);
+      await expect(
+        async () =>
+          await newWallet.listHistoricalBalances({
+            assetId: Coinbase.assets.Usdc,
+          }),
+      ).rejects.toThrow(InternalError);
+    });
+
+    it("should successfully return historical balances", async () => {
+      const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
+      Coinbase.apiClients.asset!.getAsset = getAssetMock();
+      const response = await wallet.listHistoricalBalances({
+        assetId: Coinbase.assets.Usdc,
+      });
+      expect(response.historicalBalances.length).toEqual(2);
+      expect(response.historicalBalances[0].amount).toEqual(new Decimal(1));
+      expect(response.historicalBalances[1].amount).toEqual(new Decimal(5));
+      expect(response.nextPageToken).toEqual("");
+    });
+  });
+
   describe(".createTransfer", () => {
     let weiAmount, destination, intervalSeconds, timeoutSeconds;
     let balanceModel: BalanceModel;
@@ -464,31 +530,27 @@ describe("Wallet Class", () => {
       Coinbase.apiClients.transfer = transfersApiMock;
     });
 
-    it("should successfully create and complete a transfer", async () => {
+    it("should successfully create a transfer", async () => {
       Coinbase.apiClients.transfer!.createTransfer = mockReturnValue(VALID_TRANSFER_MODEL);
       Coinbase.apiClients.transfer!.broadcastTransfer = mockReturnValue({
         transaction_hash: "0x6c087c1676e8269dd81e0777244584d0cbfd39b6997b3477242a008fa9349e11",
         ...VALID_TRANSFER_MODEL,
       });
-      Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
-        ...VALID_TRANSFER_MODEL,
-        transaction: {
-          ...VALID_TRANSFER_MODEL.transaction,
-          status: TransactionStatusEnum.Complete,
-        },
-      });
-      await wallet.createTransfer({
+
+      const transfer = await wallet.createTransfer({
         amount: weiAmount,
         assetId: Coinbase.assets.Wei,
         destination,
-        timeoutSeconds,
-        intervalSeconds,
       });
 
       expect(Coinbase.apiClients.transfer!.createTransfer).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.transfer!.broadcastTransfer).toHaveBeenCalledTimes(1);
-      expect(Coinbase.apiClients.transfer!.getTransfer).toHaveBeenCalledTimes(1);
+
+      expect(transfer).toBeInstanceOf(Transfer);
+      expect(transfer.getId()).toBe(VALID_TRANSFER_MODEL.transfer_id);
     });
+
+    // TODO: Returns the transfer.
 
     it("should throw an APIError if the createTransfer API call fails", async () => {
       Coinbase.apiClients.transfer!.createTransfer = mockReturnRejectedValue(
@@ -521,30 +583,6 @@ describe("Wallet Class", () => {
       ).rejects.toThrow(APIError);
     });
 
-    it("should throw an Error if the transfer times out", async () => {
-      Coinbase.apiClients.transfer!.createTransfer = mockReturnValue(VALID_TRANSFER_MODEL);
-      Coinbase.apiClients.transfer!.broadcastTransfer = mockReturnValue({
-        transaction_hash: "0x6c087c1676e8269dd81e0777244584d0cbfd39b6997b3477242a008fa9349e11",
-        ...VALID_TRANSFER_MODEL,
-      });
-      Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
-        ...VALID_TRANSFER_MODEL,
-        status: TransferStatus.BROADCAST,
-      });
-      intervalSeconds = 0.000002;
-      timeoutSeconds = 0.000002;
-
-      await expect(
-        wallet.createTransfer({
-          amount: weiAmount,
-          assetId: Coinbase.assets.Wei,
-          destination,
-          timeoutSeconds,
-          intervalSeconds,
-        }),
-      ).rejects.toThrow("Transfer timed out");
-    });
-
     it("should throw an ArgumentError if there are insufficient funds", async () => {
       const insufficientAmount = new Decimal("10000000000000000000");
       await expect(
@@ -558,18 +596,11 @@ describe("Wallet Class", () => {
       ).rejects.toThrow(ArgumentError);
     });
 
-    it("should successfully create and complete a transfer when using server signer", async () => {
+    it("should successfully create a transfer when using server signer", async () => {
       Coinbase.useServerSigner = true;
       Coinbase.apiClients.transfer!.createTransfer = mockReturnValue(VALID_TRANSFER_MODEL);
-      Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
-        ...VALID_TRANSFER_MODEL,
-        transaction: {
-          ...VALID_TRANSFER_MODEL,
-          status: TransactionStatusEnum.Complete,
-        },
-      });
 
-      await wallet.createTransfer({
+      const transfer = await wallet.createTransfer({
         amount: weiAmount,
         assetId: Coinbase.assets.Wei,
         destination,
@@ -578,7 +609,9 @@ describe("Wallet Class", () => {
       });
 
       expect(Coinbase.apiClients.transfer!.createTransfer).toHaveBeenCalledTimes(1);
-      expect(Coinbase.apiClients.transfer!.getTransfer).toHaveBeenCalledTimes(1);
+
+      expect(transfer).toBeInstanceOf(Transfer);
+      expect(transfer.getId()).toBe(VALID_TRANSFER_MODEL.transfer_id);
     });
 
     afterEach(() => {
@@ -600,7 +633,8 @@ describe("Wallet Class", () => {
 
     describe("#getNetworkId", () => {
       let wallet;
-      let network_id = Coinbase.networks.BaseMainnet;
+      let network_id;
+      let createWalletParams;
 
       beforeEach(async () => {
         Coinbase.apiClients.wallet = walletsApiMock;
@@ -616,27 +650,27 @@ describe("Wallet Class", () => {
           server_signer_status: ServerSignerStatus.ACTIVE,
         });
         Coinbase.apiClients.address!.createAddress = mockReturnValue(newAddressModel(walletId));
-        const createWalletParams =
-          network_id === Coinbase.networks.BaseMainnet
-            ? {
-                networkId: network_id,
-              }
-            : undefined;
+
         wallet = await Wallet.create(createWalletParams);
       });
 
       describe("when a network is specified", () => {
         beforeAll(() => {
           network_id = Coinbase.networks.BaseMainnet;
+          createWalletParams = { networkId: network_id };
         });
+
         it("it creates a wallet scoped to the specified network", () => {
           expect(wallet.getNetworkId()).toBe(Coinbase.networks.BaseMainnet);
         });
       });
+
       describe("when no network is specified", () => {
         beforeAll(() => {
           network_id = Coinbase.networks.BaseSepolia;
+          createWalletParams = {};
         });
+
         it("it creates a wallet scoped to the default network", () => {
           expect(wallet.getNetworkId()).toBe(Coinbase.networks.BaseSepolia);
         });
@@ -741,12 +775,14 @@ describe("Wallet Class", () => {
           network_id: Coinbase.networks.BaseSepolia,
           public_key: wallet1PrivateKey,
           wallet_id: walletId,
+          index: 0,
         },
         {
           address_id: address2,
           network_id: Coinbase.networks.BaseSepolia,
           public_key: wallet2PrivateKey,
           wallet_id: walletId,
+          index: 1,
         },
       ];
       walletModel = {

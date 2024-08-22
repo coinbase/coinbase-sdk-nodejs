@@ -10,7 +10,6 @@ import { Transfer } from "../coinbase/transfer";
 import { SponsoredSend } from "../coinbase/sponsored_send";
 import { Transaction } from "../coinbase/transaction";
 import { Coinbase } from "../coinbase/coinbase";
-import { WEI_PER_ETHER } from "../coinbase/constants";
 import {
   VALID_TRANSFER_MODEL,
   VALID_TRANSFER_SPONSORED_SEND_MODEL,
@@ -18,10 +17,12 @@ import {
   mockReturnRejectedValue,
   transfersApiMock,
 } from "./utils";
+
+import { TimeoutError } from "../coinbase/errors";
 import { APIError } from "../coinbase/api_error";
 
 const amount = new Decimal(ethers.parseUnits("100", 18).toString());
-const ethAmount = amount.div(WEI_PER_ETHER);
+const ethAmount = amount.div(Math.pow(10, 18));
 const signedPayload =
   "02f86b83014a3401830f4240830f4350825208946cd01c0f55ce9e0bf78f5e90f72b4345b" +
   "16d515d0280c001a0566afb8ab09129b3f5b666c3a1e4a7e92ae12bbee8c75b4c6e0c46f6" +
@@ -316,6 +317,7 @@ describe("Transfer Class", () => {
       expect(broadcastedTransfer).toBeInstanceOf(Transfer);
       expect(broadcastedTransfer.getStatus()).toEqual(TransferStatus.BROADCAST);
     });
+
     it("should return a broadcasted transfer when the send transaction delegate is a SponsoredSend", async () => {
       const transfer = Transfer.fromModel({
         ...VALID_TRANSFER_SPONSORED_SEND_MODEL,
@@ -335,10 +337,12 @@ describe("Transfer Class", () => {
       expect(broadcastedTransfer).toBeInstanceOf(Transfer);
       expect(broadcastedTransfer.getStatus()).toEqual(TransferStatus.BROADCAST);
     });
+
     it("should throw when the sned transaction delegate has not been signed", async () => {
       expect(transfer.broadcast()).rejects.toThrow(new Error("Cannot broadcast unsigned Transfer"));
     });
-    it("should thorw an APIErrror if the broadcastTransfer API call fails", async () => {
+
+    it("should throw an APIErrror if the broadcastTransfer API call fails", async () => {
       const transfer = Transfer.fromModel({
         ...VALID_TRANSFER_MODEL,
         transaction: {
@@ -365,6 +369,50 @@ describe("Transfer Class", () => {
       });
       const signature = await transfer.sign(signingKey);
       expect(signature).toEqual(transfer.getTransaction()!.getSignature()!);
+    });
+  });
+
+  describe("#wait", () => {
+    it("should return the transfer when the transaction is complete", async () => {
+      Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
+        ...VALID_TRANSFER_MODEL,
+        transaction: {
+          ...VALID_TRANSFER_MODEL.transaction!,
+          status: TransactionStatusEnum.Complete,
+        },
+      });
+      const completedTransfer = await transfer.wait();
+      expect(completedTransfer).toBeInstanceOf(Transfer);
+      expect(completedTransfer.getStatus()).toEqual(TransferStatus.COMPLETE);
+    });
+
+    it("should return the failed transfer when the transaction has failed", async () => {
+      Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
+        ...VALID_TRANSFER_MODEL,
+        transaction: {
+          ...VALID_TRANSFER_MODEL.transaction!,
+          status: TransactionStatusEnum.Failed,
+        },
+        status: TransferStatus.FAILED,
+      });
+
+
+      const completedTransfer = await transfer.wait();
+      expect(completedTransfer).toBeInstanceOf(Transfer);
+      expect(completedTransfer.getStatus()).toEqual(TransferStatus.FAILED);
+    });
+
+    it("should throw an error when the transaction has not been created", async () => {
+      Coinbase.apiClients.transfer!.getTransfer = mockReturnValue({
+        ...VALID_TRANSFER_MODEL,
+        transaction: {
+          ...VALID_TRANSFER_MODEL.transaction!,
+          status: TransactionStatusEnum.Pending,
+        },
+      });
+      expect(transfer.wait({ timeoutSeconds: 0.05, intervalSeconds: 0.05 })).rejects.toThrow(
+        new TimeoutError("Transfer timed out"),
+      );
     });
   });
 
