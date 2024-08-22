@@ -10,7 +10,6 @@ import { Transfer } from "../coinbase/transfer";
 import { ServerSignerStatus, StakeOptionsMode, TransferStatus } from "../coinbase/types";
 import {
   AddressBalanceList,
-  AddressHistoricalBalanceList,
   Address as AddressModel,
   Balance as BalanceModel,
   TransactionStatusEnum,
@@ -438,63 +437,6 @@ describe("Wallet Class", () => {
           Coinbase.networks.EthereumHolesky,
         );
       });
-    });
-  });
-
-  describe(".listHistoricalBalances", () => {
-    beforeEach(() => {
-      const mockHistoricalBalanceResponse: AddressHistoricalBalanceList = {
-        data: [
-          {
-            amount: "1000000",
-            block_hash: "0x0dadd465fb063ceb78babbb30abbc6bfc0730d0c57a53e8f6dc778dafcea568f",
-            block_height: "12345",
-            asset: {
-              asset_id: "usdc",
-              network_id: Coinbase.networks.EthereumHolesky,
-              decimals: 6,
-            },
-          },
-          {
-            amount: "5000000",
-            block_hash: "0x5c05a37dcb4910b22a775fc9480f8422d9d615ad7a6a0aa9d8778ff8cc300986",
-            block_height: "67890",
-            asset: {
-              asset_id: "usdc",
-              network_id: Coinbase.networks.EthereumHolesky,
-              decimals: 6,
-            },
-          },
-        ],
-        has_more: false,
-        next_page: "",
-      };
-      Coinbase.apiClients.externalAddress = externalAddressApiMock;
-      Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance = mockReturnValue(
-        mockHistoricalBalanceResponse,
-      );
-    });
-
-    it("should throw an error when the wallet does not have a default address", async () => {
-      const newWallet = Wallet.init(walletModel);
-      await expect(
-        async () =>
-          await newWallet.listHistoricalBalances({
-            assetId: Coinbase.assets.Usdc,
-          }),
-      ).rejects.toThrow(InternalError);
-    });
-
-    it("should successfully return historical balances", async () => {
-      const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
-      Coinbase.apiClients.asset!.getAsset = getAssetMock();
-      const response = await wallet.listHistoricalBalances({
-        assetId: Coinbase.assets.Usdc,
-      });
-      expect(response.historicalBalances.length).toEqual(2);
-      expect(response.historicalBalances[0].amount).toEqual(new Decimal(1));
-      expect(response.historicalBalances[1].amount).toEqual(new Decimal(5));
-      expect(response.nextPageToken).toEqual("");
     });
   });
 
