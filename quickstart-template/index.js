@@ -27,3 +27,5 @@ const transfer = await wallet.createTransfer({
 await transfer.wait();
 
 console.log(`Transfer successfully completed: `, transfer.toString());
+
+// TODO: add webhook

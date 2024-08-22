@@ -31,3 +31,18 @@ npm run start-mass-payout
 ```
 
 This command will demonstrate how to automatically send batched payments from a CSV file with a non-MPC API Wallet.
+
+## Webhook
+
+If you don't already have a URL setup for event notification, 
+you can follow these [instructions to setup a simple Webhook App](./webhook/README.md).
+
+To set up the template, run the following commands:
+```bash
+npm install
+npm run start-webhook
+```
+
+This command will demonstrate how to create a webhook for ERC20 transfer events on USDC.
+
+You can also use [CDP Portal](https://portal.cdp.coinbase.com/products/webhooks) for Webhook configurations.
