@@ -29,8 +29,8 @@ You can also use [Vercel](https://vercel.com/) or other hosting solutions for yo
 
 Once the public webhook app is setup, copy the URL provided and test it with:
 ```bash
-curl -X POST -H "Content-Type:application/json" -d '{"app": "webhook"}' http://url.a.free.pinggy.link:3000/callback
+curl -X POST -H "Content-Type:application/json" -d '{"app": "webhook"}' {url_copied_from_pinggy_io}/callback
 ```
-This URL (ie Notification URL) can now be used to create Webhook either 
+This URL (ie. Notification URL) can now be used to create Webhook either 
 via [CDP Portal](https://docs-cdp-onchain-data-preview.cbhq.net/developer-platform/docs/cdp-webhooks/) 
 or [Coinbase SDK](https://docs-cdp-onchain-data-preview.cbhq.net/coinbase-sdk/docs/webhooks).
