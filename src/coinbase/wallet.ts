@@ -19,8 +19,6 @@ import {
   Amount,
   CreateTransferOptions,
   CreateTradeOptions,
-  ListHistoricalBalancesOptions,
-  ListHistoricalBalancesResult,
   SeedData,
   ServerSignerStatus,
   StakeOptionsMode,
