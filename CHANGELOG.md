@@ -18,19 +18,16 @@
 
 ### Changed
 
-- Decouple `createTransfer` and `createTrade` from waiting for completion, in favor of a separate `wait` method.
-  This allows for developers to have reference to the transfer and trade objects in the case where
-  there is a timeout while waiting for them to confirm/fail on-chain.
-- Update `reload()` method to work with both External and Wallet address.
-- Update `createStakingOperation` logic to make sure we only pull in newer unsigned txs from the server.
-  This is especially important for External Address use-case where tx signing and broadcast status is maintained on client side, and we risk overwriting the existing txs.
-- Increase default timeout for `createStakingOperation` to 10 min.
-
-### Changed
 - The `createTransfer` and `createTrade` functions no longer wait for the transactions to confirm or
   fail on-chain.
   - Now they return a `Transfer` and `Trade` object respectively, which support the `wait`
     function, e.g. `await transfer.wait()`.
+  - This ensures that the developer has a reference to the object in case there is a timeout while
+    waiting to land on-chain.
+- Update `reload()` method to work with both External and Wallet address.
+- Update `createStakingOperation` logic to make sure we only pull in newer unsigned txs from the server.
+  This is especially important for External Address use-case where tx signing and broadcast status is maintained on client side, and we risk overwriting the existing txs.
+- Increase default timeout for `createStakingOperation` to 10 min.
 
 ## [0.0.16] - 2024-08-14
 
