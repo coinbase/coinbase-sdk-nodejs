@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [0.1.0] - 2024-08-22
+
 ### Added
 
 - Add `listHistoricalBalances` wallet method, that lists the historical balances for the wallet's default address.
