@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "start-trade-assets": "node trade-assets.js",
-    "start-mass-payout": "node mass-payout.js"
+    "start-mass-payout": "node mass-payout.js",
+    "start-webhook": "node webhook.js"
   },
   "keywords": [],
   "author": "",
