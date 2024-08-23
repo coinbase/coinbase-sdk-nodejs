@@ -39,10 +39,12 @@ import {
   CreateWebhookRequest,
   UpdateWebhookRequest,
   ContractEventList,
+  AddressTransactionList,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
 import { HistoricalBalance } from "./historical_balance";
+import { Transaction } from "./transaction";
 
 export type AssetAPIClient = {
   /**
@@ -363,6 +365,14 @@ export type ExternalAddressAPIClient = {
     page?: string,
     options?: RawAxiosRequestConfig,
   ): AxiosPromise<AddressHistoricalBalanceList>;
+
+  listAddressTransactions(
+    networkId: string,
+    addressId: string,
+    limit?: number,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<AddressTransactionList>;
 
   /**
    * Request faucet funds to be sent to external address.
@@ -889,6 +899,22 @@ export type ListHistoricalBalancesOptions = {
  */
 export type ListHistoricalBalancesResult = {
   historicalBalances: HistoricalBalance[];
+  nextPageToken: string;
+};
+
+/**
+ * Options for listing transactions of an address.
+ */
+export type ListTransactionsOptions = {
+  limit?: number;
+  page?: string;
+};
+
+/**
+ * Result of ListTransactions.
+ */
+export type ListTransactionsResult = {
+  transactions: Transaction[];
   nextPageToken: string;
 };
 
