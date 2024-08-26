@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import * as viem from "viem";
 import { SponsoredSend as SponsoredSendModel } from "../client/api";
 import { SponsoredSendStatus } from "./types";
 
@@ -32,6 +32,16 @@ export class SponsoredSend {
   }
 
   /**
+   * Returns the raw typed data of the Sponsored Send.
+   *
+   * @returns The raw typed data
+   * @throws Will throw an error if the raw typed data is not a valid JSON string.
+   */
+  getRawTypedData(): any {
+    return JSON.parse(viem.fromHex(`0x${this.model.raw_typed_data}`, 'string'));
+  }
+
+  /**
    * Returns the signature of the typed data.
    *
    * @returns The hash of the typed data signature.
@@ -46,9 +56,8 @@ export class SponsoredSend {
    * @param key - The key to sign the Sponsored Send with
    * @returns The hex-encoded signature
    */
-  async sign(key: ethers.Wallet) {
-    ethers.toBeArray;
-    const signature = key.signingKey.sign(ethers.getBytes(this.getTypedDataHash())).serialized;
+  async sign(account: viem.LocalAccount) {
+    const signature = await account.signTypedData(this.getRawTypedData());
     this.model.signature = signature;
     return signature;
   }

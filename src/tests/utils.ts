@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosInstance } from "axios";
 import { Decimal } from "decimal.js";
-import { generatePrivateKey, hdKeyToAccount, privateKeyToAccount } from "viem/accounts";
+import { generatePrivateKey, hdKeyToAccount, privateKeyToAccount, HDKey } from "viem/accounts";
 import { parseUnits } from "viem";
 import { randomUUID } from "crypto";
 import {
@@ -22,7 +22,6 @@ import {
 import { BASE_PATH } from "../client/base";
 import { Coinbase } from "../coinbase/coinbase";
 import { convertStringToHex, registerAxiosInterceptors } from "../coinbase/utils";
-import { HDKey } from "@scure/bip32";
 
 export const mockFn = (...args) => jest.fn(...args) as any;
 export const mockReturnValue = data => jest.fn().mockResolvedValue({ data });
@@ -142,10 +141,10 @@ export const VALID_TRANSFER_MODEL: TransferModel = {
     transaction_link: "https://sepolia.basescan.org/tx/0xdeadbeef",
     status: "pending",
   },
-  address_id: privateKeyToAccount(generatePrivateKey()).address,
+  address_id: randomETHAddress(),
   destination: "0x4D9E4F3f4D1A8B5F4f7b1F5b5C7b8d6b2B3b1b0b",
   asset_id: Coinbase.assets.Eth,
-  amount: new Decimal(ethers.parseUnits("100", 18).toString()).toString(),
+  amount: new Decimal(parseUnits("100", 18).toString()).toString(),
   gasless: false,
 };
 
@@ -167,7 +166,7 @@ export const VALID_TRANSFER_SPONSORED_SEND_MODEL: TransferModel = {
     transaction_link: "https://sepolia.basescan.org/tx/0xdeadbeef",
     status: "pending",
   },
-  address_id: ethers.Wallet.createRandom().address,
+  address_id: randomETHAddress(),
   destination: "0x4D9E4F3f4D1A8B5F4f7b1F5b5C7b8d6b2B3b1b0b",
   asset_id: Coinbase.assets.Eth,
   amount: new Decimal(parseUnits("100", 18).toString()).toString(),
@@ -201,6 +200,15 @@ export const VALID_STAKING_OPERATION_MODEL: StakingOperationModel = {
     },
   ],
 };
+
+/**
+ * randomETHAddress returns a random Ethereum address.
+ *
+ * @returns The random Ethereum address.
+ */
+export function randomETHAddress(): string {
+  return privateKeyToAccount(generatePrivateKey()).address;
+}
 
 /**
  * mockStakingOperation returns a mock StakingOperation object with the provided status.

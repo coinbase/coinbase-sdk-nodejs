@@ -116,22 +116,10 @@ export class Transfer {
   }
 
   /**
-   * Returns the Transaction of the Transfer.
-   *
-   * @returns The ethers.js Transaction object.
-   * @throws (InvalidUnsignedPayload) If the Unsigned Payload is invalid.
-   */
-  public getRawTransaction(): viem.TransactionSerializable | undefined {
-    if (!this.getTransaction()) return undefined;
-
-    return this.getTransaction()!.rawTransaction();
-  }
-
-  /**
-   * Signs the Transfer with the provided key and returns the hex signature
+   * Signs the Transfer with the provided account and returns the hex signature
    * required for broadcasting the Transfer.
    *
-   * @param key - The key to sign the Transfer with
+   * @param account - The account to sign the Transfer with
    * @returns The hex-encoded signed payload
    */
   async sign(account: viem.LocalAccount): Promise<string> {

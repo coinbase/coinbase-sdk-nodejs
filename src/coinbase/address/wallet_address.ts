@@ -247,7 +247,7 @@ export class WalletAddress extends Address {
       return trade;
     }
 
-    await trade.sign(this.getSigner());
+    await trade.sign(this.signer);
     await trade.broadcast();
 
     return trade;

@@ -114,7 +114,7 @@ export class Transaction {
    * Returns the underlying raw transaction.
    *
    * @throws {InvalidUnsignedPayload} If the Unsigned Payload is invalid.
-   * @returns The ethers.js Transaction object
+   * @returns The viem Transaction object
    */
   rawTransaction(): viem.TransactionSerializable {
     if (this.raw) {

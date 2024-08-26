@@ -1,10 +1,10 @@
-import { ethers } from "ethers";
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { SponsoredSend as SponsoredSendModel } from "../client/api";
 import { SponsoredSend } from "./../coinbase/sponsored_send";
 import { SponsoredSendStatus } from "../coinbase/types";
 
 describe("SponsoredSend", () => {
-  let fromKey;
+  let fromAccount;
   let toAddressId;
   let rawTypedData;
   let typedDataHash;
@@ -17,7 +17,7 @@ describe("SponsoredSend", () => {
   let sponsoredSend;
 
   beforeEach(() => {
-    fromKey = ethers.Wallet.createRandom();
+    fromAccount = privateKeyToAccount(generatePrivateKey());
     toAddressId = "0x4D9E4F3f4D1A8B5F4f7b1F5b5C7b8d6b2B3b1b0b";
     typedDataHash = "0x7523946e17c0b8090ee18c84d6f9a8d63bab4d579a6507f0998dde0791891823";
     signature = "0x7523946e17c0b8090ee18c84d6f9a8d63bab4d579a6507f0998dde0791891823";
@@ -100,7 +100,7 @@ describe("SponsoredSend", () => {
     let signature: string;
 
     beforeEach(async () => {
-      signature = await sponsoredSend.sign(fromKey);
+      signature = await sponsoredSend.sign(fromAccount);
     });
 
     it("should return a string when the SponsoredSend is signed", async () => {
