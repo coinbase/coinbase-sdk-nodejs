@@ -223,6 +223,8 @@ export class Address {
    * @param asset_id - The asset to check the unstakeable balance for.
    * @param mode - The staking mode. Defaults to DEFAULT.
    * @param options - Additional options for getting the unstakeable balance.
+   * A. Dedicated ETH Staking
+   *  - `validator_pub_keys` (optional): List of comma separated validator public keys to retrieve unstakeable balance for. Defaults to all validators.
    * @returns The unstakeable balance.
    */
   public async unstakeableBalance(
