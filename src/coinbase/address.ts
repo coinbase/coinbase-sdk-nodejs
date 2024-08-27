@@ -261,6 +261,10 @@ export class Address {
    * @throws {Error} If the request fails.
    */
   public async faucet(asset_id?: string): Promise<FaucetTransaction> {
+    if (!asset_id) {
+      asset_id = "";
+    }
+
     const response = await Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds(
       this.getNetworkId(),
       this.getId(),

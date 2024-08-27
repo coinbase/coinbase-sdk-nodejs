@@ -195,6 +195,21 @@ describe("WalletAddress", () => {
     expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds).toHaveBeenCalledWith(
       address.getNetworkId(),
       address.getId(),
+      "",
+    );
+    expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds).toHaveBeenCalledTimes(
+      1,
+    );
+  });
+
+  it("should request funds from the faucet and returns the faucet transaction for usdc", async () => {
+    const faucetTransaction = await address.faucet("usdc");
+    expect(faucetTransaction).toBeInstanceOf(FaucetTransaction);
+    expect(faucetTransaction.getTransactionHash()).toBe(transactionHash);
+    expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds).toHaveBeenCalledWith(
+      address.getNetworkId(),
+      address.getId(),
+      "usdc",
     );
     expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds).toHaveBeenCalledTimes(
       1,
@@ -209,6 +224,7 @@ describe("WalletAddress", () => {
     expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds).toHaveBeenCalledWith(
       address.getNetworkId(),
       address.getId(),
+      "",
     );
     expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds).toHaveBeenCalledTimes(
       1,

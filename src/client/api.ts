@@ -3285,10 +3285,11 @@ export const ExternalAddressesApiAxiosParamCreator = function (configuration?: C
          * @summary Request faucet funds for external address.
          * @param {string} networkId The ID of the wallet the address belongs to.
          * @param {string} addressId The onchain address of the address that is being fetched.
+         * @param {string} [assetId] The ID of the asset to transfer from the faucet.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        requestExternalFaucetFunds: async (networkId: string, addressId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        requestExternalFaucetFunds: async (networkId: string, addressId: string, assetId?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'networkId' is not null or undefined
             assertParamExists('requestExternalFaucetFunds', 'networkId', networkId)
             // verify required parameter 'addressId' is not null or undefined
@@ -3306,6 +3307,10 @@ export const ExternalAddressesApiAxiosParamCreator = function (configuration?: C
             const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            if (assetId !== undefined) {
+                localVarQueryParameter['asset_id'] = assetId;
+            }
 
 
     
@@ -3380,11 +3385,12 @@ export const ExternalAddressesApiFp = function(configuration?: Configuration) {
          * @summary Request faucet funds for external address.
          * @param {string} networkId The ID of the wallet the address belongs to.
          * @param {string} addressId The onchain address of the address that is being fetched.
+         * @param {string} [assetId] The ID of the asset to transfer from the faucet.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async requestExternalFaucetFunds(networkId: string, addressId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FaucetTransaction>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.requestExternalFaucetFunds(networkId, addressId, options);
+        async requestExternalFaucetFunds(networkId: string, addressId: string, assetId?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FaucetTransaction>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.requestExternalFaucetFunds(networkId, addressId, assetId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ExternalAddressesApi.requestExternalFaucetFunds']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -3500,11 +3506,12 @@ export interface ExternalAddressesApiInterface {
      * @summary Request faucet funds for external address.
      * @param {string} networkId The ID of the wallet the address belongs to.
      * @param {string} addressId The onchain address of the address that is being fetched.
+     * @param {string} [assetId] The ID of the asset to transfer from the faucet.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ExternalAddressesApiInterface
      */
-    requestExternalFaucetFunds(networkId: string, addressId: string, options?: RawAxiosRequestConfig): AxiosPromise<FaucetTransaction>;
+    requestExternalFaucetFunds(networkId: string, addressId: string, assetId?: string, options?: RawAxiosRequestConfig): AxiosPromise<FaucetTransaction>;
 
 }
 
@@ -3568,8 +3575,8 @@ export class ExternalAddressesApi extends BaseAPI implements ExternalAddressesAp
      * @throws {RequiredError}
      * @memberof ExternalAddressesApi
      */
-    public requestExternalFaucetFunds(networkId: string, addressId: string, options?: RawAxiosRequestConfig) {
-        return ExternalAddressesApiFp(this.configuration).requestExternalFaucetFunds(networkId, addressId, options).then((request) => request(this.axios, this.basePath));
+    public requestExternalFaucetFunds(networkId: string, addressId: string, assetId?: string, options?: RawAxiosRequestConfig) {
+        return ExternalAddressesApiFp(this.configuration).requestExternalFaucetFunds(networkId, addressId, assetId, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
