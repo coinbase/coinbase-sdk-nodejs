@@ -132,7 +132,7 @@ export class Trade {
    *
    * @param key - The key to sign the Transfer with
    */
-  public async sign(key: viem.LocalAccount): Promise<void> {
+  public async sign(key: viem.PrivateKeyAccount): Promise<void> {
     if (this.getApproveTransaction()) {
       await this.getApproveTransaction()!.sign(key);
     }

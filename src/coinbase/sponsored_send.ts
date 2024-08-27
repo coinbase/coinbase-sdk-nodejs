@@ -27,8 +27,8 @@ export class SponsoredSend {
    *
    * @returns The Keccak256 hash of the typed data.
    */
-  getTypedDataHash(): viem.Hex {
-    return this.model.typed_data_hash as viem.Hex;
+  getTypedDataHash(): string {
+    return this.model.typed_data_hash;
   }
 
   /**
@@ -46,8 +46,8 @@ export class SponsoredSend {
    * @param key - The key to sign the Sponsored Send with
    * @returns The hex-encoded signature
    */
-  async sign(key: viem.LocalAccount) {
-    const signature = await key.sign!({ hash: this.getTypedDataHash() });
+  async sign(key: viem.PrivateKeyAccount) {
+    const signature = await key.sign({ hash: this.getTypedDataHash() as viem.Hex });
     this.model.signature = signature;
     return signature;
   }

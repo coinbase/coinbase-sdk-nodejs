@@ -25,7 +25,7 @@ import { StakingOperation } from "../staking_operation";
  */
 export class WalletAddress extends Address {
   private model: AddressModel;
-  private key?: viem.LocalAccount;
+  private key?: viem.PrivateKeyAccount;
 
   /**
    * Initializes a new Wallet Address instance.
@@ -34,7 +34,7 @@ export class WalletAddress extends Address {
    * @param key - Viem Local Account the Address uses to sign data.
    * @throws {InternalError} If the address model is empty.
    */
-  constructor(model: AddressModel, key?: viem.LocalAccount) {
+  constructor(model: AddressModel, key?: viem.PrivateKeyAccount) {
     if (!model) {
       throw new InternalError("Address model cannot be empty");
     }
@@ -68,7 +68,7 @@ export class WalletAddress extends Address {
    * @param key - Viem Local Account the Address uses to sign data.
    * @throws {InternalError} If the private key is already set.
    */
-  public setKey(key: viem.LocalAccount) {
+  public setKey(key: viem.PrivateKeyAccount) {
     if (this.key !== undefined) {
       throw new InternalError("Private key is already set");
     }
@@ -216,7 +216,7 @@ export class WalletAddress extends Address {
    * @returns The signer for the private key.
    * @throws {InternalError} If the private key is not loaded.
    */
-  private getSigner(): viem.LocalAccount {
+  private getSigner(): viem.PrivateKeyAccount {
     if (!this.key) {
       throw new InternalError("Cannot sign without a private key");
     }
