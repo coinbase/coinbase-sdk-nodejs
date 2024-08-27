@@ -18,7 +18,16 @@ export class ExternalAddress extends Address {
    * @param amount - The amount of the asset to stake.
    * @param assetId - The asset to stake.
    * @param mode - The staking mode. Defaults to DEFAULT.
-   * @param options - Additional options for the stake operation.
+   * @param options - Additional options for the stake operation:
+   *
+   * A. Shared ETH Staking
+   *  - `integrator_contract_address` (optional): The contract address to which the stake operation is directed to. Defaults to the integrator contract address associated with CDP account (if available) or else defaults to a shared integrator contract address for that network.
+   *
+   * B. Dedicated ETH Staking
+   *  - `funding_address` (optional): Ethereum address for funding the stake operation. Defaults to the address initiating the stake operation.
+   *  - `withdrawal_address` (optional): Ethereum address for receiving rewards and withdrawal funds. Defaults to the address initiating the stake operation.
+   *  - `fee_recipient_address` (optional): Ethereum address for receiving transaction fees. Defaults to the address initiating the stake operation.
+   *
    * @returns The stake operation.
    */
   public async buildStakeOperation(
@@ -37,7 +46,15 @@ export class ExternalAddress extends Address {
    * @param amount - The amount of the asset to unstake.
    * @param assetId - The asset to unstake.
    * @param mode - The staking mode. Defaults to DEFAULT.
-   * @param options - Additional options for the unstake operation.
+   * @param options - Additional options for the unstake operation:
+   *
+   * A. Shared ETH Staking
+   *  - `integrator_contract_address` (optional): The contract address to which the unstake operation is directed to. Defaults to the integrator contract address associated with CDP account (if available) or else defaults to a shared integrator contract address for that network.
+   *
+   * B. Dedicated ETH Staking
+   *  - `immediate` (optional): Set this to "true" to unstake immediately i.e. leverage "Coinbase managed unstake" process . Defaults to "false" i.e. "User managed unstake" process.
+   *  - `validator_pub_keys` (optional): List of comma separated validator public keys to unstake. Defaults to validators being picked up on your behalf corresponding to the unstake amount.
+   *
    * @returns The unstake operation.
    */
   public async buildUnstakeOperation(
@@ -57,6 +74,10 @@ export class ExternalAddress extends Address {
    * @param assetId - The asset to claim stake.
    * @param mode - The staking mode. Defaults to DEFAULT.
    * @param options - Additional options for the claim stake operation.
+   *
+   * A. Shared ETH Staking
+   *  - `integrator_contract_address` (optional): The contract address to which the claim stake operation is directed to. Defaults to the integrator contract address associated with CDP account (if available) or else defaults to a shared integrator contract address for that network.
+   *
    * @returns The claim stake operation.
    */
   public async buildClaimStakeOperation(
