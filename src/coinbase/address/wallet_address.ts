@@ -31,7 +31,7 @@ export class WalletAddress extends Address {
    * Initializes a new Wallet Address instance.
    *
    * @param model - The address model data.
-   * @param key - Viem Local Account the Address uses to sign data.
+   * @param key - Viem Account the Address uses to sign data.
    * @throws {InternalError} If the address model is empty.
    */
   constructor(model: AddressModel, key?: viem.PrivateKeyAccount) {
@@ -65,7 +65,7 @@ export class WalletAddress extends Address {
   /**
    * Sets the private key.
    *
-   * @param key - Viem Local Account the Address uses to sign data.
+   * @param key - Viem Account the Address uses to sign data.
    * @throws {InternalError} If the private key is already set.
    */
   public setKey(key: viem.PrivateKeyAccount) {
