@@ -70,7 +70,7 @@ export class StakingBalance {
    * @returns The Balance.
    */
   public bondedStake(): Balance {
-    return Balance.fromModelWithAmountInWholeUnits(this.model.bonded_stake);
+    return Balance.fromModel(this.model.bonded_stake);
   }
 
   /**
@@ -79,7 +79,7 @@ export class StakingBalance {
    * @returns The Balance.
    */
   public unbondedBalance(): Balance {
-    return Balance.fromModelWithAmountInWholeUnits(this.model.unbonded_balance);
+    return Balance.fromModel(this.model.unbonded_balance);
   }
 
   /**
