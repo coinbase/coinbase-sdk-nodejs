@@ -10,11 +10,14 @@ import {
   StakeOptionsMode,
   ListHistoricalBalancesResult,
   ListHistoricalBalancesOptions,
+  ListTransactionsOptions,
+  ListTransactionsResult,
 } from "./types";
 import { formatDate, getWeekBackDate } from "./utils";
 import { StakingRewardFormat } from "../client";
 import { StakingReward } from "./staking_reward";
 import { StakingBalance } from "./staking_balance";
+import { Transaction } from "./transaction";
 
 /**
  * A representation of a blockchain address, which is a user-controlled account on a network.
@@ -152,6 +155,38 @@ export class Address {
       nextPageToken: "",
     };
   }
+
+    /**
+   * Returns the transactions of the address.
+   *
+   * @param options - The options to list transactions.
+   * @param options.limit - A limit on the number of objects to be returned. Limit can range between 1 and 25, and the default is 10.
+   * @param options.page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @returns The list of historical balance of the asset and next page token.
+   */
+    public async listTransactions({
+      limit,
+      page,
+    }: ListTransactionsOptions): Promise<ListTransactionsResult> {
+      const txnList: Transaction[] = [];
+  
+      const response = await Coinbase.apiClients.externalAddress!.listAddressTransactions(
+        this.getNetworkId(),
+        this.getId(),
+        limit ? limit : undefined,
+        page ? page : undefined,
+      );
+
+      response.data.data.forEach(transactionModel => {
+        const transaction = new Transaction(transactionModel);
+        txnList.push(transaction);
+      });
+  
+      return {
+        transactions: txnList,
+        nextPageToken: response.data.next_page,
+      };
+    }
 
   /**
    * Lists the staking rewards for the address.
