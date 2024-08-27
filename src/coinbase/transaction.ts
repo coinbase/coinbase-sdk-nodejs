@@ -143,7 +143,7 @@ export class Transaction {
    * @param key - The key to sign the transaction with
    * @returns The hex-encoded signed payload
    */
-  async sign(key: viem.LocalAccount): Promise<string> {
+  async sign(key: viem.PrivateKeyAccount): Promise<string> {
     const signedPayload = await key.signTransaction(this.rawTransaction());
     this.model.signed_payload = signedPayload;
     // Removes the '0x' prefix as required by the API.

@@ -247,7 +247,7 @@ export class StakingOperation {
    *
    * @param key - The key used to sign the transactions.
    */
-  public async sign(key: viem.LocalAccount): Promise<void> {
+  public async sign(key: viem.PrivateKeyAccount): Promise<void> {
     for (const tx of this.transactions) {
       if (!tx.isSigned()) {
         await tx.sign(key);

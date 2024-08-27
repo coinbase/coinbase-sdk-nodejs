@@ -131,7 +131,7 @@ export class Transfer {
    * @param key - The key to sign the Transfer with
    * @returns The hex-encoded signed payload
    */
-  async sign(key: viem.LocalAccount): Promise<string> {
+  async sign(key: viem.PrivateKeyAccount): Promise<string> {
     return this.getSendTransactionDelegate()!.sign(key);
   }
 
