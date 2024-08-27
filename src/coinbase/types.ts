@@ -375,6 +375,7 @@ export type ExternalAddressAPIClient = {
   requestExternalFaucetFunds(
     networkId: string,
     addressId: string,
+    assetId?: string,
     options?: RawAxiosRequestConfig,
   ): AxiosPromise<FaucetTransaction>;
 };

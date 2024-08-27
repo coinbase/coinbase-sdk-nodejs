@@ -255,14 +255,16 @@ export class Address {
    * Requests faucet funds for the address.
    * Only supported on testnet networks.
    *
+   * @param asset_id - The ID of the asset to transfer from the faucet.
    * @returns The faucet transaction object.
    * @throws {InternalError} If the request does not return a transaction hash.
    * @throws {Error} If the request fails.
    */
-  public async faucet(): Promise<FaucetTransaction> {
+  public async faucet(asset_id?: string): Promise<FaucetTransaction> {
     const response = await Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds(
       this.getNetworkId(),
       this.getId(),
+      asset_id,
     );
     return new FaucetTransaction(response.data);
   }
