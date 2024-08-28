@@ -7,14 +7,9 @@
 
 The Coinbase Node.js SDK enables the simple integration of crypto into your app. By calling Coinbase's Platform APIs, the SDK allows you to provision crypto wallets, send crypto into/out of those wallets, track wallet balances, and trade crypto from one asset into another.
 
-The SDK currently supports Customer-custodied Wallets on the Base Sepolia test network.
+The SDK supports various verbs on Developer-custodied Wallets across multiple networks, as documented [here](https://docs.cdp.coinbase.com/cdp-sdk/docs/networks).
 
-**NOTE: The Coinbase SDK is currently in Alpha. The SDK:**
-
-- **may make backwards-incompatible changes between releases**
-- **should not be used on Mainnet (i.e. with real funds)**
-
-Currently, the SDK is intended for use on testnet for quick bootstrapping of crypto wallets at hackathons, code academies, and other development settings.
+**CDP SDK v0 is a pre-alpha release, which means that the APIs and SDK methods are subject to change. We will continuously release updates to support new capabilities and improve the developer experience.**
 
 ## Documentation
 
