@@ -310,7 +310,7 @@ export function mockEthereumValidator(
     details: {
       index: index,
       public_key: public_key,
-      withdrawl_address: "0xwithdrawl_address_1",
+      withdrawal_address: "0xwithdrawal_address_1",
       slashed: false,
       activationEpoch: "10",
       exitEpoch: "10",
@@ -453,6 +453,9 @@ export const stakeApiMock = {
   getStakingContext: jest.fn(),
   fetchStakingRewards: jest.fn(),
   fetchHistoricalStakingBalances: jest.fn(),
+};
+
+export const walletStakeApiMock = {
   broadcastStakingOperation: jest.fn(),
   createStakingOperation: jest.fn(),
   getStakingOperation: jest.fn(),

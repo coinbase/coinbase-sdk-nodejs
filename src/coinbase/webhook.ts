@@ -143,9 +143,7 @@ export class Webhook {
    */
   public async update(notificationUri: string): Promise<Webhook> {
     const result = await Coinbase.apiClients.webhook!.updateWebhook(this.getId()!, {
-      network_id: this.getNetworkId(),
       notification_uri: notificationUri,
-      event_type: this.getEventType()!,
       event_filters: this.getEventFilters()!,
     });
 

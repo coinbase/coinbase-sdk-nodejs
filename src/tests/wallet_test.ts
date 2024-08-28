@@ -43,6 +43,7 @@ import {
   getAssetMock,
   externalAddressApiMock,
   stakeApiMock,
+  walletStakeApiMock,
 } from "./utils";
 import { Trade } from "../coinbase/trade";
 import { WalletAddress } from "../coinbase/address/wallet_address";
@@ -245,6 +246,7 @@ describe("Wallet Class", () => {
 
     beforeAll(() => {
       Coinbase.apiClients.stake = stakeApiMock;
+      Coinbase.apiClients.walletStake = walletStakeApiMock;
       Coinbase.apiClients.asset = assetsApiMock;
     });
 
@@ -258,12 +260,12 @@ describe("Wallet Class", () => {
         STAKING_OPERATION_MODEL.wallet_id = wallet.getId();
         Coinbase.apiClients.asset!.getAsset = getAssetMock();
         Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
-        Coinbase.apiClients.stake!.createStakingOperation =
+        Coinbase.apiClients.walletStake!.createStakingOperation =
           mockReturnValue(STAKING_OPERATION_MODEL);
-        Coinbase.apiClients.stake!.broadcastStakingOperation =
+        Coinbase.apiClients.walletStake!.broadcastStakingOperation =
           mockReturnValue(STAKING_OPERATION_MODEL);
         STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
-        Coinbase.apiClients.stake!.getStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
+        Coinbase.apiClients.walletStake!.getStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
 
         const op = await wallet.createStake(0.001, Coinbase.assets.Eth);
 
@@ -297,12 +299,12 @@ describe("Wallet Class", () => {
         STAKING_OPERATION_MODEL.wallet_id = wallet.getId();
         Coinbase.apiClients.asset!.getAsset = getAssetMock();
         Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
-        Coinbase.apiClients.stake!.createStakingOperation =
+        Coinbase.apiClients.walletStake!.createStakingOperation =
           mockReturnValue(STAKING_OPERATION_MODEL);
-        Coinbase.apiClients.stake!.broadcastStakingOperation =
+        Coinbase.apiClients.walletStake!.broadcastStakingOperation =
           mockReturnValue(STAKING_OPERATION_MODEL);
         STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
-        Coinbase.apiClients.stake!.getStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
+        Coinbase.apiClients.walletStake!.getStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
 
         const op = await wallet.createUnstake(0.001, Coinbase.assets.Eth);
 
@@ -323,12 +325,12 @@ describe("Wallet Class", () => {
         STAKING_OPERATION_MODEL.wallet_id = wallet.getId();
         Coinbase.apiClients.asset!.getAsset = getAssetMock();
         Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
-        Coinbase.apiClients.stake!.createStakingOperation =
+        Coinbase.apiClients.walletStake!.createStakingOperation =
           mockReturnValue(STAKING_OPERATION_MODEL);
-        Coinbase.apiClients.stake!.broadcastStakingOperation =
+        Coinbase.apiClients.walletStake!.broadcastStakingOperation =
           mockReturnValue(STAKING_OPERATION_MODEL);
         STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
-        Coinbase.apiClients.stake!.getStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
+        Coinbase.apiClients.walletStake!.getStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
 
         const op = await wallet.createClaimStake(0.001, Coinbase.assets.Eth);
 

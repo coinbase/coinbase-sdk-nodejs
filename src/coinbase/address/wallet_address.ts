@@ -528,7 +528,7 @@ export class WalletAddress extends Address {
       options: options,
     };
 
-    const response = await Coinbase.apiClients.stake!.createStakingOperation(
+    const response = await Coinbase.apiClients.walletStake!.createStakingOperation(
       this.getWalletId(),
       this.getId(),
       stakingOperationRequest,
@@ -556,7 +556,7 @@ export class WalletAddress extends Address {
       transaction_index: transactionIndex,
     };
 
-    const response = await Coinbase.apiClients.stake!.broadcastStakingOperation(
+    const response = await Coinbase.apiClients.walletStake!.broadcastStakingOperation(
       this.getWalletId(),
       this.getId(),
       stakingOperationID,
