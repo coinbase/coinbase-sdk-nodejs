@@ -57,7 +57,11 @@ export class StakingOperation {
 
       return new StakingOperation(result.data);
     } else if (walletId != undefined && walletId != "") {
-      const result = await Coinbase.apiClients.stake!.getStakingOperation(walletId!, addressId, id);
+      const result = await Coinbase.apiClients.walletStake!.getStakingOperation(
+        walletId!,
+        addressId,
+        id,
+      );
 
       return new StakingOperation(result.data);
     } else {
@@ -192,7 +196,7 @@ export class StakingOperation {
 
       this.model = result.data;
     } else if (this.getWalletID() != undefined && this.getWalletID() != "") {
-      const result = await Coinbase.apiClients.stake!.getStakingOperation(
+      const result = await Coinbase.apiClients.walletStake!.getStakingOperation(
         this.getWalletID()!,
         this.getAddressID(),
         this.getID(),
