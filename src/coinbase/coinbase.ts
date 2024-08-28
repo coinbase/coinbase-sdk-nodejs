@@ -15,6 +15,7 @@ import {
   WebhooksApiFactory,
   NetworkIdentifier,
   ContractEventsApiFactory,
+  ContractInvocationsApiFactory,
 } from "../client";
 import { BASE_PATH } from "./../client/base";
 import { Configuration } from "./../client/configuration";
@@ -128,6 +129,11 @@ export class Coinbase {
     Coinbase.apiClients.validator = ValidatorsApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.asset = AssetsApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.webhook = WebhooksApiFactory(config, basePath, axiosInstance);
+    Coinbase.apiClients.contractInvocation = ContractInvocationsApiFactory(
+      config,
+      basePath,
+      axiosInstance
+    );
     Coinbase.apiClients.externalAddress = ExternalAddressesApiFactory(
       config,
       basePath,
