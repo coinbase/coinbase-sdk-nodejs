@@ -368,7 +368,7 @@ describe("WalletAddress", () => {
           address: newAddress.address_id,
           date: "2024-05-01",
           bonded_stake: {
-            amount: "32",
+            amount: "32000000000000000000",
             asset: {
               asset_id: Coinbase.assets.Eth,
               network_id: Coinbase.networks.EthereumHolesky,
@@ -376,7 +376,7 @@ describe("WalletAddress", () => {
             },
           },
           unbonded_balance: {
-            amount: "2",
+            amount: "2000000000000000000",
             asset: {
               asset_id: Coinbase.assets.Eth,
               network_id: Coinbase.networks.EthereumHolesky,
@@ -389,7 +389,7 @@ describe("WalletAddress", () => {
           address: newAddress.address_id,
           date: "2024-05-02",
           bonded_stake: {
-            amount: "34",
+            amount: "34000000000000000000",
             asset: {
               asset_id: Coinbase.assets.Eth,
               network_id: Coinbase.networks.EthereumHolesky,
@@ -397,7 +397,7 @@ describe("WalletAddress", () => {
             },
           },
           unbonded_balance: {
-            amount: "3",
+            amount: "3000000000000000000",
             asset: {
               asset_id: Coinbase.assets.Eth,
               network_id: Coinbase.networks.EthereumHolesky,
