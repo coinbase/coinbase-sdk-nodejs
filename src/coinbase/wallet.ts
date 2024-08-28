@@ -723,16 +723,16 @@ export class Wallet {
    * Requests funds from the faucet for the Wallet's default address and returns the faucet transaction.
    * This is only supported on testnet networks.
    *
-   * @param asset_id - The ID of the Asset to request from the faucet.
+   * @param assetId - The ID of the Asset to request from the faucet.
    * @throws {InternalError} If the default address is not found.
    * @throws {APIError} If the request fails.
    * @returns The successful faucet transaction
    */
-  public async faucet(asset_id?: string): Promise<FaucetTransaction> {
+  public async faucet(assetId?: string): Promise<FaucetTransaction> {
     if (!this.model.default_address) {
       throw new InternalError("Default address not found");
     }
-    const transaction = await this.getDefaultAddress()!.faucet(asset_id);
+    const transaction = await this.getDefaultAddress()!.faucet(assetId);
     return transaction!;
   }
 
