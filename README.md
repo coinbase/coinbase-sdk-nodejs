@@ -154,7 +154,8 @@ console.log(`Faucet transaction: ${faucetTransaction}`);
 // Create a new Wallet to transfer funds to.
 // Then, we can transfer 0.00001 ETH out of the Wallet to another Wallet.
 const anotherWallet = await Wallet.create();
-const transfer = await wallet.createTransfer({ amount: 0.00001, assetId: Coinbase.assets.Eth, destination: anotherWallet });
+let transfer = await wallet.createTransfer({ amount: 0.00001, assetId: Coinbase.assets.Eth, destination: anotherWallet });
+transfer = await transfer.wait();
 ```
 
 
@@ -162,7 +163,8 @@ const transfer = await wallet.createTransfer({ amount: 0.00001, assetId: Coinbas
 
 To transfer USDC without needing to hold ETH for gas, you can use the `createTransfer` method with the `gasless` option set to `true`.
 ```typescript
-const transfer = await wallet.createTransfer({ amount: 0.00001, assetId: Coinbase.assets.Usdc, destination: anotherWallet, gasless: true });
+let transfer = await wallet.createTransfer({ amount: 0.00001, assetId: Coinbase.assets.Usdc, destination: anotherWallet, gasless: true });
+transfer = await transfer.wait();
 ```
 
 
@@ -178,8 +180,9 @@ console.log(`Wallet successfully created: ${mainnetWallet}`);
 
 // Trade 0.00001 ETH to USDC
 let trade = await wallet.createTrade({ amount: 0.00001, fromAssetId: Coinbase.assets.Eth, toAssetId: Coinbase.assets.Usdc });
+trade = await trade.wait();
 
-console.log(`Second trade successfully completed: ${trade}`);
+console.log(`Trade successfully completed: ${trade}`);
 ```
 
 ### Re-Instantiating Wallets
