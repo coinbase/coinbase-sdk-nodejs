@@ -195,7 +195,7 @@ describe("WalletAddress", () => {
     expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds).toHaveBeenCalledWith(
       address.getNetworkId(),
       address.getId(),
-      "",
+      undefined,
     );
     expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds).toHaveBeenCalledTimes(
       1,
@@ -224,7 +224,7 @@ describe("WalletAddress", () => {
     expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds).toHaveBeenCalledWith(
       address.getNetworkId(),
       address.getId(),
-      "",
+      undefined,
     );
     expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds).toHaveBeenCalledTimes(
       1,
