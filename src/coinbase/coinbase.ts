@@ -19,7 +19,7 @@ import {
 import { BASE_PATH } from "./../client/base";
 import { Configuration } from "./../client/configuration";
 import { CoinbaseAuthenticator } from "./authenticator";
-import { InternalError, InvalidAPIKeyFormat, InvalidConfiguration } from "./errors";
+import { InvalidAPIKeyFormatError, InvalidConfigurationError } from "./errors";
 import { ApiClients, CoinbaseConfigureFromJsonOptions, CoinbaseOptions } from "./types";
 import { logApiResponse, registerAxiosInterceptors } from "./utils";
 import * as os from "os";
@@ -80,8 +80,8 @@ export class Coinbase {
    * @param options.debugging - If true, logs API requests and responses to the console.
    * @param options.basePath - The base path for the API.
    * @param options.maxNetworkRetries - The maximum number of network retries for the API GET requests.
-   * @throws {InternalError} If the configuration is invalid.
-   * @throws {InvalidAPIKeyFormat} If not able to create JWT token.
+   * @throws {InvalidConfigurationError} If the configuration is invalid.
+   * @throws {InvalidAPIKeyFormatError} If not able to create JWT token.
    */
   constructor({
     apiKeyName,
@@ -92,10 +92,10 @@ export class Coinbase {
     maxNetworkRetries = 3,
   }: CoinbaseOptions) {
     if (apiKeyName === "") {
-      throw new InternalError("Invalid configuration: apiKeyName is empty");
+      throw new InvalidConfigurationError("Invalid configuration: apiKeyName is empty");
     }
     if (privateKey === "") {
-      throw new InternalError("Invalid configuration: privateKey is empty");
+      throw new InvalidConfigurationError("Invalid configuration: privateKey is empty");
     }
     const coinbaseAuthenticator = new CoinbaseAuthenticator(apiKeyName, privateKey);
     const config = new Configuration({
@@ -160,13 +160,13 @@ export class Coinbase {
     filePath = filePath.startsWith("~") ? filePath.replace("~", os.homedir()) : filePath;
 
     if (!fs.existsSync(filePath)) {
-      throw new InvalidConfiguration(`Invalid configuration: file not found at ${filePath}`);
+      throw new InvalidConfigurationError(`Invalid configuration: file not found at ${filePath}`);
     }
     try {
       const data = fs.readFileSync(filePath, "utf8");
       const config = JSON.parse(data) as { name: string; privateKey: string };
       if (!config.name || !config.privateKey) {
-        throw new InvalidAPIKeyFormat("Invalid configuration: missing configuration values");
+        throw new InvalidAPIKeyFormatError("Invalid configuration: missing configuration values");
       }
 
       return new Coinbase({
@@ -178,9 +178,9 @@ export class Coinbase {
       });
     } catch (e) {
       if (e instanceof SyntaxError) {
-        throw new InvalidAPIKeyFormat("Not able to parse the configuration file");
+        throw new InvalidAPIKeyFormatError("Not able to parse the configuration file");
       } else {
-        throw new InvalidAPIKeyFormat(
+        throw new InvalidAPIKeyFormatError(
           `An error occurred while reading the configuration file: ${(e as Error).message}`,
         );
       }

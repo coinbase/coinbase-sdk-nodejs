@@ -1,6 +1,6 @@
 import { InternalAxiosRequestConfig } from "axios";
 import { JWK, JWS } from "node-jose";
-import { InvalidAPIKeyFormat } from "./errors";
+import { InvalidAPIKeyFormatError } from "./errors";
 import { version } from "../../package.json";
 
 const pemHeader = "-----BEGIN EC PRIVATE KEY-----";
@@ -62,10 +62,10 @@ export class CoinbaseAuthenticator {
     try {
       privateKey = await JWK.asKey(pemPrivateKey, "pem");
       if (privateKey.kty !== "EC") {
-        throw new InvalidAPIKeyFormat("Invalid key type");
+        throw new InvalidAPIKeyFormatError("Invalid key type");
       }
     } catch (error) {
-      throw new InvalidAPIKeyFormat("Could not parse the private key");
+      throw new InvalidAPIKeyFormatError("Could not parse the private key");
     }
 
     const header = {
@@ -94,7 +94,7 @@ export class CoinbaseAuthenticator {
 
       return result as unknown as string;
     } catch (err) {
-      throw new InvalidAPIKeyFormat("Could not sign the JWT");
+      throw new InvalidAPIKeyFormatError("Could not sign the JWT");
     }
   }
 
@@ -112,7 +112,7 @@ export class CoinbaseAuthenticator {
       return privateKeyString;
     }
 
-    throw new InvalidAPIKeyFormat("Invalid private key format");
+    throw new InvalidAPIKeyFormatError("Invalid private key format");
   }
 
   /**
