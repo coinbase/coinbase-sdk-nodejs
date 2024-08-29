@@ -11,7 +11,7 @@ import { Asset } from "./asset";
 import { Balance } from "./balance";
 import { BalanceMap } from "./balance_map";
 import { Coinbase } from "./coinbase";
-import { ArgumentError, InternalError } from "./errors";
+import { ArgumentError } from "./errors";
 import { FaucetTransaction } from "./faucet_transaction";
 import { Trade } from "./trade";
 import { Transfer } from "./transfer";
@@ -138,7 +138,7 @@ export class Wallet {
    * @param options.intervalSeconds - The interval at which to poll the backend, in seconds.
    * @param options.timeoutSeconds - The maximum amount of time to wait for the ServerSigner to create a seed, in seconds.
    * @throws {ArgumentError} If the model or client is not provided.
-   * @throws {InternalError} - If address derivation or caching fails.
+   * @throws {Error} - If address derivation or caching fails.
    * @throws {APIError} - If the request fails.
    * @returns A promise that resolves with the new Wallet object.
    */
@@ -174,7 +174,7 @@ export class Wallet {
    * @param seed - The seed to use for the Wallet. Expects a 32-byte hexadecimal with no 0x prefix. If null or undefined, a new seed will be generated.
    * If the empty string, no seed is generated, and the Wallet will be instantiated without a seed and its corresponding private keys.
    * @throws {ArgumentError} If the model or client is not provided.
-   * @throws {InternalError} - If address derivation or caching fails.
+   * @throws {Error} - If address derivation or caching fails.
    * @throws {APIError} - If the request fails.
    * @returns A promise that resolves with the new Wallet object.
    */
@@ -195,7 +195,7 @@ export class Wallet {
    */
   public export(): WalletData {
     if (!this.seed) {
-      throw new InternalError("Cannot export Wallet without loaded seed");
+      throw new Error("Cannot export Wallet without loaded seed");
     }
     return { walletId: this.getId()!, seed: this.seed };
   }
@@ -237,14 +237,14 @@ export class Wallet {
    *
    * @param seed - The seed to use for the Wallet. Expects a 32-byte hexadecimal with no 0x prefix.
    * @throws {ArgumentError} If the seed is empty.
-   * @throws {InternalError} If the seed is already set.
+   * @throws {Error} If the seed is already set.
    */
   public setSeed(seed: string) {
     if (seed === undefined || seed === "") {
       throw new ArgumentError("Seed must not be empty");
     }
     if (this.master) {
-      throw new InternalError("Seed is already set");
+      throw new Error("Seed is already set");
     }
     this.setMasterNode(seed);
 
@@ -256,9 +256,7 @@ export class Wallet {
       const derivedKey = this.deriveKey(index);
       const etherWallet = new ethers.Wallet(convertStringToHex(derivedKey.privateKey!));
       if (etherWallet.address != address.getId()) {
-        throw new InternalError(
-          `Seed does not match wallet; cannot find address ${etherWallet.address}`,
-        );
+        throw new Error(`Seed does not match wallet; cannot find address ${etherWallet.address}`);
       }
       address.setKey(etherWallet);
     });
@@ -302,13 +300,13 @@ export class Wallet {
    * @param options.amount - The amount of the Asset to send.
    * @param options.fromAssetId - The ID of the Asset to trade from.
    * @param options.toAssetId - The ID of the Asset to trade to.
-   * @throws {InternalError} If the default address is not found.
+   * @throws {Error} If the default address is not found.
    * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
    * @returns The created Trade object.
    */
   public async createTrade(options: CreateTradeOptions): Promise<Trade> {
     if (!this.getDefaultAddress()) {
-      throw new InternalError("Default address not found");
+      throw new Error("Default address not found");
     }
     return await this.getDefaultAddress()!.createTrade(options);
   }
@@ -328,7 +326,7 @@ export class Wallet {
     options: { [key: string]: string } = {},
   ): Promise<Decimal> {
     if (!this.getDefaultAddress()) {
-      throw new InternalError("Default address not found");
+      throw new Error("Default address not found");
     }
     return await this.getDefaultAddress()!.stakeableBalance(asset_id, mode, options);
   }
@@ -348,7 +346,7 @@ export class Wallet {
     options: { [key: string]: string } = {},
   ): Promise<Decimal> {
     if (!this.getDefaultAddress()) {
-      throw new InternalError("Default address not found");
+      throw new Error("Default address not found");
     }
     return await this.getDefaultAddress()!.unstakeableBalance(asset_id, mode, options);
   }
@@ -368,7 +366,7 @@ export class Wallet {
     options: { [key: string]: string } = {},
   ): Promise<Decimal> {
     if (!this.getDefaultAddress()) {
-      throw new InternalError("Default address not found");
+      throw new Error("Default address not found");
     }
     return await this.getDefaultAddress()!.claimableBalance(asset_id, mode, options);
   }
@@ -390,7 +388,7 @@ export class Wallet {
     format: StakingRewardFormat = StakingRewardFormat.Usd,
   ): Promise<StakingReward[]> {
     if (!this.getDefaultAddress()) {
-      throw new InternalError("Default address not found");
+      throw new Error("Default address not found");
     }
     return await this.getDefaultAddress()!.stakingRewards(assetId, startTime, endTime, format);
   }
@@ -410,7 +408,7 @@ export class Wallet {
     endTime = formatDate(new Date()),
   ): Promise<StakingBalance[]> {
     if (!this.getDefaultAddress()) {
-      throw new InternalError("Default address not found");
+      throw new Error("Default address not found");
     }
     return await this.getDefaultAddress()!.historicalStakingBalances(assetId, startTime, endTime);
   }
@@ -430,7 +428,7 @@ export class Wallet {
     page,
   }: ListHistoricalBalancesOptions): Promise<ListHistoricalBalancesResult> {
     if (!this.getDefaultAddress()) {
-      throw new InternalError("Default address not found");
+      throw new Error("Default address not found");
     }
     return await this.getDefaultAddress()!.listHistoricalBalances({
       assetId: assetId,
@@ -460,7 +458,7 @@ export class Wallet {
     intervalSeconds = 0.2,
   ): Promise<StakingOperation> {
     if (!this.getDefaultAddress()) {
-      throw new InternalError("Default address not found");
+      throw new Error("Default address not found");
     }
     return await this.getDefaultAddress()!.createStake(
       amount,
@@ -493,7 +491,7 @@ export class Wallet {
     intervalSeconds = 0.2,
   ): Promise<StakingOperation> {
     if (!this.getDefaultAddress()) {
-      throw new InternalError("Default address not found");
+      throw new Error("Default address not found");
     }
     return await this.getDefaultAddress()!.createUnstake(
       amount,
@@ -526,7 +524,7 @@ export class Wallet {
     intervalSeconds = 0.2,
   ): Promise<StakingOperation> {
     if (!this.getDefaultAddress()) {
-      throw new InternalError("Default address not found");
+      throw new Error("Default address not found");
     }
     return await this.getDefaultAddress()!.createClaimStake(
       amount,
@@ -607,11 +605,11 @@ export class Wallet {
    * @param encrypt - Whether the seed information persisted to the local file system should be
    * encrypted or not. Data is unencrypted by default.
    * @returns A string indicating the success of the operation
-   * @throws {InternalError} If the Wallet does not have a seed
+   * @throws {Error} If the Wallet does not have a seed
    */
   public saveSeed(filePath: string, encrypt: boolean = false): string {
     if (!this.master) {
-      throw new InternalError("Cannot save Wallet without loaded seed");
+      throw new Error("Cannot save Wallet without loaded seed");
     }
 
     const existingSeedsInStore = this.getExistingSeeds(filePath);
@@ -724,13 +722,13 @@ export class Wallet {
    * This is only supported on testnet networks.
    *
    * @param assetId - The ID of the Asset to request from the faucet.
-   * @throws {InternalError} If the default address is not found.
+   * @throws {Error} If the default address is not found.
    * @throws {APIError} If the request fails.
    * @returns The successful faucet transaction
    */
   public async faucet(assetId?: string): Promise<FaucetTransaction> {
     if (!this.model.default_address) {
-      throw new InternalError("Default address not found");
+      throw new Error("Default address not found");
     }
     const transaction = await this.getDefaultAddress()!.faucet(assetId);
     return transaction!;
@@ -751,7 +749,7 @@ export class Wallet {
    */
   public async createTransfer(options: CreateTransferOptions): Promise<Transfer> {
     if (!this.getDefaultAddress()) {
-      throw new InternalError("Default address not found");
+      throw new Error("Default address not found");
     }
 
     return await this.getDefaultAddress()!.createTransfer(options);
@@ -843,7 +841,7 @@ export class Wallet {
     const key = this.deriveKey(index);
     const ethWallet = new ethers.Wallet(convertStringToHex(key.privateKey!));
     if (ethWallet.address != addressModel.address_id) {
-      throw new InternalError(`Seed does not match wallet`);
+      throw new Error(`Seed does not match wallet`);
     }
 
     return new WalletAddress(addressModel, ethWallet);
@@ -896,12 +894,12 @@ export class Wallet {
    * Derives a key for an already registered Address in the Wallet.
    *
    * @param index - The index of the Address to derive.
-   * @throws {InternalError} - If the key derivation fails.
+   * @throws {Error} - If the key derivation fails.
    * @returns The derived key.
    */
   private deriveKey(index: number): HDKey {
     if (!this.master) {
-      throw new InternalError("Cannot derive key for Wallet without seed loaded");
+      throw new Error("Cannot derive key for Wallet without seed loaded");
     }
     const [networkPrefix] = this.model.network_id.split("-");
     /**
@@ -909,11 +907,11 @@ export class Wallet {
      * TODO: Add unit tests for `#createAddress`.
      */
     if (!["base", "ethereum", "polygon"].includes(networkPrefix)) {
-      throw new InternalError(`Unsupported network ID: ${this.model.network_id}`);
+      throw new Error(`Unsupported network ID: ${this.model.network_id}`);
     }
     const derivedKey = this.master?.derive(this.addressPathPrefix + `/${index}`);
     if (!derivedKey?.privateKey) {
-      throw new InternalError("Failed to derive key");
+      throw new Error("Failed to derive key");
     }
     return derivedKey;
   }
@@ -927,7 +925,7 @@ export class Wallet {
   private createAttestation(key: HDKey): string {
     if (!key.publicKey || !key.privateKey) {
       /* istanbul ignore next */
-      throw InternalError;
+      throw Error;
     }
 
     const publicKey = convertStringToHex(key.publicKey);

@@ -1,7 +1,6 @@
 import { Coinbase } from "./coinbase";
 import { Validator as ValidatorModel, ValidatorStatus as APIValidatorStatus } from "../client/api";
 import { ValidatorStatus } from "./types";
-import { InternalError } from "./errors";
 
 /**
  * A representation of a validator onchain.
@@ -14,11 +13,11 @@ export class Validator {
    *
    * @class
    * @param model - The underlying Validator object.
-   * @throws {InternalError} - If the Validator model is empty.
+   * @throws {Error} - If the Validator model is empty.
    */
   constructor(model: ValidatorModel) {
     if (!model) {
-      throw new InternalError("Invalid model type");
+      throw new Error("Invalid model type");
     }
 
     this.model = model;

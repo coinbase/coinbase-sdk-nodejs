@@ -1,6 +1,5 @@
 /* eslint-disable jsdoc/require-jsdoc */
 import { AxiosError } from "axios";
-import { InternalError } from "./errors";
 
 /**
  * The API error response type.
@@ -57,7 +56,7 @@ export class APIError extends AxiosError {
       case "unauthorized":
         return new UnauthorizedError(error);
       case "internal":
-        return new InternalError(error.message);
+        return new InternalError(error);
       case "not_found":
         return new NotFoundError(error);
       case "invalid_wallet_id":
@@ -113,6 +112,7 @@ export class APIError extends AxiosError {
   }
 }
 
+export class InternalError extends APIError {}
 export class UnimplementedError extends APIError {}
 export class UnauthorizedError extends APIError {}
 export class NotFoundError extends APIError {}

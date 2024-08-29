@@ -19,7 +19,7 @@ import {
 import Decimal from "decimal.js";
 import { APIError, FaucetLimitReachedError } from "../coinbase/api_error";
 import { Coinbase } from "../coinbase/coinbase";
-import { ArgumentError, InternalError } from "../coinbase/errors";
+import { ArgumentError } from "../coinbase/errors";
 import {
   addressesApiMock,
   assetsApiMock,
@@ -183,7 +183,7 @@ describe("WalletAddress", () => {
     expect(address.getWalletId()).toBe(VALID_ADDRESS_MODEL.wallet_id);
   });
 
-  it("should throw an InternalError when model is not provided", () => {
+  it("should throw an Error when model is not provided", () => {
     expect(() => new WalletAddress(null!, key as unknown as ethers.Wallet)).toThrow(
       `Address model cannot be empty`,
     );
@@ -242,11 +242,11 @@ describe("WalletAddress", () => {
     );
   });
 
-  it("should throw an InternalError when the request fails unexpectedly", async () => {
+  it("should throw an Error when the request fails unexpectedly", async () => {
     Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds = mockReturnRejectedValue(
-      new InternalError(""),
+      new Error(""),
     );
-    await expect(address.faucet()).rejects.toThrow(InternalError);
+    await expect(address.faucet()).rejects.toThrow(Error);
     expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds).toHaveBeenCalledTimes(
       1,
     );
@@ -433,7 +433,8 @@ describe("WalletAddress", () => {
         Coinbase.apiClients.walletStake!.broadcastStakingOperation =
           mockReturnValue(STAKING_OPERATION_MODEL);
         STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
-        Coinbase.apiClients.walletStake!.getStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
+        Coinbase.apiClients.walletStake!.getStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
 
         const op = await walletAddress.createStake(0.001, Coinbase.assets.Eth);
 
@@ -448,7 +449,8 @@ describe("WalletAddress", () => {
         Coinbase.apiClients.walletStake!.broadcastStakingOperation =
           mockReturnValue(STAKING_OPERATION_MODEL);
         STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Failed;
-        Coinbase.apiClients.walletStake!.getStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
+        Coinbase.apiClients.walletStake!.getStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
 
         const op = await walletAddress.createStake(0.001, Coinbase.assets.Eth);
 
@@ -474,7 +476,8 @@ describe("WalletAddress", () => {
           mockReturnValue(STAKING_OPERATION_MODEL);
         STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
         STAKING_OPERATION_MODEL.transactions = [];
-        Coinbase.apiClients.walletStake!.getStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
+        Coinbase.apiClients.walletStake!.getStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
 
         const op = await walletAddress.createStake(0.001, Coinbase.assets.Eth);
 
@@ -491,7 +494,8 @@ describe("WalletAddress", () => {
         Coinbase.apiClients.walletStake!.broadcastStakingOperation =
           mockReturnValue(STAKING_OPERATION_MODEL);
         STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
-        Coinbase.apiClients.walletStake!.getStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
+        Coinbase.apiClients.walletStake!.getStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
 
         const op = await walletAddress.createUnstake(0.001, Coinbase.assets.Eth);
 
@@ -508,7 +512,8 @@ describe("WalletAddress", () => {
         Coinbase.apiClients.walletStake!.broadcastStakingOperation =
           mockReturnValue(STAKING_OPERATION_MODEL);
         STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
-        Coinbase.apiClients.walletStake!.getStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
+        Coinbase.apiClients.walletStake!.getStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
 
         const op = await walletAddress.createClaimStake(0.001, Coinbase.assets.Eth);
 
@@ -637,7 +642,7 @@ describe("WalletAddress", () => {
       ).rejects.toThrow(APIError);
     });
 
-    it("should throw an InternalError if the address key is not provided", async () => {
+    it("should throw an Error if the address key is not provided", async () => {
       const addressWithoutKey = new WalletAddress(VALID_ADDRESS_MODEL, null!);
       await expect(
         addressWithoutKey.createTransfer({
@@ -645,7 +650,7 @@ describe("WalletAddress", () => {
           assetId: Coinbase.assets.Wei,
           destination,
         }),
-      ).rejects.toThrow(InternalError);
+      ).rejects.toThrow(Error);
     });
 
     it("should throw an ArgumentError if the Wallet Network ID does not match the Address Network ID", async () => {
@@ -1071,14 +1076,14 @@ describe("WalletAddress", () => {
         const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, undefined);
         expect(() => {
           newAddress.setKey(key);
-        }).not.toThrow(InternalError);
+        }).not.toThrow(Error);
       });
       it("should not set the key successfully", () => {
         key = ethers.Wallet.createRandom();
         const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, key);
         expect(() => {
           newAddress.setKey(key);
-        }).toThrow(InternalError);
+        }).toThrow(Error);
       });
     });
   });

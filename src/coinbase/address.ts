@@ -259,7 +259,7 @@ export class Address {
    *
    * @param assetId - The ID of the asset to transfer from the faucet.
    * @returns The faucet transaction object.
-   * @throws {InternalError} If the request does not return a transaction hash.
+   * @throws {Error} If the request does not return a transaction hash.
    * @throws {Error} If the request fails.
    */
   public async faucet(assetId?: string): Promise<FaucetTransaction> {

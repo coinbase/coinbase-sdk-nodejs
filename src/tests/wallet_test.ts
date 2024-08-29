@@ -4,7 +4,7 @@ import Decimal from "decimal.js";
 import { ethers } from "ethers";
 import { APIError } from "../coinbase/api_error";
 import { Coinbase } from "../coinbase/coinbase";
-import { ArgumentError, InternalError } from "../coinbase/errors";
+import { ArgumentError } from "../coinbase/errors";
 import { Wallet } from "../coinbase/wallet";
 import { Transfer } from "../coinbase/transfer";
 import { ServerSignerStatus, StakeOptionsMode, TransferStatus } from "../coinbase/types";
@@ -265,7 +265,8 @@ describe("Wallet Class", () => {
         Coinbase.apiClients.walletStake!.broadcastStakingOperation =
           mockReturnValue(STAKING_OPERATION_MODEL);
         STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
-        Coinbase.apiClients.walletStake!.getStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
+        Coinbase.apiClients.walletStake!.getStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
 
         const op = await wallet.createStake(0.001, Coinbase.assets.Eth);
 
@@ -276,7 +277,7 @@ describe("Wallet Class", () => {
         const newWallet = Wallet.init(walletModel);
         await expect(
           async () => await newWallet.createStake(0.001, Coinbase.assets.Eth),
-        ).rejects.toThrow(InternalError);
+        ).rejects.toThrow(Error);
       });
 
       it("should throw an error when wait is called on wallet address based staking operation", async () => {
@@ -304,7 +305,8 @@ describe("Wallet Class", () => {
         Coinbase.apiClients.walletStake!.broadcastStakingOperation =
           mockReturnValue(STAKING_OPERATION_MODEL);
         STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
-        Coinbase.apiClients.walletStake!.getStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
+        Coinbase.apiClients.walletStake!.getStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
 
         const op = await wallet.createUnstake(0.001, Coinbase.assets.Eth);
 
@@ -315,7 +317,7 @@ describe("Wallet Class", () => {
         const newWallet = Wallet.init(walletModel);
         await expect(
           async () => await newWallet.createUnstake(0.001, Coinbase.assets.Eth),
-        ).rejects.toThrow(InternalError);
+        ).rejects.toThrow(Error);
       });
     });
 
@@ -330,7 +332,8 @@ describe("Wallet Class", () => {
         Coinbase.apiClients.walletStake!.broadcastStakingOperation =
           mockReturnValue(STAKING_OPERATION_MODEL);
         STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
-        Coinbase.apiClients.walletStake!.getStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
+        Coinbase.apiClients.walletStake!.getStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
 
         const op = await wallet.createClaimStake(0.001, Coinbase.assets.Eth);
 
@@ -341,7 +344,7 @@ describe("Wallet Class", () => {
         const newWallet = Wallet.init(walletModel);
         await expect(
           async () => await newWallet.createClaimStake(0.001, Coinbase.assets.Eth),
-        ).rejects.toThrow(InternalError);
+        ).rejects.toThrow(Error);
       });
     });
 
@@ -350,7 +353,7 @@ describe("Wallet Class", () => {
         const newWallet = Wallet.init(walletModel);
         await expect(
           async () => await newWallet.stakeableBalance(Coinbase.assets.Eth),
-        ).rejects.toThrow(InternalError);
+        ).rejects.toThrow(Error);
       });
 
       it("should return the stakeable balance successfully with default params", async () => {
@@ -366,7 +369,7 @@ describe("Wallet Class", () => {
         const newWallet = Wallet.init(walletModel);
         await expect(
           async () => await newWallet.unstakeableBalance(Coinbase.assets.Eth),
-        ).rejects.toThrow(InternalError);
+        ).rejects.toThrow(Error);
       });
 
       it("should return the unstakeableBalance balance successfully with default params", async () => {
@@ -382,7 +385,7 @@ describe("Wallet Class", () => {
         const newWallet = Wallet.init(walletModel);
         await expect(
           async () => await newWallet.claimableBalance(Coinbase.assets.Eth),
-        ).rejects.toThrow(InternalError);
+        ).rejects.toThrow(Error);
       });
 
       it("should return the claimableBalance balance successfully with default params", async () => {
@@ -398,7 +401,7 @@ describe("Wallet Class", () => {
         const newWallet = Wallet.init(walletModel);
         await expect(
           async () => await newWallet.stakingRewards(Coinbase.assets.Eth),
-        ).rejects.toThrow(InternalError);
+        ).rejects.toThrow(Error);
       });
 
       it("should successfully return staking rewards", async () => {
@@ -415,7 +418,7 @@ describe("Wallet Class", () => {
         const newWallet = Wallet.init(walletModel);
         await expect(
           async () => await newWallet.historicalStakingBalances(Coinbase.assets.Eth),
-        ).rejects.toThrow(InternalError);
+        ).rejects.toThrow(Error);
       });
 
       it("should successfully return historical staking balances", async () => {
@@ -484,7 +487,7 @@ describe("Wallet Class", () => {
           await newWallet.listHistoricalBalances({
             assetId: Coinbase.assets.Usdc,
           }),
-      ).rejects.toThrow(InternalError);
+      ).rejects.toThrow(Error);
     });
 
     it("should successfully return historical balances", async () => {
@@ -689,7 +692,7 @@ describe("Wallet Class", () => {
       expect(wallet.canSign()).toBe(true);
     });
 
-    it("should throw InternalError if derived key is not valid", async () => {
+    it("should throw Error if derived key is not valid", async () => {
       Coinbase.apiClients.address!.listAddresses = mockFn(() => {
         return {
           data: {
@@ -700,7 +703,7 @@ describe("Wallet Class", () => {
           },
         };
       });
-      await expect(wallet.listAddresses()).rejects.toThrow(InternalError);
+      await expect(wallet.listAddresses()).rejects.toThrow(Error);
     });
 
     it("should create new address and update the existing address list", async () => {
@@ -818,7 +821,7 @@ describe("Wallet Class", () => {
         network_id: Coinbase.networks.BaseSepolia,
         feature_set: {} as FeatureSet,
       });
-      await expect(async () => await wallet.faucet()).rejects.toThrow(InternalError);
+      await expect(async () => await wallet.faucet()).rejects.toThrow(Error);
     });
 
     it("should return a Wallet instance", async () => {
@@ -915,7 +918,7 @@ describe("Wallet Class", () => {
 
     it("throws an error when the Wallet is seedless", async () => {
       const seedlessWallet = Wallet.init(walletModel, "");
-      expect(() => seedlessWallet.export()).toThrow(InternalError);
+      expect(() => seedlessWallet.export()).toThrow(Error);
     });
 
     it("should return true for canSign when the wallet is initialized with a seed", () => {
@@ -1114,7 +1117,7 @@ describe("Wallet Class", () => {
 
     it("should throw an error when the wallet is seedless", async () => {
       const seedlessWallet = Wallet.init(walletModel, "");
-      expect(() => seedlessWallet.saveSeed(filePath, false)).toThrow(InternalError);
+      expect(() => seedlessWallet.saveSeed(filePath, false)).toThrow(Error);
     });
   });
 
@@ -1179,7 +1182,7 @@ describe("Wallet Class", () => {
     });
 
     it("raises an error if the wallet is already hydrated", async () => {
-      await expect(seedWallet.loadSeed(filePath)).rejects.toThrow(InternalError);
+      await expect(seedWallet.loadSeed(filePath)).rejects.toThrow(Error);
     });
 
     it("raises an error when file contains different wallet data", async () => {
@@ -1239,7 +1242,7 @@ describe("Wallet Class", () => {
       await expect(
         async () =>
           await newWallet.createTrade({ amount: 0.01, fromAssetId: "eth", toAssetId: "usdc" }),
-      ).rejects.toThrow(InternalError);
+      ).rejects.toThrow(Error);
     });
 
     it("should create a trade from the default address", async () => {

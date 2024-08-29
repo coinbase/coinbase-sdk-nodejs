@@ -4,7 +4,7 @@ import { Address as AddressModel } from "../../client";
 import { Address } from "../address";
 import { Asset } from "../asset";
 import { Coinbase } from "../coinbase";
-import { ArgumentError, InternalError } from "../errors";
+import { ArgumentError } from "../errors";
 import { Trade } from "../trade";
 import { Transfer } from "../transfer";
 import {
@@ -32,11 +32,11 @@ export class WalletAddress extends Address {
    *
    * @param model - The address model data.
    * @param key - The ethers.js SigningKey the Address uses to sign data.
-   * @throws {InternalError} If the address model is empty.
+   * @throws {Error} If the address model is empty.
    */
   constructor(model: AddressModel, key?: ethers.Wallet) {
     if (!model) {
-      throw new InternalError("Address model cannot be empty");
+      throw new Error("Address model cannot be empty");
     }
     super(model.network_id, model.address_id);
 
@@ -66,11 +66,11 @@ export class WalletAddress extends Address {
    * Sets the private key.
    *
    * @param key - The ethers.js SigningKey the Address uses to sign data.
-   * @throws {InternalError} If the private key is already set.
+   * @throws {Error} If the private key is already set.
    */
   public setKey(key: ethers.Wallet) {
     if (this.key !== undefined) {
-      throw new InternalError("Private key is already set");
+      throw new Error("Private key is already set");
     }
     this.key = key;
   }
@@ -170,7 +170,7 @@ export class WalletAddress extends Address {
     gasless = false,
   }: CreateTransferOptions): Promise<Transfer> {
     if (!Coinbase.useServerSigner && !this.key) {
-      throw new InternalError("Cannot transfer from address without private key loaded");
+      throw new Error("Cannot transfer from address without private key loaded");
     }
     const asset = await Asset.fetch(this.getNetworkId(), assetId);
     const [destinationAddress, destinationNetworkId] =
@@ -214,11 +214,11 @@ export class WalletAddress extends Address {
    * Gets a signer for the private key.
    *
    * @returns The signer for the private key.
-   * @throws {InternalError} If the private key is not loaded.
+   * @throws {Error} If the private key is not loaded.
    */
   private getSigner(): ethers.Wallet {
     if (!this.key) {
-      throw new InternalError("Cannot sign without a private key");
+      throw new Error("Cannot sign without a private key");
     }
     return new ethers.Wallet(this.key.privateKey);
   }
