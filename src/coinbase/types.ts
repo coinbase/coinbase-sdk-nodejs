@@ -375,6 +375,7 @@ export type ExternalAddressAPIClient = {
   requestExternalFaucetFunds(
     networkId: string,
     addressId: string,
+    assetId?: string,
     options?: RawAxiosRequestConfig,
   ): AxiosPromise<FaucetTransaction>;
 };
@@ -391,6 +392,30 @@ export type UserAPIClient = {
    * @throws {APIError} If the request fails.
    */
   getCurrentUser(options?: AxiosRequestConfig): AxiosPromise<UserModel>;
+};
+
+export type WalletStakeAPIClient = {
+  broadcastStakingOperation(
+    walletId: string,
+    addressId: string,
+    stakingOperationId: string,
+    broadcastStakingOperationRequest: BroadcastStakingOperationRequest,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<StakingOperationModel>;
+
+  createStakingOperation(
+    walletId: string,
+    addressId: string,
+    createStakingOperationRequest: CreateStakingOperationRequest,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<StakingOperationModel>;
+
+  getStakingOperation(
+    walletId: string,
+    addressId: string,
+    stakingOperationId: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<StakingOperationModel>;
 };
 
 export type StakeAPIClient = {
@@ -471,28 +496,6 @@ export type StakeAPIClient = {
     page?: string,
     options?: AxiosRequestConfig,
   ): AxiosPromise<FetchHistoricalStakingBalances200Response>;
-
-  broadcastStakingOperation(
-    walletId: string,
-    addressId: string,
-    stakingOperationId: string,
-    broadcastStakingOperationRequest: BroadcastStakingOperationRequest,
-    options?: AxiosRequestConfig,
-  ): AxiosPromise<StakingOperationModel>;
-
-  createStakingOperation(
-    walletId: string,
-    addressId: string,
-    createStakingOperationRequest: CreateStakingOperationRequest,
-    options?: AxiosRequestConfig,
-  ): AxiosPromise<StakingOperationModel>;
-
-  getStakingOperation(
-    walletId: string,
-    addressId: string,
-    stakingOperationId: string,
-    options?: AxiosRequestConfig,
-  ): AxiosPromise<StakingOperationModel>;
 };
 
 export type ValidatorAPIClient = {
@@ -669,6 +672,7 @@ export type ApiClients = {
   trade?: TradeApiClients;
   serverSigner?: ServerSignerAPIClient;
   stake?: StakeAPIClient;
+  walletStake?: WalletStakeAPIClient;
   validator?: ValidatorAPIClient;
   asset?: AssetAPIClient;
   externalAddress?: ExternalAddressAPIClient;

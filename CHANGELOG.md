@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## [0.2.0]
+
+### Added
+
+- USDC Faucet support on Base Sepolia
+- Improved error mesasges for `InternalError`
+
 ## [0.1.1] - 2024-08-27
 
 - Fixed a bug where `listHistoricalBalances` method was parsing conventional ETH balances instead of atomic units

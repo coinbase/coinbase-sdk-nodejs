@@ -186,9 +186,7 @@ describe("Webhook", () => {
       await webhook.update("https://new-url.com/callback");
 
       expect(Coinbase.apiClients.webhook!.updateWebhook).toHaveBeenCalledWith("test-id", {
-        network_id: "test-network",
         notification_uri: "https://new-url.com/callback",
-        event_type: "erc20_transfer",
         event_filters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
       });
 

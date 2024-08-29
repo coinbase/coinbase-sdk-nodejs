@@ -1,5 +1,5 @@
 import { Decimal } from "decimal.js";
-import { randomUUID } from "crypto"
+import { randomUUID } from "crypto";
 import { ethers } from "ethers";
 import { Transaction as CoinbaseTransaction, Trade as TradeModel } from "../client/api";
 import { Transaction } from "../coinbase/transaction";
@@ -188,7 +188,7 @@ describe("Trade", () => {
           unsigned_payload: unsignedPayload,
         } as CoinbaseTransaction;
       });
-      afterAll(() => approveTransactionModel = null);
+      afterAll(() => (approveTransactionModel = null));
 
       it("signs the approve transaction", async () => {
         expect(trade.getApproveTransaction().isSigned()).toBe(true);
@@ -230,7 +230,7 @@ describe("Trade", () => {
     });
 
     it("broadcasts the trade with the signed tx payload", async () => {
-      await trade.broadcast()
+      await trade.broadcast();
 
       expect(Coinbase.apiClients.trade!.broadcastTrade).toHaveBeenCalledWith(
         walletId,
@@ -238,13 +238,13 @@ describe("Trade", () => {
         tradeId,
         {
           signed_payload: signedPayload.slice(2),
-          approve_transaction_signed_payload: undefined
-        }
+          approve_transaction_signed_payload: undefined,
+        },
       );
     });
 
     it("returns the broadcasted trade", async () => {
-      const broadcastedTrade = await trade.broadcast()
+      const broadcastedTrade = await trade.broadcast();
 
       expect(broadcastedTrade).toBeInstanceOf(Trade);
       expect(broadcastedTrade).toBe(trade);
@@ -272,10 +272,10 @@ describe("Trade", () => {
           signed_payload: signedPayload, // TODO: use diff signed payload
         } as CoinbaseTransaction;
       });
-      afterAll(() => approveTransactionModel = null);
+      afterAll(() => (approveTransactionModel = null));
 
       it("broadcasts the trade with the signed tx and approve tx payloads", async () => {
-        await trade.broadcast()
+        await trade.broadcast();
 
         expect(Coinbase.apiClients.trade!.broadcastTrade).toHaveBeenCalledWith(
           walletId,
@@ -284,7 +284,7 @@ describe("Trade", () => {
           {
             signed_payload: signedPayload.slice(2),
             approve_transaction_signed_payload: signedPayload.slice(2),
-          }
+          },
         );
         expect(trade.getStatus()).toBe(TransactionStatus.BROADCAST);
       });

@@ -1,6 +1,5 @@
 import { Webhook as WebhookModel, WebhookEventType, WebhookEventFilter } from "../client/api";
 import { Coinbase } from "./coinbase";
-import { InternalError } from "./errors";
 
 /**
  * A representation of a Webhook,
@@ -13,11 +12,11 @@ export class Webhook {
    * Initializes a new Webhook object.
    *
    * @param model - The underlying Webhook object.
-   * @throws {InternalError} If the model is not provided.
+   * @throws {Error} If the model is not provided.
    */
   private constructor(model: WebhookModel) {
     if (!model) {
-      throw new InternalError("Webhook model cannot be empty");
+      throw new Error("Webhook model cannot be empty");
     }
     this.model = model;
   }
@@ -143,9 +142,7 @@ export class Webhook {
    */
   public async update(notificationUri: string): Promise<Webhook> {
     const result = await Coinbase.apiClients.webhook!.updateWebhook(this.getId()!, {
-      network_id: this.getNetworkId(),
       notification_uri: notificationUri,
-      event_type: this.getEventType()!,
       event_filters: this.getEventFilters()!,
     });
 
