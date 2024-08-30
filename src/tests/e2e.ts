@@ -104,6 +104,16 @@ describe("Coinbase SDK E2E Test", () => {
     console.log(`First address balances: ${firstBalance}`);
     console.log(`Second address balances: ${secondBalance}`);
 
+    console.log("Listing address historical balance...");
+    const history = await unhydratedWallet.getDefaultAddress()?.listHistoricalBalances({ assetId: Coinbase.assets.Eth})
+    expect(history?.historicalBalances.length).toBeGreaterThan(0);
+    console.log(`First historical balance: ${history?.historicalBalances[0]}`);
+
+    console.log("Listing address transactions...");
+    const txResult = await unhydratedWallet.getDefaultAddress()?.listTransactions({ limit: 2 })
+    expect(txResult?.transactions.length).toBeGreaterThan(0);
+    console.log(`First transaction: ${txResult?.transactions[0].getTransactionHash()}`);
+
     const savedSeed = JSON.parse(fs.readFileSync("test_seed.json", "utf-8"));
     fs.unlinkSync("test_seed.json");
 
