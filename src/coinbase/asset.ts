@@ -2,7 +2,7 @@ import Decimal from "decimal.js";
 import { Asset as AssetModel } from "./../client/api";
 import { Coinbase } from "./coinbase";
 import { GWEI_DECIMALS } from "./constants";
-import { ArgumentError, InternalError } from "./errors";
+import { ArgumentError } from "./errors";
 
 /** A representation of an Asset. */
 export class Asset {
@@ -41,7 +41,7 @@ export class Asset {
    */
   public static fromModel(model: AssetModel, assetId?: string) {
     if (!model) {
-      throw new InternalError("Invalid asset model");
+      throw new Error("Invalid asset model");
     }
 
     let decimals = model.decimals!;

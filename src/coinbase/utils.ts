@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Axios, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { APIError } from "./api_error";
-import { InvalidUnsignedPayload } from "./errors";
+import { InvalidUnsignedPayloadError } from "./errors";
 
 /**
  * Prints Axios response to the console for debugging purposes.
@@ -92,7 +92,7 @@ export async function delay(seconds: number): Promise<void> {
 export function parseUnsignedPayload(payload: string): Record<string, any> {
   const rawPayload = payload.match(/../g)?.map(byte => parseInt(byte, 16));
   if (!rawPayload) {
-    throw new InvalidUnsignedPayload("Unable to parse unsigned payload");
+    throw new InvalidUnsignedPayloadError("Unable to parse unsigned payload");
   }
 
   let parsedPayload;
@@ -101,7 +101,7 @@ export function parseUnsignedPayload(payload: string): Record<string, any> {
     const decoder = new TextDecoder();
     parsedPayload = JSON.parse(decoder.decode(rawPayloadBytes));
   } catch (error) {
-    throw new InvalidUnsignedPayload("Unable to decode unsigned payload JSON");
+    throw new InvalidUnsignedPayloadError("Unable to decode unsigned payload JSON");
   }
 
   return parsedPayload;

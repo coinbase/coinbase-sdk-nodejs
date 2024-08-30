@@ -1,5 +1,4 @@
 import { FaucetTransaction as FaucetTransactionModel } from "../client";
-import { InternalError } from "./errors";
 
 /**
  * Represents a transaction from a faucet.
@@ -13,11 +12,11 @@ export class FaucetTransaction {
    *
    * @class
    * @param {FaucetTransactionModel} model - The FaucetTransaction model.
-   * @throws {InternalError} If the model does not exist.
+   * @throws {Error} If the model does not exist.
    */
   constructor(model: FaucetTransactionModel) {
     if (!model?.transaction_hash) {
-      throw new InternalError("FaucetTransaction model cannot be empty");
+      throw new Error("FaucetTransaction model cannot be empty");
     }
     this.model = model;
   }

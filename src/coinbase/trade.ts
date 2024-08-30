@@ -2,7 +2,7 @@ import { Decimal } from "decimal.js";
 import { ethers } from "ethers";
 import { Trade as CoinbaseTrade } from "../client/api";
 import { Coinbase } from "./coinbase";
-import { InternalError, NotSignedError, TimeoutError } from "./errors";
+import { NotSignedError, TimeoutError } from "./errors";
 import { Transaction } from "./transaction";
 import { TransactionStatus } from "./types";
 import { delay } from "./utils";
@@ -21,11 +21,11 @@ export class Trade {
    *
    * @class
    * @param model - The underlying Trade object.
-   * @throws {InternalError} - If the Trade model is empty.
+   * @throws {Error} - If the Trade model is empty.
    */
   constructor(model: CoinbaseTrade) {
     if (!model) {
-      throw new InternalError("Trade model cannot be empty");
+      throw new Error("Trade model cannot be empty");
     }
     this.model = model;
   }

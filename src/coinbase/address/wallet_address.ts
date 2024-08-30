@@ -4,7 +4,7 @@ import { Address as AddressModel } from "../../client";
 import { Address } from "../address";
 import { Asset } from "../asset";
 import { Coinbase } from "../coinbase";
-import { ArgumentError, InternalError } from "../errors";
+import { ArgumentError } from "../errors";
 import { Trade } from "../trade";
 import { Transfer } from "../transfer";
 import {
@@ -32,11 +32,11 @@ export class WalletAddress extends Address {
    *
    * @param model - The address model data.
    * @param key - The ethers.js SigningKey the Address uses to sign data.
-   * @throws {InternalError} If the address model is empty.
+   * @throws {Error} If the address model is empty.
    */
   constructor(model: AddressModel, key?: ethers.Wallet) {
     if (!model) {
-      throw new InternalError("Address model cannot be empty");
+      throw new Error("Address model cannot be empty");
     }
     super(model.network_id, model.address_id);
 
@@ -66,11 +66,11 @@ export class WalletAddress extends Address {
    * Sets the private key.
    *
    * @param key - The ethers.js SigningKey the Address uses to sign data.
-   * @throws {InternalError} If the private key is already set.
+   * @throws {Error} If the private key is already set.
    */
   public setKey(key: ethers.Wallet) {
     if (this.key !== undefined) {
-      throw new InternalError("Private key is already set");
+      throw new Error("Private key is already set");
     }
     this.key = key;
   }
@@ -170,7 +170,7 @@ export class WalletAddress extends Address {
     gasless = false,
   }: CreateTransferOptions): Promise<Transfer> {
     if (!Coinbase.useServerSigner && !this.key) {
-      throw new InternalError("Cannot transfer from address without private key loaded");
+      throw new Error("Cannot transfer from address without private key loaded");
     }
     const asset = await Asset.fetch(this.getNetworkId(), assetId);
     const [destinationAddress, destinationNetworkId] =
@@ -214,11 +214,11 @@ export class WalletAddress extends Address {
    * Gets a signer for the private key.
    *
    * @returns The signer for the private key.
-   * @throws {InternalError} If the private key is not loaded.
+   * @throws {Error} If the private key is not loaded.
    */
   private getSigner(): ethers.Wallet {
     if (!this.key) {
-      throw new InternalError("Cannot sign without a private key");
+      throw new Error("Cannot sign without a private key");
     }
     return new ethers.Wallet(this.key.privateKey);
   }
@@ -258,7 +258,16 @@ export class WalletAddress extends Address {
    * @param amount - The amount to stake.
    * @param assetId - The asset to stake.
    * @param mode - The staking mode. Defaults to DEFAULT.
-   * @param options - Additional options such as setting the mode for the staking action.
+   * @param options - Additional options for the stake operation:
+   *
+   * A. Shared ETH Staking
+   *  - `integrator_contract_address` (optional): The contract address to which the stake operation is directed to. Defaults to the integrator contract address associated with CDP account (if available) or else defaults to a shared integrator contract address for that network.
+   *
+   * B. Dedicated ETH Staking
+   *  - `funding_address` (optional): Ethereum address for funding the stake operation. Defaults to the address initiating the stake operation.
+   *  - `withdrawal_address` (optional): Ethereum address for receiving rewards and withdrawal funds. Defaults to the address initiating the stake operation.
+   *  - `fee_recipient_address` (optional): Ethereum address for receiving transaction fees. Defaults to the address initiating the stake operation.
+   *
    * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
    * @param intervalSeconds - The amount to check each time for a successful broadcast.
    * @returns The staking operation after it's completed successfully.
@@ -289,7 +298,15 @@ export class WalletAddress extends Address {
    * @param amount - The amount to unstake.
    * @param assetId - The asset to unstake.
    * @param mode - The staking mode. Defaults to DEFAULT.
-   * @param options - Additional options such as setting the mode for the staking action.
+   * @param options - Additional options for the unstake operation:
+   *
+   * A. Shared ETH Staking
+   *  - `integrator_contract_address` (optional): The contract address to which the unstake operation is directed to. Defaults to the integrator contract address associated with CDP account (if available) or else defaults to a shared integrator contract address for that network.
+   *
+   * B. Dedicated ETH Staking
+   *  - `immediate` (optional): Set this to "true" to unstake immediately i.e. leverage "Coinbase managed unstake" process . Defaults to "false" i.e. "User managed unstake" process.
+   *  - `validator_pub_keys` (optional): List of comma separated validator public keys to unstake. Defaults to validators being picked up on your behalf corresponding to the unstake amount.
+   *
    * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
    * @param intervalSeconds - The amount to check each time for a successful broadcast.
    * @returns The staking operation after it's completed successfully.
@@ -320,7 +337,11 @@ export class WalletAddress extends Address {
    * @param amount - The amount to claim stake.
    * @param assetId - The asset to claim stake.
    * @param mode - The staking mode. Defaults to DEFAULT.
-   * @param options - Additional options such as setting the mode for the staking action.
+   * @param options - Additional options for the claim stake operation.
+   *
+   * A. Shared ETH Staking
+   *  - `integrator_contract_address` (optional): The contract address to which the claim stake operation is directed to. Defaults to the integrator contract address associated with CDP account (if available) or else defaults to a shared integrator contract address for that network.
+   *
    * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
    * @param intervalSeconds - The amount to check each time for a successful broadcast.
    * @returns The staking operation after it's completed successfully.
@@ -507,7 +528,7 @@ export class WalletAddress extends Address {
       options: options,
     };
 
-    const response = await Coinbase.apiClients.stake!.createStakingOperation(
+    const response = await Coinbase.apiClients.walletStake!.createStakingOperation(
       this.getWalletId(),
       this.getId(),
       stakingOperationRequest,
@@ -535,7 +556,7 @@ export class WalletAddress extends Address {
       transaction_index: transactionIndex,
     };
 
-    const response = await Coinbase.apiClients.stake!.broadcastStakingOperation(
+    const response = await Coinbase.apiClients.walletStake!.broadcastStakingOperation(
       this.getWalletId(),
       this.getId(),
       stakingOperationID,
