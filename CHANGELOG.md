@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- Add support for listing address transactions.
+
 ## [0.2.0]
 
 ### Added

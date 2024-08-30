@@ -107,7 +107,7 @@ describe("Coinbase SDK E2E Test", () => {
     console.log("Listing address historical balance...");
     const history = await unhydratedWallet.getDefaultAddress()?.listHistoricalBalances({ assetId: Coinbase.assets.Eth})
     expect(history?.historicalBalances.length).toBeGreaterThan(0);
-    console.log(`First historical balance: ${history?.historicalBalances[0]}`);
+    console.log(`First historical balance amount: ${history?.historicalBalances[0].amount}`);
 
     console.log("Listing address transactions...");
     const txResult = await unhydratedWallet.getDefaultAddress()?.listTransactions({ limit: 2 })
