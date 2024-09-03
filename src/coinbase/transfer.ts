@@ -6,7 +6,7 @@ import { Coinbase } from "./coinbase";
 import { Transfer as TransferModel } from "../client/api";
 import { ethers } from "ethers";
 import { delay } from "./utils";
-import { InternalError, TimeoutError } from "./errors";
+import { TimeoutError } from "./errors";
 
 /**
  * A representation of a Transfer, which moves an Amount of an Asset from
@@ -25,7 +25,7 @@ export class Transfer {
    */
   private constructor(transferModel: TransferModel) {
     if (!transferModel) {
-      throw new InternalError("Transfer model cannot be empty");
+      throw new Error("Transfer model cannot be empty");
     }
     this.model = transferModel;
   }

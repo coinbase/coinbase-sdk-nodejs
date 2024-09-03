@@ -36,7 +36,7 @@ describe("Address", () => {
     });
   });
 
-  describe(".listTransactions()", () => {
+  describe("#listTransactions", () => {
     beforeEach(() => {
       const mockTransactionsResponse: AddressTransactionList = {
         data: [
@@ -54,7 +54,7 @@ describe("Address", () => {
             block_hash: "block_hash",
             block_height: "12348",
             unsigned_payload: "",
-            status: TransactionStatus.COMPLETE
+            status: TransactionStatus.FAILED
           }
         ],
         has_more: true,

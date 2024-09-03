@@ -1,7 +1,7 @@
 import { AxiosHeaders } from "axios";
 import { CoinbaseAuthenticator } from "../coinbase/authenticator";
 import { JWK, JWS } from "node-jose";
-import { InvalidAPIKeyFormat } from "../coinbase/errors";
+import { InvalidAPIKeyFormatError } from "../coinbase/errors";
 
 const VALID_CONFIG = {
   method: "GET",
@@ -58,7 +58,9 @@ describe("Authenticator tests", () => {
   test("should throw error if private key cannot be parsed", async () => {
     jest.spyOn(JWK, "asKey").mockRejectedValue(new Error("Invalid key"));
 
-    await expect(instance.buildJWT("https://example.com")).rejects.toThrow(InvalidAPIKeyFormat);
+    await expect(instance.buildJWT("https://example.com")).rejects.toThrow(
+      InvalidAPIKeyFormatError,
+    );
     await expect(instance.buildJWT("https://example.com")).rejects.toThrow(
       "Could not parse the private key",
     );
@@ -68,7 +70,9 @@ describe("Authenticator tests", () => {
     const mockKey = { kty: "RSA" };
     jest.spyOn(JWK, "asKey").mockResolvedValue(mockKey as any);
 
-    await expect(instance.buildJWT("https://example.com")).rejects.toThrow(InvalidAPIKeyFormat);
+    await expect(instance.buildJWT("https://example.com")).rejects.toThrow(
+      InvalidAPIKeyFormatError,
+    );
   });
 
   test("should throw error if JWT signing fails", async () => {
@@ -80,6 +84,8 @@ describe("Authenticator tests", () => {
     };
     jest.spyOn(JWS, "createSign").mockReturnValue(mockSign as any);
 
-    await expect(instance.buildJWT("https://example.com")).rejects.toThrow(InvalidAPIKeyFormat);
+    await expect(instance.buildJWT("https://example.com")).rejects.toThrow(
+      InvalidAPIKeyFormatError,
+    );
   });
 });

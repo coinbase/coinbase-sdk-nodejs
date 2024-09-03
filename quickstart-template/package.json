@@ -1,6 +1,6 @@
 {
   "name": "quickstart-template",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "@coinbase/coinbase-sdk": "^0.0.13",
+    "@coinbase/coinbase-sdk": "^0.1.0",
     "csv-parse": "^5.5.6",
     "csv-writer": "^1.6.0"
   }

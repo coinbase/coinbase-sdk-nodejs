@@ -396,7 +396,6 @@ describe("Transfer Class", () => {
         status: TransferStatus.FAILED,
       });
 
-
       const completedTransfer = await transfer.wait();
       expect(completedTransfer).toBeInstanceOf(Transfer);
       expect(completedTransfer.getStatus()).toEqual(TransferStatus.FAILED);

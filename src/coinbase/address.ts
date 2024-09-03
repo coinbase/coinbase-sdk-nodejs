@@ -156,7 +156,7 @@ export class Address {
     };
   }
 
-    /**
+  /**
    * Returns the transactions of the address.
    *
    * @param options - The options to list transactions.
@@ -164,29 +164,29 @@ export class Address {
    * @param options.page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
    * @returns The list of historical balance of the asset and next page token.
    */
-    public async listTransactions({
-      limit,
-      page,
-    }: ListTransactionsOptions): Promise<ListTransactionsResult> {
-      const txnList: Transaction[] = [];
-  
-      const response = await Coinbase.apiClients.externalAddress!.listAddressTransactions(
-        this.getNetworkId(),
-        this.getId(),
-        limit ? limit : undefined,
-        page ? page : undefined,
-      );
+  public async listTransactions({
+    limit,
+    page,
+  }: ListTransactionsOptions): Promise<ListTransactionsResult> {
+    const txnList: Transaction[] = [];
 
-      response.data.data.forEach(transactionModel => {
-        const transaction = new Transaction(transactionModel);
-        txnList.push(transaction);
-      });
-  
-      return {
-        transactions: txnList,
-        nextPageToken: response.data.next_page,
-      };
-    }
+    const response = await Coinbase.apiClients.externalAddress!.listAddressTransactions(
+      this.getNetworkId(),
+      this.getId(),
+      limit ? limit : undefined,
+      page ? page : undefined,
+    );
+
+    response.data.data.forEach(transactionModel => {
+      const transaction = new Transaction(transactionModel);
+      txnList.push(transaction);
+    });
+
+    return {
+      transactions: txnList,
+      nextPageToken: response.data.next_page,
+    };
+  }
 
   /**
    * Lists the staking rewards for the address.
@@ -258,6 +258,8 @@ export class Address {
    * @param asset_id - The asset to check the unstakeable balance for.
    * @param mode - The staking mode. Defaults to DEFAULT.
    * @param options - Additional options for getting the unstakeable balance.
+   * A. Dedicated ETH Staking
+   *  - `validator_pub_keys` (optional): List of comma separated validator public keys to retrieve unstakeable balance for. Defaults to all validators.
    * @returns The unstakeable balance.
    */
   public async unstakeableBalance(
@@ -290,14 +292,16 @@ export class Address {
    * Requests faucet funds for the address.
    * Only supported on testnet networks.
    *
+   * @param assetId - The ID of the asset to transfer from the faucet.
    * @returns The faucet transaction object.
-   * @throws {InternalError} If the request does not return a transaction hash.
+   * @throws {Error} If the request does not return a transaction hash.
    * @throws {Error} If the request fails.
    */
-  public async faucet(): Promise<FaucetTransaction> {
+  public async faucet(assetId?: string): Promise<FaucetTransaction> {
     const response = await Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds(
       this.getNetworkId(),
       this.getId(),
+      assetId,
     );
     return new FaucetTransaction(response.data);
   }

@@ -1,5 +1,5 @@
 import { AxiosResponse } from "axios";
-import { InvalidUnsignedPayload } from "../coinbase/errors";
+import { InvalidUnsignedPayloadError } from "../coinbase/errors";
 import { logApiResponse, parseUnsignedPayload } from "./../coinbase/utils"; // Adjust the path as necessary
 
 describe("parseUnsignedPayload", () => {
@@ -11,22 +11,22 @@ describe("parseUnsignedPayload", () => {
 
   it("should throw InvalidUnsignedPayload error if payload cannot be parsed", () => {
     const payload = "invalidhexstring";
-    expect(() => parseUnsignedPayload(payload)).toThrow(InvalidUnsignedPayload);
+    expect(() => parseUnsignedPayload(payload)).toThrow(InvalidUnsignedPayloadError);
   });
 
   it("should throw InvalidUnsignedPayload error if payload cannot be decoded to JSON", () => {
     const payload = "000102"; // Invalid JSON
-    expect(() => parseUnsignedPayload(payload)).toThrow(InvalidUnsignedPayload);
+    expect(() => parseUnsignedPayload(payload)).toThrow(InvalidUnsignedPayloadError);
   });
 
   it("should throw InvalidUnsignedPayload error if payload is an empty string", () => {
     const payload = "";
-    expect(() => parseUnsignedPayload(payload)).toThrow(InvalidUnsignedPayload);
+    expect(() => parseUnsignedPayload(payload)).toThrow(InvalidUnsignedPayloadError);
   });
 
   it("should throw InvalidUnsignedPayload error if payload contains non-hex characters", () => {
     const payload = "7b226b6579223a2276616c75657g7d"; // Invalid hex due to 'g'
-    expect(() => parseUnsignedPayload(payload)).toThrow(InvalidUnsignedPayload);
+    expect(() => parseUnsignedPayload(payload)).toThrow(InvalidUnsignedPayloadError);
   });
 });
 

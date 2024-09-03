@@ -3,6 +3,7 @@ import {
   mockReturnValue,
   mockStakingOperation,
   stakeApiMock,
+  walletStakeApiMock,
   VALID_NATIVE_ETH_UNSTAKE_OPERATION_MODEL,
   VALID_STAKING_OPERATION_MODEL,
 } from "./utils";
@@ -14,6 +15,7 @@ describe("StakingOperation", () => {
   beforeAll(() => {
     // Mock the stake functions.
     Coinbase.apiClients.stake = stakeApiMock;
+    Coinbase.apiClients.walletStake = walletStakeApiMock;
   });
 
   beforeEach(() => {
@@ -105,7 +107,7 @@ describe("StakingOperation", () => {
     });
 
     it("should fetch staking operation with walletId", async () => {
-      Coinbase.apiClients.stake!.getStakingOperation = jest.fn().mockResolvedValue({
+      Coinbase.apiClients.walletStake!.getStakingOperation = jest.fn().mockResolvedValue({
         data: mockStakingOperationModel,
       });
 
@@ -116,7 +118,7 @@ describe("StakingOperation", () => {
         walletId,
       );
 
-      expect(Coinbase.apiClients.stake!.getStakingOperation).toHaveBeenCalledWith(
+      expect(Coinbase.apiClients.walletStake!.getStakingOperation).toHaveBeenCalledWith(
         walletId,
         addressId,
         stakingOperationId,
