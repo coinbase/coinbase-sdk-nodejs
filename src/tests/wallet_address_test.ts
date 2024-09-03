@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as crypto from "crypto";
+import { AxiosError } from "axios";
 import { randomUUID } from "crypto";
 import { ethers } from "ethers";
 import { FaucetTransaction } from "../coinbase/faucet_transaction";
@@ -24,6 +25,7 @@ import {
   addressesApiMock,
   assetsApiMock,
   externalAddressApiMock,
+  contractInvocationApiMock,
   generateRandomHash,
   getAssetMock,
   mockFn,
@@ -40,6 +42,10 @@ import {
   VALID_WALLET_MODEL,
   VALID_PAYLOAD_SIGNATURE_MODEL,
   VALID_PAYLOAD_SIGNATURE_LIST,
+  VALID_CONTRACT_INVOCATION_MODEL,
+  VALID_SIGNED_CONTRACT_INVOCATION_MODEL,
+  MINT_NFT_ABI,
+  MINT_NFT_ARGS,
   walletsApiMock,
 } from "./utils";
 import { Transfer } from "../coinbase/transfer";
@@ -52,6 +58,7 @@ import { StakingOperation } from "../coinbase/staking_operation";
 import { StakingReward } from "../coinbase/staking_reward";
 import { StakingBalance } from "../coinbase/staking_balance";
 import { PayloadSignature } from "../coinbase/payload_signature";
+import { ContractInvocation } from "../coinbase/contract_invocation";
 
 // Test suite for the WalletAddress class
 describe("WalletAddress", () => {
@@ -1105,6 +1112,254 @@ describe("WalletAddress", () => {
     });
   });
 
+  describe("#invokeContract", () => {
+    let key = ethers.Wallet.createRandom();
+    let addressModel: AddressModel;
+    let walletAddress: WalletAddress;
+    let unsignedPayload = VALID_CONTRACT_INVOCATION_MODEL.transaction.unsigned_payload;
+    let expectedSignedPayload: string;
+
+    beforeAll(() => {
+      Coinbase.apiClients.contractInvocation = contractInvocationApiMock;
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      addressModel = newAddressModel(randomUUID(), randomUUID(), Coinbase.networks.BaseSepolia);
+    });
+
+    describe("when not using a server-signer", () => {
+      beforeEach(async () => {
+        Coinbase.useServerSigner = false;
+
+        walletAddress = new WalletAddress(addressModel, key as unknown as ethers.Wallet);
+
+        const tx = new Transaction(VALID_CONTRACT_INVOCATION_MODEL.transaction);
+        expectedSignedPayload = await tx.sign(key as unknown as ethers.Wallet);
+      });
+
+      describe("when it is successful", () => {
+        let contractInvocation;
+
+        beforeEach(async () => {
+          Coinbase.apiClients.contractInvocation!.createContractInvocation = mockReturnValue({
+            ...VALID_CONTRACT_INVOCATION_MODEL,
+            address_id: walletAddress.getId(),
+            wallet_id: walletAddress.getWalletId(),
+          });
+
+          Coinbase.apiClients.contractInvocation!.broadcastContractInvocation = mockReturnValue({
+            ...VALID_SIGNED_CONTRACT_INVOCATION_MODEL,
+            address_id: walletAddress.getId(),
+            wallet_id: walletAddress.getWalletId(),
+          });
+
+          contractInvocation = await walletAddress.invokeContract({
+            abi: MINT_NFT_ABI,
+            args: MINT_NFT_ARGS,
+            method: VALID_CONTRACT_INVOCATION_MODEL.method,
+            contractAddress: VALID_CONTRACT_INVOCATION_MODEL.contract_address,
+          });
+        });
+
+        it("returns a contract invocation", async () => {
+          expect(contractInvocation).toBeInstanceOf(ContractInvocation);
+          expect(contractInvocation.getId()).toBe(
+            VALID_CONTRACT_INVOCATION_MODEL.contract_invocation_id,
+          );
+        });
+
+        it("creates the contract invocation", async () => {
+          expect(
+            Coinbase.apiClients.contractInvocation!.createContractInvocation,
+          ).toHaveBeenCalledWith(walletAddress.getWalletId(), walletAddress.getId(), {
+            abi: VALID_CONTRACT_INVOCATION_MODEL.abi,
+            args: VALID_CONTRACT_INVOCATION_MODEL.args,
+            method: VALID_CONTRACT_INVOCATION_MODEL.method,
+            contract_address: VALID_CONTRACT_INVOCATION_MODEL.contract_address,
+          });
+          expect(
+            Coinbase.apiClients.contractInvocation!.createContractInvocation,
+          ).toHaveBeenCalledTimes(1);
+        });
+
+        it("broadcasts the contract invocation", async () => {
+          expect(
+            Coinbase.apiClients.contractInvocation!.broadcastContractInvocation,
+          ).toHaveBeenCalledWith(
+            walletAddress.getWalletId(),
+            walletAddress.getId(),
+            VALID_CONTRACT_INVOCATION_MODEL.contract_invocation_id,
+            {
+              signed_payload: expectedSignedPayload,
+            },
+          );
+
+          expect(
+            Coinbase.apiClients.contractInvocation!.broadcastContractInvocation,
+          ).toHaveBeenCalledTimes(1);
+        });
+      });
+
+      describe("when no key is loaded", () => {
+        beforeEach(() => {
+          walletAddress = new WalletAddress(addressModel);
+        });
+
+        it("throws an error", async () => {
+          await expect(
+            walletAddress.invokeContract({
+              abi: MINT_NFT_ABI,
+              args: MINT_NFT_ARGS,
+              method: VALID_CONTRACT_INVOCATION_MODEL.method,
+              contractAddress: VALID_CONTRACT_INVOCATION_MODEL.contract_address,
+            }),
+          ).rejects.toThrow(Error);
+        });
+      });
+
+      describe("when it fails to create a contract invocation", () => {
+        beforeEach(() => {
+          Coinbase.apiClients.contractInvocation!.createContractInvocation =
+            mockReturnRejectedValue(
+              new APIError({
+                response: {
+                  status: 400,
+                  data: {
+                    code: "malformed_request",
+                    message: "failed to create contract invocation: invalid abi",
+                  },
+                },
+              } as AxiosError),
+            );
+        });
+
+        it("throws an error", async () => {
+          await expect(
+            walletAddress.invokeContract({
+              abi: { invalid_abi: "abi" },
+              args: MINT_NFT_ARGS,
+              method: VALID_CONTRACT_INVOCATION_MODEL.method,
+              contractAddress: VALID_CONTRACT_INVOCATION_MODEL.contract_address,
+            }),
+          ).rejects.toThrow(APIError);
+        });
+      });
+
+      describe("when it fails to broadcast a contract invocation", () => {
+        beforeEach(() => {
+          Coinbase.apiClients.contractInvocation!.createContractInvocation = mockReturnValue({
+            ...VALID_CONTRACT_INVOCATION_MODEL,
+            address_id: walletAddress.getId(),
+            wallet_id: walletAddress.getWalletId(),
+          });
+
+          Coinbase.apiClients.contractInvocation!.broadcastContractInvocation =
+            mockReturnRejectedValue(
+              new APIError({
+                response: {
+                  status: 400,
+                  data: {
+                    code: "invalid_signed_payload",
+                    message: "failed to broadcast contract invocation: invalid signed payload",
+                  },
+                },
+              } as AxiosError),
+            );
+        });
+
+        it("throws an error", async () => {
+          await expect(
+            walletAddress.invokeContract({
+              abi: MINT_NFT_ABI,
+              args: MINT_NFT_ARGS,
+              method: VALID_CONTRACT_INVOCATION_MODEL.method,
+              contractAddress: VALID_CONTRACT_INVOCATION_MODEL.contract_address,
+            }),
+          ).rejects.toThrow(APIError);
+        });
+      });
+    });
+
+    describe("when using a server-signer", () => {
+      let contractInvocation;
+
+      beforeEach(async () => {
+        Coinbase.useServerSigner = true;
+
+        walletAddress = new WalletAddress(addressModel);
+      });
+
+      describe("when it is successful", () => {
+        beforeEach(async () => {
+          Coinbase.apiClients.contractInvocation!.createContractInvocation = mockReturnValue({
+            ...VALID_CONTRACT_INVOCATION_MODEL,
+            address_id: walletAddress.getId(),
+            wallet_id: walletAddress.getWalletId(),
+          });
+
+          contractInvocation = await walletAddress.invokeContract({
+            abi: MINT_NFT_ABI,
+            args: MINT_NFT_ARGS,
+            method: VALID_CONTRACT_INVOCATION_MODEL.method,
+            contractAddress: VALID_CONTRACT_INVOCATION_MODEL.contract_address,
+          });
+        });
+
+        it("returns a pending contract invocation", async () => {
+          expect(contractInvocation).toBeInstanceOf(ContractInvocation);
+          expect(contractInvocation.getId()).toBe(
+            VALID_CONTRACT_INVOCATION_MODEL.contract_invocation_id,
+          );
+          expect(contractInvocation.getStatus()).toBe(TransactionStatus.PENDING);
+        });
+
+        it("creates a contract invocation", async () => {
+          expect(
+            Coinbase.apiClients.contractInvocation!.createContractInvocation,
+          ).toHaveBeenCalledWith(walletAddress.getWalletId(), walletAddress.getId(), {
+            abi: VALID_CONTRACT_INVOCATION_MODEL.abi,
+            args: VALID_CONTRACT_INVOCATION_MODEL.args,
+            method: VALID_CONTRACT_INVOCATION_MODEL.method,
+            contract_address: VALID_CONTRACT_INVOCATION_MODEL.contract_address,
+          });
+          expect(
+            Coinbase.apiClients.contractInvocation!.createContractInvocation,
+          ).toHaveBeenCalledTimes(1);
+        });
+      });
+
+      describe("when creating a contract invocation fails", () => {
+        beforeEach(() => {
+          Coinbase.apiClients.contractInvocation!.createContractInvocation =
+            mockReturnRejectedValue(
+              new APIError({
+                response: {
+                  status: 400,
+                  data: {
+                    code: "malformed_request",
+                    message: "failed to create contract invocation: invalid abi",
+                  },
+                },
+              } as AxiosError),
+            );
+        });
+
+        it("throws an error", async () => {
+          await expect(
+            walletAddress.invokeContract({
+              abi: { invalid_abi: "abi" },
+              args: MINT_NFT_ARGS,
+              method: VALID_CONTRACT_INVOCATION_MODEL.method,
+              contractAddress: VALID_CONTRACT_INVOCATION_MODEL.contract_address,
+            }),
+          ).rejects.toThrow(APIError);
+        });
+      });
+    });
+  });
+
   describe("#createPayloadSignature", () => {
     let key = ethers.Wallet.createRandom();
     let addressModel: AddressModel;
@@ -1147,7 +1402,7 @@ describe("WalletAddress", () => {
         expect(payloadSignature).toBeInstanceOf(PayloadSignature);
       });
 
-      it("shoud throw an error when no key is loaded", async () => {
+      it("should throw an error when no key is loaded", async () => {
         walletAddress = new WalletAddress(addressModel);
 
         expect(async () => {

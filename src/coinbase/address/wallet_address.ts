@@ -7,10 +7,12 @@ import { Coinbase } from "../coinbase";
 import { ArgumentError } from "../errors";
 import { Trade } from "../trade";
 import { Transfer } from "../transfer";
+import { ContractInvocation } from "../contract_invocation";
 import {
   Amount,
   CreateTransferOptions,
   CreateTradeOptions,
+  CreateContractInvocationOptions,
   Destination,
   StakeOptionsMode,
 } from "../types";
@@ -262,6 +264,66 @@ export class WalletAddress extends Address {
     await trade.broadcast();
 
     return trade;
+  }
+
+  /**
+   * Invokes a contract with the given data.
+   *
+   * @param options - The options to invoke the contract
+   * @param options.contractAddress - The address of the contract the method will be invoked on.
+   * @param options.method - The method to invoke on the contract.
+   * @param options.abi - The ABI of the contract.
+   * @param options.args - The arguments to pass to the contract method invocation.
+   *   The keys should be the argument names and the values should be the argument values.
+   * @returns The ContractInvocation object.
+   * @throws {APIError} if the API request to create a contract invocation fails.
+   */
+  public async invokeContract(
+    options: CreateContractInvocationOptions,
+  ): Promise<ContractInvocation> {
+    if (!Coinbase.useServerSigner && !this.key) {
+      throw new Error("Cannot invoke contract from address without private key loaded");
+    }
+
+    const contractInvocation = await this.createContractInvocation(options);
+
+    if (Coinbase.useServerSigner) {
+      return contractInvocation;
+    }
+
+    await contractInvocation.sign(this.getSigner());
+    await contractInvocation.broadcast();
+
+    return contractInvocation;
+  }
+
+  /**
+   * Creates a contract invocation model for the specified contract address, method, and arguments.
+   * The ABI object must be specified if the contract is not a known contract.
+   *
+   * @param amount - The amount of the Asset to send.
+   * @param fromAsset - The Asset to trade from.
+   * @param toAsset - The Asset to trade to.
+   * @returns A promise that resolves to a Trade object representing the new trade.
+   */
+  private async createContractInvocation({
+    abi,
+    args,
+    contractAddress,
+    method,
+  }: CreateContractInvocationOptions): Promise<ContractInvocation> {
+    const resp = await Coinbase.apiClients.contractInvocation!.createContractInvocation(
+      this.getWalletId(),
+      this.getId(),
+      {
+        method,
+        abi: JSON.stringify(abi),
+        contract_address: contractAddress,
+        args: JSON.stringify(args),
+      },
+    );
+
+    return ContractInvocation.fromModel(resp?.data);
   }
 
   /**

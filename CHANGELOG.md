@@ -6,6 +6,7 @@
 
 - Add support for list address transactions.
 - Add support for exporting the private key of a `WalletAddress`
+- Add support for invoking Smart Contracts using MPC and Developer-managed Wallets.
 
 ## [0.2.0]
 

@@ -165,13 +165,15 @@ describe("Webhook", () => {
     });
 
     it("should throw an error if creation fails", async () => {
-      Coinbase.apiClients.webhook!.createWebhook = jest.fn().mockRejectedValue(new Error("Failed to create webhook"));
+      Coinbase.apiClients.webhook!.createWebhook = jest
+        .fn()
+        .mockRejectedValue(new Error("Failed to create webhook"));
       await expect(
         Webhook.create({
           networkId: "test-network",
           notificationUri: "https://example.com/callback",
           eventType: "erc20_transfer",
-        })
+        }),
       ).rejects.toThrow("Failed to create webhook");
     });
   });

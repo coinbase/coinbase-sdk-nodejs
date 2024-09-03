@@ -506,7 +506,7 @@ describe("Wallet Class", () => {
   });
 
   describe(".createTransfer", () => {
-    let weiAmount, destination, intervalSeconds, timeoutSeconds;
+    let weiAmount, destination;
     let balanceModel: BalanceModel;
 
     beforeEach(() => {
@@ -514,8 +514,6 @@ describe("Wallet Class", () => {
       const key = ethers.Wallet.createRandom();
       weiAmount = new Decimal("5");
       destination = new WalletAddress(VALID_ADDRESS_MODEL, key as unknown as ethers.Wallet);
-      intervalSeconds = 0.2;
-      timeoutSeconds = 10;
       Coinbase.apiClients.externalAddress = externalAddressApiMock;
       Coinbase.apiClients.asset = assetsApiMock;
       Coinbase.apiClients.asset!.getAsset = getAssetMock();
@@ -568,8 +566,6 @@ describe("Wallet Class", () => {
           amount: weiAmount,
           assetId: Coinbase.assets.Wei,
           destination,
-          timeoutSeconds,
-          intervalSeconds,
         }),
       ).rejects.toThrow(APIError);
     });
@@ -584,8 +580,6 @@ describe("Wallet Class", () => {
           amount: weiAmount,
           assetId: Coinbase.assets.Wei,
           destination,
-          timeoutSeconds,
-          intervalSeconds,
         }),
       ).rejects.toThrow(APIError);
     });
@@ -597,8 +591,6 @@ describe("Wallet Class", () => {
           amount: insufficientAmount,
           assetId: Coinbase.assets.Wei,
           destination,
-          timeoutSeconds,
-          intervalSeconds,
         }),
       ).rejects.toThrow(ArgumentError);
     });
@@ -611,8 +603,6 @@ describe("Wallet Class", () => {
         amount: weiAmount,
         assetId: Coinbase.assets.Wei,
         destination,
-        timeoutSeconds,
-        intervalSeconds,
       });
 
       expect(Coinbase.apiClients.transfer!.createTransfer).toHaveBeenCalledTimes(1);

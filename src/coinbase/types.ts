@@ -45,6 +45,10 @@ import {
   WebhookEventType,
   WebhookEventFilter,
   AddressTransactionList,
+  BroadcastContractInvocationRequest,
+  CreateContractInvocationRequest,
+  ContractInvocationList,
+  ContractInvocation as ContractInvocationModel,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -754,6 +758,7 @@ export type ApiClients = {
   externalAddress?: ExternalAddressAPIClient;
   webhook?: WebhookApiClient;
   smartContract?: ExternalSmartContractAPIClient;
+  contractInvocation?: ContractInvocationAPIClient;
 };
 
 /**
@@ -948,8 +953,6 @@ export type CreateTransferOptions = {
   amount: Amount;
   assetId: string;
   destination: Destination;
-  timeoutSeconds?: number;
-  intervalSeconds?: number;
   gasless?: boolean;
 };
 
@@ -960,8 +963,16 @@ export type CreateTradeOptions = {
   amount: Amount;
   fromAssetId: string;
   toAssetId: string;
-  timeoutSeconds?: number;
-  intervalSeconds?: number;
+};
+
+/**
+ * Options for creating a Contract Invocation.
+ */
+export type CreateContractInvocationOptions = {
+  contractAddress: string;
+  abi?: object;
+  method: string;
+  args: object;
 };
 
 /**
@@ -1106,4 +1117,81 @@ export type CreateWebhookOptions = {
   eventType: WebhookEventType;
   eventFilters?: Array<WebhookEventFilter>;
   signatureHeader?: string;
+};
+
+/**
+ * ContractInvocationAPI client type definition.
+ */
+export type ContractInvocationAPIClient = {
+  /**
+   * Broadcasts a contract invocation.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address the contract invocation belongs to.
+   * @param contractInvocationId - The ID of the contract invocation to broadcast.
+   * @param broadcastContractInvocationRequest - The request body.
+   * @param options - Axios request options.
+   * @returns - A promise resolving to the ContractInvocation model.
+   * @throws {APIError} If the request fails.
+   */
+  broadcastContractInvocation(
+    walletId: string,
+    addressId: string,
+    contractInvocationId: string,
+    broadcastContractInvocationRequest: BroadcastContractInvocationRequest,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<ContractInvocationModel>;
+
+  /**
+   * Creates a Contract Invocation.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address the contract invocation belongs to.
+   * @param createContractInvocationRequest - The request body.
+   * @param options - Axios request options.
+   * @returns - A promise resolving to the ContractInvocation model.
+   * @throws {APIError} If the request fails.
+   */
+  createContractInvocation(
+    walletId: string,
+    addressId: string,
+    createContractInvocationRequest: CreateContractInvocationRequest,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<ContractInvocationModel>;
+
+  /**
+   * Retrieves a Contract Invocation.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address the contract invocation belongs to.
+   * @param contractInvocationId - The ID of the contract invocation to retrieve.
+   * @param options - Axios request options.
+   * @returns - A promise resolving to the ContractInvocation model.
+   * @throws {APIError} If the request fails.
+   */
+  getContractInvocation(
+    walletId: string,
+    addressId: string,
+    contractInvocationId: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<ContractInvocationModel>;
+
+  /**
+   * Lists Contract Invocations.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address the contract invocations belong to.
+   * @param limit - The maximum number of contract invocations to return.
+   * @param page - The cursor for pagination across multiple pages of contract invocations.
+   * @param options - Axios request options.
+   * @returns - A promise resolving to the ContractInvocation list.
+   * @throws {APIError} If the request fails.
+   */
+  listContractInvocations(
+    walletId: string,
+    addressId: string,
+    limit?: number,
+    page?: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<ContractInvocationList>;
 };

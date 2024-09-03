@@ -476,11 +476,11 @@ export interface ContractInvocation {
      */
     'method': string;
     /**
-     * The arguments to be passed to the contract method.
-     * @type {Array<string>}
+     * The JSON-encoded arguments to pass to the contract method. The keys should be the argument names and the values should be the argument values.
+     * @type {string}
      * @memberof ContractInvocation
      */
-    'args': Array<string>;
+    'args': string;
     /**
      * The JSON-encoded ABI of the contract.
      * @type {string}
@@ -569,11 +569,11 @@ export interface CreateContractInvocationRequest {
      */
     'method': string;
     /**
-     * The arguments to pass to the contract method.
-     * @type {Array<string>}
+     * The JSON-encoded arguments to pass to the contract method. The keys should be the argument names and the values should be the argument values.
+     * @type {string}
      * @memberof CreateContractInvocationRequest
      */
-    'args': Array<string>;
+    'args': string;
     /**
      * The JSON-encoded ABI of the contract.
      * @type {string}
@@ -1506,7 +1506,7 @@ export interface PayloadSignatureList {
      */
     'next_page': string;
     /**
-     * The total number of addresses for the wallet.
+     * The total number of payload signatures for the address.
      * @type {number}
      * @memberof PayloadSignatureList
      */
