@@ -20,5 +20,3 @@ export * from "./coinbase/staking_balance";
 export * from "./coinbase/validator";
 export * from "./coinbase/webhook";
 export * from "./coinbase/smart_contract";
-export * from "./coinbase/payload_signature";
-export * from "./coinbase/hash";

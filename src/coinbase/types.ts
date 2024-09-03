@@ -39,9 +39,6 @@ import {
   CreateWebhookRequest,
   UpdateWebhookRequest,
   ContractEventList,
-  CreatePayloadSignatureRequest,
-  PayloadSignature as PayloadSignatureModel,
-  PayloadSignatureList,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -308,56 +305,6 @@ export type AddressAPIClient = {
     createAddressRequest?: CreateAddressRequest,
     options?: AxiosRequestConfig,
   ): AxiosPromise<AddressModel>;
-
-  /**
-   * Create a new payload signature with an address.
-   *
-   * @param walletId - The ID of the wallet the address belongs to.
-   * @param addressId - The onchain address of the address to sign the payload with.
-   * @param CreatePayloadSignatureRequest - The payload signature creation request.
-   * @param options - Axios request options.
-   * @throws {APIError} If the request fails.
-   */
-  createPayloadSignature(
-    walletId: string,
-    addressid: string,
-    createPayloadSignatureRequest?: CreatePayloadSignatureRequest,
-    options?: AxiosRequestConfig,
-  ): AxiosPromise<PayloadSignatureModel>;
-
-  /**
-   * Get payload signature by the specified payload signature ID.
-   *
-   * @param walletId - The ID of the wallet the address belongs to.
-   * @param addressId - The onchain address of the address to sign the payload with.
-   * @param payloadSignatureId - The ID of the payload signature to fetch.
-   * @param options - Axios request options.
-   * @throws {APIError} If the request fails.
-   */
-  getPayloadSignature(
-    walletId: string,
-    addressid: string,
-    payloadSignatureId: string,
-    options?: AxiosRequestConfig,
-  ): AxiosPromise<PayloadSignatureModel>;
-
-  /**
-   * List payload signatures for the specified address.
-   *
-   * @param walletId - The ID of the wallet the address belongs to.
-   * @param addressId - The onchain address of the address to sign the payload with.
-   * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
-   * @param options - Axios request options.
-   * @throws {APIError} If the request fails.
-   */
-  listPayloadSignatures(
-    walletId: string,
-    addressid: string,
-    limit?: number,
-    page?: string,
-    options?: AxiosRequestConfig,
-  ): AxiosPromise<PayloadSignatureList>;
 };
 
 /**
@@ -785,15 +732,6 @@ export enum ValidatorStatus {
 }
 
 /**
- * Payload Signature status type definition.
- */
-export enum PayloadSignatureStatus {
-  PENDING = "pending",
-  SIGNED = "signed",
-  FAILED = "failed",
-}
-
-/**
  * The Wallet Data type definition.
  * The data required to recreate a Wallet.
  */
@@ -1012,48 +950,3 @@ export interface WebhookApiClient {
     options?: RawAxiosRequestConfig,
   ): AxiosPromise<WebhookModel>;
 }
-
-/**
- *  The domain for an EIP-712 typed data message payload.
- */
-export type TypedDataDomain = {
-  /**
-   *  The human-readable name of the signing domain.
-   */
-  name?: string;
-
-  /**
-   *  The major version of the signing domain.
-   */
-  version?: string;
-
-  /**
-   *  The chain ID of the signing domain.
-   */
-  chainId?: number;
-
-  /**
-   *  The the address of the contract that will verify the signature.
-   */
-  verifyingContract?: string;
-
-  /**
-   *  A salt used for purposes decided by the specific domain as a data hex string.
-   */
-  salt?: string;
-};
-
-/**
- *  A specific field of a structured EIP-712 type.
- */
-export type TypedDataField = {
-  /**
-   *  The field name.
-   */
-  name: string;
-
-  /**
-   *  The type of the field.
-   */
-  type: string;
-};
