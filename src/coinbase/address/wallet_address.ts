@@ -12,12 +12,13 @@ import {
   CreateTransferOptions,
   CreateTradeOptions,
   Destination,
+  TransferStatus,
+  TransactionStatus,
   StakeOptionsMode,
 } from "../types";
 import { delay } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
 import { StakingOperation } from "../staking_operation";
-import { PayloadSignature } from "../payload_signature";
 
 /**
  * A representation of a blockchain address, which is a wallet-controlled account on a network.
@@ -363,92 +364,6 @@ export class WalletAddress extends Address {
       timeoutSeconds,
       intervalSeconds,
     );
-  }
-
-  /**
-   * Creates a Payload Signature.
-   *
-   * @param unsignedPayload - The Unisgned Payload to sign.
-   * @returns A promise that resolves to the Payload Signature object.
-   * @throws {APIError} if the API request to create a Payload Signature fails.
-   * @throws {Error} if the address does not have a private key loaded or an associated Server-Signer.
-   */
-  public async createPayloadSignature(unsignedPayload: string): Promise<PayloadSignature> {
-    if (!Coinbase.useServerSigner && !this.key) {
-      throw new Error("Cannot sign payload with address without private key loaded");
-    }
-
-    let signature: undefined | string = undefined;
-    if (!Coinbase.useServerSigner) {
-      signature = this.key!.signingKey.sign(unsignedPayload).serialized;
-    }
-
-    const createPayloadSignatureRequest = {
-      unsigned_payload: unsignedPayload,
-      signature,
-    };
-
-    const response = await Coinbase.apiClients.address!.createPayloadSignature(
-      this.getWalletId(),
-      this.getId(),
-      createPayloadSignatureRequest,
-    );
-
-    const payloadSignature = new PayloadSignature(response.data);
-
-    return payloadSignature;
-  }
-
-  /**
-   * Gets a Payload Signature.
-   *
-   * @param payloadSignatureId - The ID of the Payload Signature to fetch.
-   * @returns A promise that resolves to the Payload Signature object.
-   * @throws {APIError} if the API request to get the Payload Signature fails.
-   */
-  public async getPayloadSignature(payloadSignatureId: string): Promise<PayloadSignature> {
-    const response = await Coinbase.apiClients.address!.getPayloadSignature(
-      this.getWalletId(),
-      this.getId(),
-      payloadSignatureId,
-    );
-
-    const payloadSignature = new PayloadSignature(response.data);
-
-    return payloadSignature;
-  }
-
-  /**
-   * Lists all the Payload Signatures associated with the Address.
-   *
-   * @returns A promise that resolves to the list of Payload Signature objects.
-   * @throws {APIError} if the API request to list the Payload Signatures fails.
-   */
-  public async listPayloadSignatures(): Promise<PayloadSignature[]> {
-    const payloadSignatures: PayloadSignature[] = [];
-    const queue: string[] = [""];
-
-    while (queue.length > 0) {
-      const page = queue.shift();
-      const response = await Coinbase.apiClients.address!.listPayloadSignatures(
-        this.model.wallet_id,
-        this.model.address_id,
-        100,
-        page?.length ? page : undefined,
-      );
-
-      response.data.data.forEach(payloadSignatureModel => {
-        payloadSignatures.push(new PayloadSignature(payloadSignatureModel));
-      });
-
-      if (response.data.has_more) {
-        if (response.data.next_page) {
-          queue.push(response.data.next_page);
-        }
-      }
-    }
-
-    return payloadSignatures;
   }
 
   /**
