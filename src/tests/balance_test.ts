@@ -49,27 +49,4 @@ describe("Balance", () => {
       expect(balance.assetId).toBe(Coinbase.assets.Eth);
     });
   });
-
-  describe(".fromModelWithAmountInWholeUnits", () => {
-    const amount = new Decimal(32);
-    const balanceModel: BalanceModel = {
-      asset: {
-        asset_id: Coinbase.assets.Eth,
-        network_id: Coinbase.networks.BaseSepolia,
-        decimals: 18,
-        contract_address: "0x",
-      },
-      amount: "32",
-    };
-
-    const balance = Balance.fromModelWithAmountInWholeUnits(balanceModel);
-
-    it("returns a new Balance object with the correct amount", () => {
-      expect(balance.amount).toEqual(amount);
-    });
-
-    it("returns a new Balance object with the correct asset_id", () => {
-      expect(balance.assetId).toBe(Coinbase.assets.Eth);
-    });
-  });
 });

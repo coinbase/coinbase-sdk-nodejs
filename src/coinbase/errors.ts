@@ -1,7 +1,7 @@
 /**
- * InvalidAPIKeyFormat error is thrown when the API key format is invalid.
+ * InvalidAPIKeyFormatError error is thrown when the API key format is invalid.
  */
-export class InvalidAPIKeyFormat extends Error {
+export class InvalidAPIKeyFormatError extends Error {
   static DEFAULT_MESSAGE = "Invalid API key format";
 
   /**
@@ -9,11 +9,11 @@ export class InvalidAPIKeyFormat extends Error {
    *
    * @param message - The error message.
    */
-  constructor(message: string = InvalidAPIKeyFormat.DEFAULT_MESSAGE) {
+  constructor(message: string = InvalidAPIKeyFormatError.DEFAULT_MESSAGE) {
     super(message);
-    this.name = "InvalidAPIKeyFormat";
+    this.name = "InvalidAPIKeyFormatError";
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, InvalidAPIKeyFormat);
+      Error.captureStackTrace(this, InvalidAPIKeyFormatError);
     }
   }
 }
@@ -57,29 +57,9 @@ export class ArgumentError extends Error {
 }
 
 /**
- * InternalError is thrown when there is an internal error in the SDK.
+ * InvalidConfigurationError error is thrown when apikey/privateKey configuration is invalid.
  */
-export class InternalError extends Error {
-  static DEFAULT_MESSAGE = "Internal Error";
-
-  /**
-   * Initializes a new InternalError instance.
-   *
-   * @param message - The error message.
-   */
-  constructor(message: string = InternalError.DEFAULT_MESSAGE) {
-    super(message);
-    this.name = "InternalError";
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, InternalError);
-    }
-  }
-}
-
-/**
- * InvalidConfiguration error is thrown when apikey/privateKey configuration is invalid.
- */
-export class InvalidConfiguration extends Error {
+export class InvalidConfigurationError extends Error {
   static DEFAULT_MESSAGE = "Invalid configuration";
 
   /**
@@ -87,11 +67,11 @@ export class InvalidConfiguration extends Error {
    *
    * @param message - The error message.
    */
-  constructor(message: string = InvalidConfiguration.DEFAULT_MESSAGE) {
+  constructor(message: string = InvalidConfigurationError.DEFAULT_MESSAGE) {
     super(message);
-    this.name = "InvalidConfiguration";
+    this.name = "InvalidConfigurationError";
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, InvalidConfiguration);
+      Error.captureStackTrace(this, InvalidConfigurationError);
     }
   }
 }
@@ -99,7 +79,7 @@ export class InvalidConfiguration extends Error {
 /**
  * InvalidUnsignedPayload error is thrown when the unsigned payload is invalid.
  */
-export class InvalidUnsignedPayload extends Error {
+export class InvalidUnsignedPayloadError extends Error {
   static DEFAULT_MESSAGE = "Invalid unsigned payload";
 
   /**
@@ -107,11 +87,11 @@ export class InvalidUnsignedPayload extends Error {
    *
    * @param message - The error message.
    */
-  constructor(message: string = InvalidUnsignedPayload.DEFAULT_MESSAGE) {
+  constructor(message: string = InvalidUnsignedPayloadError.DEFAULT_MESSAGE) {
     super(message);
-    this.name = "InvalidUnsignedPayload";
+    this.name = "InvalidUnsignedPayloadError";
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, InvalidUnsignedPayload);
+      Error.captureStackTrace(this, InvalidUnsignedPayloadError);
     }
   }
 }

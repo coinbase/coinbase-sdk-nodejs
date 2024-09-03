@@ -258,6 +258,8 @@ export class Address {
    * @param asset_id - The asset to check the unstakeable balance for.
    * @param mode - The staking mode. Defaults to DEFAULT.
    * @param options - Additional options for getting the unstakeable balance.
+   * A. Dedicated ETH Staking
+   *  - `validator_pub_keys` (optional): List of comma separated validator public keys to retrieve unstakeable balance for. Defaults to all validators.
    * @returns The unstakeable balance.
    */
   public async unstakeableBalance(
@@ -290,14 +292,16 @@ export class Address {
    * Requests faucet funds for the address.
    * Only supported on testnet networks.
    *
+   * @param assetId - The ID of the asset to transfer from the faucet.
    * @returns The faucet transaction object.
-   * @throws {InternalError} If the request does not return a transaction hash.
+   * @throws {Error} If the request does not return a transaction hash.
    * @throws {Error} If the request fails.
    */
-  public async faucet(): Promise<FaucetTransaction> {
+  public async faucet(assetId?: string): Promise<FaucetTransaction> {
     const response = await Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds(
       this.getNetworkId(),
       this.getId(),
+      assetId,
     );
     return new FaucetTransaction(response.data);
   }

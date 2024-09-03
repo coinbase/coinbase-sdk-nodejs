@@ -11,6 +11,9 @@ import {
   Address as AddressModel,
   Transfer as TransferModel,
   StakingOperation as StakingOperationModel,
+  PayloadSignature as PayloadSignatureModel,
+  PayloadSignatureList,
+  PayloadSignatureStatusEnum,
   ValidatorList,
   Validator,
   StakingOperationStatusEnum,
@@ -199,6 +202,32 @@ export const VALID_STAKING_OPERATION_MODEL: StakingOperationModel = {
       status: TransactionStatusEnum.Pending,
     },
   ],
+};
+
+export const VALID_PAYLOAD_SIGNATURE_MODEL: PayloadSignatureModel = {
+  payload_signature_id: "test-payload-signature-id-1",
+  wallet_id: walletId,
+  address_id: ethers.Wallet.createRandom().address,
+  unsigned_payload: "0x58f51af4cb4775cebe5853f0bf1e984927415e889a3d55ae6d243aeec46ffd10",
+  status: PayloadSignatureStatusEnum.Pending,
+};
+
+export const VALID_SIGNED_PAYLOAD_SIGNATURE_MODEL: PayloadSignatureModel = {
+  ...VALID_PAYLOAD_SIGNATURE_MODEL,
+  signature: "0x58f51af4cb4775cebe5853f0bf1e984927415e889a3d55ae6d243aeec46ffd10",
+  status: PayloadSignatureStatusEnum.Signed,
+};
+
+export const VALID_PAYLOAD_SIGNATURE_LIST: PayloadSignatureList = {
+  data: [
+    VALID_PAYLOAD_SIGNATURE_MODEL,
+    { ...VALID_PAYLOAD_SIGNATURE_MODEL, payload_signature_id: "test-payload-signature-id-2" },
+    { ...VALID_PAYLOAD_SIGNATURE_MODEL, payload_signature_id: "test-payload-signature-id-3" },
+    { ...VALID_PAYLOAD_SIGNATURE_MODEL, payload_signature_id: "test-payload-signature-id-4" },
+  ],
+  has_more: false,
+  next_page: "",
+  total_count: 4,
 };
 
 /**
@@ -431,6 +460,9 @@ export const addressesApiMock = {
   getAddressBalance: jest.fn(),
   listAddressBalances: jest.fn(),
   createAddress: jest.fn(),
+  createPayloadSignature: jest.fn(),
+  getPayloadSignature: jest.fn(),
+  listPayloadSignatures: jest.fn(),
 };
 
 export const tradeApiMock = {
@@ -453,6 +485,9 @@ export const stakeApiMock = {
   getStakingContext: jest.fn(),
   fetchStakingRewards: jest.fn(),
   fetchHistoricalStakingBalances: jest.fn(),
+};
+
+export const walletStakeApiMock = {
   broadcastStakingOperation: jest.fn(),
   createStakingOperation: jest.fn(),
   getStakingOperation: jest.fn(),
