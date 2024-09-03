@@ -31,6 +31,7 @@ import { convertStringToHex, delay, formatDate, getWeekBackDate } from "./utils"
 import { StakingOperation } from "./staking_operation";
 import { StakingReward } from "./staking_reward";
 import { StakingBalance } from "./staking_balance";
+import { PayloadSignature } from "./payload_signature";
 
 /**
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
@@ -753,6 +754,22 @@ export class Wallet {
     }
 
     return await this.getDefaultAddress()!.createTransfer(options);
+  }
+
+  /**
+   * Creates a Payload Signature.
+   *
+   * @param unsignedPayload - The Unisgned Payload to sign.
+   * @returns A promise that resolves to the Payload Signature object.
+   * @throws {APIError} if the API request to create a Payload Signature fails.
+   * @throws {Error} if the default address is not found.
+   */
+  public async createPayloadSignature(unsignedPayload: string): Promise<PayloadSignature> {
+    if (!this.getDefaultAddress()) {
+      throw new Error("Default address not found");
+    }
+
+    return await this.getDefaultAddress()!.createPayloadSignature(unsignedPayload);
   }
 
   /**
