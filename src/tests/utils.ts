@@ -503,6 +503,7 @@ export const externalAddressApiMock = {
   getExternalAddressBalance: jest.fn(),
   requestExternalFaucetFunds: jest.fn(),
   listAddressHistoricalBalance: jest.fn(),
+  listAddressTransactions: jest.fn(),
 };
 
 export const serverSignersApiMock = {
