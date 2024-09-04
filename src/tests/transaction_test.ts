@@ -233,6 +233,10 @@ describe("Transaction", () => {
       const transaction = new Transaction(onchainModel);
       expect(transaction.blockHash()).toEqual(blockHash);
     });
+
+    it("return undefined when block hash is undefined", () => {
+      expect(transaction.blockHash()).toBeUndefined;
+    });
   });
 
   describe("#blockHeight", () => {
@@ -240,12 +244,20 @@ describe("Transaction", () => {
       const transaction = new Transaction(onchainModel);
       expect(transaction.blockHeight()).toEqual(blockHeight);
     });
+
+    it("return undefined when block height is undefined", () => {
+      expect(transaction.blockHeight()).toBeUndefined;
+    });
   });
 
   describe("#content", () => {
     it("returns the ethereum transaction", () => {
       const transaction = new Transaction(onchainModel);
       expect(transaction.content()).toEqual(ethereumContent);
+    });
+
+    it("return undefined when content is undefined", () => {
+      expect(transaction.content()).toBeUndefined;
     });
   });
 

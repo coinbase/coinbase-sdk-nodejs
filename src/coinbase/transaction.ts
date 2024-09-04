@@ -91,7 +91,7 @@ export class Transaction {
   /**
    * Returns the Block Height where the Transaction is recorded.
    *
-   * @returns The BlockHeight
+   * @returns The Block Height
    */
   blockHeight(): string | undefined {
     return this.model.block_height;
@@ -100,16 +100,16 @@ export class Transaction {
   /**
    * Returns the Block Hash where the Transaction is recorded.
    *
-   * @returns The BlockHash
+   * @returns The Block Hash
    */
   blockHash(): string | undefined {
     return this.model.block_hash;
   }
 
   /**
-   * Returns the Block Hash where the Transaction is recorded.
+   * Returns the transaction content of the transaction (only have ethereum transaction for now).
    *
-   * @returns The BlockHash
+   * @returns The transaction content
    */
   content(): EthereumTransaction | undefined {
     return this.model.content;

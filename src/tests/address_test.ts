@@ -36,7 +36,7 @@ describe("Address", () => {
     });
   });
 
-  describe(".listTransactions()", () => {
+  describe("#listTransactions()", () => {
     beforeEach(() => {
       const mockTransactionsResponse: AddressTransactionList = {
         data: [
