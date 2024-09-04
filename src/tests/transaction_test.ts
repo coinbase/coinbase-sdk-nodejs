@@ -234,7 +234,7 @@ describe("Transaction", () => {
       expect(transaction.blockHash()).toEqual(blockHash);
     });
 
-    it("return undefined when block hash is undefined", () => {
+    it("returns undefined when block hash is undefined", () => {
       expect(transaction.blockHash()).toBeUndefined;
     });
   });
@@ -245,7 +245,7 @@ describe("Transaction", () => {
       expect(transaction.blockHeight()).toEqual(blockHeight);
     });
 
-    it("return undefined when block height is undefined", () => {
+    it("returns undefined when block height is undefined", () => {
       expect(transaction.blockHeight()).toBeUndefined;
     });
   });
@@ -256,7 +256,7 @@ describe("Transaction", () => {
       expect(transaction.content()).toEqual(ethereumContent);
     });
 
-    it("return undefined when content is undefined", () => {
+    it("returns undefined when content is undefined", () => {
       expect(transaction.content()).toBeUndefined;
     });
   });
