@@ -44,10 +44,12 @@ import {
   PayloadSignatureList,
   WebhookEventType,
   WebhookEventFilter,
+  AddressTransactionList,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
 import { HistoricalBalance } from "./historical_balance";
+import { Transaction } from "./transaction";
 
 export type AssetAPIClient = {
   /**
@@ -418,6 +420,25 @@ export type ExternalAddressAPIClient = {
     page?: string,
     options?: RawAxiosRequestConfig,
   ): AxiosPromise<AddressHistoricalBalanceList>;
+
+  /**
+   * List the transactions of a specific address.
+   *
+   * @summary Get address transactions
+   * @param networkId - The ID of the blockchain network
+   * @param addressId - The ID of the address to fetch transactions for.
+   * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param options - Override http request option.
+   * @throws {RequiredError}
+   */
+  listAddressTransactions(
+    networkId: string,
+    addressId: string,
+    limit?: number,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<AddressTransactionList>;
 
   /**
    * Request faucet funds to be sent to external address.
@@ -950,6 +971,22 @@ export type ListHistoricalBalancesOptions = {
   assetId: string;
   limit?: number;
   page?: string;
+};
+
+/**
+ * Options for listing transactions of an address.
+ */
+export type ListTransactionsOptions = {
+  limit?: number;
+  page?: string;
+};
+
+/**
+ * Result of ListTransactions.
+ */
+export type ListTransactionsResult = {
+  transactions: Transaction[];
+  nextPageToken: string;
 };
 
 /**
