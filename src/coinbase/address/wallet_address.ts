@@ -76,6 +76,13 @@ export class WalletAddress extends Address {
   }
 
   /**
+   * Gets the private key
+   */
+  public getKey() {
+    return this.key;
+  }
+
+  /**
    * Returns whether the Address has a private key backing it to sign transactions.
    *
    * @returns Whether the Address has a private key backing it to sign transactions.
