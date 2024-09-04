@@ -368,7 +368,7 @@ export class WalletAddress extends Address {
   /**
    * Creates a Payload Signature.
    *
-   * @param unsignedPayload - The Unisgned Payload to sign.
+   * @param unsignedPayload - The Unsigned Payload to sign.
    * @returns A promise that resolves to the Payload Signature object.
    * @throws {APIError} if the API request to create a Payload Signature fails.
    * @throws {Error} if the address does not have a private key loaded or an associated Server-Signer.
