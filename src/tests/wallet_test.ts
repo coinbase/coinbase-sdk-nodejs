@@ -44,12 +44,14 @@ import {
   externalAddressApiMock,
   stakeApiMock,
   walletStakeApiMock,
+  VALID_SIGNED_PAYLOAD_SIGNATURE_MODEL,
 } from "./utils";
 import { Trade } from "../coinbase/trade";
 import { WalletAddress } from "../coinbase/address/wallet_address";
 import { StakingOperation } from "../coinbase/staking_operation";
 import { StakingReward } from "../coinbase/staking_reward";
 import { StakingBalance } from "../coinbase/staking_balance";
+import { PayloadSignature } from "../coinbase/payload_signature";
 
 describe("Wallet Class", () => {
   let wallet: Wallet;
@@ -621,6 +623,69 @@ describe("Wallet Class", () => {
 
     afterEach(() => {
       jest.restoreAllMocks();
+    });
+  });
+
+  describe("#createPayloadSignature", () => {
+    let unsignedPayload = VALID_SIGNED_PAYLOAD_SIGNATURE_MODEL.unsigned_payload;
+    let signature =
+      "0xa4e14b28d86dfd7bae739d724ba2ffb13b4458d040930b805eea0a4bc2f5251e7901110677d1ef2ec23ef810c755d0bc72cc6472a4cfb3c53ef242c6ba9fa60a1b";
+
+    beforeAll(() => {
+      Coinbase.apiClients.address = addressesApiMock;
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should successfully create a payload signature", async () => {
+      Coinbase.apiClients.address!.createPayloadSignature = mockReturnValue(
+        VALID_SIGNED_PAYLOAD_SIGNATURE_MODEL,
+      );
+
+      const payloadSignature = await wallet.createPayloadSignature(unsignedPayload);
+
+      expect(Coinbase.apiClients.address!.createPayloadSignature).toHaveBeenCalledWith(
+        wallet.getId(),
+        wallet.getDefaultAddress()!.getId(),
+        {
+          unsigned_payload: unsignedPayload,
+          signature,
+        },
+      );
+      expect(Coinbase.apiClients.address!.createPayloadSignature).toHaveBeenCalledTimes(1);
+      expect(payloadSignature).toBeInstanceOf(PayloadSignature);
+    });
+
+    it("should throw an APIError when the API call to create a payload signature fails", async () => {
+      Coinbase.apiClients.address!.createPayloadSignature = mockReturnRejectedValue(
+        new APIError("Failed to create payload signature"),
+      );
+
+      expect(async () => {
+        await wallet.createPayloadSignature(unsignedPayload);
+      }).rejects.toThrow(Error);
+
+      expect(Coinbase.apiClients.address!.createPayloadSignature).toHaveBeenCalledWith(
+        wallet.getId(),
+        wallet.getDefaultAddress()!.getId(),
+        {
+          unsigned_payload: unsignedPayload,
+          signature,
+        },
+      );
+      expect(Coinbase.apiClients.address!.createPayloadSignature).toHaveBeenCalledTimes(1);
+    });
+
+    it("should throw an Error when the wallet does not have a default address", async () => {
+      const invalidWallet = Wallet.init(walletModel);
+
+      expect(async () => {
+        await invalidWallet.createPayloadSignature(unsignedPayload);
+      }).rejects.toThrow(Error);
+
+      expect(Coinbase.apiClients.address!.createPayloadSignature).not.toHaveBeenCalled();
     });
   });
 

@@ -1,5 +1,6 @@
 import { Webhook as WebhookModel, WebhookEventType, WebhookEventFilter } from "../client/api";
 import { Coinbase } from "./coinbase";
+import { CreateWebhookOptions } from "./types";
 
 /**
  * A representation of a Webhook,
@@ -35,23 +36,28 @@ export class Webhook {
   /**
    * Creates a new webhook for a specified network.
    *
-   * @param networkId - The network ID for which the webhook is created.
-   * @param notificationUri - The URI where notifications should be sent.
-   * @param eventType - The type of event for the webhook.
-   * @param eventFilters - Filters applied to the events that determine which specific events trigger the webhook.
+   * @param options - The options to create webhook.
+   * @param options.networkId - The network ID for which the webhook is created.
+   * @param options.notificationUri - The URI where notifications should be sent.
+   * @param options.eventType - The type of event for the webhook.
+   * @param options.eventFilters - Filters applied to the events that determine which specific events trigger the webhook.
+   * @param options.signatureHeader - The custom header to be used for x-webhook-signature header on callbacks,
+   *   so developers can verify the requests are coming from Coinbase.
    * @returns A promise that resolves to a new instance of Webhook.
    */
-  public static async create(
-    networkId: string,
-    notificationUri: string,
-    eventType: WebhookEventType,
-    eventFilters: Array<WebhookEventFilter>,
-  ): Promise<Webhook> {
+  public static async create({
+    networkId,
+    notificationUri,
+    eventType,
+    eventFilters = [],
+    signatureHeader = "",
+  }: CreateWebhookOptions): Promise<Webhook> {
     const result = await Coinbase.apiClients.webhook!.createWebhook({
       network_id: networkId,
       notification_uri: notificationUri,
       event_type: eventType,
       event_filters: eventFilters,
+      signature_header: signatureHeader,
     });
 
     return new Webhook(result.data);
@@ -135,6 +141,15 @@ export class Webhook {
   }
 
   /**
+   * Returns the signature header of the webhook.
+   *
+   * @returns The signature header which will be set on the callback requests, or undefined if the model is null.
+   */
+  public getSignatureHeader(): string | undefined {
+    return this.model?.signature_header;
+  }
+
+  /**
    * Updates the webhook with a new notification URI.
    *
    * @param notificationUri - The new URI for webhook notifications.
@@ -169,9 +184,9 @@ export class Webhook {
    */
   public toString(): string {
     return (
-      `Webhook { id: '${this.getId()}', network_id: '${this.getNetworkId()}', ` +
-      `event_type: '${this.getEventType()}', event_filter: '${JSON.stringify(this.getEventFilters())} ` +
-      `notification_uri: '${this.getNotificationURI()}' }`
+      `Webhook { id: '${this.getId()}', networkId: '${this.getNetworkId()}', ` +
+      `eventType: '${this.getEventType()}', eventFilter: ${JSON.stringify(this.getEventFilters())}, ` +
+      `notificationUri: '${this.getNotificationURI()}', signatureHeader: '${this.getSignatureHeader()}' }`
     );
   }
 }
