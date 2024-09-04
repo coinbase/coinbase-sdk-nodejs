@@ -107,7 +107,7 @@ export class Transaction {
   }
 
   /**
-   * Returns the transaction content of the transaction (only have ethereum transaction for now).
+   * Returns the Content of the Transaction.
    *
    * @returns The transaction content
    */
