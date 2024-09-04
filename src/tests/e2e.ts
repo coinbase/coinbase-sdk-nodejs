@@ -112,7 +112,7 @@ describe("Coinbase SDK E2E Test", () => {
     console.log("Fetching address historical balances...");
     const balance_result = await unhydratedWallet.getDefaultAddress()?.listHistoricalBalances( {assetId: Coinbase.assets.Eth, limit: 2} );
     expect(balance_result?.historicalBalances.length).toBeGreaterThan(0);
-    console.log(`Fetched historical balances: ${balance_result?.historicalBalances.toString()}`);
+    console.log(`First eth historical balance: ${balance_result?.historicalBalances[0].amount.toString()}`);
 
     const savedSeed = JSON.parse(fs.readFileSync("test_seed.json", "utf-8"));
     fs.unlinkSync("test_seed.json");
