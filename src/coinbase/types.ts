@@ -42,6 +42,8 @@ import {
   CreatePayloadSignatureRequest,
   PayloadSignature as PayloadSignatureModel,
   PayloadSignatureList,
+  WebhookEventType,
+  WebhookEventFilter,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -1056,4 +1058,15 @@ export type TypedDataField = {
    *  The type of the field.
    */
   type: string;
+};
+
+/**
+ * Options for creating a Webhook.
+ */
+export type CreateWebhookOptions = {
+  networkId: string;
+  notificationUri: string;
+  eventType: WebhookEventType;
+  eventFilters?: Array<WebhookEventFilter>;
+  signatureHeader?: string;
 };
