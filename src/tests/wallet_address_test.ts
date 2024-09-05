@@ -1088,6 +1088,21 @@ describe("WalletAddress", () => {
         }).toThrow(Error);
       });
     });
+
+    describe(".export", () => {
+      it("should get the private key if it is set", () => {
+        key = ethers.Wallet.createRandom();
+        const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, key);
+        expect(newAddress.export()).toEqual(key.privateKey);
+      });
+
+      it("should not get the private key if not set", () => {
+        const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, undefined);
+        expect(() => { 
+          newAddress.export();
+        }).toThrow(Error);
+      });
+    });
   });
 
   describe("#createPayloadSignature", () => {
