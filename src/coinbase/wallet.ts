@@ -17,6 +17,7 @@ import { Trade } from "./trade";
 import { Transfer } from "./transfer";
 import {
   Amount,
+  CreateContractInvocationOptions,
   CreateTransferOptions,
   CreateTradeOptions,
   ListHistoricalBalancesOptions,
@@ -32,6 +33,7 @@ import { StakingOperation } from "./staking_operation";
 import { StakingReward } from "./staking_reward";
 import { StakingBalance } from "./staking_balance";
 import { PayloadSignature } from "./payload_signature";
+import { ContractInvocation } from "../coinbase/contract_invocation";
 
 /**
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
@@ -770,6 +772,28 @@ export class Wallet {
     }
 
     return await this.getDefaultAddress()!.createPayloadSignature(unsignedPayload);
+  }
+
+  /**
+   * Invokes a contract with the given data.
+   *
+   * @param options - The options to invoke the contract
+   * @param options.contractAddress - The address of the contract the method will be invoked on.
+   * @param options.method - The method to invoke on the contract.
+   * @param options.abi - The ABI of the contract.
+   * @param options.args - The arguments to pass to the contract method invocation.
+   *   The keys should be the argument names and the values should be the argument values.
+   * @returns The ContractInvocation object.
+   * @throws {APIError} if the API request to create a contract invocation fails.
+   */
+  public async invokeContract(
+    options: CreateContractInvocationOptions,
+  ): Promise<ContractInvocation> {
+    if (!this.getDefaultAddress()) {
+      throw new Error("Default address not found");
+    }
+
+    return await this.getDefaultAddress()!.invokeContract(options);
   }
 
   /**
