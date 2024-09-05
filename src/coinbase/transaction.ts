@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { Transaction as TransactionModel } from "../client/api";
+import { Transaction as TransactionModel, EthereumTransaction } from "../client/api";
 import { TransactionStatus } from "./types";
 import { parseUnsignedPayload } from "./utils";
 
@@ -88,6 +88,32 @@ export class Transaction {
     return this.model.to_address_id;
   }
 
+  /**
+   * Returns the Block Height where the Transaction is recorded.
+   *
+   * @returns The Block Height
+   */
+  blockHeight(): string | undefined {
+    return this.model.block_height;
+  }
+
+  /**
+   * Returns the Block Hash where the Transaction is recorded.
+   *
+   * @returns The Block Hash
+   */
+  blockHash(): string | undefined {
+    return this.model.block_hash;
+  }
+
+  /**
+   * Returns the Content of the Transaction.
+   *
+   * @returns The transaction content
+   */
+  content(): EthereumTransaction | undefined {
+    return this.model.content;
+  }
   /**
    * Returns whether the Transaction is in a terminal State.
    *
