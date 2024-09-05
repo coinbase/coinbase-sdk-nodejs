@@ -5,13 +5,14 @@
 ### Added
 
 - Add support for list address transactions.
+- Add support for exporting the private key of a `WalletAddress`
 
 ## [0.2.0]
 
 ### Added
 
 - USDC Faucet support on Base Sepolia
-- Improved error mesasges for `InternalError`
+- Improved error messages for `InternalError`
 
 ## [0.1.1] - 2024-08-27
 
