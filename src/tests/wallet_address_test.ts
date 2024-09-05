@@ -260,6 +260,38 @@ describe("WalletAddress", () => {
     );
   });
 
+  describe("#setKey", () => {
+    it("should set the key successfully", () => {
+      key = ethers.Wallet.createRandom();
+      const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, undefined);
+      expect(() => {
+        newAddress.setKey(key);
+      }).not.toThrow(Error);
+    });
+    it("should not set the key successfully", () => {
+      key = ethers.Wallet.createRandom();
+      const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, key);
+      expect(() => {
+        newAddress.setKey(key);
+      }).toThrow(Error);
+    });
+  });
+
+  describe("#export", () => {
+    it("should get the private key if it is set", () => {
+      key = ethers.Wallet.createRandom();
+      const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, key);
+      expect(newAddress.export()).toEqual(key.privateKey);
+    });
+
+    it("should not get the private key if not set", () => {
+      const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, undefined);
+      expect(() => { 
+        newAddress.export();
+      }).toThrow(Error);
+    });
+  });
+
   describe("#stakingOperation", () => {
     key = ethers.Wallet.createRandom();
     const newAddress = newAddressModel("", randomUUID(), Coinbase.networks.EthereumHolesky);
@@ -1071,39 +1103,8 @@ describe("WalletAddress", () => {
         ).rejects.toThrow(Error);
       });
     });
-
-    describe("#setKey", () => {
-      it("should set the key successfully", () => {
-        key = ethers.Wallet.createRandom();
-        const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, undefined);
-        expect(() => {
-          newAddress.setKey(key);
-        }).not.toThrow(Error);
-      });
-      it("should not set the key successfully", () => {
-        key = ethers.Wallet.createRandom();
-        const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, key);
-        expect(() => {
-          newAddress.setKey(key);
-        }).toThrow(Error);
-      });
-    });
-
-    describe("#export", () => {
-      it("should get the private key if it is set", () => {
-        key = ethers.Wallet.createRandom();
-        const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, key);
-        expect(newAddress.export()).toEqual(key.privateKey);
-      });
-
-      it("should not get the private key if not set", () => {
-        const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, undefined);
-        expect(() => { 
-          newAddress.export();
-        }).toThrow(Error);
-      });
-    });
   });
+
 
   describe("#createPayloadSignature", () => {
     let key = ethers.Wallet.createRandom();
