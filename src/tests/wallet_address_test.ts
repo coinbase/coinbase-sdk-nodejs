@@ -293,7 +293,7 @@ describe("WalletAddress", () => {
 
     it("should not get the private key if not set", () => {
       const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, undefined);
-      expect(() => { 
+      expect(() => {
         newAddress.export();
       }).toThrow(Error);
     });

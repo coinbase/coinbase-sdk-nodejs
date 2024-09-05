@@ -79,7 +79,7 @@ export class WalletAddress extends Address {
   /**
    * Exports the Address's private key to a hex string.
    *
-   * @returns The Address's private key as a hex string. 
+   * @returns The Address's private key as a hex string.
    */
   public export() {
     if (this.key === undefined) {
