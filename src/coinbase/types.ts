@@ -39,10 +39,21 @@ import {
   CreateWebhookRequest,
   UpdateWebhookRequest,
   ContractEventList,
+  CreatePayloadSignatureRequest,
+  PayloadSignature as PayloadSignatureModel,
+  PayloadSignatureList,
+  WebhookEventType,
+  WebhookEventFilter,
+  AddressTransactionList,
+  BroadcastContractInvocationRequest,
+  CreateContractInvocationRequest,
+  ContractInvocationList,
+  ContractInvocation as ContractInvocationModel,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
 import { HistoricalBalance } from "./historical_balance";
+import { Transaction } from "./transaction";
 
 export type AssetAPIClient = {
   /**
@@ -305,6 +316,56 @@ export type AddressAPIClient = {
     createAddressRequest?: CreateAddressRequest,
     options?: AxiosRequestConfig,
   ): AxiosPromise<AddressModel>;
+
+  /**
+   * Create a new payload signature with an address.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The onchain address of the address to sign the payload with.
+   * @param CreatePayloadSignatureRequest - The payload signature creation request.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+  createPayloadSignature(
+    walletId: string,
+    addressid: string,
+    createPayloadSignatureRequest?: CreatePayloadSignatureRequest,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<PayloadSignatureModel>;
+
+  /**
+   * Get payload signature by the specified payload signature ID.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The onchain address of the address to sign the payload with.
+   * @param payloadSignatureId - The ID of the payload signature to fetch.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+  getPayloadSignature(
+    walletId: string,
+    addressid: string,
+    payloadSignatureId: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<PayloadSignatureModel>;
+
+  /**
+   * List payload signatures for the specified address.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The onchain address of the address to sign the payload with.
+   * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+  listPayloadSignatures(
+    walletId: string,
+    addressid: string,
+    limit?: number,
+    page?: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<PayloadSignatureList>;
 };
 
 /**
@@ -363,6 +424,25 @@ export type ExternalAddressAPIClient = {
     page?: string,
     options?: RawAxiosRequestConfig,
   ): AxiosPromise<AddressHistoricalBalanceList>;
+
+  /**
+   * List the transactions of a specific address.
+   *
+   * @summary Get address transactions
+   * @param networkId - The ID of the blockchain network
+   * @param addressId - The ID of the address to fetch transactions for.
+   * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param options - Override http request option.
+   * @throws {RequiredError}
+   */
+  listAddressTransactions(
+    networkId: string,
+    addressId: string,
+    limit?: number,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<AddressTransactionList>;
 
   /**
    * Request faucet funds to be sent to external address.
@@ -678,6 +758,7 @@ export type ApiClients = {
   externalAddress?: ExternalAddressAPIClient;
   webhook?: WebhookApiClient;
   smartContract?: ExternalSmartContractAPIClient;
+  contractInvocation?: ContractInvocationAPIClient;
 };
 
 /**
@@ -729,6 +810,15 @@ export enum ValidatorStatus {
   ACTIVE_SLASHED = "active_slashed",
   EXITED_SLASHED = "exited_slashed",
   REAPED = "reaped",
+}
+
+/**
+ * Payload Signature status type definition.
+ */
+export enum PayloadSignatureStatus {
+  PENDING = "pending",
+  SIGNED = "signed",
+  FAILED = "failed",
 }
 
 /**
@@ -863,8 +953,6 @@ export type CreateTransferOptions = {
   amount: Amount;
   assetId: string;
   destination: Destination;
-  timeoutSeconds?: number;
-  intervalSeconds?: number;
   gasless?: boolean;
 };
 
@@ -875,8 +963,16 @@ export type CreateTradeOptions = {
   amount: Amount;
   fromAssetId: string;
   toAssetId: string;
-  timeoutSeconds?: number;
-  intervalSeconds?: number;
+};
+
+/**
+ * Options for creating a Contract Invocation.
+ */
+export type CreateContractInvocationOptions = {
+  contractAddress: string;
+  abi?: object;
+  method: string;
+  args: object;
 };
 
 /**
@@ -886,6 +982,22 @@ export type ListHistoricalBalancesOptions = {
   assetId: string;
   limit?: number;
   page?: string;
+};
+
+/**
+ * Options for listing transactions of an address.
+ */
+export type ListTransactionsOptions = {
+  limit?: number;
+  page?: string;
+};
+
+/**
+ * Result of ListTransactions.
+ */
+export type ListTransactionsResult = {
+  transactions: Transaction[];
+  nextPageToken: string;
 };
 
 /**
@@ -950,3 +1062,136 @@ export interface WebhookApiClient {
     options?: RawAxiosRequestConfig,
   ): AxiosPromise<WebhookModel>;
 }
+
+/**
+ *  The domain for an EIP-712 typed data message payload.
+ */
+export type TypedDataDomain = {
+  /**
+   *  The human-readable name of the signing domain.
+   */
+  name?: string;
+
+  /**
+   *  The major version of the signing domain.
+   */
+  version?: string;
+
+  /**
+   *  The chain ID of the signing domain.
+   */
+  chainId?: number;
+
+  /**
+   *  The the address of the contract that will verify the signature.
+   */
+  verifyingContract?: string;
+
+  /**
+   *  A salt used for purposes decided by the specific domain as a data hex string.
+   */
+  salt?: string;
+};
+
+/**
+ *  A specific field of a structured EIP-712 type.
+ */
+export type TypedDataField = {
+  /**
+   *  The field name.
+   */
+  name: string;
+
+  /**
+   *  The type of the field.
+   */
+  type: string;
+};
+
+/**
+ * Options for creating a Webhook.
+ */
+export type CreateWebhookOptions = {
+  networkId: string;
+  notificationUri: string;
+  eventType: WebhookEventType;
+  eventFilters?: Array<WebhookEventFilter>;
+  signatureHeader?: string;
+};
+
+/**
+ * ContractInvocationAPI client type definition.
+ */
+export type ContractInvocationAPIClient = {
+  /**
+   * Broadcasts a contract invocation.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address the contract invocation belongs to.
+   * @param contractInvocationId - The ID of the contract invocation to broadcast.
+   * @param broadcastContractInvocationRequest - The request body.
+   * @param options - Axios request options.
+   * @returns - A promise resolving to the ContractInvocation model.
+   * @throws {APIError} If the request fails.
+   */
+  broadcastContractInvocation(
+    walletId: string,
+    addressId: string,
+    contractInvocationId: string,
+    broadcastContractInvocationRequest: BroadcastContractInvocationRequest,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<ContractInvocationModel>;
+
+  /**
+   * Creates a Contract Invocation.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address the contract invocation belongs to.
+   * @param createContractInvocationRequest - The request body.
+   * @param options - Axios request options.
+   * @returns - A promise resolving to the ContractInvocation model.
+   * @throws {APIError} If the request fails.
+   */
+  createContractInvocation(
+    walletId: string,
+    addressId: string,
+    createContractInvocationRequest: CreateContractInvocationRequest,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<ContractInvocationModel>;
+
+  /**
+   * Retrieves a Contract Invocation.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address the contract invocation belongs to.
+   * @param contractInvocationId - The ID of the contract invocation to retrieve.
+   * @param options - Axios request options.
+   * @returns - A promise resolving to the ContractInvocation model.
+   * @throws {APIError} If the request fails.
+   */
+  getContractInvocation(
+    walletId: string,
+    addressId: string,
+    contractInvocationId: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<ContractInvocationModel>;
+
+  /**
+   * Lists Contract Invocations.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address the contract invocations belong to.
+   * @param limit - The maximum number of contract invocations to return.
+   * @param page - The cursor for pagination across multiple pages of contract invocations.
+   * @param options - Axios request options.
+   * @returns - A promise resolving to the ContractInvocation list.
+   * @throws {APIError} If the request fails.
+   */
+  listContractInvocations(
+    walletId: string,
+    addressId: string,
+    limit?: number,
+    page?: string,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<ContractInvocationList>;
+};

@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { Transaction as TransactionModel } from "../client/api";
+import { Transaction as TransactionModel, EthereumTransaction } from "../client/api";
 import { Transaction } from "./../coinbase/transaction";
 import { TransactionStatus } from "../coinbase/types";
 
@@ -13,6 +13,10 @@ describe("Transaction", () => {
   let model;
   let broadcastedModel;
   let transaction;
+  let ethereumContent;
+  let onchainModel;
+  let blockHash;
+  let blockHeight;
 
   beforeEach(() => {
     fromKey = ethers.Wallet.createRandom();
@@ -34,6 +38,12 @@ describe("Transaction", () => {
 
     transactionHash = "0x6c087c1676e8269dd81e0777244584d0cbfd39b6997b3477242a008fa9349e11";
 
+    blockHash = "0x0728750d458976fd010a2e15cef69ec71c6fccb3377f38a71b70ab551ab22688";
+    blockHeight = "18779006";
+    ethereumContent = {
+      priority_fee_per_gas: 1000,
+    } as EthereumTransaction;
+
     model = {
       status: "pending",
       from_address_id: fromAddressId,
@@ -47,6 +57,15 @@ describe("Transaction", () => {
       signed_payload: signedPayload,
       transaction_hash: transactionHash,
       transaction_link: `https://sepolia.basescan.org/tx/${transactionHash}`,
+    } as TransactionModel;
+
+    onchainModel = {
+      status: "complete",
+      from_address_id: fromAddressId,
+      unsigned_payload: "",
+      block_hash: blockHash,
+      block_height: blockHeight,
+      content: ethereumContent,
     } as TransactionModel;
 
     transaction = new Transaction(model);
@@ -205,6 +224,39 @@ describe("Transaction", () => {
       model.status = TransactionStatus.FAILED;
       const transaction = new Transaction(model);
       expect(transaction.getStatus()).toEqual("failed");
+    });
+  });
+
+  describe("#blockHash", () => {
+    it("returns the block hash", () => {
+      const transaction = new Transaction(onchainModel);
+      expect(transaction.blockHash()).toEqual(blockHash);
+    });
+
+    it("returns undefined when block hash is undefined", () => {
+      expect(transaction.blockHash()).toBeUndefined;
+    });
+  });
+
+  describe("#blockHeight", () => {
+    it("returns the block height", () => {
+      const transaction = new Transaction(onchainModel);
+      expect(transaction.blockHeight()).toEqual(blockHeight);
+    });
+
+    it("returns undefined when block height is undefined", () => {
+      expect(transaction.blockHeight()).toBeUndefined;
+    });
+  });
+
+  describe("#content", () => {
+    it("returns the ethereum transaction", () => {
+      const transaction = new Transaction(onchainModel);
+      expect(transaction.content()).toEqual(ethereumContent);
+    });
+
+    it("returns undefined when content is undefined", () => {
+      expect(transaction.content()).toBeUndefined;
     });
   });
 

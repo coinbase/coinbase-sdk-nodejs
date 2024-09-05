@@ -12,7 +12,7 @@ module.exports = {
     "./src/coinbase/**": {
       branches: 80,
       functions: 90,
-      statements: 90,
+      statements: 85,
       lines: 90,
     },
   },

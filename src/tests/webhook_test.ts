@@ -9,6 +9,7 @@ describe("Webhook", () => {
     notification_uri: "https://example.com/callback",
     event_type: "erc20_transfer",
     event_filters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
+    signature_header: "example_header",
   };
 
   beforeEach(() => {
@@ -33,7 +34,7 @@ describe("Webhook", () => {
     };
   });
 
-  describe("#init", () => {
+  describe(".init", () => {
     it("should throw an error if the model is null", () => {
       expect(() => Webhook.init(null as any)).toThrow("Webhook model cannot be empty");
     });
@@ -44,7 +45,7 @@ describe("Webhook", () => {
     });
   });
 
-  describe(".getId", () => {
+  describe("#getId", () => {
     it("should return the ID of the webhook", () => {
       const webhook = Webhook.init(mockModel);
       expect(webhook.getId()).toBe("test-id");
@@ -60,7 +61,7 @@ describe("Webhook", () => {
     });
   });
 
-  describe(".getNetworkId", () => {
+  describe("#getNetworkId", () => {
     it("should return the network ID of the webhook", () => {
       const webhook = Webhook.init(mockModel);
       expect(webhook.getNetworkId()).toBe("test-network");
@@ -76,7 +77,7 @@ describe("Webhook", () => {
     });
   });
 
-  describe(".getNotificationURI", () => {
+  describe("#getNotificationURI", () => {
     it("should return the notification URI of the webhook", () => {
       const webhook = Webhook.init(mockModel);
       expect(webhook.getNotificationURI()).toBe("https://example.com/callback");
@@ -92,7 +93,7 @@ describe("Webhook", () => {
     });
   });
 
-  describe(".getEventType", () => {
+  describe("#getEventType", () => {
     it("should return the event type of the webhook", () => {
       const webhook = Webhook.init(mockModel);
       expect(webhook.getEventType()).toBe("erc20_transfer");
@@ -108,7 +109,7 @@ describe("Webhook", () => {
     });
   });
 
-  describe(".getEventFilters", () => {
+  describe("#getEventFilters", () => {
     it("should return the event filters of the webhook", () => {
       const webhook = Webhook.init(mockModel);
       expect(webhook.getEventFilters()).toEqual([
@@ -126,27 +127,58 @@ describe("Webhook", () => {
     });
   });
 
-  describe("#create", () => {
+  describe("#getSignatureHeader", () => {
+    it("should return the signature header of the webhook", () => {
+      const webhook = Webhook.init(mockModel);
+      expect(webhook.getSignatureHeader()).toBe("example_header");
+    });
+
+    it("should return undefined if the signature header is not set", () => {
+      const modelWithoutSignatureHeader: WebhookModel = {
+        ...mockModel,
+        signature_header: undefined,
+      };
+      const webhook = Webhook.init(modelWithoutSignatureHeader);
+      expect(webhook.getSignatureHeader()).toBeUndefined();
+    });
+  });
+
+  describe(".create", () => {
     it("should create a new webhook", async () => {
-      const webhook = await Webhook.create(
-        "test-network",
-        "https://example.com/callback",
-        "erc20_transfer",
-        [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
-      );
+      const webhook = await Webhook.create({
+        networkId: "test-network",
+        notificationUri: "https://example.com/callback",
+        eventType: "erc20_transfer",
+        eventFilters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
+        signatureHeader: "example_header",
+      });
 
       expect(Coinbase.apiClients.webhook!.createWebhook).toHaveBeenCalledWith({
         network_id: "test-network",
         notification_uri: "https://example.com/callback",
         event_type: "erc20_transfer",
         event_filters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
+        signature_header: "example_header",
       });
       expect(webhook).toBeInstanceOf(Webhook);
       expect(webhook.getId()).toBe("test-id");
     });
+
+    it("should throw an error if creation fails", async () => {
+      Coinbase.apiClients.webhook!.createWebhook = jest
+        .fn()
+        .mockRejectedValue(new Error("Failed to create webhook"));
+      await expect(
+        Webhook.create({
+          networkId: "test-network",
+          notificationUri: "https://example.com/callback",
+          eventType: "erc20_transfer",
+        }),
+      ).rejects.toThrow("Failed to create webhook");
+    });
   });
 
-  describe("#list", () => {
+  describe(".list", () => {
     it("should list all webhooks", async () => {
       const webhooks = await Webhook.list();
 
@@ -180,7 +212,7 @@ describe("Webhook", () => {
     });
   });
 
-  describe(".update", () => {
+  describe("#update", () => {
     it("should update the webhook notification URI", async () => {
       const webhook = Webhook.init(mockModel);
       await webhook.update("https://new-url.com/callback");
@@ -194,7 +226,7 @@ describe("Webhook", () => {
     });
   });
 
-  describe(".delete", () => {
+  describe("#delete", () => {
     it("should delete the webhook and set the model to null", async () => {
       const webhook = Webhook.init(mockModel);
       await webhook.delete();
@@ -205,12 +237,12 @@ describe("Webhook", () => {
     });
   });
 
-  describe(".toString", () => {
+  describe("#toString", () => {
     it("should return a string representation of the webhook", () => {
       const webhook = Webhook.init(mockModel);
       const stringRepresentation = webhook.toString();
       expect(stringRepresentation).toBe(
-        `Webhook { id: 'test-id', network_id: 'test-network', event_type: 'erc20_transfer', event_filter: '[{"contract_address":"0x...","from_address":"0x...","to_address":"0x..."}] notification_uri: 'https://example.com/callback' }`,
+        `Webhook { id: 'test-id', networkId: 'test-network', eventType: 'erc20_transfer', eventFilter: [{"contract_address":"0x...","from_address":"0x...","to_address":"0x..."}], notificationUri: 'https://example.com/callback', signatureHeader: 'example_header' }`,
       );
     });
   });

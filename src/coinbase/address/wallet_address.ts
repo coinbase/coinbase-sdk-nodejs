@@ -7,18 +7,19 @@ import { Coinbase } from "../coinbase";
 import { ArgumentError } from "../errors";
 import { Trade } from "../trade";
 import { Transfer } from "../transfer";
+import { ContractInvocation } from "../contract_invocation";
 import {
   Amount,
   CreateTransferOptions,
   CreateTradeOptions,
+  CreateContractInvocationOptions,
   Destination,
-  TransferStatus,
-  TransactionStatus,
   StakeOptionsMode,
 } from "../types";
 import { delay } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
 import { StakingOperation } from "../staking_operation";
+import { PayloadSignature } from "../payload_signature";
 
 /**
  * A representation of a blockchain address, which is a wallet-controlled account on a network.
@@ -73,6 +74,19 @@ export class WalletAddress extends Address {
       throw new Error("Private key is already set");
     }
     this.key = key;
+  }
+
+  /**
+   * Exports the Address's private key to a hex string.
+   *
+   * @returns The Address's private key as a hex string.
+   */
+  public export() {
+    if (this.key === undefined) {
+      throw new Error("Private key is not set");
+    }
+
+    return this.key.privateKey;
   }
 
   /**
@@ -253,6 +267,66 @@ export class WalletAddress extends Address {
   }
 
   /**
+   * Invokes a contract with the given data.
+   *
+   * @param options - The options to invoke the contract
+   * @param options.contractAddress - The address of the contract the method will be invoked on.
+   * @param options.method - The method to invoke on the contract.
+   * @param options.abi - The ABI of the contract.
+   * @param options.args - The arguments to pass to the contract method invocation.
+   *   The keys should be the argument names and the values should be the argument values.
+   * @returns The ContractInvocation object.
+   * @throws {APIError} if the API request to create a contract invocation fails.
+   */
+  public async invokeContract(
+    options: CreateContractInvocationOptions,
+  ): Promise<ContractInvocation> {
+    if (!Coinbase.useServerSigner && !this.key) {
+      throw new Error("Cannot invoke contract from address without private key loaded");
+    }
+
+    const contractInvocation = await this.createContractInvocation(options);
+
+    if (Coinbase.useServerSigner) {
+      return contractInvocation;
+    }
+
+    await contractInvocation.sign(this.getSigner());
+    await contractInvocation.broadcast();
+
+    return contractInvocation;
+  }
+
+  /**
+   * Creates a contract invocation model for the specified contract address, method, and arguments.
+   * The ABI object must be specified if the contract is not a known contract.
+   *
+   * @param amount - The amount of the Asset to send.
+   * @param fromAsset - The Asset to trade from.
+   * @param toAsset - The Asset to trade to.
+   * @returns A promise that resolves to a Trade object representing the new trade.
+   */
+  private async createContractInvocation({
+    abi,
+    args,
+    contractAddress,
+    method,
+  }: CreateContractInvocationOptions): Promise<ContractInvocation> {
+    const resp = await Coinbase.apiClients.contractInvocation!.createContractInvocation(
+      this.getWalletId(),
+      this.getId(),
+      {
+        method,
+        abi: JSON.stringify(abi),
+        contract_address: contractAddress,
+        args: JSON.stringify(args),
+      },
+    );
+
+    return ContractInvocation.fromModel(resp?.data);
+  }
+
+  /**
    * Creates a staking operation to stake.
    *
    * @param amount - The amount to stake.
@@ -364,6 +438,92 @@ export class WalletAddress extends Address {
       timeoutSeconds,
       intervalSeconds,
     );
+  }
+
+  /**
+   * Creates a Payload Signature.
+   *
+   * @param unsignedPayload - The Unsigned Payload to sign.
+   * @returns A promise that resolves to the Payload Signature object.
+   * @throws {APIError} if the API request to create a Payload Signature fails.
+   * @throws {Error} if the address does not have a private key loaded or an associated Server-Signer.
+   */
+  public async createPayloadSignature(unsignedPayload: string): Promise<PayloadSignature> {
+    if (!Coinbase.useServerSigner && !this.key) {
+      throw new Error("Cannot sign payload with address without private key loaded");
+    }
+
+    let signature: undefined | string = undefined;
+    if (!Coinbase.useServerSigner) {
+      signature = this.key!.signingKey.sign(unsignedPayload).serialized;
+    }
+
+    const createPayloadSignatureRequest = {
+      unsigned_payload: unsignedPayload,
+      signature,
+    };
+
+    const response = await Coinbase.apiClients.address!.createPayloadSignature(
+      this.getWalletId(),
+      this.getId(),
+      createPayloadSignatureRequest,
+    );
+
+    const payloadSignature = new PayloadSignature(response.data);
+
+    return payloadSignature;
+  }
+
+  /**
+   * Gets a Payload Signature.
+   *
+   * @param payloadSignatureId - The ID of the Payload Signature to fetch.
+   * @returns A promise that resolves to the Payload Signature object.
+   * @throws {APIError} if the API request to get the Payload Signature fails.
+   */
+  public async getPayloadSignature(payloadSignatureId: string): Promise<PayloadSignature> {
+    const response = await Coinbase.apiClients.address!.getPayloadSignature(
+      this.getWalletId(),
+      this.getId(),
+      payloadSignatureId,
+    );
+
+    const payloadSignature = new PayloadSignature(response.data);
+
+    return payloadSignature;
+  }
+
+  /**
+   * Lists all the Payload Signatures associated with the Address.
+   *
+   * @returns A promise that resolves to the list of Payload Signature objects.
+   * @throws {APIError} if the API request to list the Payload Signatures fails.
+   */
+  public async listPayloadSignatures(): Promise<PayloadSignature[]> {
+    const payloadSignatures: PayloadSignature[] = [];
+    const queue: string[] = [""];
+
+    while (queue.length > 0) {
+      const page = queue.shift();
+      const response = await Coinbase.apiClients.address!.listPayloadSignatures(
+        this.model.wallet_id,
+        this.model.address_id,
+        100,
+        page?.length ? page : undefined,
+      );
+
+      response.data.data.forEach(payloadSignatureModel => {
+        payloadSignatures.push(new PayloadSignature(payloadSignatureModel));
+      });
+
+      if (response.data.has_more) {
+        if (response.data.next_page) {
+          queue.push(response.data.next_page);
+        }
+      }
+    }
+
+    return payloadSignatures;
   }
 
   /**

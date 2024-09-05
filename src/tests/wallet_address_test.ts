@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as crypto from "crypto";
+import { AxiosError } from "axios";
 import { randomUUID } from "crypto";
 import { ethers } from "ethers";
 import { FaucetTransaction } from "../coinbase/faucet_transaction";
 import {
+  Address as AddressModel,
   Balance as BalanceModel,
   FetchStakingRewards200Response,
   FetchHistoricalStakingBalances200Response,
   StakingContext as StakingContextModel,
   StakingOperation as StakingOperationModel,
   StakingOperationStatusEnum,
-  TransactionStatusEnum,
   StakingRewardFormat,
   StakingRewardStateEnum,
   Trade as TradeModel,
@@ -24,6 +25,7 @@ import {
   addressesApiMock,
   assetsApiMock,
   externalAddressApiMock,
+  contractInvocationApiMock,
   generateRandomHash,
   getAssetMock,
   mockFn,
@@ -38,10 +40,16 @@ import {
   VALID_ADDRESS_MODEL,
   VALID_TRANSFER_MODEL,
   VALID_WALLET_MODEL,
+  VALID_PAYLOAD_SIGNATURE_MODEL,
+  VALID_PAYLOAD_SIGNATURE_LIST,
+  VALID_CONTRACT_INVOCATION_MODEL,
+  VALID_SIGNED_CONTRACT_INVOCATION_MODEL,
+  MINT_NFT_ABI,
+  MINT_NFT_ARGS,
   walletsApiMock,
 } from "./utils";
 import { Transfer } from "../coinbase/transfer";
-import { StakeOptionsMode, TransactionStatus, TransferStatus } from "../coinbase/types";
+import { TransactionStatus } from "../coinbase/types";
 import { Trade } from "../coinbase/trade";
 import { Transaction } from "../coinbase/transaction";
 import { WalletAddress } from "../coinbase/address/wallet_address";
@@ -49,6 +57,8 @@ import { Wallet } from "../coinbase/wallet";
 import { StakingOperation } from "../coinbase/staking_operation";
 import { StakingReward } from "../coinbase/staking_reward";
 import { StakingBalance } from "../coinbase/staking_balance";
+import { PayloadSignature } from "../coinbase/payload_signature";
+import { ContractInvocation } from "../coinbase/contract_invocation";
 
 // Test suite for the WalletAddress class
 describe("WalletAddress", () => {
@@ -60,7 +70,6 @@ describe("WalletAddress", () => {
   beforeEach(() => {
     Coinbase.apiClients.externalAddress = externalAddressApiMock;
     Coinbase.apiClients.asset = assetsApiMock;
-    Coinbase.apiClients.externalAddress = externalAddressApiMock;
     Coinbase.apiClients.asset.getAsset = getAssetMock();
     Coinbase.apiClients.externalAddress.getExternalAddressBalance = mockFn(request => {
       const [, , asset_id] = request;
@@ -258,6 +267,38 @@ describe("WalletAddress", () => {
     );
   });
 
+  describe("#setKey", () => {
+    it("should set the key successfully", () => {
+      key = ethers.Wallet.createRandom();
+      const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, undefined);
+      expect(() => {
+        newAddress.setKey(key);
+      }).not.toThrow(Error);
+    });
+    it("should not set the key successfully", () => {
+      key = ethers.Wallet.createRandom();
+      const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, key);
+      expect(() => {
+        newAddress.setKey(key);
+      }).toThrow(Error);
+    });
+  });
+
+  describe("#export", () => {
+    it("should get the private key if it is set", () => {
+      key = ethers.Wallet.createRandom();
+      const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, key);
+      expect(newAddress.export()).toEqual(key.privateKey);
+    });
+
+    it("should not get the private key if not set", () => {
+      const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, undefined);
+      expect(() => {
+        newAddress.export();
+      }).toThrow(Error);
+    });
+  });
+
   describe("#stakingOperation", () => {
     key = ethers.Wallet.createRandom();
     const newAddress = newAddressModel("", randomUUID(), Coinbase.networks.EthereumHolesky);
@@ -424,7 +465,7 @@ describe("WalletAddress", () => {
       STAKING_OPERATION_MODEL.wallet_id = newAddress.wallet_id;
     });
 
-    describe(".createStake", () => {
+    describe("#createStake", () => {
       it("should create a staking operation from the address", async () => {
         Coinbase.apiClients.asset!.getAsset = getAssetMock();
         Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
@@ -485,7 +526,7 @@ describe("WalletAddress", () => {
       });
     });
 
-    describe(".createUnstake", () => {
+    describe("#createUnstake", () => {
       it("should create a staking operation from the address", async () => {
         Coinbase.apiClients.asset!.getAsset = getAssetMock();
         Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
@@ -503,7 +544,7 @@ describe("WalletAddress", () => {
       });
     });
 
-    describe(".createClaimStake", () => {
+    describe("#createClaimStake", () => {
       it("should create a staking operation from the address", async () => {
         Coinbase.apiClients.asset!.getAsset = getAssetMock();
         Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
@@ -521,7 +562,7 @@ describe("WalletAddress", () => {
       });
     });
 
-    describe(".stakeableBalance", () => {
+    describe("#stakeableBalance", () => {
       it("should return the stakeable balance successfully with default params", async () => {
         Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
         const stakeableBalance = await walletAddress.stakeableBalance(Coinbase.assets.Eth);
@@ -529,7 +570,7 @@ describe("WalletAddress", () => {
       });
     });
 
-    describe(".unstakeableBalance", () => {
+    describe("#unstakeableBalance", () => {
       it("should return the unstakeableBalance balance successfully with default params", async () => {
         Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
         const stakeableBalance = await walletAddress.unstakeableBalance(Coinbase.assets.Eth);
@@ -537,7 +578,7 @@ describe("WalletAddress", () => {
       });
     });
 
-    describe(".claimableBalance", () => {
+    describe("#claimableBalance", () => {
       it("should return the claimableBalance balance successfully with default params", async () => {
         Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
         const stakeableBalance = await walletAddress.claimableBalance(Coinbase.assets.Eth);
@@ -545,7 +586,7 @@ describe("WalletAddress", () => {
       });
     });
 
-    describe(".stakingRewards", () => {
+    describe("#stakingRewards", () => {
       it("should successfully return staking rewards", async () => {
         Coinbase.apiClients.stake!.fetchStakingRewards = mockReturnValue(STAKING_REWARD_RESPONSE);
         Coinbase.apiClients.asset!.getAsset = getAssetMock();
@@ -554,7 +595,7 @@ describe("WalletAddress", () => {
       });
     });
 
-    describe(".historicalStakingBalances", () => {
+    describe("#historicalStakingBalances", () => {
       it("should successfully return historical staking balances", async () => {
         Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockReturnValue(
           HISTORICAL_STAKING_BALANCES_RESPONSE,
@@ -736,7 +777,7 @@ describe("WalletAddress", () => {
     });
   });
 
-  describe("#getTransfers", () => {
+  describe("#listTransfers", () => {
     beforeEach(() => {
       jest.clearAllMocks();
       const pages = ["abc", "def"];
@@ -1069,22 +1110,461 @@ describe("WalletAddress", () => {
         ).rejects.toThrow(Error);
       });
     });
+  });
 
-    describe(".setKey", () => {
-      it("should set the key successfully", () => {
-        key = ethers.Wallet.createRandom();
-        const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, undefined);
-        expect(() => {
-          newAddress.setKey(key);
-        }).not.toThrow(Error);
+  describe("#invokeContract", () => {
+    let key = ethers.Wallet.createRandom();
+    let addressModel: AddressModel;
+    let walletAddress: WalletAddress;
+    let unsignedPayload = VALID_CONTRACT_INVOCATION_MODEL.transaction.unsigned_payload;
+    let expectedSignedPayload: string;
+
+    beforeAll(() => {
+      Coinbase.apiClients.contractInvocation = contractInvocationApiMock;
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      addressModel = newAddressModel(randomUUID(), randomUUID(), Coinbase.networks.BaseSepolia);
+    });
+
+    describe("when not using a server-signer", () => {
+      beforeEach(async () => {
+        Coinbase.useServerSigner = false;
+
+        walletAddress = new WalletAddress(addressModel, key as unknown as ethers.Wallet);
+
+        const tx = new Transaction(VALID_CONTRACT_INVOCATION_MODEL.transaction);
+        expectedSignedPayload = await tx.sign(key as unknown as ethers.Wallet);
       });
-      it("should not set the key successfully", () => {
-        key = ethers.Wallet.createRandom();
-        const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, key);
-        expect(() => {
-          newAddress.setKey(key);
-        }).toThrow(Error);
+
+      describe("when it is successful", () => {
+        let contractInvocation;
+
+        beforeEach(async () => {
+          Coinbase.apiClients.contractInvocation!.createContractInvocation = mockReturnValue({
+            ...VALID_CONTRACT_INVOCATION_MODEL,
+            address_id: walletAddress.getId(),
+            wallet_id: walletAddress.getWalletId(),
+          });
+
+          Coinbase.apiClients.contractInvocation!.broadcastContractInvocation = mockReturnValue({
+            ...VALID_SIGNED_CONTRACT_INVOCATION_MODEL,
+            address_id: walletAddress.getId(),
+            wallet_id: walletAddress.getWalletId(),
+          });
+
+          contractInvocation = await walletAddress.invokeContract({
+            abi: MINT_NFT_ABI,
+            args: MINT_NFT_ARGS,
+            method: VALID_CONTRACT_INVOCATION_MODEL.method,
+            contractAddress: VALID_CONTRACT_INVOCATION_MODEL.contract_address,
+          });
+        });
+
+        it("returns a contract invocation", async () => {
+          expect(contractInvocation).toBeInstanceOf(ContractInvocation);
+          expect(contractInvocation.getId()).toBe(
+            VALID_CONTRACT_INVOCATION_MODEL.contract_invocation_id,
+          );
+        });
+
+        it("creates the contract invocation", async () => {
+          expect(
+            Coinbase.apiClients.contractInvocation!.createContractInvocation,
+          ).toHaveBeenCalledWith(walletAddress.getWalletId(), walletAddress.getId(), {
+            abi: VALID_CONTRACT_INVOCATION_MODEL.abi,
+            args: VALID_CONTRACT_INVOCATION_MODEL.args,
+            method: VALID_CONTRACT_INVOCATION_MODEL.method,
+            contract_address: VALID_CONTRACT_INVOCATION_MODEL.contract_address,
+          });
+          expect(
+            Coinbase.apiClients.contractInvocation!.createContractInvocation,
+          ).toHaveBeenCalledTimes(1);
+        });
+
+        it("broadcasts the contract invocation", async () => {
+          expect(
+            Coinbase.apiClients.contractInvocation!.broadcastContractInvocation,
+          ).toHaveBeenCalledWith(
+            walletAddress.getWalletId(),
+            walletAddress.getId(),
+            VALID_CONTRACT_INVOCATION_MODEL.contract_invocation_id,
+            {
+              signed_payload: expectedSignedPayload,
+            },
+          );
+
+          expect(
+            Coinbase.apiClients.contractInvocation!.broadcastContractInvocation,
+          ).toHaveBeenCalledTimes(1);
+        });
       });
+
+      describe("when no key is loaded", () => {
+        beforeEach(() => {
+          walletAddress = new WalletAddress(addressModel);
+        });
+
+        it("throws an error", async () => {
+          await expect(
+            walletAddress.invokeContract({
+              abi: MINT_NFT_ABI,
+              args: MINT_NFT_ARGS,
+              method: VALID_CONTRACT_INVOCATION_MODEL.method,
+              contractAddress: VALID_CONTRACT_INVOCATION_MODEL.contract_address,
+            }),
+          ).rejects.toThrow(Error);
+        });
+      });
+
+      describe("when it fails to create a contract invocation", () => {
+        beforeEach(() => {
+          Coinbase.apiClients.contractInvocation!.createContractInvocation =
+            mockReturnRejectedValue(
+              new APIError({
+                response: {
+                  status: 400,
+                  data: {
+                    code: "malformed_request",
+                    message: "failed to create contract invocation: invalid abi",
+                  },
+                },
+              } as AxiosError),
+            );
+        });
+
+        it("throws an error", async () => {
+          await expect(
+            walletAddress.invokeContract({
+              abi: { invalid_abi: "abi" },
+              args: MINT_NFT_ARGS,
+              method: VALID_CONTRACT_INVOCATION_MODEL.method,
+              contractAddress: VALID_CONTRACT_INVOCATION_MODEL.contract_address,
+            }),
+          ).rejects.toThrow(APIError);
+        });
+      });
+
+      describe("when it fails to broadcast a contract invocation", () => {
+        beforeEach(() => {
+          Coinbase.apiClients.contractInvocation!.createContractInvocation = mockReturnValue({
+            ...VALID_CONTRACT_INVOCATION_MODEL,
+            address_id: walletAddress.getId(),
+            wallet_id: walletAddress.getWalletId(),
+          });
+
+          Coinbase.apiClients.contractInvocation!.broadcastContractInvocation =
+            mockReturnRejectedValue(
+              new APIError({
+                response: {
+                  status: 400,
+                  data: {
+                    code: "invalid_signed_payload",
+                    message: "failed to broadcast contract invocation: invalid signed payload",
+                  },
+                },
+              } as AxiosError),
+            );
+        });
+
+        it("throws an error", async () => {
+          await expect(
+            walletAddress.invokeContract({
+              abi: MINT_NFT_ABI,
+              args: MINT_NFT_ARGS,
+              method: VALID_CONTRACT_INVOCATION_MODEL.method,
+              contractAddress: VALID_CONTRACT_INVOCATION_MODEL.contract_address,
+            }),
+          ).rejects.toThrow(APIError);
+        });
+      });
+    });
+
+    describe("when using a server-signer", () => {
+      let contractInvocation;
+
+      beforeEach(async () => {
+        Coinbase.useServerSigner = true;
+
+        walletAddress = new WalletAddress(addressModel);
+      });
+
+      describe("when it is successful", () => {
+        beforeEach(async () => {
+          Coinbase.apiClients.contractInvocation!.createContractInvocation = mockReturnValue({
+            ...VALID_CONTRACT_INVOCATION_MODEL,
+            address_id: walletAddress.getId(),
+            wallet_id: walletAddress.getWalletId(),
+          });
+
+          contractInvocation = await walletAddress.invokeContract({
+            abi: MINT_NFT_ABI,
+            args: MINT_NFT_ARGS,
+            method: VALID_CONTRACT_INVOCATION_MODEL.method,
+            contractAddress: VALID_CONTRACT_INVOCATION_MODEL.contract_address,
+          });
+        });
+
+        it("returns a pending contract invocation", async () => {
+          expect(contractInvocation).toBeInstanceOf(ContractInvocation);
+          expect(contractInvocation.getId()).toBe(
+            VALID_CONTRACT_INVOCATION_MODEL.contract_invocation_id,
+          );
+          expect(contractInvocation.getStatus()).toBe(TransactionStatus.PENDING);
+        });
+
+        it("creates a contract invocation", async () => {
+          expect(
+            Coinbase.apiClients.contractInvocation!.createContractInvocation,
+          ).toHaveBeenCalledWith(walletAddress.getWalletId(), walletAddress.getId(), {
+            abi: VALID_CONTRACT_INVOCATION_MODEL.abi,
+            args: VALID_CONTRACT_INVOCATION_MODEL.args,
+            method: VALID_CONTRACT_INVOCATION_MODEL.method,
+            contract_address: VALID_CONTRACT_INVOCATION_MODEL.contract_address,
+          });
+          expect(
+            Coinbase.apiClients.contractInvocation!.createContractInvocation,
+          ).toHaveBeenCalledTimes(1);
+        });
+      });
+
+      describe("when creating a contract invocation fails", () => {
+        beforeEach(() => {
+          Coinbase.apiClients.contractInvocation!.createContractInvocation =
+            mockReturnRejectedValue(
+              new APIError({
+                response: {
+                  status: 400,
+                  data: {
+                    code: "malformed_request",
+                    message: "failed to create contract invocation: invalid abi",
+                  },
+                },
+              } as AxiosError),
+            );
+        });
+
+        it("throws an error", async () => {
+          await expect(
+            walletAddress.invokeContract({
+              abi: { invalid_abi: "abi" },
+              args: MINT_NFT_ARGS,
+              method: VALID_CONTRACT_INVOCATION_MODEL.method,
+              contractAddress: VALID_CONTRACT_INVOCATION_MODEL.contract_address,
+            }),
+          ).rejects.toThrow(APIError);
+        });
+      });
+    });
+  });
+
+  describe("#createPayloadSignature", () => {
+    let key = ethers.Wallet.createRandom();
+    let addressModel: AddressModel;
+    let walletAddress: WalletAddress;
+    let unsignedPayload = VALID_PAYLOAD_SIGNATURE_MODEL.unsigned_payload;
+    let signature: string;
+
+    beforeAll(() => {
+      Coinbase.apiClients.address = addressesApiMock;
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    describe("when not using a server-signer", () => {
+      beforeEach(() => {
+        addressModel = newAddressModel(randomUUID(), randomUUID(), Coinbase.networks.BaseSepolia);
+        walletAddress = new WalletAddress(addressModel, key as unknown as ethers.Wallet);
+        signature = key.signingKey.sign(unsignedPayload).serialized;
+        Coinbase.useServerSigner = false;
+      });
+
+      it("should successfully create a payload signature", async () => {
+        Coinbase.apiClients.address!.createPayloadSignature = mockReturnValue(
+          VALID_PAYLOAD_SIGNATURE_MODEL,
+        );
+
+        const payloadSignature = await walletAddress.createPayloadSignature(unsignedPayload);
+
+        expect(Coinbase.apiClients.address!.createPayloadSignature).toHaveBeenCalledWith(
+          walletAddress.getWalletId(),
+          walletAddress.getId(),
+          {
+            unsigned_payload: unsignedPayload,
+            signature,
+          },
+        );
+        expect(Coinbase.apiClients.address!.createPayloadSignature).toHaveBeenCalledTimes(1);
+        expect(payloadSignature).toBeInstanceOf(PayloadSignature);
+      });
+
+      it("should throw an error when no key is loaded", async () => {
+        walletAddress = new WalletAddress(addressModel);
+
+        expect(async () => {
+          await walletAddress.createPayloadSignature(unsignedPayload);
+        }).rejects.toThrow(Error);
+      });
+
+      it("should throw an APIError when the API call to create a payload signature fails", async () => {
+        Coinbase.apiClients.address!.createPayloadSignature = mockReturnRejectedValue(
+          new APIError("Failed to create payload signature"),
+        );
+
+        expect(async () => {
+          await walletAddress.createPayloadSignature(unsignedPayload);
+        }).rejects.toThrow(Error);
+
+        expect(Coinbase.apiClients.address!.createPayloadSignature).toHaveBeenCalledWith(
+          walletAddress.getWalletId(),
+          walletAddress.getId(),
+          {
+            unsigned_payload: unsignedPayload,
+            signature,
+          },
+        );
+        expect(Coinbase.apiClients.address!.createPayloadSignature).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe("when using a server-signer", () => {
+      beforeEach(() => {
+        addressModel = newAddressModel(randomUUID(), randomUUID(), Coinbase.networks.BaseSepolia);
+        walletAddress = new WalletAddress(addressModel);
+        Coinbase.useServerSigner = true;
+      });
+
+      it("should successfully create a payload signature", async () => {
+        Coinbase.apiClients.address!.createPayloadSignature = mockReturnValue(
+          VALID_PAYLOAD_SIGNATURE_MODEL,
+        );
+
+        const payloadSignature = await walletAddress.createPayloadSignature(unsignedPayload);
+
+        expect(Coinbase.apiClients.address!.createPayloadSignature).toHaveBeenCalledWith(
+          walletAddress.getWalletId(),
+          walletAddress.getId(),
+          {
+            unsigned_payload: unsignedPayload,
+          },
+        );
+        expect(Coinbase.apiClients.address!.createPayloadSignature).toHaveBeenCalledTimes(1);
+        expect(payloadSignature).toBeInstanceOf(PayloadSignature);
+      });
+
+      it("should throw an APIError when the API call to create a payload signature fails", async () => {
+        Coinbase.apiClients.address!.createPayloadSignature = mockReturnRejectedValue(
+          new APIError("Failed to create payload signature"),
+        );
+
+        expect(async () => {
+          await walletAddress.createPayloadSignature(unsignedPayload);
+        }).rejects.toThrow(Error);
+
+        expect(Coinbase.apiClients.address!.createPayloadSignature).toHaveBeenCalledWith(
+          walletAddress.getWalletId(),
+          walletAddress.getId(),
+          {
+            unsigned_payload: unsignedPayload,
+          },
+        );
+        expect(Coinbase.apiClients.address!.createPayloadSignature).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
+  describe("#getPayloadSignature", () => {
+    let key = ethers.Wallet.createRandom();
+    let addressModel: AddressModel;
+    let walletAddress: WalletAddress;
+    let payloadSignatureId = VALID_PAYLOAD_SIGNATURE_MODEL.payload_signature_id;
+
+    beforeAll(() => {
+      Coinbase.apiClients.address = addressesApiMock;
+    });
+
+    beforeEach(() => {
+      addressModel = newAddressModel(randomUUID(), randomUUID(), Coinbase.networks.BaseSepolia);
+      walletAddress = new WalletAddress(addressModel, key as unknown as ethers.Wallet);
+      Coinbase.useServerSigner = false;
+      jest.clearAllMocks();
+    });
+
+    it("should successfully get the payload signature", async () => {
+      Coinbase.apiClients.address!.getPayloadSignature = mockReturnValue(
+        VALID_PAYLOAD_SIGNATURE_MODEL,
+      );
+
+      const payloadSignature = await walletAddress.getPayloadSignature(payloadSignatureId);
+
+      expect(Coinbase.apiClients.address!.getPayloadSignature).toHaveBeenCalledWith(
+        walletAddress.getWalletId(),
+        walletAddress.getId(),
+        payloadSignatureId,
+      );
+      expect(Coinbase.apiClients.address!.getPayloadSignature).toHaveBeenCalledTimes(1);
+      expect(payloadSignature).toBeInstanceOf(PayloadSignature);
+    });
+
+    it("should throw an APIError when the API call to get the payload signature fails", async () => {
+      Coinbase.apiClients.address!.getPayloadSignature = mockReturnRejectedValue(
+        new APIError("Failed to get payload signature"),
+      );
+
+      expect(async () => {
+        await walletAddress.getPayloadSignature(payloadSignatureId);
+      }).rejects.toThrow(Error);
+
+      expect(Coinbase.apiClients.address!.getPayloadSignature).toHaveBeenCalledWith(
+        walletAddress.getWalletId(),
+        walletAddress.getId(),
+        payloadSignatureId,
+      );
+      expect(Coinbase.apiClients.address!.getPayloadSignature).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("#listPayloadSignatures", () => {
+    let key = ethers.Wallet.createRandom();
+    let addressModel: AddressModel;
+    let walletAddress: WalletAddress;
+
+    beforeAll(() => {
+      Coinbase.apiClients.address = addressesApiMock;
+    });
+
+    beforeEach(() => {
+      addressModel = newAddressModel(randomUUID(), randomUUID(), Coinbase.networks.BaseSepolia);
+      walletAddress = new WalletAddress(addressModel, key as unknown as ethers.Wallet);
+      Coinbase.useServerSigner = false;
+      jest.clearAllMocks();
+    });
+
+    it("should successfully list payload signatures", async () => {
+      Coinbase.apiClients.address!.listPayloadSignatures = mockReturnValue(
+        VALID_PAYLOAD_SIGNATURE_LIST,
+      );
+
+      const payloadSignatures = await walletAddress.listPayloadSignatures();
+
+      expect(Coinbase.apiClients.address!.listPayloadSignatures).toHaveBeenCalledTimes(1);
+      expect(payloadSignatures).toHaveLength(VALID_PAYLOAD_SIGNATURE_LIST.data.length);
+    });
+
+    it("should throw an APIError when the API call to list payload signatures fails", async () => {
+      Coinbase.apiClients.address!.listPayloadSignatures = mockReturnRejectedValue(
+        new APIError("Failed to list payload signatures"),
+      );
+
+      expect(async () => {
+        await walletAddress.listPayloadSignatures();
+      }).rejects.toThrow(Error);
+
+      expect(Coinbase.apiClients.address!.listPayloadSignatures).toHaveBeenCalledTimes(1);
     });
   });
 });
