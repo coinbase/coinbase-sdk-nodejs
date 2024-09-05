@@ -75,6 +75,19 @@ export class WalletAddress extends Address {
   }
 
   /**
+   * Exports the Address's private key to a hex string.
+   *
+   * @returns The Address's private key as a hex string. 
+   */
+  public export() {
+    if (this.key === undefined) {
+      throw new Error("Private key is not set");
+    }
+
+    return this.key.privateKey;
+  }
+
+  /**
    * Returns whether the Address has a private key backing it to sign transactions.
    *
    * @returns Whether the Address has a private key backing it to sign transactions.
