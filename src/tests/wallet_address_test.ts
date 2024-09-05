@@ -1105,7 +1105,6 @@ describe("WalletAddress", () => {
     });
   });
 
-
   describe("#createPayloadSignature", () => {
     let key = ethers.Wallet.createRandom();
     let addressModel: AddressModel;
