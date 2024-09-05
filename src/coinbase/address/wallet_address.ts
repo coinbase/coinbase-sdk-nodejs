@@ -76,10 +76,14 @@ export class WalletAddress extends Address {
   }
 
   /**
-   * Gets the private key
+   * Gets the private key.
    */
-  public getKey() {
-    return this.key;
+  public export() {
+    if (this.key === undefined) {
+      throw new Error("Private key is not set")
+    }
+
+    return this.key.privateKey;
   }
 
   /**
