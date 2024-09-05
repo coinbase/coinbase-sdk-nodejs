@@ -233,7 +233,7 @@ describe("Address", () => {
         Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance,
       ).toHaveBeenCalledTimes(1);
       expect(
-        Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance,
+        Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance,
       ).toHaveBeenCalledWith(
         address.getNetworkId(),
         address.getId(),
@@ -245,7 +245,7 @@ describe("Address", () => {
     });
 
     it("should return results with USDC historical balance and next page", async () => {
-      Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance = mockReturnValue({
+      Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance = mockReturnValue({
         data: [
           {
             amount: "5000000",
@@ -269,10 +269,10 @@ describe("Address", () => {
       expect(historicalBalancesResult.historicalBalances.length).toEqual(1);
       expect(historicalBalancesResult.historicalBalances[0].amount).toEqual(new Decimal(5));
       expect(
-        Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance,
+        Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance,
       ).toHaveBeenCalledTimes(1);
       expect(
-        Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance,
+        Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance,
       ).toHaveBeenCalledWith(
         address.getNetworkId(),
         address.getId(),
