@@ -79,7 +79,7 @@ export class WalletAddress extends Address {
    */
   public export() {
     if (this.key === undefined) {
-      throw new Error("Private key is not set")
+      throw new Error("Private key is not set");
     }
 
     return this.key.privateKey;
