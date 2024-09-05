@@ -13,7 +13,7 @@ The SDK supports various verbs on Developer-custodied Wallets across multiple ne
 
 ## Documentation
 
-- [Platform API Documentation](https://docs.cdp.coinbase.com/platform-apis/docs/welcome)
+- [CDP API Documentation](https://docs.cdp.coinbase.com/cdp-apis/docs/welcome)
 
 ## Requirements
 
