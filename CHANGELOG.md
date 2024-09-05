@@ -2,10 +2,13 @@
 
 ## Unreleased
 
+## [0.3.0] - 2024-09-05
+
 ### Added
 
 - Add support for list address transactions.
 - Add support for exporting the private key of a `WalletAddress`
+- Add support for creating arbitrary payload signatures.
 - Add support for invoking Smart Contracts using MPC and Developer-managed Wallets.
 
 ## [0.2.0]
