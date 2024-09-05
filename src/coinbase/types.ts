@@ -401,27 +401,6 @@ export type ExternalAddressAPIClient = {
   ): AxiosPromise<Balance>;
 
   /**
-   * List the historical balance of an asset in a specific address.
-   *
-   * @summary Get address balance history for asset
-   * @param networkId - The ID of the blockchain network
-   * @param addressId - The ID of the address to fetch the historical balance for.
-   * @param assetId - The symbol of the asset to fetch the historical balance for.
-   * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
-   * @param options - Override http request option.
-   * @throws {RequiredError}
-   */
-  listAddressHistoricalBalance(
-    networkId: string,
-    addressId: string,
-    assetId: string,
-    limit?: number,
-    page?: string,
-    options?: RawAxiosRequestConfig,
-  ): AxiosPromise<AddressHistoricalBalanceList>;
-
-  /**
    * List the transactions of a specific address.
    *
    * @summary Get address transactions
@@ -754,6 +733,7 @@ export type ApiClients = {
   externalAddress?: ExternalAddressAPIClient;
   webhook?: WebhookApiClient;
   smartContract?: ExternalSmartContractAPIClient;
+  balanceHistory?: BalanceHistoryApiClient;
 };
 
 /**
@@ -1050,6 +1030,29 @@ export interface WebhookApiClient {
     updateWebhookRequest?: UpdateWebhookRequest,
     options?: RawAxiosRequestConfig,
   ): AxiosPromise<WebhookModel>;
+}
+
+export interface BalanceHistoryApiClient {
+  /**
+   * List the historical balance of an asset in a specific address.
+   *
+   * @summary Get address balance history for asset
+   * @param networkId - The ID of the blockchain network
+   * @param addressId - The ID of the address to fetch the historical balance for.
+   * @param assetId - The symbol of the asset to fetch the historical balance for.
+   * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param options - Override http request option.
+   * @throws {RequiredError}
+   */
+  listAddressHistoricalBalance(
+    networkId: string,
+    addressId: string,
+    assetId: string,
+    limit?: number,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<AddressHistoricalBalanceList>;
 }
 
 /**
