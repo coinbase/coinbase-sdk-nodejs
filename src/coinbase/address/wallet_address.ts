@@ -75,7 +75,9 @@ export class WalletAddress extends Address {
   }
 
   /**
-   * Gets the private key.
+   * Exports the Address's private key to a hex string.
+   *
+   * @returns The Address's private key as a hex string. 
    */
   public export() {
     if (this.key === undefined) {
