@@ -46,7 +46,7 @@ describe("Address", () => {
             block_hash: "0x0dadd465fb063ceb78babbb30abbc6bfc0730d0c57a53e8f6dc778dafcea568f",
             block_height: "12345",
             unsigned_payload: "",
-            status: TransactionStatus.COMPLETE
+            status: TransactionStatus.COMPLETE,
           },
           {
             network_id: "base-sepolia",
@@ -54,28 +54,23 @@ describe("Address", () => {
             block_hash: "block_hash",
             block_height: "12348",
             unsigned_payload: "",
-            status: TransactionStatus.FAILED
-          }
+            status: TransactionStatus.FAILED,
+          },
         ],
         has_more: true,
         next_page: "pageToken",
       };
       Coinbase.apiClients.externalAddress = externalAddressApiMock;
-      Coinbase.apiClients.externalAddress!.listAddressTransactions = mockReturnValue(
-        mockTransactionsResponse,
-      );
+      Coinbase.apiClients.externalAddress!.listAddressTransactions =
+        mockReturnValue(mockTransactionsResponse);
     });
 
     it("should return results with param", async () => {
-      const result = await address.listTransactions({limit: 2, page: "page"});
+      const result = await address.listTransactions({ limit: 2, page: "page" });
       expect(result.transactions.length).toEqual(2);
       expect(result.transactions[0].blockHeight()).toEqual("12345");
-      expect(
-        Coinbase.apiClients.externalAddress!.listAddressTransactions,
-      ).toHaveBeenCalledTimes(1);
-      expect(
-        Coinbase.apiClients.externalAddress!.listAddressTransactions,
-      ).toHaveBeenCalledWith(
+      expect(Coinbase.apiClients.externalAddress!.listAddressTransactions).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.externalAddress!.listAddressTransactions).toHaveBeenCalledWith(
         address.getNetworkId(),
         address.getId(),
         2,
@@ -93,8 +88,8 @@ describe("Address", () => {
             block_hash: "block_hash",
             block_height: "12348",
             unsigned_payload: "",
-            status: TransactionStatus.COMPLETE
-          }
+            status: TransactionStatus.COMPLETE,
+          },
         ],
         has_more: false,
         next_page: "",
@@ -102,12 +97,8 @@ describe("Address", () => {
       const result = await address.listTransactions({});
       expect(result.transactions.length).toEqual(1);
       expect(result.transactions[0].blockHeight()).toEqual("12348");
-      expect(
-        Coinbase.apiClients.externalAddress!.listAddressTransactions,
-      ).toHaveBeenCalledTimes(1);
-      expect(
-        Coinbase.apiClients.externalAddress!.listAddressTransactions,
-      ).toHaveBeenCalledWith(
+      expect(Coinbase.apiClients.externalAddress!.listAddressTransactions).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.externalAddress!.listAddressTransactions).toHaveBeenCalledWith(
         address.getNetworkId(),
         address.getId(),
         undefined,
@@ -124,12 +115,8 @@ describe("Address", () => {
       });
       const result = await address.listTransactions({});
       expect(result.transactions.length).toEqual(0);
-      expect(
-        Coinbase.apiClients.externalAddress!.listAddressTransactions,
-      ).toHaveBeenCalledTimes(1);
-      expect(
-        Coinbase.apiClients.externalAddress!.listAddressTransactions,
-      ).toHaveBeenCalledWith(
+      expect(Coinbase.apiClients.externalAddress!.listAddressTransactions).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.externalAddress!.listAddressTransactions).toHaveBeenCalledWith(
         address.getNetworkId(),
         address.getId(),
         undefined,

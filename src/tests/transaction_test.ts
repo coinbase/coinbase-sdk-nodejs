@@ -1,4 +1,3 @@
-
 import { ethers } from "ethers";
 import { Transaction as TransactionModel, EthereumTransaction } from "../client/api";
 import { Transaction } from "./../coinbase/transaction";
@@ -39,10 +38,10 @@ describe("Transaction", () => {
 
     transactionHash = "0x6c087c1676e8269dd81e0777244584d0cbfd39b6997b3477242a008fa9349e11";
 
-    blockHash = "0x0728750d458976fd010a2e15cef69ec71c6fccb3377f38a71b70ab551ab22688"
-    blockHeight = "18779006"
+    blockHash = "0x0728750d458976fd010a2e15cef69ec71c6fccb3377f38a71b70ab551ab22688";
+    blockHeight = "18779006";
     ethereumContent = {
-      priority_fee_per_gas: 1000
+      priority_fee_per_gas: 1000,
     } as EthereumTransaction;
 
     model = {
@@ -61,12 +60,12 @@ describe("Transaction", () => {
     } as TransactionModel;
 
     onchainModel = {
-        status: "complete",
-        from_address_id: fromAddressId,
-        unsigned_payload: "",
-        block_hash: blockHash,
-        block_height: blockHeight,
-        content: ethereumContent,
+      status: "complete",
+      from_address_id: fromAddressId,
+      unsigned_payload: "",
+      block_hash: blockHash,
+      block_height: blockHeight,
+      content: ethereumContent,
     } as TransactionModel;
 
     transaction = new Transaction(model);
