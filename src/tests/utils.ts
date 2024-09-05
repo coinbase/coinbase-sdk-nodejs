@@ -513,3 +513,7 @@ export const serverSignersApiMock = {
 export const smartContractApiMock = {
   listContractEvents: jest.fn(),
 };
+
+export const balanceHistoryApiMock = {
+  listAddressHistoricalBalance: jest.fn(),
+};

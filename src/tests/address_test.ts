@@ -6,6 +6,7 @@ import {
   mockReturnValue,
   newAddressModel,
   externalAddressApiMock,
+  balanceHistoryApiMock,
 } from "./utils";
 import Decimal from "decimal.js";
 import { randomUUID } from "crypto";
@@ -167,8 +168,8 @@ describe("Address", () => {
         has_more: false,
         next_page: "",
       };
-      Coinbase.apiClients.externalAddress = externalAddressApiMock;
-      Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance = mockReturnValue(
+      Coinbase.apiClients.balanceHistory = balanceHistoryApiMock;
+      Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance = mockReturnValue(
         mockHistoricalBalanceResponse,
       );
     });
@@ -181,10 +182,10 @@ describe("Address", () => {
       expect(historicalBalancesResult.historicalBalances[0].amount).toEqual(new Decimal(1));
       expect(historicalBalancesResult.historicalBalances[1].amount).toEqual(new Decimal(5));
       expect(
-        Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance,
+        Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance,
       ).toHaveBeenCalledTimes(1);
       expect(
-        Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance,
+        Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance,
       ).toHaveBeenCalledWith(
         address.getNetworkId(),
         address.getId(),
@@ -204,10 +205,10 @@ describe("Address", () => {
       expect(historicalBalancesResult.historicalBalances[0].amount).toEqual(new Decimal(1));
       expect(historicalBalancesResult.historicalBalances[1].amount).toEqual(new Decimal(5));
       expect(
-        Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance,
+        Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance,
       ).toHaveBeenCalledTimes(1);
       expect(
-        Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance,
+        Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance,
       ).toHaveBeenCalledWith(
         address.getNetworkId(),
         address.getId(),
@@ -219,7 +220,7 @@ describe("Address", () => {
     });
 
     it("should return empty if no historical balance found", async () => {
-      Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance = mockReturnValue({
+      Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance = mockReturnValue({
         data: [],
         has_more: false,
         next_page: "",
@@ -229,7 +230,7 @@ describe("Address", () => {
       });
       expect(historicalBalancesResult.historicalBalances.length).toEqual(0);
       expect(
-        Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance,
+        Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance,
       ).toHaveBeenCalledTimes(1);
       expect(
         Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance,

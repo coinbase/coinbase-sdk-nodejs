@@ -45,6 +45,7 @@ import {
   stakeApiMock,
   walletStakeApiMock,
   VALID_SIGNED_PAYLOAD_SIGNATURE_MODEL,
+  balanceHistoryApiMock,
 } from "./utils";
 import { Trade } from "../coinbase/trade";
 import { WalletAddress } from "../coinbase/address/wallet_address";
@@ -476,8 +477,8 @@ describe("Wallet Class", () => {
         has_more: false,
         next_page: "",
       };
-      Coinbase.apiClients.externalAddress = externalAddressApiMock;
-      Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance = mockReturnValue(
+      Coinbase.apiClients.balanceHistory = balanceHistoryApiMock;
+      Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance = mockReturnValue(
         mockHistoricalBalanceResponse,
       );
     });
