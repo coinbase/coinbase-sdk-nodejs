@@ -1089,7 +1089,7 @@ describe("WalletAddress", () => {
       });
     });
 
-    describe(".export", () => {
+    describe("#export", () => {
       it("should get the private key if it is set", () => {
         key = ethers.Wallet.createRandom();
         const newAddress = new WalletAddress(VALID_ADDRESS_MODEL, key);
