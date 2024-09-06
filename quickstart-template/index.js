@@ -8,7 +8,7 @@ let wallet = await Wallet.create();
 console.log(`Wallet successfully created: `, wallet.toString());
 
 // Wallets come with a single default Address, accessible via getDefaultAddress:
-let address = wallet.getDefaultAddress();
+let address = await wallet.getDefaultAddress();
 console.log(`Default address for the wallet: `, address.toString());
 
 const faucetTransaction = await wallet.faucet();

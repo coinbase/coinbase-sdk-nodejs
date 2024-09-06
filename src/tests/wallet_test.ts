@@ -280,13 +280,6 @@ describe("Wallet Class", () => {
         expect(op).toBeInstanceOf(StakingOperation);
       });
 
-      it("should throw an error when the wallet does not have a default address", async () => {
-        const newWallet = Wallet.init(walletModel);
-        await expect(
-          async () => await newWallet.createStake(0.001, Coinbase.assets.Eth),
-        ).rejects.toThrow(Error);
-      });
-
       it("should throw an error when wait is called on wallet address based staking operation", async () => {
         const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
         const op = await wallet.createStake(0.001, Coinbase.assets.Eth);
@@ -319,13 +312,6 @@ describe("Wallet Class", () => {
 
         expect(op).toBeInstanceOf(StakingOperation);
       });
-
-      it("should throw an error when the wallet does not have a default address", async () => {
-        const newWallet = Wallet.init(walletModel);
-        await expect(
-          async () => await newWallet.createUnstake(0.001, Coinbase.assets.Eth),
-        ).rejects.toThrow(Error);
-      });
     });
 
     describe(".createClaimStake", () => {
@@ -346,23 +332,9 @@ describe("Wallet Class", () => {
 
         expect(op).toBeInstanceOf(StakingOperation);
       });
-
-      it("should throw an error when the wallet does not have a default address", async () => {
-        const newWallet = Wallet.init(walletModel);
-        await expect(
-          async () => await newWallet.createClaimStake(0.001, Coinbase.assets.Eth),
-        ).rejects.toThrow(Error);
-      });
     });
 
     describe(".stakeableBalance", () => {
-      it("should throw an error when the wallet does not have a default address", async () => {
-        const newWallet = Wallet.init(walletModel);
-        await expect(
-          async () => await newWallet.stakeableBalance(Coinbase.assets.Eth),
-        ).rejects.toThrow(Error);
-      });
-
       it("should return the stakeable balance successfully with default params", async () => {
         //const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
         Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
@@ -372,13 +344,6 @@ describe("Wallet Class", () => {
     });
 
     describe(".unstakeableBalance", () => {
-      it("should throw an error when the wallet does not have a default address", async () => {
-        const newWallet = Wallet.init(walletModel);
-        await expect(
-          async () => await newWallet.unstakeableBalance(Coinbase.assets.Eth),
-        ).rejects.toThrow(Error);
-      });
-
       it("should return the unstakeableBalance balance successfully with default params", async () => {
         const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
         Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
@@ -388,13 +353,6 @@ describe("Wallet Class", () => {
     });
 
     describe(".claimableBalance", () => {
-      it("should throw an error when the wallet does not have a default address", async () => {
-        const newWallet = Wallet.init(walletModel);
-        await expect(
-          async () => await newWallet.claimableBalance(Coinbase.assets.Eth),
-        ).rejects.toThrow(Error);
-      });
-
       it("should return the claimableBalance balance successfully with default params", async () => {
         const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
         Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
@@ -404,13 +362,6 @@ describe("Wallet Class", () => {
     });
 
     describe(".stakingRewards", () => {
-      it("should throw an error when the wallet does not have a default address", async () => {
-        const newWallet = Wallet.init(walletModel);
-        await expect(
-          async () => await newWallet.stakingRewards(Coinbase.assets.Eth),
-        ).rejects.toThrow(Error);
-      });
-
       it("should successfully return staking rewards", async () => {
         const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
         Coinbase.apiClients.stake!.fetchStakingRewards = mockReturnValue(STAKING_REWARD_RESPONSE);
@@ -421,13 +372,6 @@ describe("Wallet Class", () => {
     });
 
     describe(".historicalStakingBalances", () => {
-      it("should throw an error when the wallet does not have a default address", async () => {
-        const newWallet = Wallet.init(walletModel);
-        await expect(
-          async () => await newWallet.historicalStakingBalances(Coinbase.assets.Eth),
-        ).rejects.toThrow(Error);
-      });
-
       it("should successfully return historical staking balances", async () => {
         const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
         Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockReturnValue(
@@ -485,16 +429,6 @@ describe("Wallet Class", () => {
       Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance = mockReturnValue(
         mockHistoricalBalanceResponse,
       );
-    });
-
-    it("should throw an error when the wallet does not have a default address", async () => {
-      const newWallet = Wallet.init(walletModel);
-      await expect(
-        async () =>
-          await newWallet.listHistoricalBalances({
-            assetId: Coinbase.assets.Usdc,
-          }),
-      ).rejects.toThrow(Error);
     });
 
     it("should successfully return historical balances", async () => {
@@ -630,32 +564,20 @@ describe("Wallet Class", () => {
       contractAddress: VALID_SIGNED_CONTRACT_INVOCATION_MODEL.contract_address,
     };
 
-    beforeEach(() => {
+    beforeEach(async () => {
       expectedInvocation = ContractInvocation.fromModel(VALID_SIGNED_CONTRACT_INVOCATION_MODEL);
 
-      wallet.getDefaultAddress()!.invokeContract = jest.fn().mockResolvedValue(expectedInvocation);
+      (await wallet.getDefaultAddress()).invokeContract = jest.fn().mockResolvedValue(expectedInvocation);
     });
 
     it("successfully invokes a contract on the default address", async () => {
       const contractInvocation = await wallet.invokeContract(options);
 
-      expect(wallet.getDefaultAddress()!.invokeContract).toHaveBeenCalledTimes(1);
-      expect(wallet.getDefaultAddress()!.invokeContract).toHaveBeenCalledWith(options);
+      expect((await wallet.getDefaultAddress()).invokeContract).toHaveBeenCalledTimes(1);
+      expect((await wallet.getDefaultAddress()).invokeContract).toHaveBeenCalledWith(options);
 
       expect(contractInvocation).toBeInstanceOf(ContractInvocation);
       expect(contractInvocation).toEqual(expectedInvocation);
-    });
-
-    describe("when the wallet does not have a default address", () => {
-      let invalidWallet;
-
-      beforeEach(() => (invalidWallet = Wallet.init(walletModel)));
-
-      it("should throw an Error", async () => {
-        await expect(async () => await invalidWallet.invokeContract(options)).rejects.toThrow(
-          Error,
-        );
-      });
     });
   });
 
@@ -681,7 +603,7 @@ describe("Wallet Class", () => {
 
       expect(Coinbase.apiClients.address!.createPayloadSignature).toHaveBeenCalledWith(
         wallet.getId(),
-        wallet.getDefaultAddress()!.getId(),
+        (await wallet.getDefaultAddress()).getId(),
         {
           unsigned_payload: unsignedPayload,
           signature,
@@ -702,23 +624,13 @@ describe("Wallet Class", () => {
 
       expect(Coinbase.apiClients.address!.createPayloadSignature).toHaveBeenCalledWith(
         wallet.getId(),
-        wallet.getDefaultAddress()!.getId(),
+        (await wallet.getDefaultAddress()).getId(),
         {
           unsigned_payload: unsignedPayload,
           signature,
         },
       );
       expect(Coinbase.apiClients.address!.createPayloadSignature).toHaveBeenCalledTimes(1);
-    });
-
-    it("should throw an Error when the wallet does not have a default address", async () => {
-      const invalidWallet = Wallet.init(walletModel);
-
-      expect(async () => {
-        await invalidWallet.createPayloadSignature(unsignedPayload);
-      }).rejects.toThrow(Error);
-
-      expect(Coinbase.apiClients.address!.createPayloadSignature).not.toHaveBeenCalled();
     });
   });
 
@@ -782,7 +694,7 @@ describe("Wallet Class", () => {
 
     describe("#getDefaultAddress", () => {
       it("should return the correct default address", async () => {
-        expect(wallet.getDefaultAddress()!.getId()).toBe(walletModel.default_address!.address_id);
+        expect((await wallet.getDefaultAddress()).getId()).toBe(walletModel.default_address!.address_id);
       });
     });
 
@@ -814,7 +726,7 @@ describe("Wallet Class", () => {
       mockListAddress(existingSeed, 2);
       addresses = await wallet.listAddresses();
       expect(addresses.length).toBe(2);
-      expect(wallet.getAddress(newAddress.getId())!.getId()).toBe(newAddress.getId());
+      expect((await wallet.getAddress(newAddress.getId()))!.getId()).toBe(newAddress.getId());
       expect(Coinbase.apiClients.address!.createAddress).toHaveBeenCalledTimes(1);
     });
 
@@ -913,15 +825,6 @@ describe("Wallet Class", () => {
       });
     });
 
-    it("should throw an error when the wallet does not have a default address", async () => {
-      const wallet = Wallet.init({
-        id: walletId,
-        network_id: Coinbase.networks.BaseSepolia,
-        feature_set: {} as FeatureSet,
-      });
-      await expect(async () => await wallet.faucet()).rejects.toThrow(Error);
-    });
-
     it("should return a Wallet instance", async () => {
       expect(wallet).toBeInstanceOf(Wallet);
     });
@@ -949,7 +852,7 @@ describe("Wallet Class", () => {
       expect(newAddress).toBeInstanceOf(WalletAddress);
       addresses = await wallet.listAddresses();
       expect(addresses.length).toBe(3);
-      expect(wallet.getAddress(newAddress.getId())!.getId()).toBe(newAddress.getId());
+      expect((await wallet.getAddress(newAddress.getId()))!.getId()).toBe(newAddress.getId());
     });
 
     it("should return the correct string representation", async () => {
@@ -1028,6 +931,11 @@ describe("Wallet Class", () => {
       const importedWallet = await Wallet.import(walletData);
       expect(importedWallet).toBeInstanceOf(Wallet);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
+    });
+    it("should throw an error when walletId is not provided", async () => {
+      const walletData = seedWallet.export();
+      walletData.walletId = "";
+      await expect(async () => await Wallet.import(walletData)).rejects.toThrow("Wallet ID must be provided");
     });
   });
 
@@ -1334,14 +1242,6 @@ describe("Wallet Class", () => {
         status: TransactionStatusEnum.Pending,
       },
     } as TradeModel);
-
-    it("should throw an error when the wallet does not have a default address", async () => {
-      const newWallet = Wallet.init(walletModel);
-      await expect(
-        async () =>
-          await newWallet.createTrade({ amount: 0.01, fromAssetId: "eth", toAssetId: "usdc" }),
-      ).rejects.toThrow(Error);
-    });
 
     it("should create a trade from the default address", async () => {
       const trade = Promise.resolve(tradeObject);
