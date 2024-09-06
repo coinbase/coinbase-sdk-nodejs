@@ -272,7 +272,7 @@ export class Wallet {
    * @returns The WalletAddress.
    */
   public async getAddress(addressId: string): Promise<WalletAddress | undefined> {
-    if (!this.addresses) {
+    if (this.addresses.length < 1) {
       this.addresses = await this.listAddresses();
     }
 
