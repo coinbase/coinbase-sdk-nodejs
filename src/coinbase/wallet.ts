@@ -271,7 +271,11 @@ export class Wallet {
    * @param addressId - The ID of the Address to retrieve.
    * @returns The Address.
    */
-  public getAddress(addressId: string): Address | undefined {
+  public async getAddress(addressId: string): Promise<WalletAddress | undefined> {
+    if (!this.addresses) {
+      await this.listAddresses();
+    }
+
     return this.addresses.find(address => {
       return address.getId() === addressId;
     });
@@ -705,10 +709,12 @@ export class Wallet {
    *
    * @returns The default address
    */
-  public getDefaultAddress(): WalletAddress | undefined {
-    return this.addresses.find(
-      address => address.getId() === this.model.default_address?.address_id,
-    );
+  public getDefaultAddress(): WalletAddress {
+    const walletAddress = this.getAddress(this.model.default_address?.address_id!);
+    if (!walletAddress) {
+      throw new Error("Default address not found");
+    }
+    return walletAddress;
   }
 
   /**
