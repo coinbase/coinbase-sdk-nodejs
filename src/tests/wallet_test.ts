@@ -44,10 +44,8 @@ import {
   externalAddressApiMock,
   stakeApiMock,
   walletStakeApiMock,
-  MINT_NFT_ABI,
-  MINT_NFT_ARGS,
   VALID_SIGNED_PAYLOAD_SIGNATURE_MODEL,
-  VALID_SIGNED_CONTRACT_INVOCATION_MODEL,
+  balanceHistoryApiMock,
 } from "./utils";
 import { Trade } from "../coinbase/trade";
 import { WalletAddress } from "../coinbase/address/wallet_address";
@@ -55,7 +53,6 @@ import { StakingOperation } from "../coinbase/staking_operation";
 import { StakingReward } from "../coinbase/staking_reward";
 import { StakingBalance } from "../coinbase/staking_balance";
 import { PayloadSignature } from "../coinbase/payload_signature";
-import { ContractInvocation } from "../coinbase/contract_invocation";
 
 describe("Wallet Class", () => {
   let wallet: Wallet;
@@ -480,8 +477,8 @@ describe("Wallet Class", () => {
         has_more: false,
         next_page: "",
       };
-      Coinbase.apiClients.externalAddress = externalAddressApiMock;
-      Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance = mockReturnValue(
+      Coinbase.apiClients.balanceHistory = balanceHistoryApiMock;
+      Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance = mockReturnValue(
         mockHistoricalBalanceResponse,
       );
     });
@@ -510,7 +507,7 @@ describe("Wallet Class", () => {
   });
 
   describe(".createTransfer", () => {
-    let weiAmount, destination;
+    let weiAmount, destination, intervalSeconds, timeoutSeconds;
     let balanceModel: BalanceModel;
 
     beforeEach(() => {
@@ -518,6 +515,8 @@ describe("Wallet Class", () => {
       const key = ethers.Wallet.createRandom();
       weiAmount = new Decimal("5");
       destination = new WalletAddress(VALID_ADDRESS_MODEL, key as unknown as ethers.Wallet);
+      intervalSeconds = 0.2;
+      timeoutSeconds = 10;
       Coinbase.apiClients.externalAddress = externalAddressApiMock;
       Coinbase.apiClients.asset = assetsApiMock;
       Coinbase.apiClients.asset!.getAsset = getAssetMock();
@@ -570,6 +569,8 @@ describe("Wallet Class", () => {
           amount: weiAmount,
           assetId: Coinbase.assets.Wei,
           destination,
+          timeoutSeconds,
+          intervalSeconds,
         }),
       ).rejects.toThrow(APIError);
     });
@@ -584,6 +585,8 @@ describe("Wallet Class", () => {
           amount: weiAmount,
           assetId: Coinbase.assets.Wei,
           destination,
+          timeoutSeconds,
+          intervalSeconds,
         }),
       ).rejects.toThrow(APIError);
     });
@@ -595,6 +598,8 @@ describe("Wallet Class", () => {
           amount: insufficientAmount,
           assetId: Coinbase.assets.Wei,
           destination,
+          timeoutSeconds,
+          intervalSeconds,
         }),
       ).rejects.toThrow(ArgumentError);
     });
@@ -607,6 +612,8 @@ describe("Wallet Class", () => {
         amount: weiAmount,
         assetId: Coinbase.assets.Wei,
         destination,
+        timeoutSeconds,
+        intervalSeconds,
       });
 
       expect(Coinbase.apiClients.transfer!.createTransfer).toHaveBeenCalledTimes(1);
@@ -617,44 +624,6 @@ describe("Wallet Class", () => {
 
     afterEach(() => {
       jest.restoreAllMocks();
-    });
-  });
-
-  describe("#invokeContract", () => {
-    let expectedInvocation;
-    let options = {
-      abi: MINT_NFT_ABI,
-      args: MINT_NFT_ARGS,
-      method: VALID_SIGNED_CONTRACT_INVOCATION_MODEL.method,
-      contractAddress: VALID_SIGNED_CONTRACT_INVOCATION_MODEL.contract_address,
-    };
-
-    beforeEach(() => {
-      expectedInvocation = ContractInvocation.fromModel(VALID_SIGNED_CONTRACT_INVOCATION_MODEL);
-
-      wallet.getDefaultAddress()!.invokeContract = jest.fn().mockResolvedValue(expectedInvocation);
-    });
-
-    it("successfully invokes a contract on the default address", async () => {
-      const contractInvocation = await wallet.invokeContract(options);
-
-      expect(wallet.getDefaultAddress()!.invokeContract).toHaveBeenCalledTimes(1);
-      expect(wallet.getDefaultAddress()!.invokeContract).toHaveBeenCalledWith(options);
-
-      expect(contractInvocation).toBeInstanceOf(ContractInvocation);
-      expect(contractInvocation).toEqual(expectedInvocation);
-    });
-
-    describe("when the wallet does not have a default address", () => {
-      let invalidWallet;
-
-      beforeEach(() => (invalidWallet = Wallet.init(walletModel)));
-
-      it("should throw an Error", async () => {
-        await expect(async () => await invalidWallet.invokeContract(options)).rejects.toThrow(
-          Error,
-        );
-      });
     });
   });
 
