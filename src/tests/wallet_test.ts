@@ -783,6 +783,16 @@ describe("Wallet Class", () => {
       it("should return the correct default address", async () => {
         expect((await wallet.getDefaultAddress()).getId()).toBe(walletModel.default_address!.address_id);
       });
+
+      it("should throw an Error if the wallet does not have a default address", async () => {
+        const walletModelNoDefaultAddress = {
+          id: walletId,
+          network_id: Coinbase.networks.BaseSepolia,
+          feature_set: {} as FeatureSet,
+        };
+        const newWallet = Wallet.init(walletModelNoDefaultAddress);
+        await expect(newWallet.getDefaultAddress()).rejects.toThrow("WalletModel default address not set");
+      });
     });
 
     it("should return true for canSign when the wallet is initialized without a seed", async () => {
@@ -1027,6 +1037,11 @@ describe("Wallet Class", () => {
       const importedWallet = await Wallet.import(walletData);
       expect(importedWallet).toBeInstanceOf(Wallet);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
+    });
+    it("should throw an error when walletId is not provided", async () => {
+      const walletData = seedWallet.export();
+      walletData.walletId = "";
+      await expect(async () => await Wallet.import(walletData)).rejects.toThrow("Wallet ID must be provided");
     });
   });
 
