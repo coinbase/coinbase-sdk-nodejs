@@ -42,6 +42,7 @@ import {
   mockListAddress,
   getAssetMock,
   externalAddressApiMock,
+  balanceHistoryApiMock,
   stakeApiMock,
   walletStakeApiMock,
   MINT_NFT_ABI,
@@ -480,8 +481,8 @@ describe("Wallet Class", () => {
         has_more: false,
         next_page: "",
       };
-      Coinbase.apiClients.externalAddress = externalAddressApiMock;
-      Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance = mockReturnValue(
+      Coinbase.apiClients.balanceHistory = balanceHistoryApiMock;
+      Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance = mockReturnValue(
         mockHistoricalBalanceResponse,
       );
     });
