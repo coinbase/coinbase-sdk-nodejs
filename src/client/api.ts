@@ -790,6 +790,176 @@ export interface CreateWebhookRequest {
 
 
 /**
+ * Represents an event triggered by an ERC-20 token transfer on the blockchain. Contains information about the transaction, block, and involved addresses.
+ * @export
+ * @interface ERC20TransferEvent
+ */
+export interface ERC20TransferEvent {
+    /**
+     * Unique identifier for the webhook that triggered this event.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'webhookId'?: string;
+    /**
+     * Type of event, in this case, an ERC-20 token transfer.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'eventType'?: string;
+    /**
+     * Blockchain network where the event occurred.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'network'?: string;
+    /**
+     * Hash of the block containing the transaction.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'blockHash'?: string;
+    /**
+     * Number of the block containing the transaction.
+     * @type {number}
+     * @memberof ERC20TransferEvent
+     */
+    'blockNumber'?: number;
+    /**
+     * Timestamp when the block was mined.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'blockTime'?: string;
+    /**
+     * Hash of the transaction that triggered the event.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'transactionHash'?: string;
+    /**
+     * Position of the transaction within the block.
+     * @type {number}
+     * @memberof ERC20TransferEvent
+     */
+    'transactionIndex'?: number;
+    /**
+     * Position of the event log within the transaction.
+     * @type {number}
+     * @memberof ERC20TransferEvent
+     */
+    'logIndex'?: number;
+    /**
+     * Address of the ERC-20 token contract.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'contractAddress'?: string;
+    /**
+     * Address of the sender in the token transfer.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'from'?: string;
+    /**
+     * Address of the recipient in the token transfer.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'to'?: string;
+    /**
+     * Amount of tokens transferred, typically in the smallest unit (e.g., wei for Ethereum).
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'value'?: string;
+}
+/**
+ * Represents an event triggered by an ERC-721 token transfer on the blockchain. Contains information about the transaction, block, and involved addresses.
+ * @export
+ * @interface ERC721TransferEvent
+ */
+export interface ERC721TransferEvent {
+    /**
+     * Unique identifier for the webhook that triggered this event.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'webhookId'?: string;
+    /**
+     * Type of event, in this case, an ERC-721 token transfer.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'eventType'?: string;
+    /**
+     * Blockchain network where the event occurred.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'network'?: string;
+    /**
+     * Hash of the block containing the transaction.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'blockHash'?: string;
+    /**
+     * Number of the block containing the transaction.
+     * @type {number}
+     * @memberof ERC721TransferEvent
+     */
+    'blockNumber'?: number;
+    /**
+     * Timestamp when the block was mined.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'blockTime'?: string;
+    /**
+     * Hash of the transaction that triggered the event.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'transactionHash'?: string;
+    /**
+     * Position of the transaction within the block.
+     * @type {number}
+     * @memberof ERC721TransferEvent
+     */
+    'transactionIndex'?: number;
+    /**
+     * Position of the event log within the transaction.
+     * @type {number}
+     * @memberof ERC721TransferEvent
+     */
+    'logIndex'?: number;
+    /**
+     * Address of the ERC-721 token contract.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'contractAddress'?: string;
+    /**
+     * Address of the sender in the token transfer.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'from'?: string;
+    /**
+     * Address of the recipient in the token transfer.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'to'?: string;
+    /**
+     * Unique identifier of the NFT being transferred.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'tokenId'?: string;
+}
+/**
  * 
  * @export
  * @interface EthereumTransaction
@@ -1407,7 +1577,8 @@ export interface Network {
 }
 
 export const NetworkProtocolFamilyEnum = {
-    Evm: 'evm'
+    Evm: 'evm',
+    Solana: 'solana'
 } as const;
 
 export type NetworkProtocolFamilyEnum = typeof NetworkProtocolFamilyEnum[keyof typeof NetworkProtocolFamilyEnum];
@@ -1423,7 +1594,8 @@ export const NetworkIdentifier = {
     BaseMainnet: 'base-mainnet',
     EthereumHolesky: 'ethereum-holesky',
     EthereumMainnet: 'ethereum-mainnet',
-    PolygonMainnet: 'polygon-mainnet'
+    PolygonMainnet: 'polygon-mainnet',
+    SolanaDevnet: 'solana-devnet'
 } as const;
 
 export type NetworkIdentifier = typeof NetworkIdentifier[keyof typeof NetworkIdentifier];
@@ -2704,19 +2876,19 @@ export interface Webhook {
  */
 export interface WebhookEventFilter {
     /**
-     * The onchain contract address of the token being transferred.
+     * The onchain contract address of the token for which the events should be tracked.
      * @type {string}
      * @memberof WebhookEventFilter
      */
     'contract_address'?: string;
     /**
-     * The onchain address of the sender.
+     * The onchain address of the sender. Set this filter to track all transfer events originating from your address.
      * @type {string}
      * @memberof WebhookEventFilter
      */
     'from_address'?: string;
     /**
-     * The onchain address of the receiver.
+     * The onchain address of the receiver. Set this filter to track all transfer events sent to your address.
      * @type {string}
      * @memberof WebhookEventFilter
      */
@@ -3798,6 +3970,166 @@ export class AssetsApi extends BaseAPI implements AssetsApiInterface {
 
 
 /**
+ * BalanceHistoryApi - axios parameter creator
+ * @export
+ */
+export const BalanceHistoryApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * List the historical balance of an asset in a specific address.
+         * @summary Get address balance history for asset
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the historical balance for.
+         * @param {string} assetId The symbol of the asset to fetch the historical balance for.
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listAddressHistoricalBalance: async (networkId: string, addressId: string, assetId: string, limit?: number, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('listAddressHistoricalBalance', 'networkId', networkId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('listAddressHistoricalBalance', 'addressId', addressId)
+            // verify required parameter 'assetId' is not null or undefined
+            assertParamExists('listAddressHistoricalBalance', 'assetId', assetId)
+            const localVarPath = `/v1/networks/{network_id}/addresses/{address_id}/balance_history/{asset_id}`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)))
+                .replace(`{${"asset_id"}}`, encodeURIComponent(String(assetId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * BalanceHistoryApi - functional programming interface
+ * @export
+ */
+export const BalanceHistoryApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = BalanceHistoryApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * List the historical balance of an asset in a specific address.
+         * @summary Get address balance history for asset
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the historical balance for.
+         * @param {string} assetId The symbol of the asset to fetch the historical balance for.
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listAddressHistoricalBalance(networkId: string, addressId: string, assetId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AddressHistoricalBalanceList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listAddressHistoricalBalance(networkId, addressId, assetId, limit, page, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['BalanceHistoryApi.listAddressHistoricalBalance']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * BalanceHistoryApi - factory interface
+ * @export
+ */
+export const BalanceHistoryApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = BalanceHistoryApiFp(configuration)
+    return {
+        /**
+         * List the historical balance of an asset in a specific address.
+         * @summary Get address balance history for asset
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the historical balance for.
+         * @param {string} assetId The symbol of the asset to fetch the historical balance for.
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listAddressHistoricalBalance(networkId: string, addressId: string, assetId: string, limit?: number, page?: string, options?: any): AxiosPromise<AddressHistoricalBalanceList> {
+            return localVarFp.listAddressHistoricalBalance(networkId, addressId, assetId, limit, page, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * BalanceHistoryApi - interface
+ * @export
+ * @interface BalanceHistoryApi
+ */
+export interface BalanceHistoryApiInterface {
+    /**
+     * List the historical balance of an asset in a specific address.
+     * @summary Get address balance history for asset
+     * @param {string} networkId The ID of the blockchain network
+     * @param {string} addressId The ID of the address to fetch the historical balance for.
+     * @param {string} assetId The symbol of the asset to fetch the historical balance for.
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BalanceHistoryApiInterface
+     */
+    listAddressHistoricalBalance(networkId: string, addressId: string, assetId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<AddressHistoricalBalanceList>;
+
+}
+
+/**
+ * BalanceHistoryApi - object-oriented interface
+ * @export
+ * @class BalanceHistoryApi
+ * @extends {BaseAPI}
+ */
+export class BalanceHistoryApi extends BaseAPI implements BalanceHistoryApiInterface {
+    /**
+     * List the historical balance of an asset in a specific address.
+     * @summary Get address balance history for asset
+     * @param {string} networkId The ID of the blockchain network
+     * @param {string} addressId The ID of the address to fetch the historical balance for.
+     * @param {string} assetId The symbol of the asset to fetch the historical balance for.
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof BalanceHistoryApi
+     */
+    public listAddressHistoricalBalance(networkId: string, addressId: string, assetId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig) {
+        return BalanceHistoryApiFp(this.configuration).listAddressHistoricalBalance(networkId, addressId, assetId, limit, page, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
  * ContractEventsApi - axios parameter creator
  * @export
  */
@@ -4493,58 +4825,6 @@ export const ExternalAddressesApiAxiosParamCreator = function (configuration?: C
             };
         },
         /**
-         * List the historical balance of an asset in a specific address.
-         * @summary Get address balance history for asset
-         * @param {string} networkId The ID of the blockchain network
-         * @param {string} addressId The ID of the address to fetch the historical balance for.
-         * @param {string} assetId The symbol of the asset to fetch the historical balance for.
-         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        listAddressHistoricalBalance: async (networkId: string, addressId: string, assetId: string, limit?: number, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'networkId' is not null or undefined
-            assertParamExists('listAddressHistoricalBalance', 'networkId', networkId)
-            // verify required parameter 'addressId' is not null or undefined
-            assertParamExists('listAddressHistoricalBalance', 'addressId', addressId)
-            // verify required parameter 'assetId' is not null or undefined
-            assertParamExists('listAddressHistoricalBalance', 'assetId', assetId)
-            const localVarPath = `/v1/networks/{network_id}/addresses/{address_id}/balance_history/{asset_id}`
-                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
-                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)))
-                .replace(`{${"asset_id"}}`, encodeURIComponent(String(assetId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            if (limit !== undefined) {
-                localVarQueryParameter['limit'] = limit;
-            }
-
-            if (page !== undefined) {
-                localVarQueryParameter['page'] = page;
-            }
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
          * List all transactions that interact with the address.
          * @summary List transactions for an address.
          * @param {string} networkId The ID of the blockchain network
@@ -4704,23 +4984,6 @@ export const ExternalAddressesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * List the historical balance of an asset in a specific address.
-         * @summary Get address balance history for asset
-         * @param {string} networkId The ID of the blockchain network
-         * @param {string} addressId The ID of the address to fetch the historical balance for.
-         * @param {string} assetId The symbol of the asset to fetch the historical balance for.
-         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async listAddressHistoricalBalance(networkId: string, addressId: string, assetId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AddressHistoricalBalanceList>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listAddressHistoricalBalance(networkId, addressId, assetId, limit, page, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['ExternalAddressesApi.listAddressHistoricalBalance']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
          * List all transactions that interact with the address.
          * @summary List transactions for an address.
          * @param {string} networkId The ID of the blockchain network
@@ -4789,20 +5052,6 @@ export const ExternalAddressesApiFactory = function (configuration?: Configurati
             return localVarFp.getExternalAddressBalance(networkId, addressId, assetId, options).then((request) => request(axios, basePath));
         },
         /**
-         * List the historical balance of an asset in a specific address.
-         * @summary Get address balance history for asset
-         * @param {string} networkId The ID of the blockchain network
-         * @param {string} addressId The ID of the address to fetch the historical balance for.
-         * @param {string} assetId The symbol of the asset to fetch the historical balance for.
-         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        listAddressHistoricalBalance(networkId: string, addressId: string, assetId: string, limit?: number, page?: string, options?: any): AxiosPromise<AddressHistoricalBalanceList> {
-            return localVarFp.listAddressHistoricalBalance(networkId, addressId, assetId, limit, page, options).then((request) => request(axios, basePath));
-        },
-        /**
          * List all transactions that interact with the address.
          * @summary List transactions for an address.
          * @param {string} networkId The ID of the blockchain network
@@ -4859,20 +5108,6 @@ export interface ExternalAddressesApiInterface {
      * @memberof ExternalAddressesApiInterface
      */
     getExternalAddressBalance(networkId: string, addressId: string, assetId: string, options?: RawAxiosRequestConfig): AxiosPromise<Balance>;
-
-    /**
-     * List the historical balance of an asset in a specific address.
-     * @summary Get address balance history for asset
-     * @param {string} networkId The ID of the blockchain network
-     * @param {string} addressId The ID of the address to fetch the historical balance for.
-     * @param {string} assetId The symbol of the asset to fetch the historical balance for.
-     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ExternalAddressesApiInterface
-     */
-    listAddressHistoricalBalance(networkId: string, addressId: string, assetId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<AddressHistoricalBalanceList>;
 
     /**
      * List all transactions that interact with the address.
@@ -4932,22 +5167,6 @@ export class ExternalAddressesApi extends BaseAPI implements ExternalAddressesAp
      */
     public getExternalAddressBalance(networkId: string, addressId: string, assetId: string, options?: RawAxiosRequestConfig) {
         return ExternalAddressesApiFp(this.configuration).getExternalAddressBalance(networkId, addressId, assetId, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * List the historical balance of an asset in a specific address.
-     * @summary Get address balance history for asset
-     * @param {string} networkId The ID of the blockchain network
-     * @param {string} addressId The ID of the address to fetch the historical balance for.
-     * @param {string} assetId The symbol of the asset to fetch the historical balance for.
-     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ExternalAddressesApi
-     */
-    public listAddressHistoricalBalance(networkId: string, addressId: string, assetId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig) {
-        return ExternalAddressesApiFp(this.configuration).listAddressHistoricalBalance(networkId, addressId, assetId, limit, page, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
