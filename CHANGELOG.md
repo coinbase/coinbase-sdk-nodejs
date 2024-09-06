@@ -3,7 +3,7 @@
 ## Unreleased
 
 ### Changed
-- `getDefaultAddress` wallet method signature now returns a promise, and `getAddress` returns `WalletAddress` instead of `Address`. Both functions will now fetch addresses for the wallet if they haven't been loaded.
+- `getDefaultAddress` wallet method updated to return a promise, and `getAddress` wallet methods now return a promise and `WalletAddress` instead of `Address`. Both functions will now fetch addresses for the wallet if they haven't been loaded.
 
 ## [0.3.0] - 2024-09-05
 
