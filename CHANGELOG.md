@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [0.4.0] - 2024-09-06
+
 ### Changed
 - `getDefaultAddress` wallet method updated to return a promise, and `getAddress` wallet methods now return a promise and `WalletAddress` instead of `Address`. Both functions will now fetch addresses for the wallet if they haven't been loaded.
 
