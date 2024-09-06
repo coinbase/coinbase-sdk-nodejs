@@ -61,7 +61,7 @@ describe("Address", () => {
         has_more: true,
         next_page: "pageToken",
       };
-      Coinbase.apiClients.balanceHistory = balanceHistoryApiMock;
+      Coinbase.apiClients.externalAddress = externalAddressApiMock;
       Coinbase.apiClients.externalAddress!.listAddressTransactions =
         mockReturnValue(mockTransactionsResponse);
     });
