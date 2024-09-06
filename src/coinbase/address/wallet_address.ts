@@ -188,7 +188,7 @@ export class WalletAddress extends Address {
     }
     const asset = await Asset.fetch(this.getNetworkId(), assetId);
     const [destinationAddress, destinationNetworkId] =
-      this.getDestinationAddressAndNetwork(destination);
+      await this.getDestinationAddressAndNetwork(destination);
 
     const normalizedAmount = new Decimal(amount.toString());
     const currentBalance = await this.getBalance(assetId);
@@ -532,12 +532,12 @@ export class WalletAddress extends Address {
    * @param destination - The destination to get the address and network ID of.
    * @returns The address and network ID of the destination.
    */
-  private getDestinationAddressAndNetwork(destination: Destination): [string, string] {
+  private async getDestinationAddressAndNetwork(destination: Destination): Promise<[string, string]> {
     if (typeof destination !== "string" && destination.getNetworkId() !== this.getNetworkId()) {
       throw new ArgumentError("Transfer must be on the same Network");
     }
     if (destination instanceof WalletClass) {
-      return [destination.getDefaultAddress()!.getId(), destination.getNetworkId()];
+      return [(await destination.getDefaultAddress()).getId(), destination.getNetworkId()];
     }
     if (destination instanceof Address) {
       return [destination.getId(), destination.getNetworkId()];
