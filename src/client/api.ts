@@ -476,11 +476,11 @@ export interface ContractInvocation {
      */
     'method': string;
     /**
-     * The arguments to be passed to the contract method.
-     * @type {Array<string>}
+     * The JSON-encoded arguments to pass to the contract method. The keys should be the argument names and the values should be the argument values.
+     * @type {string}
      * @memberof ContractInvocation
      */
-    'args': Array<string>;
+    'args': string;
     /**
      * The JSON-encoded ABI of the contract.
      * @type {string}
@@ -569,11 +569,11 @@ export interface CreateContractInvocationRequest {
      */
     'method': string;
     /**
-     * The arguments to pass to the contract method.
-     * @type {Array<string>}
+     * The JSON-encoded arguments to pass to the contract method. The keys should be the argument names and the values should be the argument values.
+     * @type {string}
      * @memberof CreateContractInvocationRequest
      */
-    'args': Array<string>;
+    'args': string;
     /**
      * The JSON-encoded ABI of the contract.
      * @type {string}
@@ -789,6 +789,176 @@ export interface CreateWebhookRequest {
 }
 
 
+/**
+ * Represents an event triggered by an ERC-20 token transfer on the blockchain. Contains information about the transaction, block, and involved addresses.
+ * @export
+ * @interface ERC20TransferEvent
+ */
+export interface ERC20TransferEvent {
+    /**
+     * Unique identifier for the webhook that triggered this event.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'webhookId'?: string;
+    /**
+     * Type of event, in this case, an ERC-20 token transfer.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'eventType'?: string;
+    /**
+     * Blockchain network where the event occurred.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'network'?: string;
+    /**
+     * Hash of the block containing the transaction.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'blockHash'?: string;
+    /**
+     * Number of the block containing the transaction.
+     * @type {number}
+     * @memberof ERC20TransferEvent
+     */
+    'blockNumber'?: number;
+    /**
+     * Timestamp when the block was mined.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'blockTime'?: string;
+    /**
+     * Hash of the transaction that triggered the event.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'transactionHash'?: string;
+    /**
+     * Position of the transaction within the block.
+     * @type {number}
+     * @memberof ERC20TransferEvent
+     */
+    'transactionIndex'?: number;
+    /**
+     * Position of the event log within the transaction.
+     * @type {number}
+     * @memberof ERC20TransferEvent
+     */
+    'logIndex'?: number;
+    /**
+     * Address of the ERC-20 token contract.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'contractAddress'?: string;
+    /**
+     * Address of the sender in the token transfer.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'from'?: string;
+    /**
+     * Address of the recipient in the token transfer.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'to'?: string;
+    /**
+     * Amount of tokens transferred, typically in the smallest unit (e.g., wei for Ethereum).
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'value'?: string;
+}
+/**
+ * Represents an event triggered by an ERC-721 token transfer on the blockchain. Contains information about the transaction, block, and involved addresses.
+ * @export
+ * @interface ERC721TransferEvent
+ */
+export interface ERC721TransferEvent {
+    /**
+     * Unique identifier for the webhook that triggered this event.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'webhookId'?: string;
+    /**
+     * Type of event, in this case, an ERC-721 token transfer.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'eventType'?: string;
+    /**
+     * Blockchain network where the event occurred.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'network'?: string;
+    /**
+     * Hash of the block containing the transaction.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'blockHash'?: string;
+    /**
+     * Number of the block containing the transaction.
+     * @type {number}
+     * @memberof ERC721TransferEvent
+     */
+    'blockNumber'?: number;
+    /**
+     * Timestamp when the block was mined.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'blockTime'?: string;
+    /**
+     * Hash of the transaction that triggered the event.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'transactionHash'?: string;
+    /**
+     * Position of the transaction within the block.
+     * @type {number}
+     * @memberof ERC721TransferEvent
+     */
+    'transactionIndex'?: number;
+    /**
+     * Position of the event log within the transaction.
+     * @type {number}
+     * @memberof ERC721TransferEvent
+     */
+    'logIndex'?: number;
+    /**
+     * Address of the ERC-721 token contract.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'contractAddress'?: string;
+    /**
+     * Address of the sender in the token transfer.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'from'?: string;
+    /**
+     * Address of the recipient in the token transfer.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'to'?: string;
+    /**
+     * Unique identifier of the NFT being transferred.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'tokenId'?: string;
+}
 /**
  * 
  * @export
@@ -1407,7 +1577,8 @@ export interface Network {
 }
 
 export const NetworkProtocolFamilyEnum = {
-    Evm: 'evm'
+    Evm: 'evm',
+    Solana: 'solana'
 } as const;
 
 export type NetworkProtocolFamilyEnum = typeof NetworkProtocolFamilyEnum[keyof typeof NetworkProtocolFamilyEnum];
@@ -1423,7 +1594,8 @@ export const NetworkIdentifier = {
     BaseMainnet: 'base-mainnet',
     EthereumHolesky: 'ethereum-holesky',
     EthereumMainnet: 'ethereum-mainnet',
-    PolygonMainnet: 'polygon-mainnet'
+    PolygonMainnet: 'polygon-mainnet',
+    SolanaDevnet: 'solana-devnet'
 } as const;
 
 export type NetworkIdentifier = typeof NetworkIdentifier[keyof typeof NetworkIdentifier];
@@ -2704,19 +2876,19 @@ export interface Webhook {
  */
 export interface WebhookEventFilter {
     /**
-     * The onchain contract address of the token being transferred.
+     * The onchain contract address of the token for which the events should be tracked.
      * @type {string}
      * @memberof WebhookEventFilter
      */
     'contract_address'?: string;
     /**
-     * The onchain address of the sender.
+     * The onchain address of the sender. Set this filter to track all transfer events originating from your address.
      * @type {string}
      * @memberof WebhookEventFilter
      */
     'from_address'?: string;
     /**
-     * The onchain address of the receiver.
+     * The onchain address of the receiver. Set this filter to track all transfer events sent to your address.
      * @type {string}
      * @memberof WebhookEventFilter
      */
