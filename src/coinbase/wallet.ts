@@ -287,7 +287,6 @@ export class Wallet {
    * @returns The list of Addresses.
    */
   public async listAddresses(): Promise<WalletAddress[]> {
-    console.log("ID: " + this.getId());
     const response = await Coinbase.apiClients.address!.listAddresses(
       this.getId()!,
       Wallet.MAX_ADDRESSES,
@@ -862,8 +861,6 @@ export class Wallet {
     const key = this.deriveKey(index);
     const ethWallet = new ethers.Wallet(convertStringToHex(key.privateKey!));
     if (ethWallet.address != addressModel.address_id) {
-      console.log("ethWallet.address", ethWallet.address);
-      console.log("addressModel.address_id", addressModel.address_id);
       throw new Error(`Seed does not match wallet`);
     }
 
