@@ -287,6 +287,7 @@ export class Wallet {
    * @returns The list of Addresses.
    */
   public async listAddresses(): Promise<WalletAddress[]> {
+    console.log("ID: " + this.getId());
     const response = await Coinbase.apiClients.address!.listAddresses(
       this.getId()!,
       Wallet.MAX_ADDRESSES,
@@ -312,9 +313,6 @@ export class Wallet {
    * @returns The created Trade object.
    */
   public async createTrade(options: CreateTradeOptions): Promise<Trade> {
-    if (!this.getDefaultAddress()) {
-      throw new Error("Default address not found");
-    }
     return (await this.getDefaultAddress()).createTrade(options);
   }
 
@@ -332,9 +330,6 @@ export class Wallet {
     mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
     options: { [key: string]: string } = {},
   ): Promise<Decimal> {
-    if (!this.getDefaultAddress()) {
-      throw new Error("Default address not found");
-    }
     return (await this.getDefaultAddress()).stakeableBalance(asset_id, mode, options);
   }
 
@@ -352,9 +347,6 @@ export class Wallet {
     mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
     options: { [key: string]: string } = {},
   ): Promise<Decimal> {
-    if (!this.getDefaultAddress()) {
-      throw new Error("Default address not found");
-    }
     return (await this.getDefaultAddress()).unstakeableBalance(asset_id, mode, options);
   }
 
@@ -372,9 +364,6 @@ export class Wallet {
     mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
     options: { [key: string]: string } = {},
   ): Promise<Decimal> {
-    if (!this.getDefaultAddress()) {
-      throw new Error("Default address not found");
-    }
     return (await this.getDefaultAddress()).claimableBalance(asset_id, mode, options);
   }
 
@@ -394,9 +383,6 @@ export class Wallet {
     endTime = formatDate(new Date()),
     format: StakingRewardFormat = StakingRewardFormat.Usd,
   ): Promise<StakingReward[]> {
-    if (!this.getDefaultAddress()) {
-      throw new Error("Default address not found");
-    }
     return (await this.getDefaultAddress()).stakingRewards(assetId, startTime, endTime, format);
   }
 
@@ -414,9 +400,6 @@ export class Wallet {
     startTime = getWeekBackDate(new Date()),
     endTime = formatDate(new Date()),
   ): Promise<StakingBalance[]> {
-    if (!this.getDefaultAddress()) {
-      throw new Error("Default address not found");
-    }
     return (await this.getDefaultAddress()).historicalStakingBalances(assetId, startTime, endTime);
   }
 
@@ -434,9 +417,6 @@ export class Wallet {
     limit,
     page,
   }: ListHistoricalBalancesOptions): Promise<ListHistoricalBalancesResult> {
-    if (!this.getDefaultAddress()) {
-      throw new Error("Default address not found");
-    }
     return (await this.getDefaultAddress()).listHistoricalBalances({
       assetId: assetId,
       limit: limit,
@@ -464,9 +444,6 @@ export class Wallet {
     timeoutSeconds = 60,
     intervalSeconds = 0.2,
   ): Promise<StakingOperation> {
-    if (!this.getDefaultAddress()) {
-      throw new Error("Default address not found");
-    }
     return (await this.getDefaultAddress()).createStake(
       amount,
       assetId,
@@ -497,9 +474,6 @@ export class Wallet {
     timeoutSeconds = 60,
     intervalSeconds = 0.2,
   ): Promise<StakingOperation> {
-    if (!this.getDefaultAddress()) {
-      throw new Error("Default address not found");
-    }
     return (await this.getDefaultAddress()).createUnstake(
       amount,
       assetId,
@@ -530,9 +504,6 @@ export class Wallet {
     timeoutSeconds = 60,
     intervalSeconds = 0.2,
   ): Promise<StakingOperation> {
-    if (!this.getDefaultAddress()) {
-      throw new Error("Default address not found");
-    }
     return (await this.getDefaultAddress()).createClaimStake(
       amount,
       assetId,
@@ -710,14 +681,13 @@ export class Wallet {
    * @returns The default address
    */
   public async getDefaultAddress(): Promise<WalletAddress> {
-    if (!this.model.default_address) {
+    if (this.model.default_address === undefined) {
       throw new Error("WalletModel default address not set");
     }
     const defaultAddress = await this.getAddress(this.model.default_address.address_id);
     if (!defaultAddress) {
       throw new Error("Default address not found");
     }
-
     return defaultAddress;
   }
 
@@ -892,6 +862,8 @@ export class Wallet {
     const key = this.deriveKey(index);
     const ethWallet = new ethers.Wallet(convertStringToHex(key.privateKey!));
     if (ethWallet.address != addressModel.address_id) {
+      console.log("ethWallet.address", ethWallet.address);
+      console.log("addressModel.address_id", addressModel.address_id);
       throw new Error(`Seed does not match wallet`);
     }
 
