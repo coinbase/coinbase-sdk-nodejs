@@ -718,7 +718,7 @@ export class Wallet {
       throw new Error("Default address not found");
     }
 
-    return defaultAddress
+    return defaultAddress;
   }
 
   /**
