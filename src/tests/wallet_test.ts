@@ -629,17 +629,17 @@ describe("Wallet Class", () => {
       contractAddress: VALID_SIGNED_CONTRACT_INVOCATION_MODEL.contract_address,
     };
 
-    beforeEach(() => {
+    beforeEach(async () => {
       expectedInvocation = ContractInvocation.fromModel(VALID_SIGNED_CONTRACT_INVOCATION_MODEL);
 
-      wallet.getDefaultAddress()!.invokeContract = jest.fn().mockResolvedValue(expectedInvocation);
+      (await wallet.getDefaultAddress()).invokeContract = jest.fn().mockResolvedValue(expectedInvocation);
     });
 
     it("successfully invokes a contract on the default address", async () => {
       const contractInvocation = await wallet.invokeContract(options);
 
-      expect(wallet.getDefaultAddress()!.invokeContract).toHaveBeenCalledTimes(1);
-      expect(wallet.getDefaultAddress()!.invokeContract).toHaveBeenCalledWith(options);
+      expect((await wallet.getDefaultAddress()).invokeContract).toHaveBeenCalledTimes(1);
+      expect((await wallet.getDefaultAddress()).invokeContract).toHaveBeenCalledWith(options);
 
       expect(contractInvocation).toBeInstanceOf(ContractInvocation);
       expect(contractInvocation).toEqual(expectedInvocation);
@@ -680,7 +680,7 @@ describe("Wallet Class", () => {
 
       expect(Coinbase.apiClients.address!.createPayloadSignature).toHaveBeenCalledWith(
         wallet.getId(),
-        wallet.getDefaultAddress()!.getId(),
+        (await wallet.getDefaultAddress()).getId(),
         {
           unsigned_payload: unsignedPayload,
           signature,
@@ -701,7 +701,7 @@ describe("Wallet Class", () => {
 
       expect(Coinbase.apiClients.address!.createPayloadSignature).toHaveBeenCalledWith(
         wallet.getId(),
-        wallet.getDefaultAddress()!.getId(),
+        (await wallet.getDefaultAddress()).getId(),
         {
           unsigned_payload: unsignedPayload,
           signature,
@@ -781,7 +781,7 @@ describe("Wallet Class", () => {
 
     describe("#getDefaultAddress", () => {
       it("should return the correct default address", async () => {
-        expect(wallet.getDefaultAddress()!.getId()).toBe(walletModel.default_address!.address_id);
+        expect((await wallet.getDefaultAddress()).getId()).toBe(walletModel.default_address!.address_id);
       });
     });
 
@@ -813,7 +813,7 @@ describe("Wallet Class", () => {
       mockListAddress(existingSeed, 2);
       addresses = await wallet.listAddresses();
       expect(addresses.length).toBe(2);
-      expect(wallet.getAddress(newAddress.getId())!.getId()).toBe(newAddress.getId());
+      expect((await wallet.getAddress(newAddress.getId()))!.getId()).toBe(newAddress.getId());
       expect(Coinbase.apiClients.address!.createAddress).toHaveBeenCalledTimes(1);
     });
 
@@ -948,7 +948,7 @@ describe("Wallet Class", () => {
       expect(newAddress).toBeInstanceOf(WalletAddress);
       addresses = await wallet.listAddresses();
       expect(addresses.length).toBe(3);
-      expect(wallet.getAddress(newAddress.getId())!.getId()).toBe(newAddress.getId());
+      expect((await wallet.getAddress(newAddress.getId()))!.getId()).toBe(newAddress.getId());
     });
 
     it("should return the correct string representation", async () => {
