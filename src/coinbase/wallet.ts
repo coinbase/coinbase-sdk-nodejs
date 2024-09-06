@@ -730,10 +730,6 @@ export class Wallet {
    * @throws {APIError} if the API request to broadcast a Transfer fails.
    */
   public async createTransfer(options: CreateTransferOptions): Promise<Transfer> {
-    if (!this.getDefaultAddress()) {
-      throw new Error("Default address not found");
-    }
-
     return (await this.getDefaultAddress()).createTransfer(options);
   }
 
@@ -746,10 +742,6 @@ export class Wallet {
    * @throws {Error} if the default address is not found.
    */
   public async createPayloadSignature(unsignedPayload: string): Promise<PayloadSignature> {
-    if (!this.getDefaultAddress()) {
-      throw new Error("Default address not found");
-    }
-
     return (await this.getDefaultAddress()).createPayloadSignature(unsignedPayload);
   }
 
@@ -768,10 +760,6 @@ export class Wallet {
   public async invokeContract(
     options: CreateContractInvocationOptions,
   ): Promise<ContractInvocation> {
-    if (!this.getDefaultAddress()) {
-      throw new Error("Default address not found");
-    }
-
     return (await this.getDefaultAddress()).invokeContract(options);
   }
 
