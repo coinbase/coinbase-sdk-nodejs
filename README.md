@@ -131,7 +131,7 @@ Next, view the default Address of your Wallet. You will need this default Addres
 
 ```typescript
 // A Wallet has a default Address.
-const address = wallet.getDefaultAddress();
+const address = await wallet.getDefaultAddress();
 console.log(`Address: ${address}`);
 ```
 

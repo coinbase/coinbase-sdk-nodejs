@@ -13,7 +13,7 @@ async function createReceivingWallets() {
     let receivingWallet = await Wallet.create();
     console.log(`Receiving Wallet${i} successfully created: `, receivingWallet.toString());
 
-    let receivingAddress = receivingWallet.getDefaultAddress();
+    let receivingAddress = await receivingWallet.getDefaultAddress();
     console.log(`Default address for Wallet${i}: `, receivingAddress.getId());
     addresses.push([receivingAddress.getId()]); // Storing Address as an array.
   }
@@ -41,7 +41,7 @@ async function createAndFundSendingWallet() {
   console.log(`sendingWallet successfully created: `, sendingWallet.toString());
 
   // Get sending Wallet Address.
-  let sendingAddress = sendingWallet.getDefaultAddress();
+  let sendingAddress = await sendingWallet.getDefaultAddress();
   console.log(`Default address for sendingWallet: `, sendingAddress.toString());
 
   // Fund sending Wallet.

@@ -108,7 +108,7 @@ export class Address {
     const historyList: HistoricalBalance[] = [];
 
     if (limit !== undefined || page !== undefined) {
-      const response = await Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance(
+      const response = await Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance(
         this.getNetworkId(),
         this.getId(),
         Asset.primaryDenomination(assetId),
@@ -130,7 +130,7 @@ export class Address {
     const queue: string[] = [""];
     while (queue.length > 0 && historyList.length < Address.MAX_HISTORICAL_BALANCE) {
       const page = queue.shift();
-      const response = await Coinbase.apiClients.externalAddress!.listAddressHistoricalBalance(
+      const response = await Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance(
         this.getNetworkId(),
         this.getId(),
         Asset.primaryDenomination(assetId),
