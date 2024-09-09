@@ -92,7 +92,7 @@ async function sendMassPayout(sendingWallet) {
   try {
     // Manage CDP Api Key for Coinbase SDK.
     // Configure location to CDP API Key.
-    let coinbase = Coinbase.configureFromJson({
+    Coinbase.configureFromJson({
       filePath: `${os.homedir()}/Downloads/cdp_api_key.json`,
     });
 

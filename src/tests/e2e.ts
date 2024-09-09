@@ -4,13 +4,12 @@ import { Coinbase, Wallet } from "../index";
 import { TransferStatus } from "../coinbase/types";
 
 describe("Coinbase SDK E2E Test", () => {
-  let coinbase: Coinbase;
   beforeAll(() => {
     dotenv.config();
   });
 
   beforeEach(() => {
-    coinbase = new Coinbase({
+    new Coinbase({
       apiKeyName: process.env.NAME as string,
       privateKey: process.env.PRIVATE_KEY as string,
     });

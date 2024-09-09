@@ -1,7 +1,7 @@
 import { Coinbase, Wallet } from "@coinbase/coinbase-sdk";
 
 // Change this to the path of your API key file downloaded from CDP portal.
-let coinbase = Coinbase.configureFromJson({ filePath: "~/Downloads/cdp_api_key.json" });
+Coinbase.configureFromJson({ filePath: "~/Downloads/cdp_api_key.json" });
 
 // Create a Wallet for the User.
 let wallet = await Wallet.create();
