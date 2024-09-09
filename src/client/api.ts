@@ -706,7 +706,7 @@ export interface CreateTransferRequest {
      */
     'asset_id': string;
     /**
-     * The destination address
+     * The destination address, which can be a 0x address, Basename, or ENS name
      * @type {string}
      * @memberof CreateTransferRequest
      */
