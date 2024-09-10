@@ -1,6 +1,6 @@
 import { Coinbase, Wallet } from "@coinbase/coinbase-sdk";
 
-let coinbase = Coinbase.configureFromJson({ filePath: "~/Downloads/cdp_api_key.json" });
+Coinbase.configureFromJson({ filePath: "~/Downloads/cdp_api_key.json" });
 
 // Create a Wallet on base-mainnet to trade assets with.
 let wallet = await Wallet.create({ networkId: Coinbase.networks.BaseMainnet });

@@ -79,18 +79,18 @@ const apiKeyName = "Copy your API Key name here.";
 
 const privateKey = "Copy your API Key's private key here.";
 
-const coinbase = new Coinbase({ apiKeyName: apiKeyName, privateKey: privateKey });
+Coinbase.configure({ apiKeyName: apiKeyName, privateKey: privateKey });
 ```
 
 If you are using a CDP Server-Signer to manage your private keys, enable it with the constuctor option:
 ```typescript
-const coinbase = new Coinbase({ apiKeyName: apiKeyName, privateKey: apiKeyPrivateKey, useServerSigner: true })
+Coinbase.configure({ apiKeyName: apiKeyName, privateKey: apiKeyPrivateKey, useServerSigner: true })
 ```
 
 Another way to initialize the SDK is by sourcing the API key from the json file that contains your API key, downloaded from CDP portal.
 
 ```typescript
-const coinbase = Coinbase.configureFromJson({ filePath: "path/to/your/api-key.json" });
+Coinbase.configureFromJson({ filePath: "path/to/your/api-key.json" });
 ```
 
 This will allow you to authenticate with the Platform APIs.
@@ -99,7 +99,7 @@ CommonJs:
 
 ```javascript
 const { Coinbase, Wallet } = require("@coinbase/coinbase-sdk");
-const coinbase = Coinbase.configureFromJson("path/to/your/api-key.json");
+Coinbase.configureFromJson("path/to/your/api-key.json");
 
 // List all Wallets for the CDP Project.
 Wallet.listWallets().then(wallets => {
@@ -111,7 +111,7 @@ Or using ES modules and async/await:
 
 ```typescript
 import { Coinbase, Wallet } from "@coinbase/coinbase-sdk";
-const coinbase = Coinbase.configureFromJson("path/to/your/api-key.json");
+Coinbase.configureFromJson("path/to/your/api-key.json");
 
 // List all Wallets for the CDP Project.
 const wallets = await Wallet.listWallets();
