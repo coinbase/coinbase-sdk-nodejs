@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add `Coinbase.configure` method to allow for configuration of the SDK and marked constructor as deprecated.
+
 ## [0.4.0] - 2024-09-06
 
 ### Changed

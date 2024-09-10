@@ -9,7 +9,7 @@ describe("Coinbase SDK E2E Test", () => {
   });
 
   beforeEach(() => {
-    new Coinbase({
+    Coinbase.configure({
       apiKeyName: process.env.NAME as string,
       privateKey: process.env.PRIVATE_KEY as string,
     });
