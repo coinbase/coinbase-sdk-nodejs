@@ -63,6 +63,8 @@ export const mockListAddress = (seed: string, count = 1) => {
 export const walletId = randomUUID();
 export const transferId = randomUUID();
 
+export const amount = "0";
+
 export const generateWalletFromSeed = (seed: string, count = 2) => {
   const baseWallet = HDKey.fromMasterSeed(Buffer.from(seed, "hex"));
   const data: Record<string, string> = {};
@@ -252,6 +254,7 @@ export const VALID_CONTRACT_INVOCATION_MODEL: ContractInvocationModel = {
   method: "mint",
   args: JSON.stringify(MINT_NFT_ARGS),
   abi: JSON.stringify(MINT_NFT_ABI),
+  amount: "0",
   transaction: {
     network_id: Coinbase.networks.BaseSepolia,
     from_address_id: "0xdeadbeef",

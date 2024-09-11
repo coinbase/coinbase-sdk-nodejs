@@ -1,6 +1,14 @@
 # Coinbase Node.js SDK Changelog
 
-## Unreleased
+## Unreleased 
+
+## [0.5.0] - 2024-09-11
+
+- Add Arbitrum-Mainnet support for Native transfers.
+- Add `Coinbase.configure` method to allow for configuration of the SDK and marked constructor as deprecated.
+- Return correlation ID from APIError response
+- Add optional fields to `CreateContractInvocationOptions` to set amount for payable contract method invocations
+- Add a `StakingRewardFormat` enum to allow for specifying the format in which staking rewards should be returned.
 
 ## [0.4.0] - 2024-09-06
 

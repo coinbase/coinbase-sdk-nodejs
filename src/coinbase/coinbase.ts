@@ -74,6 +74,8 @@ export class Coinbase {
   /**
    * Initializes the Coinbase SDK.
    *
+   * @deprecated as of v0.5.0, use `configure` or `configureFromJson` instead.
+   *
    * @class
    * @param options - The constructor options.
    * @param options.apiKeyName - The API key name.
@@ -144,6 +146,33 @@ export class Coinbase {
     Coinbase.apiClients.smartContract = ContractEventsApiFactory(config, basePath, axiosInstance);
     Coinbase.apiKeyPrivateKey = privateKey;
     Coinbase.useServerSigner = useServerSigner;
+  }
+
+  /**
+   * Configures the Coinbase SDK with the provided options.
+   *
+   * @param options - The configuration options.
+   * @param options.apiKeyName - The name of the API key.
+   * @param options.privateKey - The private key associated with the API key.
+   * @param options.useServerSigner - Whether to use a Server-Signer or not. Defaults to false.
+   * @param options.debugging - If true, logs API requests and responses to the console. Defaults to false.
+   * @param options.basePath - The base path for the API. Defaults to BASE_PATH.
+   * @returns A new instance of the Coinbase SDK.
+   */
+  static configure({
+    apiKeyName,
+    privateKey,
+    useServerSigner = false,
+    debugging = false,
+    basePath = BASE_PATH,
+  }: CoinbaseOptions) {
+    return new Coinbase({
+      apiKeyName,
+      privateKey,
+      useServerSigner,
+      debugging,
+      basePath,
+    });
   }
 
   /**

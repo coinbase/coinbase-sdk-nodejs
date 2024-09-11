@@ -4,7 +4,7 @@ import Decimal from "decimal.js";
 import { ethers } from "ethers";
 import * as fs from "fs";
 import * as secp256k1 from "secp256k1";
-import { Address as AddressModel, Wallet as WalletModel, StakingRewardFormat } from "../client";
+import { Address as AddressModel, Wallet as WalletModel } from "../client";
 import { Address } from "./address";
 import { WalletAddress } from "./address/wallet_address";
 import { Asset } from "./asset";
@@ -17,6 +17,7 @@ import { Trade } from "./trade";
 import { Transfer } from "./transfer";
 import {
   Amount,
+  StakingRewardFormat,
   CreateContractInvocationOptions,
   CreateTransferOptions,
   CreateTradeOptions,
@@ -380,7 +381,7 @@ export class Wallet {
     assetId: string,
     startTime = getWeekBackDate(new Date()),
     endTime = formatDate(new Date()),
-    format: StakingRewardFormat = StakingRewardFormat.Usd,
+    format: StakingRewardFormat = StakingRewardFormat.USD,
   ): Promise<StakingReward[]> {
     return (await this.getDefaultAddress()).stakingRewards(assetId, startTime, endTime, format);
   }
@@ -754,6 +755,9 @@ export class Wallet {
    * @param options.abi - The ABI of the contract.
    * @param options.args - The arguments to pass to the contract method invocation.
    *   The keys should be the argument names and the values should be the argument values.
+   * @param options.amount - The amount of the asset to send to a payable contract method.
+   * @param options.assetId - The ID of the asset to send to a payable contract method.
+   *   The asset must be a denomination of the native asset. (Ex. "wei", "gwei", or "eth").
    * @returns The ContractInvocation object.
    * @throws {APIError} if the API request to create a contract invocation fails.
    */

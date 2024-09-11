@@ -8,13 +8,13 @@ import { HistoricalBalance } from "./historical_balance";
 import {
   Amount,
   StakeOptionsMode,
+  StakingRewardFormat,
   ListHistoricalBalancesResult,
   ListHistoricalBalancesOptions,
   ListTransactionsOptions,
   ListTransactionsResult,
 } from "./types";
 import { formatDate, getWeekBackDate } from "./utils";
-import { StakingRewardFormat } from "../client";
 import { StakingReward } from "./staking_reward";
 import { StakingBalance } from "./staking_balance";
 import { Transaction } from "./transaction";
@@ -201,7 +201,7 @@ export class Address {
     assetId: string,
     startTime = getWeekBackDate(new Date()),
     endTime = formatDate(new Date()),
-    format: StakingRewardFormat = StakingRewardFormat.Usd,
+    format: StakingRewardFormat = StakingRewardFormat.USD,
   ): Promise<StakingReward[]> {
     return StakingReward.list(
       Coinbase.normalizeNetwork(this.getNetworkId()),

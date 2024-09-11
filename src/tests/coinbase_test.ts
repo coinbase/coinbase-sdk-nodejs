@@ -32,10 +32,10 @@ describe("Coinbase tests", () => {
   });
 
   it("should throw an error if the API key name or private key is empty", () => {
-    expect(() => new Coinbase({ apiKeyName: "", privateKey: "test" })).toThrow(
+    expect(() => Coinbase.configure({ apiKeyName: "", privateKey: "test" })).toThrow(
       "Invalid configuration: apiKeyName is empty",
     );
-    expect(() => new Coinbase({ apiKeyName: "test", privateKey: "" })).toThrow(
+    expect(() => Coinbase.configure({ apiKeyName: "test", privateKey: "" })).toThrow(
       "Invalid configuration: privateKey is empty",
     );
   });

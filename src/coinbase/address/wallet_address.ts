@@ -275,8 +275,13 @@ export class WalletAddress extends Address {
    * @param options.abi - The ABI of the contract.
    * @param options.args - The arguments to pass to the contract method invocation.
    *   The keys should be the argument names and the values should be the argument values.
+   * @param options.amount - The amount of the asset to send to a payable contract method.
+   * @param options.assetId - The ID of the asset to send to a payable contract method.
+   *   The asset must be a denomination of the native asset. (Ex. "wei", "gwei", or "eth").
    * @returns The ContractInvocation object.
    * @throws {APIError} if the API request to create a contract invocation fails.
+   * @throws {Error} if the address cannot sign.
+   * @throws {ArgumentError} if the address does not have sufficient balance.
    */
   public async invokeContract(
     options: CreateContractInvocationOptions,
@@ -285,7 +290,27 @@ export class WalletAddress extends Address {
       throw new Error("Cannot invoke contract from address without private key loaded");
     }
 
-    const contractInvocation = await this.createContractInvocation(options);
+    let atomicAmount: string | undefined;
+
+    if (options.assetId && options.amount) {
+      const asset = await Asset.fetch(this.getNetworkId(), options.assetId);
+      const normalizedAmount = new Decimal(options.amount.toString());
+      const currentBalance = await this.getBalance(options.assetId);
+      if (currentBalance.lessThan(normalizedAmount)) {
+        throw new ArgumentError(
+          `Insufficient funds: ${normalizedAmount} requested, but only ${currentBalance} available`,
+        );
+      }
+      atomicAmount = asset.toAtomicAmount(normalizedAmount).toString();
+    }
+
+    const contractInvocation = await this.createContractInvocation(
+      options.contractAddress,
+      options.method,
+      options.abi!,
+      options.args,
+      atomicAmount,
+    );
 
     if (Coinbase.useServerSigner) {
       return contractInvocation;
@@ -298,28 +323,33 @@ export class WalletAddress extends Address {
   }
 
   /**
-   * Creates a contract invocation model for the specified contract address, method, and arguments.
-   * The ABI object must be specified if the contract is not a known contract.
+   * Creates a contract invocation with the given data.
    *
-   * @param amount - The amount of the Asset to send.
-   * @param fromAsset - The Asset to trade from.
-   * @param toAsset - The Asset to trade to.
-   * @returns A promise that resolves to a Trade object representing the new trade.
+   * @param contractAddress - The address of the contract the method will be invoked on.
+   * @param method - The method to invoke on the contract.
+   * @param abi - The ABI of the contract.
+   * @param args - The arguments to pass to the contract method invocation.
+   *   The keys should be the argument names and the values should be the argument values.
+   * @param atomicAmount - The atomic amount of the native asset to send to a payable contract method.
+   * @returns The ContractInvocation object.
+   * @throws {APIError} if the API request to create a contract invocation fails.
    */
-  private async createContractInvocation({
-    abi,
-    args,
-    contractAddress,
-    method,
-  }: CreateContractInvocationOptions): Promise<ContractInvocation> {
+  private async createContractInvocation(
+    contractAddress: string,
+    method: string,
+    abi: object,
+    args: object,
+    atomicAmount?: string,
+  ): Promise<ContractInvocation> {
     const resp = await Coinbase.apiClients.contractInvocation!.createContractInvocation(
       this.getWalletId(),
       this.getId(),
       {
-        method,
+        method: method,
         abi: JSON.stringify(abi),
         contract_address: contractAddress,
         args: JSON.stringify(args),
+        amount: atomicAmount,
       },
     );
 
@@ -532,7 +562,9 @@ export class WalletAddress extends Address {
    * @param destination - The destination to get the address and network ID of.
    * @returns The address and network ID of the destination.
    */
-  private async getDestinationAddressAndNetwork(destination: Destination): Promise<[string, string]> {
+  private async getDestinationAddressAndNetwork(
+    destination: Destination,
+  ): Promise<[string, string]> {
     if (typeof destination !== "string" && destination.getNetworkId() !== this.getNetworkId()) {
       throw new ArgumentError("Transfer must be on the same Network");
     }
