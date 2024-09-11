@@ -34,7 +34,8 @@ describe("APIError", () => {
     expect(apiError.httpCode).toBeNull();
     expect(apiError.apiCode).toBeNull();
     expect(apiError.apiMessage).toBeNull();
-    expect(apiError.toString()).toBe("APIError{httpCode: null, apiCode: null, apiMessage: null}");
+    expect(apiError.correlationId).toBeNull();
+    expect(apiError.toString()).toBe("APIError{}");
   });
 
   test("should create APIError with response data", () => {
@@ -44,6 +45,7 @@ describe("APIError", () => {
         data: {
           code: "invalid_wallet_id",
           message: "Invalid wallet ID",
+          correlation_id: "123",
         },
       },
     } as AxiosError;
@@ -53,8 +55,9 @@ describe("APIError", () => {
     expect(apiError.httpCode).toBe(400);
     expect(apiError.apiCode).toBe("invalid_wallet_id");
     expect(apiError.apiMessage).toBe("Invalid wallet ID");
+    expect(apiError.correlationId).toBe("123");
     expect(apiError.toString()).toBe(
-      "APIError{httpCode: 400, apiCode: invalid_wallet_id, apiMessage: Invalid wallet ID}",
+      "APIError{httpCode: 400, apiCode: invalid_wallet_id, apiMessage: Invalid wallet ID, correlationId: 123}",
     );
   });
 

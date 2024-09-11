@@ -16,6 +16,7 @@ export class APIError extends AxiosError {
   httpCode: number | null;
   apiCode: string | null;
   apiMessage: string | null;
+  correlationId: string | null;
 
   /**
    * Initializes a new APIError object.
@@ -29,11 +30,13 @@ export class APIError extends AxiosError {
     this.httpCode = error.response ? error.response.status : null;
     this.apiCode = null;
     this.apiMessage = null;
+    this.correlationId = null;
 
     if (error.response && error.response.data) {
       const body = error.response.data;
       this.apiCode = body.code;
       this.apiMessage = body.message;
+      this.correlationId = body.correlation_id;
     }
   }
 
@@ -108,7 +111,14 @@ export class APIError extends AxiosError {
    * @returns {string} a String representation of the APIError
    */
   toString() {
-    return `APIError{httpCode: ${this.httpCode}, apiCode: ${this.apiCode}, apiMessage: ${this.apiMessage}}`;
+    let payload = {} as Record<string, unknown>;
+
+    if (this.httpCode) payload.httpCode = this.httpCode;
+    if (this.apiCode) payload.apiCode = this.apiCode;
+    if (this.apiMessage) payload.apiMessage = this.apiMessage;
+    if (this.correlationId) payload.correlationId = this.correlationId;
+
+    return `${this.name}{${Object.entries(payload).map(([key, value]) => `${key}: ${value}`).join(", ")}}`;
   }
 }
 
