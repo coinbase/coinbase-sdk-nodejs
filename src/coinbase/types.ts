@@ -11,7 +11,6 @@ import {
   BroadcastTransferRequest,
   CreateTransferRequest,
   TransferList,
-  User as UserModel,
   Wallet as WalletModel,
   Transfer as TransferModel,
   Trade as TradeModel,
@@ -439,20 +438,6 @@ export type ExternalAddressAPIClient = {
   ): AxiosPromise<FaucetTransaction>;
 };
 
-/**
- * UserAPI client type definition.
- */
-export type UserAPIClient = {
-  /**
-   * Retrieves the current user.
-   *
-   * @param options - Axios request options.
-   * @returns - A promise resolvindg to the User model.
-   * @throws {APIError} If the request fails.
-   */
-  getCurrentUser(options?: AxiosRequestConfig): AxiosPromise<UserModel>;
-};
-
 export type WalletStakeAPIClient = {
   broadcastStakingOperation(
     walletId: string,
@@ -724,7 +709,6 @@ export type ExternalSmartContractAPIClient = {
  * Represents the set of API clients available in the SDK.
  */
 export type ApiClients = {
-  user?: UserAPIClient;
   wallet?: WalletAPIClient;
   address?: AddressAPIClient;
   transfer?: TransferAPIClient;
