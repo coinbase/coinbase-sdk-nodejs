@@ -1,8 +1,4 @@
-import {
-  FetchStakingRewards200Response,
-  StakingRewardFormat,
-  StakingRewardStateEnum,
-} from "../client";
+import { FetchStakingRewards200Response, StakingRewardStateEnum } from "../client";
 import { Coinbase } from "../coinbase/coinbase";
 import {
   assetsApiMock,
@@ -12,6 +8,7 @@ import {
   newAddressModel,
   stakeApiMock,
 } from "./utils";
+import { StakingRewardFormat } from "../coinbase/types";
 import { StakingReward } from "../coinbase/staking_reward";
 import { ExternalAddress } from "../coinbase/address/external_address";
 import { Asset } from "../coinbase/asset";
@@ -35,7 +32,7 @@ describe("StakingReward", () => {
         date: "2024-05-01",
         amount: "361",
         state: StakingRewardStateEnum.Pending,
-        format: StakingRewardFormat.Usd,
+        format: "usd",
         usd_value: {
           amount: "361",
           conversion_price: "3000",
@@ -47,7 +44,7 @@ describe("StakingReward", () => {
         date: "2024-05-02",
         amount: "203",
         state: StakingRewardStateEnum.Pending,
-        format: StakingRewardFormat.Usd,
+        format: "usd",
         usd_value: {
           amount: "203",
           conversion_price: "3000",
@@ -59,7 +56,7 @@ describe("StakingReward", () => {
         date: "2024-05-03",
         amount: "226",
         state: StakingRewardStateEnum.Pending,
-        format: StakingRewardFormat.Usd,
+        format: "usd",
         usd_value: {
           amount: "226",
           conversion_price: "3000",
@@ -100,7 +97,7 @@ describe("StakingReward", () => {
           address_ids: [address.getId()],
           start_time: startTime,
           end_time: endTime,
-          format: StakingRewardFormat.Usd,
+          format: StakingRewardFormat.USD,
         },
         100,
         undefined,
@@ -130,7 +127,7 @@ describe("StakingReward", () => {
           address_ids: [address.getId()],
           start_time: startTime,
           end_time: endTime,
-          format: StakingRewardFormat.Usd,
+          format: StakingRewardFormat.USD,
         },
         100,
         undefined,
@@ -146,7 +143,7 @@ describe("StakingReward", () => {
           date: "2024-05-03",
           amount: "226",
           state: StakingRewardStateEnum.Pending,
-          format: StakingRewardFormat.Usd,
+          format: StakingRewardFormat.USD,
           usd_value: {
             amount: "226",
             conversion_price: "3000",
@@ -154,7 +151,7 @@ describe("StakingReward", () => {
           },
         },
         asset,
-        StakingRewardFormat.Usd,
+        StakingRewardFormat.USD,
       );
 
       const amount = reward.amount();
@@ -170,7 +167,7 @@ describe("StakingReward", () => {
           date: "2024-05-03",
           amount: "726030823305604",
           state: StakingRewardStateEnum.Pending,
-          format: StakingRewardFormat.Native,
+          format: StakingRewardFormat.NATIVE,
           usd_value: {
             amount: "179",
             conversion_price: "2461.63",
@@ -178,7 +175,7 @@ describe("StakingReward", () => {
           },
         },
         asset,
-        StakingRewardFormat.Native,
+        StakingRewardFormat.NATIVE,
       );
 
       const amount = reward.amount();
@@ -194,7 +191,7 @@ describe("StakingReward", () => {
           date: "2024-05-03",
           amount: "226",
           state: StakingRewardStateEnum.Pending,
-          format: StakingRewardFormat.Usd,
+          format: StakingRewardFormat.USD,
           usd_value: {
             amount: "226",
             conversion_price: "3000",
@@ -202,7 +199,7 @@ describe("StakingReward", () => {
           },
         },
         asset,
-        StakingRewardFormat.Usd,
+        StakingRewardFormat.USD,
       );
 
       const date = reward.date();
@@ -220,7 +217,7 @@ describe("StakingReward", () => {
           date: "2024-05-03",
           amount: "226",
           state: StakingRewardStateEnum.Pending,
-          format: StakingRewardFormat.Usd,
+          format: StakingRewardFormat.USD,
           usd_value: {
             amount: "226",
             conversion_price: "3000",
@@ -228,7 +225,7 @@ describe("StakingReward", () => {
           },
         },
         asset,
-        StakingRewardFormat.Usd,
+        StakingRewardFormat.USD,
       );
 
       const rewardStr = reward.toString();
@@ -246,7 +243,7 @@ describe("StakingReward", () => {
           date: "2024-05-03",
           amount: "226",
           state: StakingRewardStateEnum.Pending,
-          format: StakingRewardFormat.Usd,
+          format: StakingRewardFormat.USD,
           usd_value: {
             amount: "226",
             conversion_price: "3000",
@@ -254,7 +251,7 @@ describe("StakingReward", () => {
           },
         },
         asset,
-        StakingRewardFormat.Usd,
+        StakingRewardFormat.USD,
       );
 
       const addressId = reward.addressId();
