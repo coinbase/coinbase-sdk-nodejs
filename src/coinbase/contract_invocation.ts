@@ -1,3 +1,4 @@
+import { Decimal } from "decimal.js";
 import { TransactionStatus } from "./types";
 import { Transaction } from "./transaction";
 import { Coinbase } from "./coinbase";
@@ -7,9 +8,8 @@ import { delay } from "./utils";
 import { TimeoutError } from "./errors";
 
 /**
- * A representation of a ContractInvocation, which moves an Amount of an Asset from
- * a user-controlled Wallet to another Address. The fee is assumed to be paid
- * in the native Asset of the Network.
+ * A representation of a ContractInvocation, which calls a smart contract method
+ * onchain. The fee is assumed to be paid in the native Asset of the Network.
  */
 export class ContractInvocation {
   private model: ContractInvocationModel;
@@ -111,6 +111,15 @@ export class ContractInvocation {
     if (!this.model.abi) return undefined;
 
     return JSON.parse(this.model.abi);
+  }
+
+  /**
+   * Returns the amount of the native asset sent to a payable contract method, if applicable.
+   *
+   * @returns The amount in atomic units of the native asset.
+   */
+  public getAmount(): Decimal {
+    return new Decimal(this.model.amount);
   }
 
   /**
