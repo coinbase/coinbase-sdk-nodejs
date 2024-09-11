@@ -103,6 +103,12 @@ describe("Contract Invocation Class", () => {
     });
   });
 
+  describe("#getAmount", () => {
+    it("returns the amount", () => {
+      expect(contractInvocation.getAmount()).toEqual(new Decimal(0));
+    });
+  });
+
   describe("#getTransactionHash", () => {
     describe("when the transaction has a hash", () => {
       let transactionHash = "0xtransactionHash";

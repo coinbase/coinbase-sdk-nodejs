@@ -1202,6 +1202,94 @@ describe("WalletAddress", () => {
         });
       });
 
+      describe("when it is successful invoking a payable contract method", () => {
+        let contractInvocation;
+        let amount = new Decimal("1000");
+        let balanceResponse = { amount: "5000000", asset: { asset_id: "eth", decimals: 18 } };
+
+        beforeEach(async () => {
+          Coinbase.apiClients.contractInvocation!.createContractInvocation = mockReturnValue({
+            ...VALID_CONTRACT_INVOCATION_MODEL,
+            address_id: walletAddress.getId(),
+            wallet_id: walletAddress.getWalletId(),
+            amount,
+          });
+
+          Coinbase.apiClients.contractInvocation!.broadcastContractInvocation = mockReturnValue({
+            ...VALID_SIGNED_CONTRACT_INVOCATION_MODEL,
+            address_id: walletAddress.getId(),
+            wallet_id: walletAddress.getWalletId(),
+            amount,
+          });
+
+          Coinbase.apiClients.externalAddress!.getExternalAddressBalance =
+            mockReturnValue(balanceResponse);
+
+          contractInvocation = await walletAddress.invokeContract({
+            abi: MINT_NFT_ABI,
+            args: MINT_NFT_ARGS,
+            method: VALID_CONTRACT_INVOCATION_MODEL.method,
+            contractAddress: VALID_CONTRACT_INVOCATION_MODEL.contract_address,
+            amount,
+            assetId: Coinbase.assets.Wei,
+          });
+        });
+
+        it("returns a contract invocation", async () => {
+          expect(contractInvocation).toBeInstanceOf(ContractInvocation);
+          expect(contractInvocation.getId()).toBe(
+            VALID_CONTRACT_INVOCATION_MODEL.contract_invocation_id,
+          );
+          expect(contractInvocation.getAmount().toString()).toBe(amount.toString());
+        });
+
+        it("creates the contract invocation", async () => {
+          expect(
+            Coinbase.apiClients.contractInvocation!.createContractInvocation,
+          ).toHaveBeenCalledWith(walletAddress.getWalletId(), walletAddress.getId(), {
+            abi: VALID_CONTRACT_INVOCATION_MODEL.abi,
+            args: VALID_CONTRACT_INVOCATION_MODEL.args,
+            method: VALID_CONTRACT_INVOCATION_MODEL.method,
+            contract_address: VALID_CONTRACT_INVOCATION_MODEL.contract_address,
+            amount: amount.toString(),
+          });
+          expect(
+            Coinbase.apiClients.contractInvocation!.createContractInvocation,
+          ).toHaveBeenCalledTimes(1);
+        });
+
+        it("broadcasts the contract invocation", async () => {
+          expect(
+            Coinbase.apiClients.contractInvocation!.broadcastContractInvocation,
+          ).toHaveBeenCalledWith(
+            walletAddress.getWalletId(),
+            walletAddress.getId(),
+            VALID_CONTRACT_INVOCATION_MODEL.contract_invocation_id,
+            {
+              signed_payload: expectedSignedPayload,
+            },
+          );
+
+          expect(
+            Coinbase.apiClients.contractInvocation!.broadcastContractInvocation,
+          ).toHaveBeenCalledTimes(1);
+        });
+
+        it("checks for sufficient balance", async () => {
+          expect(
+            Coinbase.apiClients.externalAddress!.getExternalAddressBalance,
+          ).toHaveBeenCalledWith(
+            walletAddress.getNetworkId(),
+            walletAddress.getId(),
+            Coinbase.assets.Eth,
+          );
+
+          expect(
+            Coinbase.apiClients.externalAddress!.getExternalAddressBalance,
+          ).toHaveBeenCalledTimes(1);
+        });
+      });
+
       describe("when no key is loaded", () => {
         beforeEach(() => {
           walletAddress = new WalletAddress(addressModel);

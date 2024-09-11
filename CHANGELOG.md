@@ -4,6 +4,7 @@
 
 - Add `Coinbase.configure` method to allow for configuration of the SDK and marked constructor as deprecated.
 - Return correlation ID from APIError response
+- Add optional fields to `CreateContractInvocationOptions` to set amount for payable contract method invocations
 
 ## [0.4.0] - 2024-09-06
 

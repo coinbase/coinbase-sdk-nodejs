@@ -754,6 +754,9 @@ export class Wallet {
    * @param options.abi - The ABI of the contract.
    * @param options.args - The arguments to pass to the contract method invocation.
    *   The keys should be the argument names and the values should be the argument values.
+   * @param options.amount - The amount of the asset to send to a payable contract method.
+   * @param options.assetId - The ID of the asset to send to a payable contract method.
+   *   The asset must be a denomination of the native asset. (Ex. "wei", "gwei", or "eth").
    * @returns The ContractInvocation object.
    * @throws {APIError} if the API request to create a contract invocation fails.
    */

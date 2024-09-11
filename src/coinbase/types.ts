@@ -937,6 +937,8 @@ export type CreateContractInvocationOptions = {
   abi?: object;
   method: string;
   args: object;
+  amount?: Amount;
+  assetId?: string;
 };
 
 /**
