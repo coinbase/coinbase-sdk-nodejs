@@ -532,7 +532,9 @@ export class WalletAddress extends Address {
    * @param destination - The destination to get the address and network ID of.
    * @returns The address and network ID of the destination.
    */
-  private async getDestinationAddressAndNetwork(destination: Destination): Promise<[string, string]> {
+  private async getDestinationAddressAndNetwork(
+    destination: Destination,
+  ): Promise<[string, string]> {
     if (typeof destination !== "string" && destination.getNetworkId() !== this.getNetworkId()) {
       throw new ArgumentError("Transfer must be on the same Network");
     }

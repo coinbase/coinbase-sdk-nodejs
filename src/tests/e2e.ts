@@ -104,13 +104,16 @@ describe("Coinbase SDK E2E Test", () => {
     console.log(`Second address balances: ${secondBalance}`);
 
     console.log("Fetching address transactions...");
-    const result = await (await unhydratedWallet.getDefaultAddress()).listTransactions({ limit: 1 });
+    const result = await (
+      await unhydratedWallet.getDefaultAddress()
+    ).listTransactions({ limit: 1 });
     expect(result?.transactions.length).toBeGreaterThan(0);
     console.log(`Fetched transactions: ${result?.transactions[0].toString()}`);
 
     console.log("Fetching address historical balances...");
-    const balance_result = await (await unhydratedWallet
-      .getDefaultAddress()).listHistoricalBalances({ assetId: Coinbase.assets.Eth, limit: 2 });
+    const balance_result = await (
+      await unhydratedWallet.getDefaultAddress()
+    ).listHistoricalBalances({ assetId: Coinbase.assets.Eth, limit: 2 });
     expect(balance_result?.historicalBalances.length).toBeGreaterThan(0);
     console.log(
       `First eth historical balance: ${balance_result?.historicalBalances[0].amount.toString()}`,

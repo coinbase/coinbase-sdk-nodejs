@@ -111,14 +111,16 @@ export class APIError extends AxiosError {
    * @returns {string} a String representation of the APIError
    */
   toString() {
-    let payload = {} as Record<string, unknown>;
+    const payload = {} as Record<string, unknown>;
 
     if (this.httpCode) payload.httpCode = this.httpCode;
     if (this.apiCode) payload.apiCode = this.apiCode;
     if (this.apiMessage) payload.apiMessage = this.apiMessage;
     if (this.correlationId) payload.correlationId = this.correlationId;
 
-    return `${this.name}{${Object.entries(payload).map(([key, value]) => `${key}: ${value}`).join(", ")}}`;
+    return `${this.name}{${Object.entries(payload)
+      .map(([key, value]) => `${key}: ${value}`)
+      .join(", ")}}`;
   }
 }
 
