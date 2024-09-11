@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Add `Coinbase.configure` method to allow for configuration of the SDK and marked constructor as deprecated.
+- Return correlation ID from APIError response
 
 ## [0.4.0] - 2024-09-06
 

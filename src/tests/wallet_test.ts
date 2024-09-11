@@ -567,7 +567,9 @@ describe("Wallet Class", () => {
     beforeEach(async () => {
       expectedInvocation = ContractInvocation.fromModel(VALID_SIGNED_CONTRACT_INVOCATION_MODEL);
 
-      (await wallet.getDefaultAddress()).invokeContract = jest.fn().mockResolvedValue(expectedInvocation);
+      (await wallet.getDefaultAddress()).invokeContract = jest
+        .fn()
+        .mockResolvedValue(expectedInvocation);
     });
 
     it("successfully invokes a contract on the default address", async () => {
@@ -694,7 +696,9 @@ describe("Wallet Class", () => {
 
     describe("#getDefaultAddress", () => {
       it("should return the correct default address", async () => {
-        expect((await wallet.getDefaultAddress()).getId()).toBe(walletModel.default_address!.address_id);
+        expect((await wallet.getDefaultAddress()).getId()).toBe(
+          walletModel.default_address!.address_id,
+        );
       });
     });
 
@@ -935,7 +939,9 @@ describe("Wallet Class", () => {
     it("should throw an error when walletId is not provided", async () => {
       const walletData = seedWallet.export();
       walletData.walletId = "";
-      await expect(async () => await Wallet.import(walletData)).rejects.toThrow("Wallet ID must be provided");
+      await expect(async () => await Wallet.import(walletData)).rejects.toThrow(
+        "Wallet ID must be provided",
+      );
     });
   });
 

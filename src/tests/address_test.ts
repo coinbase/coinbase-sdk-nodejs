@@ -171,9 +171,7 @@ describe("Address", () => {
       expect(
         Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance,
       ).toHaveBeenCalledTimes(1);
-      expect(
-        Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance,
-      ).toHaveBeenCalledWith(
+      expect(Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance).toHaveBeenCalledWith(
         address.getNetworkId(),
         address.getId(),
         Coinbase.assets.Usdc,
@@ -194,9 +192,7 @@ describe("Address", () => {
       expect(
         Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance,
       ).toHaveBeenCalledTimes(1);
-      expect(
-        Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance,
-      ).toHaveBeenCalledWith(
+      expect(Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance).toHaveBeenCalledWith(
         address.getNetworkId(),
         address.getId(),
         Coinbase.assets.Usdc,
@@ -219,9 +215,7 @@ describe("Address", () => {
       expect(
         Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance,
       ).toHaveBeenCalledTimes(1);
-      expect(
-        Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance,
-      ).toHaveBeenCalledWith(
+      expect(Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance).toHaveBeenCalledWith(
         address.getNetworkId(),
         address.getId(),
         Coinbase.assets.Usdc,
@@ -258,9 +252,7 @@ describe("Address", () => {
       expect(
         Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance,
       ).toHaveBeenCalledTimes(1);
-      expect(
-        Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance,
-      ).toHaveBeenCalledWith(
+      expect(Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance).toHaveBeenCalledWith(
         address.getNetworkId(),
         address.getId(),
         Coinbase.assets.Usdc,
