@@ -1,8 +1,8 @@
-import { StakingRewardFormat, StakingReward as StakingRewardModel } from "../client";
+import { StakingReward as StakingRewardModel } from "../client";
 import Decimal from "decimal.js";
 import { Coinbase } from "./coinbase";
 import { Asset } from "./asset";
-import { Amount } from "./types";
+import { Amount, StakingRewardFormat } from "./types";
 
 /**
  * A representation of a staking reward earned on a network for a given asset.
@@ -10,7 +10,7 @@ import { Amount } from "./types";
 export class StakingReward {
   private model: StakingRewardModel;
   private asset: Asset;
-  private format: StakingRewardFormat;
+  private readonly format: StakingRewardFormat;
 
   /**
    * Creates the StakingReward object.
@@ -42,7 +42,7 @@ export class StakingReward {
     addressIds: Array<string>,
     startTime: string,
     endTime: string,
-    format: StakingRewardFormat = StakingRewardFormat.Usd,
+    format: StakingRewardFormat = StakingRewardFormat.USD,
   ): Promise<StakingReward[]> {
     const stakingRewards: StakingReward[] = [];
     const queue: string[] = [""];
@@ -85,7 +85,7 @@ export class StakingReward {
    * @returns The amount.
    */
   public amount(): Amount {
-    if (this.format == StakingRewardFormat.Usd) {
+    if (this.format == StakingRewardFormat.USD) {
       return new Decimal(this.model.amount).div(new Decimal("100"));
     }
     return this.asset.fromAtomicAmount(new Decimal(this.model.amount)).toNumber();

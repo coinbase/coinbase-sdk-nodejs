@@ -777,6 +777,15 @@ export enum ValidatorStatus {
 }
 
 /**
+ * Staking reward format type definition.
+ * Represents the format in which staking rewards can be queried.
+ */
+export enum StakingRewardFormat {
+  USD = "usd",
+  NATIVE = "native",
+}
+
+/**
  * Payload Signature status type definition.
  */
 export enum PayloadSignatureStatus {
