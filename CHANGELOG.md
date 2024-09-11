@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add Arbitrum-Mainnet support for Native transfers.
 - Add `Coinbase.configure` method to allow for configuration of the SDK and marked constructor as deprecated.
 - Return correlation ID from APIError response
 - Add optional fields to `CreateContractInvocationOptions` to set amount for payable contract method invocations
