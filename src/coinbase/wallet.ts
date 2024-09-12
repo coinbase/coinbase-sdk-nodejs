@@ -929,7 +929,6 @@ export class Wallet {
     if (!this.master) {
       throw new Error("Cannot derive key for Wallet without seed loaded");
     }
-    const [networkPrefix] = this.model.network_id.split("-");
 
     const derivedKey = this.master?.derive(this.addressPathPrefix + `/${index}`);
     if (!derivedKey?.privateKey) {
