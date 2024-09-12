@@ -934,7 +934,7 @@ export class Wallet {
      * TODO: Push this logic to the backend.
      * TODO: Add unit tests for `#createAddress`.
      */
-    if (!["base", "ethereum", "polygon"].includes(networkPrefix)) {
+    if (!["base", "ethereum", "polygon", "arbitrum"].includes(networkPrefix)) {
       throw new Error(`Unsupported network ID: ${this.model.network_id}`);
     }
     const derivedKey = this.master?.derive(this.addressPathPrefix + `/${index}`);
