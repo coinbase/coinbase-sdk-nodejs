@@ -914,13 +914,7 @@ export class Wallet {
       throw new Error("Cannot derive key for Wallet without seed loaded");
     }
     const [networkPrefix] = this.model.network_id.split("-");
-    /**
-     * TODO: Push this logic to the backend.
-     * TODO: Add unit tests for `#createAddress`.
-     */
-    if (!["base", "ethereum", "polygon", "arbitrum"].includes(networkPrefix)) {
-      throw new Error(`Unsupported network ID: ${this.model.network_id}`);
-    }
+
     const derivedKey = this.master?.derive(this.addressPathPrefix + `/${index}`);
     if (!derivedKey?.privateKey) {
       throw new Error("Failed to derive key");
