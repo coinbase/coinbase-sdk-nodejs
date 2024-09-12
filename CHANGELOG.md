@@ -4,6 +4,11 @@
 
 - Add `deployToken` method to `WalletAddress` and `Wallet` to deploy an ERC20, updated `SmartContract` class to support deployment and fetching contract details
 
+## [0.5.1] - 2024-09-12
+
+### Fixed
+- Fixed a bug that blocked arbitrum mainnet wallets from being created
+
 ## [0.5.0] - 2024-09-11
 
 - Add Arbitrum-Mainnet support for Native transfers.
