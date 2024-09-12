@@ -2,6 +2,7 @@ import { Coinbase, Wallet } from "@coinbase/coinbase-sdk";
 import { encodeFunctionData, namehash } from "viem";
 import os from "os";
 
+// Relevant ABI for L2 Resolver Contract.
 const l2ResolverABI = [
   {
     inputs: [
@@ -25,6 +26,7 @@ const l2ResolverABI = [
   },
 ];
 
+// Relevant ABI for Basenames Registrar Controller Contract.
 const registrarABI = [
   {
     inputs: [
@@ -73,23 +75,25 @@ const registrarABI = [
   },
 ];
 
-const BaseNamesRegistrarControllerAddress = "0xC6d566A56A1aFf6508b41f6c90ff131615583BCD";
+// Basenames Registrar Controller Contract Address.
+const BaseNamesRegistrarControllerAddress = "0x4cCb0BB02FCABA27e82a56646E81d8c5bC4119a5";
 
+// Create register contract method arguments.
 function createRegisterContractMethodArgs(baseName, addressId) {
   const addressData = encodeFunctionData({
-    l2ResolverABI,
+    abi: l2ResolverABI,
     functionName: "setAddr",
     args: [namehash(baseName), addressId],
   });
   const nameData = encodeFunctionData({
-    l2ResolverABI,
+    abi: l2ResolverABI,
     functionName: "setName",
     args: [namehash(baseName), baseName],
   });
 
   const registerArgs = {
     request: [
-      baseName,
+      baseName.replace(/\.base\.eth$/, ""),
       addressId,
       "31557600",
       BaseNamesRegistrarControllerAddress,
@@ -102,6 +106,7 @@ function createRegisterContractMethodArgs(baseName, addressId) {
   return registerArgs;
 }
 
+// Register a Basename for the given Wallet.
 async function registerBaseName(wallet, registerArgs) {
   try {
     const contractInvocation = await wallet.invokeContract({
@@ -121,18 +126,38 @@ async function registerBaseName(wallet, registerArgs) {
   }
 }
 
+// Fetch a funded Wallet and load its Seed.
+async function fetchWalletAndLoadSeed(walletId, seedFilePath) {
+  try {
+    const wallet = await Wallet.fetch(walletId);
+    await wallet.loadSeed(seedFilePath);
+
+    console.log(`Successfully loaded funded wallet: `, wallet);
+    return wallet;
+  } catch (error) {
+    console.error(
+      `Error loading funded wallet ${walletId} from seed file ${seedFilePath}: `,
+      error,
+    );
+  }
+}
+
 async () => {
   try {
+    const { BASE_NAME, WALLET_ID, SEED_FILE_PATH } = process.env;
+
     // Manage CDP API Key for Coinbase SDK.
     // Configure location to CDP API Key.
     Coinbase.configureFromJson({
       filePath: `${os.homedir()}/Downloads/cdp_api_key.json`,
     });
 
-    const baseName = "aiwallet2.base.eth";
-    const wallet = await Wallet.create({ networkId: Coinbase.networks.BaseMainnet });
+    // Fetch funded Wallet.
+    const wallet = await fetchWalletAndLoadSeed(WALLET_ID, SEED_FILE_PATH);
     const defaultAddress = await wallet.getDefaultAddress();
-    const registerArgs = createRegisterContractMethodArgs(baseName, defaultAddress.getId());
+
+    // Register Basename.
+    const registerArgs = createRegisterContractMethodArgs(BASE_NAME, defaultAddress.getId());
     await registerBaseName(wallet, registerArgs);
   } catch (error) {
     console.error(`Error in registering a Basename for my wallet: `, error);
