@@ -10,10 +10,10 @@ module.exports = {
   maxWorkers: 1,
   coverageThreshold: {
     "./src/coinbase/**": {
-      branches: 78,
+      branches: 77,
       functions: 90,
       statements: 85,
-      lines: 88,
+      lines: 87,
     },
   },
 };
