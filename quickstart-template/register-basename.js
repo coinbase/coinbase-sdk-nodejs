@@ -78,6 +78,9 @@ const registrarABI = [
 // Basenames Registrar Controller Contract Address.
 const BaseNamesRegistrarControllerAddress = "0x4cCb0BB02FCABA27e82a56646E81d8c5bC4119a5";
 
+// L2 Resolver Contract Address.
+const L2ResolverAddress = "0xC6d566A56A1aFf6508b41f6c90ff131615583BCD";
+
 // Create register contract method arguments.
 function createRegisterContractMethodArgs(baseName, addressId) {
   const addressData = encodeFunctionData({
@@ -96,7 +99,7 @@ function createRegisterContractMethodArgs(baseName, addressId) {
       baseName.replace(/\.base\.eth$/, ""),
       addressId,
       "31557600",
-      BaseNamesRegistrarControllerAddress,
+      L2ResolverAddress,
       [addressData, nameData],
       true,
     ],
