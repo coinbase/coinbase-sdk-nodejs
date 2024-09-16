@@ -488,6 +488,12 @@ export interface ContractInvocation {
      */
     'abi'?: string;
     /**
+     * The amount to send to the contract for a payable method
+     * @type {string}
+     * @memberof ContractInvocation
+     */
+    'amount': string;
+    /**
      * 
      * @type {Transaction}
      * @memberof ContractInvocation
@@ -580,6 +586,12 @@ export interface CreateContractInvocationRequest {
      * @memberof CreateContractInvocationRequest
      */
     'abi'?: string;
+    /**
+     * The amount in atomic units of the native asset to send to the contract for a payable method
+     * @type {string}
+     * @memberof CreateContractInvocationRequest
+     */
+    'amount'?: string;
 }
 /**
  * 
@@ -625,6 +637,27 @@ export interface CreateServerSignerRequest {
      */
     'is_mpc': boolean;
 }
+/**
+ * 
+ * @export
+ * @interface CreateSmartContractRequest
+ */
+export interface CreateSmartContractRequest {
+    /**
+     * 
+     * @type {SmartContractType}
+     * @memberof CreateSmartContractRequest
+     */
+    'type': SmartContractType;
+    /**
+     * 
+     * @type {SmartContractOptions}
+     * @memberof CreateSmartContractRequest
+     */
+    'options': SmartContractOptions;
+}
+
+
 /**
  * 
  * @export
@@ -769,11 +802,17 @@ export interface CreateWebhookRequest {
      */
     'event_type': WebhookEventType;
     /**
+     * 
+     * @type {WebhookEventTypeFilter}
+     * @memberof CreateWebhookRequest
+     */
+    'event_type_filter'?: WebhookEventTypeFilter;
+    /**
      * Webhook will monitor all events that matches any one of the event filters.
      * @type {Array<WebhookEventFilter>}
      * @memberof CreateWebhookRequest
      */
-    'event_filters': Array<WebhookEventFilter>;
+    'event_filters'?: Array<WebhookEventFilter>;
     /**
      * The URL to which the notifications will be sent
      * @type {string}
@@ -789,6 +828,19 @@ export interface CreateWebhookRequest {
 }
 
 
+/**
+ * 
+ * @export
+ * @interface DeploySmartContractRequest
+ */
+export interface DeploySmartContractRequest {
+    /**
+     * The hex-encoded signed payload of the contract deployment transaction.
+     * @type {string}
+     * @memberof DeploySmartContractRequest
+     */
+    'signed_payload': string;
+}
 /**
  * Represents an event triggered by an ERC-20 token transfer on the blockchain. Contains information about the transaction, block, and involved addresses.
  * @export
@@ -1519,6 +1571,31 @@ export interface ModelError {
      * @memberof ModelError
      */
     'message': string;
+    /**
+     * A unique identifier for the request that generated the error. This can be used to help debug issues with the API.
+     * @type {string}
+     * @memberof ModelError
+     */
+    'correlation_id'?: string;
+}
+/**
+ * Options for NFT contract creation
+ * @export
+ * @interface NFTContractOptions
+ */
+export interface NFTContractOptions {
+    /**
+     * The name of the NFT
+     * @type {string}
+     * @memberof NFTContractOptions
+     */
+    'name': string;
+    /**
+     * The symbol of the NFT
+     * @type {string}
+     * @memberof NFTContractOptions
+     */
+    'symbol': string;
 }
 /**
  * 
@@ -1595,7 +1672,8 @@ export const NetworkIdentifier = {
     EthereumHolesky: 'ethereum-holesky',
     EthereumMainnet: 'ethereum-mainnet',
     PolygonMainnet: 'polygon-mainnet',
-    SolanaDevnet: 'solana-devnet'
+    SolanaDevnet: 'solana-devnet',
+    ArbitrumMainnet: 'arbitrum-mainnet'
 } as const;
 
 export type NetworkIdentifier = typeof NetworkIdentifier[keyof typeof NetworkIdentifier];
@@ -1974,6 +2052,115 @@ export interface SignedVoluntaryExitMessageMetadata {
     'signed_voluntary_exit': string;
 }
 /**
+ * Represents a smart contract on the blockchain
+ * @export
+ * @interface SmartContract
+ */
+export interface SmartContract {
+    /**
+     * The unique identifier of the smart contract
+     * @type {string}
+     * @memberof SmartContract
+     */
+    'smart_contract_id': string;
+    /**
+     * The name of the blockchain network
+     * @type {string}
+     * @memberof SmartContract
+     */
+    'network_id': string;
+    /**
+     * The ID of the wallet that deployed the smart contract
+     * @type {string}
+     * @memberof SmartContract
+     */
+    'wallet_id': string;
+    /**
+     * The EVM address of the smart contract
+     * @type {string}
+     * @memberof SmartContract
+     */
+    'contract_address': string;
+    /**
+     * The EVM address of the account that deployed the smart contract
+     * @type {string}
+     * @memberof SmartContract
+     */
+    'deployer_address': string;
+    /**
+     * 
+     * @type {SmartContractType}
+     * @memberof SmartContract
+     */
+    'type': SmartContractType;
+    /**
+     * 
+     * @type {SmartContractOptions}
+     * @memberof SmartContract
+     */
+    'options': SmartContractOptions;
+    /**
+     * The JSON-encoded ABI of the contract
+     * @type {string}
+     * @memberof SmartContract
+     */
+    'abi': string;
+    /**
+     * 
+     * @type {Transaction}
+     * @memberof SmartContract
+     */
+    'transaction': Transaction;
+}
+
+
+/**
+ * 
+ * @export
+ * @interface SmartContractList
+ */
+export interface SmartContractList {
+    /**
+     * 
+     * @type {Array<SmartContract>}
+     * @memberof SmartContractList
+     */
+    'data': Array<SmartContract>;
+    /**
+     * True if this list has another page of items after this one that can be fetched.
+     * @type {boolean}
+     * @memberof SmartContractList
+     */
+    'has_more': boolean;
+    /**
+     * The page token to be used to fetch the next page.
+     * @type {string}
+     * @memberof SmartContractList
+     */
+    'next_page': string;
+}
+/**
+ * @type SmartContractOptions
+ * Options for smart contract creation
+ * @export
+ */
+export type SmartContractOptions = NFTContractOptions | TokenContractOptions;
+
+/**
+ * The type of the smart contract
+ * @export
+ * @enum {string}
+ */
+
+export const SmartContractType = {
+    Erc20: 'erc20',
+    Erc721: 'erc721'
+} as const;
+
+export type SmartContractType = typeof SmartContractType[keyof typeof SmartContractType];
+
+
+/**
  * An onchain sponsored gasless send.
  * @export
  * @interface SponsoredSend
@@ -2046,7 +2233,7 @@ export interface StakingBalance {
      */
     'address': string;
     /**
-     * The date of the staking balance in format \'YYYY-MM-DD\' in UTC.
+     * The timestamp of the staking balance in UTC.
      * @type {string}
      * @memberof StakingBalance
      */
@@ -2186,7 +2373,7 @@ export interface StakingReward {
      */
     'address_id': string;
     /**
-     * The date of the reward in format \'YYYY-MM-DD\' in UTC.
+     * The timestamp of the reward in UTC.
      * @type {string}
      * @memberof StakingReward
      */
@@ -2262,6 +2449,31 @@ export interface StakingRewardUSDValue {
      * @memberof StakingRewardUSDValue
      */
     'conversion_time': string;
+}
+/**
+ * Options for token contract creation
+ * @export
+ * @interface TokenContractOptions
+ */
+export interface TokenContractOptions {
+    /**
+     * The name of the token
+     * @type {string}
+     * @memberof TokenContractOptions
+     */
+    'name': string;
+    /**
+     * The symbol of the token
+     * @type {string}
+     * @memberof TokenContractOptions
+     */
+    'symbol': string;
+    /**
+     * The total supply of the token denominated in the whole amount of the token.
+     * @type {string}
+     * @memberof TokenContractOptions
+     */
+    'total_supply': string;
 }
 /**
  * A trade of an asset to another asset
@@ -2610,11 +2822,17 @@ export interface TransferList {
  */
 export interface UpdateWebhookRequest {
     /**
+     * 
+     * @type {WebhookEventTypeFilter}
+     * @memberof UpdateWebhookRequest
+     */
+    'event_type_filter'?: WebhookEventTypeFilter;
+    /**
      * Webhook will monitor all events that matches any one of the event filters.
      * @type {Array<WebhookEventFilter>}
      * @memberof UpdateWebhookRequest
      */
-    'event_filters': Array<WebhookEventFilter>;
+    'event_filters'?: Array<WebhookEventFilter>;
     /**
      * The Webhook uri that updates to
      * @type {string}
@@ -2837,6 +3055,12 @@ export interface Webhook {
      */
     'event_type'?: WebhookEventType;
     /**
+     * 
+     * @type {WebhookEventTypeFilter}
+     * @memberof Webhook
+     */
+    'event_type_filter'?: WebhookEventTypeFilter;
+    /**
      * Webhook will monitor all events that matches any one of the event filters.
      * @type {Array<WebhookEventFilter>}
      * @memberof Webhook
@@ -2903,11 +3127,19 @@ export interface WebhookEventFilter {
 export const WebhookEventType = {
     Unspecified: 'unspecified',
     Erc20Transfer: 'erc20_transfer',
-    Erc721Transfer: 'erc721_transfer'
+    Erc721Transfer: 'erc721_transfer',
+    WalletActivity: 'wallet_activity'
 } as const;
 
 export type WebhookEventType = typeof WebhookEventType[keyof typeof WebhookEventType];
 
+
+/**
+ * @type WebhookEventTypeFilter
+ * The event_type_filter parameter specifies the criteria to filter events based on event type.
+ * @export
+ */
+export type WebhookEventTypeFilter = WebhookWalletActivityFilter;
 
 /**
  * 
@@ -2933,6 +3165,25 @@ export interface WebhookList {
      * @memberof WebhookList
      */
     'next_page'?: string;
+}
+/**
+ * Filter for wallet activity events. This filter allows the client to specify one or more wallet addresses to monitor for activities such as transactions, transfers, or other types of events that are associated with the specified addresses. 
+ * @export
+ * @interface WebhookWalletActivityFilter
+ */
+export interface WebhookWalletActivityFilter {
+    /**
+     * A list of wallet addresses to filter on.
+     * @type {Array<string>}
+     * @memberof WebhookWalletActivityFilter
+     */
+    'addresses'?: Array<string>;
+    /**
+     * The ID of the wallet that owns the webhook.
+     * @type {string}
+     * @memberof WebhookWalletActivityFilter
+     */
+    'wallet_id'?: string;
 }
 
 /**
@@ -3483,7 +3734,7 @@ export const AddressesApiFactory = function (configuration?: Configuration, base
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        createAddress(walletId: string, createAddressRequest?: CreateAddressRequest, options?: any): AxiosPromise<Address> {
+        createAddress(walletId: string, createAddressRequest?: CreateAddressRequest, options?: RawAxiosRequestConfig): AxiosPromise<Address> {
             return localVarFp.createAddress(walletId, createAddressRequest, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3495,7 +3746,7 @@ export const AddressesApiFactory = function (configuration?: Configuration, base
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        createPayloadSignature(walletId: string, addressId: string, createPayloadSignatureRequest?: CreatePayloadSignatureRequest, options?: any): AxiosPromise<PayloadSignature> {
+        createPayloadSignature(walletId: string, addressId: string, createPayloadSignatureRequest?: CreatePayloadSignatureRequest, options?: RawAxiosRequestConfig): AxiosPromise<PayloadSignature> {
             return localVarFp.createPayloadSignature(walletId, addressId, createPayloadSignatureRequest, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3506,7 +3757,7 @@ export const AddressesApiFactory = function (configuration?: Configuration, base
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAddress(walletId: string, addressId: string, options?: any): AxiosPromise<Address> {
+        getAddress(walletId: string, addressId: string, options?: RawAxiosRequestConfig): AxiosPromise<Address> {
             return localVarFp.getAddress(walletId, addressId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3518,7 +3769,7 @@ export const AddressesApiFactory = function (configuration?: Configuration, base
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAddressBalance(walletId: string, addressId: string, assetId: string, options?: any): AxiosPromise<Balance> {
+        getAddressBalance(walletId: string, addressId: string, assetId: string, options?: RawAxiosRequestConfig): AxiosPromise<Balance> {
             return localVarFp.getAddressBalance(walletId, addressId, assetId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3530,7 +3781,7 @@ export const AddressesApiFactory = function (configuration?: Configuration, base
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getPayloadSignature(walletId: string, addressId: string, payloadSignatureId: string, options?: any): AxiosPromise<PayloadSignature> {
+        getPayloadSignature(walletId: string, addressId: string, payloadSignatureId: string, options?: RawAxiosRequestConfig): AxiosPromise<PayloadSignature> {
             return localVarFp.getPayloadSignature(walletId, addressId, payloadSignatureId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3542,7 +3793,7 @@ export const AddressesApiFactory = function (configuration?: Configuration, base
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listAddressBalances(walletId: string, addressId: string, page?: string, options?: any): AxiosPromise<AddressBalanceList> {
+        listAddressBalances(walletId: string, addressId: string, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<AddressBalanceList> {
             return localVarFp.listAddressBalances(walletId, addressId, page, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3554,7 +3805,7 @@ export const AddressesApiFactory = function (configuration?: Configuration, base
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listAddresses(walletId: string, limit?: number, page?: string, options?: any): AxiosPromise<AddressList> {
+        listAddresses(walletId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<AddressList> {
             return localVarFp.listAddresses(walletId, limit, page, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3567,7 +3818,7 @@ export const AddressesApiFactory = function (configuration?: Configuration, base
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listPayloadSignatures(walletId: string, addressId: string, limit?: number, page?: string, options?: any): AxiosPromise<PayloadSignatureList> {
+        listPayloadSignatures(walletId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<PayloadSignatureList> {
             return localVarFp.listPayloadSignatures(walletId, addressId, limit, page, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3579,7 +3830,7 @@ export const AddressesApiFactory = function (configuration?: Configuration, base
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        requestFaucetFunds(walletId: string, addressId: string, assetId?: string, options?: any): AxiosPromise<FaucetTransaction> {
+        requestFaucetFunds(walletId: string, addressId: string, assetId?: string, options?: RawAxiosRequestConfig): AxiosPromise<FaucetTransaction> {
             return localVarFp.requestFaucetFunds(walletId, addressId, assetId, options).then((request) => request(axios, basePath));
         },
     };
@@ -3921,7 +4172,7 @@ export const AssetsApiFactory = function (configuration?: Configuration, basePat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAsset(networkId: string, assetId: string, options?: any): AxiosPromise<Asset> {
+        getAsset(networkId: string, assetId: string, options?: RawAxiosRequestConfig): AxiosPromise<Asset> {
             return localVarFp.getAsset(networkId, assetId, options).then((request) => request(axios, basePath));
         },
     };
@@ -4075,7 +4326,7 @@ export const BalanceHistoryApiFactory = function (configuration?: Configuration,
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listAddressHistoricalBalance(networkId: string, addressId: string, assetId: string, limit?: number, page?: string, options?: any): AxiosPromise<AddressHistoricalBalanceList> {
+        listAddressHistoricalBalance(networkId: string, addressId: string, assetId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<AddressHistoricalBalanceList> {
             return localVarFp.listAddressHistoricalBalance(networkId, addressId, assetId, limit, page, options).then((request) => request(axios, basePath));
         },
     };
@@ -4267,7 +4518,7 @@ export const ContractEventsApiFactory = function (configuration?: Configuration,
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listContractEvents(networkId: string, protocolName: string, contractAddress: string, contractName: string, eventName: string, fromBlockHeight: number, toBlockHeight: number, nextPage?: string, options?: any): AxiosPromise<ContractEventList> {
+        listContractEvents(networkId: string, protocolName: string, contractAddress: string, contractName: string, eventName: string, fromBlockHeight: number, toBlockHeight: number, nextPage?: string, options?: RawAxiosRequestConfig): AxiosPromise<ContractEventList> {
             return localVarFp.listContractEvents(networkId, protocolName, contractAddress, contractName, eventName, fromBlockHeight, toBlockHeight, nextPage, options).then((request) => request(axios, basePath));
         },
     };
@@ -4607,7 +4858,7 @@ export const ContractInvocationsApiFactory = function (configuration?: Configura
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        broadcastContractInvocation(walletId: string, addressId: string, contractInvocationId: string, broadcastContractInvocationRequest: BroadcastContractInvocationRequest, options?: any): AxiosPromise<ContractInvocation> {
+        broadcastContractInvocation(walletId: string, addressId: string, contractInvocationId: string, broadcastContractInvocationRequest: BroadcastContractInvocationRequest, options?: RawAxiosRequestConfig): AxiosPromise<ContractInvocation> {
             return localVarFp.broadcastContractInvocation(walletId, addressId, contractInvocationId, broadcastContractInvocationRequest, options).then((request) => request(axios, basePath));
         },
         /**
@@ -4619,7 +4870,7 @@ export const ContractInvocationsApiFactory = function (configuration?: Configura
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        createContractInvocation(walletId: string, addressId: string, createContractInvocationRequest: CreateContractInvocationRequest, options?: any): AxiosPromise<ContractInvocation> {
+        createContractInvocation(walletId: string, addressId: string, createContractInvocationRequest: CreateContractInvocationRequest, options?: RawAxiosRequestConfig): AxiosPromise<ContractInvocation> {
             return localVarFp.createContractInvocation(walletId, addressId, createContractInvocationRequest, options).then((request) => request(axios, basePath));
         },
         /**
@@ -4631,7 +4882,7 @@ export const ContractInvocationsApiFactory = function (configuration?: Configura
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getContractInvocation(walletId: string, addressId: string, contractInvocationId: string, options?: any): AxiosPromise<ContractInvocation> {
+        getContractInvocation(walletId: string, addressId: string, contractInvocationId: string, options?: RawAxiosRequestConfig): AxiosPromise<ContractInvocation> {
             return localVarFp.getContractInvocation(walletId, addressId, contractInvocationId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -4644,7 +4895,7 @@ export const ContractInvocationsApiFactory = function (configuration?: Configura
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listContractInvocations(walletId: string, addressId: string, limit?: number, page?: string, options?: any): AxiosPromise<ContractInvocationList> {
+        listContractInvocations(walletId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<ContractInvocationList> {
             return localVarFp.listContractInvocations(walletId, addressId, limit, page, options).then((request) => request(axios, basePath));
         },
     };
@@ -5048,7 +5299,7 @@ export const ExternalAddressesApiFactory = function (configuration?: Configurati
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getExternalAddressBalance(networkId: string, addressId: string, assetId: string, options?: any): AxiosPromise<Balance> {
+        getExternalAddressBalance(networkId: string, addressId: string, assetId: string, options?: RawAxiosRequestConfig): AxiosPromise<Balance> {
             return localVarFp.getExternalAddressBalance(networkId, addressId, assetId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -5061,7 +5312,7 @@ export const ExternalAddressesApiFactory = function (configuration?: Configurati
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listAddressTransactions(networkId: string, addressId: string, limit?: number, page?: string, options?: any): AxiosPromise<AddressTransactionList> {
+        listAddressTransactions(networkId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<AddressTransactionList> {
             return localVarFp.listAddressTransactions(networkId, addressId, limit, page, options).then((request) => request(axios, basePath));
         },
         /**
@@ -5073,7 +5324,7 @@ export const ExternalAddressesApiFactory = function (configuration?: Configurati
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listExternalAddressBalances(networkId: string, addressId: string, page?: string, options?: any): AxiosPromise<AddressBalanceList> {
+        listExternalAddressBalances(networkId: string, addressId: string, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<AddressBalanceList> {
             return localVarFp.listExternalAddressBalances(networkId, addressId, page, options).then((request) => request(axios, basePath));
         },
         /**
@@ -5085,7 +5336,7 @@ export const ExternalAddressesApiFactory = function (configuration?: Configurati
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        requestExternalFaucetFunds(networkId: string, addressId: string, assetId?: string, options?: any): AxiosPromise<FaucetTransaction> {
+        requestExternalFaucetFunds(networkId: string, addressId: string, assetId?: string, options?: RawAxiosRequestConfig): AxiosPromise<FaucetTransaction> {
             return localVarFp.requestExternalFaucetFunds(networkId, addressId, assetId, options).then((request) => request(axios, basePath));
         },
     };
@@ -5295,7 +5546,7 @@ export const NetworksApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getNetwork(networkId: string, options?: any): AxiosPromise<Network> {
+        getNetwork(networkId: string, options?: RawAxiosRequestConfig): AxiosPromise<Network> {
             return localVarFp.getNetwork(networkId, options).then((request) => request(axios, basePath));
         },
     };
@@ -5685,7 +5936,7 @@ export const ServerSignersApiFactory = function (configuration?: Configuration, 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        createServerSigner(createServerSignerRequest?: CreateServerSignerRequest, options?: any): AxiosPromise<ServerSigner> {
+        createServerSigner(createServerSignerRequest?: CreateServerSignerRequest, options?: RawAxiosRequestConfig): AxiosPromise<ServerSigner> {
             return localVarFp.createServerSigner(createServerSignerRequest, options).then((request) => request(axios, basePath));
         },
         /**
@@ -5695,7 +5946,7 @@ export const ServerSignersApiFactory = function (configuration?: Configuration, 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getServerSigner(serverSignerId: string, options?: any): AxiosPromise<ServerSigner> {
+        getServerSigner(serverSignerId: string, options?: RawAxiosRequestConfig): AxiosPromise<ServerSigner> {
             return localVarFp.getServerSigner(serverSignerId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -5707,7 +5958,7 @@ export const ServerSignersApiFactory = function (configuration?: Configuration, 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listServerSignerEvents(serverSignerId: string, limit?: number, page?: string, options?: any): AxiosPromise<ServerSignerEventList> {
+        listServerSignerEvents(serverSignerId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<ServerSignerEventList> {
             return localVarFp.listServerSignerEvents(serverSignerId, limit, page, options).then((request) => request(axios, basePath));
         },
         /**
@@ -5718,7 +5969,7 @@ export const ServerSignersApiFactory = function (configuration?: Configuration, 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listServerSigners(limit?: number, page?: string, options?: any): AxiosPromise<ServerSignerList> {
+        listServerSigners(limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<ServerSignerList> {
             return localVarFp.listServerSigners(limit, page, options).then((request) => request(axios, basePath));
         },
         /**
@@ -5729,7 +5980,7 @@ export const ServerSignersApiFactory = function (configuration?: Configuration, 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        submitServerSignerSeedEventResult(serverSignerId: string, seedCreationEventResult?: SeedCreationEventResult, options?: any): AxiosPromise<SeedCreationEventResult> {
+        submitServerSignerSeedEventResult(serverSignerId: string, seedCreationEventResult?: SeedCreationEventResult, options?: RawAxiosRequestConfig): AxiosPromise<SeedCreationEventResult> {
             return localVarFp.submitServerSignerSeedEventResult(serverSignerId, seedCreationEventResult, options).then((request) => request(axios, basePath));
         },
         /**
@@ -5740,7 +5991,7 @@ export const ServerSignersApiFactory = function (configuration?: Configuration, 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        submitServerSignerSignatureEventResult(serverSignerId: string, signatureCreationEventResult?: SignatureCreationEventResult, options?: any): AxiosPromise<SignatureCreationEventResult> {
+        submitServerSignerSignatureEventResult(serverSignerId: string, signatureCreationEventResult?: SignatureCreationEventResult, options?: RawAxiosRequestConfig): AxiosPromise<SignatureCreationEventResult> {
             return localVarFp.submitServerSignerSignatureEventResult(serverSignerId, signatureCreationEventResult, options).then((request) => request(axios, basePath));
         },
     };
@@ -5901,6 +6152,437 @@ export class ServerSignersApi extends BaseAPI implements ServerSignersApiInterfa
      */
     public submitServerSignerSignatureEventResult(serverSignerId: string, signatureCreationEventResult?: SignatureCreationEventResult, options?: RawAxiosRequestConfig) {
         return ServerSignersApiFp(this.configuration).submitServerSignerSignatureEventResult(serverSignerId, signatureCreationEventResult, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * SmartContractsApi - axios parameter creator
+ * @export
+ */
+export const SmartContractsApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Create a new smart contract
+         * @summary Create a new smart contract
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to deploy the smart contract from.
+         * @param {CreateSmartContractRequest} createSmartContractRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createSmartContract: async (walletId: string, addressId: string, createSmartContractRequest: CreateSmartContractRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'walletId' is not null or undefined
+            assertParamExists('createSmartContract', 'walletId', walletId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('createSmartContract', 'addressId', addressId)
+            // verify required parameter 'createSmartContractRequest' is not null or undefined
+            assertParamExists('createSmartContract', 'createSmartContractRequest', createSmartContractRequest)
+            const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/smart_contracts`
+                .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createSmartContractRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Deploys a smart contract, by broadcasting the transaction to the network.
+         * @summary Deploy a smart contract
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to broadcast the transaction from.
+         * @param {string} smartContractId The UUID of the smart contract to broadcast the transaction to.
+         * @param {DeploySmartContractRequest} deploySmartContractRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deploySmartContract: async (walletId: string, addressId: string, smartContractId: string, deploySmartContractRequest: DeploySmartContractRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'walletId' is not null or undefined
+            assertParamExists('deploySmartContract', 'walletId', walletId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('deploySmartContract', 'addressId', addressId)
+            // verify required parameter 'smartContractId' is not null or undefined
+            assertParamExists('deploySmartContract', 'smartContractId', smartContractId)
+            // verify required parameter 'deploySmartContractRequest' is not null or undefined
+            assertParamExists('deploySmartContract', 'deploySmartContractRequest', deploySmartContractRequest)
+            const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/smart_contracts/{smart_contract_id}/deploy`
+                .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)))
+                .replace(`{${"smart_contract_id"}}`, encodeURIComponent(String(smartContractId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(deploySmartContractRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get a specific smart contract deployed by address.
+         * @summary Get a specific smart contract deployed by address
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to fetch the smart contract for.
+         * @param {string} smartContractId The UUID of the smart contract to fetch.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSmartContract: async (walletId: string, addressId: string, smartContractId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'walletId' is not null or undefined
+            assertParamExists('getSmartContract', 'walletId', walletId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('getSmartContract', 'addressId', addressId)
+            // verify required parameter 'smartContractId' is not null or undefined
+            assertParamExists('getSmartContract', 'smartContractId', smartContractId)
+            const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/smart_contracts/{smart_contract_id}`
+                .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)))
+                .replace(`{${"smart_contract_id"}}`, encodeURIComponent(String(smartContractId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * List all smart contracts deployed by address.
+         * @summary List smart contracts deployed by address
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to fetch the smart contracts for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listSmartContracts: async (walletId: string, addressId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'walletId' is not null or undefined
+            assertParamExists('listSmartContracts', 'walletId', walletId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('listSmartContracts', 'addressId', addressId)
+            const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/smart_contracts`
+                .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * SmartContractsApi - functional programming interface
+ * @export
+ */
+export const SmartContractsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = SmartContractsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Create a new smart contract
+         * @summary Create a new smart contract
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to deploy the smart contract from.
+         * @param {CreateSmartContractRequest} createSmartContractRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createSmartContract(walletId: string, addressId: string, createSmartContractRequest: CreateSmartContractRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SmartContract>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createSmartContract(walletId, addressId, createSmartContractRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SmartContractsApi.createSmartContract']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Deploys a smart contract, by broadcasting the transaction to the network.
+         * @summary Deploy a smart contract
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to broadcast the transaction from.
+         * @param {string} smartContractId The UUID of the smart contract to broadcast the transaction to.
+         * @param {DeploySmartContractRequest} deploySmartContractRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deploySmartContract(walletId: string, addressId: string, smartContractId: string, deploySmartContractRequest: DeploySmartContractRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SmartContract>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deploySmartContract(walletId, addressId, smartContractId, deploySmartContractRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SmartContractsApi.deploySmartContract']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get a specific smart contract deployed by address.
+         * @summary Get a specific smart contract deployed by address
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to fetch the smart contract for.
+         * @param {string} smartContractId The UUID of the smart contract to fetch.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getSmartContract(walletId: string, addressId: string, smartContractId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SmartContract>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getSmartContract(walletId, addressId, smartContractId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SmartContractsApi.getSmartContract']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * List all smart contracts deployed by address.
+         * @summary List smart contracts deployed by address
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to fetch the smart contracts for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listSmartContracts(walletId: string, addressId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SmartContractList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listSmartContracts(walletId, addressId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SmartContractsApi.listSmartContracts']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * SmartContractsApi - factory interface
+ * @export
+ */
+export const SmartContractsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = SmartContractsApiFp(configuration)
+    return {
+        /**
+         * Create a new smart contract
+         * @summary Create a new smart contract
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to deploy the smart contract from.
+         * @param {CreateSmartContractRequest} createSmartContractRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createSmartContract(walletId: string, addressId: string, createSmartContractRequest: CreateSmartContractRequest, options?: RawAxiosRequestConfig): AxiosPromise<SmartContract> {
+            return localVarFp.createSmartContract(walletId, addressId, createSmartContractRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Deploys a smart contract, by broadcasting the transaction to the network.
+         * @summary Deploy a smart contract
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to broadcast the transaction from.
+         * @param {string} smartContractId The UUID of the smart contract to broadcast the transaction to.
+         * @param {DeploySmartContractRequest} deploySmartContractRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deploySmartContract(walletId: string, addressId: string, smartContractId: string, deploySmartContractRequest: DeploySmartContractRequest, options?: RawAxiosRequestConfig): AxiosPromise<SmartContract> {
+            return localVarFp.deploySmartContract(walletId, addressId, smartContractId, deploySmartContractRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get a specific smart contract deployed by address.
+         * @summary Get a specific smart contract deployed by address
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to fetch the smart contract for.
+         * @param {string} smartContractId The UUID of the smart contract to fetch.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSmartContract(walletId: string, addressId: string, smartContractId: string, options?: RawAxiosRequestConfig): AxiosPromise<SmartContract> {
+            return localVarFp.getSmartContract(walletId, addressId, smartContractId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * List all smart contracts deployed by address.
+         * @summary List smart contracts deployed by address
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to fetch the smart contracts for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listSmartContracts(walletId: string, addressId: string, options?: RawAxiosRequestConfig): AxiosPromise<SmartContractList> {
+            return localVarFp.listSmartContracts(walletId, addressId, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * SmartContractsApi - interface
+ * @export
+ * @interface SmartContractsApi
+ */
+export interface SmartContractsApiInterface {
+    /**
+     * Create a new smart contract
+     * @summary Create a new smart contract
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The ID of the address to deploy the smart contract from.
+     * @param {CreateSmartContractRequest} createSmartContractRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartContractsApiInterface
+     */
+    createSmartContract(walletId: string, addressId: string, createSmartContractRequest: CreateSmartContractRequest, options?: RawAxiosRequestConfig): AxiosPromise<SmartContract>;
+
+    /**
+     * Deploys a smart contract, by broadcasting the transaction to the network.
+     * @summary Deploy a smart contract
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The ID of the address to broadcast the transaction from.
+     * @param {string} smartContractId The UUID of the smart contract to broadcast the transaction to.
+     * @param {DeploySmartContractRequest} deploySmartContractRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartContractsApiInterface
+     */
+    deploySmartContract(walletId: string, addressId: string, smartContractId: string, deploySmartContractRequest: DeploySmartContractRequest, options?: RawAxiosRequestConfig): AxiosPromise<SmartContract>;
+
+    /**
+     * Get a specific smart contract deployed by address.
+     * @summary Get a specific smart contract deployed by address
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The ID of the address to fetch the smart contract for.
+     * @param {string} smartContractId The UUID of the smart contract to fetch.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartContractsApiInterface
+     */
+    getSmartContract(walletId: string, addressId: string, smartContractId: string, options?: RawAxiosRequestConfig): AxiosPromise<SmartContract>;
+
+    /**
+     * List all smart contracts deployed by address.
+     * @summary List smart contracts deployed by address
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The ID of the address to fetch the smart contracts for.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartContractsApiInterface
+     */
+    listSmartContracts(walletId: string, addressId: string, options?: RawAxiosRequestConfig): AxiosPromise<SmartContractList>;
+
+}
+
+/**
+ * SmartContractsApi - object-oriented interface
+ * @export
+ * @class SmartContractsApi
+ * @extends {BaseAPI}
+ */
+export class SmartContractsApi extends BaseAPI implements SmartContractsApiInterface {
+    /**
+     * Create a new smart contract
+     * @summary Create a new smart contract
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The ID of the address to deploy the smart contract from.
+     * @param {CreateSmartContractRequest} createSmartContractRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartContractsApi
+     */
+    public createSmartContract(walletId: string, addressId: string, createSmartContractRequest: CreateSmartContractRequest, options?: RawAxiosRequestConfig) {
+        return SmartContractsApiFp(this.configuration).createSmartContract(walletId, addressId, createSmartContractRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Deploys a smart contract, by broadcasting the transaction to the network.
+     * @summary Deploy a smart contract
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The ID of the address to broadcast the transaction from.
+     * @param {string} smartContractId The UUID of the smart contract to broadcast the transaction to.
+     * @param {DeploySmartContractRequest} deploySmartContractRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartContractsApi
+     */
+    public deploySmartContract(walletId: string, addressId: string, smartContractId: string, deploySmartContractRequest: DeploySmartContractRequest, options?: RawAxiosRequestConfig) {
+        return SmartContractsApiFp(this.configuration).deploySmartContract(walletId, addressId, smartContractId, deploySmartContractRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get a specific smart contract deployed by address.
+     * @summary Get a specific smart contract deployed by address
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The ID of the address to fetch the smart contract for.
+     * @param {string} smartContractId The UUID of the smart contract to fetch.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartContractsApi
+     */
+    public getSmartContract(walletId: string, addressId: string, smartContractId: string, options?: RawAxiosRequestConfig) {
+        return SmartContractsApiFp(this.configuration).getSmartContract(walletId, addressId, smartContractId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * List all smart contracts deployed by address.
+     * @summary List smart contracts deployed by address
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The ID of the address to fetch the smart contracts for.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartContractsApi
+     */
+    public listSmartContracts(walletId: string, addressId: string, options?: RawAxiosRequestConfig) {
+        return SmartContractsApiFp(this.configuration).listSmartContracts(walletId, addressId, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -6247,7 +6929,7 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        buildStakingOperation(buildStakingOperationRequest: BuildStakingOperationRequest, options?: any): AxiosPromise<StakingOperation> {
+        buildStakingOperation(buildStakingOperationRequest: BuildStakingOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation> {
             return localVarFp.buildStakingOperation(buildStakingOperationRequest, options).then((request) => request(axios, basePath));
         },
         /**
@@ -6263,7 +6945,7 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        fetchHistoricalStakingBalances(networkId: string, assetId: string, addressId: string, startTime: string, endTime: string, limit?: number, page?: string, options?: any): AxiosPromise<FetchHistoricalStakingBalances200Response> {
+        fetchHistoricalStakingBalances(networkId: string, assetId: string, addressId: string, startTime: string, endTime: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<FetchHistoricalStakingBalances200Response> {
             return localVarFp.fetchHistoricalStakingBalances(networkId, assetId, addressId, startTime, endTime, limit, page, options).then((request) => request(axios, basePath));
         },
         /**
@@ -6275,7 +6957,7 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        fetchStakingRewards(fetchStakingRewardsRequest: FetchStakingRewardsRequest, limit?: number, page?: string, options?: any): AxiosPromise<FetchStakingRewards200Response> {
+        fetchStakingRewards(fetchStakingRewardsRequest: FetchStakingRewardsRequest, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<FetchStakingRewards200Response> {
             return localVarFp.fetchStakingRewards(fetchStakingRewardsRequest, limit, page, options).then((request) => request(axios, basePath));
         },
         /**
@@ -6287,7 +6969,7 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getExternalStakingOperation(networkId: string, addressId: string, stakingOperationId: string, options?: any): AxiosPromise<StakingOperation> {
+        getExternalStakingOperation(networkId: string, addressId: string, stakingOperationId: string, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation> {
             return localVarFp.getExternalStakingOperation(networkId, addressId, stakingOperationId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -6297,7 +6979,7 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getStakingContext(getStakingContextRequest: GetStakingContextRequest, options?: any): AxiosPromise<StakingContext> {
+        getStakingContext(getStakingContextRequest: GetStakingContextRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingContext> {
             return localVarFp.getStakingContext(getStakingContextRequest, options).then((request) => request(axios, basePath));
         },
     };
@@ -6731,7 +7413,7 @@ export const TradesApiFactory = function (configuration?: Configuration, basePat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        broadcastTrade(walletId: string, addressId: string, tradeId: string, broadcastTradeRequest: BroadcastTradeRequest, options?: any): AxiosPromise<Trade> {
+        broadcastTrade(walletId: string, addressId: string, tradeId: string, broadcastTradeRequest: BroadcastTradeRequest, options?: RawAxiosRequestConfig): AxiosPromise<Trade> {
             return localVarFp.broadcastTrade(walletId, addressId, tradeId, broadcastTradeRequest, options).then((request) => request(axios, basePath));
         },
         /**
@@ -6743,7 +7425,7 @@ export const TradesApiFactory = function (configuration?: Configuration, basePat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        createTrade(walletId: string, addressId: string, createTradeRequest: CreateTradeRequest, options?: any): AxiosPromise<Trade> {
+        createTrade(walletId: string, addressId: string, createTradeRequest: CreateTradeRequest, options?: RawAxiosRequestConfig): AxiosPromise<Trade> {
             return localVarFp.createTrade(walletId, addressId, createTradeRequest, options).then((request) => request(axios, basePath));
         },
         /**
@@ -6755,7 +7437,7 @@ export const TradesApiFactory = function (configuration?: Configuration, basePat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getTrade(walletId: string, addressId: string, tradeId: string, options?: any): AxiosPromise<Trade> {
+        getTrade(walletId: string, addressId: string, tradeId: string, options?: RawAxiosRequestConfig): AxiosPromise<Trade> {
             return localVarFp.getTrade(walletId, addressId, tradeId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -6768,7 +7450,7 @@ export const TradesApiFactory = function (configuration?: Configuration, basePat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listTrades(walletId: string, addressId: string, limit?: number, page?: string, options?: any): AxiosPromise<TradeList> {
+        listTrades(walletId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<TradeList> {
             return localVarFp.listTrades(walletId, addressId, limit, page, options).then((request) => request(axios, basePath));
         },
     };
@@ -7180,7 +7862,7 @@ export const TransfersApiFactory = function (configuration?: Configuration, base
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        broadcastTransfer(walletId: string, addressId: string, transferId: string, broadcastTransferRequest: BroadcastTransferRequest, options?: any): AxiosPromise<Transfer> {
+        broadcastTransfer(walletId: string, addressId: string, transferId: string, broadcastTransferRequest: BroadcastTransferRequest, options?: RawAxiosRequestConfig): AxiosPromise<Transfer> {
             return localVarFp.broadcastTransfer(walletId, addressId, transferId, broadcastTransferRequest, options).then((request) => request(axios, basePath));
         },
         /**
@@ -7192,7 +7874,7 @@ export const TransfersApiFactory = function (configuration?: Configuration, base
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        createTransfer(walletId: string, addressId: string, createTransferRequest: CreateTransferRequest, options?: any): AxiosPromise<Transfer> {
+        createTransfer(walletId: string, addressId: string, createTransferRequest: CreateTransferRequest, options?: RawAxiosRequestConfig): AxiosPromise<Transfer> {
             return localVarFp.createTransfer(walletId, addressId, createTransferRequest, options).then((request) => request(axios, basePath));
         },
         /**
@@ -7204,7 +7886,7 @@ export const TransfersApiFactory = function (configuration?: Configuration, base
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getTransfer(walletId: string, addressId: string, transferId: string, options?: any): AxiosPromise<Transfer> {
+        getTransfer(walletId: string, addressId: string, transferId: string, options?: RawAxiosRequestConfig): AxiosPromise<Transfer> {
             return localVarFp.getTransfer(walletId, addressId, transferId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -7217,7 +7899,7 @@ export const TransfersApiFactory = function (configuration?: Configuration, base
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listTransfers(walletId: string, addressId: string, limit?: number, page?: string, options?: any): AxiosPromise<TransferList> {
+        listTransfers(walletId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<TransferList> {
             return localVarFp.listTransfers(walletId, addressId, limit, page, options).then((request) => request(axios, basePath));
         },
     };
@@ -7423,7 +8105,7 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getCurrentUser(options?: any): AxiosPromise<User> {
+        getCurrentUser(options?: RawAxiosRequestConfig): AxiosPromise<User> {
             return localVarFp.getCurrentUser(options).then((request) => request(axios, basePath));
         },
     };
@@ -7629,7 +8311,7 @@ export const ValidatorsApiFactory = function (configuration?: Configuration, bas
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getValidator(networkId: string, assetId: string, validatorId: string, options?: any): AxiosPromise<Validator> {
+        getValidator(networkId: string, assetId: string, validatorId: string, options?: RawAxiosRequestConfig): AxiosPromise<Validator> {
             return localVarFp.getValidator(networkId, assetId, validatorId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -7643,7 +8325,7 @@ export const ValidatorsApiFactory = function (configuration?: Configuration, bas
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listValidators(networkId: string, assetId: string, status?: ValidatorStatus, limit?: number, page?: string, options?: any): AxiosPromise<ValidatorList> {
+        listValidators(networkId: string, assetId: string, status?: ValidatorStatus, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<ValidatorList> {
             return localVarFp.listValidators(networkId, assetId, status, limit, page, options).then((request) => request(axios, basePath));
         },
     };
@@ -7939,7 +8621,7 @@ export const WalletStakeApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        broadcastStakingOperation(walletId: string, addressId: string, stakingOperationId: string, broadcastStakingOperationRequest: BroadcastStakingOperationRequest, options?: any): AxiosPromise<StakingOperation> {
+        broadcastStakingOperation(walletId: string, addressId: string, stakingOperationId: string, broadcastStakingOperationRequest: BroadcastStakingOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation> {
             return localVarFp.broadcastStakingOperation(walletId, addressId, stakingOperationId, broadcastStakingOperationRequest, options).then((request) => request(axios, basePath));
         },
         /**
@@ -7951,7 +8633,7 @@ export const WalletStakeApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        createStakingOperation(walletId: string, addressId: string, createStakingOperationRequest: CreateStakingOperationRequest, options?: any): AxiosPromise<StakingOperation> {
+        createStakingOperation(walletId: string, addressId: string, createStakingOperationRequest: CreateStakingOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation> {
             return localVarFp.createStakingOperation(walletId, addressId, createStakingOperationRequest, options).then((request) => request(axios, basePath));
         },
         /**
@@ -7963,7 +8645,7 @@ export const WalletStakeApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getStakingOperation(walletId: string, addressId: string, stakingOperationId: string, options?: any): AxiosPromise<StakingOperation> {
+        getStakingOperation(walletId: string, addressId: string, stakingOperationId: string, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation> {
             return localVarFp.getStakingOperation(walletId, addressId, stakingOperationId, options).then((request) => request(axios, basePath));
         },
     };
@@ -8347,7 +9029,7 @@ export const WalletsApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        createWallet(createWalletRequest?: CreateWalletRequest, options?: any): AxiosPromise<Wallet> {
+        createWallet(createWalletRequest?: CreateWalletRequest, options?: RawAxiosRequestConfig): AxiosPromise<Wallet> {
             return localVarFp.createWallet(createWalletRequest, options).then((request) => request(axios, basePath));
         },
         /**
@@ -8357,7 +9039,7 @@ export const WalletsApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getWallet(walletId: string, options?: any): AxiosPromise<Wallet> {
+        getWallet(walletId: string, options?: RawAxiosRequestConfig): AxiosPromise<Wallet> {
             return localVarFp.getWallet(walletId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -8368,7 +9050,7 @@ export const WalletsApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getWalletBalance(walletId: string, assetId: string, options?: any): AxiosPromise<Balance> {
+        getWalletBalance(walletId: string, assetId: string, options?: RawAxiosRequestConfig): AxiosPromise<Balance> {
             return localVarFp.getWalletBalance(walletId, assetId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -8378,7 +9060,7 @@ export const WalletsApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listWalletBalances(walletId: string, options?: any): AxiosPromise<AddressBalanceList> {
+        listWalletBalances(walletId: string, options?: RawAxiosRequestConfig): AxiosPromise<AddressBalanceList> {
             return localVarFp.listWalletBalances(walletId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -8389,7 +9071,7 @@ export const WalletsApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listWallets(limit?: number, page?: string, options?: any): AxiosPromise<WalletList> {
+        listWallets(limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<WalletList> {
             return localVarFp.listWallets(limit, page, options).then((request) => request(axios, basePath));
         },
     };
@@ -8760,7 +9442,7 @@ export const WebhooksApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        createWebhook(createWebhookRequest?: CreateWebhookRequest, options?: any): AxiosPromise<Webhook> {
+        createWebhook(createWebhookRequest?: CreateWebhookRequest, options?: RawAxiosRequestConfig): AxiosPromise<Webhook> {
             return localVarFp.createWebhook(createWebhookRequest, options).then((request) => request(axios, basePath));
         },
         /**
@@ -8770,7 +9452,7 @@ export const WebhooksApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteWebhook(webhookId: string, options?: any): AxiosPromise<void> {
+        deleteWebhook(webhookId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.deleteWebhook(webhookId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -8781,7 +9463,7 @@ export const WebhooksApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listWebhooks(limit?: number, page?: string, options?: any): AxiosPromise<WebhookList> {
+        listWebhooks(limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<WebhookList> {
             return localVarFp.listWebhooks(limit, page, options).then((request) => request(axios, basePath));
         },
         /**
@@ -8792,7 +9474,7 @@ export const WebhooksApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        updateWebhook(webhookId: string, updateWebhookRequest?: UpdateWebhookRequest, options?: any): AxiosPromise<Webhook> {
+        updateWebhook(webhookId: string, updateWebhookRequest?: UpdateWebhookRequest, options?: RawAxiosRequestConfig): AxiosPromise<Webhook> {
             return localVarFp.updateWebhook(webhookId, updateWebhookRequest, options).then((request) => request(axios, basePath));
         },
     };
