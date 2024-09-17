@@ -153,6 +153,7 @@ describe("Webhook", () => {
         networkId: "test-network",
         notificationUri: "https://example.com/callback",
         eventType: "erc20_transfer",
+        eventTypeFilter: { addresses: ["0x1..", "0x2.."] },
         eventFilters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
         signatureHeader: "example_header",
       });
@@ -161,6 +162,7 @@ describe("Webhook", () => {
         network_id: "test-network",
         notification_uri: "https://example.com/callback",
         event_type: "erc20_transfer",
+        event_type_filters: { addresses: ["0x1..", "0x2.."] },
         event_filters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
         signature_header: "example_header",
       });
