@@ -1247,6 +1247,7 @@ export interface SmartContractAPIClient {
    * @param options - Axios request options.
    * @throws {APIError} If the request fails.
    */
+
   listSmartContracts(
     walletId: string,
     addressId: string,
