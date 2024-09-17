@@ -266,4 +266,17 @@ export class SmartContract {
 
     return contractEvents;
   }
+
+  /**
+   * Returns a string representation of the SmartContract.
+   *
+   * @returns The string representation of the SmartContract.
+   */
+  public toString(): string {
+    return (
+      `SmartContract{id: '${this.getId()}', networkId: '${this.getNetworkId()}', ` +
+      `contractAddress: '${this.getContractAddress()}', deployerAddress: '${this.getDeployerAddress()}', ` +
+      `type: '${this.getType()}'}`
+    );
+  }
 }
