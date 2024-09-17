@@ -10,6 +10,7 @@ import { ethers } from "ethers";
 import { TransactionStatus } from "../coinbase/types";
 import { APIError } from "../coinbase/api_error";
 import { AxiosError } from "axios";
+import { TimeoutError } from "../coinbase/errors";
 
 describe("SmartContract", () => {
   let smartContractModel: SmartContractModel = VALID_SMART_CONTRACT_ERC20_MODEL;
@@ -203,7 +204,88 @@ describe("SmartContract", () => {
     });
   });
   
+  describe("#wait", () => {
+    describe("when the transaction is complete", () => {
+      beforeEach(() => {
+        Coinbase.apiClients.smartContract!.getSmartContract = mockReturnValue({
+          ...VALID_SMART_CONTRACT_ERC20_MODEL,
+          transaction: {
+            ...VALID_SMART_CONTRACT_ERC20_MODEL.transaction!,
+            status: TransactionStatus.COMPLETE,
+          },
+        });
+      });
+
+      it("successfully waits and returns", async () => {
+        const completedSmartContract = await smartContract.wait();
+        expect(completedSmartContract).toBeInstanceOf(SmartContract);
+        expect(completedSmartContract.getTransaction().getStatus()).toEqual(TransactionStatus.COMPLETE);
+      });
+    });
+
+    describe("when the transaction is failed", () => {
+      beforeEach(() => {
+        Coinbase.apiClients.smartContract!.getSmartContract = mockReturnValue({
+          ...VALID_SMART_CONTRACT_ERC20_MODEL,
+          transaction: {
+            ...VALID_SMART_CONTRACT_ERC20_MODEL.transaction!,
+            status: TransactionStatus.FAILED,
+          },
+        });
+      });
+
+      it("successfully waits and returns a failed invocation", async () => {
+        const completedSmartContract = await smartContract.wait();
+        expect(completedSmartContract).toBeInstanceOf(SmartContract);
+        expect(completedSmartContract.getTransaction().getStatus()).toEqual(TransactionStatus.FAILED);
+      });
+    });
+
+    describe("when the transaction is pending", () => {
+      beforeEach(() => {
+        Coinbase.apiClients.smartContract!.getSmartContract = mockReturnValue({
+          ...VALID_SMART_CONTRACT_ERC20_MODEL,
+          transaction: {
+            ...VALID_SMART_CONTRACT_ERC20_MODEL.transaction!,
+            status: TransactionStatus.PENDING,
+          },
+        });
+      });
+
+      it("throws a timeout error", async () => {
+        expect(
+          smartContract.wait({ timeoutSeconds: 0.05, intervalSeconds: 0.05 }),
+        ).rejects.toThrow(new TimeoutError("SmartContract deployment timed out"));
+      });
+    });
+  });
   
+  describe("#reload", () => {
+    it("returns the updated smart contract", async () => {
+      Coinbase.apiClients.smartContract!.getSmartContract = mockReturnValue({
+        ...VALID_SMART_CONTRACT_ERC20_MODEL,
+        transaction: {
+          ...VALID_SMART_CONTRACT_ERC20_MODEL.transaction!,
+          status: TransactionStatus.COMPLETE,
+        },
+      });
+      await smartContract.reload();
+      expect(smartContract.getTransaction().getStatus()).toEqual(TransactionStatus.COMPLETE);
+      expect(Coinbase.apiClients.smartContract!.getSmartContract).toHaveBeenCalledTimes(
+        1,
+      );
+    });
+  });
+
+  describe("#toString", () => {
+    it("returns the same value as toString", () => {
+      expect(smartContract.toString()).toEqual(
+        `SmartContract{id: '${smartContract.getId()}', networkId: '${smartContract.getNetworkId()}', ` +
+          `contractAddress: '${smartContract.getContractAddress()}', deployerAddress: '${smartContract.getDeployerAddress()}', ` +
+          `type: '${smartContract.getType()}'}`,
+      );
+    });
+  });
 });
 
 describe("SmartContract.listEvents", () => {
