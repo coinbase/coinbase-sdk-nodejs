@@ -32,7 +32,7 @@ export class SmartContract {
     while (queue.length > 0) {
       const page = queue.shift();
 
-      const response = await Coinbase.apiClients.smartContract!.listContractEvents(
+      const response = await Coinbase.apiClients.contractEvent!.listContractEvents(
         networkId,
         protocolName,
         contractAddress,

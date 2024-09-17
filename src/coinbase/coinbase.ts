@@ -17,6 +17,7 @@ import {
   ContractEventsApiFactory,
   ContractInvocationsApiFactory,
   BalanceHistoryApiFactory,
+  SmartContractsApiFactory,
 } from "../client";
 import { BASE_PATH } from "./../client/base";
 import { Configuration } from "./../client/configuration";
@@ -143,7 +144,8 @@ export class Coinbase {
       axiosInstance,
     );
     Coinbase.apiClients.balanceHistory = BalanceHistoryApiFactory(config, basePath, axiosInstance);
-    Coinbase.apiClients.smartContract = ContractEventsApiFactory(config, basePath, axiosInstance);
+    Coinbase.apiClients.contractEvent = ContractEventsApiFactory(config, basePath, axiosInstance);
+    Coinbase.apiClients.smartContract = SmartContractsApiFactory(config, basePath, axiosInstance);
     Coinbase.apiKeyPrivateKey = privateKey;
     Coinbase.useServerSigner = useServerSigner;
   }
