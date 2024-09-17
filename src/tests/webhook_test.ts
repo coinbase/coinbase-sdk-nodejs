@@ -8,6 +8,10 @@ describe("Webhook", () => {
     network_id: "test-network",
     notification_uri: "https://example.com/callback",
     event_type: "erc20_transfer",
+    event_type_filter: {
+      addresses: ["0xa55C5950F7A3C42Fa5799B2Cac0e455774a07382"],
+      wallet_id: "w1",
+    },
     event_filters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
     signature_header: "example_header",
   };
