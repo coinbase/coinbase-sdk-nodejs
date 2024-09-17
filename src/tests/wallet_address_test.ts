@@ -16,6 +16,7 @@ import {
   StakingRewardStateEnum,
   Trade as TradeModel,
   TransferList,
+  SmartContractType,
 } from "../client";
 import Decimal from "decimal.js";
 import { APIError, FaucetLimitReachedError } from "../coinbase/api_error";
@@ -47,6 +48,11 @@ import {
   MINT_NFT_ABI,
   MINT_NFT_ARGS,
   walletsApiMock,
+  VALID_SMART_CONTRACT_ERC20_MODEL,
+  smartContractApiMock,
+  ERC20_NAME,
+  ERC20_SYMBOL,
+  ERC20_TOTAL_SUPPLY,
 } from "./utils";
 import { Transfer } from "../coinbase/transfer";
 import { TransactionStatus } from "../coinbase/types";
@@ -59,6 +65,7 @@ import { StakingReward } from "../coinbase/staking_reward";
 import { StakingBalance } from "../coinbase/staking_balance";
 import { PayloadSignature } from "../coinbase/payload_signature";
 import { ContractInvocation } from "../coinbase/contract_invocation";
+import { SmartContract } from "../coinbase/smart_contract";
 
 // Test suite for the WalletAddress class
 describe("WalletAddress", () => {
@@ -1441,6 +1448,302 @@ describe("WalletAddress", () => {
               args: MINT_NFT_ARGS,
               method: VALID_CONTRACT_INVOCATION_MODEL.method,
               contractAddress: VALID_CONTRACT_INVOCATION_MODEL.contract_address,
+            }),
+          ).rejects.toThrow(APIError);
+        });
+      });
+    });
+  });
+
+  describe("#deployToken", () => {
+    let key = ethers.Wallet.createRandom();
+    let addressModel: AddressModel;
+    let walletAddress: WalletAddress;
+    let expectedSignedPayload: string;
+
+    beforeAll(() => {
+      Coinbase.apiClients.smartContract = smartContractApiMock;
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      addressModel = newAddressModel(randomUUID(), randomUUID(), Coinbase.networks.BaseSepolia);
+    });
+
+    describe("when not using a server-signer", () => {
+      beforeEach(async () => {
+        Coinbase.useServerSigner = false;
+
+        walletAddress = new WalletAddress(addressModel, key as unknown as ethers.Wallet);
+
+        const tx = new Transaction(VALID_SMART_CONTRACT_ERC20_MODEL.transaction);
+        expectedSignedPayload = await tx.sign(key as unknown as ethers.Wallet);
+      });
+
+      describe("when it is successful", () => {
+        let smartContract;
+
+        beforeEach(async () => {
+          Coinbase.apiClients.smartContract!.createSmartContract = mockReturnValue({
+            ...VALID_SMART_CONTRACT_ERC20_MODEL,
+            deployer_address: walletAddress.getId(),
+            wallet_id: walletAddress.getWalletId(),
+          });
+
+          Coinbase.apiClients.smartContract!.deploySmartContract = mockReturnValue({
+            ...VALID_SMART_CONTRACT_ERC20_MODEL,
+            address_id: walletAddress.getId(),
+            wallet_id: walletAddress.getWalletId(),
+          });
+
+          smartContract = await walletAddress.deployToken({
+            name: ERC20_NAME,
+            symbol: ERC20_SYMBOL,
+            totalSupply: ERC20_TOTAL_SUPPLY,
+          });
+        });
+
+        it("returns a smart contract", async () => {
+          expect(smartContract).toBeInstanceOf(SmartContract);
+          expect(smartContract.getId()).toBe(VALID_SMART_CONTRACT_ERC20_MODEL.smart_contract_id);
+        });
+
+        it("creates the smart contract", async () => {
+          expect(Coinbase.apiClients.smartContract!.createSmartContract).toHaveBeenCalledWith(
+            walletAddress.getWalletId(),
+            walletAddress.getId(),
+            {
+              type: SmartContractType.Erc20,
+              options: {
+                name: ERC20_NAME,
+                symbol: ERC20_SYMBOL,
+                total_supply: ERC20_TOTAL_SUPPLY.toString(),
+              },
+            },
+          );
+          expect(Coinbase.apiClients.smartContract!.createSmartContract).toHaveBeenCalledTimes(1);
+        });
+
+        it("broadcasts the smart contract", async () => {
+          expect(Coinbase.apiClients.smartContract!.deploySmartContract).toHaveBeenCalledWith(
+            walletAddress.getWalletId(),
+            walletAddress.getId(),
+            VALID_SMART_CONTRACT_ERC20_MODEL.smart_contract_id,
+            {
+              signed_payload: expectedSignedPayload,
+            },
+          );
+
+          expect(Coinbase.apiClients.smartContract!.deploySmartContract).toHaveBeenCalledTimes(1);
+        });
+      });
+
+      describe("when it is successful deploying a smart contract", () => {
+        let smartContract;
+
+        beforeEach(async () => {
+          Coinbase.apiClients.smartContract!.createSmartContract = mockReturnValue({
+            ...VALID_SMART_CONTRACT_ERC20_MODEL,
+            deployer_address: walletAddress.getId(),
+            wallet_id: walletAddress.getWalletId(),
+          });
+
+          Coinbase.apiClients.smartContract!.deploySmartContract = mockReturnValue({
+            ...VALID_SMART_CONTRACT_ERC20_MODEL,
+            deployer_address: walletAddress.getId(),
+            wallet_id: walletAddress.getWalletId(),
+          });
+
+          Coinbase.apiClients.smartContract!.getSmartContract = mockReturnValue(
+            VALID_SMART_CONTRACT_ERC20_MODEL,
+          );
+
+          smartContract = await walletAddress.deployToken({
+            name: ERC20_NAME,
+            symbol: ERC20_SYMBOL,
+            totalSupply: ERC20_TOTAL_SUPPLY,
+          });
+        });
+
+        it("returns a smart contract", async () => {
+          expect(smartContract).toBeInstanceOf(SmartContract);
+          expect(smartContract.getId()).toBe(VALID_SMART_CONTRACT_ERC20_MODEL.smart_contract_id);
+        });
+
+        it("creates the smart contract", async () => {
+          expect(Coinbase.apiClients.smartContract!.createSmartContract).toHaveBeenCalledWith(
+            walletAddress.getWalletId(),
+            walletAddress.getId(),
+            {
+              type: SmartContractType.Erc20,
+              options: {
+                name: ERC20_NAME,
+                symbol: ERC20_SYMBOL,
+                total_supply: ERC20_TOTAL_SUPPLY.toString(),
+              },
+            },
+          );
+          expect(Coinbase.apiClients.smartContract!.createSmartContract).toHaveBeenCalledTimes(1);
+        });
+
+        it("broadcasts the smart contract", async () => {
+          expect(Coinbase.apiClients.smartContract!.deploySmartContract).toHaveBeenCalledWith(
+            walletAddress.getWalletId(),
+            walletAddress.getId(),
+            VALID_SMART_CONTRACT_ERC20_MODEL.smart_contract_id,
+            {
+              signed_payload: expectedSignedPayload,
+            },
+          );
+
+          expect(Coinbase.apiClients.smartContract!.deploySmartContract).toHaveBeenCalledTimes(1);
+        });
+      });
+
+      describe("when no key is loaded", () => {
+        beforeEach(() => {
+          walletAddress = new WalletAddress(addressModel);
+        });
+
+        it("throws an error", async () => {
+          await expect(
+            walletAddress.deployToken({
+              name: ERC20_NAME,
+              symbol: ERC20_SYMBOL,
+              totalSupply: ERC20_TOTAL_SUPPLY,
+            }),
+          ).rejects.toThrow(Error);
+        });
+      });
+
+      describe("when it fails to create a smart contract", () => {
+        beforeEach(() => {
+          Coinbase.apiClients.smartContract!.createSmartContract = mockReturnRejectedValue(
+            new APIError({
+              response: {
+                status: 400,
+                data: {
+                  code: "malformed_request",
+                  message: "failed to create smart contract: invalid abi",
+                },
+              },
+            } as AxiosError),
+          );
+        });
+
+        it("throws an error", async () => {
+          await expect(
+            walletAddress.deployToken({
+              name: ERC20_NAME,
+              symbol: ERC20_SYMBOL,
+              totalSupply: ERC20_TOTAL_SUPPLY,
+            }),
+          ).rejects.toThrow(APIError);
+        });
+      });
+
+      describe("when it fails to broadcast a smart contract", () => {
+        beforeEach(() => {
+          Coinbase.apiClients.smartContract!.createSmartContract = mockReturnValue({
+            ...VALID_CONTRACT_INVOCATION_MODEL,
+            address_id: walletAddress.getId(),
+            wallet_id: walletAddress.getWalletId(),
+          });
+
+          Coinbase.apiClients.smartContract!.deploySmartContract = mockReturnRejectedValue(
+            new APIError({
+              response: {
+                status: 400,
+                data: {
+                  code: "invalid_signed_payload",
+                  message: "failed to broadcast smart contract: invalid signed payload",
+                },
+              },
+            } as AxiosError),
+          );
+        });
+
+        it("throws an error", async () => {
+          await expect(
+            walletAddress.deployToken({
+              name: ERC20_NAME,
+              symbol: ERC20_SYMBOL,
+              totalSupply: ERC20_TOTAL_SUPPLY,
+            }),
+          ).rejects.toThrow(APIError);
+        });
+      });
+    });
+
+    describe("when using a server-signer", () => {
+      let smartContract;
+
+      beforeEach(async () => {
+        Coinbase.useServerSigner = true;
+
+        walletAddress = new WalletAddress(addressModel);
+      });
+
+      describe("when it is successful", () => {
+        beforeEach(async () => {
+          Coinbase.apiClients.smartContract!.createSmartContract = mockReturnValue({
+            ...VALID_SMART_CONTRACT_ERC20_MODEL,
+            address_id: walletAddress.getId(),
+            wallet_id: walletAddress.getWalletId(),
+          });
+
+          smartContract = await walletAddress.deployToken({
+            name: ERC20_NAME,
+            symbol: ERC20_SYMBOL,
+            totalSupply: ERC20_TOTAL_SUPPLY,
+          });
+        });
+
+        it("returns a pending contract invocation", async () => {
+          expect(smartContract).toBeInstanceOf(SmartContract);
+          expect(smartContract.getId()).toBe(VALID_SMART_CONTRACT_ERC20_MODEL.smart_contract_id);
+          expect(smartContract.getTransaction().getStatus()).toBe(TransactionStatus.PENDING);
+        });
+
+        it("creates a contract invocation", async () => {
+          expect(Coinbase.apiClients.smartContract!.createSmartContract).toHaveBeenCalledWith(
+            walletAddress.getWalletId(),
+            walletAddress.getId(),
+            {
+              type: SmartContractType.Erc20,
+              options: {
+                name: ERC20_NAME,
+                symbol: ERC20_SYMBOL,
+                total_supply: ERC20_TOTAL_SUPPLY.toString(),
+              },
+            },
+          );
+          expect(Coinbase.apiClients.smartContract!.createSmartContract).toHaveBeenCalledTimes(1);
+        });
+      });
+
+      describe("when creating a contract invocation fails", () => {
+        beforeEach(() => {
+          Coinbase.apiClients.smartContract!.createSmartContract = mockReturnRejectedValue(
+            new APIError({
+              response: {
+                status: 400,
+                data: {
+                  code: "malformed_request",
+                  message: "failed to create contract invocation: invalid abi",
+                },
+              },
+            } as AxiosError),
+          );
+        });
+
+        it("throws an error", async () => {
+          await expect(
+            walletAddress.deployToken({
+              name: ERC20_NAME,
+              symbol: ERC20_SYMBOL,
+              totalSupply: ERC20_TOTAL_SUPPLY,
             }),
           ).rejects.toThrow(APIError);
         });

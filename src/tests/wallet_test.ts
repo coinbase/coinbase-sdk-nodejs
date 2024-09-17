@@ -49,6 +49,10 @@ import {
   MINT_NFT_ARGS,
   VALID_SIGNED_PAYLOAD_SIGNATURE_MODEL,
   VALID_SIGNED_CONTRACT_INVOCATION_MODEL,
+  VALID_SMART_CONTRACT_ERC20_MODEL,
+  ERC20_NAME,
+  ERC20_SYMBOL,
+  ERC20_TOTAL_SUPPLY,
 } from "./utils";
 import { Trade } from "../coinbase/trade";
 import { WalletAddress } from "../coinbase/address/wallet_address";
@@ -57,6 +61,7 @@ import { StakingReward } from "../coinbase/staking_reward";
 import { StakingBalance } from "../coinbase/staking_balance";
 import { PayloadSignature } from "../coinbase/payload_signature";
 import { ContractInvocation } from "../coinbase/contract_invocation";
+import { SmartContract } from "../coinbase/smart_contract";
 
 describe("Wallet Class", () => {
   let wallet: Wallet;
@@ -580,6 +585,33 @@ describe("Wallet Class", () => {
 
       expect(contractInvocation).toBeInstanceOf(ContractInvocation);
       expect(contractInvocation).toEqual(expectedInvocation);
+    });
+  });
+
+  describe("#deployToken", () => {
+    let expectedSmartContract;
+    let options = {
+      name: ERC20_NAME,
+      symbol: ERC20_SYMBOL,
+      totalSupply: ERC20_TOTAL_SUPPLY,
+    };
+
+    beforeEach(async () => {
+      expectedSmartContract = SmartContract.fromModel(VALID_SMART_CONTRACT_ERC20_MODEL);
+
+      (await wallet.getDefaultAddress()).deployToken = jest
+        .fn()
+        .mockResolvedValue(expectedSmartContract);
+    });
+
+    it("successfully deploys an ERC20 contract on the default address", async () => {
+      const smartContract = await wallet.deployToken(options);
+
+      expect((await wallet.getDefaultAddress()).deployToken).toHaveBeenCalledTimes(1);
+      expect((await wallet.getDefaultAddress()).deployToken).toHaveBeenCalledWith(options);
+
+      expect(smartContract).toBeInstanceOf(SmartContract);
+      expect(smartContract).toEqual(expectedSmartContract);
     });
   });
 
