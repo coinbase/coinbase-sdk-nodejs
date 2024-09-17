@@ -927,7 +927,7 @@ export enum StakeOptionsMode {
 /**
  * Smart Contract Type
  */
-export enum ContractType {
+export enum SmartContractType {
   ERC20 = "erc20",
   ERC721 = "erc721",
 }
@@ -952,7 +952,7 @@ export type TokenContractOptions = {
 /**
  * Smart Contract Options
  */
-export type ContractOptions = NFTContractOptions | TokenContractOptions;
+export type SmartContractOptions = NFTContractOptions | TokenContractOptions;
 
 /**
  * Options for creating a Transfer.

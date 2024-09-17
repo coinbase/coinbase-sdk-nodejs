@@ -2,13 +2,12 @@ import { ethers } from "ethers";
 import {
   DeploySmartContractRequest,
   SmartContract as SmartContractModel,
-  SmartContractOptions,
-  SmartContractType,
+  SmartContractType as SmartContractTypeModel,
 } from "../client/api";
 import { Transaction } from "./transaction";
 import {
-  ContractOptions,
-  ContractType,
+  SmartContractOptions,
+  SmartContractType,
   NFTContractOptions,
   TokenContractOptions,
   TransactionStatus,
@@ -96,12 +95,12 @@ export class SmartContract {
    *
    * @returns The Smart Contract Type.
    */
-  public getType(): ContractType {
+  public getType(): SmartContractType {
     switch (this.model.type) {
-      case SmartContractType.Erc20:
-        return ContractType.ERC20;
-      case SmartContractType.Erc721:
-        return ContractType.ERC721;
+      case SmartContractTypeModel.Erc20:
+        return SmartContractType.ERC20;
+      case SmartContractTypeModel.Erc721:
+        return SmartContractType.ERC721;
       default:
         throw new Error(`Unknown smart contract type: ${this.model.type}`);
     }
@@ -112,8 +111,8 @@ export class SmartContract {
    *
    * @returns The Smart Contract Options.
    */
-  public getOptions(): ContractOptions {
-    if (this.getType() === ContractType.ERC20) {
+  public getOptions(): SmartContractOptions {
+    if (this.getType() === SmartContractType.ERC20) {
       return this.model.options as TokenContractOptions;
     }
     return this.model.options as NFTContractOptions;
