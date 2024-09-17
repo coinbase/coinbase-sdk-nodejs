@@ -162,7 +162,7 @@ describe("Webhook", () => {
         network_id: "test-network",
         notification_uri: "https://example.com/callback",
         event_type: "erc20_transfer",
-        event_type_filters: { addresses: ["0x1..", "0x2.."] },
+        event_type_filter: { addresses: ["0x1..", "0x2.."] },
         event_filters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
         signature_header: "example_header",
       });
