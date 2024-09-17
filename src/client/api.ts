@@ -1673,6 +1673,7 @@ export const NetworkIdentifier = {
     EthereumMainnet: 'ethereum-mainnet',
     PolygonMainnet: 'polygon-mainnet',
     SolanaDevnet: 'solana-devnet',
+    SolanaMainnet: 'solana-mainnet',
     ArbitrumMainnet: 'arbitrum-mainnet'
 } as const;
 
