@@ -986,6 +986,15 @@ export type CreateContractInvocationOptions = {
 };
 
 /**
+ * Options for creating a ERC20.
+ */
+export type CreateERC20Options = {
+  name: string;
+  symbol: string;
+  totalSupply: Amount;
+};
+
+/**
  * Options for listing historical balances of an address.
  */
 export type ListHistoricalBalancesOptions = {
