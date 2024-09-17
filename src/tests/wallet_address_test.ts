@@ -1455,11 +1455,10 @@ describe("WalletAddress", () => {
     });
   });
 
-  describe("#deployERC20", () => {
+  describe("#deployToken", () => {
     let key = ethers.Wallet.createRandom();
     let addressModel: AddressModel;
     let walletAddress: WalletAddress;
-    let unsignedPayload = VALID_SMART_CONTRACT_ERC20_MODEL.transaction.unsigned_payload;
     let expectedSignedPayload: string;
 
     beforeAll(() => {
@@ -1498,7 +1497,7 @@ describe("WalletAddress", () => {
             wallet_id: walletAddress.getWalletId(),
           });
 
-          smartContract = await walletAddress.deployERC20({
+          smartContract = await walletAddress.deployToken({
             name: ERC20_NAME,
             symbol: ERC20_SYMBOL,
             totalSupply: ERC20_TOTAL_SUPPLY,
@@ -1560,7 +1559,7 @@ describe("WalletAddress", () => {
             VALID_SMART_CONTRACT_ERC20_MODEL,
           );
 
-          smartContract = await walletAddress.deployERC20({
+          smartContract = await walletAddress.deployToken({
             name: ERC20_NAME,
             symbol: ERC20_SYMBOL,
             totalSupply: ERC20_TOTAL_SUPPLY,
@@ -1609,7 +1608,7 @@ describe("WalletAddress", () => {
 
         it("throws an error", async () => {
           await expect(
-            walletAddress.deployERC20({
+            walletAddress.deployToken({
               name: ERC20_NAME,
               symbol: ERC20_SYMBOL,
               totalSupply: ERC20_TOTAL_SUPPLY,
@@ -1635,7 +1634,7 @@ describe("WalletAddress", () => {
 
         it("throws an error", async () => {
           await expect(
-            walletAddress.deployERC20({
+            walletAddress.deployToken({
               name: ERC20_NAME,
               symbol: ERC20_SYMBOL,
               totalSupply: ERC20_TOTAL_SUPPLY,
@@ -1667,7 +1666,7 @@ describe("WalletAddress", () => {
 
         it("throws an error", async () => {
           await expect(
-            walletAddress.deployERC20({
+            walletAddress.deployToken({
               name: ERC20_NAME,
               symbol: ERC20_SYMBOL,
               totalSupply: ERC20_TOTAL_SUPPLY,
@@ -1694,7 +1693,7 @@ describe("WalletAddress", () => {
             wallet_id: walletAddress.getWalletId(),
           });
 
-          smartContract = await walletAddress.deployERC20({
+          smartContract = await walletAddress.deployToken({
             name: ERC20_NAME,
             symbol: ERC20_SYMBOL,
             totalSupply: ERC20_TOTAL_SUPPLY,
@@ -1741,7 +1740,7 @@ describe("WalletAddress", () => {
 
         it("throws an error", async () => {
           await expect(
-            walletAddress.deployERC20({
+            walletAddress.deployToken({
               name: ERC20_NAME,
               symbol: ERC20_SYMBOL,
               totalSupply: ERC20_TOTAL_SUPPLY,

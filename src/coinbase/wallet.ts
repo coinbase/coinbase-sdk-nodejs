@@ -779,8 +779,8 @@ export class Wallet {
    * @returns A Promise that resolves to the deployed SmartContract object.
    * @throws {Error} If the private key is not loaded when not using server signer.
    */
-  public async deployERC20(options: CreateERC20Options): Promise<SmartContract> {
-    return (await this.getDefaultAddress()).deployERC20(options);
+  public async deployToken(options: CreateERC20Options): Promise<SmartContract> {
+    return (await this.getDefaultAddress()).deployToken(options);
   }
 
   /**
