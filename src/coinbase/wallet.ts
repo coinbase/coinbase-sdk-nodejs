@@ -36,7 +36,7 @@ import { StakingReward } from "./staking_reward";
 import { StakingBalance } from "./staking_balance";
 import { PayloadSignature } from "./payload_signature";
 import { ContractInvocation } from "../coinbase/contract_invocation";
-import { Contract } from "./contract";
+import { SmartContract } from "./smart_contract";
 
 /**
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
@@ -776,10 +776,10 @@ export class Wallet {
    * @param options.name - The name of the ERC20 token.
    * @param options.symbol - The symbol of the ERC20 token.
    * @param options.totalSupply - The total supply of the ERC20 token.
-   * @returns A Promise that resolves to the deployed Contract object.
+   * @returns A Promise that resolves to the deployed SmartContract object.
    * @throws {Error} If the private key is not loaded when not using server signer.
    */
-  public async deployERC20(options: CreateERC20Options): Promise<Contract> {
+  public async deployERC20(options: CreateERC20Options): Promise<SmartContract> {
     return (await this.getDefaultAddress()).deployERC20(options);
   }
 

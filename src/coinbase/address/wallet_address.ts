@@ -21,7 +21,7 @@ import { delay } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
 import { StakingOperation } from "../staking_operation";
 import { PayloadSignature } from "../payload_signature";
-import { Contract } from "../contract";
+import { SmartContract } from "../smart_contract";
 
 /**
  * A representation of a blockchain address, which is a wallet-controlled account on a network.
@@ -331,10 +331,10 @@ export class WalletAddress extends Address {
    * @param options.name - The name of the ERC20 token.
    * @param options.symbol - The symbol of the ERC20 token.
    * @param options.totalSupply - The total supply of the ERC20 token.
-   * @returns A Promise that resolves to the deployed Contract object.
+   * @returns A Promise that resolves to the deployed SmartContract object.
    * @throws {Error} If the private key is not loaded when not using server signer.
    */
-  public async deployERC20(options: CreateERC20Options): Promise<Contract> {
+  public async deployERC20(options: CreateERC20Options): Promise<SmartContract> {
     if (!Coinbase.useServerSigner && !this.key) {
       throw new Error("Cannot deploy ERC20 without private key loaded");
     }
@@ -359,10 +359,10 @@ export class WalletAddress extends Address {
    * @param {string} options.name - The name of the ERC20 token.
    * @param {string} options.symbol - The symbol of the ERC20 token.
    * @param {BigNumber} options.totalSupply - The total supply of the ERC20 token.
-   * @returns {Promise<SmartContractModel>} A Promise that resolves to the created SmartContractModel.
+   * @returns {Promise<SmartContract>} A Promise that resolves to the created SmartContract.
    * @throws {APIError} If the API request to create a smart contract fails.
    */
-  private async createERC20(options: CreateERC20Options): Promise<Contract> {
+  private async createERC20(options: CreateERC20Options): Promise<SmartContract> {
     const resp = await Coinbase.apiClients.smartContract!.createSmartContract(
       this.getWalletId(),
       this.getId(),
@@ -375,7 +375,7 @@ export class WalletAddress extends Address {
         },
       },
     );
-    return Contract.fromModel(resp?.data);
+    return SmartContract.fromModel(resp?.data);
   }
 
   /**
