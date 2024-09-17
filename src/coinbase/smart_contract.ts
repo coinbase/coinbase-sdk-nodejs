@@ -176,7 +176,7 @@ export class SmartContract {
    * @returns The ABI as a JSON-encoded string.
    */
   public getAbi(): string {
-    return this.model.abi;
+    return JSON.parse(this.model.abi);
   }
 
   /**
@@ -206,7 +206,7 @@ export class SmartContract {
    * @throws {APIError} if the API request to broadcast a SmartContract deployment fails.
    */
   public async broadcast(): Promise<SmartContract> {
-    if (!this.getTransaction()?.isSigned())
+    if (!this.getTransaction().isSigned())
       throw new Error("Cannot broadcast unsigned SmartContract deployment");
 
     const deploySmartContractRequest: DeploySmartContractRequest = {

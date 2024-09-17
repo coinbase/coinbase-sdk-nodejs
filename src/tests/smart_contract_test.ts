@@ -80,7 +80,7 @@ describe("SmartContract", () => {
 
   describe("#getAbi", () => {
     it("returns the smart contract ABI", () => {
-      expect(smartContract.getAbi()).toEqual(VALID_SMART_CONTRACT_ERC20_MODEL.abi);
+      expect(smartContract.getAbi()).toEqual(JSON.parse(VALID_SMART_CONTRACT_ERC20_MODEL.abi));
     });
   });
 
