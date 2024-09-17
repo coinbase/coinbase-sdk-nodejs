@@ -278,6 +278,21 @@ export const VALID_SIGNED_CONTRACT_INVOCATION_MODEL: ContractInvocationModel = {
   },
 };
 
+export const ERC20_NAME = "Test NFT";
+export const ERC20_SYMBOL = "TEST";
+export const ERC20_TOTAL_SUPPLY = 100;
+
+// TODO - fix this
+export const ERC20_ABI = [
+  {
+    inputs: [{ internalType: "address", name: "recipient", type: "address" }],
+    name: "mint",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "payable",
+    type: "function",
+  },
+];
+
 export const VALID_SMART_CONTRACT_ERC20_MODEL: SmartContractModel = {
   smart_contract_id: "test-smart-contract-1",
   network_id: Coinbase.networks.BaseSepolia,
@@ -286,10 +301,11 @@ export const VALID_SMART_CONTRACT_ERC20_MODEL: SmartContractModel = {
   deployer_address: "0xdeployer-address",
   type: SmartContractType.Erc20,
   options: {
-    name: "Test NFT",
-    symbol: "TEST",
+    name: ERC20_NAME,
+    symbol: ERC20_SYMBOL,
+    total_supply: ERC20_TOTAL_SUPPLY.toString(),
   },
-  abi: "0xabi",
+  abi: JSON.stringify(ERC20_ABI),
   transaction: {
     network_id: Coinbase.networks.BaseSepolia,
     from_address_id: "0xdeadbeef",
