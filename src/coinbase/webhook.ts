@@ -1,4 +1,9 @@
-import { Webhook as WebhookModel, WebhookEventType, WebhookEventFilter } from "../client/api";
+import {
+  Webhook as WebhookModel,
+  WebhookEventType,
+  WebhookEventFilter,
+  WebhookEventTypeFilter,
+} from "../client/api";
 import { Coinbase } from "./coinbase";
 import { CreateWebhookOptions } from "./types";
 
@@ -135,6 +140,15 @@ export class Webhook {
   }
 
   /**
+   * Returns the event type filter of the webhook.
+   *
+   * @returns The filter which will be used to filter for events of a certain event type
+   */
+  public getEventTypeFilter(): WebhookEventTypeFilter | undefined {
+    return this.model?.event_type_filter;
+  }
+
+  /**
    * Returns the event filters applied to the webhook.
    *
    * @returns An array of event filters used by the webhook, or undefined if the model is null.
@@ -189,6 +203,7 @@ export class Webhook {
     return (
       `Webhook { id: '${this.getId()}', networkId: '${this.getNetworkId()}', ` +
       `eventType: '${this.getEventType()}', eventFilter: ${JSON.stringify(this.getEventFilters())}, ` +
+      `eventTypeFilter: '${this.getEventTypeFilter()}', eventTypeFilter: ${JSON.stringify(this.getEventTypeFilter())}, ` +
       `notificationUri: '${this.getNotificationURI()}', signatureHeader: '${this.getSignatureHeader()}' }`
     );
   }
