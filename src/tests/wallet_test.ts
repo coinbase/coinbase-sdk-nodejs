@@ -588,7 +588,7 @@ describe("Wallet Class", () => {
     });
   });
 
-  describe("#deployERC20", () => {
+  describe("#deployToken", () => {
     let expectedSmartContract;
     let options = {
       name: ERC20_NAME,
@@ -599,16 +599,16 @@ describe("Wallet Class", () => {
     beforeEach(async () => {
       expectedSmartContract = SmartContract.fromModel(VALID_SMART_CONTRACT_ERC20_MODEL);
 
-      (await wallet.getDefaultAddress()).deployERC20 = jest
+      (await wallet.getDefaultAddress()).deployToken = jest
         .fn()
         .mockResolvedValue(expectedSmartContract);
     });
 
     it("successfully deploys an ERC20 contract on the default address", async () => {
-      const smartContract = await wallet.deployERC20(options);
+      const smartContract = await wallet.deployToken(options);
 
-      expect((await wallet.getDefaultAddress()).deployERC20).toHaveBeenCalledTimes(1);
-      expect((await wallet.getDefaultAddress()).deployERC20).toHaveBeenCalledWith(options);
+      expect((await wallet.getDefaultAddress()).deployToken).toHaveBeenCalledTimes(1);
+      expect((await wallet.getDefaultAddress()).deployToken).toHaveBeenCalledWith(options);
 
       expect(smartContract).toBeInstanceOf(SmartContract);
       expect(smartContract).toEqual(expectedSmartContract);
