@@ -50,7 +50,7 @@ describe("SmartContract", () => {
   };
 
   beforeAll(() => {
-    Coinbase.apiClients.smartContract = smartContractApiMock;
+    Coinbase.apiClients.contractEvent = smartContractApiMock;
   });
 
   beforeEach(() => {
@@ -59,7 +59,7 @@ describe("SmartContract", () => {
 
   describe("#listEvents", () => {
     it("should successfully return contract events", async () => {
-      Coinbase.apiClients.smartContract!.listContractEvents =
+      Coinbase.apiClients.contractEvent!.listContractEvents =
         mockReturnValue(CONTRACT_EVENTS_RESPONSE);
       const response = await SmartContract.listEvents(
         networkId,
@@ -72,7 +72,7 @@ describe("SmartContract", () => {
       );
       expect(response).toBeInstanceOf(Array<ContractEvent>);
       expect(response.length).toEqual(2);
-      expect(Coinbase.apiClients.smartContract!.listContractEvents).toHaveBeenCalledWith(
+      expect(Coinbase.apiClients.contractEvent!.listContractEvents).toHaveBeenCalledWith(
         networkId,
         protocolName,
         contractAddress,
@@ -86,7 +86,7 @@ describe("SmartContract", () => {
 
     it("should successfully return contract events for multiple pages", async () => {
       const pages = ["abc", "def"];
-      Coinbase.apiClients.smartContract!.listContractEvents = mockFn(() => {
+      Coinbase.apiClients.contractEvent!.listContractEvents = mockFn(() => {
         CONTRACT_EVENTS_RESPONSE.next_page = pages.shift() as string;
         CONTRACT_EVENTS_RESPONSE.has_more = !!CONTRACT_EVENTS_RESPONSE.next_page;
         return { data: CONTRACT_EVENTS_RESPONSE };
@@ -102,7 +102,7 @@ describe("SmartContract", () => {
       );
       expect(response).toBeInstanceOf(Array<ContractEvent>);
       expect(response.length).toEqual(6);
-      expect(Coinbase.apiClients.smartContract!.listContractEvents).toHaveBeenCalledWith(
+      expect(Coinbase.apiClients.contractEvent!.listContractEvents).toHaveBeenCalledWith(
         networkId,
         protocolName,
         contractAddress,
@@ -115,7 +115,7 @@ describe("SmartContract", () => {
     });
 
     it("should handle API errors gracefully", async () => {
-      Coinbase.apiClients.smartContract!.listContractEvents = jest
+      Coinbase.apiClients.contractEvent!.listContractEvents = jest
         .fn()
         .mockRejectedValue(new Error("API Error"));
 
@@ -133,7 +133,7 @@ describe("SmartContract", () => {
     });
 
     it("should handle empty response", async () => {
-      Coinbase.apiClients.smartContract!.listContractEvents = mockReturnValue({
+      Coinbase.apiClients.contractEvent!.listContractEvents = mockReturnValue({
         data: [],
         has_more: false,
         next_page: "",
