@@ -1,10 +1,16 @@
 import { Coinbase } from "../coinbase/coinbase";
-import { smartContractApiMock, mockFn, mockReturnValue, VALID_CONTRACT_INVOCATION_MODEL, VALID_SMART_CONTRACT_ERC20_MODEL, mockReturnRejectedValue, contractEventApiMock } from "./utils";
+import {
+  smartContractApiMock,
+  mockFn,
+  mockReturnValue,
+  VALID_CONTRACT_INVOCATION_MODEL,
+  VALID_SMART_CONTRACT_ERC20_MODEL,
+  mockReturnRejectedValue,
+  contractEventApiMock,
+} from "./utils";
 import { SmartContract } from "../coinbase/smart_contract";
 import { ContractEvent } from "../coinbase/contract_event";
-import {
-  SmartContract as SmartContractModel,
-} from "../client/api";
+import { SmartContract as SmartContractModel } from "../client/api";
 import { Transaction } from "../coinbase/transaction";
 import { ethers } from "ethers";
 import { TransactionStatus } from "../coinbase/types";
@@ -34,20 +40,16 @@ describe("SmartContract", () => {
 
   describe("#getId", () => {
     it("returns the smart contract ID", () => {
-      expect(smartContract.getId()).toEqual(
-        VALID_SMART_CONTRACT_ERC20_MODEL.smart_contract_id,
-      );
+      expect(smartContract.getId()).toEqual(VALID_SMART_CONTRACT_ERC20_MODEL.smart_contract_id);
     });
   });
 
   describe("#getNetworkId", () => {
     it("returns the smart contract network ID", () => {
-      expect(smartContract.getNetworkId()).toEqual(
-        VALID_SMART_CONTRACT_ERC20_MODEL.network_id,
-      );
+      expect(smartContract.getNetworkId()).toEqual(VALID_SMART_CONTRACT_ERC20_MODEL.network_id);
     });
   });
-  
+
   describe("#getContractAddress", () => {
     it("returns the smart contract contract address", () => {
       expect(smartContract.getContractAddress()).toEqual(
@@ -55,7 +57,7 @@ describe("SmartContract", () => {
       );
     });
   });
-  
+
   describe("#getDeployerAddress", () => {
     it("returns the smart contract deployer address", () => {
       expect(smartContract.getDeployerAddress()).toEqual(
@@ -63,31 +65,25 @@ describe("SmartContract", () => {
       );
     });
   });
-  
+
   describe("#getType", () => {
     it("returns the smart contract type", () => {
-      expect(smartContract.getType()).toEqual(
-        VALID_SMART_CONTRACT_ERC20_MODEL.type,
-      );
+      expect(smartContract.getType()).toEqual(VALID_SMART_CONTRACT_ERC20_MODEL.type);
     });
   });
-  
+
   describe("#getOptions", () => {
     it("returns the smart contract options", () => {
-      expect(smartContract.getOptions()).toEqual(
-        VALID_SMART_CONTRACT_ERC20_MODEL.options,
-      );
+      expect(smartContract.getOptions()).toEqual(VALID_SMART_CONTRACT_ERC20_MODEL.options);
     });
   });
 
   describe("#getAbi", () => {
     it("returns the smart contract ABI", () => {
-      expect(smartContract.getAbi()).toEqual(
-        VALID_SMART_CONTRACT_ERC20_MODEL.abi,
-      );
+      expect(smartContract.getAbi()).toEqual(VALID_SMART_CONTRACT_ERC20_MODEL.abi);
     });
   });
-  
+
   describe("#getTransaction", () => {
     it("returns the smart contract transaction", () => {
       expect(smartContract.getTransaction()).toEqual(
@@ -120,7 +116,6 @@ describe("SmartContract", () => {
     beforeEach(() => {
       Coinbase.apiClients.smartContract = smartContractApiMock;
 
-
       // Ensure signed payload is present.
       smartContract = SmartContract.fromModel({
         ...VALID_SMART_CONTRACT_ERC20_MODEL,
@@ -149,13 +144,13 @@ describe("SmartContract", () => {
 
       it("returns the broadcasted smart contract", async () => {
         expect(broadcastedSmartContract).toBeInstanceOf(SmartContract);
-        expect(broadcastedSmartContract.getTransaction().getStatus()).toEqual(TransactionStatus.BROADCAST);
+        expect(broadcastedSmartContract.getTransaction().getStatus()).toEqual(
+          TransactionStatus.BROADCAST,
+        );
       });
 
       it("broadcasts the smart contract", async () => {
-        expect(
-          Coinbase.apiClients.smartContract!.deploySmartContract,
-        ).toHaveBeenCalledWith(
+        expect(Coinbase.apiClients.smartContract!.deploySmartContract).toHaveBeenCalledWith(
           smartContract.getWalletId(),
           smartContract.getDeployerAddress(),
           smartContract.getId(),
@@ -164,9 +159,7 @@ describe("SmartContract", () => {
           },
         );
 
-        expect(
-          Coinbase.apiClients.smartContract!.deploySmartContract,
-        ).toHaveBeenCalledTimes(1);
+        expect(Coinbase.apiClients.smartContract!.deploySmartContract).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -184,18 +177,17 @@ describe("SmartContract", () => {
 
     describe("when broadcasting fails", () => {
       beforeEach(() => {
-        Coinbase.apiClients.smartContract!.deploySmartContract =
-          mockReturnRejectedValue(
-            new APIError({
-              response: {
-                status: 400,
-                data: {
-                  code: "invalid_signed_payload",
-                  message: "failed to broadcast contract invocation: invalid signed payload",
-                },
+        Coinbase.apiClients.smartContract!.deploySmartContract = mockReturnRejectedValue(
+          new APIError({
+            response: {
+              status: 400,
+              data: {
+                code: "invalid_signed_payload",
+                message: "failed to broadcast contract invocation: invalid signed payload",
               },
-            } as AxiosError),
-          );
+            },
+          } as AxiosError),
+        );
       });
 
       it("throws an error", async () => {
@@ -203,7 +195,7 @@ describe("SmartContract", () => {
       });
     });
   });
-  
+
   describe("#wait", () => {
     describe("when the transaction is complete", () => {
       beforeEach(() => {
@@ -219,7 +211,9 @@ describe("SmartContract", () => {
       it("successfully waits and returns", async () => {
         const completedSmartContract = await smartContract.wait();
         expect(completedSmartContract).toBeInstanceOf(SmartContract);
-        expect(completedSmartContract.getTransaction().getStatus()).toEqual(TransactionStatus.COMPLETE);
+        expect(completedSmartContract.getTransaction().getStatus()).toEqual(
+          TransactionStatus.COMPLETE,
+        );
       });
     });
 
@@ -237,7 +231,9 @@ describe("SmartContract", () => {
       it("successfully waits and returns a failed invocation", async () => {
         const completedSmartContract = await smartContract.wait();
         expect(completedSmartContract).toBeInstanceOf(SmartContract);
-        expect(completedSmartContract.getTransaction().getStatus()).toEqual(TransactionStatus.FAILED);
+        expect(completedSmartContract.getTransaction().getStatus()).toEqual(
+          TransactionStatus.FAILED,
+        );
       });
     });
 
@@ -253,13 +249,13 @@ describe("SmartContract", () => {
       });
 
       it("throws a timeout error", async () => {
-        expect(
-          smartContract.wait({ timeoutSeconds: 0.05, intervalSeconds: 0.05 }),
-        ).rejects.toThrow(new TimeoutError("SmartContract deployment timed out"));
+        expect(smartContract.wait({ timeoutSeconds: 0.05, intervalSeconds: 0.05 })).rejects.toThrow(
+          new TimeoutError("SmartContract deployment timed out"),
+        );
       });
     });
   });
-  
+
   describe("#reload", () => {
     it("returns the updated smart contract", async () => {
       Coinbase.apiClients.smartContract!.getSmartContract = mockReturnValue({
@@ -271,9 +267,7 @@ describe("SmartContract", () => {
       });
       await smartContract.reload();
       expect(smartContract.getTransaction().getStatus()).toEqual(TransactionStatus.COMPLETE);
-      expect(Coinbase.apiClients.smartContract!.getSmartContract).toHaveBeenCalledTimes(
-        1,
-      );
+      expect(Coinbase.apiClients.smartContract!.getSmartContract).toHaveBeenCalledTimes(1);
     });
   });
 
