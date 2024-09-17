@@ -1114,7 +1114,7 @@ export type CreateWebhookOptions = {
   networkId: string;
   notificationUri: string;
   eventType: WebhookEventType;
-  eventTypeFilter: WebhookEventTypeFilter;
+  eventTypeFilter?: WebhookEventTypeFilter;
   eventFilters?: Array<WebhookEventFilter>;
   signatureHeader?: string;
 };
