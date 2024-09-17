@@ -203,7 +203,7 @@ export class Webhook {
     return (
       `Webhook { id: '${this.getId()}', networkId: '${this.getNetworkId()}', ` +
       `eventType: '${this.getEventType()}', eventFilter: ${JSON.stringify(this.getEventFilters())}, ` +
-      `eventTypeFilter: '${this.getEventTypeFilter()}', eventTypeFilter: ${JSON.stringify(this.getEventTypeFilter())}, ` +
+      `eventTypeFilter: ${JSON.stringify(this.getEventTypeFilter())}, ` +
       `notificationUri: '${this.getNotificationURI()}', signatureHeader: '${this.getSignatureHeader()}' }`
     );
   }
