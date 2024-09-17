@@ -1241,6 +1241,7 @@ export type ContractInvocationAPIClient = {
 export interface SmartContractAPIClient {
   /**
    * List smart contracts belonging to the user for a given wallet and address.
+   *
    * @summary List smart contracts belonging to the CDP project
    * @param walletId - The ID of the wallet the address belongs to.
    * @param addressId - The ID of the address to list smart contracts for.
