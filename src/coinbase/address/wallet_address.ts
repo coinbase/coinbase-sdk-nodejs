@@ -334,7 +334,7 @@ export class WalletAddress extends Address {
    * @returns A Promise that resolves to the deployed SmartContract object.
    * @throws {Error} If the private key is not loaded when not using server signer.
    */
-  public async deployERC20(options: CreateERC20Options): Promise<SmartContract> {
+  public async deployToken(options: CreateERC20Options): Promise<SmartContract> {
     if (!Coinbase.useServerSigner && !this.key) {
       throw new Error("Cannot deploy ERC20 without private key loaded");
     }
