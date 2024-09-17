@@ -246,7 +246,7 @@ describe("Webhook", () => {
       const webhook = Webhook.init(mockModel);
       const stringRepresentation = webhook.toString();
       expect(stringRepresentation).toBe(
-        `Webhook { id: 'test-id', networkId: 'test-network', eventType: 'erc20_transfer', eventFilter: [{"contract_address":"0x...","from_address":"0x...","to_address":"0x..."}], event_type_filter: {addresses: ["0xa55C5950F7A3C42Fa5799B2Cac0e455774a07382"], wallet_id: "w1"},notificationUri: 'https://example.com/callback', signatureHeader: 'example_header' }`,
+        `Webhook { id: 'test-id', networkId: 'test-network', eventType: 'erc20_transfer', eventFilter: [{"contract_address":"0x...","from_address":"0x...","to_address":"0x..."}], eventTypeFilter: {"addresses": ["0xa55C5950F7A3C42Fa5799B2Cac0e455774a07382"], "wallet_id": "w1"},notificationUri: 'https://example.com/callback', signatureHeader: 'example_header' }`,
       );
     });
   });
