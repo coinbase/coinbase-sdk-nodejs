@@ -47,7 +47,7 @@ describe("Asset", () => {
     });
   });
 
-  describe(".toString", () => {
+  describe("#toString", () => {
     it("should return the assetId", () => {
       const asset = Asset.fromModel({
         asset_id: "eth",
@@ -77,7 +77,7 @@ describe("Asset", () => {
     });
   });
 
-  describe(".toAtomicAmount", () => {
+  describe("#toAtomicAmount", () => {
     it("should return the atomic amount", () => {
       const asset = Asset.fromModel({
         asset_id: "eth",
