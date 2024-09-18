@@ -1373,13 +1373,13 @@ describe("Wallet Class", () => {
     });
 
     it("should create a webhook for the default address", async () => {
-      const webhookObject = await Webhook.create({
+      const webhookObject = new Webhook({
         networkId: "test-network",
         notificationUri: "https://example.com/callback",
         eventType: "wallet_activity",
         eventTypeFilter: { addresses: [address1, address2], wallet_id: walletId },
         signatureHeader: "example_header",
-      });
+      } as WebhookModel);
       const wh = Promise.resolve(webhookObject);
       jest.spyOn(Wallet.prototype, "createWebhook").mockReturnValue(wh);
       //const wallet = await Wallet.create();
