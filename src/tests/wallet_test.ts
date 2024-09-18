@@ -1388,7 +1388,7 @@ describe("Wallet Class", () => {
       const result = await wallet.createWebhook("https://example.com/callback");
       expect(result).toBeInstanceOf(Webhook);
       expect(result.getEventTypeFilter()?.wallet_id).toBe(walletId);
-      expect(result.getEventTypeFilter()?.addresses).toBe([address1]);
+      expect(result.getEventTypeFilter()?.addresses).toStrictEqual([address1]);
       expect(result.getEventType()).toBe("wallet_activity");
     });
   });
