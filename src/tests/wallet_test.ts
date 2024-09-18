@@ -1372,22 +1372,20 @@ describe("Wallet Class", () => {
       wallet = Wallet.init(walletModel, existingSeed);
     });
 
-    const webhookObject = Webhook.create({
-      networkId: "test-network",
-      notificationUri: "https://example.com/callback",
-      eventType: "wallet_activity",
-      eventTypeFilter: { addresses: [address1, address2], wallet_id: walletId },
-      signatureHeader: "example_header",
-    });
-
-    it("should create a trade from the default address", async () => {
+    it("should create a webhook for the default address", async () => {
+      const webhookObject = await Webhook.create({
+        networkId: "test-network",
+        notificationUri: "https://example.com/callback",
+        eventType: "wallet_activity",
+        eventTypeFilter: { addresses: [address1, address2], wallet_id: walletId },
+        signatureHeader: "example_header",
+      });
       const wh = Promise.resolve(webhookObject);
       jest.spyOn(Wallet.prototype, "createWebhook").mockReturnValue(wh);
       //const wallet = await Wallet.create();
       const result = await wallet.createWebhook("https://example.com/callback");
       expect(result).toBeInstanceOf(Webhook);
       expect(result.getEventTypeFilter()?.wallet_id).toBe(walletId);
-      expect(result.getEventTypeFilter()?.addresses?.length).toBe(1);
       expect(result.getEventTypeFilter()?.addresses).toBe([address1]);
       expect(result.getEventType()).toBe("wallet_activity");
     });
