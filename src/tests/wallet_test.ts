@@ -66,7 +66,7 @@ import { StakingBalance } from "../coinbase/staking_balance";
 import { PayloadSignature } from "../coinbase/payload_signature";
 import { ContractInvocation } from "../coinbase/contract_invocation";
 import { SmartContract } from "../coinbase/smart_contract";
-import {Webhook} from "../coinbase/webhook";
+import { Webhook } from "../coinbase/webhook";
 
 describe("Wallet Class", () => {
   let wallet: Wallet;

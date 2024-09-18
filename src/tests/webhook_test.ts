@@ -1,5 +1,5 @@
-import { Webhook } from "./../coinbase/webhook";
-import { Coinbase } from "./../coinbase/coinbase";
+import { Webhook } from "../coinbase/webhook";
+import { Coinbase } from "../coinbase/coinbase";
 import { Webhook as WebhookModel } from "../client/api";
 
 describe("Webhook", () => {
