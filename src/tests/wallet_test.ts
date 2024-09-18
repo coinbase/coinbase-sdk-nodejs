@@ -1378,7 +1378,7 @@ describe("Wallet Class", () => {
         network_id: "test-network",
         notification_uri: "https://example.com/callback",
         event_type: "wallet_activity",
-        event_type_filter: { addresses: [address1, address2], wallet_id: walletId },
+        event_type_filter: { addresses: [address1], wallet_id: walletId },
         signature_header: "example_header",
       } as WebhookModel);
 
