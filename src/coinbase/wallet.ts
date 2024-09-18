@@ -764,7 +764,7 @@ export class Wallet {
     notificationUri: string,
     signatureHeader: string = "",
   ): Promise<Webhook> {
-    return new Webhook.create({
+    return Webhook.create({
       networkId: this.getNetworkId(),
       notificationUri: notificationUri,
       eventType: WebhookEventType.WalletActivity,
