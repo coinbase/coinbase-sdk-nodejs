@@ -175,7 +175,7 @@ export class SmartContract {
    *
    * @returns The ABI as a JSON-encoded string.
    */
-  public getAbi(): string {
+  public getAbi(): object {
     return JSON.parse(this.model.abi);
   }
 
