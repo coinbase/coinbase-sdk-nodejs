@@ -752,13 +752,13 @@ export class Wallet {
   }
 
   /**
-   * Creates a Webhook.
+   * Creates a Webhook for a wallet, monitors all wallet addresses for onchain events.
    *
-   * @param notificationUri - [String] The URI to which the webhook notifications will be sent.
-   * @param signatureHeader - [String] (Optional) A header used to sign the webhook request,
+   * @param notificationUri - The URI to which the webhook notifications will be sent.
+   * @param signatureHeader - (Optional) A header used to sign the webhook request,
    *   defaulting to an empty string.
    *
-   * @returns [Coinbase::Webhook] The newly created webhook instance.
+   * @returns The newly created webhook instance.
    */
   public async createWebhook(
     notificationUri: string,
