@@ -16,6 +16,7 @@ import {
   TransactionStatusEnum,
   Wallet as WalletModel,
   Trade as TradeModel,
+  Webhook as WebhookModel,
   StakingOperation as StakingOperationModel,
   StakingOperationStatusEnum,
   StakingContext as StakingContextModel,
@@ -1374,12 +1375,13 @@ describe("Wallet Class", () => {
 
     it("should create a webhook for the default address", async () => {
       const webhookObject = new Webhook({
-        networkId: "test-network",
-        notificationUri: "https://example.com/callback",
-        eventType: "wallet_activity",
-        eventTypeFilter: { addresses: [address1, address2], wallet_id: walletId },
-        signatureHeader: "example_header",
+        network_id: "test-network",
+        notification_uri: "https://example.com/callback",
+        event_type: "wallet_activity",
+        event_type_filter: { addresses: [address1, address2], wallet_id: walletId },
+        signature_header: "example_header",
       } as WebhookModel);
+
       const wh = Promise.resolve(webhookObject);
       jest.spyOn(Wallet.prototype, "createWebhook").mockReturnValue(wh);
       //const wallet = await Wallet.create();
