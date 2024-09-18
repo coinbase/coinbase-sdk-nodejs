@@ -66,6 +66,7 @@ import { StakingBalance } from "../coinbase/staking_balance";
 import { PayloadSignature } from "../coinbase/payload_signature";
 import { ContractInvocation } from "../coinbase/contract_invocation";
 import { SmartContract } from "../coinbase/smart_contract";
+import {Webhook} from "../coinbase/webhook";
 
 describe("Wallet Class", () => {
   let wallet: Wallet;
@@ -1333,6 +1334,64 @@ describe("Wallet Class", () => {
       const trades = await tradeWallet.listTrades();
       expect(trades[0]).toBeInstanceOf(Trade);
       expect(trades.length).toBe(2);
+    });
+  });
+
+  describe("#createWebhook", () => {
+    let wallet: Wallet;
+    let addressList: AddressModel[];
+    let walletModel: WalletModel;
+    const existingSeed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
+    const { address1, address2, address3, wallet1PrivateKey, wallet2PrivateKey } =
+      generateWalletFromSeed(existingSeed, 3);
+
+    beforeEach(async () => {
+      jest.clearAllMocks();
+      addressList = [
+        {
+          address_id: address1,
+          network_id: Coinbase.networks.BaseSepolia,
+          public_key: wallet1PrivateKey,
+          wallet_id: walletId,
+          index: 0,
+        },
+        {
+          address_id: address2,
+          network_id: Coinbase.networks.BaseSepolia,
+          public_key: wallet2PrivateKey,
+          wallet_id: walletId,
+          index: 1,
+        },
+      ];
+      walletModel = {
+        id: walletId,
+        network_id: Coinbase.networks.BaseSepolia,
+        default_address: addressList[0],
+        feature_set: {} as FeatureSet,
+      };
+      wallet = Wallet.init(walletModel, existingSeed);
+    });
+
+    const webhookObject = new Webhook({
+      id: "abc",
+      network_id: "test-network",
+      notification_uri: "https://example.com/callback",
+      event_type: "erc20_transfer",
+      event_type_filter: { addresses: [address1, address2], wallet_id: walletId },
+      signature_header: "example_header",
+    });
+
+    it("should create a trade from the default address", async () => {
+      const wh = Promise.resolve(webhookObject);
+      jest.spyOn(Wallet.prototype, "createWebhook").mockReturnValue(wh);
+      //const wallet = await Wallet.create();
+      const result = await wallet.createWebhook("https://example.com/callback");
+      expect(result).toBeInstanceOf(Webhook);
+      expect(result.getEventTypeFilter()?.wallet_id).toBe(
+        webhookObject.getEventTypeFilter()?.wallet_id,
+      );
+      expect(result.getEventTypeFilter()?.addresses?.length).toBe(1);
+      expect(result.getEventTypeFilter()?.addresses).toBe([address1]);
     });
   });
 });
