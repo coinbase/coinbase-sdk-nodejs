@@ -5,20 +5,18 @@ const apiKeyFilePath = "~/.apikeys/prod.json";
 async function stake() {
   Coinbase.configureFromJson({ filePath: apiKeyFilePath });
 
-  // Get the rewards earned from staking in the last 10 days.
-  // Note that it can take upto a day for new rewards to show up.
-  let now = new Date();
-  let tenDaysAgo = new Date();
-  tenDaysAgo.setDate(now.getDate() - 10);
+  const end = new Date();
+  const start = new Date();
+  start.setDate(end.getDate() - 60);
 
-  let rewards = await StakingReward.list(
-    "ethereum-mainnet",
-    "eth",
+  const rewards = await StakingReward.list(
+    Coinbase.networks.EthereumMainnet,
+    Coinbase.assets.Eth,
     [
-      "0xa1d1ad0714035353258038e964ae9675dc0252ee22cea896825c01458e1807bfad2f9969338798548d9858a571f7425c",
+      "0xad927b51bf02d120dd5e25526ee734ba78468cc5c7588fde2a2d9b02ba4502296b97b0fa0ff22900ff7425652ac76d51",
     ],
-    tenDaysAgo.toISOString(),
-    now.toISOString(),
+    start.toISOString(),
+    end.toISOString(),
   );
 
   // Loop through the rewards and print each staking reward

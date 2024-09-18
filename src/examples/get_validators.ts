@@ -15,7 +15,7 @@ async function listValidators() {
   const validators = await Validator.list(
     Coinbase.networks.EthereumHolesky,
     "eth",
-    ValidatorStatus.ACTIVE,
+    ValidatorStatus.PROVISIONED,
   );
 
   // Loop through the validators and print each validator
