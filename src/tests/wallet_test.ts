@@ -1372,7 +1372,7 @@ describe("Wallet Class", () => {
       wallet = Wallet.init(walletModel, existingSeed);
     });
 
-    const webhookObject = new Webhook.create({
+    const webhookObject = Webhook.create({
       networkId: "test-network",
       notificationUri: "https://example.com/callback",
       eventType: "wallet_activity",
