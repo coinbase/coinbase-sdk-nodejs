@@ -677,6 +677,51 @@ describe("WalletAddress", () => {
       expect(transfer.getId()).toBe(VALID_TRANSFER_MODEL.transfer_id);
     });
 
+    it("should successfully construct createTransfer request when using a large number that causes scientific notation", async () => {
+      Coinbase.apiClients.transfer!.createTransfer = mockReturnValue(VALID_TRANSFER_MODEL);
+      Coinbase.apiClients.transfer!.broadcastTransfer = mockReturnValue({
+        transaction_hash: "0x6c087c1676e8269dd81e0777244584d0cbfd39b6997b3477242a008fa9349e11",
+        ...VALID_TRANSFER_MODEL,
+      });
+      Coinbase.apiClients.externalAddress!.getExternalAddressBalance = mockFn(request => {
+        const [, , asset_id] = request;
+        balanceModel = {
+          amount: "10000000000000000000000",
+          asset: {
+            asset_id,
+            network_id: Coinbase.networks.BaseSepolia,
+            decimals: 18,
+            contract_address: "0x",
+          },
+        };
+        return { data: balanceModel };
+      });
+
+      // construct amount of 1000 with 18 decimal places which is large enough to cause scientific notation
+      const transfer = await address.createTransfer({
+        amount: new Decimal("1000000000000000000000"),
+        assetId: Coinbase.assets.Wei,
+        destination,
+      });
+
+      expect(Coinbase.apiClients.transfer!.broadcastTransfer).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.transfer!.createTransfer).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.transfer!.createTransfer).toHaveBeenCalledWith(
+        address.getWalletId(),
+        address.getId(),
+        {
+          amount: "1000000000000000000000",
+          asset_id: Coinbase.assets.Eth,
+          destination: destination.getId(),
+          gasless: false,
+          network_id: Coinbase.networks.BaseSepolia,
+        },
+      );
+
+      expect(transfer).toBeInstanceOf(Transfer);
+      expect(transfer.getId()).toBe(VALID_TRANSFER_MODEL.transfer_id);
+    });
+
     it("should throw an APIError if the createTransfer API call fails", async () => {
       Coinbase.apiClients.transfer!.createTransfer = mockReturnRejectedValue(
         new APIError("Failed to create transfer"),
