@@ -1353,19 +1353,19 @@ describe("Wallet Class", () => {
           address_id: address1,
           network_id: Coinbase.networks.BaseSepolia,
           public_key: wallet1PrivateKey,
-          wallet_id: walletId,
+          wallet_id: "w1",
           index: 0,
         },
         {
           address_id: address2,
           network_id: Coinbase.networks.BaseSepolia,
           public_key: wallet2PrivateKey,
-          wallet_id: walletId,
+          wallet_id: "w1",
           index: 1,
         },
       ];
       walletModel = {
-        id: walletId,
+        id: "w1",
         network_id: Coinbase.networks.BaseSepolia,
         default_address: addressList[0],
         feature_set: {} as FeatureSet,
@@ -1378,7 +1378,7 @@ describe("Wallet Class", () => {
       network_id: "test-network",
       notification_uri: "https://example.com/callback",
       event_type: "wallet_activity",
-      event_type_filter: { addresses: [address1], wallet_id: walletId },
+      event_type_filter: { addresses: [address1], wallet_id: "w1" },
       signature_header: "example_header",
     };
 
