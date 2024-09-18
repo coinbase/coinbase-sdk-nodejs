@@ -1407,7 +1407,7 @@ describe("Wallet Class", () => {
 
       const wh = Promise.resolve(webhookObject);
       jest.spyOn(Wallet.prototype, "createWebhook").mockReturnValue(wh);
-      //const wallet = await Wallet.create();
+      const wallet = await Wallet.create();
       const result = await wallet.createWebhook("https://example.com/callback");
       expect(result).toBeInstanceOf(Webhook);
       expect(result.getEventTypeFilter()?.wallet_id).toBe(walletId);
