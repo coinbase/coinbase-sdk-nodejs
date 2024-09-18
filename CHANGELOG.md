@@ -6,6 +6,8 @@
 
 ### Fixed
 - Fixed a bug that blocked arbitrum mainnet wallets from being created
+## [0.6.0] - 2024-09-18
+
 ### Added
 - Add `deployToken` method to `WalletAddress` and `Wallet` to deploy an ERC20, updated `SmartContract` class to support deployment and fetching contract details
 - Add SOL asset support
