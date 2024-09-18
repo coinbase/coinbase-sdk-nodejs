@@ -20,7 +20,7 @@ export class Webhook {
    * @param model - The underlying Webhook object.
    * @throws {Error} If the model is not provided.
    */
-  private constructor(model: WebhookModel) {
+  constructor(model: WebhookModel) {
     if (!model) {
       throw new Error("Webhook model cannot be empty");
     }
