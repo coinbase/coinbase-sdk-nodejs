@@ -48,7 +48,14 @@ import {
   CreateContractInvocationRequest,
   ContractInvocationList,
   ContractInvocation as ContractInvocationModel,
+<<<<<<< wallet-activity-support
   WebhookEventTypeFilter,
+=======
+  SmartContractList,
+  CreateSmartContractRequest,
+  SmartContract as SmartContractModel,
+  DeploySmartContractRequest,
+>>>>>>> v0.6.0
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -721,9 +728,10 @@ export type ApiClients = {
   asset?: AssetAPIClient;
   externalAddress?: ExternalAddressAPIClient;
   webhook?: WebhookApiClient;
-  smartContract?: ExternalSmartContractAPIClient;
+  contractEvent?: ExternalSmartContractAPIClient;
   contractInvocation?: ContractInvocationAPIClient;
   balanceHistory?: BalanceHistoryApiClient;
+  smartContract?: SmartContractAPIClient;
 };
 
 /**
@@ -921,6 +929,36 @@ export enum StakeOptionsMode {
 }
 
 /**
+ * Smart Contract Type
+ */
+export enum SmartContractType {
+  ERC20 = "erc20",
+  ERC721 = "erc721",
+}
+
+/**
+ * NFT Contract Options
+ */
+export type NFTContractOptions = {
+  name: string;
+  symbol: string;
+};
+
+/**
+ * Token Contract Options
+ */
+export type TokenContractOptions = {
+  name: string;
+  symbol: string;
+  totalSupply: string;
+};
+
+/**
+ * Smart Contract Options
+ */
+export type SmartContractOptions = NFTContractOptions | TokenContractOptions;
+
+/**
  * Options for creating a Transfer.
  */
 export type CreateTransferOptions = {
@@ -949,6 +987,15 @@ export type CreateContractInvocationOptions = {
   args: object;
   amount?: Amount;
   assetId?: string;
+};
+
+/**
+ * Options for creating a ERC20.
+ */
+export type CreateERC20Options = {
+  name: string;
+  symbol: string;
+  totalSupply: Amount;
 };
 
 /**
@@ -1195,3 +1242,71 @@ export type ContractInvocationAPIClient = {
     options?: AxiosRequestConfig,
   ): AxiosPromise<ContractInvocationList>;
 };
+
+export interface SmartContractAPIClient {
+  /**
+   * List smart contracts belonging to the user for a given wallet and address.
+   *
+   * @summary List smart contracts belonging to the CDP project
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address to list smart contracts for.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+
+  listSmartContracts(
+    walletId: string,
+    addressId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<SmartContractList>;
+
+  /**
+   * Creates a new Smart Contract.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address to create the smart contract for.
+   * @param createSmartContractRequest - The request body containing the smart contract details.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+  createSmartContract(
+    walletId: string,
+    addressId: string,
+    createSmartContractRequest: CreateSmartContractRequest,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<SmartContractModel>;
+
+  /**
+   * Gets a specific Smart Contract.
+   *
+   * @param  walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address the smart contract belongs to.
+   * @param smartContractId - The ID of the smart contract to retrieve.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+  getSmartContract(
+    walletId: string,
+    addressId: string,
+    smartContractId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<SmartContractModel>;
+
+  /**
+   * Deploys a Smart Contract.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address the smart contract belongs to.
+   * @param smartContractId - The ID of the smart contract to deploy.
+   * @param deploySmartContractRequest - The request body containing deployment details.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+  deploySmartContract(
+    walletId: string,
+    addressId: string,
+    smartContractId: string,
+    deploySmartContractRequest: DeploySmartContractRequest,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<SmartContractModel>;
+}

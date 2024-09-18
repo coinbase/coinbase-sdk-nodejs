@@ -28,7 +28,11 @@ import {
   StakeOptionsMode,
   WalletCreateOptions,
   WalletData,
+<<<<<<< wallet-activity-support
   CreateWebhookOptions,
+=======
+  CreateERC20Options,
+>>>>>>> v0.6.0
 } from "./types";
 import { convertStringToHex, delay, formatDate, getWeekBackDate } from "./utils";
 import { StakingOperation } from "./staking_operation";
@@ -36,7 +40,11 @@ import { StakingReward } from "./staking_reward";
 import { StakingBalance } from "./staking_balance";
 import { PayloadSignature } from "./payload_signature";
 import { ContractInvocation } from "../coinbase/contract_invocation";
+<<<<<<< wallet-activity-support
 import { Webhook } from "./webhook";
+=======
+import { SmartContract } from "./smart_contract";
+>>>>>>> v0.6.0
 
 /**
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
@@ -792,6 +800,20 @@ export class Wallet {
     options: CreateContractInvocationOptions,
   ): Promise<ContractInvocation> {
     return (await this.getDefaultAddress()).invokeContract(options);
+  }
+
+  /**
+   * Deploys an ERC20 token contract.
+   *
+   * @param options - The options for creating the ERC20 token.
+   * @param options.name - The name of the ERC20 token.
+   * @param options.symbol - The symbol of the ERC20 token.
+   * @param options.totalSupply - The total supply of the ERC20 token.
+   * @returns A Promise that resolves to the deployed SmartContract object.
+   * @throws {Error} If the private key is not loaded when not using server signer.
+   */
+  public async deployToken(options: CreateERC20Options): Promise<SmartContract> {
+    return (await this.getDefaultAddress()).deployToken(options);
   }
 
   /**
