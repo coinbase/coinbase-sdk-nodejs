@@ -112,17 +112,19 @@ export class Asset {
    * @param wholeAmount - The whole amount to convert to atomic units.
    * @returns The amount in atomic units
    */
-  toAtomicAmount(wholeAmount: Decimal): Decimal {
-    return wholeAmount.times(new Decimal(10).pow(this.decimals));
+  toAtomicAmount(wholeAmount: Decimal): bigint {
+    const atomicAmount = wholeAmount.times(new Decimal(10).pow(this.decimals));
+    return BigInt(atomicAmount.toFixed());
   }
+
   /**
    * Converts the amount of the Asset from atomic to whole units.
    *
-   * @param wholeAmount - The atomic amount to convert to whole units.
+   * @param atomicAmount - The atomic amount to convert to whole units.
    * @returns The amount in atomic units
    */
-  fromAtomicAmount(wholeAmount: Decimal): Decimal {
-    return wholeAmount.dividedBy(new Decimal(10).pow(this.decimals));
+  fromAtomicAmount(atomicAmount: Decimal): Decimal {
+    return atomicAmount.dividedBy(new Decimal(10).pow(this.decimals));
   }
 
   /**

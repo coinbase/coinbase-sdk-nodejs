@@ -15,6 +15,8 @@ import {
   PayloadSignatureList,
   PayloadSignatureStatusEnum,
   ContractInvocation as ContractInvocationModel,
+  SmartContract as SmartContractModel,
+  SmartContractType,
   ValidatorList,
   Validator,
   StakingOperationStatusEnum,
@@ -273,6 +275,32 @@ export const VALID_SIGNED_CONTRACT_INVOCATION_MODEL: ContractInvocationModel = {
     status: TransactionStatusEnum.Broadcast,
     transaction_hash: "0xdummy-transaction-hash",
     transaction_link: "https://sepolia.basescan.org/tx/0xdummy-transaction-hash",
+  },
+};
+
+export const ERC20_NAME = "Test NFT";
+export const ERC20_SYMBOL = "TEST";
+export const ERC20_TOTAL_SUPPLY = 100;
+
+export const VALID_SMART_CONTRACT_ERC20_MODEL: SmartContractModel = {
+  smart_contract_id: "test-smart-contract-1",
+  network_id: Coinbase.networks.BaseSepolia,
+  wallet_id: walletId,
+  contract_address: "0xcontract-address",
+  deployer_address: "0xdeployer-address",
+  type: SmartContractType.Erc20,
+  options: {
+    name: ERC20_NAME,
+    symbol: ERC20_SYMBOL,
+    total_supply: ERC20_TOTAL_SUPPLY.toString(),
+  },
+  abi: JSON.stringify("some-abi"),
+  transaction: {
+    network_id: Coinbase.networks.BaseSepolia,
+    from_address_id: "0xdeadbeef",
+    unsigned_payload:
+      "7b2274797065223a22307832222c22636861696e4964223a2230783134613334222c226e6f6e6365223a22307830222c22746f223a22307861383261623835303466646562326461646161336234663037356539363762626533353036356239222c22676173223a22307865623338222c226761735072696365223a6e756c6c2c226d61785072696f72697479466565506572476173223a2230786634323430222c226d6178466565506572476173223a2230786634333638222c2276616c7565223a22307830222c22696e707574223a223078366136323738343230303030303030303030303030303030303030303030303034373564343164653761383132393862613236333138343939363830306362636161643733633062222c226163636573734c697374223a5b5d2c2276223a22307830222c2272223a22307830222c2273223a22307830222c2279506172697479223a22307830222c2268617368223a22307865333131636632303063643237326639313566656433323165663065376431653965353362393761346166623737336638653935646431343630653665326163227d",
+    status: TransactionStatusEnum.Pending,
   },
 };
 
@@ -559,8 +587,15 @@ export const serverSignersApiMock = {
   listServerSigners: jest.fn(),
 };
 
-export const smartContractApiMock = {
+export const contractEventApiMock = {
   listContractEvents: jest.fn(),
+};
+
+export const smartContractApiMock = {
+  createSmartContract: jest.fn(),
+  deploySmartContract: jest.fn(),
+  getSmartContract: jest.fn(),
+  listSmartContracts: jest.fn(),
 };
 
 export const contractInvocationApiMock = {

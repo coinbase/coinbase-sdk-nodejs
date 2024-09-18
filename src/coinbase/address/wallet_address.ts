@@ -1,6 +1,6 @@
 import { Decimal } from "decimal.js";
 import { ethers } from "ethers";
-import { Address as AddressModel } from "../../client";
+import { Address as AddressModel, SmartContractType } from "../../client";
 import { Address } from "../address";
 import { Asset } from "../asset";
 import { Coinbase } from "../coinbase";
@@ -15,11 +15,13 @@ import {
   CreateContractInvocationOptions,
   Destination,
   StakeOptionsMode,
+  CreateERC20Options,
 } from "../types";
 import { delay } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
 import { StakingOperation } from "../staking_operation";
 import { PayloadSignature } from "../payload_signature";
+import { SmartContract } from "../smart_contract";
 
 /**
  * A representation of a blockchain address, which is a wallet-controlled account on a network.
@@ -320,6 +322,60 @@ export class WalletAddress extends Address {
     await contractInvocation.broadcast();
 
     return contractInvocation;
+  }
+
+  /**
+   * Deploys an ERC20 token contract.
+   *
+   * @param options - The options for creating the ERC20 token.
+   * @param options.name - The name of the ERC20 token.
+   * @param options.symbol - The symbol of the ERC20 token.
+   * @param options.totalSupply - The total supply of the ERC20 token.
+   * @returns A Promise that resolves to the deployed SmartContract object.
+   * @throws {Error} If the private key is not loaded when not using server signer.
+   */
+  public async deployToken(options: CreateERC20Options): Promise<SmartContract> {
+    if (!Coinbase.useServerSigner && !this.key) {
+      throw new Error("Cannot deploy ERC20 without private key loaded");
+    }
+
+    const smartContract = await this.createERC20(options);
+
+    if (Coinbase.useServerSigner) {
+      return smartContract;
+    }
+
+    await smartContract.sign(this.getSigner());
+    await smartContract.broadcast();
+
+    return smartContract;
+  }
+
+  /**
+   * Creates an ERC20 token contract.
+   *
+   * @private
+   * @param {CreateERC20Options} options - The options for creating the ERC20 token.
+   * @param {string} options.name - The name of the ERC20 token.
+   * @param {string} options.symbol - The symbol of the ERC20 token.
+   * @param {BigNumber} options.totalSupply - The total supply of the ERC20 token.
+   * @returns {Promise<SmartContract>} A Promise that resolves to the created SmartContract.
+   * @throws {APIError} If the API request to create a smart contract fails.
+   */
+  private async createERC20(options: CreateERC20Options): Promise<SmartContract> {
+    const resp = await Coinbase.apiClients.smartContract!.createSmartContract(
+      this.getWalletId(),
+      this.getId(),
+      {
+        type: SmartContractType.Erc20,
+        options: {
+          name: options.name,
+          symbol: options.symbol,
+          total_supply: options.totalSupply.toString(),
+        },
+      },
+    );
+    return SmartContract.fromModel(resp?.data);
   }
 
   /**
