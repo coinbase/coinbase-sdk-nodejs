@@ -45,7 +45,7 @@ export class Webhook {
    * @param options.networkId - The network ID for which the webhook is created.
    * @param options.notificationUri - The URI where notifications should be sent.
    * @param options.eventType - The type of event for the webhook.
-   * @param options.eventTypeFilter - Filter for a specific event type.
+   * @param options.eventTypeFilter - Filter for wallet activity event type.
    * @param options.eventFilters - Filters applied to the events that determine which specific events trigger the webhook.
    * @param options.signatureHeader - The custom header to be used for x-webhook-signature header on callbacks,
    *   so developers can verify the requests are coming from Coinbase.
