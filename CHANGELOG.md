@@ -11,7 +11,7 @@
 
 ### Breaking
 - `Asset#toAtomicAmount` now returns a BigInt instead of a Decimal
-  
+
 ## [0.5.1] - 2024-09-12
 
 ### Fixed
