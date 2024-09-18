@@ -4,7 +4,6 @@ import { Address } from "../coinbase/address";
 import { NetworkIdentifier } from "../client";
 
 async function listSolanaStakingRewards() {
-
   const startTime = new Date(2024, 5).toISOString();
 
   const rewards = await StakingReward.list(
