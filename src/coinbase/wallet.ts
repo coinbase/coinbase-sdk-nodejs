@@ -28,11 +28,7 @@ import {
   StakeOptionsMode,
   WalletCreateOptions,
   WalletData,
-<<<<<<< wallet-activity-support
-  CreateWebhookOptions,
-=======
   CreateERC20Options,
->>>>>>> v0.6.0
 } from "./types";
 import { convertStringToHex, delay, formatDate, getWeekBackDate } from "./utils";
 import { StakingOperation } from "./staking_operation";
@@ -40,11 +36,8 @@ import { StakingReward } from "./staking_reward";
 import { StakingBalance } from "./staking_balance";
 import { PayloadSignature } from "./payload_signature";
 import { ContractInvocation } from "../coinbase/contract_invocation";
-<<<<<<< wallet-activity-support
 import { Webhook } from "./webhook";
-=======
 import { SmartContract } from "./smart_contract";
->>>>>>> v0.6.0
 
 /**
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,

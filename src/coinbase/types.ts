@@ -48,14 +48,11 @@ import {
   CreateContractInvocationRequest,
   ContractInvocationList,
   ContractInvocation as ContractInvocationModel,
-<<<<<<< wallet-activity-support
   WebhookEventTypeFilter,
-=======
   SmartContractList,
   CreateSmartContractRequest,
   SmartContract as SmartContractModel,
   DeploySmartContractRequest,
->>>>>>> v0.6.0
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
