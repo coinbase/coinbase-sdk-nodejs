@@ -1,8 +1,9 @@
 # Coinbase Node.js SDK Changelog
 
-## Unreleased 
+## Unreleased
 
 - Add `deployToken` method to `WalletAddress` and `Wallet` to deploy an ERC20, updated `SmartContract` class to support deployment and fetching contract details
+- Add SOL asset support
 
 ## [0.5.0] - 2024-09-11
 

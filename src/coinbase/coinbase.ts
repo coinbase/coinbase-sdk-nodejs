@@ -54,6 +54,8 @@ export class Coinbase {
     Gwei: "gwei",
     Usdc: "usdc",
     Weth: "weth",
+    Sol: "sol",
+    Lamport: "lamport",
   };
 
   static apiClients: ApiClients = {};
