@@ -7,7 +7,8 @@
     "start": "node index.js",
     "start-trade-assets": "node trade-assets.js",
     "start-mass-payout": "node mass-payout.js",
-    "start-webhook": "node webhook.js"
+    "start-webhook": "node webhook.js",
+    "start-register-basename": "node register-basename.js"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +17,7 @@
   "dependencies": {
     "@coinbase/coinbase-sdk": "^0.6.0",
     "csv-parse": "^5.5.6",
-    "csv-writer": "^1.6.0"
+    "csv-writer": "^1.6.0",
+    "viem": "^2.21.6"
   }
 }
