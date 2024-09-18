@@ -1372,13 +1372,12 @@ describe("Wallet Class", () => {
       wallet = Wallet.init(walletModel, existingSeed);
     });
 
-    const webhookObject = new Webhook({
-      id: "abc",
-      network_id: "test-network",
-      notification_uri: "https://example.com/callback",
-      event_type: "erc20_transfer",
-      event_type_filter: { addresses: [address1, address2], wallet_id: walletId },
-      signature_header: "example_header",
+    const webhookObject = new Webhook.create({
+      networkId: "test-network",
+      notificationUri: "https://example.com/callback",
+      eventType: "wallet_activity",
+      eventTypeFilter: { addresses: [address1, address2], wallet_id: walletId },
+      signatureHeader: "example_header",
     });
 
     it("should create a trade from the default address", async () => {
@@ -1392,6 +1391,7 @@ describe("Wallet Class", () => {
       );
       expect(result.getEventTypeFilter()?.addresses?.length).toBe(1);
       expect(result.getEventTypeFilter()?.addresses).toBe([address1]);
+      expect(result.getEventType()).toBe("wallet_activity");
     });
   });
 });
