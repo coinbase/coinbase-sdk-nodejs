@@ -1,3 +1,4 @@
+import Decimal from "decimal.js";
 import { Coinbase } from "../coinbase/coinbase";
 import { GWEI_DECIMALS } from "../coinbase/constants";
 import { Asset } from "./../coinbase/asset";
@@ -73,6 +74,31 @@ describe("Asset", () => {
       it("should return the assetId", () => {
         expect(Asset.primaryDenomination("other")).toEqual("other");
       });
+    });
+  });
+
+  describe(".toAtomicAmount", () => {
+    it("should return the atomic amount", () => {
+      const asset = Asset.fromModel({
+        asset_id: "eth",
+        network_id: Coinbase.networks.BaseSepolia,
+        contract_address: "contractAddress",
+        decimals: 18,
+      });
+      const atomicAmount = asset.toAtomicAmount(new Decimal(1.23));
+      expect(atomicAmount).toEqual(BigInt(1230000000000000000));
+    });
+
+    it("should handle large numbers without using scientific notation", () => {
+      const asset = Asset.fromModel({
+        asset_id: "eth",
+        network_id: Coinbase.networks.BaseSepolia,
+        contract_address: "contractAddress",
+        decimals: 18,
+      });
+      const atomicAmount = asset.toAtomicAmount(new Decimal(2000));
+      expect(atomicAmount).toEqual(BigInt(2000000000000000000000));
+      expect(atomicAmount.toString()).not.toContain("e");
     });
   });
 });
