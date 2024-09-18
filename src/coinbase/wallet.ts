@@ -764,12 +764,18 @@ export class Wallet {
     notificationUri: string,
     signatureHeader: string = "",
   ): Promise<Webhook> {
+    const addressArray = this.addresses.map(address => address.getId()!);
+    const defaultAddress = this.model.default_address?.address_id;
+
+    // Combine the addresses into one array
+    const combinedAddresses = defaultAddress ? [...addressArray, defaultAddress] : addressArray;
+
     return Webhook.create({
       networkId: this.getNetworkId(),
       notificationUri: notificationUri,
       eventType: WebhookEventType.WalletActivity,
       eventTypeFilter: {
-        addresses: this.addresses.map(address => address.getId()!),
+        addresses: combinedAddresses,
         wallet_id: this.getId()!,
       },
       signatureHeader: signatureHeader,
