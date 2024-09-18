@@ -35,7 +35,7 @@ export class HistoricalBalance {
   public static fromModel(model: HistoricalBalanceModel): HistoricalBalance {
     const asset = Asset.fromModel(model.asset);
     return new HistoricalBalance(
-      (model.amount != "") ? asset.fromAtomicAmount(new Decimal(model.amount)) : new Decimal(0),
+      asset.fromAtomicAmount(new Decimal(model.amount)),
       new Decimal(model.block_height),
       model.block_hash,
       asset,
