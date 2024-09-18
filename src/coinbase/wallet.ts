@@ -4,7 +4,7 @@ import Decimal from "decimal.js";
 import { ethers } from "ethers";
 import * as fs from "fs";
 import * as secp256k1 from "secp256k1";
-import { Address as AddressModel, Wallet as WalletModel } from "../client";
+import { Address as AddressModel, Wallet as WalletModel, WebhookEventType } from "../client";
 import { Address } from "./address";
 import { WalletAddress } from "./address/wallet_address";
 import { Asset } from "./asset";
@@ -28,6 +28,7 @@ import {
   StakeOptionsMode,
   WalletCreateOptions,
   WalletData,
+  CreateWebhookOptions,
 } from "./types";
 import { convertStringToHex, delay, formatDate, getWeekBackDate } from "./utils";
 import { StakingOperation } from "./staking_operation";
@@ -35,6 +36,7 @@ import { StakingReward } from "./staking_reward";
 import { StakingBalance } from "./staking_balance";
 import { PayloadSignature } from "./payload_signature";
 import { ContractInvocation } from "../coinbase/contract_invocation";
+import { Webhook } from "./webhook";
 
 /**
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
@@ -744,6 +746,31 @@ export class Wallet {
    */
   public async createPayloadSignature(unsignedPayload: string): Promise<PayloadSignature> {
     return (await this.getDefaultAddress()).createPayloadSignature(unsignedPayload);
+  }
+
+  /**
+   * Creates a Webhook.
+   *
+   * @param notificationUri - [String] The URI to which the webhook notifications will be sent.
+   * @param signatureHeader - [String] (Optional) A header used to sign the webhook request,
+   *   defaulting to an empty string.
+   *
+   * @returns [Coinbase::Webhook] The newly created webhook instance.
+   */
+  public async createWebhook(
+    notificationUri: string,
+    signatureHeader: string = "",
+  ): Promise<Webhook> {
+    return new Webhook.create({
+      networkId: this.getNetworkId(),
+      notificationUri: notificationUri,
+      eventType: WebhookEventType.WalletActivity,
+      eventTypeFilter: {
+        addresses: this.addresses.map(address => address.getId()!),
+        wallet_id: this.getId()!,
+      },
+      signatureHeader: signatureHeader,
+    });
   }
 
   /**
