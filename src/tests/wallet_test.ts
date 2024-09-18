@@ -902,6 +902,20 @@ describe("Wallet Class", () => {
       expect(() => newWallet.setSeed(``)).toThrow(ArgumentError);
       expect(() => newWallet.setSeed(`invalid-seed`)).toThrow(ArgumentError);
     });
+
+    it("should raise an error when creating a wallet with an invalid network", async () => {
+      const newWallet = Wallet.init(
+        {
+          ...walletModel,
+          network_id: "invalid_network_id",
+        },
+        "",
+      );
+      newWallet.setSeed(existingSeed);
+      await expect(newWallet.createAddress()).rejects.toThrow(
+        "Unsupported network ID: invalid_network_id",
+      );
+    });
   });
 
   describe("#export", () => {
