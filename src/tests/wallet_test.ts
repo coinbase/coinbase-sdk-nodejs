@@ -1346,6 +1346,15 @@ describe("Wallet Class", () => {
     const { address1, address2, address3, wallet1PrivateKey, wallet2PrivateKey } =
       generateWalletFromSeed(existingSeed, 3);
 
+    const mockModel: WebhookModel = {
+      id: "test-id",
+      network_id: "test-network",
+      notification_uri: "https://example.com/callback",
+      event_type: "wallet_activity",
+      event_type_filter: { addresses: [address1], wallet_id: walletId },
+      signature_header: "example_header",
+    };
+
     beforeEach(async () => {
       jest.clearAllMocks();
       addressList = [
@@ -1373,14 +1382,28 @@ describe("Wallet Class", () => {
       wallet = Wallet.init(walletModel, existingSeed);
     });
 
+    Coinbase.apiClients.webhook = {
+      createWebhook: jest.fn().mockResolvedValue({ data: mockModel }),
+      listWebhooks: jest.fn().mockResolvedValue({
+        data: {
+          data: [mockModel],
+          has_more: false,
+          next_page: null,
+        },
+      }),
+      updateWebhook: jest.fn().mockImplementation((id, updateRequest) => {
+        return Promise.resolve({
+          data: {
+            ...mockModel,
+            notification_uri: updateRequest.notification_uri,
+          },
+        });
+      }),
+      deleteWebhook: jest.fn().mockResolvedValue({}),
+    };
+
     it("should create a webhook for the default address", async () => {
-      const webhookObject = Webhook.create({
-        networkId: "test-network",
-        notificationUri: "https://example.com/callback",
-        eventType: "wallet_activity",
-        eventTypeFilter: { addresses: [address1], wallet_id: walletId },
-        signatureHeader: "example_header",
-      });
+      const webhookObject = Webhook.init(mockModel);
 
       const wh = Promise.resolve(webhookObject);
       jest.spyOn(Wallet.prototype, "createWebhook").mockReturnValue(wh);
