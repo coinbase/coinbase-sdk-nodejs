@@ -1386,9 +1386,7 @@ describe("Wallet Class", () => {
       //const wallet = await Wallet.create();
       const result = await wallet.createWebhook("https://example.com/callback");
       expect(result).toBeInstanceOf(Webhook);
-      expect(result.getEventTypeFilter()?.wallet_id).toBe(
-        webhookObject.getEventTypeFilter()?.wallet_id,
-      );
+      expect(result.getEventTypeFilter()?.wallet_id).toBe(walletId);
       expect(result.getEventTypeFilter()?.addresses?.length).toBe(1);
       expect(result.getEventTypeFilter()?.addresses).toBe([address1]);
       expect(result.getEventType()).toBe("wallet_activity");
