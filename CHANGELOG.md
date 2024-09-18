@@ -7,6 +7,9 @@
 - Add SOL asset support
 - Fix a bug where large numbers were being returned in scientific notation
 
+### Breaking
+- `Asset#toAtomicAmount` now returns a BigInt instead of a Decimal
+  
 ## [0.5.0] - 2024-09-11
 
 - Add Arbitrum-Mainnet support for Native transfers.
