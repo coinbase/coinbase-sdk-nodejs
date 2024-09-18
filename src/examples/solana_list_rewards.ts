@@ -4,7 +4,6 @@ import { Address } from "../coinbase/address";
 import { NetworkIdentifier } from "../client";
 
 async function listSolanaStakingRewards() {
-  Coinbase.configureFromJson({ filePath: "~/Downloads/cdp_api_key.json" });
 
   const startTime = new Date(2024, 5).toISOString();
 
