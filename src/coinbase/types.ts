@@ -408,25 +408,6 @@ export type ExternalAddressAPIClient = {
   ): AxiosPromise<Balance>;
 
   /**
-   * List the transactions of a specific address.
-   *
-   * @summary Get address transactions
-   * @param networkId - The ID of the blockchain network
-   * @param addressId - The ID of the address to fetch transactions for.
-   * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
-   * @param options - Override http request option.
-   * @throws {RequiredError}
-   */
-  listAddressTransactions(
-    networkId: string,
-    addressId: string,
-    limit?: number,
-    page?: string,
-    options?: RawAxiosRequestConfig,
-  ): AxiosPromise<AddressTransactionList>;
-
-  /**
    * Request faucet funds to be sent to external address.
    *
    * @param networkId - The ID of the blockchain network
@@ -727,6 +708,7 @@ export type ApiClients = {
   contractEvent?: ExternalSmartContractAPIClient;
   contractInvocation?: ContractInvocationAPIClient;
   balanceHistory?: BalanceHistoryApiClient;
+  transactionHistory?: TransactionHistoryApiClient;
   smartContract?: SmartContractAPIClient;
 };
 
@@ -1105,6 +1087,26 @@ export interface BalanceHistoryApiClient {
   ): AxiosPromise<AddressHistoricalBalanceList>;
 }
 
+export interface TransactionHistoryApiClient {
+  /**
+   * List the transactions of a specific address.
+   *
+   * @summary Get address transactions
+   * @param networkId - The ID of the blockchain network
+   * @param addressId - The ID of the address to fetch transactions for.
+   * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param options - Override http request option.
+   * @throws {RequiredError}
+   */
+  listAddressTransactions(
+    networkId: string,
+    addressId: string,
+    limit?: number,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<AddressTransactionList>;
+}
 /**
  *  The domain for an EIP-712 typed data message payload.
  */
