@@ -26,6 +26,8 @@
   ],
   "dependencies": {
     "@scure/bip32": "^1.4.0",
+    "@solana/web3.js": "^2.0.0-rc.1",
+    "bs58": "^6.0.0",
     "axios": "^1.6.8",
     "axios-mock-adapter": "^1.22.0",
     "axios-retry": "^4.4.1",
