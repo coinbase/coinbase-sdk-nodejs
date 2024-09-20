@@ -85,6 +85,7 @@ export class StakingReward {
    * @returns The amount.
    */
   public amount(): Amount {
+    if (this.model.amount == "") return 0;
     if (this.format == StakingRewardFormat.USD) {
       return new Decimal(this.model.amount).div(new Decimal("100"));
     }
