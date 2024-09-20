@@ -583,6 +583,10 @@ export const balanceHistoryApiMock = {
   listAddressHistoricalBalance: jest.fn(),
 };
 
+export const transactionHistoryApiMock = {
+  listAddressTransactions: jest.fn(),
+};
+
 export const serverSignersApiMock = {
   listServerSigners: jest.fn(),
 };
