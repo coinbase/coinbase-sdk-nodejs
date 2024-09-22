@@ -23,6 +23,8 @@ import {
   FeatureSet,
   TransactionStatusEnum,
   ValidatorStatus,
+  NFTContractOptions as NFTContractOptionsModel,
+  TokenContractOptions as TokenContractOptionsModel,
 } from "../client";
 import { BASE_PATH } from "../client/base";
 import { Coinbase } from "../coinbase/coinbase";
@@ -293,7 +295,7 @@ export const VALID_SMART_CONTRACT_ERC20_MODEL: SmartContractModel = {
     name: ERC20_NAME,
     symbol: ERC20_SYMBOL,
     total_supply: ERC20_TOTAL_SUPPLY.toString(),
-  },
+  } as TokenContractOptionsModel,
   abi: JSON.stringify("some-abi"),
   transaction: {
     network_id: Coinbase.networks.BaseSepolia,

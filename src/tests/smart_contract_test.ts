@@ -7,6 +7,9 @@ import {
   VALID_SMART_CONTRACT_ERC20_MODEL,
   mockReturnRejectedValue,
   contractEventApiMock,
+  ERC20_NAME,
+  ERC20_TOTAL_SUPPLY,
+  ERC20_SYMBOL,
 } from "./utils";
 import { SmartContract } from "../coinbase/smart_contract";
 import { ContractEvent } from "../coinbase/contract_event";
@@ -74,7 +77,11 @@ describe("SmartContract", () => {
 
   describe("#getOptions", () => {
     it("returns the smart contract options", () => {
-      expect(smartContract.getOptions()).toEqual(VALID_SMART_CONTRACT_ERC20_MODEL.options);
+      expect(smartContract.getOptions()).toEqual({
+        name: ERC20_NAME,
+        symbol: ERC20_SYMBOL,
+        totalSupply: ERC20_TOTAL_SUPPLY.toString(),
+      });
     });
   });
 

@@ -3,6 +3,8 @@ import {
   DeploySmartContractRequest,
   SmartContract as SmartContractModel,
   SmartContractType as SmartContractTypeModel,
+  SmartContractOptions as SmartContractOptionsModel,
+  TokenContractOptions as TokenContractOptionsModel,
 } from "../client/api";
 import { Transaction } from "./transaction";
 import {
@@ -164,10 +166,26 @@ export class SmartContract {
    * @returns The Smart Contract Options.
    */
   public getOptions(): SmartContractOptions {
-    if (this.getType() === SmartContractType.ERC20) {
-      return this.model.options as TokenContractOptions;
+    if (this.isERC20(this.getType(), this.model.options)) {
+      return {
+        name: this.model.options.name,
+        symbol: this.model.options.symbol,
+        totalSupply: this.model.options.total_supply,
+      } as TokenContractOptions;
+    } else {
+      return {
+        name: this.model.options.name,
+        symbol: this.model.options.symbol,
+        baseURI: this.model.options.base_uri,
+      } as NFTContractOptions;
     }
-    return this.model.options as NFTContractOptions;
+  }
+
+  private isERC20(
+    type: SmartContractType,
+    options: SmartContractOptionsModel,
+  ): options is TokenContractOptionsModel {
+    return type === SmartContractType.ERC20;
   }
 
   /**
