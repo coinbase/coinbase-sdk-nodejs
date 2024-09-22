@@ -1596,6 +1596,12 @@ export interface NFTContractOptions {
      * @memberof NFTContractOptions
      */
     'symbol': string;
+    /**
+     * The base URI for the NFT metadata
+     * @type {string}
+     * @memberof NFTContractOptions
+     */
+    'base_uri': string;
 }
 /**
  * 
@@ -2155,7 +2161,8 @@ export type SmartContractOptions = NFTContractOptions | TokenContractOptions;
 
 export const SmartContractType = {
     Erc20: 'erc20',
-    Erc721: 'erc721'
+    Erc721: 'erc721',
+    Erc1155: 'erc1155'
 } as const;
 
 export type SmartContractType = typeof SmartContractType[keyof typeof SmartContractType];

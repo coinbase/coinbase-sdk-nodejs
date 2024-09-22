@@ -70,7 +70,9 @@ describe("Address", () => {
       const result = await address.listTransactions({ limit: 2, page: "page" });
       expect(result.transactions.length).toEqual(2);
       expect(result.transactions[0].blockHeight()).toEqual("12345");
-      expect(Coinbase.apiClients.transactionHistory!.listAddressTransactions).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.transactionHistory!.listAddressTransactions).toHaveBeenCalledTimes(
+        1,
+      );
       expect(Coinbase.apiClients.transactionHistory!.listAddressTransactions).toHaveBeenCalledWith(
         address.getNetworkId(),
         address.getId(),
@@ -98,7 +100,9 @@ describe("Address", () => {
       const result = await address.listTransactions({});
       expect(result.transactions.length).toEqual(1);
       expect(result.transactions[0].blockHeight()).toEqual("12348");
-      expect(Coinbase.apiClients.transactionHistory!.listAddressTransactions).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.transactionHistory!.listAddressTransactions).toHaveBeenCalledTimes(
+        1,
+      );
       expect(Coinbase.apiClients.transactionHistory!.listAddressTransactions).toHaveBeenCalledWith(
         address.getNetworkId(),
         address.getId(),
@@ -116,7 +120,9 @@ describe("Address", () => {
       });
       const result = await address.listTransactions({});
       expect(result.transactions.length).toEqual(0);
-      expect(Coinbase.apiClients.transactionHistory!.listAddressTransactions).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.transactionHistory!.listAddressTransactions).toHaveBeenCalledTimes(
+        1,
+      );
       expect(Coinbase.apiClients.transactionHistory!.listAddressTransactions).toHaveBeenCalledWith(
         address.getNetworkId(),
         address.getId(),

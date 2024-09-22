@@ -16,6 +16,7 @@ import {
   Destination,
   StakeOptionsMode,
   CreateERC20Options,
+  CreateERC721Options,
 } from "../types";
 import { delay } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
@@ -352,6 +353,33 @@ export class WalletAddress extends Address {
   }
 
   /**
+   * Deploys an ERC721 token contract.
+   *
+   * @param options - The options for creating the ERC721 token.
+   * @param options.name - The name of the ERC721 token.
+   * @param options.symbol - The symbol of the ERC721 token.
+   * @param options.baseUri - The base URI of the ERC721 token.
+   * @returns A Promise that resolves to the deployed SmartContract object.
+   * @throws {Error} If the private key is not loaded when not using server signer.
+   */
+  public async deployNFT(options: CreateERC721Options): Promise<SmartContract> {
+    if (!Coinbase.useServerSigner && !this.key) {
+      throw new Error("Cannot deploy ERC721 without private key loaded");
+    }
+
+    const smartContract = await this.createERC721(options);
+
+    if (Coinbase.useServerSigner) {
+      return smartContract;
+    }
+
+    await smartContract.sign(this.getSigner());
+    await smartContract.broadcast();
+
+    return smartContract;
+  }
+
+  /**
    * Creates an ERC20 token contract.
    *
    * @private
@@ -372,6 +400,32 @@ export class WalletAddress extends Address {
           name: options.name,
           symbol: options.symbol,
           total_supply: options.totalSupply.toString(),
+        },
+      },
+    );
+    return SmartContract.fromModel(resp?.data);
+  }
+
+  /**
+   * Creates an ERC721 token contract.
+   *
+   * @param options - The options for creating the ERC721 token.
+   * @param options.name - The name of the ERC721 token.
+   * @param options.symbol - The symbol of the ERC721 token.
+   * @param options.baseUri - The base URI of the ERC721 token.
+   * @returns A Promise that resolves to the deployed SmartContract object.
+   * @throws {Error} If the private key is not loaded when not using server signer.
+   */
+  private async createERC721(options: CreateERC721Options): Promise<SmartContract> {
+    const resp = await Coinbase.apiClients.smartContract!.createSmartContract(
+      this.getWalletId(),
+      this.getId(),
+      {
+        type: SmartContractType.Erc721,
+        options: {
+          name: options.name,
+          symbol: options.symbol,
+          base_uri: options.baseUri,
         },
       },
     );
