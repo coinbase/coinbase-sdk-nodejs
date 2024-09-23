@@ -11,7 +11,6 @@ import { Transaction } from "../coinbase/transaction";
 import { Coinbase } from "../coinbase/coinbase";
 import {
   VALID_CONTRACT_INVOCATION_MODEL,
-  VALID_SIGNED_CONTRACT_INVOCATION_MODEL,
   mockReturnValue,
   mockReturnRejectedValue,
   contractInvocationApiMock,

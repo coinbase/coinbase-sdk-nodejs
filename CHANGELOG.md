@@ -1,6 +1,16 @@
 # Coinbase Node.js SDK Changelog
 
-## Unreleased 
+## Unreleased
+
+## [0.6.0] - 2024-09-18
+
+### Added
+- Add `deployToken` method to `WalletAddress` and `Wallet` to deploy an ERC20, updated `SmartContract` class to support deployment and fetching contract details
+- Add SOL asset support
+- Fix a bug where large numbers were being returned in scientific notation
+
+### Breaking
+- `Asset#toAtomicAmount` now returns a BigInt instead of a Decimal
 
 ## [0.5.1] - 2024-09-12
 

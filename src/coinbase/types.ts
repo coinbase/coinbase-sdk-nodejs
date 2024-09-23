@@ -48,6 +48,10 @@ import {
   CreateContractInvocationRequest,
   ContractInvocationList,
   ContractInvocation as ContractInvocationModel,
+  SmartContractList,
+  CreateSmartContractRequest,
+  SmartContract as SmartContractModel,
+  DeploySmartContractRequest,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -404,25 +408,6 @@ export type ExternalAddressAPIClient = {
   ): AxiosPromise<Balance>;
 
   /**
-   * List the transactions of a specific address.
-   *
-   * @summary Get address transactions
-   * @param networkId - The ID of the blockchain network
-   * @param addressId - The ID of the address to fetch transactions for.
-   * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
-   * @param options - Override http request option.
-   * @throws {RequiredError}
-   */
-  listAddressTransactions(
-    networkId: string,
-    addressId: string,
-    limit?: number,
-    page?: string,
-    options?: RawAxiosRequestConfig,
-  ): AxiosPromise<AddressTransactionList>;
-
-  /**
    * Request faucet funds to be sent to external address.
    *
    * @param networkId - The ID of the blockchain network
@@ -720,9 +705,11 @@ export type ApiClients = {
   asset?: AssetAPIClient;
   externalAddress?: ExternalAddressAPIClient;
   webhook?: WebhookApiClient;
-  smartContract?: ExternalSmartContractAPIClient;
+  contractEvent?: ExternalSmartContractAPIClient;
   contractInvocation?: ContractInvocationAPIClient;
   balanceHistory?: BalanceHistoryApiClient;
+  transactionHistory?: TransactionHistoryApiClient;
+  smartContract?: SmartContractAPIClient;
 };
 
 /**
@@ -920,6 +907,36 @@ export enum StakeOptionsMode {
 }
 
 /**
+ * Smart Contract Type
+ */
+export enum SmartContractType {
+  ERC20 = "erc20",
+  ERC721 = "erc721",
+}
+
+/**
+ * NFT Contract Options
+ */
+export type NFTContractOptions = {
+  name: string;
+  symbol: string;
+};
+
+/**
+ * Token Contract Options
+ */
+export type TokenContractOptions = {
+  name: string;
+  symbol: string;
+  totalSupply: string;
+};
+
+/**
+ * Smart Contract Options
+ */
+export type SmartContractOptions = NFTContractOptions | TokenContractOptions;
+
+/**
  * Options for creating a Transfer.
  */
 export type CreateTransferOptions = {
@@ -948,6 +965,15 @@ export type CreateContractInvocationOptions = {
   args: object;
   amount?: Amount;
   assetId?: string;
+};
+
+/**
+ * Options for creating a ERC20.
+ */
+export type CreateERC20Options = {
+  name: string;
+  symbol: string;
+  totalSupply: Amount;
 };
 
 /**
@@ -1061,6 +1087,26 @@ export interface BalanceHistoryApiClient {
   ): AxiosPromise<AddressHistoricalBalanceList>;
 }
 
+export interface TransactionHistoryApiClient {
+  /**
+   * List the transactions of a specific address.
+   *
+   * @summary Get address transactions
+   * @param networkId - The ID of the blockchain network
+   * @param addressId - The ID of the address to fetch transactions for.
+   * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param options - Override http request option.
+   * @throws {RequiredError}
+   */
+  listAddressTransactions(
+    networkId: string,
+    addressId: string,
+    limit?: number,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<AddressTransactionList>;
+}
 /**
  *  The domain for an EIP-712 typed data message payload.
  */
@@ -1193,3 +1239,71 @@ export type ContractInvocationAPIClient = {
     options?: AxiosRequestConfig,
   ): AxiosPromise<ContractInvocationList>;
 };
+
+export interface SmartContractAPIClient {
+  /**
+   * List smart contracts belonging to the user for a given wallet and address.
+   *
+   * @summary List smart contracts belonging to the CDP project
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address to list smart contracts for.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+
+  listSmartContracts(
+    walletId: string,
+    addressId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<SmartContractList>;
+
+  /**
+   * Creates a new Smart Contract.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address to create the smart contract for.
+   * @param createSmartContractRequest - The request body containing the smart contract details.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+  createSmartContract(
+    walletId: string,
+    addressId: string,
+    createSmartContractRequest: CreateSmartContractRequest,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<SmartContractModel>;
+
+  /**
+   * Gets a specific Smart Contract.
+   *
+   * @param  walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address the smart contract belongs to.
+   * @param smartContractId - The ID of the smart contract to retrieve.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+  getSmartContract(
+    walletId: string,
+    addressId: string,
+    smartContractId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<SmartContractModel>;
+
+  /**
+   * Deploys a Smart Contract.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address the smart contract belongs to.
+   * @param smartContractId - The ID of the smart contract to deploy.
+   * @param deploySmartContractRequest - The request body containing deployment details.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+  deploySmartContract(
+    walletId: string,
+    addressId: string,
+    smartContractId: string,
+    deploySmartContractRequest: DeploySmartContractRequest,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<SmartContractModel>;
+}
