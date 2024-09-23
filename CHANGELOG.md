@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Added
+- Export all missing types in `src/index`
+
 ## [0.6.0] - 2024-09-18
 
 ### Added
