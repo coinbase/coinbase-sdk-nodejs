@@ -53,6 +53,7 @@ import {
   SmartContract as SmartContractModel,
   DeploySmartContractRequest,
   WebhookEventTypeFilter,
+  CreateWalletWebhookRequest,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -1039,6 +1040,21 @@ export type ListHistoricalBalancesResult = {
 };
 
 export interface WebhookApiClient {
+  /**
+   * Create a new webhook for a wallet
+   *
+   * @summary Create a new webhook for a wallet
+   * @param {string} [walletId]
+   * @param {CreateWalletWebhookRequest} [createWalletWebhookRequest]
+   * @param {*} [options] - Override http request option.
+   * @throws {RequiredError}
+   */
+  createWalletWebhook(
+    walletId?: string,
+    createWalletWebhookRequest?: CreateWalletWebhookRequest,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<WebhookModel>;
+
   /**
    * Create a new webhook
    *

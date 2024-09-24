@@ -1379,10 +1379,10 @@ describe("Wallet Class", () => {
       notification_uri: "https://example.com/callback",
       event_type: "wallet_activity",
       event_type_filter: { addresses: [address1], wallet_id: "w1" },
-      signature_header: "example_header",
     };
 
     Coinbase.apiClients.webhook = {
+      createWalletWebhook: jest.fn().mockResolvedValue({ data: mockModel }),
       createWebhook: jest.fn().mockResolvedValue({ data: mockModel }),
       listWebhooks: jest.fn().mockResolvedValue({
         data: {
@@ -1406,7 +1406,7 @@ describe("Wallet Class", () => {
       const webhookObject = Webhook.init(mockModel);
 
       const wh = Promise.resolve(webhookObject);
-      jest.spyOn(Wallet.prototype, "createWebhook").mockReturnValue(wh);
+      jest.spyOn(Wallet.prototype, "createWalletWebhook").mockReturnValue(wh);
       const result = await wallet.createWebhook("https://example.com/callback");
       expect(result).toBeInstanceOf(Webhook);
       expect(result.getEventTypeFilter()?.wallet_id).toBe(walletModel.id);

@@ -755,25 +755,15 @@ export class Wallet {
    * Creates a Webhook for a wallet, monitors all wallet addresses for onchain events.
    *
    * @param notificationUri - The URI to which the webhook notifications will be sent.
-   * @param signatureHeader - (Optional) A header used to sign the webhook request,
-   *   defaulting to an empty string.
    *
    * @returns The newly created webhook instance.
    */
-  public async createWebhook(
-    notificationUri: string,
-    signatureHeader: string = "",
-  ): Promise<Webhook> {
-    return Webhook.create({
-      networkId: this.getNetworkId(),
-      notificationUri: notificationUri,
-      eventType: WebhookEventType.WalletActivity,
-      eventTypeFilter: {
-        addresses: this.addresses.map(address => address.getId()!),
-        wallet_id: this.getId()!,
-      },
-      signatureHeader: signatureHeader,
+  public async createWebhook(notificationUri: string): Promise<Webhook> {
+    const result = await Coinbase.apiClients.webhook!.createWalletWebhook(this.getId(), {
+      notification_uri: notificationUri,
     });
+
+    return new Webhook(result.data);
   }
 
   /**

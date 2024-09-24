@@ -13,11 +13,11 @@ describe("Webhook", () => {
       wallet_id: "w1",
     },
     event_filters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
-    signature_header: "example_header",
   };
 
   beforeEach(() => {
     Coinbase.apiClients.webhook = {
+      createWalletWebhook: jest.fn().mockResolvedValue({ data: mockModel }),
       createWebhook: jest.fn().mockResolvedValue({ data: mockModel }),
       listWebhooks: jest.fn().mockResolvedValue({
         data: {

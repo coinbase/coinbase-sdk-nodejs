@@ -47,8 +47,6 @@ export class Webhook {
    * @param options.eventType - The type of event for the webhook.
    * @param options.eventTypeFilter - Filter for wallet activity event type.
    * @param options.eventFilters - Filters applied to the events that determine which specific events trigger the webhook.
-   * @param options.signatureHeader - The custom header to be used for x-webhook-signature header on callbacks,
-   *   so developers can verify the requests are coming from Coinbase.
    * @returns A promise that resolves to a new instance of Webhook.
    */
   public static async create({
@@ -57,7 +55,6 @@ export class Webhook {
     eventType,
     eventTypeFilter,
     eventFilters = [],
-    signatureHeader = "",
   }: CreateWebhookOptions): Promise<Webhook> {
     const result = await Coinbase.apiClients.webhook!.createWebhook({
       network_id: networkId,
@@ -65,7 +62,6 @@ export class Webhook {
       event_type: eventType,
       event_type_filter: eventTypeFilter,
       event_filters: eventFilters,
-      signature_header: signatureHeader,
     });
 
     return new Webhook(result.data);
