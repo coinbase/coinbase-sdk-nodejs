@@ -181,6 +181,13 @@ export class SmartContract {
     }
   }
 
+  /**
+   * Type guard for checking if the smart contract is an ERC20.
+   *
+   * @param type - The type of the smart contract.
+   * @param options - The options of the smart contract.
+   * @returns True if the smart contract is an ERC20, false otherwise.
+   */
   private isERC20(
     type: SmartContractType,
     options: SmartContractOptionsModel,
