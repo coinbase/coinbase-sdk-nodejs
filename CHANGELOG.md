@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Added
+- Add `deployNFT` method to `WalletAddress` and `Wallet` to deploy an ERC721, updated `SmartContract` class to support deployment and fetching contract details
+
 ## [0.6.1] - 2024-09-23
 
 ### Added
