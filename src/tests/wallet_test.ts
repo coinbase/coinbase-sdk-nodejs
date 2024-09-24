@@ -53,6 +53,10 @@ import {
   ERC20_NAME,
   ERC20_SYMBOL,
   ERC20_TOTAL_SUPPLY,
+  ERC721_NAME,
+  ERC721_SYMBOL,
+  ERC721_BASE_URI,
+  VALID_SMART_CONTRACT_ERC721_MODEL,
 } from "./utils";
 import { Trade } from "../coinbase/trade";
 import { WalletAddress } from "../coinbase/address/wallet_address";
@@ -609,6 +613,33 @@ describe("Wallet Class", () => {
 
       expect((await wallet.getDefaultAddress()).deployToken).toHaveBeenCalledTimes(1);
       expect((await wallet.getDefaultAddress()).deployToken).toHaveBeenCalledWith(options);
+
+      expect(smartContract).toBeInstanceOf(SmartContract);
+      expect(smartContract).toEqual(expectedSmartContract);
+    });
+  });
+
+  describe("#deployNFT", () => {
+    let expectedSmartContract;
+    let options = {
+      name: ERC721_NAME,
+      symbol: ERC721_SYMBOL,
+      baseURI: ERC721_BASE_URI,
+    };
+
+    beforeEach(async () => {
+      expectedSmartContract = SmartContract.fromModel(VALID_SMART_CONTRACT_ERC721_MODEL);
+
+      (await wallet.getDefaultAddress()).deployNFT = jest
+        .fn()
+        .mockResolvedValue(expectedSmartContract);
+    });
+
+    it("successfully deploys an ERC721 contract on the default address", async () => {
+      const smartContract = await wallet.deployNFT(options);
+
+      expect((await wallet.getDefaultAddress()).deployNFT).toHaveBeenCalledTimes(1);
+      expect((await wallet.getDefaultAddress()).deployNFT).toHaveBeenCalledWith(options);
 
       expect(smartContract).toBeInstanceOf(SmartContract);
       expect(smartContract).toEqual(expectedSmartContract);
