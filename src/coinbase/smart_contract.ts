@@ -182,20 +182,6 @@ export class SmartContract {
   }
 
   /**
-   * Type guard for checking if the smart contract is an ERC20.
-   *
-   * @param type - The type of the smart contract.
-   * @param options - The options of the smart contract.
-   * @returns True if the smart contract is an ERC20, false otherwise.
-   */
-  private isERC20(
-    type: SmartContractType,
-    options: SmartContractOptionsModel,
-  ): options is TokenContractOptionsModel {
-    return type === SmartContractType.ERC20;
-  }
-
-  /**
    * Returns the ABI of the smart contract.
    *
    * @returns The ABI as a JSON-encoded string.
@@ -303,5 +289,19 @@ export class SmartContract {
       `contractAddress: '${this.getContractAddress()}', deployerAddress: '${this.getDeployerAddress()}', ` +
       `type: '${this.getType()}'}`
     );
+  }
+
+    /**
+   * Type guard for checking if the smart contract is an ERC20.
+   *
+   * @param type - The type of the smart contract.
+   * @param options - The options of the smart contract.
+   * @returns True if the smart contract is an ERC20, false otherwise.
+   */
+    private isERC20(
+      type: SmartContractType,
+      options: SmartContractOptionsModel,
+    ): options is TokenContractOptionsModel {
+      return type === SmartContractType.ERC20;
   }
 }
