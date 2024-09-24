@@ -1,7 +1,10 @@
-import { Coinbase, StakingReward } from "../../src";
+import { Coinbase, StakingReward } from "../..";
 
 const apiKeyFilePath = "~/.apikeys/prod.json";
 
+/**
+ * Fetches and logs staking rewards for an Ethereum validator.
+ */
 async function stake() {
   Coinbase.configureFromJson({ filePath: apiKeyFilePath });
 

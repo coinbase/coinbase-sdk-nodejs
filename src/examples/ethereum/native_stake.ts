@@ -1,11 +1,8 @@
-import { Coinbase, ExternalAddress, StakeOptionsMode } from "..";
+import { Coinbase, ExternalAddress, StakeOptionsMode } from "../..";
 import { ethers } from "ethers";
 
 const apiKeyFilePath = "/Users/drmoo/.apikeys/prod.json";
 
-/**
- * List the validators you've provisioned on the `ethereum-holesky` testnet network.
- */
 /**
  * List the validators you've provisioned on the `ethereum-holesky` testnet network.
  */

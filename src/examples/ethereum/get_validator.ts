@@ -1,10 +1,7 @@
-import { Coinbase, Validator } from "..";
+import { Coinbase, Validator } from "../..";
 
 const apiKeyFilePath = "/Users/drmoo/.apikeys/prod.json";
 
-/**
- * List the validators you've provisioned on the `ethereum-holesky` testnet network.
- */
 /**
  * List the validators you've provisioned on the `ethereum-holesky` testnet network.
  */
