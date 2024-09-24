@@ -358,7 +358,7 @@ export class WalletAddress extends Address {
    * @param options - The options for creating the ERC721 token.
    * @param options.name - The name of the ERC721 token.
    * @param options.symbol - The symbol of the ERC721 token.
-   * @param options.baseUri - The base URI of the ERC721 token.
+   * @param options.baseURI - The base URI of the ERC721 token.
    * @returns A Promise that resolves to the deployed SmartContract object.
    * @throws {Error} If the private key is not loaded when not using server signer.
    */
@@ -425,7 +425,7 @@ export class WalletAddress extends Address {
         options: {
           name: options.name,
           symbol: options.symbol,
-          base_uri: options.baseUri,
+          base_uri: options.baseURI,
         },
       },
     );

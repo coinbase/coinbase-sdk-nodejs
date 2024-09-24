@@ -983,7 +983,7 @@ export type CreateERC20Options = {
 export type CreateERC721Options = {
   name: string;
   symbol: string;
-  baseUri: string;
+  baseURI: string;
 };
 
 /**
