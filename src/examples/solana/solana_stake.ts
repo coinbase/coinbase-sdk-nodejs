@@ -1,6 +1,7 @@
 import { Coinbase } from "../../coinbase/coinbase";
 import { NetworkIdentifier, StakingOperation } from "../../client";
 import { readFileSync } from "fs";
+import { homedir } from "os";
 import {
   KeyPairSigner,
   createSolanaRpc,
