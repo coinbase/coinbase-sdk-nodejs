@@ -414,7 +414,7 @@ export class WalletAddress extends Address {
    * @param options.symbol - The symbol of the ERC721 token.
    * @param options.baseURI - The base URI of the ERC721 token.
    * @returns A Promise that resolves to the deployed SmartContract object.
-   * @throws {Error} If the private key is not loaded when not using server signer.
+   * @throws {APIError} If the private key is not loaded when not using server signer.
    */
   private async createERC721(options: CreateERC721Options): Promise<SmartContract> {
     const resp = await Coinbase.apiClients.smartContract!.createSmartContract(
