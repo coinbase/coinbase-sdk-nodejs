@@ -4,7 +4,7 @@ import Decimal from "decimal.js";
 import { ethers } from "ethers";
 import * as fs from "fs";
 import * as secp256k1 from "secp256k1";
-import { Address as AddressModel, Wallet as WalletModel, WebhookEventType } from "../client";
+import { Address as AddressModel, Wallet as WalletModel } from "../client";
 import { Address } from "./address";
 import { WalletAddress } from "./address/wallet_address";
 import { Asset } from "./asset";
