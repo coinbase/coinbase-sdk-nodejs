@@ -912,6 +912,7 @@ export enum StakeOptionsMode {
 export enum SmartContractType {
   ERC20 = "erc20",
   ERC721 = "erc721",
+  ERC1155 = "erc1155",
 }
 
 /**
@@ -933,9 +934,19 @@ export type TokenContractOptions = {
 };
 
 /**
+ * Multi-Token Contract Options
+ */
+export type MultiTokenContractOptions = {
+  uri: string;
+};
+
+/**
  * Smart Contract Options
  */
-export type SmartContractOptions = NFTContractOptions | TokenContractOptions;
+export type SmartContractOptions =
+  | NFTContractOptions
+  | TokenContractOptions
+  | MultiTokenContractOptions;
 
 /**
  * Options for creating a Transfer.
@@ -984,6 +995,13 @@ export type CreateERC721Options = {
   name: string;
   symbol: string;
   baseURI: string;
+};
+
+/**
+ * Options for creating a ERC1155.
+ */
+export type CreateERC1155Options = {
+  uri: string;
 };
 
 /**
