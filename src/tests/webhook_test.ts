@@ -132,12 +132,7 @@ describe("Webhook", () => {
   });
 
   describe("#getSignatureHeader", () => {
-    it("should return the signature header of the webhook", () => {
-      const webhook = Webhook.init(mockModel);
-      expect(webhook.getSignatureHeader()).toBe("example_header");
-    });
-
-    it("should return undefined if the signature header is not set", () => {
+    it("should return undefined since the signature header can not be set via SDK", () => {
       const modelWithoutSignatureHeader: WebhookModel = {
         ...mockModel,
         signature_header: undefined,
@@ -155,7 +150,6 @@ describe("Webhook", () => {
         eventType: "erc20_transfer",
         eventTypeFilter: { addresses: ["0x1..", "0x2.."] },
         eventFilters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
-        signatureHeader: "example_header",
       });
 
       expect(Coinbase.apiClients.webhook!.createWebhook).toHaveBeenCalledWith({
@@ -164,7 +158,6 @@ describe("Webhook", () => {
         event_type: "erc20_transfer",
         event_type_filter: { addresses: ["0x1..", "0x2.."] },
         event_filters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
-        signature_header: "example_header",
       });
       expect(webhook).toBeInstanceOf(Webhook);
       expect(webhook.getId()).toBe("test-id");
@@ -248,7 +241,7 @@ describe("Webhook", () => {
       const webhook = Webhook.init(mockModel);
       const stringRepresentation = webhook.toString();
       expect(stringRepresentation).toBe(
-        `Webhook { id: 'test-id', networkId: 'test-network', eventType: 'erc20_transfer', eventFilter: [{"contract_address":"0x...","from_address":"0x...","to_address":"0x..."}], eventTypeFilter: {"addresses":["0xa55C5950F7A3C42Fa5799B2Cac0e455774a07382"],"wallet_id":"w1"}, notificationUri: 'https://example.com/callback', signatureHeader: 'example_header' }`,
+        `Webhook { id: 'test-id', networkId: 'test-network', eventType: 'erc20_transfer', eventFilter: [{"contract_address":"0x...","from_address":"0x...","to_address":"0x..."}], eventTypeFilter: {"addresses":["0xa55C5950F7A3C42Fa5799B2Cac0e455774a07382"],"wallet_id":"w1"}, notificationUri: 'https://example.com/callback', signatureHeader: 'undefined' }`,
       );
     });
   });

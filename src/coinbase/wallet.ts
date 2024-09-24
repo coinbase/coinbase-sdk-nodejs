@@ -763,7 +763,7 @@ export class Wallet {
       notification_uri: notificationUri,
     });
 
-    return new Webhook(result.data);
+    return Webhook.init(result.data);
   }
 
   /**
