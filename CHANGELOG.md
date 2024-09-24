@@ -2,9 +2,11 @@
 
 ## Unreleased
 
+## [0.7.0] - 2024-09-24
 ### Added
 - Add `deployNFT` method to `WalletAddress` and `Wallet` to deploy an ERC721, updated `SmartContract` class to support deployment and fetching contract details
 - Add `deployMultiToken` method to `WalletAddress` and `Wallet` to deploy an ERC1155, updated `SmartContract` class to support deployment and fetching contract details
+- Add `createWebhook` method to `Wallet` to deploy a wallet activity webhook, updated `Webhook` class to disallow users from specifying webhook signature 
 
 ## [0.6.1] - 2024-09-23
 
