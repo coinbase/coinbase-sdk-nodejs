@@ -333,7 +333,7 @@ export class WalletAddress extends Address {
    * @param options.symbol - The symbol of the ERC20 token.
    * @param options.totalSupply - The total supply of the ERC20 token.
    * @returns A Promise that resolves to the deployed SmartContract object.
-   * @throws {Error} If the private key is not loaded when not using server signer.
+   * @throws {APIError} If the API request to create a smart contract fails.
    */
   public async deployToken(options: CreateERC20Options): Promise<SmartContract> {
     if (!Coinbase.useServerSigner && !this.key) {
@@ -360,7 +360,7 @@ export class WalletAddress extends Address {
    * @param options.symbol - The symbol of the ERC721 token.
    * @param options.baseURI - The base URI of the ERC721 token.
    * @returns A Promise that resolves to the deployed SmartContract object.
-   * @throws {Error} If the private key is not loaded when not using server signer.
+   * @throws {APIError} If the API request to create a smart contract fails.
    */
   public async deployNFT(options: CreateERC721Options): Promise<SmartContract> {
     if (!Coinbase.useServerSigner && !this.key) {
