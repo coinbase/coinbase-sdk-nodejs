@@ -17,6 +17,7 @@ import {
   StakeOptionsMode,
   CreateERC20Options,
   CreateERC721Options,
+  CreateERC1155Options,
 } from "../types";
 import { delay } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
@@ -380,6 +381,31 @@ export class WalletAddress extends Address {
   }
 
   /**
+   * Deploys an ERC1155 multi-token contract.
+   *
+   * @param options - The options for creating the ERC1155 token.
+   * @param options.uri - The URI for all token metadata.
+   * @returns A Promise that resolves to the deployed SmartContract object.
+   * @throws {Error} If the private key is not loaded when not using server signer.
+   */
+  public async deployMultiToken(options: CreateERC1155Options): Promise<SmartContract> {
+    if (!Coinbase.useServerSigner && !this.key) {
+      throw new Error("Cannot deploy ERC1155 without private key loaded");
+    }
+
+    const smartContract = await this.createERC1155(options);
+
+    if (Coinbase.useServerSigner) {
+      return smartContract;
+    }
+
+    await smartContract.sign(this.getSigner());
+    await smartContract.broadcast();
+
+    return smartContract;
+  }
+
+  /**
    * Creates an ERC20 token contract.
    *
    * @private
@@ -426,6 +452,29 @@ export class WalletAddress extends Address {
           name: options.name,
           symbol: options.symbol,
           base_uri: options.baseURI,
+        },
+      },
+    );
+    return SmartContract.fromModel(resp?.data);
+  }
+
+  /**
+   * Creates an ERC1155 multi-token contract.
+   *
+   * @private
+   * @param {CreateERC1155Options} options - The options for creating the ERC1155 token.
+   * @param {string} options.uri - The URI for all token metadata.
+   * @returns {Promise<SmartContract>} A Promise that resolves to the created SmartContract.
+   * @throws {APIError} If the API request to create a smart contract fails.
+   */
+  private async createERC1155(options: CreateERC1155Options): Promise<SmartContract> {
+    const resp = await Coinbase.apiClients.smartContract!.createSmartContract(
+      this.getWalletId(),
+      this.getId(),
+      {
+        type: SmartContractType.Erc1155,
+        options: {
+          uri: options.uri,
         },
       },
     );
