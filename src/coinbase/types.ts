@@ -920,6 +920,7 @@ export enum SmartContractType {
 export type NFTContractOptions = {
   name: string;
   symbol: string;
+  baseURI: string;
 };
 
 /**
@@ -974,6 +975,15 @@ export type CreateERC20Options = {
   name: string;
   symbol: string;
   totalSupply: Amount;
+};
+
+/**
+ * Options for creating a ERC721.
+ */
+export type CreateERC721Options = {
+  name: string;
+  symbol: string;
+  baseURI: string;
 };
 
 /**

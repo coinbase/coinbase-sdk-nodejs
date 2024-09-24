@@ -3,6 +3,8 @@ import {
   DeploySmartContractRequest,
   SmartContract as SmartContractModel,
   SmartContractType as SmartContractTypeModel,
+  SmartContractOptions as SmartContractOptionsModel,
+  TokenContractOptions as TokenContractOptionsModel,
 } from "../client/api";
 import { Transaction } from "./transaction";
 import {
@@ -164,10 +166,19 @@ export class SmartContract {
    * @returns The Smart Contract Options.
    */
   public getOptions(): SmartContractOptions {
-    if (this.getType() === SmartContractType.ERC20) {
-      return this.model.options as TokenContractOptions;
+    if (this.isERC20(this.getType(), this.model.options)) {
+      return {
+        name: this.model.options.name,
+        symbol: this.model.options.symbol,
+        totalSupply: this.model.options.total_supply,
+      } as TokenContractOptions;
+    } else {
+      return {
+        name: this.model.options.name,
+        symbol: this.model.options.symbol,
+        baseURI: this.model.options.base_uri,
+      } as NFTContractOptions;
     }
-    return this.model.options as NFTContractOptions;
   }
 
   /**
@@ -278,5 +289,19 @@ export class SmartContract {
       `contractAddress: '${this.getContractAddress()}', deployerAddress: '${this.getDeployerAddress()}', ` +
       `type: '${this.getType()}'}`
     );
+  }
+
+  /**
+   * Type guard for checking if the smart contract is an ERC20.
+   *
+   * @param type - The type of the smart contract.
+   * @param options - The options of the smart contract.
+   * @returns True if the smart contract is an ERC20, false otherwise.
+   */
+  private isERC20(
+    type: SmartContractType,
+    options: SmartContractOptionsModel,
+  ): options is TokenContractOptionsModel {
+    return type === SmartContractType.ERC20;
   }
 }

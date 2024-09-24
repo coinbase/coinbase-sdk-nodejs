@@ -29,6 +29,7 @@ import {
   WalletCreateOptions,
   WalletData,
   CreateERC20Options,
+  CreateERC721Options,
 } from "./types";
 import { convertStringToHex, delay, formatDate, getWeekBackDate } from "./utils";
 import { StakingOperation } from "./staking_operation";
@@ -781,6 +782,20 @@ export class Wallet {
    */
   public async deployToken(options: CreateERC20Options): Promise<SmartContract> {
     return (await this.getDefaultAddress()).deployToken(options);
+  }
+
+  /**
+   * Deploys an ERC721 token contract.
+   *
+   * @param options - The options for creating the ERC721 token.
+   * @param options.name - The name of the ERC721 token.
+   * @param options.symbol - The symbol of the ERC721 token.
+   * @param options.baseURI - The base URI of the ERC721 token.
+   * @returns A Promise that resolves to the deployed SmartContract object.
+   * @throws {APIError} If the private key is not loaded when not using server signer.
+   */
+  public async deployNFT(options: CreateERC721Options): Promise<SmartContract> {
+    return (await this.getDefaultAddress()).deployNFT(options);
   }
 
   /**

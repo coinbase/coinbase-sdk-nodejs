@@ -1596,6 +1596,12 @@ export interface NFTContractOptions {
      * @memberof NFTContractOptions
      */
     'symbol': string;
+    /**
+     * The base URI for the NFT metadata
+     * @type {string}
+     * @memberof NFTContractOptions
+     */
+    'base_uri': string;
 }
 /**
  * 
