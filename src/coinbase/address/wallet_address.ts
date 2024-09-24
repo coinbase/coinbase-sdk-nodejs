@@ -386,7 +386,7 @@ export class WalletAddress extends Address {
    * @param options - The options for creating the ERC1155 token.
    * @param options.uri - The URI for all token metadata.
    * @returns A Promise that resolves to the deployed SmartContract object.
-   * @throws {Error} If the private key is not loaded when not using server signer.
+   * @throws {APIError} If the API request to create a smart contract fails.
    */
   public async deployMultiToken(options: CreateERC1155Options): Promise<SmartContract> {
     if (!Coinbase.useServerSigner && !this.key) {
