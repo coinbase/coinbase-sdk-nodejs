@@ -6,7 +6,6 @@ import {
   SmartContractOptions as SmartContractOptionsModel,
   TokenContractOptions as TokenContractOptionsModel,
   NFTContractOptions as NFTContractOptionsModel,
-  MultiTokenContractOptions as MultiTokenContractOptionsModel,
 } from "../client/api";
 import { Transaction } from "./transaction";
 import {
