@@ -779,7 +779,7 @@ export class Wallet {
    * @param options.symbol - The symbol of the ERC20 token.
    * @param options.totalSupply - The total supply of the ERC20 token.
    * @returns A Promise that resolves to the deployed SmartContract object.
-   * @throws {APIError} If the private key is not loaded when not using server signer.
+   * @throws {Error} If the private key is not loaded when not using server signer.
    */
   public async deployToken(options: CreateERC20Options): Promise<SmartContract> {
     return (await this.getDefaultAddress()).deployToken(options);
@@ -793,7 +793,7 @@ export class Wallet {
    * @param options.symbol - The symbol of the ERC721 token.
    * @param options.baseURI - The base URI of the ERC721 token.
    * @returns A Promise that resolves to the deployed SmartContract object.
-   * @throws {APIError} If the private key is not loaded when not using server signer.
+   * @throws {Error} If the private key is not loaded when not using server signer.
    */
   public async deployNFT(options: CreateERC721Options): Promise<SmartContract> {
     return (await this.getDefaultAddress()).deployNFT(options);
@@ -807,7 +807,7 @@ export class Wallet {
    * @param options.symbol - The symbol of the ERC1155 token.
    * @param options.baseURI - The base URI of the ERC1155 token.
    * @returns A Promise that resolves to the deployed SmartContract object.
-   * @throws {APIError} If the private key is not loaded when not using server signer.
+   * @throws {Error} If the private key is not loaded when not using server signer.
    */
   public async deployMultiToken(options: CreateERC1155Options): Promise<SmartContract> {
     return (await this.getDefaultAddress()).deployMultiToken(options);
