@@ -29,6 +29,7 @@ export class ExternalAddress extends Address {
    *  - `fee_recipient_address` (optional): Ethereum address for receiving transaction fees. Defaults to the address initiating the stake operation.
    *
    * @returns The stake operation.
+   * @throws {Error} If there was an issue building the stake operation.
    */
   public async buildStakeOperation(
     amount: Amount,
@@ -36,7 +37,6 @@ export class ExternalAddress extends Address {
     mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
     options: { [key: string]: string } = {},
   ): Promise<StakingOperation> {
-    await this.validateCanStake(amount, assetId, mode, options);
     return this.buildStakingOperation(amount, assetId, "stake", mode, options);
   }
 
@@ -56,6 +56,7 @@ export class ExternalAddress extends Address {
    *  - `validator_pub_keys` (optional): List of comma separated validator public keys to unstake. Defaults to validators being picked up on your behalf corresponding to the unstake amount.
    *
    * @returns The unstake operation.
+   * @throws {Error} If there was an issue building the unstake operation.
    */
   public async buildUnstakeOperation(
     amount: Amount,
@@ -63,7 +64,6 @@ export class ExternalAddress extends Address {
     mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
     options: { [key: string]: string } = {},
   ): Promise<StakingOperation> {
-    await this.validateCanUnstake(amount, assetId, mode, options);
     return this.buildStakingOperation(amount, assetId, "unstake", mode, options);
   }
 
@@ -79,6 +79,7 @@ export class ExternalAddress extends Address {
    *  - `integrator_contract_address` (optional): The contract address to which the claim stake operation is directed to. Defaults to the integrator contract address associated with CDP account (if available) or else defaults to a shared integrator contract address for that network.
    *
    * @returns The claim stake operation.
+   * @throws {Error} If there was an issue building the claim stake operation.
    */
   public async buildClaimStakeOperation(
     amount: Amount,
@@ -86,7 +87,6 @@ export class ExternalAddress extends Address {
     mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
     options: { [key: string]: string } = {},
   ): Promise<StakingOperation> {
-    await this.validateCanClaimStake(amount, assetId, mode, options);
     return this.buildStakingOperation(amount, assetId, "claim_stake", mode, options);
   }
 
@@ -109,10 +109,6 @@ export class ExternalAddress extends Address {
     mode: StakeOptionsMode,
     options: { [key: string]: string },
   ): Promise<StakingOperation> {
-    const stakingAmount = new Decimal(amount.toString());
-    if (stakingAmount.lessThanOrEqualTo(0)) {
-      throw new Error(`Amount required greater than zero.`);
-    }
     const asset = await Asset.fetch(this.getNetworkId(), assetId);
 
     const newOptions = this.copyOptions(options);

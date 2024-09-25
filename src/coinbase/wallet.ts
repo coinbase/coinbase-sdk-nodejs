@@ -327,6 +327,11 @@ export class Wallet {
    * @param asset_id - The asset to check the stakeable balance for.
    * @param mode - The staking mode. Defaults to DEFAULT.
    * @param options - Additional options for getting the stakeable balance.
+   *
+   * A. Dedicated ETH Staking
+   *  - `funding_address` (optional): Ethereum address used for funding the stake operation and for which stakeable balance is being queried.
+   *  Defaults to the address initiating the stake operation.
+   *
    * @throws {Error} if the default address is not found.
    * @returns The stakeable balance.
    */
