@@ -14,6 +14,8 @@ import {
   ERC721_NAME,
   ERC721_SYMBOL,
   ERC721_BASE_URI,
+  VALID_SMART_CONTRACT_ERC1155_MODEL,
+  ERC1155_URI,
 } from "./utils";
 import { SmartContract } from "../coinbase/smart_contract";
 import { ContractEvent } from "../coinbase/contract_event";
@@ -30,6 +32,8 @@ describe("SmartContract", () => {
   let erc721Model: SmartContractModel = VALID_SMART_CONTRACT_ERC721_MODEL;
   let erc20SmartContract: SmartContract = SmartContract.fromModel(erc20Model);
   let erc721SmartContract: SmartContract = SmartContract.fromModel(erc721Model);
+  let erc1155Model: SmartContractModel = VALID_SMART_CONTRACT_ERC1155_MODEL;
+  let erc1155SmartContract: SmartContract = SmartContract.fromModel(erc1155Model);
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -79,13 +83,21 @@ describe("SmartContract", () => {
   });
 
   describe("#getType", () => {
-    it("returns the smart contract type", () => {
+    it("returns the smart contract type for ERC20", () => {
       expect(erc20SmartContract.getType()).toEqual(VALID_SMART_CONTRACT_ERC20_MODEL.type);
+    });
+
+    it("returns the smart contract type for ERC721", () => {
+      expect(erc721SmartContract.getType()).toEqual(VALID_SMART_CONTRACT_ERC721_MODEL.type);
+    });
+
+    it("returns the smart contract type for ERC1155", () => {
+      expect(erc1155SmartContract.getType()).toEqual(VALID_SMART_CONTRACT_ERC1155_MODEL.type);
     });
   });
 
   describe("#getOptions", () => {
-    it("returns the smart contract options", () => {
+    it("returns the smart contract options for ERC20", () => {
       expect(erc20SmartContract.getOptions()).toEqual({
         name: ERC20_NAME,
         symbol: ERC20_SYMBOL,
@@ -98,6 +110,12 @@ describe("SmartContract", () => {
         name: ERC721_NAME,
         symbol: ERC721_SYMBOL,
         baseURI: ERC721_BASE_URI,
+      });
+    });
+
+    it("returns the smart contract options for ERC1155", () => {
+      expect(erc1155SmartContract.getOptions()).toEqual({
+        uri: ERC1155_URI,
       });
     });
   });

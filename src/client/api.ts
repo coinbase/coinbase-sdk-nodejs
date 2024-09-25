@@ -1579,6 +1579,19 @@ export interface ModelError {
     'correlation_id'?: string;
 }
 /**
+ * Options for multi-token contract creation
+ * @export
+ * @interface MultiTokenContractOptions
+ */
+export interface MultiTokenContractOptions {
+    /**
+     * The URI for all token metadata
+     * @type {string}
+     * @memberof MultiTokenContractOptions
+     */
+    'uri': string;
+}
+/**
  * Options for NFT contract creation
  * @export
  * @interface NFTContractOptions
@@ -2151,7 +2164,7 @@ export interface SmartContractList {
  * Options for smart contract creation
  * @export
  */
-export type SmartContractOptions = NFTContractOptions | TokenContractOptions;
+export type SmartContractOptions = MultiTokenContractOptions | NFTContractOptions | TokenContractOptions;
 
 /**
  * The type of the smart contract
@@ -2161,7 +2174,8 @@ export type SmartContractOptions = NFTContractOptions | TokenContractOptions;
 
 export const SmartContractType = {
     Erc20: 'erc20',
-    Erc721: 'erc721'
+    Erc721: 'erc721',
+    Erc1155: 'erc1155'
 } as const;
 
 export type SmartContractType = typeof SmartContractType[keyof typeof SmartContractType];
