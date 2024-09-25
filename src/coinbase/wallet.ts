@@ -39,6 +39,7 @@ import { StakingBalance } from "./staking_balance";
 import { PayloadSignature } from "./payload_signature";
 import { ContractInvocation } from "../coinbase/contract_invocation";
 import { SmartContract } from "./smart_contract";
+import { Webhook } from "./webhook";
 
 /**
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
@@ -748,6 +749,21 @@ export class Wallet {
    */
   public async createPayloadSignature(unsignedPayload: string): Promise<PayloadSignature> {
     return (await this.getDefaultAddress()).createPayloadSignature(unsignedPayload);
+  }
+
+  /**
+   * Creates a Webhook for a wallet, monitors all wallet addresses for onchain events.
+   *
+   * @param notificationUri - The URI to which the webhook notifications will be sent.
+   *
+   * @returns The newly created webhook instance.
+   */
+  public async createWebhook(notificationUri: string): Promise<Webhook> {
+    const result = await Coinbase.apiClients.webhook!.createWalletWebhook(this.getId(), {
+      notification_uri: notificationUri,
+    });
+
+    return Webhook.init(result.data);
   }
 
   /**

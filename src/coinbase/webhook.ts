@@ -1,4 +1,9 @@
-import { Webhook as WebhookModel, WebhookEventType, WebhookEventFilter } from "../client/api";
+import {
+  Webhook as WebhookModel,
+  WebhookEventType,
+  WebhookEventFilter,
+  WebhookEventTypeFilter,
+} from "../client/api";
 import { Coinbase } from "./coinbase";
 import { CreateWebhookOptions } from "./types";
 
@@ -40,24 +45,23 @@ export class Webhook {
    * @param options.networkId - The network ID for which the webhook is created.
    * @param options.notificationUri - The URI where notifications should be sent.
    * @param options.eventType - The type of event for the webhook.
+   * @param options.eventTypeFilter - Filter for wallet activity event type.
    * @param options.eventFilters - Filters applied to the events that determine which specific events trigger the webhook.
-   * @param options.signatureHeader - The custom header to be used for x-webhook-signature header on callbacks,
-   *   so developers can verify the requests are coming from Coinbase.
    * @returns A promise that resolves to a new instance of Webhook.
    */
   public static async create({
     networkId,
     notificationUri,
     eventType,
+    eventTypeFilter,
     eventFilters = [],
-    signatureHeader = "",
   }: CreateWebhookOptions): Promise<Webhook> {
     const result = await Coinbase.apiClients.webhook!.createWebhook({
       network_id: networkId,
       notification_uri: notificationUri,
       event_type: eventType,
+      event_type_filter: eventTypeFilter,
       event_filters: eventFilters,
-      signature_header: signatureHeader,
     });
 
     return new Webhook(result.data);
@@ -132,6 +136,15 @@ export class Webhook {
   }
 
   /**
+   * Returns the event type filter of the webhook.
+   *
+   * @returns The filter which will be used to filter for events of a certain event type
+   */
+  public getEventTypeFilter(): WebhookEventTypeFilter | undefined {
+    return this.model?.event_type_filter;
+  }
+
+  /**
    * Returns the event filters applied to the webhook.
    *
    * @returns An array of event filters used by the webhook, or undefined if the model is null.
@@ -186,6 +199,7 @@ export class Webhook {
     return (
       `Webhook { id: '${this.getId()}', networkId: '${this.getNetworkId()}', ` +
       `eventType: '${this.getEventType()}', eventFilter: ${JSON.stringify(this.getEventFilters())}, ` +
+      `eventTypeFilter: ${JSON.stringify(this.getEventTypeFilter())}, ` +
       `notificationUri: '${this.getNotificationURI()}', signatureHeader: '${this.getSignatureHeader()}' }`
     );
   }

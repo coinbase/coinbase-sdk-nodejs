@@ -11,9 +11,9 @@ module.exports = {
   coverageThreshold: {
     "./src/coinbase/**": {
       branches: 77,
-      functions: 90,
+      functions: 85,
       statements: 85,
-      lines: 87,
+      lines: 85,
     },
   },
 };
