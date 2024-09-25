@@ -170,7 +170,7 @@ export class Address {
   }: ListTransactionsOptions): Promise<ListTransactionsResult> {
     const txnList: Transaction[] = [];
 
-    const response = await Coinbase.apiClients.externalAddress!.listAddressTransactions(
+    const response = await Coinbase.apiClients.transactionHistory!.listAddressTransactions(
       this.getNetworkId(),
       this.getId(),
       limit ? limit : undefined,

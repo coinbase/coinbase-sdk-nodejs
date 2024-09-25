@@ -140,7 +140,7 @@ describe("StakingReward", () => {
       const reward = new StakingReward(
         {
           address_id: address.getId(),
-          date: "2024-05-03",
+          date: "2024-05-02T00:00:00Z",
           amount: "226",
           state: StakingRewardStateEnum.Pending,
           format: StakingRewardFormat.USD,
@@ -164,7 +164,7 @@ describe("StakingReward", () => {
       const reward = new StakingReward(
         {
           address_id: address.getId(),
-          date: "2024-05-03",
+          date: "2024-05-02T00:00:00Z",
           amount: "726030823305604",
           state: StakingRewardStateEnum.Pending,
           format: StakingRewardFormat.NATIVE,
@@ -181,6 +181,28 @@ describe("StakingReward", () => {
       const amount = reward.amount();
       expect(amount).toEqual(0.000726030823305604);
     });
+
+    it("should return 0 when amount is empty", () => {
+      const reward = new StakingReward(
+        {
+          address_id: address.getId(),
+          date: "2024-05-03",
+          amount: "",
+          state: StakingRewardStateEnum.Pending,
+          format: StakingRewardFormat.NATIVE,
+          usd_value: {
+            amount: "179",
+            conversion_price: "2461.63",
+            conversion_time: "2024-05-02T00:00:00Z",
+          },
+        },
+        asset,
+        StakingRewardFormat.NATIVE,
+      );
+
+      const amount = reward.amount();
+      expect(amount).toEqual(0);
+    });
   });
 
   describe(".date", () => {
@@ -188,7 +210,7 @@ describe("StakingReward", () => {
       const reward = new StakingReward(
         {
           address_id: address.getId(),
-          date: "2024-05-03",
+          date: "2024-05-03T01:23:45Z",
           amount: "226",
           state: StakingRewardStateEnum.Pending,
           format: StakingRewardFormat.USD,
@@ -204,7 +226,7 @@ describe("StakingReward", () => {
 
       const date = reward.date();
       const conversionTime = reward.conversionTime();
-      expect(date).toEqual(new Date("2024-05-03"));
+      expect(date).toEqual(new Date("2024-05-03T01:23:45Z"));
       expect(conversionTime).toEqual(new Date("2024-05-03T00:00:00Z"));
     });
   });
