@@ -3,7 +3,7 @@ import { StakingReward } from "../../coinbase/staking_reward";
 import { Coinbase } from "../../coinbase/coinbase";
 import { NetworkIdentifier } from "../../client";
 
-const apiKeyFilePath = "/Users/drmoo/.apikeys/prod.json";
+const apiKeyFilePath = "<YOUR_API_KEY_FILE_HERE>";
 
 /**
  * List Solana historical staking balances for a given wallet.
