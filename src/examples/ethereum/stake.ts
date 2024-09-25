@@ -7,7 +7,7 @@ const apiKeyFilePath = "/Users/drmoo/.apikeys/prod.json";
  * List the validators you've provisioned on the `ethereum-holesky` testnet network.
  */
 async function stakeETH() {
-  await Coinbase.configureFromJson({ filePath: apiKeyFilePath });
+  Coinbase.configureFromJson({ filePath: apiKeyFilePath });
 
   // Create a new external address on the `ethereum-holesky` network.
   const address = new ExternalAddress(
