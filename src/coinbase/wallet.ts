@@ -29,6 +29,8 @@ import {
   WalletCreateOptions,
   WalletData,
   CreateERC20Options,
+  CreateERC721Options,
+  CreateERC1155Options,
 } from "./types";
 import { convertStringToHex, delay, formatDate, getWeekBackDate } from "./utils";
 import { StakingOperation } from "./staking_operation";
@@ -37,6 +39,7 @@ import { StakingBalance } from "./staking_balance";
 import { PayloadSignature } from "./payload_signature";
 import { ContractInvocation } from "../coinbase/contract_invocation";
 import { SmartContract } from "./smart_contract";
+import { Webhook } from "./webhook";
 
 /**
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
@@ -749,6 +752,21 @@ export class Wallet {
   }
 
   /**
+   * Creates a Webhook for a wallet, monitors all wallet addresses for onchain events.
+   *
+   * @param notificationUri - The URI to which the webhook notifications will be sent.
+   *
+   * @returns The newly created webhook instance.
+   */
+  public async createWebhook(notificationUri: string): Promise<Webhook> {
+    const result = await Coinbase.apiClients.webhook!.createWalletWebhook(this.getId(), {
+      notification_uri: notificationUri,
+    });
+
+    return Webhook.init(result.data);
+  }
+
+  /**
    * Invokes a contract with the given data.
    *
    * @param options - The options to invoke the contract
@@ -781,6 +799,34 @@ export class Wallet {
    */
   public async deployToken(options: CreateERC20Options): Promise<SmartContract> {
     return (await this.getDefaultAddress()).deployToken(options);
+  }
+
+  /**
+   * Deploys an ERC721 token contract.
+   *
+   * @param options - The options for creating the ERC721 token.
+   * @param options.name - The name of the ERC721 token.
+   * @param options.symbol - The symbol of the ERC721 token.
+   * @param options.baseURI - The base URI of the ERC721 token.
+   * @returns A Promise that resolves to the deployed SmartContract object.
+   * @throws {Error} If the private key is not loaded when not using server signer.
+   */
+  public async deployNFT(options: CreateERC721Options): Promise<SmartContract> {
+    return (await this.getDefaultAddress()).deployNFT(options);
+  }
+
+  /**
+   * Deploys an ERC1155 token contract.
+   *
+   * @param options - The options for creating the ERC1155 token.
+   * @param options.name - The name of the ERC1155 token.
+   * @param options.symbol - The symbol of the ERC1155 token.
+   * @param options.baseURI - The base URI of the ERC1155 token.
+   * @returns A Promise that resolves to the deployed SmartContract object.
+   * @throws {Error} If the private key is not loaded when not using server signer.
+   */
+  public async deployMultiToken(options: CreateERC1155Options): Promise<SmartContract> {
+    return (await this.getDefaultAddress()).deployMultiToken(options);
   }
 
   /**

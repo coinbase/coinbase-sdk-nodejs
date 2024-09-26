@@ -786,6 +786,25 @@ export interface CreateWalletRequestWallet {
 /**
  * 
  * @export
+ * @interface CreateWalletWebhookRequest
+ */
+export interface CreateWalletWebhookRequest {
+    /**
+     * The URL to which the notifications will be sent
+     * @type {string}
+     * @memberof CreateWalletWebhookRequest
+     */
+    'notification_uri': string;
+    /**
+     * The custom header to be used for x-webhook-signature header on callbacks, so developers can verify the requests are coming from Coinbase.
+     * @type {string}
+     * @memberof CreateWalletWebhookRequest
+     */
+    'signature_header'?: string;
+}
+/**
+ * 
+ * @export
  * @interface CreateWebhookRequest
  */
 export interface CreateWebhookRequest {
@@ -1579,6 +1598,19 @@ export interface ModelError {
     'correlation_id'?: string;
 }
 /**
+ * Options for multi-token contract creation
+ * @export
+ * @interface MultiTokenContractOptions
+ */
+export interface MultiTokenContractOptions {
+    /**
+     * The URI for all token metadata
+     * @type {string}
+     * @memberof MultiTokenContractOptions
+     */
+    'uri': string;
+}
+/**
  * Options for NFT contract creation
  * @export
  * @interface NFTContractOptions
@@ -1596,6 +1628,12 @@ export interface NFTContractOptions {
      * @memberof NFTContractOptions
      */
     'symbol': string;
+    /**
+     * The base URI for the NFT metadata
+     * @type {string}
+     * @memberof NFTContractOptions
+     */
+    'base_uri': string;
 }
 /**
  * 
@@ -2145,7 +2183,7 @@ export interface SmartContractList {
  * Options for smart contract creation
  * @export
  */
-export type SmartContractOptions = NFTContractOptions | TokenContractOptions;
+export type SmartContractOptions = MultiTokenContractOptions | NFTContractOptions | TokenContractOptions;
 
 /**
  * The type of the smart contract
@@ -2155,7 +2193,8 @@ export type SmartContractOptions = NFTContractOptions | TokenContractOptions;
 
 export const SmartContractType = {
     Erc20: 'erc20',
-    Erc721: 'erc721'
+    Erc721: 'erc721',
+    Erc1155: 'erc1155'
 } as const;
 
 export type SmartContractType = typeof SmartContractType[keyof typeof SmartContractType];
@@ -5077,54 +5116,6 @@ export const ExternalAddressesApiAxiosParamCreator = function (configuration?: C
             };
         },
         /**
-         * List all transactions that interact with the address.
-         * @summary List transactions for an address.
-         * @param {string} networkId The ID of the blockchain network
-         * @param {string} addressId The ID of the address to fetch the transactions for.
-         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        listAddressTransactions: async (networkId: string, addressId: string, limit?: number, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'networkId' is not null or undefined
-            assertParamExists('listAddressTransactions', 'networkId', networkId)
-            // verify required parameter 'addressId' is not null or undefined
-            assertParamExists('listAddressTransactions', 'addressId', addressId)
-            const localVarPath = `/v1/networks/{network_id}/addresses/{address_id}/transactions`
-                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
-                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            if (limit !== undefined) {
-                localVarQueryParameter['limit'] = limit;
-            }
-
-            if (page !== undefined) {
-                localVarQueryParameter['page'] = page;
-            }
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
          * List all of the balances of an external address
          * @summary Get the balances of an external address
          * @param {string} networkId The ID of the blockchain network
@@ -5236,22 +5227,6 @@ export const ExternalAddressesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * List all transactions that interact with the address.
-         * @summary List transactions for an address.
-         * @param {string} networkId The ID of the blockchain network
-         * @param {string} addressId The ID of the address to fetch the transactions for.
-         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async listAddressTransactions(networkId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AddressTransactionList>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listAddressTransactions(networkId, addressId, limit, page, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['ExternalAddressesApi.listAddressTransactions']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
          * List all of the balances of an external address
          * @summary Get the balances of an external address
          * @param {string} networkId The ID of the blockchain network
@@ -5304,19 +5279,6 @@ export const ExternalAddressesApiFactory = function (configuration?: Configurati
             return localVarFp.getExternalAddressBalance(networkId, addressId, assetId, options).then((request) => request(axios, basePath));
         },
         /**
-         * List all transactions that interact with the address.
-         * @summary List transactions for an address.
-         * @param {string} networkId The ID of the blockchain network
-         * @param {string} addressId The ID of the address to fetch the transactions for.
-         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        listAddressTransactions(networkId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<AddressTransactionList> {
-            return localVarFp.listAddressTransactions(networkId, addressId, limit, page, options).then((request) => request(axios, basePath));
-        },
-        /**
          * List all of the balances of an external address
          * @summary Get the balances of an external address
          * @param {string} networkId The ID of the blockchain network
@@ -5360,19 +5322,6 @@ export interface ExternalAddressesApiInterface {
      * @memberof ExternalAddressesApiInterface
      */
     getExternalAddressBalance(networkId: string, addressId: string, assetId: string, options?: RawAxiosRequestConfig): AxiosPromise<Balance>;
-
-    /**
-     * List all transactions that interact with the address.
-     * @summary List transactions for an address.
-     * @param {string} networkId The ID of the blockchain network
-     * @param {string} addressId The ID of the address to fetch the transactions for.
-     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ExternalAddressesApiInterface
-     */
-    listAddressTransactions(networkId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<AddressTransactionList>;
 
     /**
      * List all of the balances of an external address
@@ -5419,21 +5368,6 @@ export class ExternalAddressesApi extends BaseAPI implements ExternalAddressesAp
      */
     public getExternalAddressBalance(networkId: string, addressId: string, assetId: string, options?: RawAxiosRequestConfig) {
         return ExternalAddressesApiFp(this.configuration).getExternalAddressBalance(networkId, addressId, assetId, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * List all transactions that interact with the address.
-     * @summary List transactions for an address.
-     * @param {string} networkId The ID of the blockchain network
-     * @param {string} addressId The ID of the address to fetch the transactions for.
-     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ExternalAddressesApi
-     */
-    public listAddressTransactions(networkId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig) {
-        return ExternalAddressesApiFp(this.configuration).listAddressTransactions(networkId, addressId, limit, page, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -5674,6 +5608,7 @@ export const ServerSignersApiAxiosParamCreator = function (configuration?: Confi
          * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
          * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
          * @param {*} [options] Override http request option.
+         * @deprecated
          * @throws {RequiredError}
          */
         listServerSignerEvents: async (serverSignerId: string, limit?: number, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
@@ -5870,6 +5805,7 @@ export const ServerSignersApiFp = function(configuration?: Configuration) {
          * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
          * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
          * @param {*} [options] Override http request option.
+         * @deprecated
          * @throws {RequiredError}
          */
         async listServerSignerEvents(serverSignerId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ServerSignerEventList>> {
@@ -5957,6 +5893,7 @@ export const ServerSignersApiFactory = function (configuration?: Configuration, 
          * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
          * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
          * @param {*} [options] Override http request option.
+         * @deprecated
          * @throws {RequiredError}
          */
         listServerSignerEvents(serverSignerId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<ServerSignerEventList> {
@@ -6031,6 +5968,7 @@ export interface ServerSignersApiInterface {
      * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
      * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      * @memberof ServerSignersApiInterface
      */
@@ -6109,6 +6047,7 @@ export class ServerSignersApi extends BaseAPI implements ServerSignersApiInterfa
      * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
      * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      * @memberof ServerSignersApi
      */
@@ -7578,6 +7517,158 @@ export class TradesApi extends BaseAPI implements TradesApiInterface {
      */
     public listTrades(walletId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig) {
         return TradesApiFp(this.configuration).listTrades(walletId, addressId, limit, page, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * TransactionHistoryApi - axios parameter creator
+ * @export
+ */
+export const TransactionHistoryApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * List all transactions that interact with the address.
+         * @summary List transactions for an address.
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the transactions for.
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listAddressTransactions: async (networkId: string, addressId: string, limit?: number, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('listAddressTransactions', 'networkId', networkId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('listAddressTransactions', 'addressId', addressId)
+            const localVarPath = `/v1/networks/{network_id}/addresses/{address_id}/transactions`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * TransactionHistoryApi - functional programming interface
+ * @export
+ */
+export const TransactionHistoryApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = TransactionHistoryApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * List all transactions that interact with the address.
+         * @summary List transactions for an address.
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the transactions for.
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listAddressTransactions(networkId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AddressTransactionList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listAddressTransactions(networkId, addressId, limit, page, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TransactionHistoryApi.listAddressTransactions']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * TransactionHistoryApi - factory interface
+ * @export
+ */
+export const TransactionHistoryApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = TransactionHistoryApiFp(configuration)
+    return {
+        /**
+         * List all transactions that interact with the address.
+         * @summary List transactions for an address.
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the transactions for.
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listAddressTransactions(networkId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<AddressTransactionList> {
+            return localVarFp.listAddressTransactions(networkId, addressId, limit, page, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * TransactionHistoryApi - interface
+ * @export
+ * @interface TransactionHistoryApi
+ */
+export interface TransactionHistoryApiInterface {
+    /**
+     * List all transactions that interact with the address.
+     * @summary List transactions for an address.
+     * @param {string} networkId The ID of the blockchain network
+     * @param {string} addressId The ID of the address to fetch the transactions for.
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TransactionHistoryApiInterface
+     */
+    listAddressTransactions(networkId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<AddressTransactionList>;
+
+}
+
+/**
+ * TransactionHistoryApi - object-oriented interface
+ * @export
+ * @class TransactionHistoryApi
+ * @extends {BaseAPI}
+ */
+export class TransactionHistoryApi extends BaseAPI implements TransactionHistoryApiInterface {
+    /**
+     * List all transactions that interact with the address.
+     * @summary List transactions for an address.
+     * @param {string} networkId The ID of the blockchain network
+     * @param {string} addressId The ID of the address to fetch the transactions for.
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TransactionHistoryApi
+     */
+    public listAddressTransactions(networkId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig) {
+        return TransactionHistoryApiFp(this.configuration).listAddressTransactions(networkId, addressId, limit, page, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -9217,6 +9308,44 @@ export class WalletsApi extends BaseAPI implements WalletsApiInterface {
 export const WebhooksApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * Create a new webhook scoped to a wallet
+         * @summary Create a new webhook scoped to a wallet
+         * @param {string} walletId The ID of the wallet to create the webhook for.
+         * @param {CreateWalletWebhookRequest} [createWalletWebhookRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createWalletWebhook: async (walletId: string, createWalletWebhookRequest?: CreateWalletWebhookRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'walletId' is not null or undefined
+            assertParamExists('createWalletWebhook', 'walletId', walletId)
+            const localVarPath = `/v1/wallets/{wallet_id}/webhooks`
+                .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createWalletWebhookRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Create a new webhook
          * @summary Create a new webhook
          * @param {CreateWebhookRequest} [createWebhookRequest] 
@@ -9373,6 +9502,20 @@ export const WebhooksApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = WebhooksApiAxiosParamCreator(configuration)
     return {
         /**
+         * Create a new webhook scoped to a wallet
+         * @summary Create a new webhook scoped to a wallet
+         * @param {string} walletId The ID of the wallet to create the webhook for.
+         * @param {CreateWalletWebhookRequest} [createWalletWebhookRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createWalletWebhook(walletId: string, createWalletWebhookRequest?: CreateWalletWebhookRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Webhook>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createWalletWebhook(walletId, createWalletWebhookRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['WebhooksApi.createWalletWebhook']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Create a new webhook
          * @summary Create a new webhook
          * @param {CreateWebhookRequest} [createWebhookRequest] 
@@ -9437,6 +9580,17 @@ export const WebhooksApiFactory = function (configuration?: Configuration, baseP
     const localVarFp = WebhooksApiFp(configuration)
     return {
         /**
+         * Create a new webhook scoped to a wallet
+         * @summary Create a new webhook scoped to a wallet
+         * @param {string} walletId The ID of the wallet to create the webhook for.
+         * @param {CreateWalletWebhookRequest} [createWalletWebhookRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createWalletWebhook(walletId: string, createWalletWebhookRequest?: CreateWalletWebhookRequest, options?: RawAxiosRequestConfig): AxiosPromise<Webhook> {
+            return localVarFp.createWalletWebhook(walletId, createWalletWebhookRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Create a new webhook
          * @summary Create a new webhook
          * @param {CreateWebhookRequest} [createWebhookRequest] 
@@ -9488,6 +9642,17 @@ export const WebhooksApiFactory = function (configuration?: Configuration, baseP
  */
 export interface WebhooksApiInterface {
     /**
+     * Create a new webhook scoped to a wallet
+     * @summary Create a new webhook scoped to a wallet
+     * @param {string} walletId The ID of the wallet to create the webhook for.
+     * @param {CreateWalletWebhookRequest} [createWalletWebhookRequest] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WebhooksApiInterface
+     */
+    createWalletWebhook(walletId: string, createWalletWebhookRequest?: CreateWalletWebhookRequest, options?: RawAxiosRequestConfig): AxiosPromise<Webhook>;
+
+    /**
      * Create a new webhook
      * @summary Create a new webhook
      * @param {CreateWebhookRequest} [createWebhookRequest] 
@@ -9538,6 +9703,19 @@ export interface WebhooksApiInterface {
  * @extends {BaseAPI}
  */
 export class WebhooksApi extends BaseAPI implements WebhooksApiInterface {
+    /**
+     * Create a new webhook scoped to a wallet
+     * @summary Create a new webhook scoped to a wallet
+     * @param {string} walletId The ID of the wallet to create the webhook for.
+     * @param {CreateWalletWebhookRequest} [createWalletWebhookRequest] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WebhooksApi
+     */
+    public createWalletWebhook(walletId: string, createWalletWebhookRequest?: CreateWalletWebhookRequest, options?: RawAxiosRequestConfig) {
+        return WebhooksApiFp(this.configuration).createWalletWebhook(walletId, createWalletWebhookRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * Create a new webhook
      * @summary Create a new webhook

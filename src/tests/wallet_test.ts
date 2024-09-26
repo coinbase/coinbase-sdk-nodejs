@@ -16,6 +16,7 @@ import {
   TransactionStatusEnum,
   Wallet as WalletModel,
   Trade as TradeModel,
+  Webhook as WebhookModel,
   StakingOperation as StakingOperationModel,
   StakingOperationStatusEnum,
   StakingContext as StakingContextModel,
@@ -53,6 +54,10 @@ import {
   ERC20_NAME,
   ERC20_SYMBOL,
   ERC20_TOTAL_SUPPLY,
+  ERC721_NAME,
+  ERC721_SYMBOL,
+  ERC721_BASE_URI,
+  VALID_SMART_CONTRACT_ERC721_MODEL,
 } from "./utils";
 import { Trade } from "../coinbase/trade";
 import { WalletAddress } from "../coinbase/address/wallet_address";
@@ -62,6 +67,7 @@ import { StakingBalance } from "../coinbase/staking_balance";
 import { PayloadSignature } from "../coinbase/payload_signature";
 import { ContractInvocation } from "../coinbase/contract_invocation";
 import { SmartContract } from "../coinbase/smart_contract";
+import { Webhook } from "../coinbase/webhook";
 
 describe("Wallet Class", () => {
   let wallet: Wallet;
@@ -609,6 +615,33 @@ describe("Wallet Class", () => {
 
       expect((await wallet.getDefaultAddress()).deployToken).toHaveBeenCalledTimes(1);
       expect((await wallet.getDefaultAddress()).deployToken).toHaveBeenCalledWith(options);
+
+      expect(smartContract).toBeInstanceOf(SmartContract);
+      expect(smartContract).toEqual(expectedSmartContract);
+    });
+  });
+
+  describe("#deployNFT", () => {
+    let expectedSmartContract;
+    let options = {
+      name: ERC721_NAME,
+      symbol: ERC721_SYMBOL,
+      baseURI: ERC721_BASE_URI,
+    };
+
+    beforeEach(async () => {
+      expectedSmartContract = SmartContract.fromModel(VALID_SMART_CONTRACT_ERC721_MODEL);
+
+      (await wallet.getDefaultAddress()).deployNFT = jest
+        .fn()
+        .mockResolvedValue(expectedSmartContract);
+    });
+
+    it("successfully deploys an ERC721 contract on the default address", async () => {
+      const smartContract = await wallet.deployNFT(options);
+
+      expect((await wallet.getDefaultAddress()).deployNFT).toHaveBeenCalledTimes(1);
+      expect((await wallet.getDefaultAddress()).deployNFT).toHaveBeenCalledWith(options);
 
       expect(smartContract).toBeInstanceOf(SmartContract);
       expect(smartContract).toEqual(expectedSmartContract);
@@ -1302,6 +1335,83 @@ describe("Wallet Class", () => {
       const trades = await tradeWallet.listTrades();
       expect(trades[0]).toBeInstanceOf(Trade);
       expect(trades.length).toBe(2);
+    });
+  });
+
+  describe("#createWebhook", () => {
+    let wallet: Wallet;
+    let addressList: AddressModel[];
+    let walletModel: WalletModel;
+    const existingSeed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
+    const { address1, address2, address3, wallet1PrivateKey, wallet2PrivateKey } =
+      generateWalletFromSeed(existingSeed, 3);
+
+    beforeEach(async () => {
+      jest.clearAllMocks();
+      addressList = [
+        {
+          address_id: address1,
+          network_id: Coinbase.networks.BaseSepolia,
+          public_key: wallet1PrivateKey,
+          wallet_id: "w1",
+          index: 0,
+        },
+        {
+          address_id: address2,
+          network_id: Coinbase.networks.BaseSepolia,
+          public_key: wallet2PrivateKey,
+          wallet_id: "w1",
+          index: 1,
+        },
+      ];
+      walletModel = {
+        id: "w1",
+        network_id: Coinbase.networks.BaseSepolia,
+        default_address: addressList[0],
+        feature_set: {} as FeatureSet,
+      };
+      wallet = Wallet.init(walletModel, existingSeed);
+    });
+
+    const mockModel: WebhookModel = {
+      id: "test-id",
+      network_id: "test-network",
+      notification_uri: "https://example.com/callback",
+      event_type: "wallet_activity",
+      event_type_filter: { addresses: [address1], wallet_id: "w1" },
+    };
+
+    Coinbase.apiClients.webhook = {
+      createWalletWebhook: jest.fn().mockResolvedValue({ data: mockModel }),
+      createWebhook: jest.fn().mockResolvedValue({ data: mockModel }),
+      listWebhooks: jest.fn().mockResolvedValue({
+        data: {
+          data: [mockModel],
+          has_more: false,
+          next_page: null,
+        },
+      }),
+      updateWebhook: jest.fn().mockImplementation((id, updateRequest) => {
+        return Promise.resolve({
+          data: {
+            ...mockModel,
+            notification_uri: updateRequest.notification_uri,
+          },
+        });
+      }),
+      deleteWebhook: jest.fn().mockResolvedValue({}),
+    };
+
+    it("should create a webhook for the default address", async () => {
+      const webhookObject = Webhook.init(mockModel);
+
+      const wh = Promise.resolve(webhookObject);
+      jest.spyOn(Wallet.prototype, "createWebhook").mockReturnValue(wh);
+      const result = await wallet.createWebhook("https://example.com/callback");
+      expect(result).toBeInstanceOf(Webhook);
+      expect(result.getEventTypeFilter()?.wallet_id).toBe(walletModel.id);
+      expect(result.getEventTypeFilter()?.addresses).toStrictEqual([address1]);
+      expect(result.getEventType()).toBe("wallet_activity");
     });
   });
 });

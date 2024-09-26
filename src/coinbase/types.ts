@@ -52,6 +52,8 @@ import {
   CreateSmartContractRequest,
   SmartContract as SmartContractModel,
   DeploySmartContractRequest,
+  WebhookEventTypeFilter,
+  CreateWalletWebhookRequest,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -408,25 +410,6 @@ export type ExternalAddressAPIClient = {
   ): AxiosPromise<Balance>;
 
   /**
-   * List the transactions of a specific address.
-   *
-   * @summary Get address transactions
-   * @param networkId - The ID of the blockchain network
-   * @param addressId - The ID of the address to fetch transactions for.
-   * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
-   * @param options - Override http request option.
-   * @throws {RequiredError}
-   */
-  listAddressTransactions(
-    networkId: string,
-    addressId: string,
-    limit?: number,
-    page?: string,
-    options?: RawAxiosRequestConfig,
-  ): AxiosPromise<AddressTransactionList>;
-
-  /**
    * Request faucet funds to be sent to external address.
    *
    * @param networkId - The ID of the blockchain network
@@ -727,6 +710,7 @@ export type ApiClients = {
   contractEvent?: ExternalSmartContractAPIClient;
   contractInvocation?: ContractInvocationAPIClient;
   balanceHistory?: BalanceHistoryApiClient;
+  transactionHistory?: TransactionHistoryApiClient;
   smartContract?: SmartContractAPIClient;
 };
 
@@ -930,6 +914,7 @@ export enum StakeOptionsMode {
 export enum SmartContractType {
   ERC20 = "erc20",
   ERC721 = "erc721",
+  ERC1155 = "erc1155",
 }
 
 /**
@@ -938,6 +923,7 @@ export enum SmartContractType {
 export type NFTContractOptions = {
   name: string;
   symbol: string;
+  baseURI: string;
 };
 
 /**
@@ -950,9 +936,19 @@ export type TokenContractOptions = {
 };
 
 /**
+ * Multi-Token Contract Options
+ */
+export type MultiTokenContractOptions = {
+  uri: string;
+};
+
+/**
  * Smart Contract Options
  */
-export type SmartContractOptions = NFTContractOptions | TokenContractOptions;
+export type SmartContractOptions =
+  | NFTContractOptions
+  | TokenContractOptions
+  | MultiTokenContractOptions;
 
 /**
  * Options for creating a Transfer.
@@ -995,6 +991,22 @@ export type CreateERC20Options = {
 };
 
 /**
+ * Options for creating a ERC721.
+ */
+export type CreateERC721Options = {
+  name: string;
+  symbol: string;
+  baseURI: string;
+};
+
+/**
+ * Options for creating a ERC1155.
+ */
+export type CreateERC1155Options = {
+  uri: string;
+};
+
+/**
  * Options for listing historical balances of an address.
  */
 export type ListHistoricalBalancesOptions = {
@@ -1028,6 +1040,21 @@ export type ListHistoricalBalancesResult = {
 };
 
 export interface WebhookApiClient {
+  /**
+   * Create a new webhook for a wallet
+   *
+   * @summary Create a new webhook for a wallet
+   * @param {string} [walletId]
+   * @param {CreateWalletWebhookRequest} [createWalletWebhookRequest]
+   * @param {*} [options] - Override http request option.
+   * @throws {RequiredError}
+   */
+  createWalletWebhook(
+    walletId?: string,
+    createWalletWebhookRequest?: CreateWalletWebhookRequest,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<WebhookModel>;
+
   /**
    * Create a new webhook
    *
@@ -1105,6 +1132,26 @@ export interface BalanceHistoryApiClient {
   ): AxiosPromise<AddressHistoricalBalanceList>;
 }
 
+export interface TransactionHistoryApiClient {
+  /**
+   * List the transactions of a specific address.
+   *
+   * @summary Get address transactions
+   * @param networkId - The ID of the blockchain network
+   * @param addressId - The ID of the address to fetch transactions for.
+   * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param options - Override http request option.
+   * @throws {RequiredError}
+   */
+  listAddressTransactions(
+    networkId: string,
+    addressId: string,
+    limit?: number,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<AddressTransactionList>;
+}
 /**
  *  The domain for an EIP-712 typed data message payload.
  */
@@ -1157,6 +1204,7 @@ export type CreateWebhookOptions = {
   networkId: string;
   notificationUri: string;
   eventType: WebhookEventType;
+  eventTypeFilter?: WebhookEventTypeFilter;
   eventFilters?: Array<WebhookEventFilter>;
   signatureHeader?: string;
 };

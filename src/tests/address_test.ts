@@ -5,8 +5,8 @@ import {
   VALID_ADDRESS_MODEL,
   mockReturnValue,
   newAddressModel,
-  externalAddressApiMock,
   balanceHistoryApiMock,
+  transactionHistoryApiMock,
 } from "./utils";
 import Decimal from "decimal.js";
 import { randomUUID } from "crypto";
@@ -61,8 +61,8 @@ describe("Address", () => {
         has_more: true,
         next_page: "pageToken",
       };
-      Coinbase.apiClients.externalAddress = externalAddressApiMock;
-      Coinbase.apiClients.externalAddress!.listAddressTransactions =
+      Coinbase.apiClients.transactionHistory = transactionHistoryApiMock;
+      Coinbase.apiClients.transactionHistory!.listAddressTransactions =
         mockReturnValue(mockTransactionsResponse);
     });
 
@@ -70,8 +70,10 @@ describe("Address", () => {
       const result = await address.listTransactions({ limit: 2, page: "page" });
       expect(result.transactions.length).toEqual(2);
       expect(result.transactions[0].blockHeight()).toEqual("12345");
-      expect(Coinbase.apiClients.externalAddress!.listAddressTransactions).toHaveBeenCalledTimes(1);
-      expect(Coinbase.apiClients.externalAddress!.listAddressTransactions).toHaveBeenCalledWith(
+      expect(Coinbase.apiClients.transactionHistory!.listAddressTransactions).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(Coinbase.apiClients.transactionHistory!.listAddressTransactions).toHaveBeenCalledWith(
         address.getNetworkId(),
         address.getId(),
         2,
@@ -81,7 +83,7 @@ describe("Address", () => {
     });
 
     it("should return results without param", async () => {
-      Coinbase.apiClients.externalAddress!.listAddressTransactions = mockReturnValue({
+      Coinbase.apiClients.transactionHistory!.listAddressTransactions = mockReturnValue({
         data: [
           {
             network_id: "base-sepolia",
@@ -98,8 +100,10 @@ describe("Address", () => {
       const result = await address.listTransactions({});
       expect(result.transactions.length).toEqual(1);
       expect(result.transactions[0].blockHeight()).toEqual("12348");
-      expect(Coinbase.apiClients.externalAddress!.listAddressTransactions).toHaveBeenCalledTimes(1);
-      expect(Coinbase.apiClients.externalAddress!.listAddressTransactions).toHaveBeenCalledWith(
+      expect(Coinbase.apiClients.transactionHistory!.listAddressTransactions).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(Coinbase.apiClients.transactionHistory!.listAddressTransactions).toHaveBeenCalledWith(
         address.getNetworkId(),
         address.getId(),
         undefined,
@@ -109,15 +113,17 @@ describe("Address", () => {
     });
 
     it("should return empty if no transactions found", async () => {
-      Coinbase.apiClients.externalAddress!.listAddressTransactions = mockReturnValue({
+      Coinbase.apiClients.transactionHistory!.listAddressTransactions = mockReturnValue({
         data: [],
         has_more: false,
         next_page: "",
       });
       const result = await address.listTransactions({});
       expect(result.transactions.length).toEqual(0);
-      expect(Coinbase.apiClients.externalAddress!.listAddressTransactions).toHaveBeenCalledTimes(1);
-      expect(Coinbase.apiClients.externalAddress!.listAddressTransactions).toHaveBeenCalledWith(
+      expect(Coinbase.apiClients.transactionHistory!.listAddressTransactions).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(Coinbase.apiClients.transactionHistory!.listAddressTransactions).toHaveBeenCalledWith(
         address.getNetworkId(),
         address.getId(),
         undefined,

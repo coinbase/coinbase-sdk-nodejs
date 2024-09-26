@@ -3,6 +3,9 @@ import {
   DeploySmartContractRequest,
   SmartContract as SmartContractModel,
   SmartContractType as SmartContractTypeModel,
+  SmartContractOptions as SmartContractOptionsModel,
+  TokenContractOptions as TokenContractOptionsModel,
+  NFTContractOptions as NFTContractOptionsModel,
 } from "../client/api";
 import { Transaction } from "./transaction";
 import {
@@ -10,6 +13,7 @@ import {
   SmartContractType,
   NFTContractOptions,
   TokenContractOptions,
+  MultiTokenContractOptions,
   TransactionStatus,
 } from "./types";
 import { Coinbase } from "./coinbase";
@@ -153,6 +157,8 @@ export class SmartContract {
         return SmartContractType.ERC20;
       case SmartContractTypeModel.Erc721:
         return SmartContractType.ERC721;
+      case SmartContractTypeModel.Erc1155:
+        return SmartContractType.ERC1155;
       default:
         throw new Error(`Unknown smart contract type: ${this.model.type}`);
     }
@@ -164,10 +170,23 @@ export class SmartContract {
    * @returns The Smart Contract Options.
    */
   public getOptions(): SmartContractOptions {
-    if (this.getType() === SmartContractType.ERC20) {
-      return this.model.options as TokenContractOptions;
+    if (this.isERC20(this.getType(), this.model.options)) {
+      return {
+        name: this.model.options.name,
+        symbol: this.model.options.symbol,
+        totalSupply: this.model.options.total_supply,
+      } as TokenContractOptions;
+    } else if (this.isERC721(this.getType(), this.model.options)) {
+      return {
+        name: this.model.options.name,
+        symbol: this.model.options.symbol,
+        baseURI: this.model.options.base_uri,
+      } as NFTContractOptions;
+    } else {
+      return {
+        uri: this.model.options.uri,
+      } as MultiTokenContractOptions;
     }
-    return this.model.options as NFTContractOptions;
   }
 
   /**
@@ -278,5 +297,33 @@ export class SmartContract {
       `contractAddress: '${this.getContractAddress()}', deployerAddress: '${this.getDeployerAddress()}', ` +
       `type: '${this.getType()}'}`
     );
+  }
+
+  /**
+   * Type guard for checking if the smart contract is an ERC20.
+   *
+   * @param type - The type of the smart contract.
+   * @param options - The options of the smart contract.
+   * @returns True if the smart contract is an ERC20, false otherwise.
+   */
+  private isERC20(
+    type: SmartContractType,
+    options: SmartContractOptionsModel,
+  ): options is TokenContractOptionsModel {
+    return type === SmartContractType.ERC20;
+  }
+
+  /**
+   * Type guard for checking if the smart contract is an ERC721.
+   *
+   * @param type - The type of the smart contract.
+   * @param options - The options of the smart contract.
+   * @returns True if the smart contract is an ERC721, false otherwise.
+   */
+  private isERC721(
+    type: SmartContractType,
+    options: SmartContractOptionsModel,
+  ): options is NFTContractOptionsModel {
+    return type === SmartContractType.ERC721;
   }
 }
