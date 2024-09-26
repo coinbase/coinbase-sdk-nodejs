@@ -62,4 +62,16 @@ export class ServerSigner {
   public toString(): string {
     return `ServerSigner{id: '${this.getId()}', wallets: '${this.getWallets()}'}`;
   }
+
+  /**
+   * Returns a JSON representation of the Server-Signer.
+   *
+   * @returns a JSON representation of the Server-Signer.
+   */
+  public toJSON() {
+    return {
+      id: this.getId(),
+      wallets: this.getWallets(),
+    };
+  }
 }

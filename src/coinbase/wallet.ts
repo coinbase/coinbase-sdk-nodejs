@@ -839,6 +839,18 @@ export class Wallet {
   }
 
   /**
+   * Returns a JSON representation of the Wallet.
+   *
+   * @returns a JSON representation of the Wallet
+   */
+  public toJSON() {
+    return {
+      id: this.getId(),
+      networkId: this.getNetworkId(),
+    };
+  }
+
+  /**
    * Validates the seed and address models passed to the constructor.
    *
    * @param seed - The seed to use for the Wallet

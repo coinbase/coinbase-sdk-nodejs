@@ -59,6 +59,19 @@ export class WalletAddress extends Address {
   }
 
   /**
+   * Returns a JSON representation of the wallet address.
+   *
+   * @returns A JSON representing the wallet address.
+   */
+  public toJSON() {
+    return {
+      addressId: this.getId(),
+      networkId: this.getNetworkId(),
+      walletId: this.getWalletId(),
+    };
+  }
+
+  /**
    * Returns the wallet ID.
    *
    * @returns The wallet ID.

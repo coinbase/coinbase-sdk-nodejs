@@ -203,4 +203,21 @@ export class Webhook {
       `notificationUri: '${this.getNotificationURI()}', signatureHeader: '${this.getSignatureHeader()}' }`
     );
   }
+
+  /**
+   * Returns a JSON representation of the Webhook.
+   *
+   * @returns A JSON representation of the Webhook.
+   */
+  public toJSON() {
+    return {
+      id: this.getId(),
+      networkId: this.getNetworkId(),
+      eventType: this.getEventType(),
+      eventFilters: this.getEventFilters(),
+      eventTypeFilter: this.getEventTypeFilter(),
+      notificationUri: this.getNotificationURI(),
+      signatureHeader: this.getSignatureHeader(),
+    };
+  }
 }

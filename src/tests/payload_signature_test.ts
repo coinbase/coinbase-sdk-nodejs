@@ -11,7 +11,7 @@ import { Coinbase } from "../coinbase/coinbase";
 import { APIError } from "../coinbase/api_error";
 
 describe("PayloadSignature", () => {
-  beforeEach(() => {});
+  beforeEach(() => { });
 
   describe("constructor", () => {
     it("initializes a new PayloadSignature", () => {
@@ -209,6 +209,26 @@ describe("PayloadSignature", () => {
       expect(payloadSignature.toString()).toEqual(
         `PayloadSignature { status: '${payloadSignature.getStatus()}', unsignedPayload: '${payloadSignature.getUnsignedPayload()}', signature: ${payloadSignature.getSignature()} }`,
       );
+    });
+  });
+
+  describe("#toJSON", () => {
+    let payloadSignature: PayloadSignature;
+
+    beforeAll(() => {
+      payloadSignature = new PayloadSignature(VALID_SIGNED_PAYLOAD_SIGNATURE_MODEL);
+    });
+
+    it("returns the same value as toJSON", () => {
+      const payloadSignature = new PayloadSignature(VALID_SIGNED_PAYLOAD_SIGNATURE_MODEL);
+      expect(payloadSignature.toJSON()).toEqual({
+        id: payloadSignature.getId(),
+        addressId: payloadSignature.getAddressId(),
+        walletId: payloadSignature.getWalletId(),
+        status: payloadSignature.getStatus(),
+        unsignedPayload: payloadSignature.getUnsignedPayload(),
+        signature: payloadSignature.getSignature(),
+      });
     });
   });
 });

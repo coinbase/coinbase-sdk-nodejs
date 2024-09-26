@@ -702,7 +702,7 @@ describe("Wallet Class", () => {
   });
 
   describe(".create", () => {
-    beforeEach(() => {});
+    beforeEach(() => { });
     it("should return a Wallet instance", async () => {
       expect(wallet).toBeInstanceOf(Wallet);
     });
@@ -928,6 +928,13 @@ describe("Wallet Class", () => {
       expect(wallet.toString()).toBe(
         `Wallet{id: '${walletModel.id}', networkId: '${Coinbase.networks.BaseSepolia}'}`,
       );
+    });
+
+    it("should return the correct JSON representation", () => {
+      expect(wallet.toJSON()).toEqual({
+        id: walletModel.id,
+        networkId: Coinbase.networks.BaseSepolia,
+      });
     });
 
     it("should raise an error when the seed is invalid", async () => {

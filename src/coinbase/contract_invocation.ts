@@ -263,4 +263,25 @@ export class ContractInvocation {
       `transactionLink: '${this.getTransactionLink()}', status: '${this.getStatus()}'}`
     );
   }
+
+  /**
+   * Returns a JSON representation of the ContractInvocation.
+   *
+   * @returns The JSON representation of the ContractInvocation.
+   */
+  public toJSON() {
+    return {
+      contractInvocationId: this.getId(),
+      networkId: this.getNetworkId(),
+      fromAddressId: this.getFromAddressId(),
+      contractAddressId: this.getContractAddressId(),
+      method: this.getMethod(),
+      args: this.getArgs(),
+      transactionHash: this.getTransactionHash(),
+      transactionLink: this.getTransactionLink(),
+      transaction: this.getTransaction().toJSON(),
+      amount: this.getAmount().toNumber(),
+      status: this.getStatus(),
+    };
+  }
 }

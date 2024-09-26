@@ -193,4 +193,17 @@ describe("SponsoredSend", () => {
       expect(sponsoredSend.toString()).toContain(sponsoredSend.getTransactionHash());
     });
   });
+
+  describe("#toJSON", () => {
+    it("returns the same value as toJSON", () => {
+      const sponsoredSend = new SponsoredSend(completedModel);
+      expect(sponsoredSend.toJSON()).toEqual({
+        transactionHash: sponsoredSend.getTransactionHash(),
+        status: sponsoredSend.getStatus(),
+        typedDataHash: sponsoredSend.getTypedDataHash(),
+        signature: sponsoredSend.getSignature(),
+        transactionLink: sponsoredSend.getTransactionLink(),
+      });
+    });
+  });
 });

@@ -124,6 +124,21 @@ export class StakingOperation {
   }
 
   /**
+   * Return a JSON representation of the StakingOperation object.
+   *
+   * @returns The JSON representation of the StakingOperation object.
+   */
+  public toJSON() {
+    return {
+      id: this.getID(),
+      status: this.getStatus(),
+      networkId: this.getNetworkID(),
+      address: this.getAddressID(),
+      transactions: this.getTransactions(),
+    };
+  }
+
+  /**
    * Returns whether the Staking operation is in a terminal State.
    *
    * @returns Whether the Staking operation is in a terminal State

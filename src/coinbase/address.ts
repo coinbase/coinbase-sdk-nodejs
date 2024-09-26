@@ -316,6 +316,15 @@ export class Address {
   }
 
   /**
+   * Returns a JSON representation of the address.
+   *
+   * @returns A JSON representing the address.
+   */
+  public toJSON() {
+    return { addressId: this.getId(), networkId: this.getNetworkId() };
+  }
+
+  /**
    * Validate if the operation is able to stake with the supplied input.
    *
    * @param amount - The amount of the asset to stake.

@@ -284,4 +284,24 @@ export class Transfer {
       `transactionLink: '${this.getTransactionLink()}', status: '${this.getStatus()}'}`
     );
   }
+
+  /**
+   * Returns a JSON representation of the Transfer.
+   *
+   * @returns The JSON representation of the Transfer.
+   */
+  public toJSON() {
+    return {
+      transferId: this.getId(),
+      networkId: this.getNetworkId(),
+      fromAddressId: this.getFromAddressId(),
+      destinationAddressId: this.getDestinationAddressId(),
+      assetId: this.getAssetId(),
+      amount: this.getAmount().toJSON(),
+      status: this.getStatus(),
+      transaction: this.getTransaction()?.toJSON(),
+      transactionHash: this.getTransactionHash(),
+      transactionLink: this.getTransactionLink(),
+    };
+  }
 }

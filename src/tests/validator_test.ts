@@ -141,5 +141,9 @@ describe("Validator", () => {
     expect(validator.getValidatorId()).toEqual("0x123");
     expect(validator.getStatus()).toEqual(ValidatorStatus.EXITING);
     expect(validator.toString()).toEqual("Id: 0x123 Status: exiting");
+    expect(validator.toJSON()).toEqual({
+      id: "0x123",
+      status: ValidatorStatus.EXITING,
+    });
   });
 });

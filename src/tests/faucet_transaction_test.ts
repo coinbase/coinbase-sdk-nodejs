@@ -13,6 +13,10 @@ describe("FaucetTransaction tests", () => {
     expect(faucetTransaction.toString()).toBe(
       "Coinbase::FaucetTransaction{transaction_hash: 'abc', transaction_link: 'https://sepolia.basescan.org/tx/abc'}",
     );
+    expect(faucetTransaction.toJSON()).toEqual({
+      transactionHash: "abc",
+      transactionLink: "https://sepolia.basescan.org/tx/abc",
+    });
   });
 
   it("should throw an Error if model is not provided", () => {

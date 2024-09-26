@@ -257,6 +257,37 @@ describe("StakingReward", () => {
     });
   });
 
+  describe(".toJSON", () => {
+    it("should return the JSON representation of a staking reward", () => {
+      const model = {
+        address_id: address.getId(),
+        date: "2024-05-03",
+        amount: "226",
+        state: StakingRewardStateEnum.Pending,
+        format: StakingRewardFormat.USD,
+        usd_value: {
+          amount: "226",
+          conversion_price: "3000",
+          conversion_time: "2024-05-03T00:00:00Z",
+        },
+      };
+
+      const reward = new StakingReward(model, asset, StakingRewardFormat.USD);
+
+      const rewardJson = reward.toJSON();
+      expect(rewardJson).toEqual({
+        date: reward.date(),
+        address: address.getId(),
+        amount: reward.amount(),
+        usdValue: reward.usdValue(),
+        conversionPrice: model.usd_value.conversion_price,
+        conversionTime: reward.conversionTime(),
+        state: model.state,
+        format: model.format,
+      });
+    });
+  });
+
   describe(".addressId", () => {
     it("should return the onchain address of the StakingReward", () => {
       const reward = new StakingReward(

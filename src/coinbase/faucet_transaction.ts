@@ -47,4 +47,16 @@ export class FaucetTransaction {
   public toString(): string {
     return `Coinbase::FaucetTransaction{transaction_hash: '${this.getTransactionHash()}', transaction_link: '${this.getTransactionLink()}'}`;
   }
+
+  /**
+   * Returns a JSON representation of the FaucetTransaction.
+   *
+   * @returns A JSON representation of the FaucetTransaction.
+   */
+  public toJSON() {
+    return {
+      transactionHash: this.getTransactionHash(),
+      transactionLink: this.getTransactionLink(),
+    };
+  }
 }

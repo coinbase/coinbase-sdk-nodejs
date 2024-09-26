@@ -239,6 +239,26 @@ export class Trade {
   }
 
   /**
+   * Returns a JSON representation of the Trade.
+   *
+   * @returns A JSON representation of the Trade.
+   */
+  public toJSON() {
+    return {
+      transferId: this.getId(),
+      networkId: this.getNetworkId(),
+      addressId: this.getAddressId(),
+      fromAssetId: this.getFromAssetId(),
+      toAssetId: this.getToAssetId(),
+      fromAmount: this.getFromAmount().toNumber(),
+      toAmount: this.getToAmount().toNumber(),
+      status: this.getStatus(),
+      approveTransaction: this.getApproveTransaction()?.toJSON(),
+      transaction: this.getTransaction().toJSON(),
+    };
+  }
+
+  /**
    * Resets the trade model with the specified data from the server.
    *
    * @param model - The Trade model

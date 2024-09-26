@@ -117,4 +117,19 @@ export class StakingBalance {
   public toString(): string {
     return `StakingBalance { date: '${this.date().toISOString()}' address: '${this.address()}' bondedStake: '${this.bondedStake().amount} ${this.bondedStake().asset?.assetId?.toUpperCase()}' unbondedBalance: '${this.unbondedBalance().amount} ${this.unbondedBalance().asset?.assetId?.toUpperCase()}' participantType: '${this.participantType()}' }`;
   }
+
+  /**
+   * Print the Staking Balance as a JSON.
+   *
+   * @returns The JSON representation of the Staking Balance.
+   */
+  public toJSON() {
+    return {
+      date: this.date(),
+      address: this.address(),
+      bondedStake: this.bondedStake(),
+      unbondedBalance: this.unbondedBalance(),
+      participantType: this.participantType(),
+    };
+  }
 }

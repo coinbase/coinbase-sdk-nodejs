@@ -121,4 +121,23 @@ describe("ContractEvent", () => {
       );
     });
   });
+
+  describe(".toJSON", () => {
+    it("should return the JSON representation of a contract event", () => {
+      const event = new ContractEvent(eventData);
+      const eventJson = event.toJSON();
+      expect(eventJson).toEqual({
+        networkId: eventData.network_id,
+        protocolName: eventData.protocol_name,
+        contractName: eventData.contract_name,
+        eventName: eventData.event_name,
+        contractAddress: eventData.contract_address,
+        blockHeight: eventData.block_height,
+        txHash: eventData.tx_hash,
+        txIndex: eventData.tx_index,
+        eventIndex: eventData.event_index,
+        data: eventData.data,
+      });
+    });
+  });
 });

@@ -302,4 +302,20 @@ describe("Transaction", () => {
       expect(transaction.toString()).toContain(transaction.getTransactionHash());
     });
   });
+
+  describe("#toJSON", () => {
+    it("returns the same value as toJSON", () => {
+      const transaction = new Transaction(broadcastedModel);
+      expect(transaction.toJSON()).toEqual({
+        fromAddressId: transaction.fromAddressId(),
+        toAddressId: transaction.toAddressId(),
+        transactionHash: transaction.getTransactionHash(),
+        status: transaction.getStatus(),
+        unsignedPayload: transaction.getUnsignedPayload(),
+        signedPayload: transaction.getSignedPayload(),
+        transactionLink: transaction.getTransactionLink(),
+        rawTransaction: transaction.rawTransaction().toJSON(),
+      });
+    });
+  });
 });

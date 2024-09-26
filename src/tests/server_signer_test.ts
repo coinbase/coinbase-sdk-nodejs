@@ -93,4 +93,13 @@ describe("ServerSigner", () => {
       );
     });
   });
+
+  describe("#toJSON", () => {
+    it("should return the correct JSON representation", async () => {
+      expect(serverSigner.toJSON()).toEqual({
+        id: serverSignerId,
+        wallets: wallets,
+      });
+    });
+  });
 });

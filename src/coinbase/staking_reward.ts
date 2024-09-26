@@ -145,4 +145,22 @@ export class StakingReward {
   public toString(): string {
     return `StakingReward { date: '${this.date().toISOString()}' address: '${this.addressId()}' amount: '${this.amount().toString()}' usd_value: '${this.usdValue().toString()}' conversion_price: '${this.conversionPrice().toString()}' conversion_time: '${this.conversionTime().toISOString()}' }`;
   }
+
+  /**
+   * Returns the Staking Reward as a JSON.
+   *
+   * @returns The JSON representation of the Staking Reward.
+   */
+  public toJSON() {
+    return {
+      date: this.date(),
+      address: this.addressId(),
+      amount: this.amount(),
+      usdValue: this.usdValue(),
+      conversionPrice: this.conversionPrice().toString(),
+      conversionTime: this.conversionTime(),
+      state: this.model.state,
+      format: this.model.format,
+    };
+  }
 }

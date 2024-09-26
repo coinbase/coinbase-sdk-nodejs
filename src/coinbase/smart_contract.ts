@@ -300,6 +300,22 @@ export class SmartContract {
   }
 
   /**
+   * Returns a JSON representation of the SmartContract.
+   *
+   * @returns The JSON representation of the SmartContract.
+   */
+  public toJSON() {
+    return {
+      id: this.getId(),
+      networkId: this.getNetworkId(),
+      contractAddress: this.getContractAddress(),
+      deployerAddress: this.getDeployerAddress(),
+      type: this.getType(),
+      abi: this.getAbi(),
+    };
+  }
+
+  /**
    * Type guard for checking if the smart contract is an ERC20.
    *
    * @param type - The type of the smart contract.

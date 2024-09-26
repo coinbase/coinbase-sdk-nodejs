@@ -403,4 +403,21 @@ describe("Trade", () => {
       );
     });
   });
+
+  describe("#toJSON", () => {
+    it("should return the same value as toJSON", () => {
+      expect(trade.toJSON()).toEqual({
+        transferId: trade.getId(),
+        networkId: trade.getNetworkId(),
+        addressId: trade.getAddressId(),
+        fromAssetId: trade.getFromAssetId(),
+        toAssetId: trade.getToAssetId(),
+        fromAmount: trade.getFromAmount().toNumber(),
+        toAmount: trade.getToAmount().toNumber(),
+        status: trade.getStatus(),
+        approveTransaction: trade.getApproveTransaction()?.toJSON(),
+        transaction: trade.getTransaction().toJSON(),
+      });
+    });
+  });
 });

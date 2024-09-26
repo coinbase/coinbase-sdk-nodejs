@@ -148,6 +148,27 @@ describe("StakingBalance", () => {
     });
   });
 
+  describe(".toJSON", () => {
+    it("should return the JSON representation of a staking balance", () => {
+      const balance = new StakingBalance({
+        address: address.getId(),
+        date: "2024-05-03",
+        bonded_stake: bondedStake,
+        unbonded_balance: unbondedBalance,
+        participant_type: "validator",
+      });
+
+      const balanceJson = balance.toJSON();
+      expect(balanceJson).toEqual({
+        date: balance.date(),
+        address: balance.address(),
+        bondedStake: balance.bondedStake(),
+        unbondedBalance: balance.unbondedBalance(),
+        participantType: balance.participantType(),
+      });
+    });
+  });
+
   describe(".addressId", () => {
     it("should return the onchain address of the StakingBalance", () => {
       const balance = new StakingBalance({

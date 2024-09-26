@@ -280,6 +280,14 @@ describe("WalletAddress", () => {
     );
   });
 
+  it("should return the correct JSON representation", () => {
+    expect(address.toJSON()).toEqual({
+      addressId: VALID_ADDRESS_MODEL.address_id,
+      networkId: VALID_ADDRESS_MODEL.network_id,
+      walletId: VALID_ADDRESS_MODEL.wallet_id,
+    });
+  });
+
   describe("#setKey", () => {
     it("should set the key successfully", () => {
       key = ethers.Wallet.createRandom();

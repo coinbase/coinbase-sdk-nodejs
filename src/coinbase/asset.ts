@@ -137,6 +137,20 @@ export class Asset {
   }
 
   /**
+   * Returns a JSON representation of the Asset.
+   *
+   * @returns a JSON representation of the Asset
+   */
+  toJSON() {
+    return {
+      assetId: this.assetId,
+      networkId: this.networkId,
+      contractAddress: this.contractAddress,
+      decimals: this.decimals,
+    };
+  }
+
+  /**
    * Returns the Asset ID.
    *
    * @returns The Asset ID.

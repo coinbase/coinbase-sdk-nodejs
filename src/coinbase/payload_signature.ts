@@ -151,4 +151,20 @@ export class PayloadSignature {
   toString(): string {
     return `PayloadSignature { status: '${this.getStatus()}', unsignedPayload: '${this.getUnsignedPayload()}', signature: ${this.getSignature()} }`;
   }
+
+  /**
+   * Returns a JSON representation of the Payload Signature.
+   *
+   * @returns A JSON representation of the Payload Signature.
+   */
+  toJSON() {
+    return {
+      id: this.getId(),
+      addressId: this.getAddressId(),
+      walletId: this.getWalletId(),
+      status: this.getStatus(),
+      unsignedPayload: this.getUnsignedPayload(),
+      signature: this.getSignature(),
+    };
+  }
 }

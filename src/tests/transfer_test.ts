@@ -467,4 +467,21 @@ describe("Transfer Class", () => {
       );
     });
   });
+
+  describe("#toJSON", () => {
+    it("returns the same value as toJSON", () => {
+      expect(transfer.toJSON()).toEqual({
+        transferId: transfer.getId(),
+        networkId: transfer.getNetworkId(),
+        fromAddressId: transfer.getFromAddressId(),
+        destinationAddressId: transfer.getDestinationAddressId(),
+        assetId: transfer.getAssetId(),
+        amount: transfer.getAmount().toJSON(),
+        status: transfer.getStatus(),
+        transaction: transfer.getTransaction()?.toJSON(),
+        transactionHash: transfer.getTransactionHash(),
+        transactionLink: transfer.getTransactionLink(),
+      });
+    });
+  });
 });

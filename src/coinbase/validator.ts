@@ -158,4 +158,16 @@ export class Validator {
   public toString(): string {
     return `Id: ${this.getValidatorId()} Status: ${this.getStatus()}`;
   }
+
+  /**
+   * Returns the JSON representation of the Validator.
+   *
+   * @returns The JSON representation of the Validator.
+   */
+  public toJSON() {
+    return {
+      id: this.getValidatorId(),
+      status: this.getStatus(),
+    };
+  }
 }

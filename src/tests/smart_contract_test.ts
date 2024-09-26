@@ -322,6 +322,19 @@ describe("SmartContract", () => {
       );
     });
   });
+
+  describe("#toJSON", () => {
+    it("returns the same value as toJSON", () => {
+      expect(erc20SmartContract.toJSON()).toEqual({
+        id: erc20SmartContract.getId(),
+        networkId: erc20SmartContract.getNetworkId(),
+        contractAddress: erc20SmartContract.getContractAddress(),
+        deployerAddress: erc20SmartContract.getDeployerAddress(),
+        type: erc20SmartContract.getType(),
+        abi: erc20SmartContract.getAbi(),
+      });
+    });
+  });
 });
 
 describe("SmartContract.listEvents", () => {

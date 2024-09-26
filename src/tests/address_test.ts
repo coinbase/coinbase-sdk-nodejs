@@ -36,6 +36,15 @@ describe("Address", () => {
       );
     });
   });
+  describe(".toJSON()", () => {
+    it("should get the network ID", () => {
+      const address = new Address(VALID_ADDRESS_MODEL.network_id, VALID_ADDRESS_MODEL.address_id);
+      expect(address.toJSON()).toEqual({
+        networkId: address.getNetworkId(),
+        addressId: address.getId(),
+      });
+    });
+  });
 
   describe("#listTransactions", () => {
     beforeEach(() => {

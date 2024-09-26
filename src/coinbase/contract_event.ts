@@ -139,4 +139,24 @@ export class ContractEvent {
   public toString(): string {
     return `ContractEvent { networkId: '${this.networkId()}' protocolName: '${this.protocolName()}' contractName: '${this.contractName()}' eventName: '${this.eventName()}' contractAddress: '${this.contractAddress()}' blockHeight: ${this.blockHeight()} txHash: '${this.txHash()}' }`;
   }
+
+  /**
+   * Returns the ContractEvent as a JSON.
+   *
+   * @returns The JSON representation of the ContractEvent.
+   */
+  public toJSON() {
+    return {
+      networkId: this.networkId(),
+      protocolName: this.protocolName(),
+      contractName: this.contractName(),
+      eventName: this.eventName(),
+      contractAddress: this.contractAddress(),
+      blockHeight: this.blockHeight(),
+      txHash: this.txHash(),
+      txIndex: this.txIndex(),
+      eventIndex: this.eventIndex(),
+      data: this.data(),
+    };
+  }
 }

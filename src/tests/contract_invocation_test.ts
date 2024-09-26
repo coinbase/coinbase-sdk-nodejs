@@ -393,4 +393,22 @@ describe("Contract Invocation Class", () => {
       );
     });
   });
+
+  describe("#toJSON", () => {
+    it("returns the same value as toJSON", () => {
+      expect(contractInvocation.toJSON()).toEqual({
+        contractInvocationId: contractInvocationModel.contract_invocation_id,
+        networkId: contractInvocationModel.network_id,
+        fromAddressId: contractInvocationModel.address_id,
+        contractAddressId: contractInvocationModel.contract_address,
+        method: contractInvocationModel.method,
+        args: JSON.parse(contractInvocationModel.args),
+        transactionHash: contractInvocationModel.transaction.transaction_hash,
+        transactionLink: contractInvocationModel.transaction.transaction_link,
+        transaction: contractInvocation.getTransaction().toJSON(),
+        amount: Number(contractInvocationModel.amount),
+        status: contractInvocation.getStatus(),
+      });
+    });
+  });
 });

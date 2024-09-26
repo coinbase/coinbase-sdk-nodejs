@@ -39,6 +39,17 @@ describe("StakingOperation", () => {
     expect(op.toString()).toEqual(expectedString);
   });
 
+  it("should return a JSON representation with id, status, network_id, and address_id", () => {
+    const op = new StakingOperation(VALID_STAKING_OPERATION_MODEL);
+    expect(op.toJSON()).toEqual({
+      id: op.getID(),
+      status: op.getStatus(),
+      networkId: op.getNetworkID(),
+      address: op.getAddressID(),
+      transactions: op.getTransactions(),
+    });
+  });
+
   describe(".getTransactions", () => {
     it("return the the array of transactions", () => {
       const op = new StakingOperation(VALID_STAKING_OPERATION_MODEL);

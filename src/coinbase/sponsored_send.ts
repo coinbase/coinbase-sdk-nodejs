@@ -123,4 +123,19 @@ export class SponsoredSend {
   toString(): string {
     return `SponsoredSend { transactionHash: '${this.getTransactionHash()}', status: '${this.getStatus()}', typedDataHash: '${this.getTypedDataHash()}', signature: ${this.getSignature()}, transactionLink: ${this.getTransactionLink()} }`;
   }
+
+  /**
+   * Returns a JSON representation of the Sponsored Send.
+   *
+   * @returns A JSON representation of the Sponsored Send
+   */
+  toJSON() {
+    return {
+      transactionHash: this.getTransactionHash(),
+      status: this.getStatus(),
+      typedDataHash: this.getTypedDataHash(),
+      signature: this.getSignature(),
+      transactionLink: this.getTransactionLink(),
+    };
+  }
 }

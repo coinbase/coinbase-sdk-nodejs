@@ -201,4 +201,22 @@ export class Transaction {
   toString(): string {
     return `Transaction { transactionHash: '${this.getTransactionHash()}', status: '${this.getStatus()}', unsignedPayload: '${this.getUnsignedPayload()}', signedPayload: ${this.getSignedPayload()}, transactionLink: ${this.getTransactionLink()} }`;
   }
+
+  /**
+   * Returns a JSON representation of the Transaction.
+   *
+   * @returns A JSON representation of the Transaction.
+   */
+  toJSON() {
+    return {
+      fromAddressId: this.fromAddressId(),
+      toAddressId: this.toAddressId(),
+      transactionHash: this.getTransactionHash(),
+      status: this.getStatus(),
+      unsignedPayload: this.getUnsignedPayload(),
+      signedPayload: this.getSignedPayload(),
+      transactionLink: this.getTransactionLink(),
+      rawTransaction: this.rawTransaction().toJSON(),
+    };
+  }
 }

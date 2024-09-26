@@ -61,6 +61,23 @@ describe("Asset", () => {
     });
   });
 
+  describe("#toJSON", () => {
+    it("should return the assetId", () => {
+      const asset = Asset.fromModel({
+        asset_id: "eth",
+        network_id: Coinbase.networks.BaseSepolia,
+        contract_address: "contractAddress",
+        decimals: 18,
+      });
+      expect(asset.toJSON()).toEqual({
+        assetId: "eth",
+        networkId: Coinbase.networks.BaseSepolia,
+        contractAddress: "contractAddress",
+        decimals: 18,
+      });
+    });
+  });
+
   describe(".primaryDenomination", () => {
     ["wei", "gwei"].forEach(assetId => {
       describe(`when the assetId is ${assetId}`, () => {
