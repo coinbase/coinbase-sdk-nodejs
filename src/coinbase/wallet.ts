@@ -117,7 +117,7 @@ export interface IWallet {
   deployToken(options: CreateERC20Options): Promise<SmartContract>;
   deployNFT(options: CreateERC721Options): Promise<SmartContract>;
   deployMultiToken(options: CreateERC1155Options): Promise<SmartContract>;
-  createPayloadSignature(unsignedPayload: string): Promise<PayloadSignature>
+  createPayloadSignature(unsignedPayload: string): Promise<PayloadSignature>;
 }
 
 /**
