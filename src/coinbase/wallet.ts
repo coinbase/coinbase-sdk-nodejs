@@ -77,6 +77,40 @@ export interface IWallet {
   listHistoricalBalances(
     options: ListHistoricalBalancesOptions,
   ): Promise<ListHistoricalBalancesResult>;
+  listBalances(): Promise<BalanceMap>;
+  getBalance(assetId: string): Promise<Decimal>;
+  getNetworkId(): string;
+  getServerSignerStatus(): ServerSignerStatus | undefined;
+  saveSeed(filePath: string, encrypt?: boolean): string;
+  loadSeed(filePath: string): Promise<string>;
+  canSign(): boolean;
+  faucet(assetId?: string): Promise<FaucetTransaction>;
+  createTransfer(options: CreateTransferOptions): Promise<ITransfer>;
+  createStake(
+    amount: Amount,
+    assetId: string,
+    mode?: StakeOptionsMode,
+    options?: { [key: string]: string },
+    timeoutSeconds?: number,
+    intervalSeconds?: number,
+  ): Promise<StakingOperation>;
+  createUnstake(
+    amount: Amount,
+    assetId: string,
+    mode?: StakeOptionsMode,
+    options?: { [key: string]: string },
+    timeoutSeconds?: number,
+    intervalSeconds?: number,
+  ): Promise<StakingOperation>;
+  createClaimStake(
+    amount: Amount,
+    assetId: string,
+    mode?: StakeOptionsMode,
+    options?: { [key: string]: string },
+    timeoutSeconds?: number,
+    intervalSeconds?: number,
+  ): Promise<StakingOperation>;
+  invokeContract(options: CreateContractInvocationOptions): Promise<ContractInvocation>;
 }
 
 /**
