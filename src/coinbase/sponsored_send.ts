@@ -3,9 +3,23 @@ import { SponsoredSend as SponsoredSendModel } from "../client/api";
 import { SponsoredSendStatus } from "./types";
 
 /**
+ * Interface representing a Sponsored Send.
+ */
+export interface ISponsoredSend {
+  getTypedDataHash(): string;
+  getSignature(): string | undefined;
+  sign(key: ethers.Wallet): Promise<string>;
+  isSigned(): boolean;
+  getStatus(): SponsoredSendStatus | undefined;
+  isTerminalState(): boolean;
+  getTransactionHash(): string | undefined;
+  getTransactionLink(): string | undefined;
+}
+
+/**
  * A representation of an onchain Sponsored Send.
  */
-export class SponsoredSend {
+export class SponsoredSend implements ISponsoredSend {
   private model: SponsoredSendModel;
 
   /**

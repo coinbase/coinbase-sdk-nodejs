@@ -19,10 +19,48 @@ import { StakingReward } from "./staking_reward";
 import { StakingBalance } from "./staking_balance";
 import { Transaction } from "./transaction";
 
+export interface IAddress {
+  getNetworkId(): string;
+  getId(): string;
+  listBalances(): Promise<BalanceMap>;
+  getBalance(assetId: string): Promise<Decimal>;
+  listHistoricalBalances(
+    options: ListHistoricalBalancesOptions,
+  ): Promise<ListHistoricalBalancesResult>;
+  listTransactions(options: ListTransactionsOptions): Promise<ListTransactionsResult>;
+  stakingRewards(
+    assetId: string,
+    startTime: string,
+    endTime: string,
+    format: StakingRewardFormat,
+  ): Promise<StakingReward[]>;
+  historicalStakingBalances(
+    assetId: string,
+    startTime: string,
+    endTime: string,
+  ): Promise<StakingBalance[]>;
+  stakeableBalance(
+    assetId: string,
+    mode: StakeOptionsMode,
+    options: { [key: string]: string },
+  ): Promise<Decimal>;
+  unstakeableBalance(
+    assetId: string,
+    mode: StakeOptionsMode,
+    options: { [key: string]: string },
+  ): Promise<Decimal>;
+  claimableBalance(
+    assetId: string,
+    mode: StakeOptionsMode,
+    options: { [key: string]: string },
+  ): Promise<Decimal>;
+  faucet(assetId?: string): Promise<FaucetTransaction>;
+}
+
 /**
  * A representation of a blockchain address, which is a user-controlled account on a network.
  */
-export class Address {
+export class Address implements IAddress {
   private static MAX_HISTORICAL_BALANCE = 1000;
 
   protected networkId: string;

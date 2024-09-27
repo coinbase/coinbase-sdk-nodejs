@@ -8,12 +8,27 @@ import { ethers } from "ethers";
 import { delay } from "./utils";
 import { TimeoutError } from "./errors";
 
+export interface ITransfer {
+  getTransactionHash(): string | undefined;
+  getTransactionLink(): string | undefined;
+  getStatus(): TransferStatus | undefined;
+  getTransaction(): Transaction | undefined;
+  getSponsoredSend(): SponsoredSend | undefined;
+  getSendTransactionDelegate(): Transaction | SponsoredSend | undefined;
+  getId(): string;
+  getNetworkId(): string;
+  sign(key: ethers.Wallet): Promise<string>;
+  broadcast(): Promise<ITransfer>;
+  wait(options?: { intervalSeconds?: number; timeoutSeconds?: number }): Promise<Transfer>;
+  reload(): Promise<void>;
+}
+
 /**
  * A representation of a Transfer, which moves an Amount of an Asset from
  * a user-controlled Wallet to another Address. The fee is assumed to be paid
  * in the native Asset of the Network.
  */
-export class Transfer {
+export class Transfer implements ITransfer {
   private model: TransferModel;
 
   /**
@@ -209,7 +224,7 @@ export class Transfer {
    * @returns The Transfer object
    * @throws {APIError} if the API request to broadcast a Transfer fails.
    */
-  public async broadcast(): Promise<Transfer> {
+  public async broadcast(): Promise<ITransfer> {
     if (!this.getSendTransactionDelegate()?.isSigned())
       throw new Error("Cannot broadcast unsigned Transfer");
 

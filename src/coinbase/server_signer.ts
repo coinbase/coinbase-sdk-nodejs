@@ -1,10 +1,15 @@
 import { Coinbase } from "./coinbase";
 import { ServerSigner as ServerSignerModel } from "../client/api";
 
+export interface IServerSigner {
+  getId(): string;
+  getWallets(): string[] | undefined;
+}
+
 /**
  * A representation of a Server-Signer. Server-Signers are assigned to sign transactions for a Wallet.
  */
-export class ServerSigner {
+export class ServerSigner implements IServerSigner {
   private model: ServerSignerModel;
 
   /**

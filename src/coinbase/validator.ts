@@ -2,10 +2,14 @@ import { Coinbase } from "./coinbase";
 import { Validator as ValidatorModel, ValidatorStatus as APIValidatorStatus } from "../client/api";
 import { ValidatorStatus } from "./types";
 
+export interface IValidator {
+  getValidatorId(): string;
+  getStatus(): string;
+}
 /**
  * A representation of a validator onchain.
  */
-export class Validator {
+export class Validator implements IValidator {
   private model: ValidatorModel;
 
   /**

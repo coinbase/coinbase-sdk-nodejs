@@ -3,10 +3,21 @@ import { Transaction as TransactionModel, EthereumTransaction } from "../client/
 import { TransactionStatus } from "./types";
 import { parseUnsignedPayload } from "./utils";
 
+export interface ITransaction {
+  getUnsignedPayload(): string;
+  getSignedPayload(): string | undefined;
+  getTransactionHash(): string | undefined;
+  getStatus(): TransactionStatus | undefined;
+  fromAddressId(): string;
+  toAddressId(): string | undefined;
+  blockHeight(): string | undefined;
+  blockHash(): string | undefined;
+  content(): EthereumTransaction | undefined;
+}
 /**
  * A representation of an onchain Transaction.
  */
-export class Transaction {
+export class Transaction implements ITransaction {
   private model: TransactionModel;
   private raw?: ethers.Transaction;
 

@@ -1,11 +1,19 @@
 import { StakingBalance as StakingBalanceModel } from "../client";
-import { Balance } from "./balance";
+import { Balance, IBalance } from "./balance";
 import { Coinbase } from "./coinbase";
+
+export interface IStakingBalance {
+  bondedStake(): IBalance;
+  unbondedBalance(): IBalance;
+  participantType(): string;
+  date(): Date;
+  address(): string;
+}
 
 /**
  * A representation of the staking balance for a given asset on a specific date.
  */
-export class StakingBalance {
+export class StakingBalance implements IStakingBalance {
   private model: StakingBalanceModel;
 
   /**
@@ -69,7 +77,7 @@ export class StakingBalance {
    *
    * @returns The Balance.
    */
-  public bondedStake(): Balance {
+  public bondedStake(): IBalance {
     return Balance.fromModel(this.model.bonded_stake);
   }
 
@@ -78,7 +86,7 @@ export class StakingBalance {
    *
    * @returns The Balance.
    */
-  public unbondedBalance(): Balance {
+  public unbondedBalance(): IBalance {
     return Balance.fromModel(this.model.unbonded_balance);
   }
 

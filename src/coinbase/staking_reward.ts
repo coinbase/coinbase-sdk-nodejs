@@ -4,10 +4,19 @@ import { Coinbase } from "./coinbase";
 import { Asset } from "./asset";
 import { Amount, StakingRewardFormat } from "./types";
 
+export interface IStakingReward {
+  date(): Date;
+  amount(): Amount;
+  addressId(): string;
+  usdValue(): Amount;
+  conversionPrice(): Amount;
+  conversionTime(): Date;
+}
+
 /**
  * A representation of a staking reward earned on a network for a given asset.
  */
-export class StakingReward {
+export class StakingReward implements IStakingReward {
   private model: StakingRewardModel;
   private asset: Asset;
   private readonly format: StakingRewardFormat;

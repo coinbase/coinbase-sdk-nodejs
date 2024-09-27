@@ -7,11 +7,22 @@ import { Transaction } from "./transaction";
 import { Coinbase } from "./coinbase";
 import { delay } from "./utils";
 
+export interface IStakingOperation {
+  getID(): string;
+  getStatus(): StakingOperationStatusEnum;
+  getWalletID(): string | undefined;
+  getAddressID(): string;
+  getNetworkID(): string;
+  isTerminalState(): boolean;
+  isFailedState(): boolean;
+  isCompleteState(): boolean;
+}
+
 /**
  * A representation of a staking operation (stake, unstake, claim stake, etc.). It
  * may have multiple steps with some being transactions to sign, and others to wait.
  */
-export class StakingOperation {
+export class StakingOperation implements IStakingOperation {
   private model: StakingOperationModel;
   private readonly transactions: Transaction[];
 

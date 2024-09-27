@@ -1,9 +1,14 @@
 import { FaucetTransaction as FaucetTransactionModel } from "../client";
 
+export interface IFaucetTransaction {
+  getTransactionHash(): string;
+  getTransactionLink(): string;
+}
+
 /**
  * Represents a transaction from a faucet.
  */
-export class FaucetTransaction {
+export class FaucetTransaction implements IFaucetTransaction {
   private model: FaucetTransactionModel;
 
   /**

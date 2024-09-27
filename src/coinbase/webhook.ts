@@ -7,11 +7,22 @@ import {
 import { Coinbase } from "./coinbase";
 import { CreateWebhookOptions } from "./types";
 
+export interface IWebhook {
+  getId(): string | undefined;
+  getNetworkId(): string | undefined;
+  getNotificationURI(): string | undefined;
+  getEventType(): WebhookEventType | undefined;
+  getEventTypeFilter(): WebhookEventTypeFilter | undefined;
+  getEventFilters(): Array<WebhookEventFilter> | undefined;
+  getSignatureHeader(): string | undefined;
+  update(notificationUri: string): Promise<IWebhook>;
+  delete(): Promise<void>;
+}
 /**
  * A representation of a Webhook,
  * which provides methods to create, list, update, and delete webhooks that are used to receive notifications of specific events.
  */
-export class Webhook {
+export class Webhook implements IWebhook {
   private model: WebhookModel | null;
 
   /**
@@ -168,7 +179,7 @@ export class Webhook {
    * @param notificationUri - The new URI for webhook notifications.
    * @returns A promise that resolves to the updated Webhook object.
    */
-  public async update(notificationUri: string): Promise<Webhook> {
+  public async update(notificationUri: string): Promise<IWebhook> {
     const result = await Coinbase.apiClients.webhook!.updateWebhook(this.getId()!, {
       notification_uri: notificationUri,
       event_filters: this.getEventFilters()!,

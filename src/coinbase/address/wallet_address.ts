@@ -1,12 +1,12 @@
 import { Decimal } from "decimal.js";
 import { ethers } from "ethers";
 import { Address as AddressModel, SmartContractType } from "../../client";
-import { Address } from "../address";
+import { Address, IAddress } from "../address";
 import { Asset } from "../asset";
 import { Coinbase } from "../coinbase";
 import { ArgumentError } from "../errors";
 import { Trade } from "../trade";
-import { Transfer } from "../transfer";
+import { ITransfer, Transfer } from "../transfer";
 import { ContractInvocation } from "../contract_invocation";
 import {
   Amount,
@@ -25,10 +25,52 @@ import { StakingOperation } from "../staking_operation";
 import { PayloadSignature } from "../payload_signature";
 import { SmartContract } from "../smart_contract";
 
+export interface IWalletAddress extends IAddress {
+  getWalletId(): string;
+  setKey(key: ethers.Wallet): void;
+  export(): string;
+  canSign(): boolean;
+  listTrades(): Promise<Trade[]>;
+  listTransfers(): Promise<ITransfer[]>;
+  createTransfer(options: CreateTransferOptions): Promise<ITransfer>;
+  createTrade(options: CreateTradeOptions): Promise<Trade>;
+  invokeContract(options: CreateContractInvocationOptions): Promise<ContractInvocation>;
+  deployToken(options: CreateERC20Options): Promise<SmartContract>;
+  deployNFT(options: CreateERC721Options): Promise<SmartContract>;
+  deployMultiToken(options: CreateERC1155Options): Promise<SmartContract>;
+  createStake(
+    amount: Amount,
+    assetId: string,
+    mode: StakeOptionsMode,
+    options: { [key: string]: string },
+    timeoutSeconds: number,
+    intervalSeconds: number,
+  ): Promise<StakingOperation>;
+  createUnstake(
+    amount: Amount,
+    assetId: string,
+    mode: StakeOptionsMode,
+    options: { [key: string]: string },
+    timeoutSeconds: number,
+    intervalSeconds: number,
+  ): Promise<StakingOperation>;
+  createClaimStake(
+    amount: Amount,
+    assetId: string,
+    mode: StakeOptionsMode,
+    options: { [key: string]: string },
+    timeoutSeconds: number,
+    intervalSeconds: number,
+  ): Promise<StakingOperation>;
+  createPayloadSignature(payload: string): Promise<PayloadSignature>;
+  getPayloadSignature(signatureId: string): Promise<PayloadSignature>;
+  listPayloadSignatures(): Promise<PayloadSignature[]>;
+}
+
 /**
  * A representation of a blockchain address, which is a wallet-controlled account on a network.
  */
-export class WalletAddress extends Address {
+export class WalletAddress extends Address implements IWalletAddress {
   private model: AddressModel;
   private key?: ethers.Wallet;
 
@@ -139,8 +181,8 @@ export class WalletAddress extends Address {
    *
    * @returns The list of transfers.
    */
-  public async listTransfers(): Promise<Transfer[]> {
-    const transfers: Transfer[] = [];
+  public async listTransfers(): Promise<ITransfer[]> {
+    const transfers: ITransfer[] = [];
     const queue: string[] = [""];
 
     while (queue.length > 0) {
@@ -186,7 +228,7 @@ export class WalletAddress extends Address {
     assetId,
     destination,
     gasless = false,
-  }: CreateTransferOptions): Promise<Transfer> {
+  }: CreateTransferOptions): Promise<ITransfer> {
     if (!Coinbase.useServerSigner && !this.key) {
       throw new Error("Cannot transfer from address without private key loaded");
     }

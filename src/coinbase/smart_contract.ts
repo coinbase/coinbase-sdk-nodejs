@@ -7,7 +7,7 @@ import {
   TokenContractOptions as TokenContractOptionsModel,
   NFTContractOptions as NFTContractOptionsModel,
 } from "../client/api";
-import { Transaction } from "./transaction";
+import { ITransaction, Transaction } from "./transaction";
 import {
   SmartContractOptions,
   SmartContractType,
@@ -21,10 +21,23 @@ import { delay } from "./utils";
 import { TimeoutError } from "./errors";
 import { ContractEvent } from "./contract_event";
 
+export interface ISmartContract {
+  getId(): string;
+  getNetworkId(): string;
+  getWalletId(): string;
+  getContractAddress(): string;
+  getDeployerAddress(): string;
+  getType(): SmartContractType;
+  getOptions(): SmartContractOptions;
+  getAbi(): object;
+  getTransaction(): ITransaction;
+  sign(key: ethers.Wallet): Promise<string>;
+  broadcast(): Promise<ISmartContract>;
+}
 /**
  * A representation of a SmartContract on the blockchain.
  */
-export class SmartContract {
+export class SmartContract implements ISmartContract {
   private model: SmartContractModel;
 
   /**

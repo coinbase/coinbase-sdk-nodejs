@@ -4,10 +4,21 @@ import { delay } from "./utils";
 import { TimeoutError } from "./errors";
 import { Coinbase } from "./coinbase";
 
+export interface IPayloadSignature {
+  getId(): string;
+  getWalletId(): string;
+  getAddressId(): string;
+  getUnsignedPayload(): string;
+  getSignature(): string | undefined;
+  getStatus(): PayloadSignatureStatus | undefined;
+  isTerminalState(): boolean;
+  wait(): Promise<IPayloadSignature>;
+}
+
 /**
  * A representation of a Payload Signature.
  */
-export class PayloadSignature {
+export class PayloadSignature implements IPayloadSignature {
   private model: PayloadSignatureModel;
 
   /**

@@ -2,8 +2,14 @@ import Decimal from "decimal.js";
 import { Balance as BalanceModel } from "../client";
 import { Asset } from "./asset";
 
+export interface IBalance {
+  amount: Decimal;
+  assetId: string;
+  asset?: Asset;
+}
+
 /** A representation of a balance. */
-export class Balance {
+export class Balance implements IBalance {
   public readonly amount: Decimal;
   public readonly assetId: string;
   public readonly asset?: Asset;

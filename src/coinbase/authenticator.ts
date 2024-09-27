@@ -6,10 +6,18 @@ import { version } from "../../package.json";
 const pemHeader = "-----BEGIN EC PRIVATE KEY-----";
 const pemFooter = "-----END EC PRIVATE KEY-----";
 
+export interface IAuthenticator {
+  authenticateRequest(
+    config: InternalAxiosRequestConfig,
+    debugging?: boolean,
+  ): Promise<InternalAxiosRequestConfig>;
+  buildJWT(url: string, method?: string): Promise<string>;
+}
+
 /**
  * A class that builds JWTs for authenticating with the Coinbase Platform APIs.
  */
-export class CoinbaseAuthenticator {
+export class CoinbaseAuthenticator implements IAuthenticator {
   private apiKey: string;
   private privateKey: string;
 

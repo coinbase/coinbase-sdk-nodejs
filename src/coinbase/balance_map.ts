@@ -1,4 +1,4 @@
-import { Balance } from "./balance";
+import { Balance, IBalance } from "./balance";
 import { Balance as BalanceModel } from "../client";
 import { Decimal } from "decimal.js";
 
@@ -24,9 +24,9 @@ export class BalanceMap extends Map<string, Decimal> {
   /**
    * Adds a balance to the map.
    *
-   * @param {Balance} balance - The balance to add to the map.
+   * @param {IBalance} balance - The balance to add to the map.
    */
-  public add(balance: Balance): void {
+  public add(balance: IBalance): void {
     if (!(balance instanceof Balance)) {
       throw new Error("balance must be a Balance");
     }

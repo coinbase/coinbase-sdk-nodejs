@@ -1,8 +1,25 @@
 import { ContractEvent as ContractEventModel } from "../client";
+
+export interface IContractEvent {
+  networkId(): string;
+  protocolName(): string;
+  contractName(): string;
+  eventName(): string;
+  sig(): string;
+  fourBytes(): string;
+  contractAddress(): string;
+  blockTime(): Date;
+  blockHeight(): number;
+  txHash(): string;
+  txIndex(): number;
+  eventIndex(): number;
+  data(): string;
+}
+
 /**
  * A representation of a single contract event.
  */
-export class ContractEvent {
+export class ContractEvent implements IContractEvent {
   private model: ContractEventModel;
 
   /**

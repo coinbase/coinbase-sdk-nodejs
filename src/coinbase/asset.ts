@@ -4,8 +4,19 @@ import { Coinbase } from "./coinbase";
 import { GWEI_DECIMALS } from "./constants";
 import { ArgumentError } from "./errors";
 
+export interface IAsset {
+  networkId: string;
+  assetId: string;
+  contractAddress: string;
+  decimals: number;
+  primaryDenomination(): string;
+  toAtomicAmount(wholeAmount: Decimal): bigint;
+  fromAtomicAmount(atomicAmount: Decimal): Decimal;
+  getAssetId(): string;
+}
+
 /** A representation of an Asset. */
-export class Asset {
+export class Asset implements IAsset {
   public readonly networkId: string;
   public readonly assetId: string;
   public readonly contractAddress: string;
@@ -128,20 +139,20 @@ export class Asset {
   }
 
   /**
-   * Returns a string representation of the Asset.
-   *
-   * @returns a string representation of the Asset
-   */
-  toString(): string {
-    return `Asset{ networkId: ${this.networkId}, assetId: ${this.assetId}, contractAddress: ${this.contractAddress}, decimals: ${this.decimals} }`;
-  }
-
-  /**
    * Returns the Asset ID.
    *
    * @returns The Asset ID.
    */
   getAssetId(): string {
     return this.assetId;
+  }
+
+  /**
+   * Returns a string representation of the Asset.
+   *
+   * @returns a string representation of the Asset
+   */
+  toString(): string {
+    return `Asset{ networkId: ${this.networkId}, assetId: ${this.assetId}, contractAddress: ${this.contractAddress}, decimals: ${this.decimals} }`;
   }
 }

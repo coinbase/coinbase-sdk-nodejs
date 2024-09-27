@@ -1,16 +1,37 @@
-import { Address } from "../address";
+import { Address, IAddress } from "../address";
 import { Amount, StakeOptionsMode } from "../types";
 import { Coinbase } from "../coinbase";
 import Decimal from "decimal.js";
 import { Asset } from "../asset";
 import { StakingOperation } from "../staking_operation";
 
+export interface IExternalAddress extends IAddress {
+  buildStakeOperation(
+    amount: Amount,
+    assetId: string,
+    mode: StakeOptionsMode,
+    options: { [key: string]: string },
+  ): Promise<StakingOperation>;
+  buildUnstakeOperation(
+    amount: Amount,
+    assetId: string,
+    mode: StakeOptionsMode,
+    options: { [key: string]: string },
+  ): Promise<StakingOperation>;
+  buildClaimStakeOperation(
+    amount: Amount,
+    assetId: string,
+    mode: StakeOptionsMode,
+    options: { [key: string]: string },
+  ): Promise<StakingOperation>;
+}
+
 /**
  * A representation of a blockchain Address, which is a user-controlled account on a Network. Addresses are used to
  * send and receive Assets. An ExternalAddress is an Address that is not controlled by the developer, but is instead
  * controlled by the user.
  */
-export class ExternalAddress extends Address {
+export class ExternalAddress extends Address implements IExternalAddress {
   /**
    * Builds a stake operation for the supplied asset. The stake operation
    * may take a few minutes to complete in the case when infrastructure is spun up.

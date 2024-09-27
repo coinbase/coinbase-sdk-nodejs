@@ -7,11 +7,29 @@ import { Transaction } from "./transaction";
 import { TransactionStatus } from "./types";
 import { delay } from "./utils";
 
+export interface ITrade {
+  getId(): string;
+  getNetworkId(): string;
+  getWalletId(): string;
+  getAddressId(): string;
+  getFromAssetId(): string;
+  getFromAmount(): Decimal;
+  getToAssetId(): string;
+  getToAmount(): Decimal;
+  getTransaction(): Transaction;
+  getApproveTransaction(): Transaction | undefined;
+  sign(key: ethers.Wallet): Promise<void>;
+  broadcast(): Promise<Trade>;
+  getStatus(): TransactionStatus | undefined;
+  wait(options: { intervalSeconds: number; timeoutSeconds: number }): Promise<Trade>;
+  reload(): Promise<Trade>;
+}
+
 /**
  * A representation of a Trade, which trades an amount of an Asset to another Asset on a Network.
  * The fee is assumed to be paid in the native Asset of the Network.
  */
-export class Trade {
+export class Trade implements ITrade {
   private model: CoinbaseTrade;
   private transaction?: Transaction;
   private approveTransaction?: Transaction;

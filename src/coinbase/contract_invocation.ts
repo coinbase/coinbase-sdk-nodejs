@@ -7,11 +7,38 @@ import { ethers } from "ethers";
 import { delay } from "./utils";
 import { TimeoutError } from "./errors";
 
+export interface IContractInvocation {
+  getId(): string;
+  getNetworkId(): string;
+  getWalletId(): string;
+  getFromAddressId(): string;
+  getContractAddressId(): string;
+  getMethod(): string;
+  getArgs(): object;
+  getAbi(): object | undefined;
+  getAmount(): Decimal;
+  getTransactionHash(): string | undefined;
+  getRawTransaction(): ethers.Transaction;
+  sign(key: ethers.Wallet): Promise<string>;
+  getStatus(): TransactionStatus | undefined;
+  getTransaction(): Transaction;
+  getTransactionLink(): string;
+  broadcast(): Promise<ContractInvocation>;
+  wait({
+    intervalSeconds,
+    timeoutSeconds,
+  }: {
+    intervalSeconds: number;
+    timeoutSeconds: number;
+  }): Promise<ContractInvocation>;
+  reload(): Promise<void>;
+}
+
 /**
  * A representation of a ContractInvocation, which calls a smart contract method
  * onchain. The fee is assumed to be paid in the native Asset of the Network.
  */
-export class ContractInvocation {
+export class ContractInvocation implements IContractInvocation {
   private model: ContractInvocationModel;
 
   /**

@@ -14,7 +14,7 @@ import { Coinbase } from "./coinbase";
 import { ArgumentError } from "./errors";
 import { FaucetTransaction } from "./faucet_transaction";
 import { Trade } from "./trade";
-import { Transfer } from "./transfer";
+import { ITransfer, Transfer } from "./transfer";
 import {
   Amount,
   StakingRewardFormat,
@@ -41,6 +41,40 @@ import { ContractInvocation } from "../coinbase/contract_invocation";
 import { SmartContract } from "./smart_contract";
 import { Webhook } from "./webhook";
 
+export interface IWallet {
+  createAddress(): Promise<Address>;
+  createTrade(options: CreateTradeOptions): Promise<Trade>;
+  stakeableBalance(
+    asset_id: string,
+    mode?: StakeOptionsMode,
+    options?: { [key: string]: string },
+  ): Promise<Decimal>;
+  unstakeableBalance(
+    asset_id: string,
+    mode?: StakeOptionsMode,
+    options?: { [key: string]: string },
+  ): Promise<Decimal>;
+  claimableBalance(
+    asset_id: string,
+    mode?: StakeOptionsMode,
+    options?: { [key: string]: string },
+  ): Promise<Decimal>;
+  stakingRewards(
+    assetId: string,
+    startTime?: string,
+    endTime?: string,
+    format?: StakingRewardFormat,
+  ): Promise<StakingReward[]>;
+  historicalStakingBalances(
+    assetId: string,
+    startTime?: string,
+    endTime?: string,
+  ): Promise<StakingBalance[]>;
+  listHistoricalBalances(
+    options: ListHistoricalBalancesOptions,
+  ): Promise<ListHistoricalBalancesResult>;
+}
+
 /**
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
  * each of which can hold a balance of one or more Assets. Wallets can create new Addresses, list their addresses,
@@ -49,7 +83,7 @@ import { Webhook } from "./webhook";
  * Existing wallets can be imported with a seed using `Wallet.import`.
  * Wallets backed by a Server Signer can be fetched with `Wallet.fetch` and used for signing operations immediately.
  */
-export class Wallet {
+export class Wallet implements IWallet {
   static MAX_ADDRESSES = 20;
 
   private model: WalletModel;
@@ -79,7 +113,7 @@ export class Wallet {
    *
    * @returns The list of Wallets.
    */
-  public static async listWallets(): Promise<Wallet[]> {
+  public static async listWallets(): Promise<IWallet[]> {
     const walletList: Wallet[] = [];
     const queue: string[] = [""];
 
@@ -735,7 +769,7 @@ export class Wallet {
    * @throws {APIError} if the API request to create a Transfer fails.
    * @throws {APIError} if the API request to broadcast a Transfer fails.
    */
-  public async createTransfer(options: CreateTransferOptions): Promise<Transfer> {
+  public async createTransfer(options: CreateTransferOptions): Promise<ITransfer> {
     return (await this.getDefaultAddress()).createTransfer(options);
   }
 
