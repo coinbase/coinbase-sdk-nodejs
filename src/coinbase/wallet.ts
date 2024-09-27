@@ -5,15 +5,15 @@ import { ethers } from "ethers";
 import * as fs from "fs";
 import * as secp256k1 from "secp256k1";
 import { Address as AddressModel, Wallet as WalletModel } from "../client";
-import { Address } from "./address";
+import { Address, IAddress } from "./address";
 import { IWalletAddress, WalletAddress } from "./address/wallet_address";
 import { Asset } from "./asset";
 import { Balance } from "./balance";
 import { BalanceMap } from "./balance_map";
 import { Coinbase } from "./coinbase";
 import { ArgumentError } from "./errors";
-import { FaucetTransaction } from "./faucet_transaction";
-import { Trade } from "./trade";
+import { FaucetTransaction, IFaucetTransaction } from "./faucet_transaction";
+import { ITrade, Trade } from "./trade";
 import { ITransfer } from "./transfer";
 import {
   Amount,
@@ -33,21 +33,22 @@ import {
   CreateERC1155Options,
 } from "./types";
 import { convertStringToHex, delay, formatDate, getWeekBackDate } from "./utils";
-import { StakingOperation } from "./staking_operation";
+import { IStakingOperation, StakingOperation } from "./staking_operation";
 import { StakingReward } from "./staking_reward";
 import { StakingBalance } from "./staking_balance";
-import { PayloadSignature } from "./payload_signature";
-import { ContractInvocation } from "../coinbase/contract_invocation";
-import { SmartContract } from "./smart_contract";
-import { Webhook } from "./webhook";
+import { IPayloadSignature, PayloadSignature } from "./payload_signature";
+import { ContractInvocation, IContractInvocation } from "../coinbase/contract_invocation";
+import { ISmartContract, SmartContract } from "./smart_contract";
+import { IWebhook, Webhook } from "./webhook";
 
 export interface IWallet {
   getId(): string;
   getDefaultAddress(): Promise<IWalletAddress>;
   listAddresses(): Promise<IWalletAddress[]>;
   getAddress(addressId: string): Promise<IWalletAddress | undefined>;
-  createAddress(): Promise<Address>;
-  createTrade(options: CreateTradeOptions): Promise<Trade>;
+  createAddress(): Promise<IAddress>;
+  setSeed(seed: string): void;
+  createTrade(options: CreateTradeOptions): Promise<ITrade>;
   stakeableBalance(
     asset_id: string,
     mode?: StakeOptionsMode,
@@ -84,7 +85,7 @@ export interface IWallet {
   saveSeed(filePath: string, encrypt?: boolean): string;
   loadSeed(filePath: string): Promise<string>;
   canSign(): boolean;
-  faucet(assetId?: string): Promise<FaucetTransaction>;
+  faucet(assetId?: string): Promise<IFaucetTransaction>;
   createTransfer(options: CreateTransferOptions): Promise<ITransfer>;
   createStake(
     amount: Amount,
@@ -93,7 +94,7 @@ export interface IWallet {
     options?: { [key: string]: string },
     timeoutSeconds?: number,
     intervalSeconds?: number,
-  ): Promise<StakingOperation>;
+  ): Promise<IStakingOperation>;
   createUnstake(
     amount: Amount,
     assetId: string,
@@ -101,7 +102,7 @@ export interface IWallet {
     options?: { [key: string]: string },
     timeoutSeconds?: number,
     intervalSeconds?: number,
-  ): Promise<StakingOperation>;
+  ): Promise<IStakingOperation>;
   createClaimStake(
     amount: Amount,
     assetId: string,
@@ -109,14 +110,14 @@ export interface IWallet {
     options?: { [key: string]: string },
     timeoutSeconds?: number,
     intervalSeconds?: number,
-  ): Promise<StakingOperation>;
-  invokeContract(options: CreateContractInvocationOptions): Promise<ContractInvocation>;
+  ): Promise<IStakingOperation>;
+  invokeContract(options: CreateContractInvocationOptions): Promise<IContractInvocation>;
   export(): WalletData;
-  createWebhook(notificationUri: string): Promise<Webhook>;
-  deployToken(options: CreateERC20Options): Promise<SmartContract>;
-  deployNFT(options: CreateERC721Options): Promise<SmartContract>;
-  deployMultiToken(options: CreateERC1155Options): Promise<SmartContract>;
-  createPayloadSignature(unsignedPayload: string): Promise<PayloadSignature>;
+  createWebhook(notificationUri: string): Promise<IWebhook>;
+  deployToken(options: CreateERC20Options): Promise<ISmartContract>;
+  deployNFT(options: CreateERC721Options): Promise<ISmartContract>;
+  deployMultiToken(options: CreateERC1155Options): Promise<ISmartContract>;
+  createPayloadSignature(unsignedPayload: string): Promise<IPayloadSignature>;
 }
 
 /**
@@ -293,7 +294,7 @@ export class Wallet implements IWallet {
    * @returns The new Address.
    * @throws {APIError} - If the address creation fails.
    */
-  public async createAddress(): Promise<Address> {
+  public async createAddress(): Promise<IAddress> {
     let payload, key;
     if (!Coinbase.useServerSigner) {
       // TODO: Coordinate this value with concurrent calls to createAddress.
@@ -395,7 +396,7 @@ export class Wallet implements IWallet {
    * @throws {Error} If the private key is not loaded, or if the asset IDs are unsupported, or if there are insufficient funds.
    * @returns The created Trade object.
    */
-  public async createTrade(options: CreateTradeOptions): Promise<Trade> {
+  public async createTrade(options: CreateTradeOptions): Promise<ITrade> {
     return (await this.getDefaultAddress()).createTrade(options);
   }
 
@@ -526,7 +527,7 @@ export class Wallet implements IWallet {
     options: { [key: string]: string } = {},
     timeoutSeconds = 60,
     intervalSeconds = 0.2,
-  ): Promise<StakingOperation> {
+  ): Promise<IStakingOperation> {
     return (await this.getDefaultAddress()).createStake(
       amount,
       assetId,
@@ -556,7 +557,7 @@ export class Wallet implements IWallet {
     options: { [key: string]: string } = {},
     timeoutSeconds = 60,
     intervalSeconds = 0.2,
-  ): Promise<StakingOperation> {
+  ): Promise<IStakingOperation> {
     return (await this.getDefaultAddress()).createUnstake(
       amount,
       assetId,
@@ -586,7 +587,7 @@ export class Wallet implements IWallet {
     options: { [key: string]: string } = {},
     timeoutSeconds = 60,
     intervalSeconds = 0.2,
-  ): Promise<StakingOperation> {
+  ): Promise<IStakingOperation> {
     return (await this.getDefaultAddress()).createClaimStake(
       amount,
       assetId,
@@ -825,7 +826,7 @@ export class Wallet implements IWallet {
    * @throws {APIError} if the API request to create a Payload Signature fails.
    * @throws {Error} if the default address is not found.
    */
-  public async createPayloadSignature(unsignedPayload: string): Promise<PayloadSignature> {
+  public async createPayloadSignature(unsignedPayload: string): Promise<IPayloadSignature> {
     return (await this.getDefaultAddress()).createPayloadSignature(unsignedPayload);
   }
 
@@ -836,7 +837,7 @@ export class Wallet implements IWallet {
    *
    * @returns The newly created webhook instance.
    */
-  public async createWebhook(notificationUri: string): Promise<Webhook> {
+  public async createWebhook(notificationUri: string): Promise<IWebhook> {
     const result = await Coinbase.apiClients.webhook!.createWalletWebhook(this.getId(), {
       notification_uri: notificationUri,
     });
@@ -861,7 +862,7 @@ export class Wallet implements IWallet {
    */
   public async invokeContract(
     options: CreateContractInvocationOptions,
-  ): Promise<ContractInvocation> {
+  ): Promise<IContractInvocation> {
     return (await this.getDefaultAddress()).invokeContract(options);
   }
 
@@ -875,7 +876,7 @@ export class Wallet implements IWallet {
    * @returns A Promise that resolves to the deployed SmartContract object.
    * @throws {Error} If the private key is not loaded when not using server signer.
    */
-  public async deployToken(options: CreateERC20Options): Promise<SmartContract> {
+  public async deployToken(options: CreateERC20Options): Promise<ISmartContract> {
     return (await this.getDefaultAddress()).deployToken(options);
   }
 
@@ -889,7 +890,7 @@ export class Wallet implements IWallet {
    * @returns A Promise that resolves to the deployed SmartContract object.
    * @throws {Error} If the private key is not loaded when not using server signer.
    */
-  public async deployNFT(options: CreateERC721Options): Promise<SmartContract> {
+  public async deployNFT(options: CreateERC721Options): Promise<ISmartContract> {
     return (await this.getDefaultAddress()).deployNFT(options);
   }
 
@@ -903,7 +904,7 @@ export class Wallet implements IWallet {
    * @returns A Promise that resolves to the deployed SmartContract object.
    * @throws {Error} If the private key is not loaded when not using server signer.
    */
-  public async deployMultiToken(options: CreateERC1155Options): Promise<SmartContract> {
+  public async deployMultiToken(options: CreateERC1155Options): Promise<ISmartContract> {
     return (await this.getDefaultAddress()).deployMultiToken(options);
   }
 

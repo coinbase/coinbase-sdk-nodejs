@@ -16,6 +16,17 @@ export interface IStakingOperation {
   isTerminalState(): boolean;
   isFailedState(): boolean;
   isCompleteState(): boolean;
+  getTransactions(): Transaction[];
+  getSignedVoluntaryExitMessages(): string[];
+  reload(): Promise<void>;
+  wait({
+    intervalSeconds,
+    timeoutSeconds,
+  }: {
+    intervalSeconds: number;
+    timeoutSeconds: number;
+  }): Promise<StakingOperationModel>;
+  sign(key: ethers.Wallet): Promise<void>;
 }
 
 /**

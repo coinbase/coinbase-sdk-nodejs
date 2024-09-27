@@ -5,9 +5,9 @@ import { Address, IAddress } from "../address";
 import { Asset } from "../asset";
 import { Coinbase } from "../coinbase";
 import { ArgumentError } from "../errors";
-import { Trade } from "../trade";
+import { ITrade, Trade } from "../trade";
 import { ITransfer, Transfer } from "../transfer";
-import { ContractInvocation } from "../contract_invocation";
+import { ContractInvocation, IContractInvocation } from "../contract_invocation";
 import {
   Amount,
   CreateTransferOptions,
@@ -21,23 +21,23 @@ import {
 } from "../types";
 import { delay } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
-import { StakingOperation } from "../staking_operation";
-import { PayloadSignature } from "../payload_signature";
-import { SmartContract } from "../smart_contract";
+import { IStakingOperation, StakingOperation } from "../staking_operation";
+import { IPayloadSignature, PayloadSignature } from "../payload_signature";
+import { ISmartContract, SmartContract } from "../smart_contract";
 
 export interface IWalletAddress extends IAddress {
   getWalletId(): string;
   setKey(key: ethers.Wallet): void;
   export(): string;
   canSign(): boolean;
-  listTrades(): Promise<Trade[]>;
+  listTrades(): Promise<ITrade[]>;
   listTransfers(): Promise<ITransfer[]>;
   createTransfer(options: CreateTransferOptions): Promise<ITransfer>;
-  createTrade(options: CreateTradeOptions): Promise<Trade>;
-  invokeContract(options: CreateContractInvocationOptions): Promise<ContractInvocation>;
-  deployToken(options: CreateERC20Options): Promise<SmartContract>;
-  deployNFT(options: CreateERC721Options): Promise<SmartContract>;
-  deployMultiToken(options: CreateERC1155Options): Promise<SmartContract>;
+  createTrade(options: CreateTradeOptions): Promise<ITrade>;
+  invokeContract(options: CreateContractInvocationOptions): Promise<IContractInvocation>;
+  deployToken(options: CreateERC20Options): Promise<ISmartContract>;
+  deployNFT(options: CreateERC721Options): Promise<ISmartContract>;
+  deployMultiToken(options: CreateERC1155Options): Promise<ISmartContract>;
   createStake(
     amount: Amount,
     assetId: string,
@@ -45,7 +45,7 @@ export interface IWalletAddress extends IAddress {
     options: { [key: string]: string },
     timeoutSeconds: number,
     intervalSeconds: number,
-  ): Promise<StakingOperation>;
+  ): Promise<IStakingOperation>;
   createUnstake(
     amount: Amount,
     assetId: string,
@@ -53,7 +53,7 @@ export interface IWalletAddress extends IAddress {
     options: { [key: string]: string },
     timeoutSeconds: number,
     intervalSeconds: number,
-  ): Promise<StakingOperation>;
+  ): Promise<IStakingOperation>;
   createClaimStake(
     amount: Amount,
     assetId: string,
@@ -61,10 +61,10 @@ export interface IWalletAddress extends IAddress {
     options: { [key: string]: string },
     timeoutSeconds: number,
     intervalSeconds: number,
-  ): Promise<StakingOperation>;
-  createPayloadSignature(payload: string): Promise<PayloadSignature>;
-  getPayloadSignature(signatureId: string): Promise<PayloadSignature>;
-  listPayloadSignatures(): Promise<PayloadSignature[]>;
+  ): Promise<IStakingOperation>;
+  createPayloadSignature(payload: string): Promise<IPayloadSignature>;
+  getPayloadSignature(signatureId: string): Promise<IPayloadSignature>;
+  listPayloadSignatures(): Promise<IPayloadSignature[]>;
 }
 
 /**

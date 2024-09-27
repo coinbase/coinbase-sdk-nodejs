@@ -1,6 +1,6 @@
 import { Decimal } from "decimal.js";
 import { TransactionStatus } from "./types";
-import { Transaction } from "./transaction";
+import { ITransaction, Transaction } from "./transaction";
 import { Coinbase } from "./coinbase";
 import { ContractInvocation as ContractInvocationModel } from "../client/api";
 import { ethers } from "ethers";
@@ -21,9 +21,9 @@ export interface IContractInvocation {
   getRawTransaction(): ethers.Transaction;
   sign(key: ethers.Wallet): Promise<string>;
   getStatus(): TransactionStatus | undefined;
-  getTransaction(): Transaction;
+  getTransaction(): ITransaction;
   getTransactionLink(): string;
-  broadcast(): Promise<ContractInvocation>;
+  broadcast(): Promise<IContractInvocation>;
   wait({
     intervalSeconds,
     timeoutSeconds,

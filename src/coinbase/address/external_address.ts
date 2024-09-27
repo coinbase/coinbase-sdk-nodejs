@@ -3,7 +3,7 @@ import { Amount, StakeOptionsMode } from "../types";
 import { Coinbase } from "../coinbase";
 import Decimal from "decimal.js";
 import { Asset } from "../asset";
-import { StakingOperation } from "../staking_operation";
+import { IStakingOperation, StakingOperation } from "../staking_operation";
 
 export interface IExternalAddress extends IAddress {
   buildStakeOperation(
@@ -11,19 +11,19 @@ export interface IExternalAddress extends IAddress {
     assetId: string,
     mode: StakeOptionsMode,
     options: { [key: string]: string },
-  ): Promise<StakingOperation>;
+  ): Promise<IStakingOperation>;
   buildUnstakeOperation(
     amount: Amount,
     assetId: string,
     mode: StakeOptionsMode,
     options: { [key: string]: string },
-  ): Promise<StakingOperation>;
+  ): Promise<IStakingOperation>;
   buildClaimStakeOperation(
     amount: Amount,
     assetId: string,
     mode: StakeOptionsMode,
     options: { [key: string]: string },
-  ): Promise<StakingOperation>;
+  ): Promise<IStakingOperation>;
 }
 
 /**
