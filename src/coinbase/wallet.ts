@@ -31,7 +31,6 @@ import {
   CreateERC20Options,
   CreateERC721Options,
   CreateERC1155Options,
-  CreateWebhookOptions,
 } from "./types";
 import { convertStringToHex, delay, formatDate, getWeekBackDate } from "./utils";
 import { StakingOperation } from "./staking_operation";

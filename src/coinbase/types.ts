@@ -55,8 +55,8 @@ import {
   WebhookEventTypeFilter,
   CreateWalletWebhookRequest,
 } from "./../client/api";
-import { Address, IAddress } from "./address";
-import { IWallet, Wallet } from "./wallet";
+import { IAddress } from "./address";
+import { IWallet } from "./wallet";
 import { HistoricalBalance } from "./historical_balance";
 import { Transaction } from "./transaction";
 
