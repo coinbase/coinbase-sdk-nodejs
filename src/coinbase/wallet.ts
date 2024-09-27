@@ -5,7 +5,8 @@ import { ethers } from "ethers";
 import * as fs from "fs";
 import * as secp256k1 from "secp256k1";
 import { Address as AddressModel, Wallet as WalletModel } from "../client";
-import { Address, IAddress } from "./address";
+import { IContractInvocation } from "../coinbase/contract_invocation";
+import { IAddress } from "./address";
 import { IWalletAddress, WalletAddress } from "./address/wallet_address";
 import { Asset } from "./asset";
 import { Balance } from "./balance";
@@ -13,32 +14,31 @@ import { BalanceMap } from "./balance_map";
 import { Coinbase } from "./coinbase";
 import { ArgumentError } from "./errors";
 import { FaucetTransaction, IFaucetTransaction } from "./faucet_transaction";
-import { ITrade, Trade } from "./trade";
+import { IPayloadSignature } from "./payload_signature";
+import { ISmartContract } from "./smart_contract";
+import { StakingBalance } from "./staking_balance";
+import { IStakingOperation } from "./staking_operation";
+import { StakingReward } from "./staking_reward";
+import { ITrade } from "./trade";
 import { ITransfer } from "./transfer";
 import {
   Amount,
-  StakingRewardFormat,
   CreateContractInvocationOptions,
-  CreateTransferOptions,
+  CreateERC1155Options,
+  CreateERC20Options,
+  CreateERC721Options,
   CreateTradeOptions,
+  CreateTransferOptions,
   ListHistoricalBalancesOptions,
   ListHistoricalBalancesResult,
   SeedData,
   ServerSignerStatus,
   StakeOptionsMode,
+  StakingRewardFormat,
   WalletCreateOptions,
   WalletData,
-  CreateERC20Options,
-  CreateERC721Options,
-  CreateERC1155Options,
 } from "./types";
 import { convertStringToHex, delay, formatDate, getWeekBackDate } from "./utils";
-import { IStakingOperation, StakingOperation } from "./staking_operation";
-import { StakingReward } from "./staking_reward";
-import { StakingBalance } from "./staking_balance";
-import { IPayloadSignature, PayloadSignature } from "./payload_signature";
-import { ContractInvocation, IContractInvocation } from "../coinbase/contract_invocation";
-import { ISmartContract, SmartContract } from "./smart_contract";
 import { IWebhook, Webhook } from "./webhook";
 
 export interface IWallet {

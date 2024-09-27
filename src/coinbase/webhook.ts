@@ -21,7 +21,7 @@ export interface IWebhook {
 /**
  * A representation of a Webhook,
  * which provides methods to create, list, update, and delete webhooks that are used to receive notifications of specific events.
- */ 
+ */
 export class Webhook implements IWebhook {
   private model: WebhookModel | null;
 
