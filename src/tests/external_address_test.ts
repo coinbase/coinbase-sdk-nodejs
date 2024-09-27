@@ -195,7 +195,6 @@ describe("ExternalAddress", () => {
 
   describe(".buildStakeOperation", () => {
     it("should successfully build a stake operation", async () => {
-      Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       Coinbase.apiClients.stake!.buildStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
       Coinbase.apiClients.asset!.getAsset = getAssetMock();
       const op = await address.buildStakeOperation(
@@ -204,14 +203,6 @@ describe("ExternalAddress", () => {
         StakeOptionsMode.PARTIAL,
       );
 
-      expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
-        address_id: address.getId(),
-        network_id: address.getNetworkId(),
-        asset_id: Coinbase.assets.Eth,
-        options: {
-          mode: StakeOptionsMode.PARTIAL,
-        },
-      });
       expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledWith({
         address_id: address.getId(),
         network_id: address.getNetworkId(),
@@ -225,59 +216,14 @@ describe("ExternalAddress", () => {
 
       expect(op).toBeInstanceOf(StakingOperation);
     });
-
-    it("should return an error for not enough amount to stake", async () => {
-      Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
-
-      await expect(
-        address.buildStakeOperation(new Decimal("3.1"), Coinbase.assets.Eth),
-      ).rejects.toThrow(Error);
-      expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
-        address_id: address.getId(),
-        network_id: address.getNetworkId(),
-        asset_id: Coinbase.assets.Eth,
-        options: {
-          mode: StakeOptionsMode.DEFAULT,
-        },
-      });
-      expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledTimes(0);
-    });
-
-    it("should return an error for trying to stake less than or equal to zero", async () => {
-      Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
-      Coinbase.apiClients.stake!.buildStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
-
-      await expect(
-        address.buildStakeOperation(new Decimal("0"), Coinbase.assets.Eth),
-      ).rejects.toThrow(Error);
-
-      expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
-        address_id: address.getId(),
-        network_id: address.getNetworkId(),
-        asset_id: Coinbase.assets.Eth,
-        options: {
-          mode: StakeOptionsMode.DEFAULT,
-        },
-      });
-      expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledTimes(0);
-    });
   });
 
   describe(".buildUnstakeOperation", () => {
     it("should successfully build a unstake operation", async () => {
-      Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       Coinbase.apiClients.stake!.buildStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
       Coinbase.apiClients.asset!.getAsset = getAssetMock();
       const op = await address.buildUnstakeOperation(new Decimal("0.0001"), Coinbase.assets.Eth);
 
-      expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
-        address_id: address.getId(),
-        network_id: address.getNetworkId(),
-        asset_id: Coinbase.assets.Eth,
-        options: {
-          mode: StakeOptionsMode.DEFAULT,
-        },
-      });
       expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledWith({
         address_id: address.getId(),
         network_id: address.getNetworkId(),
@@ -290,59 +236,14 @@ describe("ExternalAddress", () => {
       });
       expect(op).toBeInstanceOf(StakingOperation);
     });
-
-    it("should return an error for not enough amount to unstake", async () => {
-      Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
-
-      await expect(
-        address.buildUnstakeOperation(new Decimal("2.1"), Coinbase.assets.Eth),
-      ).rejects.toThrow(Error);
-      expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
-        address_id: address.getId(),
-        network_id: address.getNetworkId(),
-        asset_id: Coinbase.assets.Eth,
-        options: {
-          mode: StakeOptionsMode.DEFAULT,
-        },
-      });
-      expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledTimes(0);
-    });
-
-    it("should return an error for trying to unstake less than or equal to zero", async () => {
-      Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
-      Coinbase.apiClients.stake!.buildStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
-
-      await expect(
-        address.buildUnstakeOperation(new Decimal("0"), Coinbase.assets.Eth),
-      ).rejects.toThrow(Error);
-
-      expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
-        address_id: address.getId(),
-        network_id: address.getNetworkId(),
-        asset_id: Coinbase.assets.Eth,
-        options: {
-          mode: StakeOptionsMode.DEFAULT,
-        },
-      });
-      expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledTimes(0);
-    });
   });
 
   describe(".buildClaimStakeOperation", () => {
     it("should successfully build a claim stake operation", async () => {
-      Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       Coinbase.apiClients.stake!.buildStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
       Coinbase.apiClients.asset!.getAsset = getAssetMock();
       const op = await address.buildClaimStakeOperation(new Decimal("0.0001"), Coinbase.assets.Eth);
 
-      expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
-        address_id: address.getId(),
-        network_id: address.getNetworkId(),
-        asset_id: Coinbase.assets.Eth,
-        options: {
-          mode: StakeOptionsMode.DEFAULT,
-        },
-      });
       expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledWith({
         address_id: address.getId(),
         network_id: address.getNetworkId(),
@@ -354,52 +255,6 @@ describe("ExternalAddress", () => {
         },
       });
       expect(op).toBeInstanceOf(StakingOperation);
-    });
-
-    it("should return an error for not enough amount to claim stake", async () => {
-      Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
-
-      await expect(
-        address.buildClaimStakeOperation(new Decimal("1.1"), Coinbase.assets.Eth),
-      ).rejects.toThrow(Error);
-      expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
-        address_id: address.getId(),
-        network_id: address.getNetworkId(),
-        asset_id: Coinbase.assets.Eth,
-        options: {
-          mode: StakeOptionsMode.DEFAULT,
-        },
-      });
-      expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledTimes(0);
-    });
-
-    it("should return an error for trying to claim stake less than or equal to zero", async () => {
-      Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
-      Coinbase.apiClients.stake!.buildStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
-
-      await expect(
-        address.buildClaimStakeOperation(new Decimal("0"), Coinbase.assets.Eth),
-      ).rejects.toThrow(Error);
-
-      expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
-        address_id: address.getId(),
-        network_id: address.getNetworkId(),
-        asset_id: Coinbase.assets.Eth,
-        options: {
-          mode: StakeOptionsMode.DEFAULT,
-        },
-      });
-      expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledTimes(0);
-    });
-
-    it("should return an error for trying to claim stake for native eth", async () => {
-      await expect(
-        address.buildClaimStakeOperation(
-          new Decimal("0"),
-          Coinbase.assets.Eth,
-          StakeOptionsMode.NATIVE,
-        ),
-      ).rejects.toThrow(Error);
     });
   });
 

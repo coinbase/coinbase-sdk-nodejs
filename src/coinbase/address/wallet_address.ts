@@ -534,6 +534,7 @@ export class WalletAddress extends Address {
    * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
    * @param intervalSeconds - The amount to check each time for a successful broadcast.
    * @returns The staking operation after it's completed successfully.
+   * @throws {Error} If there was an issue creating the stake operation.
    */
   public async createStake(
     amount: Amount,
@@ -543,7 +544,6 @@ export class WalletAddress extends Address {
     timeoutSeconds = 600,
     intervalSeconds = 0.2,
   ): Promise<StakingOperation> {
-    await this.validateCanStake(amount, assetId, mode, options);
     return this.createStakingOperation(
       amount,
       assetId,
@@ -573,6 +573,7 @@ export class WalletAddress extends Address {
    * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
    * @param intervalSeconds - The amount to check each time for a successful broadcast.
    * @returns The staking operation after it's completed successfully.
+   * @throws {Error} If there was an issue creating the unstake operation.
    */
   public async createUnstake(
     amount: Amount,
@@ -582,7 +583,6 @@ export class WalletAddress extends Address {
     timeoutSeconds = 600,
     intervalSeconds = 0.2,
   ): Promise<StakingOperation> {
-    await this.validateCanUnstake(amount, assetId, mode, options);
     return this.createStakingOperation(
       amount,
       assetId,
@@ -608,6 +608,7 @@ export class WalletAddress extends Address {
    * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
    * @param intervalSeconds - The amount to check each time for a successful broadcast.
    * @returns The staking operation after it's completed successfully.
+   * @throws {Error} If there was an issue creating the claim stake operation.
    */
   public async createClaimStake(
     amount: Amount,
@@ -617,7 +618,6 @@ export class WalletAddress extends Address {
     timeoutSeconds = 600,
     intervalSeconds = 0.2,
   ): Promise<StakingOperation> {
-    await this.validateCanClaimStake(amount, assetId, mode, options);
     return this.createStakingOperation(
       amount,
       assetId,
