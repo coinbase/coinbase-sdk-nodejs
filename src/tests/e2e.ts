@@ -31,7 +31,6 @@ describe("Coinbase SDK E2E Test", () => {
     console.log("Creating new wallet...");
     const wallet = await Wallet.create();
 
-    expect(wallet.toString()).toBeDefined();
     expect(wallet?.getId()).toBeDefined();
     console.log(
       `Created new wallet with ID: ${wallet.getId()}, default address: ${wallet.getDefaultAddress()}`,

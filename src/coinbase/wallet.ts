@@ -6,7 +6,7 @@ import * as fs from "fs";
 import * as secp256k1 from "secp256k1";
 import { Address as AddressModel, Wallet as WalletModel } from "../client";
 import { Address } from "./address";
-import { WalletAddress } from "./address/wallet_address";
+import { IWalletAddress, WalletAddress } from "./address/wallet_address";
 import { Asset } from "./asset";
 import { Balance } from "./balance";
 import { BalanceMap } from "./balance_map";
@@ -42,6 +42,10 @@ import { SmartContract } from "./smart_contract";
 import { Webhook } from "./webhook";
 
 export interface IWallet {
+  getId(): string;
+  getDefaultAddress(): Promise<IWalletAddress>;
+  listAddresses(): Promise<IWalletAddress[]>;
+  getAddress(addressId: string): Promise<IWalletAddress | undefined>;
   createAddress(): Promise<Address>;
   createTrade(options: CreateTradeOptions): Promise<Trade>;
   stakeableBalance(
@@ -114,7 +118,7 @@ export class Wallet implements IWallet {
    * @returns The list of Wallets.
    */
   public static async listWallets(): Promise<IWallet[]> {
-    const walletList: Wallet[] = [];
+    const walletList: IWallet[] = [];
     const queue: string[] = [""];
 
     while (queue.length > 0) {
@@ -143,7 +147,7 @@ export class Wallet implements IWallet {
    * @param wallet_id - The ID of the Wallet to fetch
    * @returns The fetched Wallet
    */
-  public static async fetch(wallet_id: string): Promise<Wallet> {
+  public static async fetch(wallet_id: string): Promise<IWallet> {
     const response = await Coinbase.apiClients.wallet!.getWallet(wallet_id);
     return Wallet.init(response.data!, "");
   }
@@ -159,7 +163,7 @@ export class Wallet implements IWallet {
    * @throws {ArgumentError} If the seed is not provided.
    * @throws {APIError} If the request fails.
    */
-  public static async import(data: WalletData): Promise<Wallet> {
+  public static async import(data: WalletData): Promise<IWallet> {
     if (!data.walletId) {
       throw new ArgumentError("Wallet ID must be provided");
     }
@@ -609,7 +613,7 @@ export class Wallet implements IWallet {
    *
    * @returns The wallet ID.
    */
-  public getId(): string | undefined {
+  public getId(): string {
     return this.model.id;
   }
 
@@ -719,7 +723,7 @@ export class Wallet implements IWallet {
    *
    * @returns The default address
    */
-  public async getDefaultAddress(): Promise<WalletAddress> {
+  public async getDefaultAddress(): Promise<IWalletAddress> {
     if (this.model.default_address === undefined) {
       throw new Error("WalletModel default address not set");
     }
