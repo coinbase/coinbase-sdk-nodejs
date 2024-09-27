@@ -14,7 +14,7 @@ import { Coinbase } from "./coinbase";
 import { ArgumentError } from "./errors";
 import { FaucetTransaction } from "./faucet_transaction";
 import { Trade } from "./trade";
-import { ITransfer, Transfer } from "./transfer";
+import { ITransfer } from "./transfer";
 import {
   Amount,
   StakingRewardFormat,
