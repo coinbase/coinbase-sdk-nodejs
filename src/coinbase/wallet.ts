@@ -31,6 +31,7 @@ import {
   CreateERC20Options,
   CreateERC721Options,
   CreateERC1155Options,
+  CreateWebhookOptions,
 } from "./types";
 import { convertStringToHex, delay, formatDate, getWeekBackDate } from "./utils";
 import { StakingOperation } from "./staking_operation";
@@ -112,6 +113,11 @@ export interface IWallet {
   ): Promise<StakingOperation>;
   invokeContract(options: CreateContractInvocationOptions): Promise<ContractInvocation>;
   export(): WalletData;
+  createWebhook(notificationUri: string): Promise<Webhook>;
+  deployToken(options: CreateERC20Options): Promise<SmartContract>;
+  deployNFT(options: CreateERC721Options): Promise<SmartContract>;
+  deployMultiToken(options: CreateERC1155Options): Promise<SmartContract>;
+  createPayloadSignature(unsignedPayload: string): Promise<PayloadSignature>
 }
 
 /**

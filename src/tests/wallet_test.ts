@@ -5,7 +5,7 @@ import { ethers } from "ethers";
 import { APIError } from "../coinbase/api_error";
 import { Coinbase } from "../coinbase/coinbase";
 import { ArgumentError } from "../coinbase/errors";
-import { Wallet } from "../coinbase/wallet";
+import { IWallet, Wallet } from "../coinbase/wallet";
 import { Transfer } from "../coinbase/transfer";
 import { ServerSignerStatus, StakeOptionsMode, TransferStatus } from "../coinbase/types";
 import {
@@ -70,7 +70,7 @@ import { SmartContract } from "../coinbase/smart_contract";
 import { Webhook } from "../coinbase/webhook";
 
 describe("Wallet Class", () => {
-  let wallet: Wallet;
+  let wallet: IWallet;
   let walletModel: WalletModel;
   let walletId: string;
   const apiResponses = {};
@@ -801,7 +801,7 @@ describe("Wallet Class", () => {
 
     describe("when using a server signer", () => {
       const walletId = crypto.randomUUID();
-      let wallet: Wallet;
+      let wallet: IWallet;
       beforeEach(async () => {
         jest.clearAllMocks();
         Coinbase.useServerSigner = true;
@@ -844,7 +844,7 @@ describe("Wallet Class", () => {
   });
 
   describe(".init", () => {
-    let wallet: Wallet;
+    let wallet: IWallet;
     let addressList: AddressModel[];
     let walletModel: WalletModel;
     const existingSeed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
@@ -1339,7 +1339,7 @@ describe("Wallet Class", () => {
   });
 
   describe("#createWebhook", () => {
-    let wallet: Wallet;
+    let wallet: IWallet;
     let addressList: AddressModel[];
     let walletModel: WalletModel;
     const existingSeed = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
