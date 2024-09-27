@@ -3,7 +3,7 @@ import {
   StakingOperation as StakingOperationModel,
   StakingOperationStatusEnum,
 } from "../client/api";
-import { Transaction } from "./transaction";
+import { ITransaction, Transaction } from "./transaction";
 import { Coinbase } from "./coinbase";
 import { delay } from "./utils";
 
@@ -16,7 +16,7 @@ export interface IStakingOperation {
   isTerminalState(): boolean;
   isFailedState(): boolean;
   isCompleteState(): boolean;
-  getTransactions(): Transaction[];
+  getTransactions(): ITransaction[];
   getSignedVoluntaryExitMessages(): string[];
   reload(): Promise<void>;
   wait(options?: {

@@ -16,9 +16,9 @@ import { ArgumentError } from "./errors";
 import { FaucetTransaction, IFaucetTransaction } from "./faucet_transaction";
 import { IPayloadSignature } from "./payload_signature";
 import { ISmartContract } from "./smart_contract";
-import { StakingBalance } from "./staking_balance";
+import { IStakingBalance, StakingBalance } from "./staking_balance";
 import { IStakingOperation } from "./staking_operation";
-import { StakingReward } from "./staking_reward";
+import { IStakingReward, StakingReward } from "./staking_reward";
 import { ITrade } from "./trade";
 import { ITransfer } from "./transfer";
 import {
@@ -69,12 +69,12 @@ export interface IWallet {
     startTime?: string,
     endTime?: string,
     format?: StakingRewardFormat,
-  ): Promise<StakingReward[]>;
+  ): Promise<IStakingReward[]>;
   historicalStakingBalances(
     assetId: string,
     startTime?: string,
     endTime?: string,
-  ): Promise<StakingBalance[]>;
+  ): Promise<IStakingBalance[]>;
   listHistoricalBalances(
     options: ListHistoricalBalancesOptions,
   ): Promise<ListHistoricalBalancesResult>;
