@@ -111,6 +111,7 @@ export interface IWallet {
     intervalSeconds?: number,
   ): Promise<StakingOperation>;
   invokeContract(options: CreateContractInvocationOptions): Promise<ContractInvocation>;
+  export(): WalletData;
 }
 
 /**
@@ -227,7 +228,7 @@ export class Wallet implements IWallet {
     networkId = Coinbase.networks.BaseSepolia,
     timeoutSeconds = 20,
     intervalSeconds = 0.2,
-  }: WalletCreateOptions = {}): Promise<Wallet> {
+  }: WalletCreateOptions = {}): Promise<IWallet> {
     const result = await Coinbase.apiClients.wallet!.createWallet({
       wallet: {
         network_id: networkId,

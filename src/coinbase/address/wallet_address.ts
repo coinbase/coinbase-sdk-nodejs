@@ -769,13 +769,17 @@ export class WalletAddress extends Address implements IWalletAddress {
     if (typeof destination !== "string" && destination.getNetworkId() !== this.getNetworkId()) {
       throw new ArgumentError("Transfer must be on the same Network");
     }
-    if (destination instanceof WalletClass) {
-      return [(await destination.getDefaultAddress()).getId(), destination.getNetworkId()];
+    if (typeof destination === 'string') {
+      return [destination, this.getNetworkId()];
     }
-    if (destination instanceof Address) {
+    if ('getDefaultAddress' in destination) {
+      const defaultAddress = await destination.getDefaultAddress();
+      return [defaultAddress.getId(), destination.getNetworkId()];
+    }
+    if ('getId' in destination) {
       return [destination.getId(), destination.getNetworkId()];
     }
-    return [destination, this.getNetworkId()];
+    throw new ArgumentError('Invalid destination type');
   }
 
   /**

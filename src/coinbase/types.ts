@@ -55,8 +55,8 @@ import {
   WebhookEventTypeFilter,
   CreateWalletWebhookRequest,
 } from "./../client/api";
-import { Address } from "./address";
-import { Wallet } from "./wallet";
+import { Address, IAddress } from "./address";
+import { IWallet, Wallet } from "./wallet";
 import { HistoricalBalance } from "./historical_balance";
 import { Transaction } from "./transaction";
 
@@ -810,7 +810,7 @@ export type Amount = number | bigint | Decimal;
 /**
  * Destination type definition.
  */
-export type Destination = string | Address | Wallet;
+export type Destination = string | IAddress | IWallet;
 
 /**
  * ServerSigner status type definition.
