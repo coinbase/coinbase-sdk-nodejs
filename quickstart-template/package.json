@@ -8,6 +8,7 @@
     "start-trade-assets": "node trade-assets.js",
     "start-mass-payout": "node mass-payout.js",
     "start-webhook": "node webhook.js",
+    "start-webhook-wallet-transfer": "node webhook-wallet-transfer.js",
     "start-register-basename": "node register-basename.js"
   },
   "keywords": [],
