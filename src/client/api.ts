@@ -848,6 +848,176 @@ export interface CreateWebhookRequest {
 
 
 /**
+ * Represents an event triggered by an ERC-20 token transfer on the blockchain. Contains information about the transaction, block, and involved addresses.
+ * @export
+ * @interface ERC20TransferEvent
+ */
+export interface ERC20TransferEvent {
+    /**
+     * Unique identifier for the webhook that triggered this event.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'webhookId'?: string;
+    /**
+     * Type of event, in this case, an ERC-20 token transfer.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'eventType'?: string;
+    /**
+     * Blockchain network where the event occurred.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'network'?: string;
+    /**
+     * Hash of the block containing the transaction.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'blockHash'?: string;
+    /**
+     * Number of the block containing the transaction.
+     * @type {number}
+     * @memberof ERC20TransferEvent
+     */
+    'blockNumber'?: number;
+    /**
+     * Timestamp when the block was mined.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'blockTime'?: string;
+    /**
+     * Hash of the transaction that triggered the event.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'transactionHash'?: string;
+    /**
+     * Position of the transaction within the block.
+     * @type {number}
+     * @memberof ERC20TransferEvent
+     */
+    'transactionIndex'?: number;
+    /**
+     * Position of the event log within the transaction.
+     * @type {number}
+     * @memberof ERC20TransferEvent
+     */
+    'logIndex'?: number;
+    /**
+     * Address of the ERC-20 token contract.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'contractAddress'?: string;
+    /**
+     * Address of the sender in the token transfer.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'from'?: string;
+    /**
+     * Address of the recipient in the token transfer.
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'to'?: string;
+    /**
+     * Amount of tokens transferred, typically in the smallest unit (e.g., wei for Ethereum).
+     * @type {string}
+     * @memberof ERC20TransferEvent
+     */
+    'value'?: string;
+}
+/**
+ * Represents an event triggered by an ERC-721 token transfer on the blockchain. Contains information about the transaction, block, and involved addresses.
+ * @export
+ * @interface ERC721TransferEvent
+ */
+export interface ERC721TransferEvent {
+    /**
+     * Unique identifier for the webhook that triggered this event.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'webhookId'?: string;
+    /**
+     * Type of event, in this case, an ERC-721 token transfer.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'eventType'?: string;
+    /**
+     * Blockchain network where the event occurred.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'network'?: string;
+    /**
+     * Hash of the block containing the transaction.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'blockHash'?: string;
+    /**
+     * Number of the block containing the transaction.
+     * @type {number}
+     * @memberof ERC721TransferEvent
+     */
+    'blockNumber'?: number;
+    /**
+     * Timestamp when the block was mined.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'blockTime'?: string;
+    /**
+     * Hash of the transaction that triggered the event.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'transactionHash'?: string;
+    /**
+     * Position of the transaction within the block.
+     * @type {number}
+     * @memberof ERC721TransferEvent
+     */
+    'transactionIndex'?: number;
+    /**
+     * Position of the event log within the transaction.
+     * @type {number}
+     * @memberof ERC721TransferEvent
+     */
+    'logIndex'?: number;
+    /**
+     * Address of the ERC-721 token contract.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'contractAddress'?: string;
+    /**
+     * Address of the sender in the token transfer.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'from'?: string;
+    /**
+     * Address of the recipient in the token transfer.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'to'?: string;
+    /**
+     * Unique identifier of the NFT being transferred.
+     * @type {string}
+     * @memberof ERC721TransferEvent
+     */
+    'tokenId'?: string;
+}
+/**
  * 
  * @export
  * @interface DeploySmartContractRequest
