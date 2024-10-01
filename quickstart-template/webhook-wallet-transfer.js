@@ -32,7 +32,6 @@ let webhook = await Webhook.create({
   networkId: 'base-sepolia', // Listening on sepolia testnet transactions
   notificationUri: 'https://<your_webhook_uri>/callback', // Your webhook address
   eventType: 'erc20_transfer',
-  signatureHeader: '<signature>', // signature that identifies webhook. Will be sent through x-webhook-signature header to your webhook
   eventFilters: [{ 
     // Webhook will only be triggered when these filter criteria are met
     from_address: myWalletAddressId,
@@ -47,8 +46,6 @@ console.log(`Webhook event filters: `, webhook.getEventFilters());
 console.log(`Webhook event type: `, webhook.getEventType());
 console.log(`Webhook network id: `, webhook.getNetworkId());
 console.log(`Webhook notification URI: `, webhook.getNotificationURI());
-console.log(`Webhook signature header: `, webhook.getSignatureHeader());
-
 
 // Create transfer from myWallet to anotherWallet
 const transfer = await myWallet.createTransfer({
@@ -62,4 +59,6 @@ const transfer = await myWallet.createTransfer({
 await transfer.wait();
 console.log(`Transfer successfully completed: `, transfer.toString());
 
-// Note: Be aware that after transfer is successfully completed, it may take a few minutes for the webhook to be triggered
+console.log('------------------------------------------------------------------------------------------------------------------');
+console.log('Be aware that after transfer is successfully completed, it may take a few minutes for the webhook to be triggered.');
+console.log('------------------------------------------------------------------------------------------------------------------');
