@@ -39,14 +39,22 @@ let webhook = await Webhook.create({
   }],
 });
 
-console.log(`Webhook successfully created: `, webhook.toString());
+console.log(`\nWebhook successfully created: `, webhook.toString());
 
 // You can fetch all the information used on webhook creation using getters functions:
-console.log(`Webhook event filters: `, webhook.getEventFilters());
+console.log(`\nWebhook event filters: `, webhook.getEventFilters());
 console.log(`Webhook event type: `, webhook.getEventType());
 console.log(`Webhook network id: `, webhook.getNetworkId());
 console.log(`Webhook notification URI: `, webhook.getNotificationURI());
 
+console.log('\n\n------------------------------------------------------------------------------------------------------------------');
+console.log(`Before transferring, please make sure you have your local server running:`);
+console.log(`cd webhook && npm install && npm run start-webhook-app`);
+console.log('------------------------------------------------------------------------------------------------------------------');
+console.log('Please press Enter to continue...');
+await waitForEnter();
+
+console.log('Creating transfer...');
 // Create transfer from myWallet to anotherWallet
 const transfer = await myWallet.createTransfer({
   amount: 0.0001,
@@ -59,6 +67,24 @@ const transfer = await myWallet.createTransfer({
 await transfer.wait();
 console.log(`Transfer successfully completed: `, transfer.toString());
 
-console.log('------------------------------------------------------------------------------------------------------------------');
+// From the default address object, you can list the transaction that was just made:
+// const transactions = (await myWalletAddress.listTransactions({})).transactions
+// console.log('Transactions list', transactions);
+// You can also get a specific transaction link to see transaction details
+// transactions[0].getTransactionLink()
+
+console.log('\n\n------------------------------------------------------------------------------------------------------------------');
 console.log('Be aware that after transfer is successfully completed, it may take a few minutes for the webhook to be triggered.');
 console.log('------------------------------------------------------------------------------------------------------------------');
+
+
+function waitForEnter() {
+  return new Promise(resolve => {
+      process.stdin.on('data',function (chunk) {
+          if (chunk[0] === 10) {
+              resolve();
+              process.stdin.pause();
+          }
+      });
+  });
+}
