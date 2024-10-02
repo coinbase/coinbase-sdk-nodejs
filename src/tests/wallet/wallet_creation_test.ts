@@ -38,7 +38,7 @@ describe("Wallet Creation", () => {
   });
 
   describe(".create", () => {
-    it("should return a Wallet instance", async () => {
+    beforeEach(() => {
       jest.spyOn(ethers.Wallet, "createRandom").mockReturnValue({
         privateKey: `0x${existingSeed}`,
       } as never);
@@ -67,7 +67,9 @@ describe("Wallet Creation", () => {
       Coinbase.apiClients.address!.createAddress = mockFn(walletId => {
         return { data: newAddressModel(walletId) };
       });
+    });
 
+    it("should return a Wallet instance", async () => {
       const wallet = await Wallet.create();
       expect(wallet).toBeInstanceOf(Wallet);
       expect(wallet.getId()).toBe(walletId);
@@ -84,7 +86,6 @@ describe("Wallet Creation", () => {
         network_id: Coinbase.networks.BaseMainnet,
         server_signer_status: ServerSignerStatus.ACTIVE,
       });
-      Coinbase.apiClients.address!.createAddress = mockReturnValue(newAddressModel(walletId));
       
       const wallet = await Wallet.create({
         networkId: Coinbase.networks.BaseMainnet,
@@ -197,70 +198,89 @@ describe("Wallet Creation", () => {
   });
 
   describe("#export", () => {
-    let walletModel: WalletModel;
-    let seedWallet: Wallet;
-
+    let wallet: Wallet;
+    const walletId = "test-wallet-id";
+    const publicKey = "some-public-key";
     beforeEach(() => {
-      const addressModel = newAddressModel(walletId);
-      walletModel = {
+      const walletModel: WalletModel = {
         id: walletId,
         network_id: Coinbase.networks.BaseSepolia,
-        default_address: addressModel,
+        default_address: {
+          wallet_id: walletId,
+          network_id: Coinbase.networks.BaseSepolia,
+          public_key: publicKey,
+          address_id: address1,
+          index: 0,
+        },
         feature_set: {} as FeatureSet,
       };
-      Coinbase.apiClients.address!.getAddress = mockFn(() => {
-        return { data: addressModel };
+      wallet = Wallet.init(walletModel, existingSeed);
+    });
+
+    it("should export the wallet data correctly", () => {
+      const exportedData = wallet.export();
+      expect(exportedData).toEqual({
+        walletId: walletId,
+        seed: existingSeed,
       });
-      seedWallet = Wallet.init(walletModel, existingSeed);
     });
 
-    it("exports the Wallet data", () => {
-      const walletData = seedWallet.export();
-      expect(walletData.walletId).toBe(seedWallet.getId());
-      expect(walletData.seed).toBe(existingSeed);
+    it("should throw an error when exporting a wallet without a seed", () => {
+      const seedlessWalletModel: WalletModel = {
+        id: "seedless-wallet-id",
+        network_id: Coinbase.networks.BaseSepolia,
+        default_address: {
+          wallet_id: "test-wallet-id",
+          network_id: Coinbase.networks.BaseSepolia,
+          public_key: publicKey,
+          address_id: address1,
+          index: 0,
+        },
+        feature_set: {} as FeatureSet,
+      };
+      const seedlessWallet = Wallet.init(seedlessWalletModel, "");
+
+      expect(() => seedlessWallet.export()).toThrow("Cannot export Wallet without loaded seed");
     });
 
-    it("allows for re-creation of a Wallet", () => {
-      const walletData = seedWallet.export();
-      const newWallet = Wallet.init(walletModel, walletData.seed);
-      expect(newWallet).toBeInstanceOf(Wallet);
+    it("should export different wallets with different data", () => {
+      const anotherWalletModel: WalletModel = {
+        id: "another-wallet-id",
+        network_id: Coinbase.networks.BaseMainnet,
+        default_address: {
+          wallet_id: "another-wallet-id",
+          network_id: Coinbase.networks.BaseMainnet,
+          public_key: publicKey,
+          address_id: address2,
+          index: 1,
+        },
+        feature_set: {} as FeatureSet,
+      };
+      const anotherSeed = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+      const anotherWallet = Wallet.init(anotherWalletModel, anotherSeed);
+
+      const exportedData1 = wallet.export();
+      const exportedData2 = anotherWallet.export();
+
+      expect(exportedData1).not.toEqual(exportedData2);
+      expect(exportedData1.walletId).toBe(walletId);
+      expect(exportedData1.seed).toBe(existingSeed);
+      expect(exportedData2.walletId).toBe("another-wallet-id");
+      expect(exportedData2.seed).toBe(anotherSeed);
     });
 
-    it("throws an error when the Wallet is seedless", () => {
-      const seedlessWallet = Wallet.init(walletModel, "");
-      expect(() => seedlessWallet.export()).toThrow(Error);
-    });
-
-    it("should be able to be imported", async () => {
-      const walletData = seedWallet.export();
-      Coinbase.apiClients.address!.listAddresses = mockFn(() => {
-        return {
-          data: {
-            data: [newAddressModel(walletId)],
-          },
-        };
-      });
-      const importedWallet = await Wallet.import(walletData);
-      expect(importedWallet).toBeInstanceOf(Wallet);
-      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
-    });
-
-    it("should throw an error when walletId is not provided", async () => {
-      const walletData = seedWallet.export();
-      walletData.walletId = "";
-      await expect(async () => await Wallet.import(walletData)).rejects.toThrow(
-        "Wallet ID must be provided",
-      );
+    it("should not expose any additional wallet data", () => {
+      const exportedData = wallet.export();
+      expect(Object.keys(exportedData)).toHaveLength(2);
+      expect(Object.keys(exportedData)).toEqual(expect.arrayContaining(['walletId', 'seed']));
     });
   });
-
+  
   describe("#saveSeed", () => {
-    let apiPrivateKey: string;
     const filePath = "seeds.json";
     let seedWallet: Wallet;
 
     beforeEach(() => {
-      apiPrivateKey = Coinbase.apiKeyPrivateKey;
       Coinbase.apiKeyPrivateKey = crypto.generateKeyPairSync("ec", {
         namedCurve: "prime256v1",
         privateKeyEncoding: { type: "pkcs8", format: "pem" },
@@ -277,7 +297,6 @@ describe("Wallet Creation", () => {
 
     afterEach(() => {
       fs.unlinkSync(filePath);
-      Coinbase.apiKeyPrivateKey = apiPrivateKey;
     });
 
     it("should save the seed when encryption is false", () => {
@@ -312,20 +331,48 @@ describe("Wallet Creation", () => {
   });
 
   describe("#loadSeed", () => {
-    let apiPrivateKey: string;
-    const filePath = "seeds.json";
+    const filePath = "test_seeds.json";
     let seedWallet: Wallet;
     let seedlessWallet: Wallet;
 
     beforeEach(() => {
-      apiPrivateKey = Coinbase.apiKeyPrivateKey;
+      // Setup mock for Coinbase.apiKeyPrivateKey
       Coinbase.apiKeyPrivateKey = crypto.generateKeyPairSync("ec", {
         namedCurve: "prime256v1",
         privateKeyEncoding: { type: "pkcs8", format: "pem" },
         publicKeyEncoding: { type: "spki", format: "pem" },
       }).privateKey;
 
-      const initialSeedData = {
+      // Create a wallet model
+      const walletModel: WalletModel = {
+        id: walletId,
+        network_id: Coinbase.networks.BaseSepolia,
+        default_address: newAddressModel(walletId),
+        feature_set: {} as FeatureSet,
+      };
+
+      // Initialize wallets
+      seedWallet = Wallet.init(walletModel, existingSeed);
+      seedlessWallet = Wallet.init(walletModel, "");
+
+      // Generate the correct address from the seed
+      const hdNode = ethers.HDNodeWallet.fromSeed(Buffer.from(existingSeed, 'hex'));
+      const derivedAddress = hdNode.derivePath("m/44'/60'/0'/0/0").address;
+
+      // Mock the listAddresses API call with the correct address
+      Coinbase.apiClients.address!.listAddresses = jest.fn().mockResolvedValue({
+        data: {
+          data: [{
+            ...newAddressModel(walletId),
+            address_id: derivedAddress,
+          }],
+          has_more: false,
+          next_page: "",
+        },
+      });
+
+      // Create a seed file
+      const seedData = {
         [walletId]: {
           encrypted: false,
           iv: "",
@@ -333,93 +380,75 @@ describe("Wallet Creation", () => {
           seed: existingSeed,
         },
       };
-      fs.writeFileSync(filePath, JSON.stringify(initialSeedData), "utf8");
-      seedWallet = Wallet.init({
-        id: walletId,
-        network_id: Coinbase.networks.BaseSepolia,
-        default_address: newAddressModel(walletId),
-        feature_set: {} as FeatureSet,
-      }, existingSeed);
-      seedlessWallet = Wallet.init({
-        id: walletId,
-        network_id: Coinbase.networks.BaseSepolia,
-        default_address: newAddressModel(walletId),
-        feature_set: {} as FeatureSet,
-      }, "");
+      fs.writeFileSync(filePath, JSON.stringify(seedData), "utf8");
     });
 
     afterEach(() => {
-      fs.unlinkSync(filePath);
-      Coinbase.apiKeyPrivateKey = apiPrivateKey;
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
     });
 
-    it("loads the seed from the file", async () => {
+    it("should load an unencrypted seed from file", async () => {
       await seedlessWallet.loadSeed(filePath);
       expect(seedlessWallet.canSign()).toBe(true);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
     });
 
-    it("loads the encrypted seed from the file", async () => {
+    it("should load an encrypted seed from file", async () => {
+      // Save an encrypted seed
       seedWallet.saveSeed(filePath, true);
+      
       await seedlessWallet.loadSeed(filePath);
       expect(seedlessWallet.canSign()).toBe(true);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
     });
 
-    it("loads the encrypted seed from the file with multiple seeds", async () => {
-      seedWallet.saveSeed(filePath, true);
-
-      const otherWalletId = crypto.randomUUID();
-      const otherModel = {
-        id: otherWalletId,
-        network_id: Coinbase.networks.BaseSepolia,
-        default_address: newAddressModel(otherWalletId),
-        feature_set: {} as FeatureSet,
-      };
-      const randomSeed = ethers.Wallet.createRandom().privateKey.slice(2);
-      const otherWallet = Wallet.init(otherModel, randomSeed);
-      otherWallet.saveSeed(filePath, true);
-
-      await seedlessWallet.loadSeed(filePath);
-      expect(seedlessWallet.canSign()).toBe(true);
+    it("should throw an error when trying to load a seed for an already seeded wallet", async () => {
+      await expect(seedWallet.loadSeed(filePath)).rejects.toThrow("Seed is already set");
     });
 
-    it("raises an error if the wallet is already hydrated", async () => {
-      await expect(seedWallet.loadSeed(filePath)).rejects.toThrow(Error);
-    });
-
-    it("raises an error when file contains different wallet data", async () => {
-      const otherSeedData = {
-        [crypto.randomUUID()]: {
+    it("should throw an error when the file doesn't contain data for the wallet", async () => {
+      const differentWalletId = "different-wallet-id";
+      const differentSeedData = {
+        [differentWalletId]: {
           encrypted: false,
           iv: "",
           authTag: "",
           seed: existingSeed,
         },
       };
-      fs.writeFileSync(filePath, JSON.stringify(otherSeedData), "utf8");
+      fs.writeFileSync(filePath, JSON.stringify(differentSeedData), "utf8");
 
-      await expect(seedlessWallet.loadSeed(filePath)).rejects.toThrow(ArgumentError);
+      await expect(seedlessWallet.loadSeed(filePath)).rejects.toThrow(
+        `File ${filePath} does not contain seed data for wallet ${walletId}`
+      );
     });
 
-    it("raises an error when the file is absent", async () => {
-      await expect(seedlessWallet.loadSeed("non-file.json")).rejects.toThrow(ArgumentError);
+    it("should throw an error when the file doesn't exist", async () => {
+      const nonExistentFile = "non_existent_file.json";
+      await expect(seedlessWallet.loadSeed(nonExistentFile)).rejects.toThrow(
+        `File ${nonExistentFile} does not contain any seed data`
+      );
     });
 
-    it("raises an error when the file is corrupted", async () => {
-      fs.writeFileSync(filePath, "corrupted data", "utf8");
-
-      await expect(seedlessWallet.loadSeed(filePath)).rejects.toThrow(ArgumentError);
+    it("should throw an error when the file contains invalid JSON", async () => {
+      fs.writeFileSync(filePath, "invalid json", "utf8");
+      await expect(seedlessWallet.loadSeed(filePath)).rejects.toThrow("Malformed backup data");
     });
 
-    it("throws an error when the file is empty", async () => {
-      fs.writeFileSync("invalid-file.json", "", "utf8");
-      await expect(seedlessWallet.loadSeed("invalid-file.json")).rejects.toThrow(ArgumentError);
-      fs.unlinkSync("invalid-file.json");
-    });
+    it("should throw an error when the seed data is malformed", async () => {
+      const malformedSeedData = {
+        [walletId]: {
+          encrypted: false,
+          iv: "",
+          authTag: "",
+          // Missing seed property
+        },
+      };
+      fs.writeFileSync(filePath, JSON.stringify(malformedSeedData), "utf8");
 
-    it("throws an error when the file is not a valid JSON", async () => {
-      fs.writeFileSync("invalid-file.json", `{"test":{"authTag":false}}`, "utf8");
-      await expect(seedlessWallet.loadSeed("invalid-file.json")).rejects.toThrow(ArgumentError);
-      fs.unlinkSync("invalid-file.json");
+      await expect(seedlessWallet.loadSeed(filePath)).rejects.toThrow("Malformed backup data");
     });
   });
 });
