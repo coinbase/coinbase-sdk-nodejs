@@ -756,6 +756,7 @@ export class Wallet {
    *
    * @param notificationUri - The URI to which the webhook notifications will be sent.
    *
+   * @param addresses
    * @returns The newly created webhook instance.
    */
   public async createWebhook(notificationUri: string): Promise<Webhook> {
