@@ -322,6 +322,15 @@ export class Wallet {
   }
 
   /**
+   * Returns the list of Trades in the Wallet.
+   *
+   * @returns The list of Trades.
+   */
+  public async listTrades(): Promise<Trade[]> {
+    return (await this.getDefaultAddress()).listTrades();
+  }
+
+  /**
    * Get the stakeable balance for the supplied asset.
    *
    * @param asset_id - The asset to check the stakeable balance for.
