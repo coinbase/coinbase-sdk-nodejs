@@ -1213,7 +1213,7 @@ export type CreateWebhookOptions = {
  * Options for updating a Webhook.
  */
 export type UpdateWebhookOptions = {
-  notificationUri: string;
+  notificationUri?: string;
   eventFilters?: Array<WebhookEventFilter>;
   eventTypeFilter?: { addresses: string[] };
 };
