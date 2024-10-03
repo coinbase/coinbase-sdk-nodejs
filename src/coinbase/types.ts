@@ -1210,6 +1210,15 @@ export type CreateWebhookOptions = {
 };
 
 /**
+ * Options for updating a Webhook.
+ */
+export type UpdateWebhookOptions = {
+  notificationUri?: string;
+  eventFilters?: Array<WebhookEventFilter>;
+  eventTypeFilter?: { addresses: string[] };
+};
+
+/**
  * ContractInvocationAPI client type definition.
  */
 export type ContractInvocationAPIClient = {

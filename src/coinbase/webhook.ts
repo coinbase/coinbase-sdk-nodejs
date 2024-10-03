@@ -5,7 +5,7 @@ import {
   WebhookEventTypeFilter,
 } from "../client/api";
 import { Coinbase } from "./coinbase";
-import { CreateWebhookOptions } from "./types";
+import { CreateWebhookOptions, UpdateWebhookOptions } from "./types";
 
 /**
  * A representation of a Webhook,
@@ -163,15 +163,21 @@ export class Webhook {
   }
 
   /**
-   * Updates the webhook with a new notification URI.
+   * Updates the webhook with a new notification URI, and optionally a new list of addresses to monitor.
    *
-   * @param notificationUri - The new URI for webhook notifications.
+   * @param options - The options to update webhook.
+   * @param options.notificationUri - The new URI for webhook notifications.
+   * @param options.eventTypeFilter - The new eventTypeFilter that contains a new list (replacement) of addresses to monitor for the webhook.
    * @returns A promise that resolves to the updated Webhook object.
    */
-  public async update(notificationUri: string): Promise<Webhook> {
+  public async update({
+    notificationUri,
+    eventTypeFilter,
+  }: UpdateWebhookOptions): Promise<Webhook> {
     const result = await Coinbase.apiClients.webhook!.updateWebhook(this.getId()!, {
       notification_uri: notificationUri,
       event_filters: this.getEventFilters()!,
+      event_type_filter: eventTypeFilter,
     });
 
     this.model = result.data;
