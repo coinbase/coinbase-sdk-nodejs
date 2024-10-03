@@ -31,6 +31,7 @@ describe("Webhook", () => {
           data: {
             ...mockModel,
             notification_uri: updateRequest.notification_uri,
+            event_type_filter: updateRequest.event_type_filter,
           },
         });
       }),
@@ -214,7 +215,7 @@ describe("Webhook", () => {
   describe("#update", () => {
     it("should update the webhook notification URI", async () => {
       const webhook = Webhook.init(mockModel);
-      await webhook.update("https://new-url.com/callback");
+      await webhook.update({ notificationUri: "https://new-url.com/callback" });
 
       expect(Coinbase.apiClients.webhook!.updateWebhook).toHaveBeenCalledWith("test-id", {
         notification_uri: "https://new-url.com/callback",
@@ -222,6 +223,32 @@ describe("Webhook", () => {
       });
 
       expect(webhook.getNotificationURI()).toBe("https://new-url.com/callback");
+    });
+    it("should update both the webhook notification URI and the list of addresses monitoring", async () => {
+      const mockModel: WebhookModel = {
+        id: "test-id",
+        network_id: "test-network",
+        notification_uri: "https://example.com/callback",
+        event_type: "erc20_transfer",
+        event_type_filter: {
+          addresses: ["0xa55C5950F7A3C42Fa5799B2Cac0e455774a07382"],
+        },
+        event_filters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
+      };
+      const webhook = Webhook.init(mockModel);
+      await webhook.update({
+        notificationUri: "https://new-url.com/callback",
+        eventTypeFilter: { addresses: ["0x1..", "0x2.."] },
+      });
+
+      expect(Coinbase.apiClients.webhook!.updateWebhook).toHaveBeenCalledWith("test-id", {
+        notification_uri: "https://new-url.com/callback",
+        event_filters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
+        event_type_filter: { addresses: ["0x1..", "0x2.."] },
+      });
+
+      expect(webhook.getNotificationURI()).toBe("https://new-url.com/callback");
+      expect(webhook.getEventTypeFilter()).toEqual({ addresses: ["0x1..", "0x2.."] });
     });
   });
 
