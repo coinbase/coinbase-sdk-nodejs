@@ -5,7 +5,7 @@
 ## [0.8.0] - 2024-10-03
 
 ### Breaking
-- `Webhook#update` now takes an Object of `{notificationUri, eventTypeFilter}` instead of a string of notification Uri. 
+- `Webhook#update` now takes an Object of `{notificationUri, eventTypeFilter}` instead of `notificationUri` string
 
 ## [0.7.0] - 2024-09-26
 
