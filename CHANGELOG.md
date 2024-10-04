@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## [0.8.0] - 2024-10-03
+## [0.8.0] - 2024-10-04
 
 ### Added
 - Explicit paginated list methods for listing `Wallet`, `Transfer`, `Transaction`, `Webhook`, `PayloadSignature`, and `HistoricalBalance`.
