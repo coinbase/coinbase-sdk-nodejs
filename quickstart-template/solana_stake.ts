@@ -11,7 +11,7 @@ import * as bs58 from "bs58";
 import { NetworkIdentifier } from "@coinbase/coinbase-sdk/dist/client";
 
 // Get data about staking for the provided wallet, get stakable balance, unstakeable balances and
-// balances that can be claimed back. 
+// balances that can be claimed back.
 async function stakeOperations(signer: KeyPairSigner) {
   const ctx = (
     await Coinbase.apiClients.stake?.getStakingContext({

@@ -1,6 +1,8 @@
 import { Webhook } from "../coinbase/webhook";
 import { Coinbase } from "../coinbase/coinbase";
 import { Webhook as WebhookModel } from "../client/api";
+import { mockReturnRejectedValue } from "./utils";
+import { APIError } from "../coinbase/api_error";
 
 describe("Webhook", () => {
   const mockModel: WebhookModel = {
@@ -22,7 +24,7 @@ describe("Webhook", () => {
       listWebhooks: jest.fn().mockResolvedValue({
         data: {
           data: [mockModel],
-          has_more: false,
+          has_more: true,
           next_page: null,
         },
       }),
@@ -180,35 +182,19 @@ describe("Webhook", () => {
 
   describe(".list", () => {
     it("should list all webhooks", async () => {
-      const webhooks = await Webhook.list();
+      const paginationResponse = await Webhook.list({ limit: 1 });
+      const webhooks = paginationResponse.data;
 
-      expect(Coinbase.apiClients.webhook!.listWebhooks).toHaveBeenCalledWith(100, undefined);
+      expect(Coinbase.apiClients.webhook!.listWebhooks).toHaveBeenCalledWith(1, undefined);
       expect(webhooks.length).toBe(1);
       expect(webhooks[0].getId()).toBe("test-id");
+      expect(paginationResponse.hasMore).toBe(true);
+      expect(paginationResponse.nextPage).toBe(undefined);
     });
 
-    it("should list all webhooks across multiple pages", async () => {
-      Coinbase.apiClients.webhook!.listWebhooks = jest
-        .fn()
-        .mockResolvedValueOnce({
-          data: {
-            data: [mockModel],
-            has_more: true,
-            next_page: "next-page-token",
-          },
-        })
-        .mockResolvedValueOnce({
-          data: {
-            data: [mockModel],
-            has_more: false,
-            next_page: null,
-          },
-        });
-
-      const webhooks = await Webhook.list();
-
-      expect(webhooks.length).toBe(2);
-      expect(Coinbase.apiClients.webhook!.listWebhooks).toHaveBeenCalledTimes(2);
+    it("should throw an error if list fails", async () => {
+      Coinbase.apiClients.webhook!.listWebhooks = mockReturnRejectedValue(new APIError(""));
+      await expect(Webhook.list()).rejects.toThrow(APIError);
     });
   });
 

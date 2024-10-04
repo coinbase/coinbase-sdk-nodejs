@@ -1,7 +1,4 @@
-import {
-  KeyPairSigner,
-  createKeyPairSignerFromBytes,
-} from "@solana/web3.js";
+import { KeyPairSigner, createKeyPairSignerFromBytes } from "@solana/web3.js";
 import { readFileSync } from "fs";
 import { homedir } from "os";
 import { env } from "process";

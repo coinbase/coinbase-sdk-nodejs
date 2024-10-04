@@ -21,8 +21,6 @@ import {
   CreateContractInvocationOptions,
   CreateTransferOptions,
   CreateTradeOptions,
-  ListHistoricalBalancesOptions,
-  ListHistoricalBalancesResult,
   SeedData,
   ServerSignerStatus,
   StakeOptionsMode,
@@ -31,6 +29,8 @@ import {
   CreateERC20Options,
   CreateERC721Options,
   CreateERC1155Options,
+  PaginationOptions,
+  PaginationResponse,
 } from "./types";
 import { convertStringToHex, delay, formatDate, getWeekBackDate } from "./utils";
 import { StakingOperation } from "./staking_operation";
@@ -40,6 +40,7 @@ import { PayloadSignature } from "./payload_signature";
 import { ContractInvocation } from "../coinbase/contract_invocation";
 import { SmartContract } from "./smart_contract";
 import { Webhook } from "./webhook";
+import { HistoricalBalance } from "./historical_balance";
 
 /**
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
@@ -77,29 +78,39 @@ export class Wallet {
   /**
    * Lists the Wallets belonging to the CDP Project.
    *
-   * @returns The list of Wallets.
+   * @param options - The pagination options.
+   * @param options.limit - The maximum number of Wallets to return. Limit can range between 1 and 100.
+   * @param options.page - The cursor for pagination across multiple pages of Wallets. Don\&#39;t include this parameter on the first call. Use the next page value returned in a previous response to request subsequent results.
+   *
+   * @returns The paginated list response of Wallets.
    */
-  public static async listWallets(): Promise<Wallet[]> {
-    const walletList: Wallet[] = [];
-    const queue: string[] = [""];
+  public static async listWallets({
+    limit = Coinbase.defaultPageLimit,
+    page = undefined,
+  }: PaginationOptions = {}): Promise<PaginationResponse<Wallet>> {
+    const data: Wallet[] = [];
+    let nextPage: string | undefined;
 
-    while (queue.length > 0) {
-      const page = queue.shift();
-      const response = await Coinbase.apiClients.wallet!.listWallets(100, page ? page : undefined);
+    const response = await Coinbase.apiClients.wallet!.listWallets(limit, page);
 
-      const wallets = response.data.data;
-      for (const wallet of wallets) {
-        walletList.push(Wallet.init(wallet, ""));
-      }
+    const wallets = response.data.data;
+    for (const wallet of wallets) {
+      data.push(Wallet.init(wallet, ""));
+    }
 
-      if (response.data.has_more) {
-        if (response.data.next_page) {
-          queue.push(response.data.next_page);
-        }
+    const hasMore = response.data.has_more;
+
+    if (hasMore) {
+      if (response.data.next_page) {
+        nextPage = response.data.next_page;
       }
     }
 
-    return walletList;
+    return {
+      data,
+      hasMore,
+      nextPage,
+    };
   }
 
   /**
@@ -411,22 +422,18 @@ export class Wallet {
   /**
    * Lists the historical balances for a given asset belonging to the default address of the wallet.
    *
-   * @param options - The options to list historical balances.
-   * @param options.assetId - The asset ID.
-   * @param options.limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-   * @param options.page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
-   * @returns The list of historical balance of the asset and next page token.
+   * @param assetId - The asset ID.
+   * @param options - The pagination options.
+   * @param options.limit - The maximum number of Historical Balances to return. Limit can range between 1 and 100.
+   * @param options.page - The cursor for pagination across multiple pages of Historical Balances. Don\&#39;t include this parameter on the first call. Use the next page value returned in a previous response to request subsequent results.
+   *
+   * @returns The paginated list response of Historical Balances for the given Asset ID.
    */
-  public async listHistoricalBalances({
-    assetId,
-    limit,
-    page,
-  }: ListHistoricalBalancesOptions): Promise<ListHistoricalBalancesResult> {
-    return (await this.getDefaultAddress()).listHistoricalBalances({
-      assetId: assetId,
-      limit: limit,
-      page: page,
-    });
+  public async listHistoricalBalances(
+    assetId: string,
+    { limit = Coinbase.defaultPageLimit, page = undefined }: PaginationOptions = {},
+  ): Promise<PaginationResponse<HistoricalBalance>> {
+    return (await this.getDefaultAddress()).listHistoricalBalances(assetId, { limit, page });
   }
 
   /**

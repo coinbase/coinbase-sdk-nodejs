@@ -102,8 +102,8 @@ const { Coinbase, Wallet } = require("@coinbase/coinbase-sdk");
 Coinbase.configureFromJson("path/to/your/api-key.json");
 
 // List all Wallets for the CDP Project.
-Wallet.listWallets().then(wallets => {
-  console.log(wallets);
+Wallet.listWallets().then(resp => {
+  console.log(resp.data);
 });
 ```
 
@@ -114,8 +114,8 @@ import { Coinbase, Wallet } from "@coinbase/coinbase-sdk";
 Coinbase.configureFromJson("path/to/your/api-key.json");
 
 // List all Wallets for the CDP Project.
-const wallets = await Wallet.listWallets();
-console.log(wallets);
+const resp = await Wallet.listWallets();
+console.log(resp.data);
 ```
 
 ### Wallets, Addresses, and Transfers
