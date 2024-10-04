@@ -1368,7 +1368,7 @@ export interface SmartContractAPIClient {
  */
 export type PaginationOptions = {
   limit?: number;
-  page?: string | undefined;
+  page?: string;
 };
 
 /**
