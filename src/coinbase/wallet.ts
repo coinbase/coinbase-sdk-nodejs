@@ -602,7 +602,7 @@ export class Wallet {
       throw new Error("Cannot save Wallet without loaded seed");
     }
 
-    const existingSeedsInStore = this.getExistingSeeds(filePath);
+    const existingSeedsInStore = Wallet.getExistingSeeds(filePath);
     const data = this.export();
     let seedToStore = data.seed;
     let authTag = "";
@@ -610,7 +610,7 @@ export class Wallet {
 
     if (encrypt) {
       const ivBytes = crypto.randomBytes(12);
-      const sharedSecret = this.getEncryptionKey();
+      const sharedSecret = Wallet.getEncryptionKey();
       const cipher: crypto.CipherCCM = crypto.createCipheriv(
         "aes-256-gcm",
         crypto.createHash("sha256").update(sharedSecret).digest(),
@@ -634,6 +634,48 @@ export class Wallet {
     return `Successfully saved seed for ${data.walletId} to ${filePath}.`;
   }
 
+  public static async loadWalletsFromSeedFile(filePath: string): Promise<Wallet[]> {
+    const existingSeedsInStore = Wallet.getExistingSeeds(filePath);
+    const wallets: Wallet[] = [];
+    for (const [walletId, seedData] of Object.entries(existingSeedsInStore)) {
+      let seed = seedData.seed;
+      if (!seed) {
+        /* istanbul ignore next */
+        throw new ArgumentError("Seed data is malformed");
+      }
+
+      const wallet = await Wallet.fetch(walletId);
+      if (seedData.encrypted) {
+        const sharedSecret = Wallet.getEncryptionKey();
+        if (!seedData.iv || !seedData.authTag) {
+          /* istanbul ignore next */
+          throw new ArgumentError("Encrypted seed data is malformed");
+        }
+  
+        const decipher = crypto.createDecipheriv(
+          "aes-256-gcm",
+          crypto.createHash("sha256").update(sharedSecret).digest(),
+          Buffer.from(seedData.iv, "hex"),
+        );
+        decipher.setAuthTag(Buffer.from(seedData.authTag, "hex"));
+  
+        const decryptedData = Buffer.concat([
+          decipher.update(Buffer.from(seed, "hex")),
+          decipher.final(),
+        ]);
+  
+        seed = decryptedData.toString("utf8");
+      }
+  
+      wallet.setSeed(seed);
+      await wallet.listAddresses();
+
+      wallets.push(wallet);
+    }
+
+    return wallets;
+  }
+
   /**
    * Loads the seed of the Wallet from the given file.
    *
@@ -641,7 +683,7 @@ export class Wallet {
    * @returns A string indicating the success of the operation
    */
   public async loadSeed(filePath: string): Promise<string> {
-    const existingSeedsInStore = this.getExistingSeeds(filePath);
+    const existingSeedsInStore = Wallet.getExistingSeeds(filePath);
     if (Object.keys(existingSeedsInStore).length === 0) {
       throw new ArgumentError(`File ${filePath} does not contain any seed data`);
     }
@@ -660,7 +702,7 @@ export class Wallet {
     }
 
     if (seedData.encrypted) {
-      const sharedSecret = this.getEncryptionKey();
+      const sharedSecret = Wallet.getEncryptionKey();
       if (!seedData.iv || !seedData.authTag) {
         /* istanbul ignore next */
         throw new ArgumentError("Encrypted seed data is malformed");
@@ -862,7 +904,7 @@ export class Wallet {
    * @param filePath - The path of the file to load the seed data from
    * @returns The seed data
    */
-  private getExistingSeeds(filePath: string): Record<string, SeedData> {
+  private static getExistingSeeds(filePath: string): Record<string, SeedData> {
     try {
       const data = fs.readFileSync(filePath, "utf8");
       if (!data) {
@@ -898,7 +940,7 @@ export class Wallet {
    *
    * @returns The encryption key.
    */
-  private getEncryptionKey(): Buffer {
+  private static getEncryptionKey(): Buffer {
     const privateKey = crypto.createPrivateKey(Coinbase.apiKeyPrivateKey);
     const publicKey = crypto.createPublicKey(Coinbase.apiKeyPrivateKey);
     const encryptionKey = crypto.diffieHellman({
