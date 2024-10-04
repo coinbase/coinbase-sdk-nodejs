@@ -2,7 +2,7 @@ import { StakingReward, Coinbase, Address } from "@coinbase/coinbase-sdk";
 import { coinbaseApiKeyPath, getKeypair } from "./solana_wallet";
 
 // list solana staking rewards for the provided wallet on solana-mainnet
-// then get the historical staking balances for the same wallet. 
+// then get the historical staking balances for the same wallet.
 // use May 2024 until current the today's date.
 async function listSolanaStakingRewards(wallet: string) {
   const startTime = new Date(2024, 5).toISOString();

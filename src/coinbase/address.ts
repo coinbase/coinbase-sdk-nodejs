@@ -9,10 +9,8 @@ import {
   Amount,
   StakeOptionsMode,
   StakingRewardFormat,
-  ListHistoricalBalancesResult,
-  ListHistoricalBalancesOptions,
-  ListTransactionsOptions,
-  ListTransactionsResult,
+  PaginationOptions,
+  PaginationResponse,
 } from "./types";
 import { formatDate, getWeekBackDate } from "./utils";
 import { StakingReward } from "./staking_reward";
@@ -94,97 +92,88 @@ export class Address {
   /**
    * Returns the historical balances of the provided asset.
    *
-   * @param options - The options to list historical balances.
-   * @param options.assetId - The asset ID.
-   * @param options.limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-   * @param options.page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
-   * @returns The list of historical balance of the asset and next page token.
+   * @param assetId - The asset ID.
+   * @param options - The pagination options.
+   * @param options.limit - The maximum number of Historical Balances to return. Limit can range between 1 and 100.
+   * @param options.page - The cursor for pagination across multiple pages of Historical Balances. Don\&#39;t include this parameter on the first call. Use the next page value returned in a previous response to request subsequent results.
+   *
+   * @returns The paginated list response of Historical Balances for the given Asset ID.
    */
-  public async listHistoricalBalances({
-    assetId,
-    limit,
-    page,
-  }: ListHistoricalBalancesOptions): Promise<ListHistoricalBalancesResult> {
-    const historyList: HistoricalBalance[] = [];
+  public async listHistoricalBalances(
+    assetId: string,
+    { limit = Coinbase.defaultPageLimit, page = undefined }: PaginationOptions = {},
+  ): Promise<PaginationResponse<HistoricalBalance>> {
+    const data: HistoricalBalance[] = [];
+    let nextPage: string | undefined;
 
-    if (limit !== undefined || page !== undefined) {
-      const response = await Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance(
-        this.getNetworkId(),
-        this.getId(),
-        Asset.primaryDenomination(assetId),
-        limit ? limit : undefined,
-        page ? page : undefined,
-      );
+    const response = await Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance(
+      this.getNetworkId(),
+      this.getId(),
+      Asset.primaryDenomination(assetId),
+      limit,
+      page,
+    );
 
-      response.data.data.forEach(historicalBalanceModel => {
-        const historicalBalance = HistoricalBalance.fromModel(historicalBalanceModel);
-        historyList.push(historicalBalance);
-      });
+    response.data.data.forEach(historicalBalanceModel => {
+      const historicalBalance = HistoricalBalance.fromModel(historicalBalanceModel);
+      data.push(historicalBalance);
+    });
 
-      return {
-        historicalBalances: historyList,
-        nextPageToken: response.data.next_page,
-      };
-    }
+    const hasMore = response.data.has_more;
 
-    const queue: string[] = [""];
-    while (queue.length > 0 && historyList.length < Address.MAX_HISTORICAL_BALANCE) {
-      const page = queue.shift();
-      const response = await Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance(
-        this.getNetworkId(),
-        this.getId(),
-        Asset.primaryDenomination(assetId),
-        100,
-        page ? page : undefined,
-      );
-
-      response.data.data.forEach(historicalBalanceModel => {
-        const historicalBalance = HistoricalBalance.fromModel(historicalBalanceModel);
-        historyList.push(historicalBalance);
-      });
-
-      if (response.data.has_more) {
-        if (response.data.next_page) {
-          queue.push(response.data.next_page);
-        }
+    if (hasMore) {
+      if (response.data.next_page) {
+        nextPage = response.data.next_page;
       }
     }
 
     return {
-      historicalBalances: historyList,
-      nextPageToken: "",
+      data,
+      hasMore,
+      nextPage,
     };
   }
 
   /**
    * Returns the transactions of the address.
    *
-   * @param options - The options to list transactions.
-   * @param options.limit - A limit on the number of objects to be returned. Limit can range between 1 and 25, and the default is 10.
-   * @param options.page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
-   * @returns The list of historical balance of the asset and next page token.
+   * @param options - The pagination options.
+   * @param options.limit - The maximum number of Transactions to return. Limit can range between 1 and 100.
+   * @param options.page - The cursor for pagination across multiple pages of Transactions. Don\&#39;t include this parameter on the first call. Use the next page value returned in a previous response to request subsequent results.
+   *
+   * @returns The paginated list response of Transactions.
    */
   public async listTransactions({
-    limit,
-    page,
-  }: ListTransactionsOptions): Promise<ListTransactionsResult> {
-    const txnList: Transaction[] = [];
+    limit = Coinbase.defaultPageLimit,
+    page = undefined,
+  }: PaginationOptions = {}): Promise<PaginationResponse<Transaction>> {
+    const data: Transaction[] = [];
+    let nextPage: string | undefined;
 
     const response = await Coinbase.apiClients.transactionHistory!.listAddressTransactions(
       this.getNetworkId(),
       this.getId(),
-      limit ? limit : undefined,
-      page ? page : undefined,
+      limit,
+      page,
     );
 
     response.data.data.forEach(transactionModel => {
       const transaction = new Transaction(transactionModel);
-      txnList.push(transaction);
+      data.push(transaction);
     });
 
+    const hasMore = response.data.has_more;
+
+    if (hasMore) {
+      if (response.data.next_page) {
+        nextPage = response.data.next_page;
+      }
+    }
+
     return {
-      transactions: txnList,
-      nextPageToken: response.data.next_page,
+      data,
+      hasMore,
+      nextPage,
     };
   }
 

@@ -13,11 +13,11 @@ let webhook = await Webhook.create(
 console.log(`Webhook successfully created: `, webhook.toString());
 
 // List out the webhooks created
-let webhooks = await Webhook.list();
+let resp = await Webhook.list();
 
 // Iterate over all webhooks created
 // You cna also see list of webhook from CDP Portal
 // https://portal.cdp.coinbase.com/products/webhooks
-for (const wh of webhooks) {
+for (const wh of resp.data) {
   console.log(wh.toString());
 }
