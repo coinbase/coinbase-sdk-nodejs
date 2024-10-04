@@ -1210,6 +1210,15 @@ export type CreateWebhookOptions = {
 };
 
 /**
+ * Options for updating a Webhook.
+ */
+export type UpdateWebhookOptions = {
+  notificationUri?: string;
+  eventFilters?: Array<WebhookEventFilter>;
+  eventTypeFilter?: { addresses: string[] };
+};
+
+/**
  * ContractInvocationAPI client type definition.
  */
 export type ContractInvocationAPIClient = {
@@ -1352,4 +1361,21 @@ export interface SmartContractAPIClient {
     deploySmartContractRequest: DeploySmartContractRequest,
     options?: RawAxiosRequestConfig,
   ): AxiosPromise<SmartContractModel>;
+}
+
+/**
+ * Options for pagination on list methods.
+ */
+export type PaginationOptions = {
+  limit?: number;
+  page?: string;
+};
+
+/**
+ * Paginated list response.
+ */
+export interface PaginationResponse<T> {
+  data: T[];
+  hasMore: boolean;
+  nextPage: string | undefined;
 }

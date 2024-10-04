@@ -1,6 +1,8 @@
 import { Webhook } from "../coinbase/webhook";
 import { Coinbase } from "../coinbase/coinbase";
 import { Webhook as WebhookModel } from "../client/api";
+import { mockReturnRejectedValue } from "./utils";
+import { APIError } from "../coinbase/api_error";
 
 describe("Webhook", () => {
   const mockModel: WebhookModel = {
@@ -22,7 +24,7 @@ describe("Webhook", () => {
       listWebhooks: jest.fn().mockResolvedValue({
         data: {
           data: [mockModel],
-          has_more: false,
+          has_more: true,
           next_page: null,
         },
       }),
@@ -31,6 +33,7 @@ describe("Webhook", () => {
           data: {
             ...mockModel,
             notification_uri: updateRequest.notification_uri,
+            event_type_filter: updateRequest.event_type_filter,
           },
         });
       }),
@@ -179,42 +182,26 @@ describe("Webhook", () => {
 
   describe(".list", () => {
     it("should list all webhooks", async () => {
-      const webhooks = await Webhook.list();
+      const paginationResponse = await Webhook.list({ limit: 1 });
+      const webhooks = paginationResponse.data;
 
-      expect(Coinbase.apiClients.webhook!.listWebhooks).toHaveBeenCalledWith(100, undefined);
+      expect(Coinbase.apiClients.webhook!.listWebhooks).toHaveBeenCalledWith(1, undefined);
       expect(webhooks.length).toBe(1);
       expect(webhooks[0].getId()).toBe("test-id");
+      expect(paginationResponse.hasMore).toBe(true);
+      expect(paginationResponse.nextPage).toBe(undefined);
     });
 
-    it("should list all webhooks across multiple pages", async () => {
-      Coinbase.apiClients.webhook!.listWebhooks = jest
-        .fn()
-        .mockResolvedValueOnce({
-          data: {
-            data: [mockModel],
-            has_more: true,
-            next_page: "next-page-token",
-          },
-        })
-        .mockResolvedValueOnce({
-          data: {
-            data: [mockModel],
-            has_more: false,
-            next_page: null,
-          },
-        });
-
-      const webhooks = await Webhook.list();
-
-      expect(webhooks.length).toBe(2);
-      expect(Coinbase.apiClients.webhook!.listWebhooks).toHaveBeenCalledTimes(2);
+    it("should throw an error if list fails", async () => {
+      Coinbase.apiClients.webhook!.listWebhooks = mockReturnRejectedValue(new APIError(""));
+      await expect(Webhook.list()).rejects.toThrow(APIError);
     });
   });
 
   describe("#update", () => {
     it("should update the webhook notification URI", async () => {
       const webhook = Webhook.init(mockModel);
-      await webhook.update("https://new-url.com/callback");
+      await webhook.update({ notificationUri: "https://new-url.com/callback" });
 
       expect(Coinbase.apiClients.webhook!.updateWebhook).toHaveBeenCalledWith("test-id", {
         notification_uri: "https://new-url.com/callback",
@@ -222,6 +209,32 @@ describe("Webhook", () => {
       });
 
       expect(webhook.getNotificationURI()).toBe("https://new-url.com/callback");
+    });
+    it("should update both the webhook notification URI and the list of addresses monitoring", async () => {
+      const mockModel: WebhookModel = {
+        id: "test-id",
+        network_id: "test-network",
+        notification_uri: "https://example.com/callback",
+        event_type: "erc20_transfer",
+        event_type_filter: {
+          addresses: ["0xa55C5950F7A3C42Fa5799B2Cac0e455774a07382"],
+        },
+        event_filters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
+      };
+      const webhook = Webhook.init(mockModel);
+      await webhook.update({
+        notificationUri: "https://new-url.com/callback",
+        eventTypeFilter: { addresses: ["0x1..", "0x2.."] },
+      });
+
+      expect(Coinbase.apiClients.webhook!.updateWebhook).toHaveBeenCalledWith("test-id", {
+        notification_uri: "https://new-url.com/callback",
+        event_filters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
+        event_type_filter: { addresses: ["0x1..", "0x2.."] },
+      });
+
+      expect(webhook.getNotificationURI()).toBe("https://new-url.com/callback");
+      expect(webhook.getEventTypeFilter()).toEqual({ addresses: ["0x1..", "0x2.."] });
     });
   });
 

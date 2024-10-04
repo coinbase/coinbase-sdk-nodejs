@@ -18,6 +18,8 @@ import {
   CreateERC20Options,
   CreateERC721Options,
   CreateERC1155Options,
+  PaginationOptions,
+  PaginationResponse,
 } from "../types";
 import { delay } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
@@ -105,65 +107,85 @@ export class WalletAddress extends Address {
   /**
    * Returns all the trades associated with the address.
    *
-   * @returns The list of trades.
+   * @param options - The pagination options.
+   * @param options.limit - The maximum number of Trades to return. Limit can range between 1 and 100.
+   * @param options.page - The cursor for pagination across multiple pages of Trades. Don\&#39;t include this parameter on the first call. Use the next page value returned in a previous response to request subsequent results.
+   *
+   * @returns The paginated list response of trades.
    */
-  public async listTrades(): Promise<Trade[]> {
-    const trades: Trade[] = [];
-    const queue: string[] = [""];
+  public async listTrades({
+    limit = Coinbase.defaultPageLimit,
+    page = undefined,
+  }: PaginationOptions = {}): Promise<PaginationResponse<Trade>> {
+    const data: Trade[] = [];
+    let nextPage: string | undefined;
 
-    while (queue.length > 0) {
-      const page = queue.shift();
-      const response = await Coinbase.apiClients.trade!.listTrades(
-        this.model.wallet_id,
-        this.model.address_id,
-        100,
-        page?.length ? page : undefined,
-      );
+    const response = await Coinbase.apiClients.trade!.listTrades(
+      this.model.wallet_id,
+      this.model.address_id,
+      limit,
+      page,
+    );
 
-      response.data.data.forEach(tradeModel => {
-        trades.push(new Trade(tradeModel));
-      });
+    response.data.data.forEach(tradeModel => {
+      data.push(new Trade(tradeModel));
+    });
 
-      if (response.data.has_more) {
-        if (response.data.next_page) {
-          queue.push(response.data.next_page);
-        }
+    const hasMore = response.data.has_more;
+
+    if (hasMore) {
+      if (response.data.next_page) {
+        nextPage = response.data.next_page;
       }
     }
 
-    return trades;
+    return {
+      data,
+      hasMore,
+      nextPage,
+    };
   }
 
   /**
    * Returns all the transfers associated with the address.
    *
-   * @returns The list of transfers.
+   * @param options - The pagination options.
+   * @param options.limit - The maximum number of Transfers to return. Limit can range between 1 and 100.
+   * @param options.page - The cursor for pagination across multiple pages of Transfers. Don\&#39;t include this parameter on the first call. Use the next page value returned in a previous response to request subsequent results.
+   *
+   * @returns The paginated list response of transfers.
    */
-  public async listTransfers(): Promise<Transfer[]> {
-    const transfers: Transfer[] = [];
-    const queue: string[] = [""];
+  public async listTransfers({
+    limit = Coinbase.defaultPageLimit,
+    page = undefined,
+  }: PaginationOptions = {}): Promise<PaginationResponse<Transfer>> {
+    const data: Transfer[] = [];
+    let nextPage: string | undefined;
 
-    while (queue.length > 0) {
-      const page = queue.shift();
-      const response = await Coinbase.apiClients.transfer!.listTransfers(
-        this.model.wallet_id,
-        this.model.address_id,
-        100,
-        page?.length ? page : undefined,
-      );
+    const response = await Coinbase.apiClients.transfer!.listTransfers(
+      this.model.wallet_id,
+      this.model.address_id,
+      limit,
+      page,
+    );
 
-      response.data.data.forEach(transferModel => {
-        transfers.push(Transfer.fromModel(transferModel));
-      });
+    response.data.data.forEach(transferModel => {
+      data.push(Transfer.fromModel(transferModel));
+    });
 
-      if (response.data.has_more) {
-        if (response.data.next_page) {
-          queue.push(response.data.next_page);
-        }
+    const hasMore = response.data.has_more;
+
+    if (hasMore) {
+      if (response.data.next_page) {
+        nextPage = response.data.next_page;
       }
     }
 
-    return transfers;
+    return {
+      data,
+      hasMore,
+      nextPage,
+    };
   }
 
   /**
@@ -685,34 +707,44 @@ export class WalletAddress extends Address {
   /**
    * Lists all the Payload Signatures associated with the Address.
    *
-   * @returns A promise that resolves to the list of Payload Signature objects.
+   * @param options - The pagination options.
+   * @param options.limit - The maximum number of Payload Signatures to return. Limit can range between 1 and 100.
+   * @param options.page - The cursor for pagination across multiple pages of Payload Signatures. Don\&#39;t include this parameter on the first call. Use the next page value returned in a previous response to request subsequent results.
+   *
+   * @returns A promise that resolves to the paginated list response of Payload Signatures.
    * @throws {APIError} if the API request to list the Payload Signatures fails.
    */
-  public async listPayloadSignatures(): Promise<PayloadSignature[]> {
-    const payloadSignatures: PayloadSignature[] = [];
-    const queue: string[] = [""];
+  public async listPayloadSignatures({
+    limit = Coinbase.defaultPageLimit,
+    page = undefined,
+  }: PaginationOptions = {}): Promise<PaginationResponse<PayloadSignature>> {
+    const data: PayloadSignature[] = [];
+    let nextPage: string | undefined;
 
-    while (queue.length > 0) {
-      const page = queue.shift();
-      const response = await Coinbase.apiClients.address!.listPayloadSignatures(
-        this.model.wallet_id,
-        this.model.address_id,
-        100,
-        page?.length ? page : undefined,
-      );
+    const response = await Coinbase.apiClients.address!.listPayloadSignatures(
+      this.model.wallet_id,
+      this.model.address_id,
+      100,
+      page?.length ? page : undefined,
+    );
 
-      response.data.data.forEach(payloadSignatureModel => {
-        payloadSignatures.push(new PayloadSignature(payloadSignatureModel));
-      });
+    response.data.data.forEach(payloadSignatureModel => {
+      data.push(new PayloadSignature(payloadSignatureModel));
+    });
 
-      if (response.data.has_more) {
-        if (response.data.next_page) {
-          queue.push(response.data.next_page);
-        }
+    const hasMore = response.data.has_more;
+
+    if (hasMore) {
+      if (response.data.next_page) {
+        nextPage = response.data.next_page;
       }
     }
 
-    return payloadSignatures;
+    return {
+      data,
+      hasMore,
+      nextPage,
+    };
   }
 
   /**

@@ -5,7 +5,12 @@ import {
   WebhookEventTypeFilter,
 } from "../client/api";
 import { Coinbase } from "./coinbase";
-import { CreateWebhookOptions } from "./types";
+import {
+  CreateWebhookOptions,
+  UpdateWebhookOptions,
+  PaginationOptions,
+  PaginationResponse,
+} from "./types";
 
 /**
  * A representation of a Webhook,
@@ -68,35 +73,41 @@ export class Webhook {
   }
 
   /**
-   * Enumerates the webhooks.
-   * The result is an array that contains all webhooks.
+   * Lists the Webhooks belonging to the CDP Project.
    *
-   * @returns A promise that resolves to an array of Webhook instances.
+   * @param options - The pagination options.
+   * @param options.limit - The maximum number of Webhooks to return. Limit can range between 1 and 100.
+   * @param options.page - The cursor for pagination across multiple pages of Webhooks. Don\&#39;t include this parameter on the first call. Use the next page value returned in a previous response to request subsequent results.
+   *
+   * @returns The paginated list response of Webhooks.
    */
-  public static async list(): Promise<Webhook[]> {
-    const webhookList: Webhook[] = [];
-    const queue: string[] = [""];
+  public static async list({
+    limit = Coinbase.defaultPageLimit,
+    page = undefined,
+  }: PaginationOptions = {}): Promise<PaginationResponse<Webhook>> {
+    const data: Webhook[] = [];
+    let nextPage: string | undefined;
 
-    while (queue.length > 0) {
-      const page = queue.shift();
-      const response = await Coinbase.apiClients.webhook!.listWebhooks(
-        100,
-        page ? page : undefined,
-      );
+    const response = await Coinbase.apiClients.webhook!.listWebhooks(limit, page);
 
-      const webhooks = response.data.data;
-      for (const w of webhooks) {
-        webhookList.push(new Webhook(w));
-      }
+    const webhooks = response.data.data;
+    for (const w of webhooks) {
+      data.push(new Webhook(w));
+    }
 
-      if (response.data.has_more) {
-        if (response.data.next_page) {
-          queue.push(response.data.next_page);
-        }
+    const hasMore: boolean = response.data.has_more ? response.data.has_more : false;
+
+    if (hasMore) {
+      if (response.data.next_page) {
+        nextPage = response.data.next_page;
       }
     }
 
-    return webhookList;
+    return {
+      data,
+      hasMore,
+      nextPage,
+    };
   }
 
   /**
@@ -163,15 +174,21 @@ export class Webhook {
   }
 
   /**
-   * Updates the webhook with a new notification URI.
+   * Updates the webhook with a new notification URI, and optionally a new list of addresses to monitor.
    *
-   * @param notificationUri - The new URI for webhook notifications.
+   * @param options - The options to update webhook.
+   * @param options.notificationUri - The new URI for webhook notifications.
+   * @param options.eventTypeFilter - The new eventTypeFilter that contains a new list (replacement) of addresses to monitor for the webhook.
    * @returns A promise that resolves to the updated Webhook object.
    */
-  public async update(notificationUri: string): Promise<Webhook> {
+  public async update({
+    notificationUri,
+    eventTypeFilter,
+  }: UpdateWebhookOptions): Promise<Webhook> {
     const result = await Coinbase.apiClients.webhook!.updateWebhook(this.getId()!, {
       notification_uri: notificationUri,
       event_filters: this.getEventFilters()!,
+      event_type_filter: eventTypeFilter,
     });
 
     this.model = result.data;

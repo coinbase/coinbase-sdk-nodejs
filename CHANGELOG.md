@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## [0.8.0] - 2024-10-04
+
+### Added
+- Explicit paginated list methods for listing `Wallet`, `Transfer`, `Transaction`, `Webhook`, `PayloadSignature`, and `HistoricalBalance`.
+
+### Breaking
+- `Webhook#update` now takes an Object of `{notificationUri, eventTypeFilter}` instead of `notificationUri` string
+- list methods for listing `Wallet`, `Transfer`, `Transaction`, `Webhook`, `PayloadSignature`, and `HistoricalBalance` now take `PaginationOptions` and return `PaginationResponse<T>`
+
 ## [0.7.0] - 2024-09-26
 
 ### Added

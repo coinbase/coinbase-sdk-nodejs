@@ -790,7 +790,7 @@ export interface CreateWalletRequestWallet {
  */
 export interface CreateWalletWebhookRequest {
     /**
-     * The URL to which the notifications will be sent
+     * The URL to which the notifications will be sent.
      * @type {string}
      * @memberof CreateWalletWebhookRequest
      */
@@ -2186,7 +2186,7 @@ export interface SmartContractList {
 export type SmartContractOptions = MultiTokenContractOptions | NFTContractOptions | TokenContractOptions;
 
 /**
- * The type of the smart contract
+ * The type of the smart contract.
  * @export
  * @enum {string}
  */
@@ -2878,7 +2878,7 @@ export interface UpdateWebhookRequest {
      * @type {string}
      * @memberof UpdateWebhookRequest
      */
-    'notification_uri': string;
+    'notification_uri'?: string;
 }
 /**
  * 

@@ -67,9 +67,10 @@ describe("Address", () => {
     });
 
     it("should return results with param", async () => {
-      const result = await address.listTransactions({ limit: 2, page: "page" });
-      expect(result.transactions.length).toEqual(2);
-      expect(result.transactions[0].blockHeight()).toEqual("12345");
+      const paginationResponse = await address.listTransactions({ limit: 2, page: "page" });
+      const transactions = paginationResponse.data;
+      expect(transactions.length).toEqual(2);
+      expect(transactions[0].blockHeight()).toEqual("12345");
       expect(Coinbase.apiClients.transactionHistory!.listAddressTransactions).toHaveBeenCalledTimes(
         1,
       );
@@ -79,7 +80,7 @@ describe("Address", () => {
         2,
         "page",
       );
-      expect(result.nextPageToken).toEqual("pageToken");
+      expect(paginationResponse.nextPage).toEqual("pageToken");
     });
 
     it("should return results without param", async () => {
@@ -97,19 +98,20 @@ describe("Address", () => {
         has_more: false,
         next_page: "",
       });
-      const result = await address.listTransactions({});
-      expect(result.transactions.length).toEqual(1);
-      expect(result.transactions[0].blockHeight()).toEqual("12348");
+      const paginationResponse = await address.listTransactions();
+      const transactions = paginationResponse.data;
+      expect(transactions.length).toEqual(1);
+      expect(transactions[0].blockHeight()).toEqual("12348");
       expect(Coinbase.apiClients.transactionHistory!.listAddressTransactions).toHaveBeenCalledTimes(
         1,
       );
       expect(Coinbase.apiClients.transactionHistory!.listAddressTransactions).toHaveBeenCalledWith(
         address.getNetworkId(),
         address.getId(),
-        undefined,
+        Coinbase.defaultPageLimit,
         undefined,
       );
-      expect(result.nextPageToken).toEqual("");
+      expect(paginationResponse.nextPage).toBe(undefined);
     });
 
     it("should return empty if no transactions found", async () => {
@@ -118,18 +120,19 @@ describe("Address", () => {
         has_more: false,
         next_page: "",
       });
-      const result = await address.listTransactions({});
-      expect(result.transactions.length).toEqual(0);
+      const paginationResponse = await address.listTransactions();
+      const transactions = paginationResponse.data;
+      expect(transactions.length).toEqual(0);
       expect(Coinbase.apiClients.transactionHistory!.listAddressTransactions).toHaveBeenCalledTimes(
         1,
       );
       expect(Coinbase.apiClients.transactionHistory!.listAddressTransactions).toHaveBeenCalledWith(
         address.getNetworkId(),
         address.getId(),
-        undefined,
+        Coinbase.defaultPageLimit,
         undefined,
       );
-      expect(result.nextPageToken).toEqual("");
+      expect(paginationResponse.nextPage).toBe(undefined);
     });
   });
 
@@ -168,12 +171,11 @@ describe("Address", () => {
     });
 
     it("should return results with USDC historical balance with limit", async () => {
-      const historicalBalancesResult = await address.listHistoricalBalances({
-        assetId: Coinbase.assets.Usdc,
-      });
-      expect(historicalBalancesResult.historicalBalances.length).toEqual(2);
-      expect(historicalBalancesResult.historicalBalances[0].amount).toEqual(new Decimal(1));
-      expect(historicalBalancesResult.historicalBalances[1].amount).toEqual(new Decimal(5));
+      const paginationResponse = await address.listHistoricalBalances(Coinbase.assets.Usdc);
+      const historicalBalances = paginationResponse.data;
+      expect(historicalBalances.length).toEqual(2);
+      expect(historicalBalances[0].amount).toEqual(new Decimal(1));
+      expect(historicalBalances[1].amount).toEqual(new Decimal(5));
       expect(
         Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance,
       ).toHaveBeenCalledTimes(1);
@@ -184,17 +186,17 @@ describe("Address", () => {
         100,
         undefined,
       );
-      expect(historicalBalancesResult.nextPageToken).toEqual("");
+      expect(paginationResponse.nextPage).toBe(undefined);
     });
 
     it("should return results with USDC historical balance with page", async () => {
-      const historicalBalancesResult = await address.listHistoricalBalances({
-        assetId: Coinbase.assets.Usdc,
+      const paginationResponse = await address.listHistoricalBalances(Coinbase.assets.Usdc, {
         page: "page_token",
       });
-      expect(historicalBalancesResult.historicalBalances.length).toEqual(2);
-      expect(historicalBalancesResult.historicalBalances[0].amount).toEqual(new Decimal(1));
-      expect(historicalBalancesResult.historicalBalances[1].amount).toEqual(new Decimal(5));
+      const historicalBalances = paginationResponse.data;
+      expect(historicalBalances.length).toEqual(2);
+      expect(historicalBalances[0].amount).toEqual(new Decimal(1));
+      expect(historicalBalances[1].amount).toEqual(new Decimal(5));
       expect(
         Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance,
       ).toHaveBeenCalledTimes(1);
@@ -202,10 +204,10 @@ describe("Address", () => {
         address.getNetworkId(),
         address.getId(),
         Coinbase.assets.Usdc,
-        undefined,
+        Coinbase.defaultPageLimit,
         "page_token",
       );
-      expect(historicalBalancesResult.nextPageToken).toEqual("");
+      expect(paginationResponse.nextPage).toBe(undefined);
     });
 
     it("should return empty if no historical balance found", async () => {
@@ -214,10 +216,9 @@ describe("Address", () => {
         has_more: false,
         next_page: "",
       });
-      const historicalBalancesResult = await address.listHistoricalBalances({
-        assetId: Coinbase.assets.Usdc,
-      });
-      expect(historicalBalancesResult.historicalBalances.length).toEqual(0);
+      const paginationResponse = await address.listHistoricalBalances(Coinbase.assets.Usdc);
+      const historicalBalances = paginationResponse.data;
+      expect(historicalBalances.length).toEqual(0);
       expect(
         Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance,
       ).toHaveBeenCalledTimes(1);
@@ -228,7 +229,7 @@ describe("Address", () => {
         100,
         undefined,
       );
-      expect(historicalBalancesResult.nextPageToken).toEqual("");
+      expect(paginationResponse.nextPage).toBe(undefined);
     });
 
     it("should return results with USDC historical balance and next page", async () => {
@@ -249,12 +250,12 @@ describe("Address", () => {
         next_page: "next page",
       });
 
-      const historicalBalancesResult = await address.listHistoricalBalances({
-        assetId: Coinbase.assets.Usdc,
+      const paginationResponse = await address.listHistoricalBalances(Coinbase.assets.Usdc, {
         limit: 1,
       });
-      expect(historicalBalancesResult.historicalBalances.length).toEqual(1);
-      expect(historicalBalancesResult.historicalBalances[0].amount).toEqual(new Decimal(5));
+      const historicalBalances = paginationResponse.data;
+      expect(historicalBalances.length).toEqual(1);
+      expect(historicalBalances[0].amount).toEqual(new Decimal(5));
       expect(
         Coinbase.apiClients.balanceHistory!.listAddressHistoricalBalance,
       ).toHaveBeenCalledTimes(1);
@@ -265,7 +266,7 @@ describe("Address", () => {
         1,
         undefined,
       );
-      expect(historicalBalancesResult.nextPageToken).toEqual("next page");
+      expect(paginationResponse.nextPage).toEqual("next page");
     });
   });
 });

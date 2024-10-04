@@ -76,6 +76,13 @@ export class Coinbase {
   static useServerSigner: boolean;
 
   /**
+   * The default page limit for list methods.
+   *
+   * @constant
+   */
+  static defaultPageLimit: number = 100;
+
+  /**
    * Initializes the Coinbase SDK.
    *
    * @deprecated as of v0.5.0, use `configure` or `configureFromJson` instead.

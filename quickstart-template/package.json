@@ -8,15 +8,18 @@
     "start-trade-assets": "node trade-assets.js",
     "start-mass-payout": "node mass-payout.js",
     "start-webhook": "node webhook.js",
-    "start-webhook-wallet-transfer": "node webhook-wallet-transfer.js",
-    "start-register-basename": "node register-basename.js"
+    "start-register-basename": "node register-basename.js",
+    "solana-list-rewards": "tsx solana_list_rewards.ts",
+    "solana-stake": "tsx solana_stake.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "@coinbase/coinbase-sdk": "^0.7.0",
+    "@solana/web3.js": "^2.0.0-rc.1",
+    "bs58": "^6.0.0",
+    "@coinbase/coinbase-sdk": "^0.8.0",
     "csv-parse": "^5.5.6",
     "csv-writer": "^1.6.0",
     "viem": "^2.21.6"
