@@ -64,6 +64,10 @@ async function bridgeUSDC(baseWallet: Wallet, arbitrumWallet: Wallet, usdcAmount
     console.log("Base USDC initial balance:", baseUSDCBalance);
     console.log("Arbitrum USDC initial balance:", arbitrumUSDCBalance);
 
+    // read MessageTransmitter.json ABI
+    const messageTransmitterAbi = JSON.parse(fs.readFileSync("MessageTransmitter.json", "utf8"));
+
+
     // pad the recipient address
     const arbitrumRecipientAddress = padAddress((await arbitrumWallet.getDefaultAddress()).getId());
     console.log("Arbitrum recipient address:", arbitrumRecipientAddress);
@@ -103,11 +107,12 @@ async function bridgeUSDC(baseWallet: Wallet, arbitrumWallet: Wallet, usdcAmount
         throw new Error('MessageSent event not found in transaction logs');
     }
     const messageBytes = decodeAbiParameters([{ type: 'bytes' }], log.data)[0];
+    console.log("Message bytes:", messageBytes);
     const messageHash = keccak256(messageBytes)
     console.log("Message hash:", messageHash);
 
     // step 4 - wait for attestation on the message
-    let attestationResponse: { status: string, signature?: string } = { status: 'pending' }
+    let attestationResponse: { status: string, attestation?: string } = { status: 'pending' }
     while (attestationResponse.status != 'complete') {
     const response = await fetch(
         `https://iris-api.circle.com/attestations/${messageHash}`,
@@ -116,16 +121,18 @@ async function bridgeUSDC(baseWallet: Wallet, arbitrumWallet: Wallet, usdcAmount
     await new Promise((r) => setTimeout(r, 2000))
     }
 
-    const attestationSignature = attestationResponse.signature!;
+    const attestationSignature = attestationResponse.attestation!;
+    console.log("Attestation signature:", attestationSignature);
 
     // step 5 - call receiveMessage on the arbitrum wallet MessageTransmitter
     const receiveMessageTx = await arbitrumWallet.invokeContract({
         contractAddress: "0xC30362313FBBA5cf9163F0bb16a0e01f01A896ca",
         method: "receiveMessage",
         args: {
-            message: messageHash,
-            signature: attestationSignature
+            message: messageBytes,
+            attestation: attestationSignature
         },
+        abi: messageTransmitterAbi
     });
     await receiveMessageTx.wait();
     console.log("Receive message transaction completed: ", receiveMessageTx.getTransactionHash());
@@ -135,6 +142,72 @@ async function bridgeUSDC(baseWallet: Wallet, arbitrumWallet: Wallet, usdcAmount
     const finalArbitrumUSDCBalance = await arbitrumWallet.getBalance("usdc");
     console.log("Base USDC final balance:", finalBaseUSDCBalance);
     console.log("Arbitrum USDC final balance:", finalArbitrumUSDCBalance);
+}
+
+async function bridgeUSDCDemo(baseWallet: Wallet, arbitrumWallet: Wallet, usdcAmount: Decimal) {
+    const tokenMessengerAbi = JSON.parse(fs.readFileSync("TokenMessenger.json", "utf8"));
+    const messageTransmitterAbi = JSON.parse(fs.readFileSync("MessageTransmitter.json", "utf8"));
+    // format the address to 32 bytes
+    const arbitrumRecipientAddress = padAddress((await arbitrumWallet.getDefaultAddress()).getId());
+    
+    // step 1a - approve funds to be burnt
+    const approveTx = await baseWallet.invokeContract({
+        contractAddress: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        method: "approve",
+        args: {
+            spender: "0x1682Ae6375C4E4A97e4B583BC394c861A46D8962",
+            value: usdcAmount.toString()
+        },
+    });
+    await approveTx.wait();
+    
+    // step 1b - tell Circle to burn the USDC
+    const burnTx = await baseWallet.invokeContract({
+        contractAddress: "0x1682Ae6375C4E4A97e4B583BC394c861A46D8962",
+        method: "depositForBurn",
+        args: {
+            amount: usdcAmount.toString(), // uint256 as string
+            destinationDomain: "3", // uint32 as string
+            mintRecipient: arbitrumRecipientAddress, // already padded bytes32 as hex string
+            burnToken: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" // address as hex string
+        },
+        abi: tokenMessengerAbi
+    });
+    await burnTx.wait();
+    
+    // step 1c - get the messageHash identifier
+    const transactionReceipt = await getTransactionReceipt(burnTx.getTransactionHash()!);
+    const eventTopic = keccak256(toBytes('MessageSent(bytes)'));
+    const log = transactionReceipt.logs.find((l) => l.topics[0] === eventTopic);
+    if (!log) {
+        throw new Error('MessageSent event not found in transaction logs');
+    }
+    const messageBytes = decodeAbiParameters([{ type: 'bytes' }], log.data)[0];
+    const messageHash = keccak256(messageBytes)
+
+    // step 2 - wait for circle to provide an attestation, indicating we're ready to mint on receiving chin
+    let attestationResponse: { status: string, attestation?: string } = { status: 'pending' }
+    while (attestationResponse.status != 'complete') {
+    const response = await fetch(
+        `https://iris-api.circle.com/attestations/${messageHash}`,
+    )
+    attestationResponse = await response.json()
+    await new Promise((r) => setTimeout(r, 2000))
+    }
+
+    const attestationSignature = attestationResponse.attestation!;
+
+    // step 3 - call receiveMessage on the arbitrum wallet MessageTransmitter
+    const receiveMessageTx = await arbitrumWallet.invokeContract({
+        contractAddress: "0xC30362313FBBA5cf9163F0bb16a0e01f01A896ca",
+        method: "receiveMessage",
+        args: {
+            message: messageBytes,
+            attestation: attestationSignature
+        },
+        abi: messageTransmitterAbi
+    });
+    await receiveMessageTx.wait();
 }
 
 async function main() {
