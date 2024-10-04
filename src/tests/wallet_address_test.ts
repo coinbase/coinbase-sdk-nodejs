@@ -845,32 +845,20 @@ describe("WalletAddress", () => {
         next_page: "",
         total_count: 0,
       } as TransferList;
-      Coinbase.apiClients.transfer!.listTransfers = mockFn((walletId, addressId) => {
-        VALID_TRANSFER_MODEL.wallet_id = walletId;
-        VALID_TRANSFER_MODEL.address_id = addressId;
-        response.next_page = pages.shift() as string;
-        response.data = [VALID_TRANSFER_MODEL];
-        response.has_more = !!response.next_page;
-        return { data: response };
-      });
+      Coinbase.apiClients.transfer!.listTransfers = mockReturnValue(response);
     });
 
     it("should return the list of transfers", async () => {
-      const transfers = await address.listTransfers();
-      expect(transfers).toHaveLength(3);
+      const paginationResponse = await address.listTransfers();
+      const transfers = paginationResponse.data;
+      expect(transfers).toHaveLength(1);
       expect(transfers[0]).toBeInstanceOf(Transfer);
-      expect(Coinbase.apiClients.transfer!.listTransfers).toHaveBeenCalledTimes(3);
+      expect(Coinbase.apiClients.transfer!.listTransfers).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.transfer!.listTransfers).toHaveBeenCalledWith(
         address.getWalletId(),
         address.getId(),
         100,
         undefined,
-      );
-      expect(Coinbase.apiClients.transfer!.listTransfers).toHaveBeenCalledWith(
-        address.getWalletId(),
-        address.getId(),
-        100,
-        "abc",
       );
     });
 
@@ -2563,10 +2551,12 @@ describe("WalletAddress", () => {
         VALID_PAYLOAD_SIGNATURE_LIST,
       );
 
-      const payloadSignatures = await walletAddress.listPayloadSignatures();
+      const paginationResponse = await walletAddress.listPayloadSignatures();
 
       expect(Coinbase.apiClients.address!.listPayloadSignatures).toHaveBeenCalledTimes(1);
-      expect(payloadSignatures).toHaveLength(VALID_PAYLOAD_SIGNATURE_LIST.data.length);
+      expect(paginationResponse.data).toHaveLength(VALID_PAYLOAD_SIGNATURE_LIST.data.length);
+      expect(paginationResponse.hasMore).toBe(false);
+      expect(paginationResponse.nextPage).toBe(undefined);
     });
 
     it("should throw an APIError when the API call to list payload signatures fails", async () => {

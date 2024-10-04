@@ -1362,3 +1362,20 @@ export interface SmartContractAPIClient {
     options?: RawAxiosRequestConfig,
   ): AxiosPromise<SmartContractModel>;
 }
+
+/**
+ * Options for pagination on list methods.
+ */
+export type PaginationOptions = {
+  limit?: number;
+  page?: string;
+};
+
+/**
+ * Paginated list response.
+ */
+export interface PaginationResponse<T> {
+  data: T[];
+  hasMore: boolean;
+  nextPage: string | undefined;
+}

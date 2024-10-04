@@ -445,13 +445,11 @@ describe("Wallet Class", () => {
     it("should successfully return historical balances", async () => {
       const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
       Coinbase.apiClients.asset!.getAsset = getAssetMock();
-      const response = await wallet.listHistoricalBalances({
-        assetId: Coinbase.assets.Usdc,
-      });
-      expect(response.historicalBalances.length).toEqual(2);
-      expect(response.historicalBalances[0].amount).toEqual(new Decimal(1));
-      expect(response.historicalBalances[1].amount).toEqual(new Decimal(5));
-      expect(response.nextPageToken).toEqual("");
+      const response = await wallet.listHistoricalBalances(Coinbase.assets.Usdc);
+      expect(response.data.length).toEqual(2);
+      expect(response.data[0].amount).toEqual(new Decimal(1));
+      expect(response.data[1].amount).toEqual(new Decimal(5));
+      expect(response.nextPage).toBe(undefined);
     });
   });
 
@@ -1332,9 +1330,10 @@ describe("Wallet Class", () => {
 
       const [address1] = await wallet.listAddresses();
       const tradeWallet = (await wallet.getAddress(address1.getId())) as WalletAddress;
-      const trades = await tradeWallet.listTrades();
+      const paginationResponse = await tradeWallet.listTrades();
+      const trades = paginationResponse.data;
       expect(trades[0]).toBeInstanceOf(Trade);
-      expect(trades.length).toBe(2);
+      expect(trades.length).toBe(1);
     });
   });
 
