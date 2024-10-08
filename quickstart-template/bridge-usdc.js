@@ -122,9 +122,7 @@ async function bridgeUSDC(baseWallet, arbitrumWallet, usdcAmount) {
 }
 
 function padAddress(address) {
-    // Remove '0x' if present
     address = address.replace(/^0x/, '');
-    // Pad to 64 characters (32 bytes)
     return '0x' + address.padStart(64, '0');
 }
 
@@ -157,10 +155,7 @@ async function fetchWalletAndLoadSeed(walletId, seedFilePath) {
 async function main() {
     try {
       const { BASE_WALLET_ID, ARBITRUM_WALLET_ID, SEED_FILE_PATH } = process.env;
-      console.log("BASE_WALLET_ID: ", BASE_WALLET_ID);
-      console.log("ARBITRUM_WALLET_ID: ", ARBITRUM_WALLET_ID);
-      console.log("SEED_FILE_PATH: ", SEED_FILE_PATH);
-      // Manage CDP API Key for Coinbase SDK.
+
       // Configure location to CDP API Key.
       Coinbase.configureFromJson({
         filePath: `${os.homedir()}/Downloads/cdp_api_key.json`,
