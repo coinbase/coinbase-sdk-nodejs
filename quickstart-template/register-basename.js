@@ -145,7 +145,7 @@ async function fetchWalletAndLoadSeed(walletId, seedFilePath) {
   }
 }
 
-async () => {
+(async () => {
   try {
     const { BASE_NAME, WALLET_ID, SEED_FILE_PATH } = process.env;
 
@@ -165,4 +165,4 @@ async () => {
   } catch (error) {
     console.error(`Error in registering a Basename for my wallet: `, error);
   }
-};
+})();
