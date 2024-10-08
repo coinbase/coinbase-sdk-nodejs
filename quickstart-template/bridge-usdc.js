@@ -63,7 +63,7 @@ async function bridgeUSDC(baseWallet, arbitrumWallet, usdcAmount) {
         },
     });
     await approveTx.wait();
-    console.log("Approve transaction completed: ", approveTx.getTransactionHash());
+    console.log("Approve transaction completed:", approveTx.getTransactionHash());
     
     // step 2 - call depositForBurn
     const depositTx = await baseWallet.invokeContract({
@@ -78,7 +78,7 @@ async function bridgeUSDC(baseWallet, arbitrumWallet, usdcAmount) {
         abi: tokenMessengerAbi
     });
     await depositTx.wait();
-    console.log("Deposit transaction completed: ", depositTx.getTransactionHash());
+    console.log("Deposit transaction completed:", depositTx.getTransactionHash());
     
     // step 3 - get the messageHash from the transaction receipt logs
     const transactionReceipt = await getTransactionReceipt(depositTx.getTransactionHash());
@@ -102,6 +102,7 @@ async function bridgeUSDC(baseWallet, arbitrumWallet, usdcAmount) {
     }
 
     const attestationSignature = attestationResponse.attestation;
+    console.log("Received attestation signature from Circle's Iris service:", attestationSignature);
 
     // step 5 - call receiveMessage on the arbitrum wallet MessageTransmitter
     const receiveMessageTx = await arbitrumWallet.invokeContract({
@@ -114,7 +115,7 @@ async function bridgeUSDC(baseWallet, arbitrumWallet, usdcAmount) {
         abi: messageTransmitterAbi
     });
     await receiveMessageTx.wait();
-    console.log("Receive message transaction completed: ", receiveMessageTx.getTransactionHash());
+    console.log("Receive message transaction completed:", receiveMessageTx.getTransactionHash());
 
     const finalBaseUSDCBalance = await baseWallet.getBalance("usdc");
     const finalArbitrumUSDCBalance = await arbitrumWallet.getBalance("usdc");
