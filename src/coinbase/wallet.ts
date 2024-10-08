@@ -660,7 +660,7 @@ export class Wallet {
     }
 
     if (seedData.encrypted) {
-      const sharedSecret = Wallet.getEncryptionKey();
+      const sharedSecret = this.getEncryptionKey();
       if (!seedData.iv || !seedData.authTag) {
         /* istanbul ignore next */
         throw new ArgumentError("Encrypted seed data is malformed");
