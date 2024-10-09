@@ -185,10 +185,13 @@ export class Webhook {
     notificationUri,
     eventTypeFilter,
   }: UpdateWebhookOptions): Promise<Webhook> {
+    const finalNotificationUri = notificationUri ?? this.getNotificationURI();
+    const finalEventTypeFilter = eventTypeFilter ?? this.getEventTypeFilter();
+
     const result = await Coinbase.apiClients.webhook!.updateWebhook(this.getId()!, {
-      notification_uri: notificationUri,
+      notification_uri: finalNotificationUri,
       event_filters: this.getEventFilters()!,
-      event_type_filter: eventTypeFilter,
+      event_type_filter: finalEventTypeFilter,
     });
 
     this.model = result.data;

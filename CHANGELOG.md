@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## [0.8.1] - 2024-10-09
+
+### Fixed
+- Fixed a bug that overwrites existing webhook notification URI when only updating a webhook's addresses
+
 ## [0.8.0] - 2024-10-04
 
 ### Added
