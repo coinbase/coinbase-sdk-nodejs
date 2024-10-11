@@ -3,16 +3,38 @@
 This is a template repository for quickly getting started with a Webhook App,
 which can be used for setting up Webhooks for listening to blockchain event notifications.
 
-## Public Webhook App
+## Local Webhook App
 
-You can use [webhook.site](https://webhook.site/) or [Vercel](https://vercel.com/) or other hosting solutions to create a simple webapp with public facing URL which can receive data from webhook POST calls.
-
-Once the public webapp is setup, copy the URL provided and test it locally. Below is an example from webhook.site:
+To set up the template, run the following commands from this `webhook` folder:
 
 ```bash
-curl -X POST 'https://webhook.site/00000000-0000-0000-0000-000000000000' \
-  -H 'content-type: application/json' \
-  -d $'{"id": 7, "name": "Jack Daniels", "position": "Assistant"}'
+npm install
+npm run start-webhook-app
+```
+
+This command will set up a webhook app locally.
+
+Once the local webhook app is setup, in another terminal window, you can test it with:
+
+```bash
+curl -X POST -H "Content-Type:application/json" -d '{"app": "webhook"}' http://localhost:3000/callback
+```
+
+## Public Webhook App
+
+To setup a temporary public URL that points to this local webhook app,
+you can use [Pinggy](https://pinggy.io/) in another terminal window:
+
+```bash
+ssh -p 443 -R0:localhost:3000 -L4300:localhost:4300 qr@a.pinggy.io
+```
+
+You can also use [Vercel](https://vercel.com/) or other hosting solutions for your webhook app.
+
+Once the public webhook app is setup, copy the URL provided and test it with:
+
+```bash
+curl -X POST -H "Content-Type:application/json" -d '{"app": "webhook"}' {url_copied_from_pinggy_io}/callback
 ```
 
 This URL (ie Notification URL) can now be used to create Webhook either
