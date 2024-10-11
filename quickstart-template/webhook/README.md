@@ -23,13 +23,13 @@ curl -X POST -H "Content-Type:application/json" -d '{"app": "webhook"}' http://l
 ## Public Webhook App
 
 To setup a temporary public URL that points to this local webhook app,
-you can use [Pinggy](https://pinggy.io/) in another terminal window:
+you can use [Pinggy](https://pinggy.io/) or [ngrok](https://ngrok.com/) in another terminal window:
 
 ```bash
 ssh -p 443 -R0:localhost:3000 -L4300:localhost:4300 qr@a.pinggy.io
 ```
 
-You can also use [Vercel](https://vercel.com/) or other hosting solutions for your webhook app.
+You can also use [Vercel](https://vercel.com/), [webhook.site](https://webhook.site/) or other hosting solutions for your webhook app.
 
 Once the public webhook app is setup, copy the URL provided and test it with:
 
