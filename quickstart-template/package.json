@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start-webhook-wallet-transfer": "node webhook-wallet-transfer.js",
+    "start-wallet-history": "node wallet-history.js",
     "start": "node index.js",
     "start-trade-assets": "node trade-assets.js",
     "start-mass-payout": "node mass-payout.js",
