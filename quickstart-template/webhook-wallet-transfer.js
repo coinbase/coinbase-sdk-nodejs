@@ -4,8 +4,7 @@ import { Coinbase, Wallet, Webhook } from "@coinbase/coinbase-sdk";
 Coinbase.configureFromJson({ filePath: "~/Downloads/cdp_api_key.json" });
 
 // Change this to your webhook URL
-// const webhookNotificationUri = '<YOUR_NOTIFICATION_URL>'
-const webhookNotificationUri = 'https://webhook.site/90b1f7cc-b451-43cb-88bf-5980b97cd77d'
+const webhookNotificationUri = '<YOUR_NOTIFICATION_URL>'
 
 ;(async function() {
   console.log('------------------------------------------------------------------------------------------------------------------');
