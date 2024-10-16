@@ -13,6 +13,17 @@ npm run start
 
 This command will create a developer-custodial wallet, deposit testnet funds to it and perform a transfer to another wallet.
 
+## Wallet transaction history
+
+To set up the template, run the following commands:
+
+```bash
+npm install
+npm run start-wallet-history
+```
+
+This command will create a developer-custodial wallet, deposit testnet funds to it and perform a few transfers to another wallet and back. Then list all the transactions on that wallet.
+
 ## Trade Assets
 
 To set up the template, run the following commands:
