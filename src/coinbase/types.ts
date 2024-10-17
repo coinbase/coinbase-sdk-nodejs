@@ -54,6 +54,8 @@ import {
   DeploySmartContractRequest,
   WebhookEventTypeFilter,
   CreateWalletWebhookRequest,
+  ReadContractRequest,
+  SolidityValue,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -1361,6 +1363,21 @@ export interface SmartContractAPIClient {
     deploySmartContractRequest: DeploySmartContractRequest,
     options?: RawAxiosRequestConfig,
   ): AxiosPromise<SmartContractModel>;
+
+  /**
+   * Read a contract
+   *
+   * @param networkId - Unique identifier for the blockchain network
+   * @param contractAddress - EVM address of the smart contract (42 characters, including '0x', in lowercase)
+   * @param readContractRequest - The request body containing the method, args, and optionally the ABI
+   * @returns - A promise resolving to the contract read result
+   * @throws {APIError} If the request fails
+   */
+  readContract(
+    networkId: string,
+    contractAddress: string,
+    readContractRequest: ReadContractRequest,
+  ): AxiosPromise<SolidityValue>;
 }
 
 /**

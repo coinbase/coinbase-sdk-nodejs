@@ -1802,6 +1802,31 @@ export interface PayloadSignatureList {
     'total_count': number;
 }
 /**
+ * 
+ * @export
+ * @interface ReadContractRequest
+ */
+export interface ReadContractRequest {
+    /**
+     * The name of the contract method to call
+     * @type {string}
+     * @memberof ReadContractRequest
+     */
+    'method': string;
+    /**
+     * The JSON-encoded arguments to pass to the contract method. The keys should be the argument names and the values should be the argument values.
+     * @type {string}
+     * @memberof ReadContractRequest
+     */
+    'args': string;
+    /**
+     * The JSON-encoded ABI of the contract method (optional, will use cached ABI if not provided)
+     * @type {string}
+     * @memberof ReadContractRequest
+     */
+    'abi'?: string;
+}
+/**
  * An event representing a seed creation.
  * @export
  * @interface SeedCreationEvent
@@ -2199,6 +2224,93 @@ export const SmartContractType = {
 
 export type SmartContractType = typeof SmartContractType[keyof typeof SmartContractType];
 
+
+/**
+ * 
+ * @export
+ * @interface SolidityValue
+ */
+export interface SolidityValue {
+    /**
+     * 
+     * @type {string}
+     * @memberof SolidityValue
+     */
+    'type': SolidityValueTypeEnum;
+    /**
+     * The field name for tuple types. Not used for other types.
+     * @type {string}
+     * @memberof SolidityValue
+     */
+    'name'?: string;
+    /**
+     * The value as a string for simple types. Not used for complex types (array, tuple).
+     * @type {string}
+     * @memberof SolidityValue
+     */
+    'value'?: string;
+    /**
+     * For array and tuple types, the components of the value
+     * @type {Array<SolidityValue>}
+     * @memberof SolidityValue
+     */
+    'values'?: Array<SolidityValue>;
+}
+
+export const SolidityValueTypeEnum = {
+    Uint8: 'uint8',
+    Uint16: 'uint16',
+    Uint32: 'uint32',
+    Uint64: 'uint64',
+    Uint128: 'uint128',
+    Uint256: 'uint256',
+    Int8: 'int8',
+    Int16: 'int16',
+    Int32: 'int32',
+    Int64: 'int64',
+    Int128: 'int128',
+    Int256: 'int256',
+    Address: 'address',
+    Bool: 'bool',
+    String: 'string',
+    Bytes: 'bytes',
+    Bytes1: 'bytes1',
+    Bytes2: 'bytes2',
+    Bytes3: 'bytes3',
+    Bytes4: 'bytes4',
+    Bytes5: 'bytes5',
+    Bytes6: 'bytes6',
+    Bytes7: 'bytes7',
+    Bytes8: 'bytes8',
+    Bytes9: 'bytes9',
+    Bytes10: 'bytes10',
+    Bytes11: 'bytes11',
+    Bytes12: 'bytes12',
+    Bytes13: 'bytes13',
+    Bytes14: 'bytes14',
+    Bytes15: 'bytes15',
+    Bytes16: 'bytes16',
+    Bytes17: 'bytes17',
+    Bytes18: 'bytes18',
+    Bytes19: 'bytes19',
+    Bytes20: 'bytes20',
+    Bytes21: 'bytes21',
+    Bytes22: 'bytes22',
+    Bytes23: 'bytes23',
+    Bytes24: 'bytes24',
+    Bytes25: 'bytes25',
+    Bytes26: 'bytes26',
+    Bytes27: 'bytes27',
+    Bytes28: 'bytes28',
+    Bytes29: 'bytes29',
+    Bytes30: 'bytes30',
+    Bytes31: 'bytes31',
+    Bytes32: 'bytes32',
+    Array: 'array',
+    Tuple: 'tuple'
+} as const;
+
+export type SolidityValueTypeEnum = typeof SolidityValueTypeEnum[keyof typeof SolidityValueTypeEnum];
 
 /**
  * An onchain sponsored gasless send.
@@ -6275,6 +6387,50 @@ export const SmartContractsApiAxiosParamCreator = function (configuration?: Conf
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Perform a read operation on a smart contract without creating a transaction
+         * @summary Read data from a smart contract
+         * @param {string} networkId 
+         * @param {string} contractAddress 
+         * @param {ReadContractRequest} readContractRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        readContract: async (networkId: string, contractAddress: string, readContractRequest: ReadContractRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('readContract', 'networkId', networkId)
+            // verify required parameter 'contractAddress' is not null or undefined
+            assertParamExists('readContract', 'contractAddress', contractAddress)
+            // verify required parameter 'readContractRequest' is not null or undefined
+            assertParamExists('readContract', 'readContractRequest', readContractRequest)
+            const localVarPath = `/v1/networks/{network_id}/smart_contracts/{contract_address}/read`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"contract_address"}}`, encodeURIComponent(String(contractAddress)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(readContractRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -6345,6 +6501,21 @@ export const SmartContractsApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['SmartContractsApi.listSmartContracts']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * Perform a read operation on a smart contract without creating a transaction
+         * @summary Read data from a smart contract
+         * @param {string} networkId 
+         * @param {string} contractAddress 
+         * @param {ReadContractRequest} readContractRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async readContract(networkId: string, contractAddress: string, readContractRequest: ReadContractRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SolidityValue>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.readContract(networkId, contractAddress, readContractRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SmartContractsApi.readContract']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -6403,6 +6574,18 @@ export const SmartContractsApiFactory = function (configuration?: Configuration,
         listSmartContracts(walletId: string, addressId: string, options?: RawAxiosRequestConfig): AxiosPromise<SmartContractList> {
             return localVarFp.listSmartContracts(walletId, addressId, options).then((request) => request(axios, basePath));
         },
+        /**
+         * Perform a read operation on a smart contract without creating a transaction
+         * @summary Read data from a smart contract
+         * @param {string} networkId 
+         * @param {string} contractAddress 
+         * @param {ReadContractRequest} readContractRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        readContract(networkId: string, contractAddress: string, readContractRequest: ReadContractRequest, options?: RawAxiosRequestConfig): AxiosPromise<SolidityValue> {
+            return localVarFp.readContract(networkId, contractAddress, readContractRequest, options).then((request) => request(axios, basePath));
+        },
     };
 };
 
@@ -6459,6 +6642,18 @@ export interface SmartContractsApiInterface {
      * @memberof SmartContractsApiInterface
      */
     listSmartContracts(walletId: string, addressId: string, options?: RawAxiosRequestConfig): AxiosPromise<SmartContractList>;
+
+    /**
+     * Perform a read operation on a smart contract without creating a transaction
+     * @summary Read data from a smart contract
+     * @param {string} networkId 
+     * @param {string} contractAddress 
+     * @param {ReadContractRequest} readContractRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartContractsApiInterface
+     */
+    readContract(networkId: string, contractAddress: string, readContractRequest: ReadContractRequest, options?: RawAxiosRequestConfig): AxiosPromise<SolidityValue>;
 
 }
 
@@ -6523,6 +6718,20 @@ export class SmartContractsApi extends BaseAPI implements SmartContractsApiInter
      */
     public listSmartContracts(walletId: string, addressId: string, options?: RawAxiosRequestConfig) {
         return SmartContractsApiFp(this.configuration).listSmartContracts(walletId, addressId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Perform a read operation on a smart contract without creating a transaction
+     * @summary Read data from a smart contract
+     * @param {string} networkId 
+     * @param {string} contractAddress 
+     * @param {ReadContractRequest} readContractRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartContractsApi
+     */
+    public readContract(networkId: string, contractAddress: string, readContractRequest: ReadContractRequest, options?: RawAxiosRequestConfig) {
+        return SmartContractsApiFp(this.configuration).readContract(networkId, contractAddress, readContractRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
