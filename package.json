@@ -13,9 +13,10 @@
     "format": "prettier -c .prettierrc --write \"**/*.{ts,js,cjs,json,md}\"",
     "format-check": "prettier -c .prettierrc --check \"**/*.{ts,js,cjs,json,md}\"",
     "check": "tsc --noEmit",
-    "test": "npx jest --no-cache  --testMatch=**/*_test.ts",
+    "test": "npx jest --no-cache  --testMatch=**/*_test.ts && npm run test:types",
     "test:dry-run": "npm install && npm ci && npm publish --dry-run",
     "test:e2e": "npx jest --no-cache --testMatch=**/e2e.ts --coverageThreshold '{}'",
+    "test:types": "tsd --files src/tests/types.test-d.ts",
     "clean": "rm -rf dist/*",
     "build": "tsc",
     "prepack": "tsc",
@@ -26,6 +27,7 @@
   ],
   "dependencies": {
     "@scure/bip32": "^1.4.0",
+    "abitype": "^1.0.6",
     "axios": "^1.6.8",
     "axios-mock-adapter": "^1.22.0",
     "axios-retry": "^4.4.1",
@@ -35,7 +37,8 @@
     "dotenv": "^16.4.5",
     "ethers": "^6.12.1",
     "node-jose": "^2.2.0",
-    "secp256k1": "^5.0.0"
+    "secp256k1": "^5.0.0",
+    "viem": "^2.21.26"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
@@ -53,6 +56,7 @@
     "prettier": "^3.2.5",
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
+    "tsd": "^0.31.2",
     "typedoc": "^0.25.13",
     "typescript": "^5.4.5"
   }
