@@ -27,3 +27,4 @@ export * from "./coinbase/types";
 export * from "./coinbase/validator";
 export * from "./coinbase/wallet";
 export * from "./coinbase/webhook";
+export * from "./coinbase/read_contract";
