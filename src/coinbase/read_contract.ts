@@ -2,7 +2,7 @@ import type { Abi } from "abitype";
 import { Coinbase } from "./coinbase";
 import { ContractFunctionName } from "viem";
 import { SolidityValue } from "../client";
-import { ContractFunctionReturnType } from "./types/contract";
+import { ContractFunctionReturnType, NestedArgs } from "./types/contract";
 
 /**
  * Converts a SolidityValue to its corresponding JavaScript type.
@@ -114,7 +114,7 @@ function parseSolidityValue<T>(solidityValue: SolidityValue): T {
 export async function readContract<
   TAbi extends Abi | undefined,
   TFunctionName extends TAbi extends Abi ? ContractFunctionName<TAbi, "view" | "pure"> : string,
-  TArgs extends Record<string, string>,
+  TArgs extends NestedArgs,
 >(params: {
   networkId: string;
   contractAddress: `0x${string}`;
