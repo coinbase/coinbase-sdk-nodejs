@@ -12,7 +12,7 @@ import { ContractFunctionName } from "viem";
  * Each parameter name becomes a key in the resulting dictionary, with a string value.
  */
 type AbiParametersToDictionary<T extends readonly AbiParameter[]> = {
-  [K in T[number]["name"] as K extends string ? K : never]: string;
+  [K in T[number]["name"] as K extends string ? K : any]: string;
 };
 
 /**
@@ -38,9 +38,9 @@ type MatchArgsToFunction<
     ? TFunctions extends AbiFunction
       ? MatchesParams<TArgs, AbiParametersToDictionary<TFunctions["inputs"]>> extends true
         ? TFunctions
-        : never
-      : never
-    : never;
+        : any
+      : any
+    : any;
 
 /**
  * Determines the return type of a contract function based on the ABI, function name, and arguments.
@@ -68,6 +68,6 @@ export type ContractFunctionReturnType<
           : TOutputs extends readonly [infer TOutput]
             ? TOutput
             : TOutputs
-        : never
-      : unknown
-    : unknown;
+        : any
+      : any
+    : any;

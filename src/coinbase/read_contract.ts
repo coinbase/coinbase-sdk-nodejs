@@ -114,7 +114,7 @@ function parseSolidityValue<T>(solidityValue: SolidityValue): T {
 export async function readContract<
   TAbi extends Abi | undefined,
   TFunctionName extends TAbi extends Abi ? ContractFunctionName<TAbi, "view" | "pure"> : string,
-  TArgs extends Record<string, string>,
+  TArgs extends Record<string, any>,
 >(params: {
   networkId: string;
   contractAddress: `0x${string}`;
@@ -128,7 +128,7 @@ export async function readContract<
         Extract<TFunctionName, ContractFunctionName<TAbi, "view" | "pure">>,
         TArgs
       >
-    : unknown
+    : any
 > {
   const response = await Coinbase.apiClients.smartContract!.readContract(
     params.networkId,
