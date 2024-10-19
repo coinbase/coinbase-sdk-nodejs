@@ -110,7 +110,7 @@ function parseSolidityValue<T>(solidityValue: SolidityValue): T {
  * @param {TFunctionName} params.method - The contract method to call.
  * @param {TArgs} params.args - The arguments for the contract method.
  * @param {TAbi} [params.abi] - The contract ABI (optional).
- * @returns {Promise<any>} The result of the contract call.
+ * @returns {Promise<TAbi extends Abi ? ContractFunctionReturnType<TAbi, Extract<TFunctionName, ContractFunctionName<TAbi, "view" | "pure">>, TArgs> : unknown>} The result of the contract call.
  */
 export async function readContract<
   TAbi extends Abi | undefined,
@@ -148,6 +148,6 @@ export async function readContract<
           Extract<TFunctionName, ContractFunctionName<TAbi, "view" | "pure">>,
           TArgs
         >
-      : unknown
+      : any
   >(response.data);
 }
