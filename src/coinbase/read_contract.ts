@@ -1,3 +1,4 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 import type { Abi } from "abitype";
 import { Coinbase } from "./coinbase";
 import { ContractFunctionName } from "viem";
@@ -109,7 +110,7 @@ function parseSolidityValue<T>(solidityValue: SolidityValue): T {
  * @param {TFunctionName} params.method - The contract method to call.
  * @param {TArgs} params.args - The arguments for the contract method.
  * @param {TAbi} [params.abi] - The contract ABI (optional).
- * @returns {Promise<unknown>} The result of the contract call.
+ * @returns {Promise<any>} The result of the contract call.
  */
 export async function readContract<
   TAbi extends Abi | undefined,
