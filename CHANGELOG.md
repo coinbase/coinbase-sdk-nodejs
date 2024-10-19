@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## [0.9.1] - 2024-10-18
+
+### Fixed
+- Fixed a bug where readContract was not working for nested types
+
 ## [0.9.0] - 2024-10-17
 
 ### Added

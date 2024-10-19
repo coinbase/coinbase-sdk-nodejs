@@ -1,3 +1,4 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 import type { Abi } from "abitype";
 import { Coinbase } from "./coinbase";
 import { ContractFunctionName } from "viem";
@@ -109,12 +110,12 @@ function parseSolidityValue<T>(solidityValue: SolidityValue): T {
  * @param {TFunctionName} params.method - The contract method to call.
  * @param {TArgs} params.args - The arguments for the contract method.
  * @param {TAbi} [params.abi] - The contract ABI (optional).
- * @returns {Promise<unknown>} The result of the contract call.
+ * @returns {Promise<any>} The result of the contract call.
  */
 export async function readContract<
   TAbi extends Abi | undefined,
   TFunctionName extends TAbi extends Abi ? ContractFunctionName<TAbi, "view" | "pure"> : string,
-  TArgs extends Record<string, string>,
+  TArgs extends Record<string, any>,
 >(params: {
   networkId: string;
   contractAddress: `0x${string}`;
@@ -128,7 +129,7 @@ export async function readContract<
         Extract<TFunctionName, ContractFunctionName<TAbi, "view" | "pure">>,
         TArgs
       >
-    : unknown
+    : any
 > {
   const response = await Coinbase.apiClients.smartContract!.readContract(
     params.networkId,
@@ -147,6 +148,6 @@ export async function readContract<
           Extract<TFunctionName, ContractFunctionName<TAbi, "view" | "pure">>,
           TArgs
         >
-      : unknown
+      : any
   >(response.data);
 }
