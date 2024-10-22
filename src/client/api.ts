@@ -1033,6 +1033,57 @@ export interface ERC721TransferEvent {
 /**
  * 
  * @export
+ * @interface EthereumTokenTransfer
+ */
+export interface EthereumTokenTransfer {
+    /**
+     * 
+     * @type {string}
+     * @memberof EthereumTokenTransfer
+     */
+    'contract_address': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof EthereumTokenTransfer
+     */
+    'from_address': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof EthereumTokenTransfer
+     */
+    'to_address': string;
+    /**
+     * The value of the transaction in atomic units of the token being transfer for ERC20 or ERC1155 contracts.
+     * @type {string}
+     * @memberof EthereumTokenTransfer
+     */
+    'value'?: string;
+    /**
+     * The ID of ERC721 or ERC1155 token being transferred.
+     * @type {string}
+     * @memberof EthereumTokenTransfer
+     */
+    'token_id'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof EthereumTokenTransfer
+     */
+    'log_index': number;
+    /**
+     * 
+     * @type {TokenTransferType}
+     * @memberof EthereumTokenTransfer
+     */
+    'token_transfer_type': TokenTransferType;
+}
+
+
+/**
+ * 
+ * @export
  * @interface EthereumTransaction
  */
 export interface EthereumTransaction {
@@ -1120,6 +1171,12 @@ export interface EthereumTransaction {
      * @memberof EthereumTransaction
      */
     'transaction_access_list'?: EthereumTransactionAccessList;
+    /**
+     * 
+     * @type {Array<EthereumTokenTransfer>}
+     * @memberof EthereumTransaction
+     */
+    'token_transfers'?: Array<EthereumTokenTransfer>;
     /**
      * 
      * @type {Array<EthereumTransactionFlattenedTrace>}
@@ -1718,6 +1775,111 @@ export const NetworkIdentifier = {
 export type NetworkIdentifier = typeof NetworkIdentifier[keyof typeof NetworkIdentifier];
 
 
+/**
+ * A representation of an onchain stored name from name systems i.e. ENS or Basenames
+ * @export
+ * @interface OnchainName
+ */
+export interface OnchainName {
+    /**
+     * The ID for the NFT related to this name
+     * @type {string}
+     * @memberof OnchainName
+     */
+    'token_id': string;
+    /**
+     * The onchain address of the owner of the name
+     * @type {string}
+     * @memberof OnchainName
+     */
+    'owner_address': string;
+    /**
+     * The onchain address of the manager of the name
+     * @type {string}
+     * @memberof OnchainName
+     */
+    'manager_address': string;
+    /**
+     * The primary onchain address of the name
+     * @type {string}
+     * @memberof OnchainName
+     */
+    'primary_address'?: string;
+    /**
+     * The readable format for the name in complete form
+     * @type {string}
+     * @memberof OnchainName
+     */
+    'domain': string;
+    /**
+     * The visual representation attached to this name
+     * @type {string}
+     * @memberof OnchainName
+     */
+    'avatar'?: string;
+    /**
+     * The ID of the blockchain network
+     * @type {string}
+     * @memberof OnchainName
+     */
+    'network_id': string;
+    /**
+     * The metadata attached to this name
+     * @type {Array<OnchainNameTextRecordsInner>}
+     * @memberof OnchainName
+     */
+    'text_records'?: Array<OnchainNameTextRecordsInner>;
+}
+/**
+ * A list of onchain events with pagination information
+ * @export
+ * @interface OnchainNameList
+ */
+export interface OnchainNameList {
+    /**
+     * A list of onchain name objects
+     * @type {Array<OnchainName>}
+     * @memberof OnchainNameList
+     */
+    'data': Array<OnchainName>;
+    /**
+     * True if this list has another page of items after this one that can be fetched.
+     * @type {boolean}
+     * @memberof OnchainNameList
+     */
+    'has_more'?: boolean;
+    /**
+     * The page token to be used to fetch the next page.
+     * @type {string}
+     * @memberof OnchainNameList
+     */
+    'next_page': string;
+    /**
+     * The total number of payload signatures for the address.
+     * @type {number}
+     * @memberof OnchainNameList
+     */
+    'total_count'?: number;
+}
+/**
+ * 
+ * @export
+ * @interface OnchainNameTextRecordsInner
+ */
+export interface OnchainNameTextRecordsInner {
+    /**
+     * The key for the text record
+     * @type {string}
+     * @memberof OnchainNameTextRecordsInner
+     */
+    'key'?: string;
+    /**
+     * The value for the text record
+     * @type {string}
+     * @memberof OnchainNameTextRecordsInner
+     */
+    'value'?: string;
+}
 /**
  * A payload signed by an address.
  * @export
@@ -2627,6 +2789,22 @@ export interface TokenContractOptions {
      */
     'total_supply': string;
 }
+/**
+ * The type of the token transfer.
+ * @export
+ * @enum {string}
+ */
+
+export const TokenTransferType = {
+    Erc20: 'erc20',
+    Erc721: 'erc721',
+    Erc1155: 'erc1155',
+    Unknown: 'unknown'
+} as const;
+
+export type TokenTransferType = typeof TokenTransferType[keyof typeof TokenTransferType];
+
+
 /**
  * A trade of an asset to another asset
  * @export
@@ -5634,6 +5812,158 @@ export class NetworksApi extends BaseAPI implements NetworksApiInterface {
      */
     public getNetwork(networkId: string, options?: RawAxiosRequestConfig) {
         return NetworksApiFp(this.configuration).getNetwork(networkId, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * OnchainIdentityApi - axios parameter creator
+ * @export
+ */
+export const OnchainIdentityApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Obtains onchain identity for an address on a specific network
+         * @summary Obtains onchain identity for an address on a specific network
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the identity for
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        resolveIdentityByAddress: async (networkId: string, addressId: string, limit?: number, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('resolveIdentityByAddress', 'networkId', networkId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('resolveIdentityByAddress', 'addressId', addressId)
+            const localVarPath = `/v1/networks/{network_id}/addresses/{address_id}/identity`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * OnchainIdentityApi - functional programming interface
+ * @export
+ */
+export const OnchainIdentityApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = OnchainIdentityApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Obtains onchain identity for an address on a specific network
+         * @summary Obtains onchain identity for an address on a specific network
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the identity for
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async resolveIdentityByAddress(networkId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OnchainNameList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.resolveIdentityByAddress(networkId, addressId, limit, page, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OnchainIdentityApi.resolveIdentityByAddress']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * OnchainIdentityApi - factory interface
+ * @export
+ */
+export const OnchainIdentityApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = OnchainIdentityApiFp(configuration)
+    return {
+        /**
+         * Obtains onchain identity for an address on a specific network
+         * @summary Obtains onchain identity for an address on a specific network
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the identity for
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        resolveIdentityByAddress(networkId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<OnchainNameList> {
+            return localVarFp.resolveIdentityByAddress(networkId, addressId, limit, page, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * OnchainIdentityApi - interface
+ * @export
+ * @interface OnchainIdentityApi
+ */
+export interface OnchainIdentityApiInterface {
+    /**
+     * Obtains onchain identity for an address on a specific network
+     * @summary Obtains onchain identity for an address on a specific network
+     * @param {string} networkId The ID of the blockchain network
+     * @param {string} addressId The ID of the address to fetch the identity for
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OnchainIdentityApiInterface
+     */
+    resolveIdentityByAddress(networkId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<OnchainNameList>;
+
+}
+
+/**
+ * OnchainIdentityApi - object-oriented interface
+ * @export
+ * @class OnchainIdentityApi
+ * @extends {BaseAPI}
+ */
+export class OnchainIdentityApi extends BaseAPI implements OnchainIdentityApiInterface {
+    /**
+     * Obtains onchain identity for an address on a specific network
+     * @summary Obtains onchain identity for an address on a specific network
+     * @param {string} networkId The ID of the blockchain network
+     * @param {string} addressId The ID of the address to fetch the identity for
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OnchainIdentityApi
+     */
+    public resolveIdentityByAddress(networkId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig) {
+        return OnchainIdentityApiFp(this.configuration).resolveIdentityByAddress(networkId, addressId, limit, page, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
