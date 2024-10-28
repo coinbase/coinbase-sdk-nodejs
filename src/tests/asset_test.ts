@@ -17,6 +17,20 @@ describe("Asset", () => {
       expect(asset.getAssetId()).toEqual(Coinbase.assets.Eth);
     });
 
+    describe("when the specified Asset ID is not normalized", () => {
+      it("should normalize the Asset ID", () => {
+        const model = {
+          asset_id: "pol",
+          network_id: Coinbase.networks.PolygonMainnet,
+          decimals: 18,
+        };
+        const asset = Asset.fromModel(model, "POL");
+        expect(asset).toBeInstanceOf(Asset);
+        expect(asset.getAssetId()).toEqual(Coinbase.assets.Pol);
+
+      });
+    });
+
     describe("when the model is invalid", () => {
       it("should throw an error", () => {
         expect(() => Asset.fromModel(null!)).toThrow("Invalid asset model");
@@ -34,6 +48,7 @@ describe("Asset", () => {
         expect(Asset.fromModel(model, Coinbase.assets.Gwei).decimals).toEqual(GWEI_DECIMALS);
       });
     });
+
     describe("when the asset_id is wei", () => {
       it("should set the decimals to 0", () => {
         const model = {
@@ -62,7 +77,7 @@ describe("Asset", () => {
   });
 
   describe(".primaryDenomination", () => {
-    ["wei", "gwei"].forEach(assetId => {
+    ["wei", "gwei", "WEI", "GWEI"].forEach(assetId => {
       describe(`when the assetId is ${assetId}`, () => {
         it("should return 'eth'", () => {
           expect(Asset.primaryDenomination(assetId)).toEqual("eth");

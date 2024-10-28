@@ -57,6 +57,7 @@ export class Coinbase {
     Weth: "weth",
     Sol: "sol",
     Lamport: "lamport",
+    Pol: "pol",
   };
 
   static apiClients: ApiClients = {};
@@ -253,11 +254,12 @@ export class Coinbase {
 
   /**
    * Converts a string to a symbol, replacing hyphens with underscores.
+   * This also converts the string to lowercase.
    *
    * @param asset - The string to convert
    * @returns the converted symbol
    */
   static toAssetId(asset: string): string {
-    return asset.replace(/-/g, "_");
+    return asset.replace(/-/g, "_").toLowerCase();
   }
 }
