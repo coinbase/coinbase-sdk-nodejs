@@ -1,43 +1,72 @@
 import "dotenv/config";
 import { Coinbase, Webhook, Wallet } from "@coinbase/coinbase-sdk";
+import fs from "fs";
 
 // Change this to the path of your API key file downloaded from CDP portal.
-Coinbase.configureFromJson({ filePath: "~/Downloads/cdp_api_key.json" });
+Coinbase.configureFromJson({ filePath: "/Users/jairdarosajunior/Downloads/cdp_api_key.json" });
+const webhookNotificationUri = process.env.WEBHOOK_NOTIFICATION_URL;
 
 (async function() {
-  const webhookNotificationUri = process.env.WEBHOOK_NOTIFICATION_URL;
   if (!webhookNotificationUri) {
     console.log('WEBHOOK_NOTIFICATION_URL is missing from env file.');
     return;
   }
-  
-  //You should now, create a couple of wallets:
-  let myWallet = await Wallet.create();
+  const seedPath = 'wallet_saved_seeds.json';
+
+  let myWallet;
   let anotherWallet = await Wallet.create();
+
+  // If Wallet exists, load
+  if (fs.existsSync(seedPath)) {
+    console.log("🔄 Wallet exists, re-instantiating...");
+    const seedData = transformConfig(seedPath);
+    myWallet = await Wallet.import(seedData);
+    console.log("✅ Wallet re-instantiated!");
+  }
+  // Create Wallet
+  else {
+    myWallet = await Wallet.create();
+    const saveSeed = myWallet.saveSeed(seedPath);
+    console.log("✅ Seed saved: ", saveSeed);
+  }
   
-  // After you created the wallet, let's add some USDC funds to it:
-  await myWallet.faucet(Coinbase.assets.Usdc);
+  const balance = await myWallet.getBalance(Coinbase.assets.Usdc);
+  console.log(`💰 Wallet USDC balance:`, balance);
+  if (balance <= 0) {
+    // If wallet doesn't have funds we need to add funds to it
+    await myWallet.faucet(Coinbase.assets.Usdc);
+    console.log("✅ Funds added!");
+    
+    // Sometimes funds take a few seconds to be available on the wallet, so lets wait 5 secs
+    await sleep(5000)
+  }
   
   // Now use below code to get wallets addresses so we can use it for adding it to the webhook filter.
   let myWalletAddress = await myWallet.getDefaultAddress();
-  let anotherWalletAddress = await anotherWallet.getDefaultAddress();
   const myWalletAddressId = myWalletAddress.getId();
-  const anotherWalletAddressId = anotherWalletAddress.getId();
-  
-  await Webhook.create({
+
+  console.log('💳 myWallet address: ', myWalletAddressId);
+  const webhookConfig = {
     networkId: Coinbase.networks.BaseSepolia,
     notificationUri: webhookNotificationUri,
-    eventType: 'erc20_transfer',
-    eventFilters: [{
-      from_address: myWalletAddressId,
-      to_address: anotherWalletAddressId,
-    }],
-  });
-  
-  // Sometimes funds take a few seconds to be available on the wallet, so lets wait 3 secs
-  await sleep(3000)
-  
-  // For testing this above example, let's now create a transfer between both wallets we created:
+    eventType: 'wallet_activity',
+    eventTypeFilter: {
+      addresses: [myWalletAddressId],
+    },
+  }
+
+  const webhooks = await Webhook.list()
+  let shouldCreateWebhook = !webhookAlreadyExists(webhooks)
+
+  if (shouldCreateWebhook) {
+    console.log("🔄 Creating webhook...");
+    await Webhook.create(webhookConfig);
+    console.log("✅ Webhook created!");
+  } else {
+    console.log("⏩ Skipping Webhook creation...");
+  }
+
+  // For testing this above example, let's now create a transfer between both wallets:
   // Create transfer from myWallet to anotherWallet
   const transfer = await myWallet.createTransfer({
     amount: 0.0001,
@@ -51,8 +80,34 @@ Coinbase.configureFromJson({ filePath: "~/Downloads/cdp_api_key.json" });
     intervalSeconds: 1, // check for transfer completion each 1 second
     timeoutSeconds: 30, // keep checking for 30 seconds
   });
-  console.log('Transfer was successful: ', transfer.toString());
+  console.log('✅ Transfer was successful: ', transfer.toString());
 })()
+
+// ========================== UTILS FUNCTIONS ===================================
+function webhookAlreadyExists(webhooks) {
+  for (let currentWebhook of webhooks.data) {
+    if (currentWebhook.getEventType() === 'wallet_activity' && currentWebhook.getNotificationURI() === webhookNotificationUri) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function transformConfig(filePath) {
+  try {
+    const rawData = fs.readFileSync(filePath, 'utf-8');
+    const originalConfig = JSON.parse(rawData);
+    const walletId = Object.keys(originalConfig)[0];
+    const { seed } = originalConfig[walletId];
+    return {
+      walletId,
+      seed
+    };
+  } catch (error) {
+    console.error('Error reading or parsing file:', error);
+    throw error;
+  }
+}
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
