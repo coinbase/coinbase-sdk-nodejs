@@ -4,9 +4,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start-server": "node app.js",
+    "start-server": "node app.cjs",
     "start-transfer": "node webhook-transfer.js",
-    "start-pinggy": "ssh -p 443 -R0:localhost:3000 -L4300:localhost:4300 a.pinggy.io"
+    "start-pinggy": "ssh -p 443 -R0:localhost:5000 -L4300:localhost:4300 a.pinggy.io"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +16,7 @@
   "dependencies": {
     "@coinbase/coinbase-sdk": "^0.9.1",
     "axios": "^1.7.7",
+    "body-parser": "^1.20.3",
     "dotenv": "^16.4.5",
     "express": "^4.21.1"
   }

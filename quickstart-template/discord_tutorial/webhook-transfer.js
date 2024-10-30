@@ -46,21 +46,20 @@ const webhookNotificationUri = process.env.WEBHOOK_NOTIFICATION_URL;
   const myWalletAddressId = myWalletAddress.getId();
 
   console.log('💳 myWallet address: ', myWalletAddressId);
-  const webhookConfig = {
-    networkId: Coinbase.networks.BaseSepolia,
-    notificationUri: webhookNotificationUri,
-    eventType: 'wallet_activity',
-    eventTypeFilter: {
-      addresses: [myWalletAddressId],
-    },
-  }
 
   const webhooks = await Webhook.list()
   let shouldCreateWebhook = !webhookAlreadyExists(webhooks)
 
   if (shouldCreateWebhook) {
     console.log("🔄 Creating webhook...");
-    await Webhook.create(webhookConfig);
+    await Webhook.create({
+      networkId: Coinbase.networks.BaseSepolia,
+      notificationUri: webhookNotificationUri,
+      eventType: 'wallet_activity',
+      eventTypeFilter: {
+        addresses: [myWalletAddressId],
+      },
+    });
     console.log("✅ Webhook created!");
   } else {
     console.log("⏩ Skipping Webhook creation...");
