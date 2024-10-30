@@ -724,9 +724,11 @@ export enum TransferStatus {
  */
 export enum TransactionStatus {
   PENDING = "pending",
+  SIGNED = "signed",
   BROADCAST = "broadcast",
   COMPLETE = "complete",
   FAILED = "failed",
+  UNSPECIFIED = "unspecified",
 }
 
 /**

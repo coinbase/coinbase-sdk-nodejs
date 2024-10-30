@@ -209,34 +209,49 @@ describe("Transaction", () => {
   });
 
   describe("#getStatus", () => {
-    it("should return undefined when the transaction has not been initiated with a model", async () => {
-      model.status = "";
-      const transaction = new Transaction(model);
-      expect(transaction.getStatus()).toBeUndefined();
+    [
+      {status: TransactionStatus.PENDING, expected: "pending"},
+      {status: TransactionStatus.BROADCAST, expected: "broadcast"},
+      {status: TransactionStatus.SIGNED, expected: "signed"},
+      {status: TransactionStatus.COMPLETE, expected: "complete"},
+      {status: TransactionStatus.FAILED, expected: "failed"},
+    ].forEach(({status, expected}) => {
+      describe(`when the status is ${status}`, () => {
+        beforeEach(() => model.status = status);
+
+        it(`should return ${expected}`, () => {
+          const transaction = new Transaction(model);
+
+          expect(transaction.getStatus()).toEqual(expected);
+        });
+      });
+    });
+  });
+
+  describe("#isTerminalState", () => {
+    [
+      TransactionStatus.PENDING,
+      TransactionStatus.BROADCAST,
+      TransactionStatus.SIGNED,
+    ].forEach((status) => {
+      it(`should return false when the status is ${status}`, () => {
+        model.status = status;
+        const transaction = new Transaction(model);
+
+        expect(transaction.isTerminalState()).toEqual(false);
+      });
     });
 
-    it("should return a pending status", () => {
-      model.status = TransactionStatus.PENDING;
-      const transaction = new Transaction(model);
-      expect(transaction.getStatus()).toEqual("pending");
-    });
+    [
+      TransactionStatus.COMPLETE,
+      TransactionStatus.FAILED,
+    ].forEach((status) => {
+      it(`should return true when the status is ${status}`, () => {
+        model.status = status;
+        const transaction = new Transaction(model);
 
-    it("should return a broadcast status", () => {
-      model.status = TransactionStatus.BROADCAST;
-      const transaction = new Transaction(model);
-      expect(transaction.getStatus()).toEqual("broadcast");
-    });
-
-    it("should return a complete status", () => {
-      model.status = TransactionStatus.COMPLETE;
-      const transaction = new Transaction(model);
-      expect(transaction.getStatus()).toEqual("complete");
-    });
-
-    it("should return a failed status", () => {
-      model.status = TransactionStatus.FAILED;
-      const transaction = new Transaction(model);
-      expect(transaction.getStatus()).toEqual("failed");
+        expect(transaction.isTerminalState()).toEqual(true);
+      });
     });
   });
 
