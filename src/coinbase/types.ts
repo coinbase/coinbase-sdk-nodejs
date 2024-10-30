@@ -418,6 +418,23 @@ export type ExternalAddressAPIClient = {
     skipWait?: boolean,
     options?: RawAxiosRequestConfig,
   ): AxiosPromise<FaucetTransaction>;
+
+  /**
+   * Get the faucet transaction for an external address.
+   *
+   * @param networkId - The ID of the blockchain network
+   * @param addressId - The onchain address of the address that is being fetched.
+   * @param transactionHash - The transaction hash of the faucet transaction.
+   * @param options - Override http request option.
+   * @throws {APIError} If the request fails.
+   * @returns The faucet transaction.
+   */
+  getFaucetTransaction(
+    networkId: string,
+    addressId: string,
+    transactionHash: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<FaucetTransaction>;
 };
 
 export type WalletStakeAPIClient = {

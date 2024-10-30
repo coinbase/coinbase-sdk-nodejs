@@ -291,6 +291,7 @@ export class Address {
       this.getNetworkId(),
       this.getId(),
       assetId,
+      true, // Skip waiting for confirmation server-side.
     );
     return new FaucetTransaction(response.data);
   }

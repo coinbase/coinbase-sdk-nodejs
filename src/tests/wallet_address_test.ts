@@ -228,6 +228,7 @@ describe("WalletAddress", () => {
         address.getNetworkId(),
         address.getId(),
         undefined,
+        true, // Skip wait should be true.
       );
 
       expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds)
@@ -244,6 +245,7 @@ describe("WalletAddress", () => {
         address.getNetworkId(),
         address.getId(),
         "usdc",
+        true, // Skip wait should be true.
       );
 
       expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds)
@@ -261,6 +263,7 @@ describe("WalletAddress", () => {
         address.getNetworkId(),
         address.getId(),
         undefined,
+        true, // Skip wait should be true.
       );
 
       expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds)

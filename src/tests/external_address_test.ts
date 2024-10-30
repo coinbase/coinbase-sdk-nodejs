@@ -603,6 +603,7 @@ describe("ExternalAddress", () => {
         address.getNetworkId(),
         address.getId(),
         undefined,
+        true, // Skip wait should be true.
       );
     });
 

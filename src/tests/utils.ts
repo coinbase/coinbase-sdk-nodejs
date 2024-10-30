@@ -10,6 +10,7 @@ import {
   AddressBalanceList,
   Address as AddressModel,
   Transfer as TransferModel,
+  FaucetTransaction as FaucetTransactionModel,
   StakingOperation as StakingOperationModel,
   PayloadSignature as PayloadSignatureModel,
   PayloadSignatureList,
@@ -252,7 +253,7 @@ export const MINT_NFT_ARGS = { recipient: "0x475d41de7A81298Ba263184996800CBcaAD
 
 const faucetTxHash = generateRandomHash(64);
 
-export const VALID_FAUCET_TRANSACTION_MODEL = {
+export const VALID_FAUCET_TRANSACTION_MODEL: FaucetTransactionModel  = {
   transaction_hash: faucetTxHash,
   transaction_link: "https://sepolia.basescan.org/tx/" + faucetTxHash,
   transaction: {
@@ -641,6 +642,7 @@ export const externalAddressApiMock = {
   getExternalAddressBalance: jest.fn(),
   requestExternalFaucetFunds: jest.fn(),
   listAddressTransactions: jest.fn(),
+  getFaucetTransaction: jest.fn(),
 };
 
 export const balanceHistoryApiMock = {
