@@ -6,7 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start-server": "node app.cjs",
     "start-transfer": "node webhook-transfer.js",
-    "start-pinggy": "ssh -p 443 -R0:localhost:5000 -L4300:localhost:4300 a.pinggy.io"
+    "start-pinggy": "ssh -p 443 -R0:localhost:5000 a.pinggy.io"
   },
   "keywords": [],
   "author": "",
