@@ -2,6 +2,7 @@ import { ethers } from "ethers";
 import { Transaction as TransactionModel, EthereumTransaction } from "../client/api";
 import { Transaction } from "./../coinbase/transaction";
 import { TransactionStatus } from "../coinbase/types";
+import { Coinbase } from "../coinbase/coinbase";
 
 describe("Transaction", () => {
   let fromKey;
@@ -17,6 +18,7 @@ describe("Transaction", () => {
   let onchainModel;
   let blockHash;
   let blockHeight;
+  let networkID;
 
   beforeEach(() => {
     fromKey = ethers.Wallet.createRandom();
@@ -43,15 +45,18 @@ describe("Transaction", () => {
     ethereumContent = {
       priority_fee_per_gas: 1000,
     } as EthereumTransaction;
+    networkID = Coinbase.networks.BaseSepolia;
 
     model = {
       status: "pending",
+      network_id: networkID,
       from_address_id: fromAddressId,
       unsigned_payload: unsignedPayload,
     } as TransactionModel;
 
     broadcastedModel = {
       status: "broadcast",
+      network_id: networkID,
       from_address_id: fromAddressId,
       unsigned_payload: unsignedPayload,
       signed_payload: signedPayload,
@@ -61,6 +66,7 @@ describe("Transaction", () => {
 
     onchainModel = {
       status: "complete",
+      network_id: networkID,
       from_address_id: fromAddressId,
       unsigned_payload: "",
       block_hash: blockHash,
@@ -109,6 +115,12 @@ describe("Transaction", () => {
     });
   });
 
+  describe("#getNetworkId", () => {
+    it("should return the network ID", () => {
+      expect(transaction.getNetworkId()).toEqual(networkID);
+    });
+  });
+
   describe("#getRawTransaction", () => {
     let raw: ethers.Transaction, rawPayload;
 
@@ -116,6 +128,7 @@ describe("Transaction", () => {
       raw = transaction.rawTransaction();
       rawPayload = JSON.parse(Buffer.from(unsignedPayload, "hex").toString());
     });
+
     it("should return the raw transaction", () => {
       expect(raw).toBeInstanceOf(ethers.Transaction);
     });

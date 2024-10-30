@@ -137,6 +137,15 @@ export class Transaction {
   }
 
   /**
+   * Returns the Network ID of the Transaction.
+   *
+   * @returns The Network ID.
+   */
+  public getNetworkId(): string {
+    return this.model.network_id;
+  }
+
+  /**
    * Returns the underlying raw transaction.
    *
    * @throws {InvalidUnsignedPayload} If the Unsigned Payload is invalid.
