@@ -237,16 +237,6 @@ export type WalletAPIClient = {
  */
 export type AddressAPIClient = {
   /**
-   * Requests faucet funds for the address.
-   *
-   * @param walletId - The wallet ID.
-   * @param addressId - The address ID.
-   * @returns The transaction hash.
-   * @throws {APIError} If the request fails.
-   */
-  requestFaucetFunds(walletId: string, addressId: string): AxiosPromise<FaucetTransaction>;
-
-  /**
    * Get address by onchain address.
    *
    * @param walletId - The ID of the wallet the address belongs to.
@@ -416,6 +406,8 @@ export type ExternalAddressAPIClient = {
    *
    * @param networkId - The ID of the blockchain network
    * @param addressId - The onchain address of the address that is being fetched.
+   * @param assetId - The Optional ID of the asset to request funds for. Defaults to native asset.
+   * @param skipWait - The Optional flag to skip waiting for the transaction to be mined. Defaults to false.
    * @param options - Override http request option.
    * @throws {APIError} If the request fails.
    */
@@ -423,6 +415,7 @@ export type ExternalAddressAPIClient = {
     networkId: string,
     addressId: string,
     assetId?: string,
+    skipWait?: boolean,
     options?: RawAxiosRequestConfig,
   ): AxiosPromise<FaucetTransaction>;
 };
