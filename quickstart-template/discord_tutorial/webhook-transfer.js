@@ -34,7 +34,11 @@ const webhookNotificationUri = process.env.WEBHOOK_NOTIFICATION_URL;
   console.log(`💰 Wallet USDC balance:`, balance);
   if (balance <= 0) {
     // If wallet doesn't have funds we need to add funds to it
-    await myWallet.faucet(Coinbase.assets.Usdc);
+    const faucetTx = await myWallet.faucet(Coinbase.assets.Usdc);
+
+    // Wait for the faucet transaction to confirm.
+    await faucetTx.wait();
+    
     console.log("✅ Funds added!");
     
     // Sometimes funds take a few seconds to be available on the wallet, so lets wait 5 secs
