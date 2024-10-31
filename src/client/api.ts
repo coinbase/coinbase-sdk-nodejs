@@ -596,6 +596,50 @@ export interface CreateContractInvocationRequest {
 /**
  * 
  * @export
+ * @interface CreateFundOperationRequest
+ */
+export interface CreateFundOperationRequest {
+    /**
+     * The amount of the asset to fund the address with in atomic units.
+     * @type {string}
+     * @memberof CreateFundOperationRequest
+     */
+    'amount': string;
+    /**
+     * The ID of the asset to fund the address with.
+     * @type {string}
+     * @memberof CreateFundOperationRequest
+     */
+    'asset_id': string;
+    /**
+     * The Optional ID of the fund quote to fund the address with. If omitted we will generate a quote and immediately execute it.
+     * @type {string}
+     * @memberof CreateFundOperationRequest
+     */
+    'fund_quote_id'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface CreateFundQuoteRequest
+ */
+export interface CreateFundQuoteRequest {
+    /**
+     * The amount of the asset to fund the address with in atomic units.
+     * @type {string}
+     * @memberof CreateFundQuoteRequest
+     */
+    'amount': string;
+    /**
+     * The ID of the asset to fund the address with.
+     * @type {string}
+     * @memberof CreateFundQuoteRequest
+     */
+    'asset_id': string;
+}
+/**
+ * 
+ * @export
  * @interface CreatePayloadSignatureRequest
  */
 export interface CreatePayloadSignatureRequest {
@@ -848,6 +892,25 @@ export interface CreateWebhookRequest {
 
 
 /**
+ * An amount in cryptocurrency
+ * @export
+ * @interface CryptoAmount
+ */
+export interface CryptoAmount {
+    /**
+     * The amount of the crypto in atomic units
+     * @type {string}
+     * @memberof CryptoAmount
+     */
+    'amount': string;
+    /**
+     * 
+     * @type {Asset}
+     * @memberof CryptoAmount
+     */
+    'asset': Asset;
+}
+/**
  * 
  * @export
  * @interface DeploySmartContractRequest
@@ -1033,6 +1096,57 @@ export interface ERC721TransferEvent {
 /**
  * 
  * @export
+ * @interface EthereumTokenTransfer
+ */
+export interface EthereumTokenTransfer {
+    /**
+     * 
+     * @type {string}
+     * @memberof EthereumTokenTransfer
+     */
+    'contract_address': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof EthereumTokenTransfer
+     */
+    'from_address': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof EthereumTokenTransfer
+     */
+    'to_address': string;
+    /**
+     * The value of the transaction in atomic units of the token being transfer for ERC20 or ERC1155 contracts.
+     * @type {string}
+     * @memberof EthereumTokenTransfer
+     */
+    'value'?: string;
+    /**
+     * The ID of ERC721 or ERC1155 token being transferred.
+     * @type {string}
+     * @memberof EthereumTokenTransfer
+     */
+    'token_id'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof EthereumTokenTransfer
+     */
+    'log_index': number;
+    /**
+     * 
+     * @type {TokenTransferType}
+     * @memberof EthereumTokenTransfer
+     */
+    'token_transfer_type': TokenTransferType;
+}
+
+
+/**
+ * 
+ * @export
  * @interface EthereumTransaction
  */
 export interface EthereumTransaction {
@@ -1120,6 +1234,12 @@ export interface EthereumTransaction {
      * @memberof EthereumTransaction
      */
     'transaction_access_list'?: EthereumTransactionAccessList;
+    /**
+     * 
+     * @type {Array<EthereumTokenTransfer>}
+     * @memberof EthereumTransaction
+     */
+    'token_transfers'?: Array<EthereumTokenTransfer>;
     /**
      * 
      * @type {Array<EthereumTransactionFlattenedTrace>}
@@ -1371,6 +1491,12 @@ export interface FaucetTransaction {
      * @memberof FaucetTransaction
      */
     'transaction_link': string;
+    /**
+     * 
+     * @type {Transaction}
+     * @memberof FaucetTransaction
+     */
+    'transaction': Transaction;
 }
 /**
  * 
@@ -1510,6 +1636,194 @@ export interface FetchStakingRewardsRequest {
 }
 
 
+/**
+ * An amount in fiat currency
+ * @export
+ * @interface FiatAmount
+ */
+export interface FiatAmount {
+    /**
+     * The amount of the fiat in whole units.
+     * @type {string}
+     * @memberof FiatAmount
+     */
+    'amount': string;
+    /**
+     * The currency of the fiat
+     * @type {string}
+     * @memberof FiatAmount
+     */
+    'currency': string;
+}
+/**
+ * An operation to fund a wallet with crypto
+ * @export
+ * @interface FundOperation
+ */
+export interface FundOperation {
+    /**
+     * The ID of the fund operation
+     * @type {string}
+     * @memberof FundOperation
+     */
+    'fund_operation_id': string;
+    /**
+     * The ID of the blockchain network
+     * @type {string}
+     * @memberof FundOperation
+     */
+    'network_id': string;
+    /**
+     * The ID of the wallet that will receive the crypto
+     * @type {string}
+     * @memberof FundOperation
+     */
+    'wallet_id': string;
+    /**
+     * The ID of the address that will receive the crypto
+     * @type {string}
+     * @memberof FundOperation
+     */
+    'address_id': string;
+    /**
+     * 
+     * @type {CryptoAmount}
+     * @memberof FundOperation
+     */
+    'crypto_amount': CryptoAmount;
+    /**
+     * 
+     * @type {FiatAmount}
+     * @memberof FundOperation
+     */
+    'fiat_amount': FiatAmount;
+    /**
+     * 
+     * @type {FundOperationFees}
+     * @memberof FundOperation
+     */
+    'fees': FundOperationFees;
+    /**
+     * The status of the fund operation
+     * @type {string}
+     * @memberof FundOperation
+     */
+    'status': FundOperationStatusEnum;
+}
+
+export const FundOperationStatusEnum = {
+    Pending: 'pending',
+    Complete: 'complete',
+    Failed: 'failed'
+} as const;
+
+export type FundOperationStatusEnum = typeof FundOperationStatusEnum[keyof typeof FundOperationStatusEnum];
+
+/**
+ * The fees for a fund operation.
+ * @export
+ * @interface FundOperationFees
+ */
+export interface FundOperationFees {
+    /**
+     * 
+     * @type {FiatAmount}
+     * @memberof FundOperationFees
+     */
+    'buy_fee': FiatAmount;
+    /**
+     * 
+     * @type {CryptoAmount}
+     * @memberof FundOperationFees
+     */
+    'transfer_fee': CryptoAmount;
+}
+/**
+ * Paginated list of fund operations
+ * @export
+ * @interface FundOperationList
+ */
+export interface FundOperationList {
+    /**
+     * 
+     * @type {Array<FundOperation>}
+     * @memberof FundOperationList
+     */
+    'data': Array<FundOperation>;
+    /**
+     * True if this list has another page of items after this one that can be fetched.
+     * @type {boolean}
+     * @memberof FundOperationList
+     */
+    'has_more': boolean;
+    /**
+     * The page token to be used to fetch the next page.
+     * @type {string}
+     * @memberof FundOperationList
+     */
+    'next_page': string;
+    /**
+     * The total number of fund operations
+     * @type {number}
+     * @memberof FundOperationList
+     */
+    'total_count': number;
+}
+/**
+ * A quote for a fund operation
+ * @export
+ * @interface FundQuote
+ */
+export interface FundQuote {
+    /**
+     * The ID of the fund quote
+     * @type {string}
+     * @memberof FundQuote
+     */
+    'fund_quote_id': string;
+    /**
+     * The ID of the blockchain network
+     * @type {string}
+     * @memberof FundQuote
+     */
+    'network_id': string;
+    /**
+     * The ID of the wallet that will receive the crypto
+     * @type {string}
+     * @memberof FundQuote
+     */
+    'wallet_id': string;
+    /**
+     * The ID of the address that will receive the crypto
+     * @type {string}
+     * @memberof FundQuote
+     */
+    'address_id': string;
+    /**
+     * 
+     * @type {CryptoAmount}
+     * @memberof FundQuote
+     */
+    'crypto_amount': CryptoAmount;
+    /**
+     * 
+     * @type {FiatAmount}
+     * @memberof FundQuote
+     */
+    'fiat_amount': FiatAmount;
+    /**
+     * The time at which the quote expires
+     * @type {string}
+     * @memberof FundQuote
+     */
+    'expires_at': string;
+    /**
+     * 
+     * @type {FundOperationFees}
+     * @memberof FundQuote
+     */
+    'fees': FundOperationFees;
+}
 /**
  * 
  * @export
@@ -1718,6 +2032,104 @@ export const NetworkIdentifier = {
 export type NetworkIdentifier = typeof NetworkIdentifier[keyof typeof NetworkIdentifier];
 
 
+/**
+ * A representation of an onchain stored name from name systems i.e. ENS or Basenames
+ * @export
+ * @interface OnchainName
+ */
+export interface OnchainName {
+    /**
+     * The ID for the NFT related to this name
+     * @type {string}
+     * @memberof OnchainName
+     */
+    'token_id': string;
+    /**
+     * The onchain address of the owner of the name
+     * @type {string}
+     * @memberof OnchainName
+     */
+    'owner_address': string;
+    /**
+     * The onchain address of the manager of the name
+     * @type {string}
+     * @memberof OnchainName
+     */
+    'manager_address': string;
+    /**
+     * The primary onchain address of the name
+     * @type {string}
+     * @memberof OnchainName
+     */
+    'primary_address'?: string;
+    /**
+     * The readable format for the name in complete form
+     * @type {string}
+     * @memberof OnchainName
+     */
+    'domain': string;
+    /**
+     * The visual representation attached to this name
+     * @type {string}
+     * @memberof OnchainName
+     */
+    'avatar'?: string;
+    /**
+     * The ID of the blockchain network
+     * @type {string}
+     * @memberof OnchainName
+     */
+    'network_id': string;
+    /**
+     * The expiration date for this name\'s ownership
+     * @type {string}
+     * @memberof OnchainName
+     */
+    'expires_at': string;
+    /**
+     * The metadata attached to this name
+     * @type {{ [key: string]: string; }}
+     * @memberof OnchainName
+     */
+    'text_records'?: { [key: string]: string; };
+    /**
+     * Whether this name is the primary name for the owner (This is when the ETH coin address for this name is equal to the primary_address. More info here https://docs.ens.domains/ensip/19)
+     * @type {boolean}
+     * @memberof OnchainName
+     */
+    'is_primary': boolean;
+}
+/**
+ * A list of onchain events with pagination information
+ * @export
+ * @interface OnchainNameList
+ */
+export interface OnchainNameList {
+    /**
+     * A list of onchain name objects
+     * @type {Array<OnchainName>}
+     * @memberof OnchainNameList
+     */
+    'data': Array<OnchainName>;
+    /**
+     * True if this list has another page of items after this one that can be fetched.
+     * @type {boolean}
+     * @memberof OnchainNameList
+     */
+    'has_more'?: boolean;
+    /**
+     * The page token to be used to fetch the next page.
+     * @type {string}
+     * @memberof OnchainNameList
+     */
+    'next_page': string;
+    /**
+     * The total number of payload signatures for the address.
+     * @type {number}
+     * @memberof OnchainNameList
+     */
+    'total_count'?: number;
+}
 /**
  * A payload signed by an address.
  * @export
@@ -2627,6 +3039,22 @@ export interface TokenContractOptions {
      */
     'total_supply': string;
 }
+/**
+ * The type of the token transfer.
+ * @export
+ * @enum {string}
+ */
+
+export const TokenTransferType = {
+    Erc20: 'erc20',
+    Erc721: 'erc721',
+    Erc1155: 'erc1155',
+    Unknown: 'unknown'
+} as const;
+
+export type TokenTransferType = typeof TokenTransferType[keyof typeof TokenTransferType];
+
+
 /**
  * A trade of an asset to another asset
  * @export
@@ -3688,6 +4116,7 @@ export const AddressesApiAxiosParamCreator = function (configuration?: Configura
          * @param {string} addressId The onchain address of the address that is being fetched.
          * @param {string} [assetId] The ID of the asset to transfer from the faucet.
          * @param {*} [options] Override http request option.
+         * @deprecated
          * @throws {RequiredError}
          */
         requestFaucetFunds: async (walletId: string, addressId: string, assetId?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
@@ -3860,6 +4289,7 @@ export const AddressesApiFp = function(configuration?: Configuration) {
          * @param {string} addressId The onchain address of the address that is being fetched.
          * @param {string} [assetId] The ID of the asset to transfer from the faucet.
          * @param {*} [options] Override http request option.
+         * @deprecated
          * @throws {RequiredError}
          */
         async requestFaucetFunds(walletId: string, addressId: string, assetId?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FaucetTransaction>> {
@@ -3980,6 +4410,7 @@ export const AddressesApiFactory = function (configuration?: Configuration, base
          * @param {string} addressId The onchain address of the address that is being fetched.
          * @param {string} [assetId] The ID of the asset to transfer from the faucet.
          * @param {*} [options] Override http request option.
+         * @deprecated
          * @throws {RequiredError}
          */
         requestFaucetFunds(walletId: string, addressId: string, assetId?: string, options?: RawAxiosRequestConfig): AxiosPromise<FaucetTransaction> {
@@ -4096,6 +4527,7 @@ export interface AddressesApiInterface {
      * @param {string} addressId The onchain address of the address that is being fetched.
      * @param {string} [assetId] The ID of the asset to transfer from the faucet.
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      * @memberof AddressesApiInterface
      */
@@ -4228,6 +4660,7 @@ export class AddressesApi extends BaseAPI implements AddressesApiInterface {
      * @param {string} addressId The onchain address of the address that is being fetched.
      * @param {string} [assetId] The ID of the asset to transfer from the faucet.
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      * @memberof AddressesApi
      */
@@ -5228,6 +5661,48 @@ export const ExternalAddressesApiAxiosParamCreator = function (configuration?: C
             };
         },
         /**
+         * Get the status of a faucet transaction
+         * @summary Get the status of a faucet transaction
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the faucet transaction for
+         * @param {string} txHash The hash of the faucet transaction
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getFaucetTransaction: async (networkId: string, addressId: string, txHash: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('getFaucetTransaction', 'networkId', networkId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('getFaucetTransaction', 'addressId', addressId)
+            // verify required parameter 'txHash' is not null or undefined
+            assertParamExists('getFaucetTransaction', 'txHash', txHash)
+            const localVarPath = `/v1/networks/{network_id}/addresses/{address_id}/faucet/{tx_hash}`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)))
+                .replace(`{${"tx_hash"}}`, encodeURIComponent(String(txHash)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * List all of the balances of an external address
          * @summary Get the balances of an external address
          * @param {string} networkId The ID of the blockchain network
@@ -5276,10 +5751,11 @@ export const ExternalAddressesApiAxiosParamCreator = function (configuration?: C
          * @param {string} networkId The ID of the wallet the address belongs to.
          * @param {string} addressId The onchain address of the address that is being fetched.
          * @param {string} [assetId] The ID of the asset to transfer from the faucet.
+         * @param {boolean} [skipWait] Whether to skip waiting for the transaction to be mined. This will become the default behavior in the future.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        requestExternalFaucetFunds: async (networkId: string, addressId: string, assetId?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        requestExternalFaucetFunds: async (networkId: string, addressId: string, assetId?: string, skipWait?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'networkId' is not null or undefined
             assertParamExists('requestExternalFaucetFunds', 'networkId', networkId)
             // verify required parameter 'addressId' is not null or undefined
@@ -5300,6 +5776,10 @@ export const ExternalAddressesApiAxiosParamCreator = function (configuration?: C
 
             if (assetId !== undefined) {
                 localVarQueryParameter['asset_id'] = assetId;
+            }
+
+            if (skipWait !== undefined) {
+                localVarQueryParameter['skip_wait'] = skipWait;
             }
 
 
@@ -5339,6 +5819,21 @@ export const ExternalAddressesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Get the status of a faucet transaction
+         * @summary Get the status of a faucet transaction
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the faucet transaction for
+         * @param {string} txHash The hash of the faucet transaction
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getFaucetTransaction(networkId: string, addressId: string, txHash: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FaucetTransaction>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getFaucetTransaction(networkId, addressId, txHash, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ExternalAddressesApi.getFaucetTransaction']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * List all of the balances of an external address
          * @summary Get the balances of an external address
          * @param {string} networkId The ID of the blockchain network
@@ -5359,11 +5854,12 @@ export const ExternalAddressesApiFp = function(configuration?: Configuration) {
          * @param {string} networkId The ID of the wallet the address belongs to.
          * @param {string} addressId The onchain address of the address that is being fetched.
          * @param {string} [assetId] The ID of the asset to transfer from the faucet.
+         * @param {boolean} [skipWait] Whether to skip waiting for the transaction to be mined. This will become the default behavior in the future.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async requestExternalFaucetFunds(networkId: string, addressId: string, assetId?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FaucetTransaction>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.requestExternalFaucetFunds(networkId, addressId, assetId, options);
+        async requestExternalFaucetFunds(networkId: string, addressId: string, assetId?: string, skipWait?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FaucetTransaction>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.requestExternalFaucetFunds(networkId, addressId, assetId, skipWait, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ExternalAddressesApi.requestExternalFaucetFunds']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -5391,6 +5887,18 @@ export const ExternalAddressesApiFactory = function (configuration?: Configurati
             return localVarFp.getExternalAddressBalance(networkId, addressId, assetId, options).then((request) => request(axios, basePath));
         },
         /**
+         * Get the status of a faucet transaction
+         * @summary Get the status of a faucet transaction
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the faucet transaction for
+         * @param {string} txHash The hash of the faucet transaction
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getFaucetTransaction(networkId: string, addressId: string, txHash: string, options?: RawAxiosRequestConfig): AxiosPromise<FaucetTransaction> {
+            return localVarFp.getFaucetTransaction(networkId, addressId, txHash, options).then((request) => request(axios, basePath));
+        },
+        /**
          * List all of the balances of an external address
          * @summary Get the balances of an external address
          * @param {string} networkId The ID of the blockchain network
@@ -5408,11 +5916,12 @@ export const ExternalAddressesApiFactory = function (configuration?: Configurati
          * @param {string} networkId The ID of the wallet the address belongs to.
          * @param {string} addressId The onchain address of the address that is being fetched.
          * @param {string} [assetId] The ID of the asset to transfer from the faucet.
+         * @param {boolean} [skipWait] Whether to skip waiting for the transaction to be mined. This will become the default behavior in the future.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        requestExternalFaucetFunds(networkId: string, addressId: string, assetId?: string, options?: RawAxiosRequestConfig): AxiosPromise<FaucetTransaction> {
-            return localVarFp.requestExternalFaucetFunds(networkId, addressId, assetId, options).then((request) => request(axios, basePath));
+        requestExternalFaucetFunds(networkId: string, addressId: string, assetId?: string, skipWait?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<FaucetTransaction> {
+            return localVarFp.requestExternalFaucetFunds(networkId, addressId, assetId, skipWait, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -5436,6 +5945,18 @@ export interface ExternalAddressesApiInterface {
     getExternalAddressBalance(networkId: string, addressId: string, assetId: string, options?: RawAxiosRequestConfig): AxiosPromise<Balance>;
 
     /**
+     * Get the status of a faucet transaction
+     * @summary Get the status of a faucet transaction
+     * @param {string} networkId The ID of the blockchain network
+     * @param {string} addressId The ID of the address to fetch the faucet transaction for
+     * @param {string} txHash The hash of the faucet transaction
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExternalAddressesApiInterface
+     */
+    getFaucetTransaction(networkId: string, addressId: string, txHash: string, options?: RawAxiosRequestConfig): AxiosPromise<FaucetTransaction>;
+
+    /**
      * List all of the balances of an external address
      * @summary Get the balances of an external address
      * @param {string} networkId The ID of the blockchain network
@@ -5453,11 +5974,12 @@ export interface ExternalAddressesApiInterface {
      * @param {string} networkId The ID of the wallet the address belongs to.
      * @param {string} addressId The onchain address of the address that is being fetched.
      * @param {string} [assetId] The ID of the asset to transfer from the faucet.
+     * @param {boolean} [skipWait] Whether to skip waiting for the transaction to be mined. This will become the default behavior in the future.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ExternalAddressesApiInterface
      */
-    requestExternalFaucetFunds(networkId: string, addressId: string, assetId?: string, options?: RawAxiosRequestConfig): AxiosPromise<FaucetTransaction>;
+    requestExternalFaucetFunds(networkId: string, addressId: string, assetId?: string, skipWait?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<FaucetTransaction>;
 
 }
 
@@ -5483,6 +6005,20 @@ export class ExternalAddressesApi extends BaseAPI implements ExternalAddressesAp
     }
 
     /**
+     * Get the status of a faucet transaction
+     * @summary Get the status of a faucet transaction
+     * @param {string} networkId The ID of the blockchain network
+     * @param {string} addressId The ID of the address to fetch the faucet transaction for
+     * @param {string} txHash The hash of the faucet transaction
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExternalAddressesApi
+     */
+    public getFaucetTransaction(networkId: string, addressId: string, txHash: string, options?: RawAxiosRequestConfig) {
+        return ExternalAddressesApiFp(this.configuration).getFaucetTransaction(networkId, addressId, txHash, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * List all of the balances of an external address
      * @summary Get the balances of an external address
      * @param {string} networkId The ID of the blockchain network
@@ -5502,12 +6038,454 @@ export class ExternalAddressesApi extends BaseAPI implements ExternalAddressesAp
      * @param {string} networkId The ID of the wallet the address belongs to.
      * @param {string} addressId The onchain address of the address that is being fetched.
      * @param {string} [assetId] The ID of the asset to transfer from the faucet.
+     * @param {boolean} [skipWait] Whether to skip waiting for the transaction to be mined. This will become the default behavior in the future.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ExternalAddressesApi
      */
-    public requestExternalFaucetFunds(networkId: string, addressId: string, assetId?: string, options?: RawAxiosRequestConfig) {
-        return ExternalAddressesApiFp(this.configuration).requestExternalFaucetFunds(networkId, addressId, assetId, options).then((request) => request(this.axios, this.basePath));
+    public requestExternalFaucetFunds(networkId: string, addressId: string, assetId?: string, skipWait?: boolean, options?: RawAxiosRequestConfig) {
+        return ExternalAddressesApiFp(this.configuration).requestExternalFaucetFunds(networkId, addressId, assetId, skipWait, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * FundApi - axios parameter creator
+ * @export
+ */
+export const FundApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Create a new fund operation with an address.
+         * @summary Create a new fund operation.
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The onchain address to be funded.
+         * @param {CreateFundOperationRequest} createFundOperationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createFundOperation: async (walletId: string, addressId: string, createFundOperationRequest: CreateFundOperationRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'walletId' is not null or undefined
+            assertParamExists('createFundOperation', 'walletId', walletId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('createFundOperation', 'addressId', addressId)
+            // verify required parameter 'createFundOperationRequest' is not null or undefined
+            assertParamExists('createFundOperation', 'createFundOperationRequest', createFundOperationRequest)
+            const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/fund_operations`
+                .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createFundOperationRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Create a new fund operation with an address.
+         * @summary Create a Fund Operation quote.
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The onchain address to be funded.
+         * @param {CreateFundQuoteRequest} createFundQuoteRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createFundQuote: async (walletId: string, addressId: string, createFundQuoteRequest: CreateFundQuoteRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'walletId' is not null or undefined
+            assertParamExists('createFundQuote', 'walletId', walletId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('createFundQuote', 'addressId', addressId)
+            // verify required parameter 'createFundQuoteRequest' is not null or undefined
+            assertParamExists('createFundQuote', 'createFundQuoteRequest', createFundQuoteRequest)
+            const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/fund_operations/quote`
+                .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createFundQuoteRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get fund operation.
+         * @summary Get fund operation.
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The onchain address of the address that created the fund operation.
+         * @param {string} fundOperationId The ID of the fund operation to fetch.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getFundOperation: async (walletId: string, addressId: string, fundOperationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'walletId' is not null or undefined
+            assertParamExists('getFundOperation', 'walletId', walletId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('getFundOperation', 'addressId', addressId)
+            // verify required parameter 'fundOperationId' is not null or undefined
+            assertParamExists('getFundOperation', 'fundOperationId', fundOperationId)
+            const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/fund_operations/{fund_operation_id}`
+                .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)))
+                .replace(`{${"fund_operation_id"}}`, encodeURIComponent(String(fundOperationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * List fund operations for an address.
+         * @summary List fund operations for an address.
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The onchain address of the address to list fund operations for.
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listFundOperations: async (walletId: string, addressId: string, limit?: number, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'walletId' is not null or undefined
+            assertParamExists('listFundOperations', 'walletId', walletId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('listFundOperations', 'addressId', addressId)
+            const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/fund_operations`
+                .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * FundApi - functional programming interface
+ * @export
+ */
+export const FundApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = FundApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Create a new fund operation with an address.
+         * @summary Create a new fund operation.
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The onchain address to be funded.
+         * @param {CreateFundOperationRequest} createFundOperationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createFundOperation(walletId: string, addressId: string, createFundOperationRequest: CreateFundOperationRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FundOperation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createFundOperation(walletId, addressId, createFundOperationRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['FundApi.createFundOperation']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Create a new fund operation with an address.
+         * @summary Create a Fund Operation quote.
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The onchain address to be funded.
+         * @param {CreateFundQuoteRequest} createFundQuoteRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createFundQuote(walletId: string, addressId: string, createFundQuoteRequest: CreateFundQuoteRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FundQuote>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createFundQuote(walletId, addressId, createFundQuoteRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['FundApi.createFundQuote']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get fund operation.
+         * @summary Get fund operation.
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The onchain address of the address that created the fund operation.
+         * @param {string} fundOperationId The ID of the fund operation to fetch.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getFundOperation(walletId: string, addressId: string, fundOperationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FundOperation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getFundOperation(walletId, addressId, fundOperationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['FundApi.getFundOperation']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * List fund operations for an address.
+         * @summary List fund operations for an address.
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The onchain address of the address to list fund operations for.
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listFundOperations(walletId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FundOperationList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listFundOperations(walletId, addressId, limit, page, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['FundApi.listFundOperations']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * FundApi - factory interface
+ * @export
+ */
+export const FundApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = FundApiFp(configuration)
+    return {
+        /**
+         * Create a new fund operation with an address.
+         * @summary Create a new fund operation.
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The onchain address to be funded.
+         * @param {CreateFundOperationRequest} createFundOperationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createFundOperation(walletId: string, addressId: string, createFundOperationRequest: CreateFundOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<FundOperation> {
+            return localVarFp.createFundOperation(walletId, addressId, createFundOperationRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Create a new fund operation with an address.
+         * @summary Create a Fund Operation quote.
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The onchain address to be funded.
+         * @param {CreateFundQuoteRequest} createFundQuoteRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createFundQuote(walletId: string, addressId: string, createFundQuoteRequest: CreateFundQuoteRequest, options?: RawAxiosRequestConfig): AxiosPromise<FundQuote> {
+            return localVarFp.createFundQuote(walletId, addressId, createFundQuoteRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get fund operation.
+         * @summary Get fund operation.
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The onchain address of the address that created the fund operation.
+         * @param {string} fundOperationId The ID of the fund operation to fetch.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getFundOperation(walletId: string, addressId: string, fundOperationId: string, options?: RawAxiosRequestConfig): AxiosPromise<FundOperation> {
+            return localVarFp.getFundOperation(walletId, addressId, fundOperationId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * List fund operations for an address.
+         * @summary List fund operations for an address.
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The onchain address of the address to list fund operations for.
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listFundOperations(walletId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<FundOperationList> {
+            return localVarFp.listFundOperations(walletId, addressId, limit, page, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * FundApi - interface
+ * @export
+ * @interface FundApi
+ */
+export interface FundApiInterface {
+    /**
+     * Create a new fund operation with an address.
+     * @summary Create a new fund operation.
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The onchain address to be funded.
+     * @param {CreateFundOperationRequest} createFundOperationRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof FundApiInterface
+     */
+    createFundOperation(walletId: string, addressId: string, createFundOperationRequest: CreateFundOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<FundOperation>;
+
+    /**
+     * Create a new fund operation with an address.
+     * @summary Create a Fund Operation quote.
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The onchain address to be funded.
+     * @param {CreateFundQuoteRequest} createFundQuoteRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof FundApiInterface
+     */
+    createFundQuote(walletId: string, addressId: string, createFundQuoteRequest: CreateFundQuoteRequest, options?: RawAxiosRequestConfig): AxiosPromise<FundQuote>;
+
+    /**
+     * Get fund operation.
+     * @summary Get fund operation.
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The onchain address of the address that created the fund operation.
+     * @param {string} fundOperationId The ID of the fund operation to fetch.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof FundApiInterface
+     */
+    getFundOperation(walletId: string, addressId: string, fundOperationId: string, options?: RawAxiosRequestConfig): AxiosPromise<FundOperation>;
+
+    /**
+     * List fund operations for an address.
+     * @summary List fund operations for an address.
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The onchain address of the address to list fund operations for.
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof FundApiInterface
+     */
+    listFundOperations(walletId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<FundOperationList>;
+
+}
+
+/**
+ * FundApi - object-oriented interface
+ * @export
+ * @class FundApi
+ * @extends {BaseAPI}
+ */
+export class FundApi extends BaseAPI implements FundApiInterface {
+    /**
+     * Create a new fund operation with an address.
+     * @summary Create a new fund operation.
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The onchain address to be funded.
+     * @param {CreateFundOperationRequest} createFundOperationRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof FundApi
+     */
+    public createFundOperation(walletId: string, addressId: string, createFundOperationRequest: CreateFundOperationRequest, options?: RawAxiosRequestConfig) {
+        return FundApiFp(this.configuration).createFundOperation(walletId, addressId, createFundOperationRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Create a new fund operation with an address.
+     * @summary Create a Fund Operation quote.
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The onchain address to be funded.
+     * @param {CreateFundQuoteRequest} createFundQuoteRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof FundApi
+     */
+    public createFundQuote(walletId: string, addressId: string, createFundQuoteRequest: CreateFundQuoteRequest, options?: RawAxiosRequestConfig) {
+        return FundApiFp(this.configuration).createFundQuote(walletId, addressId, createFundQuoteRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get fund operation.
+     * @summary Get fund operation.
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The onchain address of the address that created the fund operation.
+     * @param {string} fundOperationId The ID of the fund operation to fetch.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof FundApi
+     */
+    public getFundOperation(walletId: string, addressId: string, fundOperationId: string, options?: RawAxiosRequestConfig) {
+        return FundApiFp(this.configuration).getFundOperation(walletId, addressId, fundOperationId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * List fund operations for an address.
+     * @summary List fund operations for an address.
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The onchain address of the address to list fund operations for.
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof FundApi
+     */
+    public listFundOperations(walletId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig) {
+        return FundApiFp(this.configuration).listFundOperations(walletId, addressId, limit, page, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -5637,6 +6615,175 @@ export class NetworksApi extends BaseAPI implements NetworksApiInterface {
     }
 }
 
+
+
+/**
+ * OnchainIdentityApi - axios parameter creator
+ * @export
+ */
+export const OnchainIdentityApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Obtains onchain identity for an address on a specific network
+         * @summary Obtains onchain identity for an address on a specific network
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the identity for
+         * @param {Array<ResolveIdentityByAddressRolesEnum>} [roles] A filter by role of the names related to this address (managed or owned)
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        resolveIdentityByAddress: async (networkId: string, addressId: string, roles?: Array<ResolveIdentityByAddressRolesEnum>, limit?: number, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('resolveIdentityByAddress', 'networkId', networkId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('resolveIdentityByAddress', 'addressId', addressId)
+            const localVarPath = `/v1/networks/{network_id}/addresses/{address_id}/identity`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (roles) {
+                localVarQueryParameter['roles'] = roles.join(COLLECTION_FORMATS.csv);
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * OnchainIdentityApi - functional programming interface
+ * @export
+ */
+export const OnchainIdentityApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = OnchainIdentityApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Obtains onchain identity for an address on a specific network
+         * @summary Obtains onchain identity for an address on a specific network
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the identity for
+         * @param {Array<ResolveIdentityByAddressRolesEnum>} [roles] A filter by role of the names related to this address (managed or owned)
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async resolveIdentityByAddress(networkId: string, addressId: string, roles?: Array<ResolveIdentityByAddressRolesEnum>, limit?: number, page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OnchainNameList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.resolveIdentityByAddress(networkId, addressId, roles, limit, page, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OnchainIdentityApi.resolveIdentityByAddress']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * OnchainIdentityApi - factory interface
+ * @export
+ */
+export const OnchainIdentityApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = OnchainIdentityApiFp(configuration)
+    return {
+        /**
+         * Obtains onchain identity for an address on a specific network
+         * @summary Obtains onchain identity for an address on a specific network
+         * @param {string} networkId The ID of the blockchain network
+         * @param {string} addressId The ID of the address to fetch the identity for
+         * @param {Array<ResolveIdentityByAddressRolesEnum>} [roles] A filter by role of the names related to this address (managed or owned)
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        resolveIdentityByAddress(networkId: string, addressId: string, roles?: Array<ResolveIdentityByAddressRolesEnum>, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<OnchainNameList> {
+            return localVarFp.resolveIdentityByAddress(networkId, addressId, roles, limit, page, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * OnchainIdentityApi - interface
+ * @export
+ * @interface OnchainIdentityApi
+ */
+export interface OnchainIdentityApiInterface {
+    /**
+     * Obtains onchain identity for an address on a specific network
+     * @summary Obtains onchain identity for an address on a specific network
+     * @param {string} networkId The ID of the blockchain network
+     * @param {string} addressId The ID of the address to fetch the identity for
+     * @param {Array<ResolveIdentityByAddressRolesEnum>} [roles] A filter by role of the names related to this address (managed or owned)
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OnchainIdentityApiInterface
+     */
+    resolveIdentityByAddress(networkId: string, addressId: string, roles?: Array<ResolveIdentityByAddressRolesEnum>, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<OnchainNameList>;
+
+}
+
+/**
+ * OnchainIdentityApi - object-oriented interface
+ * @export
+ * @class OnchainIdentityApi
+ * @extends {BaseAPI}
+ */
+export class OnchainIdentityApi extends BaseAPI implements OnchainIdentityApiInterface {
+    /**
+     * Obtains onchain identity for an address on a specific network
+     * @summary Obtains onchain identity for an address on a specific network
+     * @param {string} networkId The ID of the blockchain network
+     * @param {string} addressId The ID of the address to fetch the identity for
+     * @param {Array<ResolveIdentityByAddressRolesEnum>} [roles] A filter by role of the names related to this address (managed or owned)
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OnchainIdentityApi
+     */
+    public resolveIdentityByAddress(networkId: string, addressId: string, roles?: Array<ResolveIdentityByAddressRolesEnum>, limit?: number, page?: string, options?: RawAxiosRequestConfig) {
+        return OnchainIdentityApiFp(this.configuration).resolveIdentityByAddress(networkId, addressId, roles, limit, page, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+/**
+ * @export
+ */
+export const ResolveIdentityByAddressRolesEnum = {
+    Managed: 'managed',
+    Owned: 'owned'
+} as const;
+export type ResolveIdentityByAddressRolesEnum = typeof ResolveIdentityByAddressRolesEnum[keyof typeof ResolveIdentityByAddressRolesEnum];
 
 
 /**
