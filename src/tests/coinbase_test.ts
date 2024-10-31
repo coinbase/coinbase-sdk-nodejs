@@ -109,9 +109,6 @@ describe("Coinbase tests", () => {
 
       Coinbase.apiClients.wallet!.createWallet = mockReturnValue(walletModel);
       Coinbase.apiClients.wallet!.getWallet = mockReturnValue(walletModel);
-      Coinbase.apiClients.address!.requestFaucetFunds = mockReturnValue({
-        transaction_hash: transactionHash,
-      });
       Coinbase.apiClients.address!.createAddress = mockReturnValue(
         VALID_WALLET_MODEL.default_address,
       );

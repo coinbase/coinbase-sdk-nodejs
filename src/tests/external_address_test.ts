@@ -8,6 +8,7 @@ import {
   newAddressModel,
   stakeApiMock,
   validatorApiMock,
+  VALID_FAUCET_TRANSACTION_MODEL,
 } from "./utils";
 import {
   AddressBalanceList,
@@ -193,7 +194,7 @@ describe("ExternalAddress", () => {
     jest.clearAllMocks();
   });
 
-  describe(".buildStakeOperation", () => {
+  describe("#buildStakeOperation", () => {
     it("should successfully build a stake operation", async () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       Coinbase.apiClients.stake!.buildStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
@@ -263,7 +264,7 @@ describe("ExternalAddress", () => {
     });
   });
 
-  describe(".buildUnstakeOperation", () => {
+  describe("#buildUnstakeOperation", () => {
     it("should successfully build a unstake operation", async () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       Coinbase.apiClients.stake!.buildStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
@@ -328,7 +329,7 @@ describe("ExternalAddress", () => {
     });
   });
 
-  describe(".buildClaimStakeOperation", () => {
+  describe("#buildClaimStakeOperation", () => {
     it("should successfully build a claim stake operation", async () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       Coinbase.apiClients.stake!.buildStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
@@ -403,7 +404,7 @@ describe("ExternalAddress", () => {
     });
   });
 
-  describe(".stakingRewards", () => {
+  describe("#stakingRewards", () => {
     it("should return staking rewards successfully", async () => {
       Coinbase.apiClients.stake!.fetchStakingRewards = mockReturnValue(STAKING_REWARD_RESPONSE);
       Coinbase.apiClients.asset!.getAsset = getAssetMock();
@@ -426,7 +427,7 @@ describe("ExternalAddress", () => {
     });
   });
 
-  describe(".historicalStakingBalances", () => {
+  describe("#historicalStakingBalances", () => {
     it("should return staking balances successfully", async () => {
       Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockReturnValue(
         HISTORICAL_STAKING_BALANCES_RESPONSE,
@@ -452,7 +453,7 @@ describe("ExternalAddress", () => {
     });
   });
 
-  describe(".listBalances", () => {
+  describe("#listBalances", () => {
     beforeEach(() => {
       const mockBalanceResponse: AddressBalanceList = {
         data: [
@@ -514,7 +515,7 @@ describe("ExternalAddress", () => {
     });
   });
 
-  describe(".getBalance", () => {
+  describe("#getBalance", () => {
     beforeEach(() => {
       const mockWalletBalance: Balance = {
         amount: "5000000000000000000",
@@ -582,16 +583,28 @@ describe("ExternalAddress", () => {
     });
   });
 
-  describe(".faucet", () => {
+  describe("#faucet", () => {
     beforeEach(() => {
-      Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds = mockReturnValue({
-        transaction_hash: generateRandomHash(8),
-      });
+      Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds = mockReturnValue(VALID_FAUCET_TRANSACTION_MODEL);
     });
 
     it("should successfully request funds from the faucet", async () => {
-      const transaction = await address.faucet();
-      expect(transaction.getTransactionHash()).toEqual(expect.any(String));
+      const faucetTx = await address.faucet();
+
+      const {
+        transaction_hash: txHash,
+        transaction_link: txLink,
+      } = VALID_FAUCET_TRANSACTION_MODEL.transaction;
+
+      expect(faucetTx.getTransactionHash()).toEqual(txHash);
+      expect(faucetTx.getTransactionLink()).toEqual(txLink);
+
+      expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds).toHaveBeenCalledWith(
+        address.getNetworkId(),
+        address.getId(),
+        undefined,
+        true, // Skip wait should be true.
+      );
     });
 
     it("should throw an error if the faucet request fails", async () => {
@@ -600,7 +613,7 @@ describe("ExternalAddress", () => {
     });
   });
 
-  describe(".stakeableBalance", () => {
+  describe("#stakeableBalance", () => {
     it("should return the stakeable balance successfully with default params", async () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       const stakeableBalance = await address.stakeableBalance(Coinbase.assets.Eth);
@@ -634,7 +647,7 @@ describe("ExternalAddress", () => {
     });
   });
 
-  describe(".unstakeableBalance", () => {
+  describe("#unstakeableBalance", () => {
     it("should return the unstakeable balance successfully with default params", async () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       const unstakeableBalance = await address.unstakeableBalance(Coinbase.assets.Eth);
@@ -668,7 +681,7 @@ describe("ExternalAddress", () => {
     });
   });
 
-  describe(".claimableBalance", () => {
+  describe("#claimableBalance", () => {
     it("should return the claimable balance successfully with default params", async () => {
       Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
       const claimableBalance = await address.claimableBalance(Coinbase.assets.Eth);

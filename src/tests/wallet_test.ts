@@ -7,6 +7,7 @@ import { Coinbase } from "../coinbase/coinbase";
 import { ArgumentError } from "../coinbase/errors";
 import { Wallet } from "../coinbase/wallet";
 import { Transfer } from "../coinbase/transfer";
+import { FaucetTransaction } from "../coinbase/faucet_transaction";
 import { ServerSignerStatus, StakeOptionsMode, TransferStatus } from "../coinbase/types";
 import {
   AddressBalanceList,
@@ -48,6 +49,7 @@ import {
   walletStakeApiMock,
   MINT_NFT_ABI,
   MINT_NFT_ARGS,
+  VALID_FAUCET_TRANSACTION_MODEL,
   VALID_SIGNED_PAYLOAD_SIGNATURE_MODEL,
   VALID_SIGNED_CONTRACT_INVOCATION_MODEL,
   VALID_SMART_CONTRACT_ERC20_MODEL,
@@ -589,6 +591,38 @@ describe("Wallet Class", () => {
 
       expect(contractInvocation).toBeInstanceOf(ContractInvocation);
       expect(contractInvocation).toEqual(expectedInvocation);
+    });
+  });
+
+  describe("#faucet", () => {
+    let expectedFaucetTx;
+
+    beforeEach(async () => {
+      expectedFaucetTx = new FaucetTransaction(VALID_FAUCET_TRANSACTION_MODEL);
+
+      (await wallet.getDefaultAddress()).faucet = jest
+        .fn()
+        .mockResolvedValue(expectedFaucetTx);
+    });
+
+    it("successfully requests faucet funds", async () => {
+      const faucetTx = await wallet.faucet();
+
+      expect((await wallet.getDefaultAddress()).faucet).toHaveBeenCalledTimes(1);
+      expect((await wallet.getDefaultAddress()).faucet).toHaveBeenCalledWith(undefined);
+
+      expect(faucetTx).toBeInstanceOf(FaucetTransaction);
+      expect(faucetTx).toEqual(expectedFaucetTx);
+    });
+
+    it("successfully requests faucet funds with an asset specified", async () => {
+      const faucetTx = await wallet.faucet("usdc");
+
+      expect((await wallet.getDefaultAddress()).faucet).toHaveBeenCalledTimes(1);
+      expect((await wallet.getDefaultAddress()).faucet).toHaveBeenCalledWith("usdc");
+
+      expect(faucetTx).toBeInstanceOf(FaucetTransaction);
+      expect(faucetTx).toEqual(expectedFaucetTx);
     });
   });
 

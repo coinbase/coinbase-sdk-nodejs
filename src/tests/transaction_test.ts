@@ -2,6 +2,7 @@ import { ethers } from "ethers";
 import { Transaction as TransactionModel, EthereumTransaction } from "../client/api";
 import { Transaction } from "./../coinbase/transaction";
 import { TransactionStatus } from "../coinbase/types";
+import { Coinbase } from "../coinbase/coinbase";
 
 describe("Transaction", () => {
   let fromKey;
@@ -17,6 +18,7 @@ describe("Transaction", () => {
   let onchainModel;
   let blockHash;
   let blockHeight;
+  let networkID;
 
   beforeEach(() => {
     fromKey = ethers.Wallet.createRandom();
@@ -43,15 +45,18 @@ describe("Transaction", () => {
     ethereumContent = {
       priority_fee_per_gas: 1000,
     } as EthereumTransaction;
+    networkID = Coinbase.networks.BaseSepolia;
 
     model = {
       status: "pending",
+      network_id: networkID,
       from_address_id: fromAddressId,
       unsigned_payload: unsignedPayload,
     } as TransactionModel;
 
     broadcastedModel = {
       status: "broadcast",
+      network_id: networkID,
       from_address_id: fromAddressId,
       unsigned_payload: unsignedPayload,
       signed_payload: signedPayload,
@@ -61,6 +66,7 @@ describe("Transaction", () => {
 
     onchainModel = {
       status: "complete",
+      network_id: networkID,
       from_address_id: fromAddressId,
       unsigned_payload: "",
       block_hash: blockHash,
@@ -109,6 +115,12 @@ describe("Transaction", () => {
     });
   });
 
+  describe("#getNetworkId", () => {
+    it("should return the network ID", () => {
+      expect(transaction.getNetworkId()).toEqual(networkID);
+    });
+  });
+
   describe("#getRawTransaction", () => {
     let raw: ethers.Transaction, rawPayload;
 
@@ -116,6 +128,7 @@ describe("Transaction", () => {
       raw = transaction.rawTransaction();
       rawPayload = JSON.parse(Buffer.from(unsignedPayload, "hex").toString());
     });
+
     it("should return the raw transaction", () => {
       expect(raw).toBeInstanceOf(ethers.Transaction);
     });
@@ -196,34 +209,49 @@ describe("Transaction", () => {
   });
 
   describe("#getStatus", () => {
-    it("should return undefined when the transaction has not been initiated with a model", async () => {
-      model.status = "";
-      const transaction = new Transaction(model);
-      expect(transaction.getStatus()).toBeUndefined();
+    [
+      {status: TransactionStatus.PENDING, expected: "pending"},
+      {status: TransactionStatus.BROADCAST, expected: "broadcast"},
+      {status: TransactionStatus.SIGNED, expected: "signed"},
+      {status: TransactionStatus.COMPLETE, expected: "complete"},
+      {status: TransactionStatus.FAILED, expected: "failed"},
+    ].forEach(({status, expected}) => {
+      describe(`when the status is ${status}`, () => {
+        beforeEach(() => model.status = status);
+
+        it(`should return ${expected}`, () => {
+          const transaction = new Transaction(model);
+
+          expect(transaction.getStatus()).toEqual(expected);
+        });
+      });
+    });
+  });
+
+  describe("#isTerminalState", () => {
+    [
+      TransactionStatus.PENDING,
+      TransactionStatus.BROADCAST,
+      TransactionStatus.SIGNED,
+    ].forEach((status) => {
+      it(`should return false when the status is ${status}`, () => {
+        model.status = status;
+        const transaction = new Transaction(model);
+
+        expect(transaction.isTerminalState()).toEqual(false);
+      });
     });
 
-    it("should return a pending status", () => {
-      model.status = TransactionStatus.PENDING;
-      const transaction = new Transaction(model);
-      expect(transaction.getStatus()).toEqual("pending");
-    });
+    [
+      TransactionStatus.COMPLETE,
+      TransactionStatus.FAILED,
+    ].forEach((status) => {
+      it(`should return true when the status is ${status}`, () => {
+        model.status = status;
+        const transaction = new Transaction(model);
 
-    it("should return a broadcast status", () => {
-      model.status = TransactionStatus.BROADCAST;
-      const transaction = new Transaction(model);
-      expect(transaction.getStatus()).toEqual("broadcast");
-    });
-
-    it("should return a complete status", () => {
-      model.status = TransactionStatus.COMPLETE;
-      const transaction = new Transaction(model);
-      expect(transaction.getStatus()).toEqual("complete");
-    });
-
-    it("should return a failed status", () => {
-      model.status = TransactionStatus.FAILED;
-      const transaction = new Transaction(model);
-      expect(transaction.getStatus()).toEqual("failed");
+        expect(transaction.isTerminalState()).toEqual(true);
+      });
     });
   });
 

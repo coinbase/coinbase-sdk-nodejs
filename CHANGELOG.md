@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## [0.10.0] - 2024-10-31
+
+### Added
+- Add support for async faucet transactions i.e. using `faucetTx.wait()` to wait for the transaction to be confirmed.
+
 ## [0.9.1] - 2024-10-18
 
 ### Fixed

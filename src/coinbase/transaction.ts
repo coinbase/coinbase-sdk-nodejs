@@ -55,19 +55,32 @@ export class Transaction {
    *
    * @returns The Status
    */
-  getStatus(): TransactionStatus | undefined {
+  getStatus(): TransactionStatus {
     switch (this.model.status) {
       case TransactionStatus.PENDING:
         return TransactionStatus.PENDING;
       case TransactionStatus.BROADCAST:
         return TransactionStatus.BROADCAST;
+      case TransactionStatus.SIGNED:
+        return TransactionStatus.SIGNED;
       case TransactionStatus.COMPLETE:
         return TransactionStatus.COMPLETE;
       case TransactionStatus.FAILED:
         return TransactionStatus.FAILED;
       default:
-        return undefined;
+        return TransactionStatus.UNSPECIFIED;
     }
+  }
+
+  /**
+   * Returns whether the Transaction is in a terminal State.
+   *
+   * @returns Whether the Transaction is in a terminal State
+   */
+  isTerminalState(): boolean {
+    const status = this.getStatus();
+
+    return [TransactionStatus.COMPLETE, TransactionStatus.FAILED].includes(status);
   }
 
   /**
@@ -114,18 +127,6 @@ export class Transaction {
   content(): EthereumTransaction | undefined {
     return this.model.content;
   }
-  /**
-   * Returns whether the Transaction is in a terminal State.
-   *
-   * @returns Whether the Transaction is in a terminal State
-   */
-  isTerminalState(): boolean {
-    const status = this.getStatus();
-
-    if (!status) return false;
-
-    return [TransactionStatus.COMPLETE, TransactionStatus.FAILED].includes(status);
-  }
 
   /**
    * Returns the link to the Transaction on the blockchain explorer.
@@ -134,6 +135,15 @@ export class Transaction {
    */
   getTransactionLink(): string {
     return this.model.transaction_link!;
+  }
+
+  /**
+   * Returns the Network ID of the Transaction.
+   *
+   * @returns The Network ID.
+   */
+  public getNetworkId(): string {
+    return this.model.network_id;
   }
 
   /**
