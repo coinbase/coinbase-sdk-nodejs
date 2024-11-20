@@ -37,7 +37,7 @@ export class Validator {
     status?: ValidatorStatus,
   ): Promise<Validator[]> {
     const validators: Validator[] = [];
-    const response = await Coinbase.apiClients.validator!.listValidators(
+    const response = await Coinbase.apiClients.stake!.listValidators(
       networkId,
       assetId,
       Validator.getAPIValidatorStatus(status),
@@ -60,7 +60,7 @@ export class Validator {
    * @returns The requested validator details.
    */
   public static async fetch(networkId: string, assetId: string, id: string): Promise<Validator> {
-    const response = await Coinbase.apiClients.validator!.getValidator(networkId, assetId, id);
+    const response = await Coinbase.apiClients.stake!.getValidator(networkId, assetId, id);
 
     return new Validator(response.data);
   }

@@ -624,6 +624,8 @@ export const stakeApiMock = {
   getStakingContext: jest.fn(),
   fetchStakingRewards: jest.fn(),
   fetchHistoricalStakingBalances: jest.fn(),
+  getValidator: jest.fn(),
+  listValidators: jest.fn(),
 };
 
 export const walletStakeApiMock = {

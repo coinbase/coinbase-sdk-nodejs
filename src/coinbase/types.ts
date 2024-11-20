@@ -539,9 +539,7 @@ export type StakeAPIClient = {
     page?: string,
     options?: AxiosRequestConfig,
   ): AxiosPromise<FetchHistoricalStakingBalances200Response>;
-};
 
-export type ValidatorAPIClient = {
   /**
    * List the validators for a given network and asset.
    *
@@ -715,7 +713,6 @@ export type ApiClients = {
   serverSigner?: ServerSignerAPIClient;
   stake?: StakeAPIClient;
   walletStake?: WalletStakeAPIClient;
-  validator?: ValidatorAPIClient;
   asset?: AssetAPIClient;
   externalAddress?: ExternalAddressAPIClient;
   webhook?: WebhookApiClient;

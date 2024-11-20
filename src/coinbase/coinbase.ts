@@ -8,8 +8,6 @@ import {
   TradesApiFactory,
   ServerSignersApiFactory,
   StakeApiFactory,
-  WalletStakeApiFactory,
-  ValidatorsApiFactory,
   AssetsApiFactory,
   ExternalAddressesApiFactory,
   WebhooksApiFactory,
@@ -19,6 +17,7 @@ import {
   BalanceHistoryApiFactory,
   SmartContractsApiFactory,
   TransactionHistoryApiFactory,
+  MPCWalletStakeApiFactory,
 } from "../client";
 import { BASE_PATH } from "./../client/base";
 import { Configuration } from "./../client/configuration";
@@ -139,8 +138,7 @@ export class Coinbase {
     Coinbase.apiClients.trade = TradesApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.serverSigner = ServerSignersApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.stake = StakeApiFactory(config, basePath, axiosInstance);
-    Coinbase.apiClients.walletStake = WalletStakeApiFactory(config, basePath, axiosInstance);
-    Coinbase.apiClients.validator = ValidatorsApiFactory(config, basePath, axiosInstance);
+    Coinbase.apiClients.walletStake = MPCWalletStakeApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.asset = AssetsApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.webhook = WebhooksApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.contractInvocation = ContractInvocationsApiFactory(
