@@ -26,6 +26,8 @@ import { Wallet as WalletClass } from "../wallet";
 import { StakingOperation } from "../staking_operation";
 import { PayloadSignature } from "../payload_signature";
 import { SmartContract } from "../smart_contract";
+import { FundOperation } from "../fund_operation";
+import { FundQuote } from "../fund_quote";
 
 /**
  * A representation of a blockchain address, which is a wallet-controlled account on a network.
@@ -745,6 +747,45 @@ export class WalletAddress extends Address {
       hasMore,
       nextPage,
     };
+  }
+
+
+  /**
+   * Fund the address from your account on the Coinbase Platform.
+   *
+   * @param amount - The amount of the Asset to fund the wallet with
+   * @param assetId - The ID of the Asset to fund with. For Ether, eth, gwei, and wei are supported.
+   * @returns The created fund operation object
+   */
+  public async fund(amount: Amount, assetId: string): Promise<FundOperation> {
+    const normalizedAmount = new Decimal(amount.toString());
+
+    return FundOperation.create(
+      this.getWalletId(),
+      this.getId(),
+      normalizedAmount,
+      assetId,
+      this.getNetworkId(),
+    );
+  }
+
+  /**
+   * Get a quote for funding the address from your Coinbase platform account.
+   *
+   * @param amount - The amount to fund
+   * @param assetId - The ID of the Asset to fund with. For Ether, eth, gwei, and wei are supported.
+   * @returns The fund quote object
+   */
+  public async quoteFund(amount: Amount, assetId: string): Promise<FundQuote> {
+    const normalizedAmount = new Decimal(amount.toString());
+
+    return FundQuote.create(
+      this.getWalletId(),
+      this.getId(),
+      normalizedAmount,
+      assetId,
+      this.getNetworkId(),
+    );
   }
 
   /**
