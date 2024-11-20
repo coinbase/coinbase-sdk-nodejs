@@ -148,6 +148,105 @@ export interface AddressList {
     'total_count': number;
 }
 /**
+ * The reputation score with metadata of a blockchain address.
+ * @export
+ * @interface AddressReputation
+ */
+export interface AddressReputation {
+    /**
+     * The reputation score of a wallet address which lie between 0 to 100.
+     * @type {number}
+     * @memberof AddressReputation
+     */
+    'reputation_score': number;
+    /**
+     * 
+     * @type {AddressReputationMetadata}
+     * @memberof AddressReputation
+     */
+    'metadata': AddressReputationMetadata;
+}
+/**
+ * The metadata for the reputation score of onchain address.
+ * @export
+ * @interface AddressReputationMetadata
+ */
+export interface AddressReputationMetadata {
+    /**
+     * The total number of transactions performed by the address.
+     * @type {number}
+     * @memberof AddressReputationMetadata
+     */
+    'total_transactions': number;
+    /**
+     * The number of unique days the address was active.
+     * @type {number}
+     * @memberof AddressReputationMetadata
+     */
+    'unique_days_active': number;
+    /**
+     * The longest streak of consecutive active days.
+     * @type {number}
+     * @memberof AddressReputationMetadata
+     */
+    'longest_active_streak': number;
+    /**
+     * The current streak of consecutive active days.
+     * @type {number}
+     * @memberof AddressReputationMetadata
+     */
+    'current_active_streak': number;
+    /**
+     * The total number of days the address has been active.
+     * @type {number}
+     * @memberof AddressReputationMetadata
+     */
+    'activity_period_days': number;
+    /**
+     * The number of token swaps performed by the address.
+     * @type {number}
+     * @memberof AddressReputationMetadata
+     */
+    'token_swaps_performed': number;
+    /**
+     * The number of bridge transactions performed by the address.
+     * @type {number}
+     * @memberof AddressReputationMetadata
+     */
+    'bridge_transactions_performed': number;
+    /**
+     * The number of lend, borrow, or stake transactions performed by the address.
+     * @type {number}
+     * @memberof AddressReputationMetadata
+     */
+    'lend_borrow_stake_transactions': number;
+    /**
+     * The number of interactions with ENS contracts.
+     * @type {number}
+     * @memberof AddressReputationMetadata
+     */
+    'ens_contract_interactions': number;
+    /**
+     * The number of smart contracts deployed by the address.
+     * @type {number}
+     * @memberof AddressReputationMetadata
+     */
+    'smart_contract_deployments': number;
+}
+/**
+ * The risk score of a blockchain address.
+ * @export
+ * @interface AddressRisk
+ */
+export interface AddressRisk {
+    /**
+     * The lower the score is, the higher the risk is. The score lies between -100 to 0.
+     * @type {number}
+     * @memberof AddressRisk
+     */
+    'risk_score': number;
+}
+/**
  * 
  * @export
  * @interface AddressTransactionList
@@ -317,7 +416,7 @@ export interface BuildStakingOperationRequest {
      */
     'action': string;
     /**
-     * 
+     * Additional options for the staking operation.
      * @type {{ [key: string]: string; }}
      * @memberof BuildStakingOperationRequest
      */
@@ -727,7 +826,7 @@ export interface CreateStakingOperationRequest {
      */
     'action': string;
     /**
-     * 
+     * Additional options for the staking operation.
      * @type {{ [key: string]: string; }}
      * @memberof CreateStakingOperationRequest
      */
@@ -1849,7 +1948,7 @@ export interface GetStakingContextRequest {
      */
     'address_id': string;
     /**
-     * 
+     * Additional options for getting the staking context. This typically includes network specific fields.
      * @type {{ [key: string]: string; }}
      * @memberof GetStakingContextRequest
      */
@@ -2675,10 +2774,13 @@ export const SolidityValueTypeEnum = {
     Uint32: 'uint32',
     Uint64: 'uint64',
     Uint128: 'uint128',
+    Uint160: 'uint160',
     Uint256: 'uint256',
     Int8: 'int8',
     Int16: 'int16',
+    Int24: 'int24',
     Int32: 'int32',
+    Int56: 'int56',
     Int64: 'int64',
     Int128: 'int128',
     Int256: 'int256',
@@ -6492,6 +6594,350 @@ export class FundApi extends BaseAPI implements FundApiInterface {
 
 
 /**
+ * MPCWalletStakeApi - axios parameter creator
+ * @export
+ */
+export const MPCWalletStakeApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Broadcast a staking operation.
+         * @summary Broadcast a staking operation
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address the staking operation belongs to.
+         * @param {string} stakingOperationId The ID of the staking operation to broadcast.
+         * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        broadcastStakingOperation: async (walletId: string, addressId: string, stakingOperationId: string, broadcastStakingOperationRequest: BroadcastStakingOperationRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'walletId' is not null or undefined
+            assertParamExists('broadcastStakingOperation', 'walletId', walletId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('broadcastStakingOperation', 'addressId', addressId)
+            // verify required parameter 'stakingOperationId' is not null or undefined
+            assertParamExists('broadcastStakingOperation', 'stakingOperationId', stakingOperationId)
+            // verify required parameter 'broadcastStakingOperationRequest' is not null or undefined
+            assertParamExists('broadcastStakingOperation', 'broadcastStakingOperationRequest', broadcastStakingOperationRequest)
+            const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/staking_operations/{staking_operation_id}/broadcast`
+                .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)))
+                .replace(`{${"staking_operation_id"}}`, encodeURIComponent(String(stakingOperationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(broadcastStakingOperationRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Create a new staking operation.
+         * @summary Create a new staking operation for an address
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to create the staking operation for.
+         * @param {CreateStakingOperationRequest} createStakingOperationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createStakingOperation: async (walletId: string, addressId: string, createStakingOperationRequest: CreateStakingOperationRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'walletId' is not null or undefined
+            assertParamExists('createStakingOperation', 'walletId', walletId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('createStakingOperation', 'addressId', addressId)
+            // verify required parameter 'createStakingOperationRequest' is not null or undefined
+            assertParamExists('createStakingOperation', 'createStakingOperationRequest', createStakingOperationRequest)
+            const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/staking_operations`
+                .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createStakingOperationRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get the latest state of a staking operation.
+         * @summary Get the latest state of a staking operation
+         * @param {string} walletId The ID of the wallet the address belongs to
+         * @param {string} addressId The ID of the address to fetch the staking operation for.
+         * @param {string} stakingOperationId The ID of the staking operation.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getStakingOperation: async (walletId: string, addressId: string, stakingOperationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'walletId' is not null or undefined
+            assertParamExists('getStakingOperation', 'walletId', walletId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('getStakingOperation', 'addressId', addressId)
+            // verify required parameter 'stakingOperationId' is not null or undefined
+            assertParamExists('getStakingOperation', 'stakingOperationId', stakingOperationId)
+            const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/staking_operations/{staking_operation_id}`
+                .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)))
+                .replace(`{${"staking_operation_id"}}`, encodeURIComponent(String(stakingOperationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * MPCWalletStakeApi - functional programming interface
+ * @export
+ */
+export const MPCWalletStakeApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = MPCWalletStakeApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Broadcast a staking operation.
+         * @summary Broadcast a staking operation
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address the staking operation belongs to.
+         * @param {string} stakingOperationId The ID of the staking operation to broadcast.
+         * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async broadcastStakingOperation(walletId: string, addressId: string, stakingOperationId: string, broadcastStakingOperationRequest: BroadcastStakingOperationRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<StakingOperation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.broadcastStakingOperation(walletId, addressId, stakingOperationId, broadcastStakingOperationRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['MPCWalletStakeApi.broadcastStakingOperation']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Create a new staking operation.
+         * @summary Create a new staking operation for an address
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to create the staking operation for.
+         * @param {CreateStakingOperationRequest} createStakingOperationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createStakingOperation(walletId: string, addressId: string, createStakingOperationRequest: CreateStakingOperationRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<StakingOperation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createStakingOperation(walletId, addressId, createStakingOperationRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['MPCWalletStakeApi.createStakingOperation']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get the latest state of a staking operation.
+         * @summary Get the latest state of a staking operation
+         * @param {string} walletId The ID of the wallet the address belongs to
+         * @param {string} addressId The ID of the address to fetch the staking operation for.
+         * @param {string} stakingOperationId The ID of the staking operation.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getStakingOperation(walletId: string, addressId: string, stakingOperationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<StakingOperation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getStakingOperation(walletId, addressId, stakingOperationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['MPCWalletStakeApi.getStakingOperation']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * MPCWalletStakeApi - factory interface
+ * @export
+ */
+export const MPCWalletStakeApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = MPCWalletStakeApiFp(configuration)
+    return {
+        /**
+         * Broadcast a staking operation.
+         * @summary Broadcast a staking operation
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address the staking operation belongs to.
+         * @param {string} stakingOperationId The ID of the staking operation to broadcast.
+         * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        broadcastStakingOperation(walletId: string, addressId: string, stakingOperationId: string, broadcastStakingOperationRequest: BroadcastStakingOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation> {
+            return localVarFp.broadcastStakingOperation(walletId, addressId, stakingOperationId, broadcastStakingOperationRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Create a new staking operation.
+         * @summary Create a new staking operation for an address
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to create the staking operation for.
+         * @param {CreateStakingOperationRequest} createStakingOperationRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createStakingOperation(walletId: string, addressId: string, createStakingOperationRequest: CreateStakingOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation> {
+            return localVarFp.createStakingOperation(walletId, addressId, createStakingOperationRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get the latest state of a staking operation.
+         * @summary Get the latest state of a staking operation
+         * @param {string} walletId The ID of the wallet the address belongs to
+         * @param {string} addressId The ID of the address to fetch the staking operation for.
+         * @param {string} stakingOperationId The ID of the staking operation.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getStakingOperation(walletId: string, addressId: string, stakingOperationId: string, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation> {
+            return localVarFp.getStakingOperation(walletId, addressId, stakingOperationId, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * MPCWalletStakeApi - interface
+ * @export
+ * @interface MPCWalletStakeApi
+ */
+export interface MPCWalletStakeApiInterface {
+    /**
+     * Broadcast a staking operation.
+     * @summary Broadcast a staking operation
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The ID of the address the staking operation belongs to.
+     * @param {string} stakingOperationId The ID of the staking operation to broadcast.
+     * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MPCWalletStakeApiInterface
+     */
+    broadcastStakingOperation(walletId: string, addressId: string, stakingOperationId: string, broadcastStakingOperationRequest: BroadcastStakingOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation>;
+
+    /**
+     * Create a new staking operation.
+     * @summary Create a new staking operation for an address
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The ID of the address to create the staking operation for.
+     * @param {CreateStakingOperationRequest} createStakingOperationRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MPCWalletStakeApiInterface
+     */
+    createStakingOperation(walletId: string, addressId: string, createStakingOperationRequest: CreateStakingOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation>;
+
+    /**
+     * Get the latest state of a staking operation.
+     * @summary Get the latest state of a staking operation
+     * @param {string} walletId The ID of the wallet the address belongs to
+     * @param {string} addressId The ID of the address to fetch the staking operation for.
+     * @param {string} stakingOperationId The ID of the staking operation.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MPCWalletStakeApiInterface
+     */
+    getStakingOperation(walletId: string, addressId: string, stakingOperationId: string, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation>;
+
+}
+
+/**
+ * MPCWalletStakeApi - object-oriented interface
+ * @export
+ * @class MPCWalletStakeApi
+ * @extends {BaseAPI}
+ */
+export class MPCWalletStakeApi extends BaseAPI implements MPCWalletStakeApiInterface {
+    /**
+     * Broadcast a staking operation.
+     * @summary Broadcast a staking operation
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The ID of the address the staking operation belongs to.
+     * @param {string} stakingOperationId The ID of the staking operation to broadcast.
+     * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MPCWalletStakeApi
+     */
+    public broadcastStakingOperation(walletId: string, addressId: string, stakingOperationId: string, broadcastStakingOperationRequest: BroadcastStakingOperationRequest, options?: RawAxiosRequestConfig) {
+        return MPCWalletStakeApiFp(this.configuration).broadcastStakingOperation(walletId, addressId, stakingOperationId, broadcastStakingOperationRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Create a new staking operation.
+     * @summary Create a new staking operation for an address
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The ID of the address to create the staking operation for.
+     * @param {CreateStakingOperationRequest} createStakingOperationRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MPCWalletStakeApi
+     */
+    public createStakingOperation(walletId: string, addressId: string, createStakingOperationRequest: CreateStakingOperationRequest, options?: RawAxiosRequestConfig) {
+        return MPCWalletStakeApiFp(this.configuration).createStakingOperation(walletId, addressId, createStakingOperationRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get the latest state of a staking operation.
+     * @summary Get the latest state of a staking operation
+     * @param {string} walletId The ID of the wallet the address belongs to
+     * @param {string} addressId The ID of the address to fetch the staking operation for.
+     * @param {string} stakingOperationId The ID of the staking operation.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MPCWalletStakeApi
+     */
+    public getStakingOperation(walletId: string, addressId: string, stakingOperationId: string, options?: RawAxiosRequestConfig) {
+        return MPCWalletStakeApiFp(this.configuration).getStakingOperation(walletId, addressId, stakingOperationId, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
  * NetworksApi - axios parameter creator
  * @export
  */
@@ -6784,6 +7230,227 @@ export const ResolveIdentityByAddressRolesEnum = {
     Owned: 'owned'
 } as const;
 export type ResolveIdentityByAddressRolesEnum = typeof ResolveIdentityByAddressRolesEnum[keyof typeof ResolveIdentityByAddressRolesEnum];
+
+
+/**
+ * ReputationApi - axios parameter creator
+ * @export
+ */
+export const ReputationApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Get the onchain reputation of an external address
+         * @summary Get the onchain reputation of an external address
+         * @param {string} networkId The ID of the blockchain network.
+         * @param {string} addressId The ID of the address to fetch the reputation for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAddressReputation: async (networkId: string, addressId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('getAddressReputation', 'networkId', networkId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('getAddressReputation', 'addressId', addressId)
+            const localVarPath = `/v1/networks/{network_id}/addresses/{address_id}/reputation`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get the risk of an address
+         * @summary Get the risk of an address
+         * @param {string} networkId The ID of the blockchain network.
+         * @param {string} addressId The ID of the address to fetch the risk for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAddressRisk: async (networkId: string, addressId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('getAddressRisk', 'networkId', networkId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('getAddressRisk', 'addressId', addressId)
+            const localVarPath = `/v1/networks/{network_id}/addresses/{address_id}/risk`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * ReputationApi - functional programming interface
+ * @export
+ */
+export const ReputationApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = ReputationApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Get the onchain reputation of an external address
+         * @summary Get the onchain reputation of an external address
+         * @param {string} networkId The ID of the blockchain network.
+         * @param {string} addressId The ID of the address to fetch the reputation for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getAddressReputation(networkId: string, addressId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AddressReputation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getAddressReputation(networkId, addressId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ReputationApi.getAddressReputation']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get the risk of an address
+         * @summary Get the risk of an address
+         * @param {string} networkId The ID of the blockchain network.
+         * @param {string} addressId The ID of the address to fetch the risk for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getAddressRisk(networkId: string, addressId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AddressRisk>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getAddressRisk(networkId, addressId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ReputationApi.getAddressRisk']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * ReputationApi - factory interface
+ * @export
+ */
+export const ReputationApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = ReputationApiFp(configuration)
+    return {
+        /**
+         * Get the onchain reputation of an external address
+         * @summary Get the onchain reputation of an external address
+         * @param {string} networkId The ID of the blockchain network.
+         * @param {string} addressId The ID of the address to fetch the reputation for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAddressReputation(networkId: string, addressId: string, options?: RawAxiosRequestConfig): AxiosPromise<AddressReputation> {
+            return localVarFp.getAddressReputation(networkId, addressId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get the risk of an address
+         * @summary Get the risk of an address
+         * @param {string} networkId The ID of the blockchain network.
+         * @param {string} addressId The ID of the address to fetch the risk for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAddressRisk(networkId: string, addressId: string, options?: RawAxiosRequestConfig): AxiosPromise<AddressRisk> {
+            return localVarFp.getAddressRisk(networkId, addressId, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * ReputationApi - interface
+ * @export
+ * @interface ReputationApi
+ */
+export interface ReputationApiInterface {
+    /**
+     * Get the onchain reputation of an external address
+     * @summary Get the onchain reputation of an external address
+     * @param {string} networkId The ID of the blockchain network.
+     * @param {string} addressId The ID of the address to fetch the reputation for.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ReputationApiInterface
+     */
+    getAddressReputation(networkId: string, addressId: string, options?: RawAxiosRequestConfig): AxiosPromise<AddressReputation>;
+
+    /**
+     * Get the risk of an address
+     * @summary Get the risk of an address
+     * @param {string} networkId The ID of the blockchain network.
+     * @param {string} addressId The ID of the address to fetch the risk for.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ReputationApiInterface
+     */
+    getAddressRisk(networkId: string, addressId: string, options?: RawAxiosRequestConfig): AxiosPromise<AddressRisk>;
+
+}
+
+/**
+ * ReputationApi - object-oriented interface
+ * @export
+ * @class ReputationApi
+ * @extends {BaseAPI}
+ */
+export class ReputationApi extends BaseAPI implements ReputationApiInterface {
+    /**
+     * Get the onchain reputation of an external address
+     * @summary Get the onchain reputation of an external address
+     * @param {string} networkId The ID of the blockchain network.
+     * @param {string} addressId The ID of the address to fetch the reputation for.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ReputationApi
+     */
+    public getAddressReputation(networkId: string, addressId: string, options?: RawAxiosRequestConfig) {
+        return ReputationApiFp(this.configuration).getAddressReputation(networkId, addressId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get the risk of an address
+     * @summary Get the risk of an address
+     * @param {string} networkId The ID of the blockchain network.
+     * @param {string} addressId The ID of the address to fetch the risk for.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ReputationApi
+     */
+    public getAddressRisk(networkId: string, addressId: string, options?: RawAxiosRequestConfig) {
+        return ReputationApiFp(this.configuration).getAddressRisk(networkId, addressId, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
 
 
 /**
@@ -8123,6 +8790,101 @@ export const StakeApiAxiosParamCreator = function (configuration?: Configuration
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Get a validator belonging to the user for a given network, asset and id.
+         * @summary Get a validator belonging to the CDP project
+         * @param {string} networkId The ID of the blockchain network.
+         * @param {string} assetId The symbol of the asset to get the validator for.
+         * @param {string} validatorId The unique id of the validator to fetch details for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getValidator: async (networkId: string, assetId: string, validatorId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('getValidator', 'networkId', networkId)
+            // verify required parameter 'assetId' is not null or undefined
+            assertParamExists('getValidator', 'assetId', assetId)
+            // verify required parameter 'validatorId' is not null or undefined
+            assertParamExists('getValidator', 'validatorId', validatorId)
+            const localVarPath = `/v1/networks/{network_id}/assets/{asset_id}/validators/{validator_id}`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"asset_id"}}`, encodeURIComponent(String(assetId)))
+                .replace(`{${"validator_id"}}`, encodeURIComponent(String(validatorId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * List validators belonging to the user for a given network and asset.
+         * @summary List validators belonging to the CDP project
+         * @param {string} networkId The ID of the blockchain network.
+         * @param {string} assetId The symbol of the asset to get the validators for.
+         * @param {ValidatorStatus} [status] A filter to list validators based on a status.
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listValidators: async (networkId: string, assetId: string, status?: ValidatorStatus, limit?: number, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('listValidators', 'networkId', networkId)
+            // verify required parameter 'assetId' is not null or undefined
+            assertParamExists('listValidators', 'assetId', assetId)
+            const localVarPath = `/v1/networks/{network_id}/assets/{asset_id}/validators`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"asset_id"}}`, encodeURIComponent(String(assetId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (status !== undefined) {
+                localVarQueryParameter['status'] = status;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -8208,6 +8970,38 @@ export const StakeApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['StakeApi.getStakingContext']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * Get a validator belonging to the user for a given network, asset and id.
+         * @summary Get a validator belonging to the CDP project
+         * @param {string} networkId The ID of the blockchain network.
+         * @param {string} assetId The symbol of the asset to get the validator for.
+         * @param {string} validatorId The unique id of the validator to fetch details for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getValidator(networkId: string, assetId: string, validatorId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Validator>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getValidator(networkId, assetId, validatorId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['StakeApi.getValidator']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * List validators belonging to the user for a given network and asset.
+         * @summary List validators belonging to the CDP project
+         * @param {string} networkId The ID of the blockchain network.
+         * @param {string} assetId The symbol of the asset to get the validators for.
+         * @param {ValidatorStatus} [status] A filter to list validators based on a status.
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listValidators(networkId: string, assetId: string, status?: ValidatorStatus, limit?: number, page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ValidatorList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listValidators(networkId, assetId, status, limit, page, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['StakeApi.listValidators']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -8278,6 +9072,32 @@ export const StakeApiFactory = function (configuration?: Configuration, basePath
         getStakingContext(getStakingContextRequest: GetStakingContextRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingContext> {
             return localVarFp.getStakingContext(getStakingContextRequest, options).then((request) => request(axios, basePath));
         },
+        /**
+         * Get a validator belonging to the user for a given network, asset and id.
+         * @summary Get a validator belonging to the CDP project
+         * @param {string} networkId The ID of the blockchain network.
+         * @param {string} assetId The symbol of the asset to get the validator for.
+         * @param {string} validatorId The unique id of the validator to fetch details for.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getValidator(networkId: string, assetId: string, validatorId: string, options?: RawAxiosRequestConfig): AxiosPromise<Validator> {
+            return localVarFp.getValidator(networkId, assetId, validatorId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * List validators belonging to the user for a given network and asset.
+         * @summary List validators belonging to the CDP project
+         * @param {string} networkId The ID of the blockchain network.
+         * @param {string} assetId The symbol of the asset to get the validators for.
+         * @param {ValidatorStatus} [status] A filter to list validators based on a status.
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listValidators(networkId: string, assetId: string, status?: ValidatorStatus, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<ValidatorList> {
+            return localVarFp.listValidators(networkId, assetId, status, limit, page, options).then((request) => request(axios, basePath));
+        },
     };
 };
 
@@ -8346,6 +9166,32 @@ export interface StakeApiInterface {
      * @memberof StakeApiInterface
      */
     getStakingContext(getStakingContextRequest: GetStakingContextRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingContext>;
+
+    /**
+     * Get a validator belonging to the user for a given network, asset and id.
+     * @summary Get a validator belonging to the CDP project
+     * @param {string} networkId The ID of the blockchain network.
+     * @param {string} assetId The symbol of the asset to get the validator for.
+     * @param {string} validatorId The unique id of the validator to fetch details for.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApiInterface
+     */
+    getValidator(networkId: string, assetId: string, validatorId: string, options?: RawAxiosRequestConfig): AxiosPromise<Validator>;
+
+    /**
+     * List validators belonging to the user for a given network and asset.
+     * @summary List validators belonging to the CDP project
+     * @param {string} networkId The ID of the blockchain network.
+     * @param {string} assetId The symbol of the asset to get the validators for.
+     * @param {ValidatorStatus} [status] A filter to list validators based on a status.
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApiInterface
+     */
+    listValidators(networkId: string, assetId: string, status?: ValidatorStatus, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<ValidatorList>;
 
 }
 
@@ -8424,6 +9270,36 @@ export class StakeApi extends BaseAPI implements StakeApiInterface {
      */
     public getStakingContext(getStakingContextRequest: GetStakingContextRequest, options?: RawAxiosRequestConfig) {
         return StakeApiFp(this.configuration).getStakingContext(getStakingContextRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get a validator belonging to the user for a given network, asset and id.
+     * @summary Get a validator belonging to the CDP project
+     * @param {string} networkId The ID of the blockchain network.
+     * @param {string} assetId The symbol of the asset to get the validator for.
+     * @param {string} validatorId The unique id of the validator to fetch details for.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApi
+     */
+    public getValidator(networkId: string, assetId: string, validatorId: string, options?: RawAxiosRequestConfig) {
+        return StakeApiFp(this.configuration).getValidator(networkId, assetId, validatorId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * List validators belonging to the user for a given network and asset.
+     * @summary List validators belonging to the CDP project
+     * @param {string} networkId The ID of the blockchain network.
+     * @param {string} assetId The symbol of the asset to get the validators for.
+     * @param {ValidatorStatus} [status] A filter to list validators based on a status.
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof StakeApi
+     */
+    public listValidators(networkId: string, assetId: string, status?: ValidatorStatus, limit?: number, page?: string, options?: RawAxiosRequestConfig) {
+        return StakeApiFp(this.configuration).listValidators(networkId, assetId, status, limit, page, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -9592,606 +10468,6 @@ export class UsersApi extends BaseAPI implements UsersApiInterface {
      */
     public getCurrentUser(options?: RawAxiosRequestConfig) {
         return UsersApiFp(this.configuration).getCurrentUser(options).then((request) => request(this.axios, this.basePath));
-    }
-}
-
-
-
-/**
- * ValidatorsApi - axios parameter creator
- * @export
- */
-export const ValidatorsApiAxiosParamCreator = function (configuration?: Configuration) {
-    return {
-        /**
-         * Get a validator belonging to the user for a given network, asset and id.
-         * @summary Get a validator belonging to the CDP project
-         * @param {string} networkId The ID of the blockchain network.
-         * @param {string} assetId The symbol of the asset to get the validator for.
-         * @param {string} validatorId The unique id of the validator to fetch details for.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getValidator: async (networkId: string, assetId: string, validatorId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'networkId' is not null or undefined
-            assertParamExists('getValidator', 'networkId', networkId)
-            // verify required parameter 'assetId' is not null or undefined
-            assertParamExists('getValidator', 'assetId', assetId)
-            // verify required parameter 'validatorId' is not null or undefined
-            assertParamExists('getValidator', 'validatorId', validatorId)
-            const localVarPath = `/v1/networks/{network_id}/assets/{asset_id}/validators/{validator_id}`
-                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
-                .replace(`{${"asset_id"}}`, encodeURIComponent(String(assetId)))
-                .replace(`{${"validator_id"}}`, encodeURIComponent(String(validatorId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * List validators belonging to the user for a given network and asset.
-         * @summary List validators belonging to the CDP project
-         * @param {string} networkId The ID of the blockchain network.
-         * @param {string} assetId The symbol of the asset to get the validators for.
-         * @param {ValidatorStatus} [status] A filter to list validators based on a status.
-         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
-         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        listValidators: async (networkId: string, assetId: string, status?: ValidatorStatus, limit?: number, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'networkId' is not null or undefined
-            assertParamExists('listValidators', 'networkId', networkId)
-            // verify required parameter 'assetId' is not null or undefined
-            assertParamExists('listValidators', 'assetId', assetId)
-            const localVarPath = `/v1/networks/{network_id}/assets/{asset_id}/validators`
-                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
-                .replace(`{${"asset_id"}}`, encodeURIComponent(String(assetId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            if (status !== undefined) {
-                localVarQueryParameter['status'] = status;
-            }
-
-            if (limit !== undefined) {
-                localVarQueryParameter['limit'] = limit;
-            }
-
-            if (page !== undefined) {
-                localVarQueryParameter['page'] = page;
-            }
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-    }
-};
-
-/**
- * ValidatorsApi - functional programming interface
- * @export
- */
-export const ValidatorsApiFp = function(configuration?: Configuration) {
-    const localVarAxiosParamCreator = ValidatorsApiAxiosParamCreator(configuration)
-    return {
-        /**
-         * Get a validator belonging to the user for a given network, asset and id.
-         * @summary Get a validator belonging to the CDP project
-         * @param {string} networkId The ID of the blockchain network.
-         * @param {string} assetId The symbol of the asset to get the validator for.
-         * @param {string} validatorId The unique id of the validator to fetch details for.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getValidator(networkId: string, assetId: string, validatorId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Validator>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getValidator(networkId, assetId, validatorId, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['ValidatorsApi.getValidator']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * List validators belonging to the user for a given network and asset.
-         * @summary List validators belonging to the CDP project
-         * @param {string} networkId The ID of the blockchain network.
-         * @param {string} assetId The symbol of the asset to get the validators for.
-         * @param {ValidatorStatus} [status] A filter to list validators based on a status.
-         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
-         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async listValidators(networkId: string, assetId: string, status?: ValidatorStatus, limit?: number, page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ValidatorList>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listValidators(networkId, assetId, status, limit, page, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['ValidatorsApi.listValidators']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-    }
-};
-
-/**
- * ValidatorsApi - factory interface
- * @export
- */
-export const ValidatorsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = ValidatorsApiFp(configuration)
-    return {
-        /**
-         * Get a validator belonging to the user for a given network, asset and id.
-         * @summary Get a validator belonging to the CDP project
-         * @param {string} networkId The ID of the blockchain network.
-         * @param {string} assetId The symbol of the asset to get the validator for.
-         * @param {string} validatorId The unique id of the validator to fetch details for.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getValidator(networkId: string, assetId: string, validatorId: string, options?: RawAxiosRequestConfig): AxiosPromise<Validator> {
-            return localVarFp.getValidator(networkId, assetId, validatorId, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * List validators belonging to the user for a given network and asset.
-         * @summary List validators belonging to the CDP project
-         * @param {string} networkId The ID of the blockchain network.
-         * @param {string} assetId The symbol of the asset to get the validators for.
-         * @param {ValidatorStatus} [status] A filter to list validators based on a status.
-         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
-         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        listValidators(networkId: string, assetId: string, status?: ValidatorStatus, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<ValidatorList> {
-            return localVarFp.listValidators(networkId, assetId, status, limit, page, options).then((request) => request(axios, basePath));
-        },
-    };
-};
-
-/**
- * ValidatorsApi - interface
- * @export
- * @interface ValidatorsApi
- */
-export interface ValidatorsApiInterface {
-    /**
-     * Get a validator belonging to the user for a given network, asset and id.
-     * @summary Get a validator belonging to the CDP project
-     * @param {string} networkId The ID of the blockchain network.
-     * @param {string} assetId The symbol of the asset to get the validator for.
-     * @param {string} validatorId The unique id of the validator to fetch details for.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ValidatorsApiInterface
-     */
-    getValidator(networkId: string, assetId: string, validatorId: string, options?: RawAxiosRequestConfig): AxiosPromise<Validator>;
-
-    /**
-     * List validators belonging to the user for a given network and asset.
-     * @summary List validators belonging to the CDP project
-     * @param {string} networkId The ID of the blockchain network.
-     * @param {string} assetId The symbol of the asset to get the validators for.
-     * @param {ValidatorStatus} [status] A filter to list validators based on a status.
-     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
-     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ValidatorsApiInterface
-     */
-    listValidators(networkId: string, assetId: string, status?: ValidatorStatus, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<ValidatorList>;
-
-}
-
-/**
- * ValidatorsApi - object-oriented interface
- * @export
- * @class ValidatorsApi
- * @extends {BaseAPI}
- */
-export class ValidatorsApi extends BaseAPI implements ValidatorsApiInterface {
-    /**
-     * Get a validator belonging to the user for a given network, asset and id.
-     * @summary Get a validator belonging to the CDP project
-     * @param {string} networkId The ID of the blockchain network.
-     * @param {string} assetId The symbol of the asset to get the validator for.
-     * @param {string} validatorId The unique id of the validator to fetch details for.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ValidatorsApi
-     */
-    public getValidator(networkId: string, assetId: string, validatorId: string, options?: RawAxiosRequestConfig) {
-        return ValidatorsApiFp(this.configuration).getValidator(networkId, assetId, validatorId, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * List validators belonging to the user for a given network and asset.
-     * @summary List validators belonging to the CDP project
-     * @param {string} networkId The ID of the blockchain network.
-     * @param {string} assetId The symbol of the asset to get the validators for.
-     * @param {ValidatorStatus} [status] A filter to list validators based on a status.
-     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 50.
-     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ValidatorsApi
-     */
-    public listValidators(networkId: string, assetId: string, status?: ValidatorStatus, limit?: number, page?: string, options?: RawAxiosRequestConfig) {
-        return ValidatorsApiFp(this.configuration).listValidators(networkId, assetId, status, limit, page, options).then((request) => request(this.axios, this.basePath));
-    }
-}
-
-
-
-/**
- * WalletStakeApi - axios parameter creator
- * @export
- */
-export const WalletStakeApiAxiosParamCreator = function (configuration?: Configuration) {
-    return {
-        /**
-         * Broadcast a staking operation.
-         * @summary Broadcast a staking operation
-         * @param {string} walletId The ID of the wallet the address belongs to.
-         * @param {string} addressId The ID of the address the staking operation belongs to.
-         * @param {string} stakingOperationId The ID of the staking operation to broadcast.
-         * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        broadcastStakingOperation: async (walletId: string, addressId: string, stakingOperationId: string, broadcastStakingOperationRequest: BroadcastStakingOperationRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'walletId' is not null or undefined
-            assertParamExists('broadcastStakingOperation', 'walletId', walletId)
-            // verify required parameter 'addressId' is not null or undefined
-            assertParamExists('broadcastStakingOperation', 'addressId', addressId)
-            // verify required parameter 'stakingOperationId' is not null or undefined
-            assertParamExists('broadcastStakingOperation', 'stakingOperationId', stakingOperationId)
-            // verify required parameter 'broadcastStakingOperationRequest' is not null or undefined
-            assertParamExists('broadcastStakingOperation', 'broadcastStakingOperationRequest', broadcastStakingOperationRequest)
-            const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/staking_operations/{staking_operation_id}/broadcast`
-                .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
-                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)))
-                .replace(`{${"staking_operation_id"}}`, encodeURIComponent(String(stakingOperationId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(broadcastStakingOperationRequest, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Create a new staking operation.
-         * @summary Create a new staking operation for an address
-         * @param {string} walletId The ID of the wallet the address belongs to.
-         * @param {string} addressId The ID of the address to create the staking operation for.
-         * @param {CreateStakingOperationRequest} createStakingOperationRequest 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createStakingOperation: async (walletId: string, addressId: string, createStakingOperationRequest: CreateStakingOperationRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'walletId' is not null or undefined
-            assertParamExists('createStakingOperation', 'walletId', walletId)
-            // verify required parameter 'addressId' is not null or undefined
-            assertParamExists('createStakingOperation', 'addressId', addressId)
-            // verify required parameter 'createStakingOperationRequest' is not null or undefined
-            assertParamExists('createStakingOperation', 'createStakingOperationRequest', createStakingOperationRequest)
-            const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/staking_operations`
-                .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
-                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(createStakingOperationRequest, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Get the latest state of a staking operation.
-         * @summary Get the latest state of a staking operation
-         * @param {string} walletId The ID of the wallet the address belongs to
-         * @param {string} addressId The ID of the address to fetch the staking operation for.
-         * @param {string} stakingOperationId The ID of the staking operation.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getStakingOperation: async (walletId: string, addressId: string, stakingOperationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'walletId' is not null or undefined
-            assertParamExists('getStakingOperation', 'walletId', walletId)
-            // verify required parameter 'addressId' is not null or undefined
-            assertParamExists('getStakingOperation', 'addressId', addressId)
-            // verify required parameter 'stakingOperationId' is not null or undefined
-            assertParamExists('getStakingOperation', 'stakingOperationId', stakingOperationId)
-            const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/staking_operations/{staking_operation_id}`
-                .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
-                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)))
-                .replace(`{${"staking_operation_id"}}`, encodeURIComponent(String(stakingOperationId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-    }
-};
-
-/**
- * WalletStakeApi - functional programming interface
- * @export
- */
-export const WalletStakeApiFp = function(configuration?: Configuration) {
-    const localVarAxiosParamCreator = WalletStakeApiAxiosParamCreator(configuration)
-    return {
-        /**
-         * Broadcast a staking operation.
-         * @summary Broadcast a staking operation
-         * @param {string} walletId The ID of the wallet the address belongs to.
-         * @param {string} addressId The ID of the address the staking operation belongs to.
-         * @param {string} stakingOperationId The ID of the staking operation to broadcast.
-         * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async broadcastStakingOperation(walletId: string, addressId: string, stakingOperationId: string, broadcastStakingOperationRequest: BroadcastStakingOperationRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<StakingOperation>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.broadcastStakingOperation(walletId, addressId, stakingOperationId, broadcastStakingOperationRequest, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['WalletStakeApi.broadcastStakingOperation']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * Create a new staking operation.
-         * @summary Create a new staking operation for an address
-         * @param {string} walletId The ID of the wallet the address belongs to.
-         * @param {string} addressId The ID of the address to create the staking operation for.
-         * @param {CreateStakingOperationRequest} createStakingOperationRequest 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async createStakingOperation(walletId: string, addressId: string, createStakingOperationRequest: CreateStakingOperationRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<StakingOperation>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.createStakingOperation(walletId, addressId, createStakingOperationRequest, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['WalletStakeApi.createStakingOperation']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * Get the latest state of a staking operation.
-         * @summary Get the latest state of a staking operation
-         * @param {string} walletId The ID of the wallet the address belongs to
-         * @param {string} addressId The ID of the address to fetch the staking operation for.
-         * @param {string} stakingOperationId The ID of the staking operation.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getStakingOperation(walletId: string, addressId: string, stakingOperationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<StakingOperation>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getStakingOperation(walletId, addressId, stakingOperationId, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['WalletStakeApi.getStakingOperation']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-    }
-};
-
-/**
- * WalletStakeApi - factory interface
- * @export
- */
-export const WalletStakeApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = WalletStakeApiFp(configuration)
-    return {
-        /**
-         * Broadcast a staking operation.
-         * @summary Broadcast a staking operation
-         * @param {string} walletId The ID of the wallet the address belongs to.
-         * @param {string} addressId The ID of the address the staking operation belongs to.
-         * @param {string} stakingOperationId The ID of the staking operation to broadcast.
-         * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        broadcastStakingOperation(walletId: string, addressId: string, stakingOperationId: string, broadcastStakingOperationRequest: BroadcastStakingOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation> {
-            return localVarFp.broadcastStakingOperation(walletId, addressId, stakingOperationId, broadcastStakingOperationRequest, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Create a new staking operation.
-         * @summary Create a new staking operation for an address
-         * @param {string} walletId The ID of the wallet the address belongs to.
-         * @param {string} addressId The ID of the address to create the staking operation for.
-         * @param {CreateStakingOperationRequest} createStakingOperationRequest 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createStakingOperation(walletId: string, addressId: string, createStakingOperationRequest: CreateStakingOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation> {
-            return localVarFp.createStakingOperation(walletId, addressId, createStakingOperationRequest, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Get the latest state of a staking operation.
-         * @summary Get the latest state of a staking operation
-         * @param {string} walletId The ID of the wallet the address belongs to
-         * @param {string} addressId The ID of the address to fetch the staking operation for.
-         * @param {string} stakingOperationId The ID of the staking operation.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getStakingOperation(walletId: string, addressId: string, stakingOperationId: string, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation> {
-            return localVarFp.getStakingOperation(walletId, addressId, stakingOperationId, options).then((request) => request(axios, basePath));
-        },
-    };
-};
-
-/**
- * WalletStakeApi - interface
- * @export
- * @interface WalletStakeApi
- */
-export interface WalletStakeApiInterface {
-    /**
-     * Broadcast a staking operation.
-     * @summary Broadcast a staking operation
-     * @param {string} walletId The ID of the wallet the address belongs to.
-     * @param {string} addressId The ID of the address the staking operation belongs to.
-     * @param {string} stakingOperationId The ID of the staking operation to broadcast.
-     * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WalletStakeApiInterface
-     */
-    broadcastStakingOperation(walletId: string, addressId: string, stakingOperationId: string, broadcastStakingOperationRequest: BroadcastStakingOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation>;
-
-    /**
-     * Create a new staking operation.
-     * @summary Create a new staking operation for an address
-     * @param {string} walletId The ID of the wallet the address belongs to.
-     * @param {string} addressId The ID of the address to create the staking operation for.
-     * @param {CreateStakingOperationRequest} createStakingOperationRequest 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WalletStakeApiInterface
-     */
-    createStakingOperation(walletId: string, addressId: string, createStakingOperationRequest: CreateStakingOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation>;
-
-    /**
-     * Get the latest state of a staking operation.
-     * @summary Get the latest state of a staking operation
-     * @param {string} walletId The ID of the wallet the address belongs to
-     * @param {string} addressId The ID of the address to fetch the staking operation for.
-     * @param {string} stakingOperationId The ID of the staking operation.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WalletStakeApiInterface
-     */
-    getStakingOperation(walletId: string, addressId: string, stakingOperationId: string, options?: RawAxiosRequestConfig): AxiosPromise<StakingOperation>;
-
-}
-
-/**
- * WalletStakeApi - object-oriented interface
- * @export
- * @class WalletStakeApi
- * @extends {BaseAPI}
- */
-export class WalletStakeApi extends BaseAPI implements WalletStakeApiInterface {
-    /**
-     * Broadcast a staking operation.
-     * @summary Broadcast a staking operation
-     * @param {string} walletId The ID of the wallet the address belongs to.
-     * @param {string} addressId The ID of the address the staking operation belongs to.
-     * @param {string} stakingOperationId The ID of the staking operation to broadcast.
-     * @param {BroadcastStakingOperationRequest} broadcastStakingOperationRequest 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WalletStakeApi
-     */
-    public broadcastStakingOperation(walletId: string, addressId: string, stakingOperationId: string, broadcastStakingOperationRequest: BroadcastStakingOperationRequest, options?: RawAxiosRequestConfig) {
-        return WalletStakeApiFp(this.configuration).broadcastStakingOperation(walletId, addressId, stakingOperationId, broadcastStakingOperationRequest, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Create a new staking operation.
-     * @summary Create a new staking operation for an address
-     * @param {string} walletId The ID of the wallet the address belongs to.
-     * @param {string} addressId The ID of the address to create the staking operation for.
-     * @param {CreateStakingOperationRequest} createStakingOperationRequest 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WalletStakeApi
-     */
-    public createStakingOperation(walletId: string, addressId: string, createStakingOperationRequest: CreateStakingOperationRequest, options?: RawAxiosRequestConfig) {
-        return WalletStakeApiFp(this.configuration).createStakingOperation(walletId, addressId, createStakingOperationRequest, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Get the latest state of a staking operation.
-     * @summary Get the latest state of a staking operation
-     * @param {string} walletId The ID of the wallet the address belongs to
-     * @param {string} addressId The ID of the address to fetch the staking operation for.
-     * @param {string} stakingOperationId The ID of the staking operation.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WalletStakeApi
-     */
-    public getStakingOperation(walletId: string, addressId: string, stakingOperationId: string, options?: RawAxiosRequestConfig) {
-        return WalletStakeApiFp(this.configuration).getStakingOperation(walletId, addressId, stakingOperationId, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
