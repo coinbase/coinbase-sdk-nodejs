@@ -726,6 +726,7 @@ export type ApiClients = {
   balanceHistory?: BalanceHistoryApiClient;
   transactionHistory?: TransactionHistoryApiClient;
   smartContract?: SmartContractAPIClient;
+  fund?: FundOperationApiClient;
 };
 
 /**
