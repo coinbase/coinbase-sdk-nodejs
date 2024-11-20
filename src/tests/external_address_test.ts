@@ -187,7 +187,6 @@ describe("ExternalAddress", () => {
   beforeAll(() => {
     Coinbase.apiClients.stake = stakeApiMock;
     Coinbase.apiClients.asset = assetsApiMock;
-    Coinbase.apiClients.validator = validatorApiMock;
   });
 
   beforeEach(() => {

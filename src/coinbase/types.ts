@@ -544,9 +544,7 @@ export type StakeAPIClient = {
     page?: string,
     options?: AxiosRequestConfig,
   ): AxiosPromise<FetchHistoricalStakingBalances200Response>;
-};
 
-export type ValidatorAPIClient = {
   /**
    * List the validators for a given network and asset.
    *
@@ -720,7 +718,6 @@ export type ApiClients = {
   serverSigner?: ServerSignerAPIClient;
   stake?: StakeAPIClient;
   walletStake?: WalletStakeAPIClient;
-  validator?: ValidatorAPIClient;
   asset?: AssetAPIClient;
   externalAddress?: ExternalAddressAPIClient;
   webhook?: WebhookApiClient;
@@ -1419,7 +1416,7 @@ export interface FundOperationApiClient {
   /**
    * Get a fund operation
    *
-    * @param walletId - The ID of the wallet the address belongs to.
+   * @param walletId - The ID of the wallet the address belongs to.
    * @param addressId - The ID of the address the fund operation belongs to.
    * @param fundOperationId - The ID of the fund operation to retrieve
    * @param options - Axios request options
