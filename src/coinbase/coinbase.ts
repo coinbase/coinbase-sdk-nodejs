@@ -8,8 +8,6 @@ import {
   TradesApiFactory,
   ServerSignersApiFactory,
   StakeApiFactory,
-  WalletStakeApiFactory,
-  ValidatorsApiFactory,
   AssetsApiFactory,
   ExternalAddressesApiFactory,
   WebhooksApiFactory,
