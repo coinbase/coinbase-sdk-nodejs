@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Fixed
+- Fixed a bug where the asset ID was not being set correctly for Gwei and Wei
+
 ## [0.10.0] - 2024-10-31
 
 ### Added
