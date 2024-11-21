@@ -64,7 +64,12 @@ export class Asset {
           throw new ArgumentError(`Invalid asset ID: ${assetId}`);
       }
     }
-    return new Asset(model.network_id, assetId ?? model.asset_id, model.contract_address!, decimals);
+    return new Asset(
+      model.network_id,
+      assetId ?? model.asset_id,
+      model.contract_address!,
+      decimals,
+    );
   }
 
   /**
