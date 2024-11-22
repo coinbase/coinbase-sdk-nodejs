@@ -17,6 +17,7 @@ import {
   PayloadSignatureStatusEnum,
   ContractInvocation as ContractInvocationModel,
   SmartContract as SmartContractModel,
+  CryptoAmount as CryptoAmountModel,
   SmartContractType,
   ValidatorList,
   Validator,
@@ -32,6 +33,7 @@ import { BASE_PATH } from "../client/base";
 import { Coinbase } from "../coinbase/coinbase";
 import { convertStringToHex, registerAxiosInterceptors } from "../coinbase/utils";
 import { HDKey } from "@scure/bip32";
+import { Asset } from "../coinbase/asset";
 
 export const mockFn = (...args) => jest.fn(...args) as any;
 export const mockReturnValue = data => jest.fn().mockResolvedValue({ data });
@@ -369,6 +371,33 @@ export const VALID_SMART_CONTRACT_ERC1155_MODEL: SmartContractModel = {
   },
 };
 
+const asset = Asset.fromModel({
+  asset_id: Coinbase.assets.Eth,
+  network_id: "base-sepolia",
+  contract_address: "0x",
+  decimals: 18,
+});
+
+export const VALID_USDC_CRYPTO_AMOUNT_MODEL: CryptoAmountModel = {
+  amount: "1",
+  asset: {
+    network_id: "base-sepolia",
+    asset_id: Coinbase.assets.Usdc,
+    contract_address: "0x",
+    decimals: 6,
+  }
+};
+
+export const VALID_ETH_CRYPTO_AMOUNT_MODEL: CryptoAmountModel = {
+  amount: "1",
+  asset: {
+    network_id: "base-sepolia",
+    asset_id: Coinbase.assets.Eth,
+    contract_address: "0x",
+    decimals: 18,
+  }
+};
+
 /**
  * mockStakingOperation returns a mock StakingOperation object with the provided status.
  *
@@ -676,6 +705,13 @@ export const contractInvocationApiMock = {
   listContractInvocations: jest.fn(),
   createContractInvocation: jest.fn(),
   broadcastContractInvocation: jest.fn(),
+};
+
+export const fundOperationsApiMock = {
+  getFundOperation: jest.fn(),
+  listFundOperations: jest.fn(),
+  createFundOperation: jest.fn(),
+  cancelFundQuote: jest.fn(),
 };
 
 export const testAllReadTypesABI = [

@@ -18,9 +18,6 @@ export class CryptoAmount {
    * @param assetId - Optional Asset ID override
    */
   constructor(amount: Decimal, asset: Asset, assetId?: string) {
-    if (!amount || !asset) {
-      throw new Error("Amount and asset cannot be empty");
-    }
     this.amount = amount;
     this.assetObj = asset;
     this.assetId = assetId || asset.getAssetId();
@@ -47,7 +44,7 @@ export class CryptoAmount {
    * @returns The converted CryptoAmount object
    */
   public static fromModelAndAssetId(amountModel: CryptoAmountModel, assetId: string): CryptoAmount {
-    const asset = Asset.fromModel(amountModel.asset);
+    const asset = Asset.fromModel(amountModel.asset, assetId);
     return new CryptoAmount(
       asset.fromAtomicAmount(new Decimal(amountModel.amount)),
       asset,
