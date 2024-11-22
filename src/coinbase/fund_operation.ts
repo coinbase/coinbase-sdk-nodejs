@@ -37,6 +37,16 @@ export class FundOperation {
   }
 
   /**
+   * Converts a FundOperationModel into a FundOperation object.
+   *
+   * @param fundOperationModel - The FundOperation model object.
+   * @returns The FundOperation object.
+   */
+  public static fromModel(fundOperationModel: FundOperationModel): FundOperation {
+    return new FundOperation(fundOperationModel);
+  }
+
+  /**
    * Create a new Fund Operation.
    *
    * @param walletId - The Wallet ID
@@ -72,7 +82,7 @@ export class FundOperation {
       createRequest,
     );
 
-    return new FundOperation(response.data);
+    return FundOperation.fromModel(response.data);
   }
 
   /**
@@ -101,7 +111,7 @@ export class FundOperation {
     );
 
     response.data.data.forEach(operationModel => {
-      data.push(new FundOperation(operationModel));
+      data.push(FundOperation.fromModel(operationModel));
     });
 
     const hasMore = response.data.has_more;

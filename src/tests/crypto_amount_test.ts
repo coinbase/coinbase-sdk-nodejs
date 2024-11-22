@@ -70,7 +70,7 @@ describe('CryptoAmount', () => {
 
   describe('#toAtomicAmount', () => {
     it('should correctly convert to atomic amount', () => {
-      // expect(cryptoAmount.toAtomicAmount()).toEqual(new Decimal(1))
+      expect(cryptoAmount.toAtomicAmount().toString()).toEqual("1")
     });
   });
 

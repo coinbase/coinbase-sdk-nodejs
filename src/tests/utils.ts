@@ -18,6 +18,9 @@ import {
   ContractInvocation as ContractInvocationModel,
   SmartContract as SmartContractModel,
   CryptoAmount as CryptoAmountModel,
+  Asset as AssetModel,
+  FundQuote as FundQuoteModel,
+  FundOperation as FundOperationModel,
   SmartContractType,
   ValidatorList,
   Validator,
@@ -398,6 +401,41 @@ export const VALID_ETH_CRYPTO_AMOUNT_MODEL: CryptoAmountModel = {
   }
 };
 
+export const VALID_ASSET_MODEL: AssetModel = {
+  asset_id: Coinbase.assets.Eth,
+  network_id: "base-sepolia",
+  contract_address: "0x",
+  decimals: 18,
+};
+
+export const VALID_FUND_QUOTE_MODEL: FundQuoteModel = {
+  fund_quote_id: "test-quote-id",
+  network_id: "base-sepolia",
+  wallet_id: "test-wallet-id",
+  address_id: "test-address-id",
+  crypto_amount: VALID_ETH_CRYPTO_AMOUNT_MODEL,
+  fiat_amount: {
+    amount: "100",
+    currency: "USD"
+  },
+  expires_at: "2024-12-31T23:59:59Z",
+  fees: {
+    buy_fee: {
+      amount: "1",
+      currency: "USD"
+    },
+    transfer_fee: {
+      amount: "10000000000000000", // 0.01 ETH
+      asset: {
+        network_id: "base-sepolia",
+        asset_id: Coinbase.assets.Eth,
+        contract_address: "0x",
+        decimals: 18
+      }
+    }
+  }
+};
+
 /**
  * mockStakingOperation returns a mock StakingOperation object with the provided status.
  *
@@ -707,11 +745,15 @@ export const contractInvocationApiMock = {
   broadcastContractInvocation: jest.fn(),
 };
 
+export const assetApiMock = {
+  getAsset: jest.fn(),
+};
+
 export const fundOperationsApiMock = {
   getFundOperation: jest.fn(),
   listFundOperations: jest.fn(),
   createFundOperation: jest.fn(),
-  cancelFundQuote: jest.fn(),
+  createFundQuote: jest.fn(),
 };
 
 export const testAllReadTypesABI = [

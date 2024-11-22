@@ -28,3 +28,7 @@ export * from "./coinbase/validator";
 export * from "./coinbase/wallet";
 export * from "./coinbase/webhook";
 export * from "./coinbase/read_contract";
+export * from "./coinbase/crypto_amount";
+export * from "./coinbase/fiat_amount";
+export * from "./coinbase/fund_operation";
+export * from "./coinbase/fund_quote";

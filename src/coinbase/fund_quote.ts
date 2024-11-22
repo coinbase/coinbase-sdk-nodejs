@@ -22,6 +22,16 @@ export class FundQuote {
   }
 
   /**
+   * Converts a FundQuoteModel into a FundQuote object.
+   *
+   * @param fundQuoteModel - The FundQuote model object.
+   * @returns The FundQuote object.
+   */
+  public static fromModel(fundQuoteModel: FundQuoteModel): FundQuote {
+    return new FundQuote(fundQuoteModel);
+  }
+
+  /**
    * Create a new Fund Operation Quote.
    *
    * @param walletId - The Wallet ID
@@ -45,7 +55,7 @@ export class FundQuote {
       amount: asset.toAtomicAmount(amount).toString(),
     });
 
-    return new FundQuote(response.data);
+    return FundQuote.fromModel(response.data);
   }
 
   /**
