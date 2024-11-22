@@ -5,8 +5,6 @@ import {
   VALID_FUND_QUOTE_MODEL,
   VALID_ASSET_MODEL,
   mockReturnValue,
-  mockReturnRejectedValue,
-  contractInvocationApiMock,
   fundOperationsApiMock,
   assetApiMock,
 } from "./utils";
