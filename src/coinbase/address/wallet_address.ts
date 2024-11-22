@@ -749,7 +749,6 @@ export class WalletAddress extends Address {
     };
   }
 
-
   /**
    * Fund the address from your account on the Coinbase Platform.
    *

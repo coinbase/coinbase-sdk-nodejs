@@ -1,7 +1,15 @@
 import { FundQuote } from "../coinbase/fund_quote";
 import { FundQuote as FundQuoteModel, Asset as AssetModel } from "../client/api";
 import { Coinbase } from "../coinbase/coinbase";
-import { VALID_FUND_QUOTE_MODEL, VALID_ASSET_MODEL, mockReturnValue, mockReturnRejectedValue, contractInvocationApiMock, fundOperationsApiMock, assetApiMock } from "./utils";
+import {
+  VALID_FUND_QUOTE_MODEL,
+  VALID_ASSET_MODEL,
+  mockReturnValue,
+  mockReturnRejectedValue,
+  contractInvocationApiMock,
+  fundOperationsApiMock,
+  assetApiMock,
+} from "./utils";
 import { Asset } from "../coinbase/asset";
 import Decimal from "decimal.js";
 import { CryptoAmount } from "../coinbase/crypto_amount";
@@ -39,15 +47,26 @@ describe("FundQuote", () => {
 
   describe(".create", () => {
     it("should create a new fund quote", async () => {
-      const newFundQuote = await FundQuote.create(fundQuoteModel.wallet_id, fundQuoteModel.address_id, new Decimal(fundQuoteModel.crypto_amount.amount), fundQuoteModel.crypto_amount.asset.asset_id, fundQuoteModel.network_id);
+      const newFundQuote = await FundQuote.create(
+        fundQuoteModel.wallet_id,
+        fundQuoteModel.address_id,
+        new Decimal(fundQuoteModel.crypto_amount.amount),
+        fundQuoteModel.crypto_amount.asset.asset_id,
+        fundQuoteModel.network_id,
+      );
       expect(newFundQuote).toBeInstanceOf(FundQuote);
-      expect(Coinbase.apiClients.asset!.getAsset).toHaveBeenCalledWith(fundQuoteModel.network_id, fundQuoteModel.crypto_amount.asset.asset_id);
-      expect(
-        Coinbase.apiClients.fund!.createFundQuote,
-      ).toHaveBeenCalledWith(fundQuoteModel.wallet_id, fundQuoteModel.address_id, {
-        asset_id: Asset.primaryDenomination(fundQuoteModel.crypto_amount.asset.asset_id),
-        amount: asset.toAtomicAmount(new Decimal(fundQuoteModel.crypto_amount.amount)).toString(),
-      });
+      expect(Coinbase.apiClients.asset!.getAsset).toHaveBeenCalledWith(
+        fundQuoteModel.network_id,
+        fundQuoteModel.crypto_amount.asset.asset_id,
+      );
+      expect(Coinbase.apiClients.fund!.createFundQuote).toHaveBeenCalledWith(
+        fundQuoteModel.wallet_id,
+        fundQuoteModel.address_id,
+        {
+          asset_id: Asset.primaryDenomination(fundQuoteModel.crypto_amount.asset.asset_id),
+          amount: asset.toAtomicAmount(new Decimal(fundQuoteModel.crypto_amount.amount)).toString(),
+        },
+      );
     });
   });
 
@@ -84,7 +103,9 @@ describe("FundQuote", () => {
   describe("#getAmount", () => {
     it("should return the crypto amount", () => {
       const cryptoAmount = fundQuote.getAmount();
-      expect(cryptoAmount.getAmount()).toEqual(new Decimal(fundQuoteModel.crypto_amount.amount).div(new Decimal(10).pow(asset.decimals)));
+      expect(cryptoAmount.getAmount()).toEqual(
+        new Decimal(fundQuoteModel.crypto_amount.amount).div(new Decimal(10).pow(asset.decimals)),
+      );
       expect(cryptoAmount.getAsset()).toEqual(asset);
     });
   });
@@ -112,7 +133,9 @@ describe("FundQuote", () => {
 
   describe("#getTransferFee", () => {
     it("should return the transfer fee", () => {
-      expect(fundQuote.getTransferFee()).toEqual(CryptoAmount.fromModel(fundQuoteModel.fees.transfer_fee));
+      expect(fundQuote.getTransferFee()).toEqual(
+        CryptoAmount.fromModel(fundQuoteModel.fees.transfer_fee),
+      );
     });
   });
 
@@ -121,11 +144,15 @@ describe("FundQuote", () => {
       Coinbase.apiClients.fund!.createFundOperation = mockReturnValue(fundQuoteModel);
       const newFundOperation = await fundQuote.execute();
       expect(newFundOperation).toBeInstanceOf(FundOperation);
-      expect(Coinbase.apiClients.fund!.createFundOperation).toHaveBeenCalledWith(fundQuoteModel.wallet_id, fundQuoteModel.address_id, {
-        asset_id: Asset.primaryDenomination(fundQuoteModel.crypto_amount.asset.asset_id),
-        amount: fundQuoteModel.crypto_amount.amount,
-        fund_quote_id: fundQuoteModel.fund_quote_id,
-      });
+      expect(Coinbase.apiClients.fund!.createFundOperation).toHaveBeenCalledWith(
+        fundQuoteModel.wallet_id,
+        fundQuoteModel.address_id,
+        {
+          asset_id: Asset.primaryDenomination(fundQuoteModel.crypto_amount.asset.asset_id),
+          amount: fundQuoteModel.crypto_amount.amount,
+          fund_quote_id: fundQuoteModel.fund_quote_id,
+        },
+      );
     });
   });
 });

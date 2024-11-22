@@ -258,7 +258,7 @@ export const MINT_NFT_ARGS = { recipient: "0x475d41de7A81298Ba263184996800CBcaAD
 
 const faucetTxHash = generateRandomHash(64);
 
-export const VALID_FAUCET_TRANSACTION_MODEL: FaucetTransactionModel  = {
+export const VALID_FAUCET_TRANSACTION_MODEL: FaucetTransactionModel = {
   transaction_hash: faucetTxHash,
   transaction_link: "https://sepolia.basescan.org/tx/" + faucetTxHash,
   transaction: {
@@ -388,7 +388,7 @@ export const VALID_USDC_CRYPTO_AMOUNT_MODEL: CryptoAmountModel = {
     asset_id: Coinbase.assets.Usdc,
     contract_address: "0x",
     decimals: 6,
-  }
+  },
 };
 
 export const VALID_ETH_CRYPTO_AMOUNT_MODEL: CryptoAmountModel = {
@@ -398,7 +398,7 @@ export const VALID_ETH_CRYPTO_AMOUNT_MODEL: CryptoAmountModel = {
     asset_id: Coinbase.assets.Eth,
     contract_address: "0x",
     decimals: 18,
-  }
+  },
 };
 
 export const VALID_ASSET_MODEL: AssetModel = {
@@ -416,13 +416,13 @@ export const VALID_FUND_QUOTE_MODEL: FundQuoteModel = {
   crypto_amount: VALID_ETH_CRYPTO_AMOUNT_MODEL,
   fiat_amount: {
     amount: "100",
-    currency: "USD"
+    currency: "USD",
   },
   expires_at: "2024-12-31T23:59:59Z",
   fees: {
     buy_fee: {
       amount: "1",
-      currency: "USD"
+      currency: "USD",
     },
     transfer_fee: {
       amount: "10000000000000000", // 0.01 ETH
@@ -430,10 +430,10 @@ export const VALID_FUND_QUOTE_MODEL: FundQuoteModel = {
         network_id: "base-sepolia",
         asset_id: Coinbase.assets.Eth,
         contract_address: "0x",
-        decimals: 18
-      }
-    }
-  }
+        decimals: 18,
+      },
+    },
+  },
 };
 
 /**

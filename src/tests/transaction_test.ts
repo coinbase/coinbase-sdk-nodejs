@@ -210,14 +210,14 @@ describe("Transaction", () => {
 
   describe("#getStatus", () => {
     [
-      {status: TransactionStatus.PENDING, expected: "pending"},
-      {status: TransactionStatus.BROADCAST, expected: "broadcast"},
-      {status: TransactionStatus.SIGNED, expected: "signed"},
-      {status: TransactionStatus.COMPLETE, expected: "complete"},
-      {status: TransactionStatus.FAILED, expected: "failed"},
-    ].forEach(({status, expected}) => {
+      { status: TransactionStatus.PENDING, expected: "pending" },
+      { status: TransactionStatus.BROADCAST, expected: "broadcast" },
+      { status: TransactionStatus.SIGNED, expected: "signed" },
+      { status: TransactionStatus.COMPLETE, expected: "complete" },
+      { status: TransactionStatus.FAILED, expected: "failed" },
+    ].forEach(({ status, expected }) => {
       describe(`when the status is ${status}`, () => {
-        beforeEach(() => model.status = status);
+        beforeEach(() => (model.status = status));
 
         it(`should return ${expected}`, () => {
           const transaction = new Transaction(model);
@@ -229,23 +229,18 @@ describe("Transaction", () => {
   });
 
   describe("#isTerminalState", () => {
-    [
-      TransactionStatus.PENDING,
-      TransactionStatus.BROADCAST,
-      TransactionStatus.SIGNED,
-    ].forEach((status) => {
-      it(`should return false when the status is ${status}`, () => {
-        model.status = status;
-        const transaction = new Transaction(model);
+    [TransactionStatus.PENDING, TransactionStatus.BROADCAST, TransactionStatus.SIGNED].forEach(
+      status => {
+        it(`should return false when the status is ${status}`, () => {
+          model.status = status;
+          const transaction = new Transaction(model);
 
-        expect(transaction.isTerminalState()).toEqual(false);
-      });
-    });
+          expect(transaction.isTerminalState()).toEqual(false);
+        });
+      },
+    );
 
-    [
-      TransactionStatus.COMPLETE,
-      TransactionStatus.FAILED,
-    ].forEach((status) => {
+    [TransactionStatus.COMPLETE, TransactionStatus.FAILED].forEach(status => {
       it(`should return true when the status is ${status}`, () => {
         model.status = status;
         const transaction = new Transaction(model);

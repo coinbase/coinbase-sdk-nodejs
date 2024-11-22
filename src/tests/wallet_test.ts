@@ -600,9 +600,7 @@ describe("Wallet Class", () => {
     beforeEach(async () => {
       expectedFaucetTx = new FaucetTransaction(VALID_FAUCET_TRANSACTION_MODEL);
 
-      (await wallet.getDefaultAddress()).faucet = jest
-        .fn()
-        .mockResolvedValue(expectedFaucetTx);
+      (await wallet.getDefaultAddress()).faucet = jest.fn().mockResolvedValue(expectedFaucetTx);
     });
 
     it("successfully requests faucet funds", async () => {
