@@ -2690,6 +2690,121 @@ export interface SmartContract {
 
 
 /**
+ * Represents an event triggered by a smart contract activity on the blockchain. Contains information about the function, transaction, block, and involved addresses.
+ * @export
+ * @interface SmartContractActivityEvent
+ */
+export interface SmartContractActivityEvent {
+    /**
+     * Unique identifier for the webhook that triggered this event.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'webhookId'?: string;
+    /**
+     * Type of event, in this case, an ERC-721 token transfer.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'eventType'?: string;
+    /**
+     * Blockchain network where the event occurred.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'network'?: string;
+    /**
+     * Name of the project this smart contract belongs to.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'projectName'?: string;
+    /**
+     * Name of the contract.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'contractName'?: string;
+    /**
+     * Name of the function.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'func'?: string;
+    /**
+     * Signature of the function.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'sig'?: string;
+    /**
+     * First 4 bytes of the Transaction, a unique ID.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'fourBytes'?: string;
+    /**
+     * Address of the smart contract.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'contractAddress'?: string;
+    /**
+     * Hash of the block containing the transaction.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'blockHash'?: string;
+    /**
+     * Number of the block containing the transaction.
+     * @type {number}
+     * @memberof SmartContractActivityEvent
+     */
+    'blockNumber'?: number;
+    /**
+     * Timestamp when the block was mined.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'blockTime'?: string;
+    /**
+     * Hash of the transaction that triggered the event.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'transactionHash'?: string;
+    /**
+     * Position of the transaction within the block.
+     * @type {number}
+     * @memberof SmartContractActivityEvent
+     */
+    'transactionIndex'?: number;
+    /**
+     * Position of the event log within the transaction.
+     * @type {number}
+     * @memberof SmartContractActivityEvent
+     */
+    'logIndex'?: number;
+    /**
+     * Address of the initiator in the transfer.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'from'?: string;
+    /**
+     * Address of the recipient in the transfer.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'to'?: string;
+    /**
+     * Amount of tokens transferred, typically in the smallest unit (e.g., wei for Ethereum).
+     * @type {number}
+     * @memberof SmartContractActivityEvent
+     */
+    'value'?: number;
+}
+/**
  * 
  * @export
  * @interface SmartContractList
@@ -3810,7 +3925,8 @@ export const WebhookEventType = {
     Unspecified: 'unspecified',
     Erc20Transfer: 'erc20_transfer',
     Erc721Transfer: 'erc721_transfer',
-    WalletActivity: 'wallet_activity'
+    WalletActivity: 'wallet_activity',
+    SmartContractEventActivity: 'smart_contract_event_activity'
 } as const;
 
 export type WebhookEventType = typeof WebhookEventType[keyof typeof WebhookEventType];
@@ -3821,7 +3937,7 @@ export type WebhookEventType = typeof WebhookEventType[keyof typeof WebhookEvent
  * The event_type_filter parameter specifies the criteria to filter events based on event type.
  * @export
  */
-export type WebhookEventTypeFilter = WebhookWalletActivityFilter;
+export type WebhookEventTypeFilter = WebhookSmartContractEventFilter | WebhookWalletActivityFilter;
 
 /**
  * 
@@ -3847,6 +3963,19 @@ export interface WebhookList {
      * @memberof WebhookList
      */
     'next_page'?: string;
+}
+/**
+ * Filter for smart contract events. This filter allows the client to specify smart contract addresses to monitor for activities such as contract function calls. 
+ * @export
+ * @interface WebhookSmartContractEventFilter
+ */
+export interface WebhookSmartContractEventFilter {
+    /**
+     * A list of smart contract addresses to filter on.
+     * @type {Array<string>}
+     * @memberof WebhookSmartContractEventFilter
+     */
+    'contract_addresses': Array<string>;
 }
 /**
  * Filter for wallet activity events. This filter allows the client to specify one or more wallet addresses to monitor for activities such as transactions, transfers, or other types of events that are associated with the specified addresses. 
@@ -6523,6 +6652,7 @@ export interface FundApiInterface {
      * @memberof FundApiInterface
      */
     listFundOperations(walletId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<FundOperationList>;
+
 }
 
 /**
