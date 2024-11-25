@@ -801,6 +801,15 @@ export enum PayloadSignatureStatus {
 }
 
 /**
+ * Fund Operation status type definition.
+ */
+export enum FundOperationStatus {
+  PENDING = "pending",
+  COMPLETE = "complete",
+  FAILED = "failed",
+}
+
+/**
  * The Wallet Data type definition.
  * The data required to recreate a Wallet.
  */

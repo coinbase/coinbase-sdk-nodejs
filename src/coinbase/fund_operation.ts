@@ -5,7 +5,8 @@ import { Coinbase } from "./coinbase";
 import { delay } from "./utils";
 import { TimeoutError } from "./errors";
 import { FundQuote } from "./fund_quote";
-import { PaginationOptions, PaginationResponse } from "./types";
+import { FundOperationStatus, PaginationOptions, PaginationResponse } from "./types";
+import { CryptoAmount } from "./crypto_amount";
 
 /**
  * A representation of a Fund Operation.
@@ -15,9 +16,6 @@ export class FundOperation {
    * Fund Operation status constants.
    */
   public static readonly Status = {
-    PENDING: "pending",
-    COMPLETE: "complete",
-    FAILED: "failed",
     TERMINAL_STATES: new Set(["complete", "failed"]),
   } as const;
 
@@ -30,9 +28,6 @@ export class FundOperation {
    * @param model - The model representing the fund operation
    */
   constructor(model: FundOperationModel) {
-    if (!model) {
-      throw new Error("Fund operation model cannot be empty");
-    }
     this.model = model;
   }
 
@@ -180,12 +175,10 @@ export class FundOperation {
   /**
    * Gets the amount.
    *
-   * @returns {Decimal} The amount in decimal format
+   * @returns {CryptoAmount} The crypto amount
    */
-  public getAmount(): Decimal {
-    return new Decimal(this.model.crypto_amount.amount).div(
-      new Decimal(10).pow(this.model.crypto_amount.asset.decimals || 0),
-    );
+  public getAmount(): CryptoAmount {
+    return CryptoAmount.fromModel(this.model.crypto_amount);
   }
 
   /**
@@ -207,12 +200,21 @@ export class FundOperation {
   }
 
   /**
-   * Gets the status.
+   * Returns the Status of the Transfer.
    *
-   * @returns {string} The current status of the fund operation
+   * @returns The Status of the Transfer.
    */
-  public getStatus(): string {
-    return this.model.status;
+  public getStatus(): FundOperationStatus {
+    switch (this.model.status) {
+      case FundOperationStatus.PENDING:
+        return FundOperationStatus.PENDING;
+      case FundOperationStatus.COMPLETE:
+        return FundOperationStatus.COMPLETE;
+      case FundOperationStatus.FAILED:
+        return FundOperationStatus.FAILED;
+      default:
+        throw new Error(`Unknown fund operation status: ${this.model.status}`);
+    }
   }
 
   /**
@@ -242,17 +244,18 @@ export class FundOperation {
   public async wait({ intervalSeconds = 0.2, timeoutSeconds = 20 } = {}): Promise<FundOperation> {
     const startTime = Date.now();
 
-    while (!this.isTerminalState()) {
+    while (Date.now() - startTime < timeoutSeconds * 1000) {
       await this.reload();
 
-      if (Date.now() - startTime > timeoutSeconds * 1000) {
-        throw new TimeoutError("Fund operation timed out");
+      // If the FundOperation is in a terminal state, return the FundOperation
+      if (this.isTerminalState()) {
+        return this;
       }
 
       await delay(intervalSeconds);
     }
 
-    return this;
+    throw new TimeoutError("Fund operation timed out");
   }
 
   /**
