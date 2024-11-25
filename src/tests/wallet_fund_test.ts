@@ -19,17 +19,17 @@ describe("Wallet Fund", () => {
     defaultAddress = new WalletAddress(addressModel);
 
     walletModel = {
-        id: walletId,
-        network_id: Coinbase.networks.BaseSepolia,
-        default_address: addressModel,
-        feature_set: {} as FeatureSet,
-      };
-    
+      id: walletId,
+      network_id: Coinbase.networks.BaseSepolia,
+      default_address: addressModel,
+      feature_set: {} as FeatureSet,
+    };
+
     wallet = Wallet.init(walletModel, "");
 
     // Mock getDefaultAddress to return our test address
     jest.spyOn(wallet, "getDefaultAddress").mockResolvedValue(defaultAddress);
-    
+
     // Mock the fund and quoteFund methods on the default address
     jest.spyOn(defaultAddress, "fund").mockResolvedValue({} as FundOperation);
     jest.spyOn(defaultAddress, "quoteFund").mockResolvedValue({} as FundQuote);
@@ -68,8 +68,10 @@ describe("Wallet Fund", () => {
     });
 
     it("should throw error if default address does not exist", async () => {
-      jest.spyOn(wallet, "getDefaultAddress").mockRejectedValue(new Error("Default address does not exist"));
-      
+      jest
+        .spyOn(wallet, "getDefaultAddress")
+        .mockRejectedValue(new Error("Default address does not exist"));
+
       const amount = new Decimal("1.0");
       const assetId = "eth";
 
@@ -106,12 +108,16 @@ describe("Wallet Fund", () => {
     });
 
     it("should throw error if default address does not exist", async () => {
-      jest.spyOn(wallet, "getDefaultAddress").mockRejectedValue(new Error("Default address does not exist"));
-      
+      jest
+        .spyOn(wallet, "getDefaultAddress")
+        .mockRejectedValue(new Error("Default address does not exist"));
+
       const amount = new Decimal("1.0");
       const assetId = "eth";
 
-      await expect(wallet.quoteFund(amount, assetId)).rejects.toThrow("Default address does not exist");
+      await expect(wallet.quoteFund(amount, assetId)).rejects.toThrow(
+        "Default address does not exist",
+      );
     });
   });
 });

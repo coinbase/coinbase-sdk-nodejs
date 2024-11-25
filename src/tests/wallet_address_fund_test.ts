@@ -12,8 +12,8 @@ describe("WalletAddress Fund", () => {
   beforeEach(() => {
     walletAddress = new WalletAddress(newAddressModel(walletId, addressId));
 
-    jest.spyOn(FundOperation, 'create').mockResolvedValue({} as FundOperation);
-    jest.spyOn(FundQuote, 'create').mockResolvedValue({} as FundQuote);
+    jest.spyOn(FundOperation, "create").mockResolvedValue({} as FundOperation);
+    jest.spyOn(FundQuote, "create").mockResolvedValue({} as FundQuote);
   });
 
   afterEach(() => {
@@ -32,7 +32,7 @@ describe("WalletAddress Fund", () => {
         addressId,
         amount,
         assetId,
-        walletAddress.getNetworkId()
+        walletAddress.getNetworkId(),
       );
     });
     it("should call FundOperation.create with correct parameters when passing in number amount", async () => {
@@ -46,7 +46,7 @@ describe("WalletAddress Fund", () => {
         addressId,
         new Decimal(amount),
         assetId,
-        walletAddress.getNetworkId()
+        walletAddress.getNetworkId(),
       );
     });
     it("should call FundOperation.create with correct parameters when passing in bigint amount", async () => {
@@ -60,7 +60,7 @@ describe("WalletAddress Fund", () => {
         addressId,
         new Decimal(amount.toString()),
         assetId,
-        walletAddress.getNetworkId()
+        walletAddress.getNetworkId(),
       );
     });
   });
@@ -77,7 +77,7 @@ describe("WalletAddress Fund", () => {
         addressId,
         amount,
         assetId,
-        walletAddress.getNetworkId()
+        walletAddress.getNetworkId(),
       );
     });
     it("should call FundQuote.create with correct parameters when passing in number amount", async () => {
@@ -91,7 +91,7 @@ describe("WalletAddress Fund", () => {
         addressId,
         new Decimal(amount),
         assetId,
-        walletAddress.getNetworkId()
+        walletAddress.getNetworkId(),
       );
     });
     it("should call FundQuote.create with correct parameters when passing in bigint amount", async () => {
@@ -105,7 +105,7 @@ describe("WalletAddress Fund", () => {
         addressId,
         new Decimal(amount.toString()),
         assetId,
-        walletAddress.getNetworkId()
+        walletAddress.getNetworkId(),
       );
     });
   });

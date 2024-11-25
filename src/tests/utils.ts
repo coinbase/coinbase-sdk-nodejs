@@ -439,29 +439,29 @@ export const VALID_FUND_QUOTE_MODEL: FundQuoteModel = {
 export const VALID_FUND_OPERATION_MODEL: FundOperationModel = {
   fund_operation_id: "test-operation-id",
   network_id: Coinbase.networks.BaseSepolia,
-  wallet_id: "test-wallet-id", 
+  wallet_id: "test-wallet-id",
   address_id: "test-address-id",
   crypto_amount: VALID_ETH_CRYPTO_AMOUNT_MODEL,
   fiat_amount: {
-      amount: "100",
-      currency: "USD"
+    amount: "100",
+    currency: "USD",
   },
   fees: {
-      buy_fee: {
-          amount: "1",
-          currency: "USD"
+    buy_fee: {
+      amount: "1",
+      currency: "USD",
+    },
+    transfer_fee: {
+      amount: "10000000000000000", // 0.01 ETH in wei
+      asset: {
+        asset_id: Coinbase.assets.Eth,
+        network_id: Coinbase.networks.BaseSepolia,
+        decimals: 18,
+        contract_address: "0x",
       },
-      transfer_fee: {
-          amount: "10000000000000000", // 0.01 ETH in wei
-          asset: {
-              asset_id: Coinbase.assets.Eth,
-              network_id: Coinbase.networks.BaseSepolia,
-              decimals: 18,
-              contract_address: "0x",
-          }
-      }
+    },
   },
-  status: "complete" as const
+  status: "complete" as const,
 };
 
 /**

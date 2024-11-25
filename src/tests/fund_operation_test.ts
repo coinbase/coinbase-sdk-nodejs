@@ -1,4 +1,9 @@
-import { FundOperation as FundOperationModel, Asset as AssetModel, FundOperationList, FundOperationStatusEnum } from "../client/api";
+import {
+  FundOperation as FundOperationModel,
+  Asset as AssetModel,
+  FundOperationList,
+  FundOperationStatusEnum,
+} from "../client/api";
 import { Coinbase } from "../coinbase/coinbase";
 import {
   VALID_ASSET_MODEL,
@@ -17,7 +22,7 @@ import { TimeoutError } from "../coinbase/errors";
 import { FundOperationStatus } from "../coinbase/types";
 
 describe("FundOperation", () => {
- let assetModel: AssetModel;
+  let assetModel: AssetModel;
   let asset: Asset;
   let fundOperationModel: FundOperationModel;
   let fundOperation: FundOperation;
@@ -48,22 +53,47 @@ describe("FundOperation", () => {
 
   describe(".create", () => {
     it("should create a new fund operation without quote", async () => {
-      const newFundOperation = await FundOperation.create(fundOperationModel.wallet_id, fundOperationModel.address_id, new Decimal(fundOperationModel.crypto_amount.amount), fundOperationModel.crypto_amount.asset.asset_id, fundOperationModel.network_id);
+      const newFundOperation = await FundOperation.create(
+        fundOperationModel.wallet_id,
+        fundOperationModel.address_id,
+        new Decimal(fundOperationModel.crypto_amount.amount),
+        fundOperationModel.crypto_amount.asset.asset_id,
+        fundOperationModel.network_id,
+      );
       expect(newFundOperation).toBeInstanceOf(FundOperation);
-      expect(Coinbase.apiClients.fund!.createFundOperation).toHaveBeenCalledWith(fundOperationModel.wallet_id, fundOperationModel.address_id, {
-        fund_quote_id: undefined,
-        amount: new Decimal(fundOperationModel.crypto_amount.amount).mul(10 ** asset.decimals).toString(),
-        asset_id: fundOperationModel.crypto_amount.asset.asset_id,
-      });
+      expect(Coinbase.apiClients.fund!.createFundOperation).toHaveBeenCalledWith(
+        fundOperationModel.wallet_id,
+        fundOperationModel.address_id,
+        {
+          fund_quote_id: undefined,
+          amount: new Decimal(fundOperationModel.crypto_amount.amount)
+            .mul(10 ** asset.decimals)
+            .toString(),
+          asset_id: fundOperationModel.crypto_amount.asset.asset_id,
+        },
+      );
     });
     it("should create a new fund operation with quote", async () => {
-      const newFundOperation = await FundOperation.create(fundOperationModel.wallet_id, fundOperationModel.address_id, new Decimal(fundOperationModel.crypto_amount.amount), fundOperationModel.crypto_amount.asset.asset_id, fundOperationModel.network_id, FundQuote.fromModel(VALID_FUND_QUOTE_MODEL));
+      const newFundOperation = await FundOperation.create(
+        fundOperationModel.wallet_id,
+        fundOperationModel.address_id,
+        new Decimal(fundOperationModel.crypto_amount.amount),
+        fundOperationModel.crypto_amount.asset.asset_id,
+        fundOperationModel.network_id,
+        FundQuote.fromModel(VALID_FUND_QUOTE_MODEL),
+      );
       expect(newFundOperation).toBeInstanceOf(FundOperation);
-      expect(Coinbase.apiClients.fund!.createFundOperation).toHaveBeenCalledWith(fundOperationModel.wallet_id, fundOperationModel.address_id, {
-        fund_quote_id: VALID_FUND_QUOTE_MODEL.fund_quote_id,
-        amount: new Decimal(fundOperationModel.crypto_amount.amount).mul(10 ** asset.decimals).toString(),
-        asset_id: fundOperationModel.crypto_amount.asset.asset_id,
-      });
+      expect(Coinbase.apiClients.fund!.createFundOperation).toHaveBeenCalledWith(
+        fundOperationModel.wallet_id,
+        fundOperationModel.address_id,
+        {
+          fund_quote_id: VALID_FUND_QUOTE_MODEL.fund_quote_id,
+          amount: new Decimal(fundOperationModel.crypto_amount.amount)
+            .mul(10 ** asset.decimals)
+            .toString(),
+          asset_id: fundOperationModel.crypto_amount.asset.asset_id,
+        },
+      );
     });
   });
 
@@ -76,7 +106,10 @@ describe("FundOperation", () => {
         total_count: 0,
       } as FundOperationList;
       Coinbase.apiClients.fund!.listFundOperations = mockReturnValue(response);
-      const paginationResponse = await FundOperation.listFundOperations(fundOperationModel.wallet_id, fundOperationModel.address_id);
+      const paginationResponse = await FundOperation.listFundOperations(
+        fundOperationModel.wallet_id,
+        fundOperationModel.address_id,
+      );
       const fundOperations = paginationResponse.data;
       expect(fundOperations).toHaveLength(1);
       expect(fundOperations[0]).toBeInstanceOf(FundOperation);
@@ -96,7 +129,10 @@ describe("FundOperation", () => {
         total_count: 0,
       } as FundOperationList;
       Coinbase.apiClients.fund!.listFundOperations = mockReturnValue(response);
-      const paginationResponse = await FundOperation.listFundOperations(fundOperationModel.wallet_id, fundOperationModel.address_id);
+      const paginationResponse = await FundOperation.listFundOperations(
+        fundOperationModel.wallet_id,
+        fundOperationModel.address_id,
+      );
       expect(paginationResponse.nextPage).toEqual("abc");
       expect(paginationResponse.hasMore).toEqual(true);
       const fundOperations = paginationResponse.data;
@@ -144,13 +180,17 @@ describe("FundOperation", () => {
 
   describe("#getAmount", () => {
     it("should return the amount", () => {
-      expect(fundOperation.getAmount()).toEqual(CryptoAmount.fromModel(fundOperationModel.crypto_amount));
+      expect(fundOperation.getAmount()).toEqual(
+        CryptoAmount.fromModel(fundOperationModel.crypto_amount),
+      );
     });
   });
 
   describe("#getFiatAmount", () => {
     it("should return the fiat amount", () => {
-      expect(fundOperation.getFiatAmount()).toEqual(new Decimal(fundOperationModel.fiat_amount.amount));
+      expect(fundOperation.getFiatAmount()).toEqual(
+        new Decimal(fundOperationModel.fiat_amount.amount),
+      );
     });
   });
 
@@ -224,7 +264,9 @@ describe("FundOperation", () => {
         ...VALID_FUND_OPERATION_MODEL,
         status: FundOperationStatus.PENDING,
       });
-      await expect(fundOperation.wait({ timeoutSeconds: 0.05, intervalSeconds: 0.05 })).rejects.toThrow(new TimeoutError("Fund operation timed out"));
+      await expect(
+        fundOperation.wait({ timeoutSeconds: 0.05, intervalSeconds: 0.05 }),
+      ).rejects.toThrow(new TimeoutError("Fund operation timed out"));
     });
   });
 });
