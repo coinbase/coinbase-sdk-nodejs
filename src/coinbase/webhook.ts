@@ -2,7 +2,8 @@ import {
   Webhook as WebhookModel,
   WebhookEventType,
   WebhookEventFilter,
-  WebhookEventTypeFilter, WebhookWalletActivityFilter,
+  WebhookEventTypeFilter,
+  WebhookWalletActivityFilter,
 } from "../client/api";
 import { Coinbase } from "./coinbase";
 import {
@@ -188,7 +189,7 @@ export class Webhook {
     const finalNotificationUri = notificationUri ?? this.getNotificationURI();
     const finalEventTypeFilter = eventTypeFilter ?? this.getEventTypeFilter();
 
-    // wallet ID is required for wallet activity event type filter, but we do not support updating it just yet
+    // wallet ID is required for wallet activity event type filter, but we do not support updating it just yet, this will be added in the future
     if (this.getEventType() === WebhookEventType.WalletActivity) {
       (finalEventTypeFilter as WebhookWalletActivityFilter).wallet_id = <string>(
         (this.getEventTypeFilter() as WebhookWalletActivityFilter)?.wallet_id
