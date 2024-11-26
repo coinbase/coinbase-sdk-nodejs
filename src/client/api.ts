@@ -1357,6 +1357,12 @@ export interface EthereumTransaction {
      * @memberof EthereumTransaction
      */
     'mint'?: string;
+    /**
+     * RLP encoded transaction as a hex string (prefixed with 0x) for native compatibility with popular eth clients such as etherjs, viem etc.
+     * @type {string}
+     * @memberof EthereumTransaction
+     */
+    'rlp_encoded_tx'?: string;
 }
 /**
  * 
