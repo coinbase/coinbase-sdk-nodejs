@@ -24,6 +24,25 @@ import type { RequestArgs } from './base';
 import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerMap } from './base';
 
 /**
+ * Smart Contract to be registered
+ * @export
+ * @interface ABI
+ */
+export interface ABI {
+    /**
+     * ABI of the smart contract
+     * @type {string}
+     * @memberof ABI
+     */
+    'abi': string;
+    /**
+     * Name of the smart contract
+     * @type {string}
+     * @memberof ABI
+     */
+    'contract_name': string;
+}
+/**
  * 
  * @export
  * @interface Address
@@ -2663,6 +2682,12 @@ export interface SmartContract {
      */
     'contract_address': string;
     /**
+     * The name of the smart contract
+     * @type {string}
+     * @memberof SmartContract
+     */
+    'contract_name': string;
+    /**
      * The EVM address of the account that deployed the smart contract
      * @type {string}
      * @memberof SmartContract
@@ -2695,6 +2720,121 @@ export interface SmartContract {
 }
 
 
+/**
+ * Represents an event triggered by a smart contract activity on the blockchain. Contains information about the function, transaction, block, and involved addresses.
+ * @export
+ * @interface SmartContractActivityEvent
+ */
+export interface SmartContractActivityEvent {
+    /**
+     * Unique identifier for the webhook that triggered this event.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'webhookId'?: string;
+    /**
+     * Type of event, in this case, an ERC-721 token transfer.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'eventType'?: string;
+    /**
+     * Blockchain network where the event occurred.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'network'?: string;
+    /**
+     * Name of the project this smart contract belongs to.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'projectName'?: string;
+    /**
+     * Name of the contract.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'contractName'?: string;
+    /**
+     * Name of the function.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'func'?: string;
+    /**
+     * Signature of the function.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'sig'?: string;
+    /**
+     * First 4 bytes of the Transaction, a unique ID.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'fourBytes'?: string;
+    /**
+     * Address of the smart contract.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'contractAddress'?: string;
+    /**
+     * Hash of the block containing the transaction.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'blockHash'?: string;
+    /**
+     * Number of the block containing the transaction.
+     * @type {number}
+     * @memberof SmartContractActivityEvent
+     */
+    'blockNumber'?: number;
+    /**
+     * Timestamp when the block was mined.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'blockTime'?: string;
+    /**
+     * Hash of the transaction that triggered the event.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'transactionHash'?: string;
+    /**
+     * Position of the transaction within the block.
+     * @type {number}
+     * @memberof SmartContractActivityEvent
+     */
+    'transactionIndex'?: number;
+    /**
+     * Position of the event log within the transaction.
+     * @type {number}
+     * @memberof SmartContractActivityEvent
+     */
+    'logIndex'?: number;
+    /**
+     * Address of the initiator in the transfer.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'from'?: string;
+    /**
+     * Address of the recipient in the transfer.
+     * @type {string}
+     * @memberof SmartContractActivityEvent
+     */
+    'to'?: string;
+    /**
+     * Amount of tokens transferred, typically in the smallest unit (e.g., wei for Ethereum).
+     * @type {number}
+     * @memberof SmartContractActivityEvent
+     */
+    'value'?: number;
+}
 /**
  * 
  * @export
@@ -2736,7 +2876,8 @@ export type SmartContractOptions = MultiTokenContractOptions | NFTContractOption
 export const SmartContractType = {
     Erc20: 'erc20',
     Erc721: 'erc721',
-    Erc1155: 'erc1155'
+    Erc1155: 'erc1155',
+    Custom: 'custom'
 } as const;
 
 export type SmartContractType = typeof SmartContractType[keyof typeof SmartContractType];
@@ -3816,7 +3957,8 @@ export const WebhookEventType = {
     Unspecified: 'unspecified',
     Erc20Transfer: 'erc20_transfer',
     Erc721Transfer: 'erc721_transfer',
-    WalletActivity: 'wallet_activity'
+    WalletActivity: 'wallet_activity',
+    SmartContractEventActivity: 'smart_contract_event_activity'
 } as const;
 
 export type WebhookEventType = typeof WebhookEventType[keyof typeof WebhookEventType];
@@ -3827,7 +3969,7 @@ export type WebhookEventType = typeof WebhookEventType[keyof typeof WebhookEvent
  * The event_type_filter parameter specifies the criteria to filter events based on event type.
  * @export
  */
-export type WebhookEventTypeFilter = WebhookWalletActivityFilter;
+export type WebhookEventTypeFilter = WebhookSmartContractEventFilter | WebhookWalletActivityFilter;
 
 /**
  * 
@@ -3855,6 +3997,19 @@ export interface WebhookList {
     'next_page'?: string;
 }
 /**
+ * Filter for smart contract events. This filter allows the client to specify smart contract addresses to monitor for activities such as contract function calls. 
+ * @export
+ * @interface WebhookSmartContractEventFilter
+ */
+export interface WebhookSmartContractEventFilter {
+    /**
+     * A list of smart contract addresses to filter on.
+     * @type {Array<string>}
+     * @memberof WebhookSmartContractEventFilter
+     */
+    'contract_addresses': Array<string>;
+}
+/**
  * Filter for wallet activity events. This filter allows the client to specify one or more wallet addresses to monitor for activities such as transactions, transfers, or other types of events that are associated with the specified addresses. 
  * @export
  * @interface WebhookWalletActivityFilter
@@ -3871,7 +4026,7 @@ export interface WebhookWalletActivityFilter {
      * @type {string}
      * @memberof WebhookWalletActivityFilter
      */
-    'wallet_id'?: string;
+    'wallet_id': string;
 }
 
 /**
@@ -6529,6 +6684,7 @@ export interface FundApiInterface {
      * @memberof FundApiInterface
      */
     listFundOperations(walletId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<FundOperationList>;
+
 }
 
 /**
@@ -8169,21 +8325,14 @@ export const SmartContractsApiAxiosParamCreator = function (configuration?: Conf
             };
         },
         /**
-         * List all smart contracts deployed by address.
-         * @summary List smart contracts deployed by address
-         * @param {string} walletId The ID of the wallet the address belongs to.
-         * @param {string} addressId The ID of the address to fetch the smart contracts for.
+         * List smart contracts
+         * @summary List smart contracts
+         * @param {string} [page] Pagination token for retrieving the next set of results
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listSmartContracts: async (walletId: string, addressId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'walletId' is not null or undefined
-            assertParamExists('listSmartContracts', 'walletId', walletId)
-            // verify required parameter 'addressId' is not null or undefined
-            assertParamExists('listSmartContracts', 'addressId', addressId)
-            const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/smart_contracts`
-                .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
-                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)));
+        listSmartContracts: async (page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/v1/smart_contracts`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -8194,6 +8343,10 @@ export const SmartContractsApiAxiosParamCreator = function (configuration?: Conf
             const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
 
 
     
@@ -8244,6 +8397,50 @@ export const SmartContractsApiAxiosParamCreator = function (configuration?: Conf
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(readContractRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Register a smart contract
+         * @summary Register a smart contract
+         * @param {string} contractAddress EVM address of the smart contract (42 characters, including \&#39;0x\&#39;, in lowercase)
+         * @param {string} networkId The ID of the network to fetch.
+         * @param {ABI} aBI 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        registerSmartContract: async (contractAddress: string, networkId: string, aBI: ABI, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'contractAddress' is not null or undefined
+            assertParamExists('registerSmartContract', 'contractAddress', contractAddress)
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('registerSmartContract', 'networkId', networkId)
+            // verify required parameter 'aBI' is not null or undefined
+            assertParamExists('registerSmartContract', 'aBI', aBI)
+            const localVarPath = `/v1/networks/{network_id}/smart_contracts/{contract_address}/register`
+                .replace(`{${"contract_address"}}`, encodeURIComponent(String(contractAddress)))
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(aBI, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -8307,15 +8504,14 @@ export const SmartContractsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * List all smart contracts deployed by address.
-         * @summary List smart contracts deployed by address
-         * @param {string} walletId The ID of the wallet the address belongs to.
-         * @param {string} addressId The ID of the address to fetch the smart contracts for.
+         * List smart contracts
+         * @summary List smart contracts
+         * @param {string} [page] Pagination token for retrieving the next set of results
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listSmartContracts(walletId: string, addressId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SmartContractList>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listSmartContracts(walletId, addressId, options);
+        async listSmartContracts(page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SmartContractList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listSmartContracts(page, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SmartContractsApi.listSmartContracts']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -8333,6 +8529,21 @@ export const SmartContractsApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.readContract(networkId, contractAddress, readContractRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SmartContractsApi.readContract']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Register a smart contract
+         * @summary Register a smart contract
+         * @param {string} contractAddress EVM address of the smart contract (42 characters, including \&#39;0x\&#39;, in lowercase)
+         * @param {string} networkId The ID of the network to fetch.
+         * @param {ABI} aBI 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async registerSmartContract(contractAddress: string, networkId: string, aBI: ABI, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.registerSmartContract(contractAddress, networkId, aBI, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SmartContractsApi.registerSmartContract']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
@@ -8383,15 +8594,14 @@ export const SmartContractsApiFactory = function (configuration?: Configuration,
             return localVarFp.getSmartContract(walletId, addressId, smartContractId, options).then((request) => request(axios, basePath));
         },
         /**
-         * List all smart contracts deployed by address.
-         * @summary List smart contracts deployed by address
-         * @param {string} walletId The ID of the wallet the address belongs to.
-         * @param {string} addressId The ID of the address to fetch the smart contracts for.
+         * List smart contracts
+         * @summary List smart contracts
+         * @param {string} [page] Pagination token for retrieving the next set of results
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listSmartContracts(walletId: string, addressId: string, options?: RawAxiosRequestConfig): AxiosPromise<SmartContractList> {
-            return localVarFp.listSmartContracts(walletId, addressId, options).then((request) => request(axios, basePath));
+        listSmartContracts(page?: string, options?: RawAxiosRequestConfig): AxiosPromise<SmartContractList> {
+            return localVarFp.listSmartContracts(page, options).then((request) => request(axios, basePath));
         },
         /**
          * Perform a read operation on a smart contract without creating a transaction
@@ -8404,6 +8614,18 @@ export const SmartContractsApiFactory = function (configuration?: Configuration,
          */
         readContract(networkId: string, contractAddress: string, readContractRequest: ReadContractRequest, options?: RawAxiosRequestConfig): AxiosPromise<SolidityValue> {
             return localVarFp.readContract(networkId, contractAddress, readContractRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Register a smart contract
+         * @summary Register a smart contract
+         * @param {string} contractAddress EVM address of the smart contract (42 characters, including \&#39;0x\&#39;, in lowercase)
+         * @param {string} networkId The ID of the network to fetch.
+         * @param {ABI} aBI 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        registerSmartContract(contractAddress: string, networkId: string, aBI: ABI, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.registerSmartContract(contractAddress, networkId, aBI, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -8452,15 +8674,14 @@ export interface SmartContractsApiInterface {
     getSmartContract(walletId: string, addressId: string, smartContractId: string, options?: RawAxiosRequestConfig): AxiosPromise<SmartContract>;
 
     /**
-     * List all smart contracts deployed by address.
-     * @summary List smart contracts deployed by address
-     * @param {string} walletId The ID of the wallet the address belongs to.
-     * @param {string} addressId The ID of the address to fetch the smart contracts for.
+     * List smart contracts
+     * @summary List smart contracts
+     * @param {string} [page] Pagination token for retrieving the next set of results
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof SmartContractsApiInterface
      */
-    listSmartContracts(walletId: string, addressId: string, options?: RawAxiosRequestConfig): AxiosPromise<SmartContractList>;
+    listSmartContracts(page?: string, options?: RawAxiosRequestConfig): AxiosPromise<SmartContractList>;
 
     /**
      * Perform a read operation on a smart contract without creating a transaction
@@ -8473,6 +8694,18 @@ export interface SmartContractsApiInterface {
      * @memberof SmartContractsApiInterface
      */
     readContract(networkId: string, contractAddress: string, readContractRequest: ReadContractRequest, options?: RawAxiosRequestConfig): AxiosPromise<SolidityValue>;
+
+    /**
+     * Register a smart contract
+     * @summary Register a smart contract
+     * @param {string} contractAddress EVM address of the smart contract (42 characters, including \&#39;0x\&#39;, in lowercase)
+     * @param {string} networkId The ID of the network to fetch.
+     * @param {ABI} aBI 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartContractsApiInterface
+     */
+    registerSmartContract(contractAddress: string, networkId: string, aBI: ABI, options?: RawAxiosRequestConfig): AxiosPromise<void>;
 
 }
 
@@ -8527,16 +8760,15 @@ export class SmartContractsApi extends BaseAPI implements SmartContractsApiInter
     }
 
     /**
-     * List all smart contracts deployed by address.
-     * @summary List smart contracts deployed by address
-     * @param {string} walletId The ID of the wallet the address belongs to.
-     * @param {string} addressId The ID of the address to fetch the smart contracts for.
+     * List smart contracts
+     * @summary List smart contracts
+     * @param {string} [page] Pagination token for retrieving the next set of results
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof SmartContractsApi
      */
-    public listSmartContracts(walletId: string, addressId: string, options?: RawAxiosRequestConfig) {
-        return SmartContractsApiFp(this.configuration).listSmartContracts(walletId, addressId, options).then((request) => request(this.axios, this.basePath));
+    public listSmartContracts(page?: string, options?: RawAxiosRequestConfig) {
+        return SmartContractsApiFp(this.configuration).listSmartContracts(page, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -8551,6 +8783,20 @@ export class SmartContractsApi extends BaseAPI implements SmartContractsApiInter
      */
     public readContract(networkId: string, contractAddress: string, readContractRequest: ReadContractRequest, options?: RawAxiosRequestConfig) {
         return SmartContractsApiFp(this.configuration).readContract(networkId, contractAddress, readContractRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Register a smart contract
+     * @summary Register a smart contract
+     * @param {string} contractAddress EVM address of the smart contract (42 characters, including \&#39;0x\&#39;, in lowercase)
+     * @param {string} networkId The ID of the network to fetch.
+     * @param {ABI} aBI 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartContractsApi
+     */
+    public registerSmartContract(contractAddress: string, networkId: string, aBI: ABI, options?: RawAxiosRequestConfig) {
+        return SmartContractsApiFp(this.configuration).registerSmartContract(contractAddress, networkId, aBI, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

@@ -7,6 +7,7 @@
 
 ### Added
 - Add `rlp_encoded_tx` field to `EthereumTransaction` interface
+- Added create and update feature for `SmartContractEventActivity` webhook and its related event type filter.
 
 ## [0.10.0] - 2024-10-31
 
