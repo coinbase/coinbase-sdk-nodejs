@@ -5,6 +5,9 @@
 ### Fixed
 - Fixed a bug where the asset ID was not being set correctly for Gwei and Wei
 
+### Added
+- Add `rlp_encoded_tx` field to `EthereumTransaction` interface
+
 ## [0.10.0] - 2024-10-31
 
 ### Added
