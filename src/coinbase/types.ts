@@ -1226,7 +1226,7 @@ export type CreateWebhookOptions = {
 export type UpdateWebhookOptions = {
   notificationUri?: string;
   eventFilters?: Array<WebhookEventFilter>;
-  eventTypeFilter?: { addresses: string[] };
+  eventTypeFilter?: WebhookEventTypeFilter;
 };
 
 /**

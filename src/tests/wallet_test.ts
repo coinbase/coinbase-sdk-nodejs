@@ -25,7 +25,7 @@ import {
   FetchHistoricalStakingBalances200Response,
   StakingRewardStateEnum,
   StakingRewardFormat,
-  FeatureSet,
+  FeatureSet, WebhookWalletActivityFilter,
 } from "./../client";
 import {
   VALID_ADDRESS_MODEL,
@@ -1442,8 +1442,8 @@ describe("Wallet Class", () => {
       jest.spyOn(Wallet.prototype, "createWebhook").mockReturnValue(wh);
       const result = await wallet.createWebhook("https://example.com/callback");
       expect(result).toBeInstanceOf(Webhook);
-      expect(result.getEventTypeFilter()?.wallet_id).toBe(walletModel.id);
-      expect(result.getEventTypeFilter()?.addresses).toStrictEqual([address1]);
+      expect((result.getEventTypeFilter() as WebhookWalletActivityFilter)?.wallet_id).toBe(walletModel.id);
+      expect((result.getEventTypeFilter() as WebhookWalletActivityFilter)?.addresses).toStrictEqual([address1]);
       expect(result.getEventType()).toBe("wallet_activity");
     });
   });
