@@ -908,6 +908,16 @@ export type CoinbaseConfigureFromJsonOptions = {
    * The base path for the API.
    */
   basePath?: string;
+
+  /**
+   * The source for the API request, used for analytics. Defaults to `sdk`.
+   */
+  source?: string;
+
+  /**
+   * The version of the source for the API request, used for analytics.
+   */
+  sourceVersion?: string;
 };
 
 /**

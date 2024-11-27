@@ -207,6 +207,8 @@ export class Coinbase {
    * @param options.useServerSigner - Whether to use a Server-Signer or not.
    * @param options.debugging - If true, logs API requests and responses to the console.
    * @param options.basePath - The base path for the API.
+   * @param options.source - Optional source string to be sent with the API requests. Defaults to `sdk`.
+   * @param options.sourceVersion - Optional source version string to be sent with the API requests.
    * @returns A new instance of the Coinbase SDK.
    * @throws {InvalidAPIKeyFormat} If the file does not exist or the configuration values are missing/invalid.
    * @throws {InvalidConfiguration} If the configuration is invalid.
@@ -217,6 +219,8 @@ export class Coinbase {
     useServerSigner = false,
     debugging = false,
     basePath = BASE_PATH,
+    source = "sdk",
+    sourceVersion = undefined,
   }: CoinbaseConfigureFromJsonOptions = {}): Coinbase {
     filePath = filePath.startsWith("~") ? filePath.replace("~", os.homedir()) : filePath;
 
@@ -236,6 +240,8 @@ export class Coinbase {
         useServerSigner: useServerSigner,
         debugging: debugging,
         basePath: basePath,
+        source,
+        sourceVersion,
       });
     } catch (e) {
       if (e instanceof SyntaxError) {
