@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## Added
+
+- Add `FundOperation` and `FundQuote` classes to support wallet funding
+
 ### Fixed
 - Fixed a bug where the asset ID was not being set correctly for Gwei and Wei
 
