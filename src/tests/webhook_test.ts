@@ -60,7 +60,7 @@ describe("Webhook", () => {
 
   describe(".init", () => {
     it("should throw an error if the model is null", () => {
-      expect(() => Webhook.init(null as any)).toThrow("Webhook model cannot be empty");
+      expect(() => Webhook.init(null as never)).toThrow("Webhook model cannot be empty");
     });
 
     it("should create an instance of Webhook", () => {
@@ -236,7 +236,10 @@ describe("Webhook", () => {
       });
 
       expect(webhook.getNotificationURI()).toBe("https://example.com/callback");
-      expect((webhook.getEventTypeFilter() as WebhookWalletActivityFilter)?.addresses).toEqual(["0x1..", "0x2.."]);
+      expect((webhook.getEventTypeFilter() as WebhookWalletActivityFilter)?.addresses).toEqual([
+        "0x1..",
+        "0x2..",
+      ]);
     });
     it("should update both the webhook notification URI and the list of addresses monitoring", async () => {
       const webhook = Webhook.init(mockWalletActivityWebhookModel);
@@ -247,11 +250,14 @@ describe("Webhook", () => {
 
       expect(Coinbase.apiClients.webhook!.updateWebhook).toHaveBeenCalledWith("test-id", {
         notification_uri: "https://new-url.com/callback",
-        event_type_filter: { addresses: ["0x1..", "0x2.."], wallet_id: "test-wallet-id"},
+        event_type_filter: { addresses: ["0x1..", "0x2.."], wallet_id: "test-wallet-id" },
       });
 
       expect(webhook.getNotificationURI()).toBe("https://new-url.com/callback");
-      expect(webhook.getEventTypeFilter()).toEqual({ addresses: ["0x1..", "0x2.."], wallet_id: "test-wallet-id" });
+      expect(webhook.getEventTypeFilter()).toEqual({
+        addresses: ["0x1..", "0x2.."],
+        wallet_id: "test-wallet-id",
+      });
     });
     it("should update notification URI for contract webhook", async () => {
       const webhook = Webhook.init(mockContractActivityWebhookModel);
