@@ -12,16 +12,22 @@ const pemFooter = "-----END EC PRIVATE KEY-----";
 export class CoinbaseAuthenticator {
   private apiKey: string;
   private privateKey: string;
+  private source: string;
+  private sourceVersion?: string;
 
   /**
    * Initializes the Authenticator.
    *
    * @param {string} apiKey - The API key name.
    * @param {string} privateKey - The private key associated with the API key.
+   * @param {string} source - The source of the request.
+   * @param {string} sourceVersion - The version of the source.
    */
-  constructor(apiKey: string, privateKey: string) {
+  constructor(apiKey: string, privateKey: string, source: string, sourceVersion?: string) {
     this.apiKey = apiKey;
     this.privateKey = privateKey;
+    this.source = source;
+    this.sourceVersion = sourceVersion;
   }
 
   /**
@@ -140,7 +146,12 @@ export class CoinbaseAuthenticator {
     const data = {
       sdk_version: version,
       sdk_language: "typescript",
+      source: this.source,
     };
+
+    if (this.sourceVersion) {
+      data["source_version"] = this.sourceVersion;
+    }
 
     return Object.keys(data)
       .map(key => `${key}=${encodeURIComponent(data[key])}`)

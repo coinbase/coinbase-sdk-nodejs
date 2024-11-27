@@ -873,6 +873,16 @@ export type CoinbaseOptions = {
    * The maximum number of network retries for the API GET requests.
    */
   maxNetworkRetries?: number;
+
+  /**
+   * The source for the API request, used for analytics. Defaults to `sdk`.
+   */
+  source?: string;
+
+  /**
+   * The version of the source for the API request, used for analytics.
+   */
+  sourceVersion?: string;
 };
 
 /**

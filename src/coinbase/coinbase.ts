@@ -94,6 +94,8 @@ export class Coinbase {
    * @param options.debugging - If true, logs API requests and responses to the console.
    * @param options.basePath - The base path for the API.
    * @param options.maxNetworkRetries - The maximum number of network retries for the API GET requests.
+   * @param options.source - Optional source string to be sent with the API requests. Defaults to `sdk`.
+   * @param options.sourceVersion - Optional source version string to be sent with the API requests.
    * @throws {InvalidConfigurationError} If the configuration is invalid.
    * @throws {InvalidAPIKeyFormatError} If not able to create JWT token.
    */
@@ -104,6 +106,8 @@ export class Coinbase {
     debugging = false,
     basePath = BASE_PATH,
     maxNetworkRetries = 3,
+    source = "sdk",
+    sourceVersion = undefined,
   }: CoinbaseOptions) {
     if (apiKeyName === "") {
       throw new InvalidConfigurationError("Invalid configuration: apiKeyName is empty");
@@ -111,7 +115,12 @@ export class Coinbase {
     if (privateKey === "") {
       throw new InvalidConfigurationError("Invalid configuration: privateKey is empty");
     }
-    const coinbaseAuthenticator = new CoinbaseAuthenticator(apiKeyName, privateKey);
+    const coinbaseAuthenticator = new CoinbaseAuthenticator(
+      apiKeyName,
+      privateKey,
+      source,
+      sourceVersion,
+    );
     const config = new Configuration({
       basePath: basePath,
     });
