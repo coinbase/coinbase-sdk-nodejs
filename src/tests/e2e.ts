@@ -319,7 +319,7 @@ describe("Coinbase SDK Stake E2E Test", () => {
   describe("Stake: Build Tests", () => {
     it("should return an unsigned tx for shared ETH staking", async () => {
       const address = new ExternalAddress(
-        Coinbase.networks.EthereumHolesky,
+        Coinbase.networks.EthereumMainnet,
         process.env.STAKE_ADDRESS_ID_2 as string,
       );
 
@@ -335,13 +335,13 @@ describe("Coinbase SDK Stake E2E Test", () => {
       expect(stakingOperation.getID()).toBeDefined();
       expect(stakingOperation.getStatus()).toEqual(StakingOperationStatusEnum.Complete);
       expect(stakingOperation.getAddressID()).toEqual(process.env.STAKE_ADDRESS_ID_2 as string);
-      expect(stakingOperation.getNetworkID()).toEqual(Coinbase.networks.EthereumHolesky);
+      expect(stakingOperation.getNetworkID()).toEqual(Coinbase.networks.EthereumMainnet);
       expect(stakingOperation.isCompleteState()).toBe(true);
       expect(stakingOperation.getSignedVoluntaryExitMessages()).toEqual([]);
       expect(stakingOperation.getTransactions().length).toEqual(1);
       expect(stakingOperation.getTransactions()[0].isSigned()).toBe(false);
       expect(stakingOperation.getTransactions()[0].getNetworkId()).toEqual(
-        Coinbase.networks.EthereumHolesky,
+        Coinbase.networks.EthereumMainnet,
       );
       expect(stakingOperation.getTransactions()[0].getUnsignedPayload()).toBeDefined();
       expect(stakingOperation.getTransactions()[0].getStatus()).toEqual(TransactionStatus.PENDING);
