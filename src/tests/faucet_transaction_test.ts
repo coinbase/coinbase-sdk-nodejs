@@ -30,8 +30,7 @@ describe("FaucetTransaction tests", () => {
     });
 
     it("throws an Error if model is not provided", () => {
-      expect(() => new FaucetTransaction(null!))
-        .toThrow(`FaucetTransaction model cannot be empty`);
+      expect(() => new FaucetTransaction(null!)).toThrow(`FaucetTransaction model cannot be empty`);
     });
   });
 
@@ -79,9 +78,9 @@ describe("FaucetTransaction tests", () => {
       TransactionStatusEnum.Pending,
       TransactionStatusEnum.Complete,
       TransactionStatusEnum.Failed,
-    ].forEach((status) => {
+    ].forEach(status => {
       describe(`when the transaction is ${status}`, () => {
-        beforeAll(() => txStatus = status);
+        beforeAll(() => (txStatus = status));
 
         it("returns a FaucetTransaction", () => {
           expect(reloadedFaucetTx).toBeInstanceOf(FaucetTransaction);
@@ -97,7 +96,9 @@ describe("FaucetTransaction tests", () => {
             toAddressId,
             txHash,
           );
-          expect(Coinbase.apiClients.externalAddress!.getFaucetTransaction).toHaveBeenCalledTimes(1);
+          expect(Coinbase.apiClients.externalAddress!.getFaucetTransaction).toHaveBeenCalledTimes(
+            1,
+          );
         });
       });
     });
@@ -106,7 +107,8 @@ describe("FaucetTransaction tests", () => {
   describe("#wait", () => {
     describe("when the transaction eventually completes", () => {
       beforeEach(() => {
-        Coinbase.apiClients.externalAddress!.getFaucetTransaction = jest.fn()
+        Coinbase.apiClients.externalAddress!.getFaucetTransaction = jest
+          .fn()
           .mockResolvedValueOnce({ data: VALID_FAUCET_TRANSACTION_MODEL }) // Pending
           .mockResolvedValueOnce({
             data: {
@@ -140,7 +142,8 @@ describe("FaucetTransaction tests", () => {
 
     describe("when the transaction eventually fails", () => {
       beforeEach(() => {
-        Coinbase.apiClients.externalAddress!.getFaucetTransaction = jest.fn()
+        Coinbase.apiClients.externalAddress!.getFaucetTransaction = jest
+          .fn()
           .mockResolvedValueOnce({ data: VALID_FAUCET_TRANSACTION_MODEL }) // Pending
           .mockResolvedValueOnce({
             data: {
@@ -175,13 +178,15 @@ describe("FaucetTransaction tests", () => {
     describe("when the transaction times out", () => {
       beforeEach(() => {
         // Returns pending for every request.
-        Coinbase.apiClients.externalAddress!.getFaucetTransaction = jest.fn()
-          .mockResolvedValueOnce({ data: VALID_FAUCET_TRANSACTION_MODEL }) // Pending
+        Coinbase.apiClients.externalAddress!.getFaucetTransaction = jest
+          .fn()
+          .mockResolvedValueOnce({ data: VALID_FAUCET_TRANSACTION_MODEL }); // Pending
       });
 
       it("throws a TimeoutError", async () => {
-        expect(faucetTransaction.wait({ timeoutSeconds: 0.001, intervalSeconds: 0.001 }))
-          .rejects.toThrow(new Error("FaucetTransaction timed out"));
+        expect(
+          faucetTransaction.wait({ timeoutSeconds: 0.001, intervalSeconds: 0.001 }),
+        ).rejects.toThrow(new Error("FaucetTransaction timed out"));
       });
     });
   });

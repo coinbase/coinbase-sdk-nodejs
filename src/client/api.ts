@@ -6529,6 +6529,7 @@ export interface FundApiInterface {
      * @memberof FundApiInterface
      */
     listFundOperations(walletId: string, addressId: string, limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<FundOperationList>;
+
 }
 
 /**

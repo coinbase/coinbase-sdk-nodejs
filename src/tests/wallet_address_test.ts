@@ -213,7 +213,9 @@ describe("WalletAddress", () => {
     let faucetTransaction: FaucetTransaction;
 
     beforeEach(() => {
-      Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds = mockReturnValue(VALID_FAUCET_TRANSACTION_MODEL);
+      Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds = mockReturnValue(
+        VALID_FAUCET_TRANSACTION_MODEL,
+      );
     });
 
     it("returns the faucet transaction", async () => {
@@ -221,8 +223,9 @@ describe("WalletAddress", () => {
 
       expect(faucetTransaction).toBeInstanceOf(FaucetTransaction);
 
-      expect(faucetTransaction.getTransactionHash())
-        .toBe(VALID_FAUCET_TRANSACTION_MODEL.transaction!.transaction_hash);
+      expect(faucetTransaction.getTransactionHash()).toBe(
+        VALID_FAUCET_TRANSACTION_MODEL.transaction!.transaction_hash,
+      );
 
       expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds).toHaveBeenCalledWith(
         address.getNetworkId(),
@@ -231,15 +234,17 @@ describe("WalletAddress", () => {
         true, // Skip wait should be true.
       );
 
-      expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds)
-        .toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds).toHaveBeenCalledTimes(
+        1,
+      );
     });
 
     it("returns the faucet transaction when specifying the asset ID", async () => {
       const faucetTransaction = await address.faucet("usdc");
 
-      expect(faucetTransaction.getTransactionHash())
-        .toBe(VALID_FAUCET_TRANSACTION_MODEL.transaction!.transaction_hash);
+      expect(faucetTransaction.getTransactionHash()).toBe(
+        VALID_FAUCET_TRANSACTION_MODEL.transaction!.transaction_hash,
+      );
 
       expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds).toHaveBeenCalledWith(
         address.getNetworkId(),
@@ -248,8 +253,9 @@ describe("WalletAddress", () => {
         true, // Skip wait should be true.
       );
 
-      expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds)
-        .toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds).toHaveBeenCalledTimes(
+        1,
+      );
     });
 
     it("should throw an APIError when the request is unsuccessful", async () => {
@@ -266,8 +272,9 @@ describe("WalletAddress", () => {
         true, // Skip wait should be true.
       );
 
-      expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds)
-        .toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds).toHaveBeenCalledTimes(
+        1,
+      );
     });
 
     it("should throw a FaucetLimitReachedError when the faucet limit is reached", async () => {

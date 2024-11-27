@@ -17,6 +17,10 @@ import {
   PayloadSignatureStatusEnum,
   ContractInvocation as ContractInvocationModel,
   SmartContract as SmartContractModel,
+  CryptoAmount as CryptoAmountModel,
+  Asset as AssetModel,
+  FundQuote as FundQuoteModel,
+  FundOperation as FundOperationModel,
   SmartContractType,
   ValidatorList,
   Validator,
@@ -32,6 +36,7 @@ import { BASE_PATH } from "../client/base";
 import { Coinbase } from "../coinbase/coinbase";
 import { convertStringToHex, registerAxiosInterceptors } from "../coinbase/utils";
 import { HDKey } from "@scure/bip32";
+import { Asset } from "../coinbase/asset";
 
 export const mockFn = (...args) => jest.fn(...args) as any;
 export const mockReturnValue = data => jest.fn().mockResolvedValue({ data });
@@ -253,7 +258,7 @@ export const MINT_NFT_ARGS = { recipient: "0x475d41de7A81298Ba263184996800CBcaAD
 
 const faucetTxHash = generateRandomHash(64);
 
-export const VALID_FAUCET_TRANSACTION_MODEL: FaucetTransactionModel  = {
+export const VALID_FAUCET_TRANSACTION_MODEL: FaucetTransactionModel = {
   transaction_hash: faucetTxHash,
   transaction_link: "https://sepolia.basescan.org/tx/" + faucetTxHash,
   transaction: {
@@ -367,6 +372,96 @@ export const VALID_SMART_CONTRACT_ERC1155_MODEL: SmartContractModel = {
       "7b2274797065223a22307832222c22636861696e4964223a2230783134613334222c226e6f6e6365223a22307830222c22746f223a22307861383261623835303466646562326461646161336234663037356539363762626533353036356239222c22676173223a22307865623338222c226761735072696365223a6e756c6c2c226d61785072696f72697479466565506572476173223a2230786634323430222c226d6178466565506572476173223a2230786634333638222c2276616c7565223a22307830222c22696e707574223a223078366136323738343230303030303030303030303030303030303030303030303034373564343164653761383132393862613236333138343939363830306362636161643733633062222c226163636573734c697374223a5b5d2c2276223a22307830222c2272223a22307830222c2273223a22307830222c2279506172697479223a22307830222c2268617368223a22307865333131636632303063643237326639313566656433323165663065376431653965353362393761346166623737336638653935646431343630653665326163227d",
     status: TransactionStatusEnum.Pending,
   },
+};
+
+const asset = Asset.fromModel({
+  asset_id: Coinbase.assets.Eth,
+  network_id: "base-sepolia",
+  contract_address: "0x",
+  decimals: 18,
+});
+
+export const VALID_USDC_CRYPTO_AMOUNT_MODEL: CryptoAmountModel = {
+  amount: "1",
+  asset: {
+    network_id: "base-sepolia",
+    asset_id: Coinbase.assets.Usdc,
+    contract_address: "0x",
+    decimals: 6,
+  },
+};
+
+export const VALID_ETH_CRYPTO_AMOUNT_MODEL: CryptoAmountModel = {
+  amount: "1",
+  asset: {
+    network_id: "base-sepolia",
+    asset_id: Coinbase.assets.Eth,
+    contract_address: "0x",
+    decimals: 18,
+  },
+};
+
+export const VALID_ASSET_MODEL: AssetModel = {
+  asset_id: Coinbase.assets.Eth,
+  network_id: "base-sepolia",
+  contract_address: "0x",
+  decimals: 18,
+};
+
+export const VALID_FUND_QUOTE_MODEL: FundQuoteModel = {
+  fund_quote_id: "test-quote-id",
+  network_id: "base-sepolia",
+  wallet_id: "test-wallet-id",
+  address_id: "test-address-id",
+  crypto_amount: VALID_ETH_CRYPTO_AMOUNT_MODEL,
+  fiat_amount: {
+    amount: "100",
+    currency: "USD",
+  },
+  expires_at: "2024-12-31T23:59:59Z",
+  fees: {
+    buy_fee: {
+      amount: "1",
+      currency: "USD",
+    },
+    transfer_fee: {
+      amount: "10000000000000000", // 0.01 ETH
+      asset: {
+        network_id: "base-sepolia",
+        asset_id: Coinbase.assets.Eth,
+        contract_address: "0x",
+        decimals: 18,
+      },
+    },
+  },
+};
+
+export const VALID_FUND_OPERATION_MODEL: FundOperationModel = {
+  fund_operation_id: "test-operation-id",
+  network_id: Coinbase.networks.BaseSepolia,
+  wallet_id: "test-wallet-id",
+  address_id: "test-address-id",
+  crypto_amount: VALID_ETH_CRYPTO_AMOUNT_MODEL,
+  fiat_amount: {
+    amount: "100",
+    currency: "USD",
+  },
+  fees: {
+    buy_fee: {
+      amount: "1",
+      currency: "USD",
+    },
+    transfer_fee: {
+      amount: "10000000000000000", // 0.01 ETH in wei
+      asset: {
+        asset_id: Coinbase.assets.Eth,
+        network_id: Coinbase.networks.BaseSepolia,
+        decimals: 18,
+        contract_address: "0x",
+      },
+    },
+  },
+  status: "complete" as const,
 };
 
 /**
@@ -676,6 +771,17 @@ export const contractInvocationApiMock = {
   listContractInvocations: jest.fn(),
   createContractInvocation: jest.fn(),
   broadcastContractInvocation: jest.fn(),
+};
+
+export const assetApiMock = {
+  getAsset: jest.fn(),
+};
+
+export const fundOperationsApiMock = {
+  getFundOperation: jest.fn(),
+  listFundOperations: jest.fn(),
+  createFundOperation: jest.fn(),
+  createFundQuote: jest.fn(),
 };
 
 export const testAllReadTypesABI = [
