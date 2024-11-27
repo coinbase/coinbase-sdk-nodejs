@@ -25,7 +25,8 @@ import {
   FetchHistoricalStakingBalances200Response,
   StakingRewardStateEnum,
   StakingRewardFormat,
-  FeatureSet, WebhookWalletActivityFilter,
+  FeatureSet,
+  WebhookWalletActivityFilter,
 } from "./../client";
 import {
   VALID_ADDRESS_MODEL,
