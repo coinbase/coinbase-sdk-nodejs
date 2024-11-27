@@ -13,6 +13,27 @@ describe("Webhook", () => {
     event_filters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
   };
 
+  const mockWalletActivityWebhookModel: WebhookModel = {
+    id: "test-id",
+    network_id: "test-network",
+    notification_uri: "https://example.com/callback",
+    event_type: "wallet_activity",
+    event_type_filter: {
+      addresses: ["0xa55C5950F7A3C42Fa5799B2Cac0e455774a07382"],
+      wallet_id: "test-wallet-id",
+    },
+  };
+
+  const mockContractActivityWebhookModel: WebhookModel = {
+    id: "test-id",
+    network_id: "test-network",
+    notification_uri: "https://example.com/callback",
+    event_type: "smart_contract_event_activity",
+    event_type_filter: {
+      contract_addresses: ["0xa55C5950F7A3C42Fa5799B2Cac0e455774a07382"],
+    },
+  };
+
   beforeEach(() => {
     Coinbase.apiClients.webhook = {
       createWalletWebhook: jest.fn().mockResolvedValue({ data: mockModel }),
@@ -218,16 +239,7 @@ describe("Webhook", () => {
       expect((webhook.getEventTypeFilter() as WebhookWalletActivityFilter)?.addresses).toEqual(["0x1..", "0x2.."]);
     });
     it("should update both the webhook notification URI and the list of addresses monitoring", async () => {
-      const mockModel: WebhookModel = {
-        id: "test-id",
-        network_id: "test-network",
-        notification_uri: "https://example.com/callback",
-        event_type: "wallet_activity",
-        event_type_filter: {
-          addresses: ["0xa55C5950F7A3C42Fa5799B2Cac0e455774a07382"],
-        },
-      };
-      const webhook = Webhook.init(mockModel);
+      const webhook = Webhook.init(mockWalletActivityWebhookModel);
       await webhook.update({
         notificationUri: "https://new-url.com/callback",
         eventTypeFilter: { addresses: ["0x1..", "0x2.."] },
@@ -235,11 +247,51 @@ describe("Webhook", () => {
 
       expect(Coinbase.apiClients.webhook!.updateWebhook).toHaveBeenCalledWith("test-id", {
         notification_uri: "https://new-url.com/callback",
-        event_type_filter: { addresses: ["0x1..", "0x2.."] },
+        event_type_filter: { addresses: ["0x1..", "0x2.."], wallet_id: "test-wallet-id"},
       });
 
       expect(webhook.getNotificationURI()).toBe("https://new-url.com/callback");
-      expect(webhook.getEventTypeFilter()).toEqual({ addresses: ["0x1..", "0x2.."] });
+      expect(webhook.getEventTypeFilter()).toEqual({ addresses: ["0x1..", "0x2.."], wallet_id: "test-wallet-id" });
+    });
+    it("should update notification URI for contract webhook", async () => {
+      const webhook = Webhook.init(mockContractActivityWebhookModel);
+      await webhook.update({
+        notificationUri: "https://new-url-for-contract-webhook.com/callback",
+      });
+
+      expect(Coinbase.apiClients.webhook!.updateWebhook).toHaveBeenCalledWith("test-id", {
+        notification_uri: "https://new-url-for-contract-webhook.com/callback",
+        event_type_filter: {
+          contract_addresses: ["0xa55C5950F7A3C42Fa5799B2Cac0e455774a07382"],
+        },
+      });
+
+      expect(webhook.getNotificationURI()).toBe(
+        "https://new-url-for-contract-webhook.com/callback",
+      );
+      expect(webhook.getEventTypeFilter()).toEqual({
+        contract_addresses: ["0xa55C5950F7A3C42Fa5799B2Cac0e455774a07382"],
+      });
+    });
+    it("should update contract addresses for contract webhook", async () => {
+      const webhook = Webhook.init(mockContractActivityWebhookModel);
+      await webhook.update({
+        eventTypeFilter: {
+          contract_addresses: ["0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"],
+        },
+      });
+
+      expect(Coinbase.apiClients.webhook!.updateWebhook).toHaveBeenCalledWith("test-id", {
+        notification_uri: "https://example.com/callback",
+        event_type_filter: {
+          contract_addresses: ["0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"],
+        },
+      });
+
+      expect(webhook.getNotificationURI()).toBe("https://example.com/callback");
+      expect(webhook.getEventTypeFilter()).toEqual({
+        contract_addresses: ["0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"],
+      });
     });
   });
 
