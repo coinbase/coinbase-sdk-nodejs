@@ -247,7 +247,6 @@ export class FundOperation {
     while (Date.now() - startTime < timeoutSeconds * 1000) {
       await this.reload();
 
-      // If the FundOperation is in a terminal state, return the FundOperation
       if (this.isTerminalState()) {
         return this;
       }
