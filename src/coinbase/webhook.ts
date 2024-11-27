@@ -3,6 +3,7 @@ import {
   WebhookEventType,
   WebhookEventFilter,
   WebhookEventTypeFilter,
+  WebhookWalletActivityFilter,
 } from "../client/api";
 import { Coinbase } from "./coinbase";
 import {
@@ -50,7 +51,7 @@ export class Webhook {
    * @param options.networkId - The network ID for which the webhook is created.
    * @param options.notificationUri - The URI where notifications should be sent.
    * @param options.eventType - The type of event for the webhook.
-   * @param options.eventTypeFilter - Filter for wallet activity event type.
+   * @param options.eventTypeFilter - Filter for wallet or smart contract activity event types.
    * @param options.eventFilters - Filters applied to the events that determine which specific events trigger the webhook.
    * @returns A promise that resolves to a new instance of Webhook.
    */
@@ -187,6 +188,13 @@ export class Webhook {
   }: UpdateWebhookOptions): Promise<Webhook> {
     const finalNotificationUri = notificationUri ?? this.getNotificationURI();
     const finalEventTypeFilter = eventTypeFilter ?? this.getEventTypeFilter();
+
+    // wallet ID is required for wallet activity event type filter, but we do not support updating it just yet, this will be added in the future
+    if (this.getEventType() === WebhookEventType.WalletActivity) {
+      (finalEventTypeFilter as WebhookWalletActivityFilter).wallet_id = <string>(
+        (this.getEventTypeFilter() as WebhookWalletActivityFilter)?.wallet_id
+      );
+    }
 
     const result = await Coinbase.apiClients.webhook!.updateWebhook(this.getId()!, {
       notification_uri: finalNotificationUri,

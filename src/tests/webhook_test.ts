@@ -1,6 +1,6 @@
 import { Webhook } from "../coinbase/webhook";
 import { Coinbase } from "../coinbase/coinbase";
-import { Webhook as WebhookModel } from "../client/api";
+import { Webhook as WebhookModel, WebhookWalletActivityFilter } from "../client/api";
 import { mockReturnRejectedValue } from "./utils";
 import { APIError } from "../coinbase/api_error";
 
@@ -10,11 +10,28 @@ describe("Webhook", () => {
     network_id: "test-network",
     notification_uri: "https://example.com/callback",
     event_type: "erc20_transfer",
+    event_filters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
+  };
+
+  const mockWalletActivityWebhookModel: WebhookModel = {
+    id: "test-id",
+    network_id: "test-network",
+    notification_uri: "https://example.com/callback",
+    event_type: "wallet_activity",
     event_type_filter: {
       addresses: ["0xa55C5950F7A3C42Fa5799B2Cac0e455774a07382"],
-      wallet_id: "w1",
+      wallet_id: "test-wallet-id",
     },
-    event_filters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
+  };
+
+  const mockContractActivityWebhookModel: WebhookModel = {
+    id: "test-id",
+    network_id: "test-network",
+    notification_uri: "https://example.com/callback",
+    event_type: "smart_contract_event_activity",
+    event_type_filter: {
+      contract_addresses: ["0xa55C5950F7A3C42Fa5799B2Cac0e455774a07382"],
+    },
   };
 
   beforeEach(() => {
@@ -43,7 +60,7 @@ describe("Webhook", () => {
 
   describe(".init", () => {
     it("should throw an error if the model is null", () => {
-      expect(() => Webhook.init(null as any)).toThrow("Webhook model cannot be empty");
+      expect(() => Webhook.init(null as never)).toThrow("Webhook model cannot be empty");
     });
 
     it("should create an instance of Webhook", () => {
@@ -151,7 +168,6 @@ describe("Webhook", () => {
         networkId: "test-network",
         notificationUri: "https://example.com/callback",
         eventType: "erc20_transfer",
-        eventTypeFilter: { addresses: ["0x1..", "0x2.."] },
         eventFilters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
       });
 
@@ -159,7 +175,6 @@ describe("Webhook", () => {
         network_id: "test-network",
         notification_uri: "https://example.com/callback",
         event_type: "erc20_transfer",
-        event_type_filter: { addresses: ["0x1..", "0x2.."] },
         event_filters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
       });
       expect(webhook).toBeInstanceOf(Webhook);
@@ -206,10 +221,6 @@ describe("Webhook", () => {
       expect(Coinbase.apiClients.webhook!.updateWebhook).toHaveBeenCalledWith("test-id", {
         notification_uri: "https://new-url.com/callback",
         event_filters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
-        event_type_filter: {
-          addresses: ["0xa55C5950F7A3C42Fa5799B2Cac0e455774a07382"],
-          wallet_id: "w1",
-        },
       });
 
       expect(webhook.getNotificationURI()).toBe("https://new-url.com/callback");
@@ -225,20 +236,13 @@ describe("Webhook", () => {
       });
 
       expect(webhook.getNotificationURI()).toBe("https://example.com/callback");
-      expect(webhook.getEventTypeFilter()?.addresses).toEqual(["0x1..", "0x2.."]);
+      expect((webhook.getEventTypeFilter() as WebhookWalletActivityFilter)?.addresses).toEqual([
+        "0x1..",
+        "0x2..",
+      ]);
     });
     it("should update both the webhook notification URI and the list of addresses monitoring", async () => {
-      const mockModel: WebhookModel = {
-        id: "test-id",
-        network_id: "test-network",
-        notification_uri: "https://example.com/callback",
-        event_type: "erc20_transfer",
-        event_type_filter: {
-          addresses: ["0xa55C5950F7A3C42Fa5799B2Cac0e455774a07382"],
-        },
-        event_filters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
-      };
-      const webhook = Webhook.init(mockModel);
+      const webhook = Webhook.init(mockWalletActivityWebhookModel);
       await webhook.update({
         notificationUri: "https://new-url.com/callback",
         eventTypeFilter: { addresses: ["0x1..", "0x2.."] },
@@ -246,12 +250,54 @@ describe("Webhook", () => {
 
       expect(Coinbase.apiClients.webhook!.updateWebhook).toHaveBeenCalledWith("test-id", {
         notification_uri: "https://new-url.com/callback",
-        event_filters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
-        event_type_filter: { addresses: ["0x1..", "0x2.."] },
+        event_type_filter: { addresses: ["0x1..", "0x2.."], wallet_id: "test-wallet-id" },
       });
 
       expect(webhook.getNotificationURI()).toBe("https://new-url.com/callback");
-      expect(webhook.getEventTypeFilter()).toEqual({ addresses: ["0x1..", "0x2.."] });
+      expect(webhook.getEventTypeFilter()).toEqual({
+        addresses: ["0x1..", "0x2.."],
+        wallet_id: "test-wallet-id",
+      });
+    });
+    it("should update notification URI for contract webhook", async () => {
+      const webhook = Webhook.init(mockContractActivityWebhookModel);
+      await webhook.update({
+        notificationUri: "https://new-url-for-contract-webhook.com/callback",
+      });
+
+      expect(Coinbase.apiClients.webhook!.updateWebhook).toHaveBeenCalledWith("test-id", {
+        notification_uri: "https://new-url-for-contract-webhook.com/callback",
+        event_type_filter: {
+          contract_addresses: ["0xa55C5950F7A3C42Fa5799B2Cac0e455774a07382"],
+        },
+      });
+
+      expect(webhook.getNotificationURI()).toBe(
+        "https://new-url-for-contract-webhook.com/callback",
+      );
+      expect(webhook.getEventTypeFilter()).toEqual({
+        contract_addresses: ["0xa55C5950F7A3C42Fa5799B2Cac0e455774a07382"],
+      });
+    });
+    it("should update contract addresses for contract webhook", async () => {
+      const webhook = Webhook.init(mockContractActivityWebhookModel);
+      await webhook.update({
+        eventTypeFilter: {
+          contract_addresses: ["0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"],
+        },
+      });
+
+      expect(Coinbase.apiClients.webhook!.updateWebhook).toHaveBeenCalledWith("test-id", {
+        notification_uri: "https://example.com/callback",
+        event_type_filter: {
+          contract_addresses: ["0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"],
+        },
+      });
+
+      expect(webhook.getNotificationURI()).toBe("https://example.com/callback");
+      expect(webhook.getEventTypeFilter()).toEqual({
+        contract_addresses: ["0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"],
+      });
     });
   });
 
@@ -271,7 +317,7 @@ describe("Webhook", () => {
       const webhook = Webhook.init(mockModel);
       const stringRepresentation = webhook.toString();
       expect(stringRepresentation).toBe(
-        `Webhook { id: 'test-id', networkId: 'test-network', eventType: 'erc20_transfer', eventFilter: [{"contract_address":"0x...","from_address":"0x...","to_address":"0x..."}], eventTypeFilter: {"addresses":["0xa55C5950F7A3C42Fa5799B2Cac0e455774a07382"],"wallet_id":"w1"}, notificationUri: 'https://example.com/callback', signatureHeader: 'undefined' }`,
+        `Webhook { id: 'test-id', networkId: 'test-network', eventType: 'erc20_transfer', eventFilter: [{"contract_address":"0x...","from_address":"0x...","to_address":"0x..."}], eventTypeFilter: undefined, notificationUri: 'https://example.com/callback', signatureHeader: 'undefined' }`,
       );
     });
   });
