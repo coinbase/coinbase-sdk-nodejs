@@ -26,6 +26,7 @@ import {
   StakingRewardStateEnum,
   StakingRewardFormat,
   FeatureSet,
+  WebhookWalletActivityFilter,
 } from "./../client";
 import {
   VALID_ADDRESS_MODEL,
@@ -600,9 +601,7 @@ describe("Wallet Class", () => {
     beforeEach(async () => {
       expectedFaucetTx = new FaucetTransaction(VALID_FAUCET_TRANSACTION_MODEL);
 
-      (await wallet.getDefaultAddress()).faucet = jest
-        .fn()
-        .mockResolvedValue(expectedFaucetTx);
+      (await wallet.getDefaultAddress()).faucet = jest.fn().mockResolvedValue(expectedFaucetTx);
     });
 
     it("successfully requests faucet funds", async () => {
@@ -1442,8 +1441,8 @@ describe("Wallet Class", () => {
       jest.spyOn(Wallet.prototype, "createWebhook").mockReturnValue(wh);
       const result = await wallet.createWebhook("https://example.com/callback");
       expect(result).toBeInstanceOf(Webhook);
-      expect(result.getEventTypeFilter()?.wallet_id).toBe(walletModel.id);
-      expect(result.getEventTypeFilter()?.addresses).toStrictEqual([address1]);
+      expect((result.getEventTypeFilter() as WebhookWalletActivityFilter)?.wallet_id).toBe(walletModel.id);
+      expect((result.getEventTypeFilter() as WebhookWalletActivityFilter)?.addresses).toStrictEqual([address1]);
       expect(result.getEventType()).toBe("wallet_activity");
     });
   });

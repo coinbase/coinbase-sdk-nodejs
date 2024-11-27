@@ -34,5 +34,9 @@ describe("Index file exports", () => {
     expect(index).toHaveProperty("Wallet");
     expect(index).toHaveProperty("WalletAddress");
     expect(index).toHaveProperty("Webhook");
+    expect(index).toHaveProperty("CryptoAmount");
+    expect(index).toHaveProperty("FiatAmount");
+    expect(index).toHaveProperty("FundOperation");
+    expect(index).toHaveProperty("FundQuote");
   });
 });

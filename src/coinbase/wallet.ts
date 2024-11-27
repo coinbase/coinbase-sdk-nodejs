@@ -41,6 +41,8 @@ import { ContractInvocation } from "../coinbase/contract_invocation";
 import { SmartContract } from "./smart_contract";
 import { Webhook } from "./webhook";
 import { HistoricalBalance } from "./historical_balance";
+import { FundOperation } from "./fund_operation";
+import { FundQuote } from "./fund_quote";
 
 /**
  * A representation of a Wallet. Wallets come with a single default Address, but can expand to have a set of Addresses,
@@ -834,6 +836,40 @@ export class Wallet {
    */
   public async deployMultiToken(options: CreateERC1155Options): Promise<SmartContract> {
     return (await this.getDefaultAddress()).deployMultiToken(options);
+  }
+
+  /**
+   * Fund the wallet from your account on the Coinbase Platform.
+   *
+   * @param amount - The amount of the Asset to fund the wallet with
+   * @param assetId - The ID of the Asset to fund with. For Ether, eth, gwei, and wei are supported.
+   * @returns The created fund operation object
+   * @throws {Error} If the default address does not exist
+   */
+  public async fund(amount: Amount, assetId: string): Promise<FundOperation> {
+    const defaultAddress = await this.getDefaultAddress();
+    if (!defaultAddress) {
+      throw new Error("Default address does not exist");
+    }
+
+    return defaultAddress.fund(amount, assetId);
+  }
+
+  /**
+   * Get a quote for funding the wallet from your Coinbase platform account.
+   *
+   * @param amount - The amount to fund
+   * @param assetId - The ID of the Asset to fund with. For Ether, eth, gwei, and wei are supported.
+   * @returns The fund quote object
+   * @throws {Error} If the default address does not exist
+   */
+  public async quoteFund(amount: Amount, assetId: string): Promise<FundQuote> {
+    const defaultAddress = await this.getDefaultAddress();
+    if (!defaultAddress) {
+      throw new Error("Default address does not exist");
+    }
+
+    return defaultAddress.quoteFund(amount, assetId);
   }
 
   /**

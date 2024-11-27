@@ -51,11 +51,16 @@ import {
   SmartContractList,
   CreateSmartContractRequest,
   SmartContract as SmartContractModel,
+  FundOperation as FundOperationModel,
+  FundQuote as FundQuoteModel,
   DeploySmartContractRequest,
   WebhookEventTypeFilter,
   CreateWalletWebhookRequest,
   ReadContractRequest,
   SolidityValue,
+  FundOperationList,
+  CreateFundOperationRequest,
+  CreateFundQuoteRequest,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -539,9 +544,7 @@ export type StakeAPIClient = {
     page?: string,
     options?: AxiosRequestConfig,
   ): AxiosPromise<FetchHistoricalStakingBalances200Response>;
-};
 
-export type ValidatorAPIClient = {
   /**
    * List the validators for a given network and asset.
    *
@@ -715,7 +718,6 @@ export type ApiClients = {
   serverSigner?: ServerSignerAPIClient;
   stake?: StakeAPIClient;
   walletStake?: WalletStakeAPIClient;
-  validator?: ValidatorAPIClient;
   asset?: AssetAPIClient;
   externalAddress?: ExternalAddressAPIClient;
   webhook?: WebhookApiClient;
@@ -724,6 +726,7 @@ export type ApiClients = {
   balanceHistory?: BalanceHistoryApiClient;
   transactionHistory?: TransactionHistoryApiClient;
   smartContract?: SmartContractAPIClient;
+  fund?: FundOperationApiClient;
 };
 
 /**
@@ -794,6 +797,15 @@ export enum StakingRewardFormat {
 export enum PayloadSignatureStatus {
   PENDING = "pending",
   SIGNED = "signed",
+  FAILED = "failed",
+}
+
+/**
+ * Fund Operation status type definition.
+ */
+export enum FundOperationStatus {
+  PENDING = "pending",
+  COMPLETE = "complete",
   FAILED = "failed",
 }
 
@@ -876,6 +888,16 @@ export type CoinbaseOptions = {
    * The maximum number of network retries for the API GET requests.
    */
   maxNetworkRetries?: number;
+
+  /**
+   * The source for the API request, used for analytics. Defaults to `sdk`.
+   */
+  source?: string;
+
+  /**
+   * The version of the source for the API request, used for analytics.
+   */
+  sourceVersion?: string;
 };
 
 /**
@@ -901,6 +923,16 @@ export type CoinbaseConfigureFromJsonOptions = {
    * The base path for the API.
    */
   basePath?: string;
+
+  /**
+   * The source for the API request, used for analytics. Defaults to `sdk`.
+   */
+  source?: string;
+
+  /**
+   * The version of the source for the API request, used for analytics.
+   */
+  sourceVersion?: string;
 };
 
 /**
@@ -1229,7 +1261,7 @@ export type CreateWebhookOptions = {
 export type UpdateWebhookOptions = {
   notificationUri?: string;
   eventFilters?: Array<WebhookEventFilter>;
-  eventTypeFilter?: { addresses: string[] };
+  eventTypeFilter?: WebhookEventTypeFilter;
 };
 
 /**
@@ -1390,6 +1422,74 @@ export interface SmartContractAPIClient {
     contractAddress: string,
     readContractRequest: ReadContractRequest,
   ): AxiosPromise<SolidityValue>;
+}
+
+export interface FundOperationApiClient {
+  /**
+   * List fund operations
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address to list fund operations for.
+   * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param options - Axios request options
+   * @throws {APIError} If the request fails
+   */
+  listFundOperations(
+    walletId: string,
+    addressId: string,
+    limit?: number,
+    page?: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<FundOperationList>;
+
+  /**
+   * Get a fund operation
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address the fund operation belongs to.
+   * @param fundOperationId - The ID of the fund operation to retrieve
+   * @param options - Axios request options
+   * @throws {APIError} If the request fails
+   */
+  getFundOperation(
+    walletId: string,
+    addressId: string,
+    fundOperationId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<FundOperationModel>;
+
+  /**
+   * Create a fund operation
+   *
+   * @param walletId - The ID of the wallet to create the fund operation for
+   * @param addressId - The ID of the address to create the fund operation for
+   * @param createFundOperationRequest - The request body containing the fund operation details
+   * @param options - Axios request options
+   * @throws {APIError} If the request fails
+   */
+  createFundOperation(
+    walletId: string,
+    addressId: string,
+    createFundOperationRequest: CreateFundOperationRequest,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<FundOperationModel>;
+
+  /**
+   * Create a fund operation quote
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address to create the fund operation quote for.
+   * @param createFundQuoteRequest - The request body containing the fund operation quote details.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+  createFundQuote(
+    walletId: string,
+    addressId: string,
+    createFundQuoteRequest: CreateFundQuoteRequest,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<FundQuoteModel>;
 }
 
 /**

@@ -24,25 +24,29 @@ describe("Asset", () => {
     });
 
     describe("when the asset_id is gwei", () => {
-      it("should set the decimals to 9", () => {
+      it("should set the decimals to 9 and assetId to gwei", () => {
         const model = {
           asset_id: "eth",
           network_id: Coinbase.networks.BaseSepolia,
           contract_address: "0x",
           decimals: 18,
         };
-        expect(Asset.fromModel(model, Coinbase.assets.Gwei).decimals).toEqual(GWEI_DECIMALS);
+        const asset = Asset.fromModel(model, Coinbase.assets.Gwei);
+        expect(asset.decimals).toEqual(GWEI_DECIMALS);
+        expect(asset.getAssetId()).toEqual("gwei");
       });
     });
     describe("when the asset_id is wei", () => {
-      it("should set the decimals to 0", () => {
+      it("should set the decimals to 0 and assetId to wei", () => {
         const model = {
           asset_id: "eth",
           network_id: Coinbase.networks.BaseSepolia,
           contract_address: "0x",
           decimals: 18,
         };
-        expect(Asset.fromModel(model, Coinbase.assets.Wei).decimals).toEqual(0);
+        const asset = Asset.fromModel(model, Coinbase.assets.Wei);
+        expect(asset.decimals).toEqual(0);
+        expect(asset.getAssetId()).toEqual("wei");
       });
     });
   });

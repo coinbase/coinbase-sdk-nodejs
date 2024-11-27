@@ -19,4 +19,9 @@ jobs:
         NAME: ${{ secrets.NAME }}
         PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
         WALLET_DATA: ${{ secrets.WALLET_DATA }}
+        STAKE_API_KEY_NAME: ${{ secrets.STAKE_API_KEY_NAME }}
+        STAKE_API_PRIVATE_KEY: ${{ secrets.STAKE_API_PRIVATE_KEY }}
+        STAKE_ADDRESS_ID_1: ${{ secrets.STAKE_ADDRESS_ID_1 }}
+        STAKE_ADDRESS_ID_2: ${{ secrets.STAKE_ADDRESS_ID_2 }}
+        STAKE_VALIDATOR_ADDRESS_1: ${{ secrets.STAKE_VALIDATOR_ADDRESS_1 }}
       run: npm run test:dry-run && npm run test:e2e

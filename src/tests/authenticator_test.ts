@@ -5,7 +5,7 @@ import { InvalidAPIKeyFormatError } from "../coinbase/errors";
 
 const VALID_CONFIG = {
   method: "GET",
-  url: "https://api.cdp.coinbase.com/platform/v1/users/me",
+  url: "https://api.cdp.coinbase.com/platform/v1/networks/base-mainnet",
   headers: {} as AxiosHeaders,
 };
 
@@ -13,27 +13,29 @@ describe("Authenticator tests", () => {
   const filePath = "./config/test_api_key.json";
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const keys = require(filePath);
-  const authenticator = new CoinbaseAuthenticator(keys.name, keys.privateKey);
-  let instance;
+  let authenticator;
+  let source;
+  let sourceVersion;
   let privateKey;
   let apiKey;
 
   beforeEach(() => {
     privateKey = "mockPrivateKey";
     apiKey = "mockApiKey";
-    instance = new CoinbaseAuthenticator(privateKey, apiKey);
-    instance.extractPemKey = jest.fn().mockReturnValue("mockPemPrivateKey");
-    instance.nonce = jest.fn().mockReturnValue("mockNonce");
+    source = "mockSource";
+
     jest.spyOn(console, "log").mockImplementation(() => {});
+
+    authenticator = new CoinbaseAuthenticator(keys.name, keys.privateKey, source, sourceVersion);
   });
 
   it("should raise InvalidConfiguration error for invalid config", async () => {
     const invalidConfig = {
       method: "GET",
-      url: "https://api.cdp.coinbase.com/platform/v1/users/me",
+      url: "", // Invalid URL
       headers: {} as AxiosHeaders,
     };
-    const authenticator = new CoinbaseAuthenticator("api_key", "private_key");
+
     await expect(authenticator.authenticateRequest(invalidConfig)).rejects.toThrow();
   });
 
@@ -47,45 +49,68 @@ describe("Authenticator tests", () => {
   it("includes a correlation context header", async () => {
     const config = await authenticator.authenticateRequest(VALID_CONFIG, true);
     const correlationContext = config.headers["Correlation-Context"] as string;
-    expect(correlationContext).toContain(",sdk_language=typescript");
+    expect(correlationContext).toContain(",sdk_language=typescript,source=mockSource");
+    expect(correlationContext).not.toContain("source_version");
+  });
+
+  describe("when a source version is provided", () => {
+    beforeAll(() => sourceVersion = "1.0.0");
+    afterAll(() => sourceVersion = undefined);
+
+    it("includes the source version in the correlation context", async () => {
+      const config = await authenticator.authenticateRequest(VALID_CONFIG, true);
+      const correlationContext = config.headers["Correlation-Context"] as string;
+      expect(correlationContext).toContain(",source_version=1.0.0");
+    });
   });
 
   it("invalid pem key should raise an InvalidAPIKeyFormat error", async () => {
-    const invalidAuthenticator = new CoinbaseAuthenticator("test-key", "-----BEGIN EC KEY-----\n");
+    const invalidAuthenticator = new CoinbaseAuthenticator("test-key", "-----BEGIN EC KEY-----\n", source);
+
     expect(invalidAuthenticator.authenticateRequest(VALID_CONFIG)).rejects.toThrow();
   });
 
-  test("should throw error if private key cannot be parsed", async () => {
-    jest.spyOn(JWK, "asKey").mockRejectedValue(new Error("Invalid key"));
+  describe("#buildJWT", () => {
+    let instance;
 
-    await expect(instance.buildJWT("https://example.com")).rejects.toThrow(
-      InvalidAPIKeyFormatError,
-    );
-    await expect(instance.buildJWT("https://example.com")).rejects.toThrow(
-      "Could not parse the private key",
-    );
-  });
+    beforeEach(() => {
+      instance = new CoinbaseAuthenticator(apiKey, privateKey, source);
+      instance.extractPemKey = jest.fn().mockReturnValue("mockPemPrivateKey");
+      instance.nonce = jest.fn().mockReturnValue("mockNonce");
+    });
 
-  test("should throw error if key type is not EC", async () => {
-    const mockKey = { kty: "RSA" };
-    jest.spyOn(JWK, "asKey").mockResolvedValue(mockKey as any);
+    test("should throw error if private key cannot be parsed", async () => {
+      jest.spyOn(JWK, "asKey").mockRejectedValue(new Error("Invalid key"));
 
-    await expect(instance.buildJWT("https://example.com")).rejects.toThrow(
-      InvalidAPIKeyFormatError,
-    );
-  });
+      await expect(instance.buildJWT("https://example.com")).rejects.toThrow(
+        InvalidAPIKeyFormatError,
+      );
+      await expect(instance.buildJWT("https://example.com")).rejects.toThrow(
+        "Could not parse the private key",
+      );
+    });
 
-  test("should throw error if JWT signing fails", async () => {
-    const mockKey = { kty: "EC" };
-    jest.spyOn(JWK, "asKey").mockResolvedValue(mockKey as any);
-    const mockSign = {
-      update: jest.fn().mockReturnThis(),
-      final: jest.fn().mockRejectedValue(new Error("Signing error")),
-    };
-    jest.spyOn(JWS, "createSign").mockReturnValue(mockSign as any);
+    test("should throw error if key type is not EC", async () => {
+      const mockKey = { kty: "RSA" };
+      jest.spyOn(JWK, "asKey").mockResolvedValue(mockKey as any);
 
-    await expect(instance.buildJWT("https://example.com")).rejects.toThrow(
-      InvalidAPIKeyFormatError,
-    );
+      await expect(instance.buildJWT("https://example.com")).rejects.toThrow(
+        InvalidAPIKeyFormatError,
+      );
+    });
+
+    test("should throw error if JWT signing fails", async () => {
+      const mockKey = { kty: "EC" };
+      jest.spyOn(JWK, "asKey").mockResolvedValue(mockKey as any);
+      const mockSign = {
+        update: jest.fn().mockReturnThis(),
+        final: jest.fn().mockRejectedValue(new Error("Signing error")),
+      };
+      jest.spyOn(JWS, "createSign").mockReturnValue(mockSign as any);
+
+      await expect(instance.buildJWT("https://example.com")).rejects.toThrow(
+        InvalidAPIKeyFormatError,
+      );
+    });
   });
 });

@@ -8,8 +8,6 @@ import {
   TradesApiFactory,
   ServerSignersApiFactory,
   StakeApiFactory,
-  WalletStakeApiFactory,
-  ValidatorsApiFactory,
   AssetsApiFactory,
   ExternalAddressesApiFactory,
   WebhooksApiFactory,
@@ -19,6 +17,8 @@ import {
   BalanceHistoryApiFactory,
   SmartContractsApiFactory,
   TransactionHistoryApiFactory,
+  MPCWalletStakeApiFactory,
+  FundApiFactory,
 } from "../client";
 import { BASE_PATH } from "./../client/base";
 import { Configuration } from "./../client/configuration";
@@ -95,6 +95,8 @@ export class Coinbase {
    * @param options.debugging - If true, logs API requests and responses to the console.
    * @param options.basePath - The base path for the API.
    * @param options.maxNetworkRetries - The maximum number of network retries for the API GET requests.
+   * @param options.source - Optional source string to be sent with the API requests. Defaults to `sdk`.
+   * @param options.sourceVersion - Optional source version string to be sent with the API requests.
    * @throws {InvalidConfigurationError} If the configuration is invalid.
    * @throws {InvalidAPIKeyFormatError} If not able to create JWT token.
    */
@@ -105,6 +107,8 @@ export class Coinbase {
     debugging = false,
     basePath = BASE_PATH,
     maxNetworkRetries = 3,
+    source = "sdk",
+    sourceVersion = undefined,
   }: CoinbaseOptions) {
     if (apiKeyName === "") {
       throw new InvalidConfigurationError("Invalid configuration: apiKeyName is empty");
@@ -112,7 +116,12 @@ export class Coinbase {
     if (privateKey === "") {
       throw new InvalidConfigurationError("Invalid configuration: privateKey is empty");
     }
-    const coinbaseAuthenticator = new CoinbaseAuthenticator(apiKeyName, privateKey);
+    const coinbaseAuthenticator = new CoinbaseAuthenticator(
+      apiKeyName,
+      privateKey,
+      source,
+      sourceVersion,
+    );
     const config = new Configuration({
       basePath: basePath,
     });
@@ -139,8 +148,7 @@ export class Coinbase {
     Coinbase.apiClients.trade = TradesApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.serverSigner = ServerSignersApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.stake = StakeApiFactory(config, basePath, axiosInstance);
-    Coinbase.apiClients.walletStake = WalletStakeApiFactory(config, basePath, axiosInstance);
-    Coinbase.apiClients.validator = ValidatorsApiFactory(config, basePath, axiosInstance);
+    Coinbase.apiClients.walletStake = MPCWalletStakeApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.asset = AssetsApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.webhook = WebhooksApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.contractInvocation = ContractInvocationsApiFactory(
@@ -156,6 +164,7 @@ export class Coinbase {
     Coinbase.apiClients.balanceHistory = BalanceHistoryApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.contractEvent = ContractEventsApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.smartContract = SmartContractsApiFactory(config, basePath, axiosInstance);
+    Coinbase.apiClients.fund = FundApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.transactionHistory = TransactionHistoryApiFactory(
       config,
       basePath,
@@ -200,6 +209,8 @@ export class Coinbase {
    * @param options.useServerSigner - Whether to use a Server-Signer or not.
    * @param options.debugging - If true, logs API requests and responses to the console.
    * @param options.basePath - The base path for the API.
+   * @param options.source - Optional source string to be sent with the API requests. Defaults to `sdk`.
+   * @param options.sourceVersion - Optional source version string to be sent with the API requests.
    * @returns A new instance of the Coinbase SDK.
    * @throws {InvalidAPIKeyFormat} If the file does not exist or the configuration values are missing/invalid.
    * @throws {InvalidConfiguration} If the configuration is invalid.
@@ -210,6 +221,8 @@ export class Coinbase {
     useServerSigner = false,
     debugging = false,
     basePath = BASE_PATH,
+    source = "sdk",
+    sourceVersion = undefined,
   }: CoinbaseConfigureFromJsonOptions = {}): Coinbase {
     filePath = filePath.startsWith("~") ? filePath.replace("~", os.homedir()) : filePath;
 
@@ -229,6 +242,8 @@ export class Coinbase {
         useServerSigner: useServerSigner,
         debugging: debugging,
         basePath: basePath,
+        source,
+        sourceVersion,
       });
     } catch (e) {
       if (e instanceof SyntaxError) {

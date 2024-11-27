@@ -187,7 +187,6 @@ describe("ExternalAddress", () => {
   beforeAll(() => {
     Coinbase.apiClients.stake = stakeApiMock;
     Coinbase.apiClients.asset = assetsApiMock;
-    Coinbase.apiClients.validator = validatorApiMock;
   });
 
   beforeEach(() => {
@@ -585,16 +584,16 @@ describe("ExternalAddress", () => {
 
   describe("#faucet", () => {
     beforeEach(() => {
-      Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds = mockReturnValue(VALID_FAUCET_TRANSACTION_MODEL);
+      Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds = mockReturnValue(
+        VALID_FAUCET_TRANSACTION_MODEL,
+      );
     });
 
     it("should successfully request funds from the faucet", async () => {
       const faucetTx = await address.faucet();
 
-      const {
-        transaction_hash: txHash,
-        transaction_link: txLink,
-      } = VALID_FAUCET_TRANSACTION_MODEL.transaction;
+      const { transaction_hash: txHash, transaction_link: txLink } =
+        VALID_FAUCET_TRANSACTION_MODEL.transaction;
 
       expect(faucetTx.getTransactionHash()).toEqual(txHash);
       expect(faucetTx.getTransactionLink()).toEqual(txLink);
