@@ -139,6 +139,9 @@ async function main() {
   await tx.wait();
   console.log(JSON.stringify(tx, null, 2));
 
+  // export the wallet owner key
+  console.log("Wallet owner seed", wallet.export());
+
   console.log("Done!");
 }
 
