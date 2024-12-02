@@ -183,6 +183,8 @@ export class Coinbase {
    * @param options.useServerSigner - Whether to use a Server-Signer or not. Defaults to false.
    * @param options.debugging - If true, logs API requests and responses to the console. Defaults to false.
    * @param options.basePath - The base path for the API. Defaults to BASE_PATH.
+   * @param options.source - Optional source string to be sent with the API requests. Defaults to `sdk`.
+   * @param options.sourceVersion - Optional source version string to be sent with the API requests.
    * @returns A new instance of the Coinbase SDK.
    */
   static configure({
@@ -191,6 +193,8 @@ export class Coinbase {
     useServerSigner = false,
     debugging = false,
     basePath = BASE_PATH,
+    source = "sdk",
+    sourceVersion = undefined,
   }: CoinbaseOptions) {
     return new Coinbase({
       apiKeyName,
@@ -198,6 +202,8 @@ export class Coinbase {
       useServerSigner,
       debugging,
       basePath,
+      source,
+      sourceVersion,
     });
   }
 

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## [0.11.1] - 2024-11-29
+
+### Fixed
+- Support setting `source` and `sourceVersion` correlation data via `Coinbase.configure()`
+
 ## [0.11.0] - 2024-11-27
 
 ### Added
