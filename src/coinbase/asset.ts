@@ -44,6 +44,7 @@ export class Asset {
       throw new Error("Invalid asset model");
     }
 
+
     let decimals = model.decimals!;
     // TODO: Push this logic down to the backend.
     if (
@@ -51,7 +52,7 @@ export class Asset {
       model.asset_id &&
       Coinbase.toAssetId(model.asset_id) !== Coinbase.toAssetId(assetId)
     ) {
-      switch (assetId) {
+      switch (Coinbase.toAssetId(assetId)) {
         case "gwei":
           decimals = GWEI_DECIMALS;
           break;
@@ -97,9 +98,11 @@ export class Asset {
    * @returns The primary denomination for the Asset ID.
    */
   public static primaryDenomination(assetId: string): string {
-    return [Coinbase.assets.Gwei, Coinbase.assets.Wei].includes(assetId)
+    const normalizedAssetId = Coinbase.toAssetId(assetId);
+
+    return [Coinbase.assets.Gwei, Coinbase.assets.Wei].includes(normalizedAssetId)
       ? Coinbase.assets.Eth
-      : assetId;
+      : normalizedAssetId;
   }
 
   /**
