@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### [0.11.2] - 2024-12-04
+
+### Added
+
 - Add `listFundOperations` method to `Wallet` and `WalletAddress` to list the fund operations associated with the wallet or address.
 - Updated `fund` and `quoteFund` methods to take `CreateFundOptions` object instead of individual parameters.
 
