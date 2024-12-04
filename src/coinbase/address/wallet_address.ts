@@ -20,6 +20,8 @@ import {
   CreateERC1155Options,
   PaginationOptions,
   PaginationResponse,
+  CreateFundOptions,
+  CreateQuoteOptions,
 } from "../types";
 import { delay } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
@@ -311,19 +313,24 @@ export class WalletAddress extends Address {
    * @throws {Error} if the address cannot sign.
    * @throws {ArgumentError} if the address does not have sufficient balance.
    */
-  public async invokeContract(
-    options: CreateContractInvocationOptions,
-  ): Promise<ContractInvocation> {
+  public async invokeContract({
+    contractAddress,
+    method,
+    abi,
+    args,
+    amount,
+    assetId,
+  }: CreateContractInvocationOptions): Promise<ContractInvocation> {
     if (!Coinbase.useServerSigner && !this.key) {
       throw new Error("Cannot invoke contract from address without private key loaded");
     }
 
     let atomicAmount: string | undefined;
 
-    if (options.assetId && options.amount) {
-      const asset = await Asset.fetch(this.getNetworkId(), options.assetId);
-      const normalizedAmount = new Decimal(options.amount.toString());
-      const currentBalance = await this.getBalance(options.assetId);
+    if (assetId && amount) {
+      const asset = await Asset.fetch(this.getNetworkId(), assetId);
+      const normalizedAmount = new Decimal(amount.toString());
+      const currentBalance = await this.getBalance(assetId);
       if (currentBalance.lessThan(normalizedAmount)) {
         throw new ArgumentError(
           `Insufficient funds: ${normalizedAmount} requested, but only ${currentBalance} available`,
@@ -333,10 +340,10 @@ export class WalletAddress extends Address {
     }
 
     const contractInvocation = await this.createContractInvocation(
-      options.contractAddress,
-      options.method,
-      options.abi!,
-      options.args,
+      contractAddress,
+      method,
+      abi!,
+      args,
       atomicAmount,
     );
 
@@ -360,12 +367,12 @@ export class WalletAddress extends Address {
    * @returns A Promise that resolves to the deployed SmartContract object.
    * @throws {APIError} If the API request to create a smart contract fails.
    */
-  public async deployToken(options: CreateERC20Options): Promise<SmartContract> {
+  public async deployToken({ name, symbol, totalSupply }: CreateERC20Options): Promise<SmartContract> {
     if (!Coinbase.useServerSigner && !this.key) {
       throw new Error("Cannot deploy ERC20 without private key loaded");
     }
 
-    const smartContract = await this.createERC20(options);
+    const smartContract = await this.createERC20({ name, symbol, totalSupply });
 
     if (Coinbase.useServerSigner) {
       return smartContract;
@@ -387,12 +394,12 @@ export class WalletAddress extends Address {
    * @returns A Promise that resolves to the deployed SmartContract object.
    * @throws {APIError} If the API request to create a smart contract fails.
    */
-  public async deployNFT(options: CreateERC721Options): Promise<SmartContract> {
+  public async deployNFT({ name, symbol, baseURI }: CreateERC721Options): Promise<SmartContract> {
     if (!Coinbase.useServerSigner && !this.key) {
       throw new Error("Cannot deploy ERC721 without private key loaded");
     }
 
-    const smartContract = await this.createERC721(options);
+    const smartContract = await this.createERC721({ name, symbol, baseURI });
 
     if (Coinbase.useServerSigner) {
       return smartContract;
@@ -412,12 +419,12 @@ export class WalletAddress extends Address {
    * @returns A Promise that resolves to the deployed SmartContract object.
    * @throws {APIError} If the API request to create a smart contract fails.
    */
-  public async deployMultiToken(options: CreateERC1155Options): Promise<SmartContract> {
+  public async deployMultiToken({ uri }: CreateERC1155Options): Promise<SmartContract> {
     if (!Coinbase.useServerSigner && !this.key) {
       throw new Error("Cannot deploy ERC1155 without private key loaded");
     }
 
-    const smartContract = await this.createERC1155(options);
+    const smartContract = await this.createERC1155({ uri });
 
     if (Coinbase.useServerSigner) {
       return smartContract;
@@ -440,16 +447,16 @@ export class WalletAddress extends Address {
    * @returns {Promise<SmartContract>} A Promise that resolves to the created SmartContract.
    * @throws {APIError} If the API request to create a smart contract fails.
    */
-  private async createERC20(options: CreateERC20Options): Promise<SmartContract> {
+  private async createERC20({ name, symbol, totalSupply }: CreateERC20Options): Promise<SmartContract> {
     const resp = await Coinbase.apiClients.smartContract!.createSmartContract(
       this.getWalletId(),
       this.getId(),
       {
         type: SmartContractType.Erc20,
         options: {
-          name: options.name,
-          symbol: options.symbol,
-          total_supply: options.totalSupply.toString(),
+          name,
+          symbol,
+          total_supply: totalSupply.toString(),
         },
       },
     );
@@ -466,16 +473,16 @@ export class WalletAddress extends Address {
    * @returns A Promise that resolves to the deployed SmartContract object.
    * @throws {APIError} If the private key is not loaded when not using server signer.
    */
-  private async createERC721(options: CreateERC721Options): Promise<SmartContract> {
+  private async createERC721({ name, symbol, baseURI }: CreateERC721Options): Promise<SmartContract> {
     const resp = await Coinbase.apiClients.smartContract!.createSmartContract(
       this.getWalletId(),
       this.getId(),
       {
         type: SmartContractType.Erc721,
         options: {
-          name: options.name,
-          symbol: options.symbol,
-          base_uri: options.baseURI,
+          name,
+          symbol,
+          base_uri: baseURI,
         },
       },
     );
@@ -491,14 +498,14 @@ export class WalletAddress extends Address {
    * @returns {Promise<SmartContract>} A Promise that resolves to the created SmartContract.
    * @throws {APIError} If the API request to create a smart contract fails.
    */
-  private async createERC1155(options: CreateERC1155Options): Promise<SmartContract> {
+  private async createERC1155({ uri }: CreateERC1155Options): Promise<SmartContract> {
     const resp = await Coinbase.apiClients.smartContract!.createSmartContract(
       this.getWalletId(),
       this.getId(),
       {
         type: SmartContractType.Erc1155,
         options: {
-          uri: options.uri,
+          uri,
         },
       },
     );
@@ -752,11 +759,15 @@ export class WalletAddress extends Address {
   /**
    * Fund the address from your account on the Coinbase Platform.
    *
-   * @param amount - The amount of the Asset to fund the wallet with
-   * @param assetId - The ID of the Asset to fund with. For Ether, eth, gwei, and wei are supported.
+   * @param options - The options to create the fund operation
+   * @param options.amount - The amount of the Asset to fund the wallet with
+   * @param options.assetId - The ID of the Asset to fund with. For Ether, eth, gwei, and wei are supported.
    * @returns The created fund operation object
    */
-  public async fund(amount: Amount, assetId: string): Promise<FundOperation> {
+  public async fund({
+    amount,
+    assetId,
+  }: CreateFundOptions): Promise<FundOperation> {
     const normalizedAmount = new Decimal(amount.toString());
 
     return FundOperation.create(
@@ -771,11 +782,15 @@ export class WalletAddress extends Address {
   /**
    * Get a quote for funding the address from your Coinbase platform account.
    *
-   * @param amount - The amount to fund
-   * @param assetId - The ID of the Asset to fund with. For Ether, eth, gwei, and wei are supported.
+   * @param options - The options to create the fund quote
+   * @param options.amount - The amount to fund
+   * @param options.assetId - The ID of the Asset to fund with. For Ether, eth, gwei, and wei are supported.
    * @returns The fund quote object
    */
-  public async quoteFund(amount: Amount, assetId: string): Promise<FundQuote> {
+  public async quoteFund({
+    amount,
+    assetId,
+  }: CreateQuoteOptions): Promise<FundQuote> {
     const normalizedAmount = new Decimal(amount.toString());
 
     return FundQuote.create(
@@ -785,6 +800,25 @@ export class WalletAddress extends Address {
       assetId,
       this.getNetworkId(),
     );
+  }
+
+  /**
+   * Returns all the fund operations associated with the address.
+   *
+   * @param options - The pagination options.
+   * @param options.limit - The maximum number of Fund Operations to return. Limit can range between 1 and 100.
+   * @param options.page - The cursor for pagination across multiple pages of Fund Operations. Don't include this parameter on the first call. Use the next page value returned in a previous response to request subsequent results.
+   *
+   * @returns The paginated list response of fund operations.
+   */
+  public async listFundOperations({
+    limit = Coinbase.defaultPageLimit,
+    page = undefined,
+  }: PaginationOptions = {}): Promise<PaginationResponse<FundOperation>> {
+    return FundOperation.listFundOperations(this.model.wallet_id, this.model.address_id, {
+      limit,
+      page,
+    });
   }
 
   /**

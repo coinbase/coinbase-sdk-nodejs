@@ -1,6 +1,7 @@
 import { WalletAddress } from "../coinbase/address/wallet_address";
 import { FundOperation } from "../coinbase/fund_operation";
 import { FundQuote } from "../coinbase/fund_quote";
+import { PaginationResponse } from "../coinbase/types";
 import { newAddressModel } from "./utils";
 import { Decimal } from "decimal.js";
 
@@ -14,6 +15,9 @@ describe("WalletAddress Fund", () => {
 
     jest.spyOn(FundOperation, "create").mockResolvedValue({} as FundOperation);
     jest.spyOn(FundQuote, "create").mockResolvedValue({} as FundQuote);
+    jest
+      .spyOn(FundOperation, "listFundOperations")
+      .mockResolvedValue({} as PaginationResponse<FundOperation>);
   });
 
   afterEach(() => {
@@ -25,7 +29,7 @@ describe("WalletAddress Fund", () => {
       const amount = new Decimal("1.0");
       const assetId = "eth";
 
-      await walletAddress.fund(amount, assetId);
+      await walletAddress.fund({ amount, assetId });
 
       expect(FundOperation.create).toHaveBeenCalledWith(
         walletId,
@@ -39,7 +43,7 @@ describe("WalletAddress Fund", () => {
       const amount = 1;
       const assetId = "eth";
 
-      await walletAddress.fund(amount, assetId);
+      await walletAddress.fund({ amount, assetId });
 
       expect(FundOperation.create).toHaveBeenCalledWith(
         walletId,
@@ -53,7 +57,7 @@ describe("WalletAddress Fund", () => {
       const amount = BigInt(1);
       const assetId = "eth";
 
-      await walletAddress.fund(amount, assetId);
+      await walletAddress.fund({ amount, assetId });
 
       expect(FundOperation.create).toHaveBeenCalledWith(
         walletId,
@@ -70,7 +74,7 @@ describe("WalletAddress Fund", () => {
       const amount = new Decimal("1.0");
       const assetId = "eth";
 
-      await walletAddress.quoteFund(amount, assetId);
+      await walletAddress.quoteFund({ amount, assetId });
 
       expect(FundQuote.create).toHaveBeenCalledWith(
         walletId,
@@ -84,7 +88,7 @@ describe("WalletAddress Fund", () => {
       const amount = 1;
       const assetId = "eth";
 
-      await walletAddress.quoteFund(amount, assetId);
+      await walletAddress.quoteFund({ amount, assetId });
 
       expect(FundQuote.create).toHaveBeenCalledWith(
         walletId,
@@ -98,7 +102,7 @@ describe("WalletAddress Fund", () => {
       const amount = BigInt(1);
       const assetId = "eth";
 
-      await walletAddress.quoteFund(amount, assetId);
+      await walletAddress.quoteFund({ amount, assetId });
 
       expect(FundQuote.create).toHaveBeenCalledWith(
         walletId,
@@ -107,6 +111,17 @@ describe("WalletAddress Fund", () => {
         assetId,
         walletAddress.getNetworkId(),
       );
+    });
+  });
+
+  describe("#listFundOperations", () => {
+    it("should call listFundOperations with correct parameters", async () => {
+      await walletAddress.listFundOperations({ limit: 10, page: "test-page" });
+
+      expect(FundOperation.listFundOperations).toHaveBeenCalledWith(walletId, addressId, {
+        limit: 10,
+        page: "test-page",
+      });
     });
   });
 });

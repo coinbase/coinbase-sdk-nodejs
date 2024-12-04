@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Add `listFundOperations` method to `Wallet` and `WalletAddress` to list the fund operations associated with the wallet or address.
+- Updated `fund` and `quoteFund` methods to take `CreateFundOptions` object instead of individual parameters.
+
+## [0.11.1] - 2024-11-29
+
+### Fixed
+- Support setting `source` and `sourceVersion` correlation data via `Coinbase.configure()`
+
 ## [0.11.0] - 2024-11-27
 
 ### Added

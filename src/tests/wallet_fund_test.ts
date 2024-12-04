@@ -4,7 +4,7 @@ import { FundOperation } from "../coinbase/fund_operation";
 import { FundQuote } from "../coinbase/fund_quote";
 import { newAddressModel } from "./utils";
 import { Decimal } from "decimal.js";
-import { Coinbase } from "..";
+import { Coinbase, PaginationResponse } from "..";
 import { FeatureSet, Wallet as WalletModel } from "../client/api";
 
 describe("Wallet Fund", () => {
@@ -33,6 +33,9 @@ describe("Wallet Fund", () => {
     // Mock the fund and quoteFund methods on the default address
     jest.spyOn(defaultAddress, "fund").mockResolvedValue({} as FundOperation);
     jest.spyOn(defaultAddress, "quoteFund").mockResolvedValue({} as FundQuote);
+    jest
+      .spyOn(defaultAddress, "listFundOperations")
+      .mockResolvedValue({} as PaginationResponse<FundOperation>);
   });
 
   afterEach(() => {
@@ -44,27 +47,27 @@ describe("Wallet Fund", () => {
       const amount = new Decimal("1.0");
       const assetId = "eth";
 
-      await wallet.fund(amount, assetId);
+      await wallet.fund({ amount, assetId });
 
-      expect(defaultAddress.fund).toHaveBeenCalledWith(amount, assetId);
+      expect(defaultAddress.fund).toHaveBeenCalledWith({ amount, assetId });
     });
 
     it("should call defaultAddress.fund with correct parameters when passing in number amount", async () => {
       const amount = 1;
       const assetId = "eth";
 
-      await wallet.fund(amount, assetId);
+      await wallet.fund({ amount, assetId });
 
-      expect(defaultAddress.fund).toHaveBeenCalledWith(amount, assetId);
+      expect(defaultAddress.fund).toHaveBeenCalledWith({ amount, assetId });
     });
 
     it("should call defaultAddress.fund with correct parameters when passing in bigint amount", async () => {
       const amount = BigInt(1);
       const assetId = "eth";
 
-      await wallet.fund(amount, assetId);
+      await wallet.fund({ amount, assetId });
 
-      expect(defaultAddress.fund).toHaveBeenCalledWith(amount, assetId);
+      expect(defaultAddress.fund).toHaveBeenCalledWith({ amount, assetId });
     });
 
     it("should throw error if default address does not exist", async () => {
@@ -75,7 +78,9 @@ describe("Wallet Fund", () => {
       const amount = new Decimal("1.0");
       const assetId = "eth";
 
-      await expect(wallet.fund(amount, assetId)).rejects.toThrow("Default address does not exist");
+      await expect(wallet.fund({ amount, assetId })).rejects.toThrow(
+        "Default address does not exist",
+      );
     });
   });
 
@@ -84,27 +89,27 @@ describe("Wallet Fund", () => {
       const amount = new Decimal("1.0");
       const assetId = "eth";
 
-      await wallet.quoteFund(amount, assetId);
+      await wallet.quoteFund({ amount, assetId });
 
-      expect(defaultAddress.quoteFund).toHaveBeenCalledWith(amount, assetId);
+      expect(defaultAddress.quoteFund).toHaveBeenCalledWith({ amount, assetId });
     });
 
     it("should call defaultAddress.quoteFund with correct parameters when passing in number amount", async () => {
       const amount = 1;
       const assetId = "eth";
 
-      await wallet.quoteFund(amount, assetId);
+      await wallet.quoteFund({ amount, assetId });
 
-      expect(defaultAddress.quoteFund).toHaveBeenCalledWith(amount, assetId);
+      expect(defaultAddress.quoteFund).toHaveBeenCalledWith({ amount, assetId });
     });
 
     it("should call defaultAddress.quoteFund with correct parameters when passing in bigint amount", async () => {
       const amount = BigInt(1);
       const assetId = "eth";
 
-      await wallet.quoteFund(amount, assetId);
+      await wallet.quoteFund({ amount, assetId });
 
-      expect(defaultAddress.quoteFund).toHaveBeenCalledWith(amount, assetId);
+      expect(defaultAddress.quoteFund).toHaveBeenCalledWith({ amount, assetId });
     });
 
     it("should throw error if default address does not exist", async () => {
@@ -115,9 +120,23 @@ describe("Wallet Fund", () => {
       const amount = new Decimal("1.0");
       const assetId = "eth";
 
-      await expect(wallet.quoteFund(amount, assetId)).rejects.toThrow(
+      await expect(wallet.quoteFund({ amount, assetId })).rejects.toThrow(
         "Default address does not exist",
       );
+    });
+  });
+
+  describe("#listFundOperations", () => {
+    it("should call defaultAddress.listFundOperations with correct parameters", async () => {
+      await wallet.listFundOperations({
+        limit: 10,
+        page: "test-page",
+      });
+
+      expect(defaultAddress.listFundOperations).toHaveBeenCalledWith({
+        limit: 10,
+        page: "test-page",
+      });
     });
   });
 });
