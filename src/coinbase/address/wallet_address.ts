@@ -20,6 +20,8 @@ import {
   CreateERC1155Options,
   PaginationOptions,
   PaginationResponse,
+  CreateFundOptions,
+  CreateQuoteOptions,
 } from "../types";
 import { delay } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
@@ -752,18 +754,19 @@ export class WalletAddress extends Address {
   /**
    * Fund the address from your account on the Coinbase Platform.
    *
-   * @param amount - The amount of the Asset to fund the wallet with
-   * @param assetId - The ID of the Asset to fund with. For Ether, eth, gwei, and wei are supported.
+   * @param options - The options to create the fund operation
+   * @param options.amount - The amount of the Asset to fund the wallet with
+   * @param options.assetId - The ID of the Asset to fund with. For Ether, eth, gwei, and wei are supported.
    * @returns The created fund operation object
    */
-  public async fund(amount: Amount, assetId: string): Promise<FundOperation> {
-    const normalizedAmount = new Decimal(amount.toString());
+  public async fund(options: CreateFundOptions): Promise<FundOperation> {
+    const normalizedAmount = new Decimal(options.amount.toString());
 
     return FundOperation.create(
       this.getWalletId(),
       this.getId(),
       normalizedAmount,
-      assetId,
+      options.assetId,
       this.getNetworkId(),
     );
   }
@@ -771,20 +774,40 @@ export class WalletAddress extends Address {
   /**
    * Get a quote for funding the address from your Coinbase platform account.
    *
-   * @param amount - The amount to fund
-   * @param assetId - The ID of the Asset to fund with. For Ether, eth, gwei, and wei are supported.
+   * @param options - The options to create the fund quote
+   * @param options.amount - The amount to fund
+   * @param options.assetId - The ID of the Asset to fund with. For Ether, eth, gwei, and wei are supported.
    * @returns The fund quote object
    */
-  public async quoteFund(amount: Amount, assetId: string): Promise<FundQuote> {
-    const normalizedAmount = new Decimal(amount.toString());
+  public async quoteFund(options: CreateQuoteOptions): Promise<FundQuote> {
+    const normalizedAmount = new Decimal(options.amount.toString());
 
     return FundQuote.create(
       this.getWalletId(),
       this.getId(),
       normalizedAmount,
-      assetId,
+      options.assetId,
       this.getNetworkId(),
     );
+  }
+
+  /**
+   * Returns all the fund operations associated with the address.
+   *
+   * @param options - The pagination options.
+   * @param options.limit - The maximum number of Fund Operations to return. Limit can range between 1 and 100.
+   * @param options.page - The cursor for pagination across multiple pages of Fund Operations. Don't include this parameter on the first call. Use the next page value returned in a previous response to request subsequent results.
+   *
+   * @returns The paginated list response of fund operations.
+   */
+  public async listFunds({
+    limit = Coinbase.defaultPageLimit,
+    page = undefined,
+  }: PaginationOptions = {}): Promise<PaginationResponse<FundOperation>> {
+    return FundOperation.listFundOperations(this.model.wallet_id, this.model.address_id, {
+      limit,
+      page,
+    });
   }
 
   /**

@@ -31,6 +31,8 @@ import {
   CreateERC1155Options,
   PaginationOptions,
   PaginationResponse,
+  CreateFundOptions,
+  CreateQuoteOptions,
 } from "./types";
 import { convertStringToHex, delay, formatDate, getWeekBackDate } from "./utils";
 import { StakingOperation } from "./staking_operation";
@@ -841,35 +843,58 @@ export class Wallet {
   /**
    * Fund the wallet from your account on the Coinbase Platform.
    *
-   * @param amount - The amount of the Asset to fund the wallet with
-   * @param assetId - The ID of the Asset to fund with. For Ether, eth, gwei, and wei are supported.
+   * @param options - The options to create the fund operation
+   * @param options.amount - The amount of the Asset to fund the wallet with
+   * @param options.assetId - The ID of the Asset to fund with. For Ether, eth, gwei, and wei are supported.
    * @returns The created fund operation object
    * @throws {Error} If the default address does not exist
    */
-  public async fund(amount: Amount, assetId: string): Promise<FundOperation> {
+  public async fund(options: CreateFundOptions): Promise<FundOperation> {
     const defaultAddress = await this.getDefaultAddress();
     if (!defaultAddress) {
       throw new Error("Default address does not exist");
     }
 
-    return defaultAddress.fund(amount, assetId);
+    return defaultAddress.fund(options);
   }
 
   /**
    * Get a quote for funding the wallet from your Coinbase platform account.
    *
-   * @param amount - The amount to fund
-   * @param assetId - The ID of the Asset to fund with. For Ether, eth, gwei, and wei are supported.
+   * @param options - The options to create the fund quote
+   * @param options.amount - The amount to fund
+   * @param options.assetId - The ID of the Asset to fund with. For Ether, eth, gwei, and wei are supported.
    * @returns The fund quote object
    * @throws {Error} If the default address does not exist
    */
-  public async quoteFund(amount: Amount, assetId: string): Promise<FundQuote> {
+  public async quoteFund(options: CreateQuoteOptions): Promise<FundQuote> {
     const defaultAddress = await this.getDefaultAddress();
     if (!defaultAddress) {
       throw new Error("Default address does not exist");
     }
 
-    return defaultAddress.quoteFund(amount, assetId);
+    return defaultAddress.quoteFund(options);
+  }
+
+  /**
+   * Returns all the fund operations associated with the wallet's default address.
+   *
+   * @param options - The pagination options.
+   * @param options.limit - The maximum number of fund operations to return. Limit can range between 1 and 100.
+   * @param options.page - The cursor for pagination across multiple pages of fund operations. Don't include this parameter on the first call. Use the next page value returned in a previous response to request subsequent results.
+   * @returns The paginated list response of fund operations.
+   * @throws {Error} If the default address does not exist
+   */
+  public async listFunds({
+    limit = Coinbase.defaultPageLimit,
+    page = undefined,
+  }: PaginationOptions = {}): Promise<PaginationResponse<FundOperation>> {
+    const defaultAddress = await this.getDefaultAddress();
+    if (!defaultAddress) {
+      throw new Error("Default address does not exist");
+    }
+
+    return defaultAddress.listFunds({ limit, page });
   }
 
   /**
