@@ -800,7 +800,7 @@ export class WalletAddress extends Address {
    *
    * @returns The paginated list response of fund operations.
    */
-  public async listFunds({
+  public async listFundOperations({
     limit = Coinbase.defaultPageLimit,
     page = undefined,
   }: PaginationOptions = {}): Promise<PaginationResponse<FundOperation>> {

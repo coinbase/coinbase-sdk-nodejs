@@ -885,7 +885,7 @@ export class Wallet {
    * @returns The paginated list response of fund operations.
    * @throws {Error} If the default address does not exist
    */
-  public async listFunds({
+  public async listFundOperations({
     limit = Coinbase.defaultPageLimit,
     page = undefined,
   }: PaginationOptions = {}): Promise<PaginationResponse<FundOperation>> {
@@ -894,7 +894,7 @@ export class Wallet {
       throw new Error("Default address does not exist");
     }
 
-    return defaultAddress.listFunds({ limit, page });
+    return defaultAddress.listFundOperations({ limit, page });
   }
 
   /**

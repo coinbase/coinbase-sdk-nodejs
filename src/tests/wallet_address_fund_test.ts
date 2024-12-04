@@ -114,9 +114,9 @@ describe("WalletAddress Fund", () => {
     });
   });
 
-  describe("#listFunds", () => {
-    it("should call listFunds with correct parameters", async () => {
-      await walletAddress.listFunds({ limit: 10, page: "test-page" });
+  describe("#listFundOperations", () => {
+    it("should call listFundOperations with correct parameters", async () => {
+      await walletAddress.listFundOperations({ limit: 10, page: "test-page" });
 
       expect(FundOperation.listFundOperations).toHaveBeenCalledWith(walletId, addressId, {
         limit: 10,

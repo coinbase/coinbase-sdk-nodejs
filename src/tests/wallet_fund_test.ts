@@ -34,7 +34,7 @@ describe("Wallet Fund", () => {
     jest.spyOn(defaultAddress, "fund").mockResolvedValue({} as FundOperation);
     jest.spyOn(defaultAddress, "quoteFund").mockResolvedValue({} as FundQuote);
     jest
-      .spyOn(defaultAddress, "listFunds")
+      .spyOn(defaultAddress, "listFundOperations")
       .mockResolvedValue({} as PaginationResponse<FundOperation>);
   });
 
@@ -126,14 +126,14 @@ describe("Wallet Fund", () => {
     });
   });
 
-  describe("#listFunds", () => {
-    it("should call defaultAddress.listFunds with correct parameters", async () => {
-      await wallet.listFunds({
+  describe("#listFundOperations", () => {
+    it("should call defaultAddress.listFundOperations with correct parameters", async () => {
+      await wallet.listFundOperations({
         limit: 10,
         page: "test-page",
       });
 
-      expect(defaultAddress.listFunds).toHaveBeenCalledWith({
+      expect(defaultAddress.listFundOperations).toHaveBeenCalledWith({
         limit: 10,
         page: "test-page",
       });
