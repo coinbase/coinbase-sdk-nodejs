@@ -1053,6 +1053,19 @@ export type CreateERC1155Options = {
 };
 
 /**
+ * Options for creating a fund operation.
+ */
+export type CreateFundOptions = {
+  amount: Amount;
+  assetId: string;
+};
+
+/**
+ * Options for creating a quote for a fund operation.
+ */
+export type CreateQuoteOptions = CreateFundOptions;
+
+/**
  * Options for listing historical balances of an address.
  */
 export type ListHistoricalBalancesOptions = {
