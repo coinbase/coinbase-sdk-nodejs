@@ -1360,6 +1360,22 @@ describe("WalletAddress", () => {
         });
       });
 
+      describe("when it is fails to invoke a payable contract method", () => {
+        let amount = new Decimal("1000");
+
+        it("throws an error for invalid input", async () => {
+          await expect(
+            walletAddress.invokeContract({
+              abi: MINT_NFT_ABI,
+              args: MINT_NFT_ARGS,
+              method: VALID_CONTRACT_INVOCATION_MODEL.method,
+              contractAddress: VALID_CONTRACT_INVOCATION_MODEL.contract_address,
+              amount,
+            }),
+          ).rejects.toThrow(Error);
+        });
+      });
+
       describe("when no key is loaded", () => {
         beforeEach(() => {
           walletAddress = new WalletAddress(addressModel);

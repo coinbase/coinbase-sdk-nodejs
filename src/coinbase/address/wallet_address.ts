@@ -325,6 +325,12 @@ export class WalletAddress extends Address {
       throw new Error("Cannot invoke contract from address without private key loaded");
     }
 
+    if (amount && !assetId) {
+      throw new ArgumentError(
+        "Asset ID is required for contract ivocation if an amount is provided",
+      );
+    }
+
     let atomicAmount: string | undefined;
 
     if (assetId && amount) {
