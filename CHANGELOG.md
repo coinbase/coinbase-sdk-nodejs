@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+### [0.11.3] - 2024-12-10
+
 ### Added
 
 - Wallet address contract invocation input validation for payable contracts.
