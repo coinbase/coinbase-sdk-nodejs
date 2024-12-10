@@ -1360,7 +1360,7 @@ describe("WalletAddress", () => {
         });
       });
 
-      describe("when it is fails invoking a payable contract method", () => {
+      describe("when it is fails to invoke a payable contract method", () => {
         let amount = new Decimal("1000");
 
         it("throws an error for invalid input", async () => {
