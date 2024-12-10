@@ -227,12 +227,14 @@ describe("Webhook", () => {
     });
     it("should update the webhook address list only", async () => {
       const webhook = Webhook.init(mockModel);
-      await webhook.update({ eventTypeFilter: { addresses: ["0x1..", "0x2.."] } });
+      await webhook.update({
+        eventTypeFilter: { addresses: ["0x1..", "0x2.."], wallet_id: "test_wallet_id" },
+      });
 
       expect(Coinbase.apiClients.webhook!.updateWebhook).toHaveBeenCalledWith("test-id", {
         notification_uri: "https://example.com/callback",
         event_filters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
-        event_type_filter: { addresses: ["0x1..", "0x2.."] },
+        event_type_filter: { addresses: ["0x1..", "0x2.."], wallet_id: "test_wallet_id" },
       });
 
       expect(webhook.getNotificationURI()).toBe("https://example.com/callback");
@@ -245,7 +247,7 @@ describe("Webhook", () => {
       const webhook = Webhook.init(mockWalletActivityWebhookModel);
       await webhook.update({
         notificationUri: "https://new-url.com/callback",
-        eventTypeFilter: { addresses: ["0x1..", "0x2.."] },
+        eventTypeFilter: { addresses: ["0x1..", "0x2.."], wallet_id: "test_wallet_id" },
       });
 
       expect(Coinbase.apiClients.webhook!.updateWebhook).toHaveBeenCalledWith("test-id", {

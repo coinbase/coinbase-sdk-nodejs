@@ -1,19 +1,21 @@
 import { ethers } from "ethers";
 import {
   DeploySmartContractRequest,
-  SmartContract as SmartContractModel,
-  SmartContractType as SmartContractTypeModel,
-  SmartContractOptions as SmartContractOptionsModel,
-  TokenContractOptions as TokenContractOptionsModel,
   NFTContractOptions as NFTContractOptionsModel,
+  SmartContract as SmartContractModel,
+  SmartContractOptions as SmartContractOptionsModel,
+  SmartContractType as SmartContractTypeModel,
+  TokenContractOptions as TokenContractOptionsModel,
 } from "../client/api";
 import { Transaction } from "./transaction";
 import {
+  MultiTokenContractOptions,
+  NFTContractOptions,
+  PaginationOptions,
+  PaginationResponse,
   SmartContractOptions,
   SmartContractType,
-  NFTContractOptions,
   TokenContractOptions,
-  MultiTokenContractOptions,
   TransactionStatus,
 } from "./types";
 import { Coinbase } from "./coinbase";
@@ -92,6 +94,93 @@ export class SmartContract {
   }
 
   /**
+   * Register a smart contract.
+   *
+   * @param networkId - The network ID.
+   * @param contractAddress - The contract address.
+   * @param abi - The ABI of the contract.
+   * @param contractName - The contract name.
+   * @returns The smart contract.
+   */
+  public static async register(
+    networkId: string,
+    contractAddress: string,
+    abi: object,
+    contractName?: string,
+  ): Promise<SmartContract> {
+    const response = await Coinbase.apiClients.smartContract!.registerSmartContract(
+      networkId,
+      contractAddress,
+      {
+        abi: JSON.stringify(abi),
+        contract_name: contractName,
+      },
+    );
+    return SmartContract.fromModel(response.data);
+  }
+
+  /**
+   * Update a smart contract.
+   *
+   * @param networkId - The network ID.
+   * @param contractAddress - The contract address.
+   * @param abi - The new ABI of the contract.
+   * @param contractName - The new contract name.
+   * @returns The smart contract.
+   */
+  public static async update(
+    networkId: string,
+    contractAddress: string,
+    abi?: object,
+    contractName?: string,
+  ): Promise<SmartContract> {
+    const response = await Coinbase.apiClients.smartContract!.updateSmartContract(
+      networkId,
+      contractAddress,
+      {
+        abi: JSON.stringify(abi),
+        contract_name: contractName,
+      },
+    );
+    return SmartContract.fromModel(response.data);
+  }
+
+  /**
+   * Lists Smart Contracts.
+   *
+   * @param options - The pagination options.
+   * @param options.page - The cursor for pagination across multiple pages of Smart Contract. Don\&#39;t include this parameter on the first call. Use the next page value returned in a previous response to request subsequent results.
+   *
+   * @returns The paginated list response of Smart Contracts.
+   */
+  public static async list({ page = undefined }: PaginationOptions = {}): Promise<
+    PaginationResponse<SmartContract>
+  > {
+    const data: SmartContract[] = [];
+    let nextPage: string | undefined;
+
+    const response = await Coinbase.apiClients.smartContract!.listSmartContracts(page);
+    const smartContracts = response.data.data;
+    for (const sc of smartContracts) {
+      data.push(new SmartContract(sc));
+    }
+
+    const hasMore: boolean = response.data.has_more ? response.data.has_more : false;
+
+    if (hasMore) {
+      if (response.data.next_page) {
+        nextPage = response.data.next_page;
+      }
+    }
+
+    return {
+      data,
+      hasMore,
+      nextPage,
+    };
+  }
+
+  /**
    * Converts a SmartContractModel into a SmartContract object.
    *
    * @param contractModel - The SmartContract model object.
@@ -124,7 +213,7 @@ export class SmartContract {
    *
    * @returns The Wallet ID.
    */
-  public getWalletId(): string {
+  public getWalletId(): string | undefined {
     return this.model.wallet_id;
   }
 
@@ -142,8 +231,17 @@ export class SmartContract {
    *
    * @returns The Deployer Address.
    */
-  public getDeployerAddress(): string {
+  public getDeployerAddress(): string | undefined {
     return this.model.deployer_address;
+  }
+
+  /**
+   * Returns the name of the smart contract.
+   *
+   * @returns The contract name.
+   */
+  public getContractName(): string {
+    return this.model.contract_name;
   }
 
   /**
@@ -159,6 +257,8 @@ export class SmartContract {
         return SmartContractType.ERC721;
       case SmartContractTypeModel.Erc1155:
         return SmartContractType.ERC1155;
+      case SmartContractTypeModel.Custom:
+        return SmartContractType.CUSTOM;
       default:
         throw new Error(`Unknown smart contract type: ${this.model.type}`);
     }
@@ -184,7 +284,7 @@ export class SmartContract {
       } as NFTContractOptions;
     } else {
       return {
-        uri: this.model.options.uri,
+        uri: this.model.options?.uri,
       } as MultiTokenContractOptions;
     }
   }
@@ -203,7 +303,10 @@ export class SmartContract {
    *
    * @returns The Transaction.
    */
-  public getTransaction(): Transaction {
+  public getTransaction(): Transaction | undefined {
+    if (!this.model.transaction) {
+      return undefined;
+    }
     return new Transaction(this.model.transaction);
   }
 
@@ -214,8 +317,8 @@ export class SmartContract {
    * @param key - The key to sign the SmartContract deployment with
    * @returns The hex-encoded signed payload
    */
-  async sign(key: ethers.Wallet): Promise<string> {
-    return this.getTransaction().sign(key);
+  async sign(key: ethers.Wallet): Promise<string | undefined> {
+    return this.getTransaction()?.sign(key);
   }
 
   /**
@@ -225,7 +328,7 @@ export class SmartContract {
    * @throws {APIError} if the API request to broadcast a SmartContract deployment fails.
    */
   public async broadcast(): Promise<SmartContract> {
-    if (!this.getTransaction().isSigned())
+    if (!this.getTransaction()!.isSigned())
       throw new Error("Cannot broadcast unsigned SmartContract deployment");
 
     const deploySmartContractRequest: DeploySmartContractRequest = {
@@ -233,8 +336,8 @@ export class SmartContract {
     };
 
     const response = await Coinbase.apiClients.smartContract!.deploySmartContract(
-      this.getWalletId(),
-      this.getDeployerAddress(),
+      this.getWalletId() as string,
+      this.getDeployerAddress() as string,
       this.getId(),
       deploySmartContractRequest,
     );
@@ -261,7 +364,7 @@ export class SmartContract {
       await this.reload();
 
       // If the SmartContract deployment is in a terminal state, return the SmartContract.
-      const status = this.getTransaction().getStatus();
+      const status = this.getTransaction()!.getStatus();
       if (status === TransactionStatus.COMPLETE || status === TransactionStatus.FAILED) {
         return this;
       }
@@ -279,8 +382,8 @@ export class SmartContract {
    */
   public async reload(): Promise<void> {
     const result = await Coinbase.apiClients.smartContract!.getSmartContract(
-      this.getWalletId(),
-      this.getDeployerAddress(),
+      this.getWalletId() as string,
+      this.getDeployerAddress() as string,
       this.getId(),
     );
     this.model = result?.data;
@@ -308,7 +411,7 @@ export class SmartContract {
    */
   private isERC20(
     type: SmartContractType,
-    options: SmartContractOptionsModel,
+    options: SmartContractOptionsModel | undefined,
   ): options is TokenContractOptionsModel {
     return type === SmartContractType.ERC20;
   }
@@ -322,7 +425,7 @@ export class SmartContract {
    */
   private isERC721(
     type: SmartContractType,
-    options: SmartContractOptionsModel,
+    options: SmartContractOptionsModel | undefined,
   ): options is NFTContractOptionsModel {
     return type === SmartContractType.ERC721;
   }

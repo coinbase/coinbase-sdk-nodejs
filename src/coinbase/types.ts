@@ -61,6 +61,8 @@ import {
   FundOperationList,
   CreateFundOperationRequest,
   CreateFundQuoteRequest,
+  RegisterSmartContractRequest,
+  UpdateSmartContractRequest,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -961,6 +963,7 @@ export enum SmartContractType {
   ERC20 = "erc20",
   ERC721 = "erc721",
   ERC1155 = "erc1155",
+  CUSTOM = "custom",
 }
 
 /**
@@ -1356,20 +1359,13 @@ export type ContractInvocationAPIClient = {
 
 export interface SmartContractAPIClient {
   /**
-   * List smart contracts belonging to the user for a given wallet and address.
+   * List smart contracts
    *
    * @summary List smart contracts belonging to the CDP project
-   * @param walletId - The ID of the wallet the address belongs to.
-   * @param addressId - The ID of the address to list smart contracts for.
-   * @param options - Axios request options.
-   * @throws {APIError} If the request fails.
+   * @param {string} [page] - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @throws {APIError} If the request fails
    */
-
-  listSmartContracts(
-    walletId: string,
-    addressId: string,
-    options?: RawAxiosRequestConfig,
-  ): AxiosPromise<SmartContractList>;
+  listSmartContracts(page?: string): AxiosPromise<SmartContractList>;
 
   /**
    * Creates a new Smart Contract.
@@ -1435,6 +1431,38 @@ export interface SmartContractAPIClient {
     contractAddress: string,
     readContractRequest: ReadContractRequest,
   ): AxiosPromise<SolidityValue>;
+
+  /**
+   * Register a smart contract.
+   *
+   * @summary Register a smart contract.
+   * @param {string} [networkId] - The network ID.
+   * @param {string} [contractAddress] - The contract address.
+   * @param {RegisterSmartContractRequest} [registerSmartContractRequest] - The request body containing the register smart contract details.
+   * @returns - A promise resolving to the register smart contract result
+   * @throws {APIError} If the request fails
+   */
+  registerSmartContract(
+    networkId: string,
+    contractAddress: string,
+    registerSmartContractRequest: RegisterSmartContractRequest,
+  ): AxiosPromise<SmartContractModel>;
+
+  /**
+   * Update a smart contract.
+   *
+   * @summary Update a smart contract.
+   * @param {string} [networkId] - The network ID.
+   * @param {string} [contractAddress] - The contract address.
+   * @param {UpdateSmartContractRequest} [updateSmartContractRequest] - The request body containing the update smart contract details.
+   * @returns - A promise resolving to the update smart contract result
+   * @throws {APIError} If the request fails
+   */
+  updateSmartContract(
+    networkId: string,
+    contractAddress: string,
+    updateSmartContractRequest: UpdateSmartContractRequest,
+  ): AxiosPromise<SmartContractModel>;
 }
 
 export interface FundOperationApiClient {

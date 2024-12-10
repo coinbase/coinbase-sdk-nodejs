@@ -319,6 +319,8 @@ export const VALID_SMART_CONTRACT_ERC20_MODEL: SmartContractModel = {
     total_supply: ERC20_TOTAL_SUPPLY.toString(),
   } as TokenContractOptionsModel,
   abi: JSON.stringify("some-abi"),
+  contract_name: "TestToken",
+  is_external: false,
   transaction: {
     network_id: Coinbase.networks.BaseSepolia,
     from_address_id: "0xdeadbeef",
@@ -344,6 +346,8 @@ export const VALID_SMART_CONTRACT_ERC721_MODEL: SmartContractModel = {
     base_uri: ERC721_BASE_URI,
   } as NFTContractOptionsModel,
   abi: JSON.stringify("some-abi"),
+  contract_name: "TestToken",
+  is_external: false,
   transaction: {
     network_id: Coinbase.networks.BaseSepolia,
     from_address_id: "0xdeadbeef",
@@ -365,6 +369,8 @@ export const VALID_SMART_CONTRACT_ERC1155_MODEL: SmartContractModel = {
     uri: ERC1155_URI,
   } as MultiTokenContractOptionsModel,
   abi: JSON.stringify("some-abi"),
+  contract_name: "TestToken",
+  is_external: false,
   transaction: {
     network_id: Coinbase.networks.BaseSepolia,
     from_address_id: "0xdeadbeef",
@@ -764,6 +770,8 @@ export const smartContractApiMock = {
   getSmartContract: jest.fn(),
   listSmartContracts: jest.fn(),
   readContract: jest.fn(),
+  registerSmartContract: jest.fn(),
+  updateSmartContract: jest.fn(),
 };
 
 export const contractInvocationApiMock = {
