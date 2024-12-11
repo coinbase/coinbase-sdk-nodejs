@@ -18,12 +18,14 @@ Coinbase.configureFromJson({ filePath: "~/Downloads/cdp_api_key.json" });
   console.log('myWallet address: ', myWalletAddressId);
   console.log('anotherWallet address: ', anotherWalletAddressId);
   
-  
-  
   // Faucet wallet to add some funds
-  await myWallet.faucet(Coinbase.assets.Usdc); // USDC funds to actual transaction
-  await myWallet.faucet(Coinbase.assets.Eth);  // ETH funds for transfer gas fee (USDC gas fee is charged in ETH)
-  
+  const usdcFaucetTx = await myWallet.faucet(Coinbase.assets.Usdc); // USDC funds to actual transaction
+  const ethFaucetTx = await myWallet.faucet(Coinbase.assets.Eth);  // ETH funds for transfer gas fee (USDC gas fee is charged in ETH)
+
+  // Wait for the faucet transactions to complete or fail on-chain.
+  await usdcFaucetTx.wait();
+  await ethFaucetTx.wait();
+
   console.log('\nFunds added to myWallet! ...');
   console.log('Funds available on myWallet:', (await myWallet.listBalances()).toString());
   console.log('Funds available on anotherWallet:', (await anotherWallet.listBalances()).toString());

@@ -46,6 +46,9 @@ async function createAndFundSendingWallet() {
 
   // Fund sending Wallet.
   const faucetTransaction = await sendingWallet.faucet();
+
+  // Wait for the faucet transaction to complete or fail on-chain.
+  await faucetTransaction.wait();
   console.log(`Faucet transaction successfully completed: `, faucetTransaction.toString());
 
   return sendingWallet;
