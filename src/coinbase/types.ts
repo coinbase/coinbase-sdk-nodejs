@@ -1439,17 +1439,50 @@ export interface SmartContractAPIClient {
 
 export interface SmartWalletAPIClient {
   /**
-   * Creates a new Smart Contract.
+   * Creates a new Smart Wallet.
    *
    * @param walletId - The ID of the wallet the address belongs to.
-   * @param addressId - The ID of the address to create the smart contract for.
-   * @param createSmartContractRequest - The request body containing the smart contract details.
+   * @param addressId - The ID of the address to create the smart wallet for.
    * @param options - Axios request options.
    * @throws {APIError} If the request fails.
    */
   createSmartWallet(
     walletId: string,
     addressId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<SmartWalletModel>;
+
+  /**
+   * Gets a specific Smart Wallet.
+   *
+   * @param  walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address the smart wallet belongs to.
+   * @param smartWalletId - The ID of the smart wallet to retrieve.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+  getSmartWallet(
+    walletId: string,
+    addressId: string,
+    smartWalletId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<SmartWalletModel>;
+
+  /**
+   * Deploys a Smart Wallet.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address the smart wallet belongs to.
+   * @param smartWalletId - The ID of the smart wallet to deploy.
+   * @param deploySmartWalletRequest - The request body containing deployment details.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+  deploySmartWallet(
+    walletId: string,
+    addressId: string,
+    smartWalletId: string,
+    deploySmartWalletRequest: DeploySmartContractRequest,
     options?: RawAxiosRequestConfig,
   ): AxiosPromise<SmartWalletModel>;
 }

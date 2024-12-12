@@ -260,7 +260,7 @@ export class WalletAddress extends Address {
    * @returns The signer for the private key.
    * @throws {Error} If the private key is not loaded.
    */
-  private getSigner(): ethers.Wallet {
+  public getSigner(): ethers.Wallet {
     if (!this.key) {
       throw new Error("Cannot sign without a private key");
     }

@@ -2893,7 +2893,7 @@ export interface SmartWallet {
      * @type {string}
      * @memberof SmartWallet
      */
-    'smart_wallet_address'?: string;
+    'smart_wallet_address': string;
     /**
      * 
      * @type {ContractInvocation}

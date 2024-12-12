@@ -7,12 +7,15 @@ import { ethers } from "ethers";
 import { delay } from "./utils";
 import { TimeoutError } from "./errors";
 import { Wallet } from "./wallet";
+import { ContractInvocation } from "./contract_invocation";
 
 /**
  * A representation of a SmartWallet, which is a smart wallet onchain.
  */
 export class SmartWallet {
-  private model: SmartWalletModel;
+  private smart_wallet_id: string;
+  private contractInvocation: ContractInvocation;
+  private contractAddress: string;
 
   /**
    * Private constructor to prevent direct instantiation outside of the factory methods.
@@ -22,10 +25,9 @@ export class SmartWallet {
    * @hideconstructor
    */
   private constructor(smartWalletModel: SmartWalletModel) {
-    if (!smartWalletModel) {
-      throw new Error("SmartWallet model cannot be empty");
-    }
-    this.model = smartWalletModel;
+    this.smart_wallet_id = smartWalletModel.smart_wallet_id;
+    this.contractInvocation = ContractInvocation.fromModel(smartWalletModel.contractInvocation!);
+    this.contractAddress = smartWalletModel.smart_wallet_address;
   }
 
   /**
@@ -61,6 +63,13 @@ export class SmartWallet {
     const smartWallet = SmartWallet.fromModel(resp?.data);
     console.log("Smart wallet:", JSON.stringify(smartWallet, null, 2));
 
+    if (Coinbase.useServerSigner) {
+      return smartWallet;
+    }
+  
+    await smartWallet.sign(address.getSigner());
+    await smartWallet.broadcast();
+
     return smartWallet;
   }
 
@@ -80,7 +89,7 @@ export class SmartWallet {
    * @returns The SmartWallet ID.
    */
   public getId(): string {
-    return this.model.smart_wallet_id;
+    return this.smart_wallet_id;
   }
 
   /**
@@ -89,7 +98,7 @@ export class SmartWallet {
    * @returns The Network ID.
    */
   public getNetworkId(): string {
-    return this.model.contractInvocation!.network_id;
+    return this.contractInvocation.getNetworkId();
   }
 
   /**
@@ -98,7 +107,7 @@ export class SmartWallet {
    * @returns The Wallet ID.
    */
   public getWalletId(): string {
-    return this.model.contractInvocation!.wallet_id;
+    return this.contractInvocation.getWalletId();
   }
 
   /**
@@ -106,8 +115,8 @@ export class SmartWallet {
    *
    * @returns The From Address ID.
    */
-  public getFromAddressId(): string {
-    return this.model.contractInvocation!.address_id;
+  public getAddressId(): string {
+    return this.contractInvocation.getFromAddressId();
   }
 
   /**
@@ -115,8 +124,8 @@ export class SmartWallet {
    *
    * @returns The Destination Address ID.
    */
-  public getContractAddressId(): string | undefined {
-    return this.model.smart_wallet_address;
+  public getContractAddress(): string | undefined {
+    return this.contractAddress;
   }
 
   /**
@@ -150,9 +159,9 @@ export class SmartWallet {
   }
 
   /**
-   * Returns the Status of the ContractInvocation.
+   * Returns the Status of the SmartWallet.
    *
-   * @returns The Status of the ContractInvocation.
+   * @returns The Status of the SmartWallet.
    */
   public getStatus(): TransactionStatus | undefined {
     return this.getTransaction().getStatus();
@@ -164,7 +173,7 @@ export class SmartWallet {
    * @returns The Transaction
    */
   public getTransaction(): Transaction {
-    return new Transaction(this.model.contractInvocation!.transaction);
+    return this.contractInvocation.getTransaction();
   }
 
   /**
@@ -177,33 +186,33 @@ export class SmartWallet {
   }
 
   /**
-   * Broadcasts the ContractInvocation to the Network.
+   * Broadcasts the SmartWallet to the Network.
    *
    * @returns The SmartWallet object
    * @throws {APIError} if the API request to broadcast a SmartWallet fails.
    */
-//   public async broadcast(): Promise<SmartWallet> {
-//     if (!this.getTransaction()?.isSigned())
-//       throw new Error("Cannot broadcast unsigned SmartWallet");
+  public async broadcast(): Promise<SmartWallet> {
+    if (!this.getTransaction()?.isSigned())
+      throw new Error("Cannot broadcast unsigned SmartWallet");
 
-//     const broadcastContractInvocationRequest = {
-//       signed_payload: this.getTransaction()!.getSignature()!,
-//     };
+    const broadcastSmartWalletRequest = {
+      signed_payload: this.getTransaction()!.getSignature()!,
+    };
 
-//     const response = await Coinbase.apiClients.contractInvocation!.broadcastContractInvocation(
-//       this.getWalletId(),
-//       this.getFromAddressId(),
-//       this.getId(),
-//       broadcastContractInvocationRequest,
-//     );
+    const response = await Coinbase.apiClients.smartWallet!.deploySmartWallet(
+      this.getWalletId(),
+      this.getAddressId(),
+      this.getId(),
+      broadcastSmartWalletRequest,
+    );
 
-//     return SmartWallet.fromModel(response.data);
-//   }
+    return SmartWallet.fromModel(response.data);
+  }
 
   /**
-   * Waits for the SmartWallet to be confirmed on the Network or fail on chain.
-   * Waits until the SmartWallet is completed or failed on-chain by polling at the given interval.
-   * Raises an error if the SmartWallet takes longer than the given timeout.
+   * Waits for the ContractInvocation to be confirmed on the Network or fail on chain.
+   * Waits until the ContractInvocation is completed or failed on-chain by polling at the given interval.
+   * Raises an error if the ContractInvocation takes longer than the given timeout.
    *
    * @param options - The options to configure the wait function.
    * @param options.intervalSeconds - The interval to check the status of the ContractInvocation.
@@ -212,52 +221,53 @@ export class SmartWallet {
    * @returns The ContractInvocation object in a terminal state.
    * @throws {Error} if the ContractInvocation times out.
    */
-//   public async wait({
-//     intervalSeconds = 0.2,
-//     timeoutSeconds = 10,
-//   } = {}): Promise<ContractInvocation> {
-//     const startTime = Date.now();
+  public async wait({
+    intervalSeconds = 0.2,
+    timeoutSeconds = 10,
+  } = {}): Promise<SmartWallet> {
+    const startTime = Date.now();
 
-//     while (Date.now() - startTime < timeoutSeconds * 1000) {
-//       await this.reload();
+    while (Date.now() - startTime < timeoutSeconds * 1000) {
+      await this.reload();
 
-//       // If the ContractInvocation is in a terminal state, return the ContractInvocation.
-//       const status = this.getStatus();
-//       if (status === TransactionStatus.COMPLETE || status === TransactionStatus.FAILED) {
-//         return this;
-//       }
+      // If the SmartWallet is in a terminal state, return the SmartWallet.
+      const status = this.getStatus();
+      if (status === TransactionStatus.COMPLETE || status === TransactionStatus.FAILED) {
+        return this;
+      }
 
-//       await delay(intervalSeconds);
-//     }
+      await delay(intervalSeconds);
+    }
 
-//     throw new TimeoutError("ContractInvocation timed out");
-//   }
+    throw new TimeoutError("SmartWallet timed out");
+  }
 
   /**
-   * Reloads the ContractInvocation model with the latest data from the server.
+   * Reloads the SmartWallet model with the latest data from the server.
    *
-   * @throws {APIError} if the API request to get a ContractInvocation fails.
+   * @throws {APIError} if the API request to get a SmartWallet fails.
    */
-//   public async reload(): Promise<void> {
-//     const result = await Coinbase.apiClients.contractInvocation!.getContractInvocation(
-//       this.getWalletId(),
-//       this.getFromAddressId(),
-//       this.getId(),
-//     );
-//     this.model = result?.data;
-//   }
+  public async reload(): Promise<void> {
+    const result = await Coinbase.apiClients.smartWallet!.getSmartWallet(
+      this.getWalletId(),
+      this.getAddressId(),
+      this.getId(),
+    );
+    this.contractInvocation = ContractInvocation.fromModel(result?.data.contractInvocation!);
+  }
 
-//   /**
-//    * Returns a string representation of the ContractInvocation.
-//    *
-//    * @returns The string representation of the ContractInvocation.
-//    */
-//   public toString(): string {
-//     return (
-//       `ContractInvocation{contractInvocationId: '${this.getId()}', networkId: '${this.getNetworkId()}', ` +
-//       `fromAddressId: '${this.getFromAddressId()}', contractAddressId: '${this.getContractAddressId()}', ` +
-//       `method: '${this.getMethod()}', args: '${this.getArgs()}', transactionHash: '${this.getTransactionHash()}', ` +
-//       `transactionLink: '${this.getTransactionLink()}', status: '${this.getStatus()}'}`
-//     );
-//   }
+
+  /**
+   * Returns a string representation of the SmartWallet.
+   *
+   * @returns The string representation of the SmartWallet.
+   */
+  public toString(): string {
+    return (
+      `SmartWallet{smartWalletId: '${this.getId()}', networkId: '${this.getNetworkId()}', ` +
+      `addressId: '${this.getAddressId()}', contractAddress: '${this.getContractAddress()}', ` +
+      `transactionLink: '${this.getTransactionLink()}', status: '${this.getStatus()}'}`
+    );
+  }
 }
+
