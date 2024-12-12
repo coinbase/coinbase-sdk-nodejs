@@ -1366,8 +1366,7 @@ export interface SmartContractAPIClient {
    */
 
   listSmartContracts(
-    walletId: string,
-    addressId: string,
+    page?: string,
     options?: RawAxiosRequestConfig,
   ): AxiosPromise<SmartContractList>;
 
