@@ -15,6 +15,7 @@ import {
   Transfer as TransferModel,
   Trade as TradeModel,
   Asset as AssetModel,
+  SmartWallet as SmartWalletModel,
   WalletList,
   TradeList as TradeListModel,
   CreateTradeRequest,
@@ -727,6 +728,7 @@ export type ApiClients = {
   transactionHistory?: TransactionHistoryApiClient;
   smartContract?: SmartContractAPIClient;
   fund?: FundOperationApiClient;
+  smartWallet?: SmartWalletAPIClient;
 };
 
 /**
@@ -1436,6 +1438,24 @@ export interface SmartContractAPIClient {
     readContractRequest: ReadContractRequest,
   ): AxiosPromise<SolidityValue>;
 }
+
+export interface SmartWalletAPIClient {
+  /**
+   * Creates a new Smart Contract.
+   *
+   * @param walletId - The ID of the wallet the address belongs to.
+   * @param addressId - The ID of the address to create the smart contract for.
+   * @param createSmartContractRequest - The request body containing the smart contract details.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+  createSmartWallet(
+    walletId: string,
+    addressId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<SmartWalletModel>;
+}
+
 
 export interface FundOperationApiClient {
   /**
