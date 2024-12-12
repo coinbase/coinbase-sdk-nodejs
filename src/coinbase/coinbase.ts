@@ -19,6 +19,7 @@ import {
   TransactionHistoryApiFactory,
   MPCWalletStakeApiFactory,
   FundApiFactory,
+  SmartWalletsApiFactory,
 } from "../client";
 import { BASE_PATH } from "./../client/base";
 import { Configuration } from "./../client/configuration";
@@ -165,6 +166,7 @@ export class Coinbase {
     Coinbase.apiClients.contractEvent = ContractEventsApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.smartContract = SmartContractsApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.fund = FundApiFactory(config, basePath, axiosInstance);
+    Coinbase.apiClients.smartWallet = SmartWalletsApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.transactionHistory = TransactionHistoryApiFactory(
       config,
       basePath,

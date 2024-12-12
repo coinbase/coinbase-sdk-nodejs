@@ -1361,15 +1361,13 @@ export interface SmartContractAPIClient {
    * List smart contracts belonging to the user for a given wallet and address.
    *
    * @summary List smart contracts belonging to the CDP project
-   * @param walletId - The ID of the wallet the address belongs to.
-   * @param addressId - The ID of the address to list smart contracts for.
+   * @param page - The cursor for pagination across multiple pages of smart contracts. Don\&#39;t include this parameter on the first call. Use the next page value returned in a previous response to request subsequent results.
    * @param options - Axios request options.
    * @throws {APIError} If the request fails.
    */
 
   listSmartContracts(
-    walletId: string,
-    addressId: string,
+    page?: string,
     options?: RawAxiosRequestConfig,
   ): AxiosPromise<SmartContractList>;
 

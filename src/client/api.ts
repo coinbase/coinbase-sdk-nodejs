@@ -2877,6 +2877,31 @@ export type SmartContractType = typeof SmartContractType[keyof typeof SmartContr
 
 
 /**
+ * Represents a smart wallet on the blockchain
+ * @export
+ * @interface SmartWallet
+ */
+export interface SmartWallet {
+    /**
+     * The unique identifier of the smart contract.
+     * @type {string}
+     * @memberof SmartWallet
+     */
+    'smart_wallet_id': string;
+    /**
+     * The EVM address of the smart wallet
+     * @type {string}
+     * @memberof SmartWallet
+     */
+    'smart_wallet_address'?: string;
+    /**
+     * 
+     * @type {ContractInvocation}
+     * @memberof SmartWallet
+     */
+    'contractInvocation'?: ContractInvocation;
+}
+/**
  * 
  * @export
  * @interface SolidityValue
@@ -8908,6 +8933,352 @@ export class SmartContractsApi extends BaseAPI implements SmartContractsApiInter
      */
     public registerSmartContract(networkId: string, contractAddress: string, registerSmartContractRequest?: RegisterSmartContractRequest, options?: RawAxiosRequestConfig) {
         return SmartContractsApiFp(this.configuration).registerSmartContract(networkId, contractAddress, registerSmartContractRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * SmartWalletsApi - axios parameter creator
+ * @export
+ */
+export const SmartWalletsApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Create a new smart wallet
+         * @summary Create a new SmartWallet
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to deploy the smart wallet from. This address becomes the owner of the smart wallet.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createSmartWallet: async (walletId: string, addressId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'walletId' is not null or undefined
+            assertParamExists('createSmartWallet', 'walletId', walletId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('createSmartWallet', 'addressId', addressId)
+            const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/smart_wallets`
+                .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication apiKey required
+            await setApiKeyToObject(localVarHeaderParameter, "Jwt", configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Deploys a smart wallet, by broadcasting the transaction to the network.
+         * @summary Deploy a smart wallet
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to broadcast the transaction from.
+         * @param {string} smartWalletId The UUID of the smart contract to broadcast the transaction to.
+         * @param {DeploySmartContractRequest} deploySmartContractRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deploySmartWallet: async (walletId: string, addressId: string, smartWalletId: string, deploySmartContractRequest: DeploySmartContractRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'walletId' is not null or undefined
+            assertParamExists('deploySmartWallet', 'walletId', walletId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('deploySmartWallet', 'addressId', addressId)
+            // verify required parameter 'smartWalletId' is not null or undefined
+            assertParamExists('deploySmartWallet', 'smartWalletId', smartWalletId)
+            // verify required parameter 'deploySmartContractRequest' is not null or undefined
+            assertParamExists('deploySmartWallet', 'deploySmartContractRequest', deploySmartContractRequest)
+            const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/smart_wallets/{smart_wallet_id}/deploy`
+                .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)))
+                .replace(`{${"smart_wallet_id"}}`, encodeURIComponent(String(smartWalletId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication apiKey required
+            await setApiKeyToObject(localVarHeaderParameter, "Jwt", configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(deploySmartContractRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get a specific smart contract wallet by address.
+         * @summary Get a specific smart wallet deployed by address
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to fetch the smart contract for.
+         * @param {string} smartWalletId The UUID of the smart contract to fetch.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSmartWallet: async (walletId: string, addressId: string, smartWalletId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'walletId' is not null or undefined
+            assertParamExists('getSmartWallet', 'walletId', walletId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('getSmartWallet', 'addressId', addressId)
+            // verify required parameter 'smartWalletId' is not null or undefined
+            assertParamExists('getSmartWallet', 'smartWalletId', smartWalletId)
+            const localVarPath = `/v1/wallets/{wallet_id}/addresses/{address_id}/smart_wallets/{smart_wallet_id}`
+                .replace(`{${"wallet_id"}}`, encodeURIComponent(String(walletId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)))
+                .replace(`{${"smart_wallet_id"}}`, encodeURIComponent(String(smartWalletId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication apiKey required
+            await setApiKeyToObject(localVarHeaderParameter, "Jwt", configuration)
+
+            // authentication session required
+            await setApiKeyToObject(localVarHeaderParameter, "Jwt", configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * SmartWalletsApi - functional programming interface
+ * @export
+ */
+export const SmartWalletsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = SmartWalletsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Create a new smart wallet
+         * @summary Create a new SmartWallet
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to deploy the smart wallet from. This address becomes the owner of the smart wallet.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createSmartWallet(walletId: string, addressId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SmartWallet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createSmartWallet(walletId, addressId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SmartWalletsApi.createSmartWallet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Deploys a smart wallet, by broadcasting the transaction to the network.
+         * @summary Deploy a smart wallet
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to broadcast the transaction from.
+         * @param {string} smartWalletId The UUID of the smart contract to broadcast the transaction to.
+         * @param {DeploySmartContractRequest} deploySmartContractRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deploySmartWallet(walletId: string, addressId: string, smartWalletId: string, deploySmartContractRequest: DeploySmartContractRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SmartWallet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deploySmartWallet(walletId, addressId, smartWalletId, deploySmartContractRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SmartWalletsApi.deploySmartWallet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get a specific smart contract wallet by address.
+         * @summary Get a specific smart wallet deployed by address
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to fetch the smart contract for.
+         * @param {string} smartWalletId The UUID of the smart contract to fetch.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getSmartWallet(walletId: string, addressId: string, smartWalletId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SmartWallet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getSmartWallet(walletId, addressId, smartWalletId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SmartWalletsApi.getSmartWallet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * SmartWalletsApi - factory interface
+ * @export
+ */
+export const SmartWalletsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = SmartWalletsApiFp(configuration)
+    return {
+        /**
+         * Create a new smart wallet
+         * @summary Create a new SmartWallet
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to deploy the smart wallet from. This address becomes the owner of the smart wallet.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createSmartWallet(walletId: string, addressId: string, options?: RawAxiosRequestConfig): AxiosPromise<SmartWallet> {
+            return localVarFp.createSmartWallet(walletId, addressId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Deploys a smart wallet, by broadcasting the transaction to the network.
+         * @summary Deploy a smart wallet
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to broadcast the transaction from.
+         * @param {string} smartWalletId The UUID of the smart contract to broadcast the transaction to.
+         * @param {DeploySmartContractRequest} deploySmartContractRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deploySmartWallet(walletId: string, addressId: string, smartWalletId: string, deploySmartContractRequest: DeploySmartContractRequest, options?: RawAxiosRequestConfig): AxiosPromise<SmartWallet> {
+            return localVarFp.deploySmartWallet(walletId, addressId, smartWalletId, deploySmartContractRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get a specific smart contract wallet by address.
+         * @summary Get a specific smart wallet deployed by address
+         * @param {string} walletId The ID of the wallet the address belongs to.
+         * @param {string} addressId The ID of the address to fetch the smart contract for.
+         * @param {string} smartWalletId The UUID of the smart contract to fetch.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSmartWallet(walletId: string, addressId: string, smartWalletId: string, options?: RawAxiosRequestConfig): AxiosPromise<SmartWallet> {
+            return localVarFp.getSmartWallet(walletId, addressId, smartWalletId, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * SmartWalletsApi - interface
+ * @export
+ * @interface SmartWalletsApi
+ */
+export interface SmartWalletsApiInterface {
+    /**
+     * Create a new smart wallet
+     * @summary Create a new SmartWallet
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The ID of the address to deploy the smart wallet from. This address becomes the owner of the smart wallet.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartWalletsApiInterface
+     */
+    createSmartWallet(walletId: string, addressId: string, options?: RawAxiosRequestConfig): AxiosPromise<SmartWallet>;
+
+    /**
+     * Deploys a smart wallet, by broadcasting the transaction to the network.
+     * @summary Deploy a smart wallet
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The ID of the address to broadcast the transaction from.
+     * @param {string} smartWalletId The UUID of the smart contract to broadcast the transaction to.
+     * @param {DeploySmartContractRequest} deploySmartContractRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartWalletsApiInterface
+     */
+    deploySmartWallet(walletId: string, addressId: string, smartWalletId: string, deploySmartContractRequest: DeploySmartContractRequest, options?: RawAxiosRequestConfig): AxiosPromise<SmartWallet>;
+
+    /**
+     * Get a specific smart contract wallet by address.
+     * @summary Get a specific smart wallet deployed by address
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The ID of the address to fetch the smart contract for.
+     * @param {string} smartWalletId The UUID of the smart contract to fetch.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartWalletsApiInterface
+     */
+    getSmartWallet(walletId: string, addressId: string, smartWalletId: string, options?: RawAxiosRequestConfig): AxiosPromise<SmartWallet>;
+
+}
+
+/**
+ * SmartWalletsApi - object-oriented interface
+ * @export
+ * @class SmartWalletsApi
+ * @extends {BaseAPI}
+ */
+export class SmartWalletsApi extends BaseAPI implements SmartWalletsApiInterface {
+    /**
+     * Create a new smart wallet
+     * @summary Create a new SmartWallet
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The ID of the address to deploy the smart wallet from. This address becomes the owner of the smart wallet.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartWalletsApi
+     */
+    public createSmartWallet(walletId: string, addressId: string, options?: RawAxiosRequestConfig) {
+        return SmartWalletsApiFp(this.configuration).createSmartWallet(walletId, addressId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Deploys a smart wallet, by broadcasting the transaction to the network.
+     * @summary Deploy a smart wallet
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The ID of the address to broadcast the transaction from.
+     * @param {string} smartWalletId The UUID of the smart contract to broadcast the transaction to.
+     * @param {DeploySmartContractRequest} deploySmartContractRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartWalletsApi
+     */
+    public deploySmartWallet(walletId: string, addressId: string, smartWalletId: string, deploySmartContractRequest: DeploySmartContractRequest, options?: RawAxiosRequestConfig) {
+        return SmartWalletsApiFp(this.configuration).deploySmartWallet(walletId, addressId, smartWalletId, deploySmartContractRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get a specific smart contract wallet by address.
+     * @summary Get a specific smart wallet deployed by address
+     * @param {string} walletId The ID of the wallet the address belongs to.
+     * @param {string} addressId The ID of the address to fetch the smart contract for.
+     * @param {string} smartWalletId The UUID of the smart contract to fetch.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartWalletsApi
+     */
+    public getSmartWallet(walletId: string, addressId: string, smartWalletId: string, options?: RawAxiosRequestConfig) {
+        return SmartWalletsApiFp(this.configuration).getSmartWallet(walletId, addressId, smartWalletId, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

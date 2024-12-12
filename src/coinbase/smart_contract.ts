@@ -124,7 +124,7 @@ export class SmartContract {
    *
    * @returns The Wallet ID.
    */
-  public getWalletId(): string {
+  public getWalletId(): string | undefined {
     return this.model.wallet_id;
   }
 
@@ -142,7 +142,7 @@ export class SmartContract {
    *
    * @returns The Deployer Address.
    */
-  public getDeployerAddress(): string {
+  public getDeployerAddress(): string | undefined {
     return this.model.deployer_address;
   }
 
@@ -170,21 +170,21 @@ export class SmartContract {
    * @returns The Smart Contract Options.
    */
   public getOptions(): SmartContractOptions {
-    if (this.isERC20(this.getType(), this.model.options)) {
+    if (this.isERC20(this.getType(), this.model.options!)) {
       return {
         name: this.model.options.name,
         symbol: this.model.options.symbol,
         totalSupply: this.model.options.total_supply,
       } as TokenContractOptions;
-    } else if (this.isERC721(this.getType(), this.model.options)) {
+    } else if (this.isERC721(this.getType(), this.model.options!)) {
       return {
-        name: this.model.options.name,
-        symbol: this.model.options.symbol,
-        baseURI: this.model.options.base_uri,
+        name: this.model.options!.name,
+        symbol: this.model.options!.symbol,
+        baseURI: this.model.options!.base_uri,
       } as NFTContractOptions;
     } else {
       return {
-        uri: this.model.options.uri,
+        uri: this.model.options!.uri,
       } as MultiTokenContractOptions;
     }
   }
@@ -204,7 +204,7 @@ export class SmartContract {
    * @returns The Transaction.
    */
   public getTransaction(): Transaction {
-    return new Transaction(this.model.transaction);
+    return new Transaction(this.model.transaction!);
   }
 
   /**
@@ -233,8 +233,8 @@ export class SmartContract {
     };
 
     const response = await Coinbase.apiClients.smartContract!.deploySmartContract(
-      this.getWalletId(),
-      this.getDeployerAddress(),
+      this.getWalletId()!,
+      this.getDeployerAddress()!,
       this.getId(),
       deploySmartContractRequest,
     );
@@ -279,8 +279,8 @@ export class SmartContract {
    */
   public async reload(): Promise<void> {
     const result = await Coinbase.apiClients.smartContract!.getSmartContract(
-      this.getWalletId(),
-      this.getDeployerAddress(),
+      this.getWalletId()!,
+      this.getDeployerAddress()!,
       this.getId(),
     );
     this.model = result?.data;
