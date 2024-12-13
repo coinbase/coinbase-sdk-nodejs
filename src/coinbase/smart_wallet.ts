@@ -10,6 +10,24 @@ import { Wallet } from "./wallet";
 import { ContractInvocation } from "./contract_invocation";
 import { Transfer } from "./transfer";
 import { WalletAddress } from "./address/wallet_address";
+import { sign, SignReturnType } from "viem/accounts";
+import { encodeAbiParameters, encodePacked, Hex } from "viem";
+
+
+const SignatureWrapperStruct = {
+    components: [
+      {
+        name: "ownerIndex",
+        type: "uint256",
+      },
+      {
+        name: "signatureData",
+        type: "bytes",
+      },
+    ],
+    name: "SignatureWrapper",
+    type: "tuple",
+};
 
 /**
  * A representation of a SmartWallet, which is a smart wallet onchain.
@@ -40,22 +58,29 @@ export class SmartWallet {
    */
   public static async create(signer?: WalletAddress): Promise<SmartWallet> {
     if (!signer) {
-        // create a wallet
-        const wallet = await Wallet.create();
+        const wallet = await Wallet.import({
+            walletId: 'bfdcec50-f794-4038-8784-5c51b62cffbc',
+            seed: '33de606bb16a886b1a5dd008d2ef2fac841fd0fe7b3f6a81326a295ec8294271'
+          })    
+          const address = await wallet.getDefaultAddress();
+          console.log("Address:", address);
 
-        // use the default address of the wallet
-        const address = await wallet.getDefaultAddress();
+        // // create a wallet
+        // const wallet = await Wallet.create();
 
-        // faucet the address
-        const faucet_tx = await address.faucet();
-        await faucet_tx.wait();
+        // // use the default address of the wallet
+        // const address = await wallet.getDefaultAddress();
 
-        // view balance
-        const balance = await address.getBalance("eth");
-        console.log("Balance:", balance);
+        // // faucet the address
+        // const faucet_tx = await address.faucet();
+        // await faucet_tx.wait();
 
-        // log address
-        console.log("Deployer and owner of smart wallet:", address);
+        // // view balance
+        // const balance = await address.getBalance("eth");
+        // console.log("Balance:", balance);
+
+        // // log address
+        // console.log("Deployer and owner of smart wallet:", address);
 
         const resp = await Coinbase.apiClients.smartWallet!.createSmartWallet(
             wallet.getId()!,
@@ -133,17 +158,43 @@ export class SmartWallet {
     }
 
     const key = await this.address.getSigner();
+    // const signedPayload = await key!.signMessage(ethers.getBytes(preparedCalls.signatureRequest.hash));
 
+    // // Parse the signature into r,s,v components
+    // const parsedSig = ethers.Signature.from(signedPayload);
+    
+    // // Create the signature wrapper matching the viem implementation
+    // const wrappedSignature = ethers.AbiCoder.defaultAbiCoder().encode(
+    //     ["tuple(uint256 ownerIndex, bytes signatureData)"],
+    //     [{
+    //         ownerIndex: 0,
+    //         signatureData: ethers.concat([
+    //             parsedSig.r,
+    //             parsedSig.s,
+    //             ethers.toBeHex(parseInt(parsedSig.v.toString()), 1) // 1 byte = uint8
+    //             // ethers.toBeHex(parsedSig.v)
+    //         ])
+    //     }]
+    // );
 
-     const signedPayload = await key!.signMessage(ethers.getBytes(preparedCalls.signatureRequest.hash));
+    // TODO - these are currently different, need to switch to viem or fix ethers.
 
-     const wrappedSignature = ethers.AbiCoder.defaultAbiCoder().encode(
-        ["tuple(uint256 ownerIndex, bytes signatureData)"],
-        [{ownerIndex: 0, signatureData: signedPayload}]
-    );
+    // MY WRAPPED SIGNATUTRE
+    const wrappedSignature = await this.getWrappedSignature(preparedCalls.signatureRequest.hash, key!);
+    console.log("Wrapped signature:", wrappedSignature);
+
+    const viemWrappedSignature = await this.getWrappedSignatureViem(preparedCalls.signatureRequest.hash as `0x${string}`, key!);
+    console.log("Viem wrapped signature:", viemWrappedSignature);
+
+    // TODO - these are currently different, need to switch to viem or fix ethers.
+
+    // const wrappedSignature = ethers.AbiCoder.defaultAbiCoder().encode(
+    //     ["tuple(uint256 ownerIndex, bytes signatureData)"],
+    //     [{ownerIndex: 0, signatureData: signedPayload}]
+    // );
 
     // fill the signature in the preparedCalls
-    preparedCalls.userOp.signature = wrappedSignature;
+    preparedCalls.userOp.signature = viemWrappedSignature;
 
     console.log("Smart transfer signed payload:", JSON.stringify(preparedCalls, null, 2));
 
@@ -159,6 +210,71 @@ export class SmartWallet {
 
     return undefined;
    // return Transfer.fromModel(response.data);
+  }
+
+  async getWrappedSignature(hash: string, signer: ethers.Wallet): Promise<string> {
+    const signedPayload = await signer!.signMessage(ethers.getBytes(hash));
+
+    // Parse the signature into r,s,v components
+    const parsedSig = ethers.Signature.from(signedPayload);
+    
+    // Create the signature wrapper matching the viem implementation
+    const wrappedSignature = ethers.AbiCoder.defaultAbiCoder().encode(
+        ["tuple(uint256 ownerIndex, bytes signatureData)"],
+        [{
+            ownerIndex: 0,
+            signatureData: ethers.concat([
+                parsedSig.r,
+                parsedSig.s,
+                ethers.toBeHex(parseInt(parsedSig.v.toString()), 1) // 1 byte = uint8
+                // ethers.toBeHex(parsedSig.v)
+            ])
+        }]
+    );
+
+    return wrappedSignature;
+  }
+
+  async getWrappedSignatureViem(hash: `0x${string}`, signer: ethers.Wallet): Promise<string> {
+    const signature = await sign({ hash, privateKey: signer.privateKey as Hex });
+    if (!signature) {
+      throw new Error("Signature is undefined");
+    }
+    
+    const signatureWrapper = this.buildSignatureWrapperForEOA({
+      signature,
+      ownerIndex: 0n,
+    });
+
+    return signatureWrapper;
+  }
+
+  
+
+  async buildSignatureWrapperForEOA(
+    { signature, ownerIndex }: { signature: SignReturnType; ownerIndex: bigint },
+  ) {
+    if (!signature.v) {
+      throw new Error("Signature is undefined");
+    }
+
+    const signatureData = encodePacked(
+      ["bytes32", "bytes32", "uint8"],
+      [
+        signature.r,
+        signature.s,
+        parseInt(signature.v.toString()),
+      ],
+    );
+    return encodeAbiParameters(
+      [SignatureWrapperStruct],
+      [
+        {
+          ownerIndex,
+          signatureData,
+        },
+      ],
+    );
   }
 
   /**
