@@ -2,12 +2,14 @@ import { Decimal } from "decimal.js";
 import { TransactionStatus } from "./types";
 import { Transaction } from "./transaction";
 import { Coinbase } from "./coinbase";
-import { SmartWallet as SmartWalletModel } from "../client/api";
+import { CreateSmartTransferRequest, SmartWallet as SmartWalletModel } from "../client/api";
 import { ethers } from "ethers";
 import { delay } from "./utils";
 import { TimeoutError } from "./errors";
 import { Wallet } from "./wallet";
 import { ContractInvocation } from "./contract_invocation";
+import { Transfer } from "./transfer";
+import { WalletAddress } from "./address/wallet_address";
 
 /**
  * A representation of a SmartWallet, which is a smart wallet onchain.
@@ -16,7 +18,7 @@ export class SmartWallet {
   private smart_wallet_id: string;
   private contractInvocation: ContractInvocation;
   private contractAddress: string;
-
+  private address: WalletAddress;
   /**
    * Private constructor to prevent direct instantiation outside of the factory methods.
    *
@@ -24,10 +26,11 @@ export class SmartWallet {
    * @param smartWalletModel - The SmartWallet model.
    * @hideconstructor
    */
-  private constructor(smartWalletModel: SmartWalletModel) {
+  private constructor(smartWalletModel: SmartWalletModel, address: WalletAddress) {
     this.smart_wallet_id = smartWalletModel.smart_wallet_id;
     this.contractInvocation = ContractInvocation.fromModel(smartWalletModel.contractInvocation!);
     this.contractAddress = smartWalletModel.smart_wallet_address;
+    this.address = address;
   }
 
   /**
@@ -35,42 +38,127 @@ export class SmartWallet {
    *
    * @returns The SmartWallet object
    */
-  public static async create(): Promise<SmartWallet> {
-    // create a wallet
-    const wallet = await Wallet.create();
+  public static async create(signer?: WalletAddress): Promise<SmartWallet> {
+    if (!signer) {
+        // create a wallet
+        const wallet = await Wallet.create();
 
-    // use the default address of the wallet
-    const address = await wallet.getDefaultAddress();
+        // use the default address of the wallet
+        const address = await wallet.getDefaultAddress();
 
-    // faucet the address
-    const faucet_tx = await address.faucet();
-    await faucet_tx.wait();
+        // faucet the address
+        const faucet_tx = await address.faucet();
+        await faucet_tx.wait();
 
-    // view balance
-    const balance = await address.getBalance("eth");
-    console.log("Balance:", balance);
+        // view balance
+        const balance = await address.getBalance("eth");
+        console.log("Balance:", balance);
+
+        // log address
+        console.log("Deployer and owner of smart wallet:", address);
+
+        const resp = await Coinbase.apiClients.smartWallet!.createSmartWallet(
+            wallet.getId()!,
+            address.getId(),
+        );
+
+        // log smart wallet
+        const smartWallet = SmartWallet.fromModel(resp?.data, address);
+        console.log("Smart wallet:", JSON.stringify(smartWallet, null, 2));
+
+        if (Coinbase.useServerSigner) {
+            return smartWallet;
+        }
+    
+        await smartWallet.sign(address.getSigner());
+        await smartWallet.broadcast();
+        return smartWallet;
+    } else {
+        console.log("Deployer and owner of smart wallet:", signer);
+        const resp = await Coinbase.apiClients.smartWallet!.createSmartWallet(
+            signer.getWalletId(),
+            signer.getId(),
+        );
+        const smartWallet = SmartWallet.fromModel(resp?.data, signer);
+        if (Coinbase.useServerSigner) {
+            return smartWallet;
+        }
+        await smartWallet.sign(signer.getSigner());
+        await smartWallet.broadcast();
+        return smartWallet;
+    }
+  }
+
+  /**
+   * Creates a Smart Transfer.
+   *
+   * @param smartWalletId - The ID of the wallet the source address belongs to.
+   * @param createSmartTransferRequest - The request body.
+   * @param options - Axios request options.
+   * @returns - A promise resolving to the Transfer model.
+   * @throws {APIError} If the request fails.
+   */
+  public async createSmartTransfer(createSmartTransferRequest: CreateSmartTransferRequest): Promise<undefined> { // TODO - create a SmartTransfer class to wrap model, need to change cdp-service response type first
+    const response = await Coinbase.apiClients.transfer!.createSmartTransfer(
+      this.getId(),
+      createSmartTransferRequest,
+    );
+    const preparedCallsResponse = response.data;
+    console.log("Smart transfer response hash:", preparedCallsResponse);
+
+    // decode string to json
+    let preparedCalls = JSON.parse(preparedCallsResponse) as {
+        type: string;
+        userOp: {
+            sender: string;
+            nonce: string;
+            initCode: string;
+            callData: string;
+            callGasLimit: string;
+            verificationGasLimit: string;
+            preVerificationGas: string;
+            maxFeePerGas: string;
+            maxPriorityFeePerGas: string;
+            paymasterAndData: string;
+            signature: string;
+        },
+        chainId: string;
+        signatureRequest: {
+            hash: string;
+        },
+        capabilities: {
+            paymasterService: string;
+            walletSync: string;
+        }
+    }
+
+    const key = await this.address.getSigner();
 
 
-    const resp = await Coinbase.apiClients.smartWallet!.createSmartWallet(
-      wallet.getId()!,
-      address.getId(),
+     const signedPayload = await key!.signMessage(ethers.getBytes(preparedCalls.signatureRequest.hash));
+
+     const wrappedSignature = ethers.AbiCoder.defaultAbiCoder().encode(
+        ["tuple(uint256 ownerIndex, bytes signatureData)"],
+        [{ownerIndex: 0, signatureData: signedPayload}]
     );
 
-    // log address
-    console.log("Deployer and owner of smart wallet:", address);
+    // fill the signature in the preparedCalls
+    preparedCalls.userOp.signature = wrappedSignature;
 
-    // log smart wallet
-    const smartWallet = SmartWallet.fromModel(resp?.data);
-    console.log("Smart wallet:", JSON.stringify(smartWallet, null, 2));
+    console.log("Smart transfer signed payload:", JSON.stringify(preparedCalls, null, 2));
 
-    if (Coinbase.useServerSigner) {
-      return smartWallet;
-    }
-  
-    await smartWallet.sign(address.getSigner());
-    await smartWallet.broadcast();
+    // let's broadcast the smart transfer
+    const broadcastResponse = await Coinbase.apiClients.transfer!.deploySmartTransfer(
+        this.getId(),
+        {
+            user_op: JSON.stringify(preparedCalls.userOp),
+        }
+    );
 
-    return smartWallet;
+    console.log("Smart transfer broadcast response:", JSON.stringify(broadcastResponse, null, 2));
+
+    return undefined;
+   // return Transfer.fromModel(response.data);
   }
 
   /**
@@ -79,8 +167,8 @@ export class SmartWallet {
    * @param smartWalletModel - The SmartWallet model object.
    * @returns The SmartWallet object.
    */
-  public static fromModel(smartWalletModel: SmartWalletModel): SmartWallet {
-    return new SmartWallet(smartWalletModel);
+  public static fromModel(smartWalletModel: SmartWalletModel, signer: WalletAddress): SmartWallet {
+    return new SmartWallet(smartWalletModel, signer);
   }
 
   /**
@@ -191,7 +279,7 @@ export class SmartWallet {
    * @returns The SmartWallet object
    * @throws {APIError} if the API request to broadcast a SmartWallet fails.
    */
-  public async broadcast(): Promise<SmartWallet> {
+  public async broadcast(): Promise<undefined> {
     if (!this.getTransaction()?.isSigned())
       throw new Error("Cannot broadcast unsigned SmartWallet");
 
@@ -206,7 +294,8 @@ export class SmartWallet {
       broadcastSmartWalletRequest,
     );
 
-    return SmartWallet.fromModel(response.data);
+    // response is unused
+    return undefined;
   }
 
   /**

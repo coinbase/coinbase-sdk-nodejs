@@ -62,6 +62,8 @@ import {
   FundOperationList,
   CreateFundOperationRequest,
   CreateFundQuoteRequest,
+  CreateSmartTransferRequest,
+  DeploySmartTransferRequest,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -656,6 +658,36 @@ export type TransferAPIClient = {
     page?: string,
     options?: AxiosRequestConfig,
   ): AxiosPromise<TransferList>;
+
+  /**
+   * Creates a Smart Transfer.
+   *
+   * @param smartWalletId - The ID of the wallet the source address belongs to.
+   * @param createSmartTransferRequest - The request body.
+   * @param options - Axios request options.
+   * @returns - A promise resolving to the string of the hash to be signed
+   * @throws {APIError} If the request fails.
+   */
+  createSmartTransfer(
+    smartWalletId: string,
+    createSmartTransferRequest: CreateSmartTransferRequest,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<string>;
+
+  /**
+   * Deploy a smart transfer.
+   *
+   * @param smartWalletId - The ID of the smart wallet the transfer belongs to.
+   * @param deploySmartTransferRequest - The request body.
+   * @param options - Axios request options.
+   * @returns - A promise resolving to the Transfer model.
+   * @throws {APIError} If the request fails.
+   */
+  deploySmartTransfer(
+    smartWalletId: string,
+    deploySmartTransferRequest: DeploySmartTransferRequest,
+    options?: AxiosRequestConfig,
+  ): AxiosPromise<string>;
 };
 
 /**

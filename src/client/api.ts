@@ -791,6 +791,31 @@ export interface CreateSmartContractRequest {
 /**
  * 
  * @export
+ * @interface CreateSmartTransferRequest
+ */
+export interface CreateSmartTransferRequest {
+    /**
+     * The amount to transfer
+     * @type {string}
+     * @memberof CreateSmartTransferRequest
+     */
+    'amount': string;
+    /**
+     * The ID of the asset to transfer
+     * @type {string}
+     * @memberof CreateSmartTransferRequest
+     */
+    'asset_id': string;
+    /**
+     * The destination address, which can be a 0x address, Basename, or ENS name
+     * @type {string}
+     * @memberof CreateSmartTransferRequest
+     */
+    'destination': string;
+}
+/**
+ * 
+ * @export
  * @interface CreateStakingOperationRequest
  */
 export interface CreateStakingOperationRequest {
@@ -1008,6 +1033,19 @@ export interface DeploySmartContractRequest {
      * @memberof DeploySmartContractRequest
      */
     'signed_payload': string;
+}
+/**
+ * 
+ * @export
+ * @interface DeploySmartTransferRequest
+ */
+export interface DeploySmartTransferRequest {
+    /**
+     * The signed user operation to deploy, in JSON format to be decoded
+     * @type {string}
+     * @memberof DeploySmartTransferRequest
+     */
+    'user_op': string;
 }
 /**
  * Represents an event triggered by an ERC-20 token transfer on the blockchain. Contains information about the transaction, block, and involved addresses.
@@ -2875,6 +2913,89 @@ export const SmartContractType = {
 
 export type SmartContractType = typeof SmartContractType[keyof typeof SmartContractType];
 
+
+/**
+ * A smart wallet transfer of an asset from one smart wallet to another address
+ * @export
+ * @interface SmartTransfer
+ */
+export interface SmartTransfer {
+    /**
+     * The ID of the blockchain network
+     * @type {string}
+     * @memberof SmartTransfer
+     */
+    'network_id': string;
+    /**
+     * The ID of the wallet that owns the from address
+     * @type {string}
+     * @memberof SmartTransfer
+     */
+    'smart_wallet_id'?: string;
+    /**
+     * The onchain address of the recipient
+     * @type {string}
+     * @memberof SmartTransfer
+     */
+    'destination': string;
+    /**
+     * The amount in the atomic units of the asset
+     * @type {string}
+     * @memberof SmartTransfer
+     */
+    'amount': string;
+    /**
+     * The ID of the asset being transferred
+     * @type {string}
+     * @memberof SmartTransfer
+     */
+    'asset_id': string;
+    /**
+     * 
+     * @type {Asset}
+     * @memberof SmartTransfer
+     */
+    'asset': Asset;
+    /**
+     * The ID of the smart transfer
+     * @type {string}
+     * @memberof SmartTransfer
+     */
+    'smart_transfer_id'?: string;
+    /**
+     * The unsigned payload of the transfer. This is the payload that needs to be signed by the sender.
+     * @type {string}
+     * @memberof SmartTransfer
+     */
+    'unsigned_payload'?: string;
+    /**
+     * The signed payload of the transfer. This is the payload that has been signed by the sender.
+     * @type {string}
+     * @memberof SmartTransfer
+     */
+    'signed_payload'?: string;
+    /**
+     * The hash of the transfer transaction
+     * @type {string}
+     * @memberof SmartTransfer
+     */
+    'transaction_hash'?: string;
+    /**
+     * The status of the transfer
+     * @type {string}
+     * @memberof SmartTransfer
+     */
+    'status'?: SmartTransferStatusEnum;
+}
+
+export const SmartTransferStatusEnum = {
+    Pending: 'pending',
+    Broadcast: 'broadcast',
+    Complete: 'complete',
+    Failed: 'failed'
+} as const;
+
+export type SmartTransferStatusEnum = typeof SmartTransferStatusEnum[keyof typeof SmartTransferStatusEnum];
 
 /**
  * Represents a smart wallet on the blockchain
@@ -10764,6 +10885,49 @@ export const TransfersApiAxiosParamCreator = function (configuration?: Configura
         },
         /**
          * Create a new transfer
+         * @summary Create a new transfer for a smart wallet
+         * @param {string} smartWalletId The ID of the wallet the source address belongs to
+         * @param {CreateSmartTransferRequest} createSmartTransferRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createSmartTransfer: async (smartWalletId: string, createSmartTransferRequest: CreateSmartTransferRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'smartWalletId' is not null or undefined
+            assertParamExists('createSmartTransfer', 'smartWalletId', smartWalletId)
+            // verify required parameter 'createSmartTransferRequest' is not null or undefined
+            assertParamExists('createSmartTransfer', 'createSmartTransferRequest', createSmartTransferRequest)
+            const localVarPath = `/v1/smart_wallets/{smart_wallet_id}/transfers`
+                .replace(`{${"smart_wallet_id"}}`, encodeURIComponent(String(smartWalletId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication apiKey required
+            await setApiKeyToObject(localVarHeaderParameter, "Jwt", configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createSmartTransferRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Create a new transfer
          * @summary Create a new transfer for an address
          * @param {string} walletId The ID of the wallet the source address belongs to
          * @param {string} addressId The ID of the address to transfer from
@@ -10803,6 +10967,49 @@ export const TransfersApiAxiosParamCreator = function (configuration?: Configura
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(createTransferRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Deploy a signed smart transfer
+         * @summary Deploy a signed smart wallet transfer for a smart wallet
+         * @param {string} smartWalletId The ID of the wallet the source address belongs to
+         * @param {DeploySmartTransferRequest} deploySmartTransferRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deploySmartTransfer: async (smartWalletId: string, deploySmartTransferRequest: DeploySmartTransferRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'smartWalletId' is not null or undefined
+            assertParamExists('deploySmartTransfer', 'smartWalletId', smartWalletId)
+            // verify required parameter 'deploySmartTransferRequest' is not null or undefined
+            assertParamExists('deploySmartTransfer', 'deploySmartTransferRequest', deploySmartTransferRequest)
+            const localVarPath = `/v1/smart_wallets/{smart_wallet_id}/transfers/deploy`
+                .replace(`{${"smart_wallet_id"}}`, encodeURIComponent(String(smartWalletId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication apiKey required
+            await setApiKeyToObject(localVarHeaderParameter, "Jwt", configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(deploySmartTransferRequest, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -10939,6 +11146,20 @@ export const TransfersApiFp = function(configuration?: Configuration) {
         },
         /**
          * Create a new transfer
+         * @summary Create a new transfer for a smart wallet
+         * @param {string} smartWalletId The ID of the wallet the source address belongs to
+         * @param {CreateSmartTransferRequest} createSmartTransferRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createSmartTransfer(smartWalletId: string, createSmartTransferRequest: CreateSmartTransferRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createSmartTransfer(smartWalletId, createSmartTransferRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TransfersApi.createSmartTransfer']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Create a new transfer
          * @summary Create a new transfer for an address
          * @param {string} walletId The ID of the wallet the source address belongs to
          * @param {string} addressId The ID of the address to transfer from
@@ -10950,6 +11171,20 @@ export const TransfersApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.createTransfer(walletId, addressId, createTransferRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TransfersApi.createTransfer']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Deploy a signed smart transfer
+         * @summary Deploy a signed smart wallet transfer for a smart wallet
+         * @param {string} smartWalletId The ID of the wallet the source address belongs to
+         * @param {DeploySmartTransferRequest} deploySmartTransferRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deploySmartTransfer(smartWalletId: string, deploySmartTransferRequest: DeploySmartTransferRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deploySmartTransfer(smartWalletId, deploySmartTransferRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TransfersApi.deploySmartTransfer']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -11008,6 +11243,17 @@ export const TransfersApiFactory = function (configuration?: Configuration, base
         },
         /**
          * Create a new transfer
+         * @summary Create a new transfer for a smart wallet
+         * @param {string} smartWalletId The ID of the wallet the source address belongs to
+         * @param {CreateSmartTransferRequest} createSmartTransferRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createSmartTransfer(smartWalletId: string, createSmartTransferRequest: CreateSmartTransferRequest, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+            return localVarFp.createSmartTransfer(smartWalletId, createSmartTransferRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Create a new transfer
          * @summary Create a new transfer for an address
          * @param {string} walletId The ID of the wallet the source address belongs to
          * @param {string} addressId The ID of the address to transfer from
@@ -11017,6 +11263,17 @@ export const TransfersApiFactory = function (configuration?: Configuration, base
          */
         createTransfer(walletId: string, addressId: string, createTransferRequest: CreateTransferRequest, options?: RawAxiosRequestConfig): AxiosPromise<Transfer> {
             return localVarFp.createTransfer(walletId, addressId, createTransferRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Deploy a signed smart transfer
+         * @summary Deploy a signed smart wallet transfer for a smart wallet
+         * @param {string} smartWalletId The ID of the wallet the source address belongs to
+         * @param {DeploySmartTransferRequest} deploySmartTransferRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deploySmartTransfer(smartWalletId: string, deploySmartTransferRequest: DeploySmartTransferRequest, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+            return localVarFp.deploySmartTransfer(smartWalletId, deploySmartTransferRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * Get a transfer by ID
@@ -11067,6 +11324,17 @@ export interface TransfersApiInterface {
 
     /**
      * Create a new transfer
+     * @summary Create a new transfer for a smart wallet
+     * @param {string} smartWalletId The ID of the wallet the source address belongs to
+     * @param {CreateSmartTransferRequest} createSmartTransferRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TransfersApiInterface
+     */
+    createSmartTransfer(smartWalletId: string, createSmartTransferRequest: CreateSmartTransferRequest, options?: RawAxiosRequestConfig): AxiosPromise<string>;
+
+    /**
+     * Create a new transfer
      * @summary Create a new transfer for an address
      * @param {string} walletId The ID of the wallet the source address belongs to
      * @param {string} addressId The ID of the address to transfer from
@@ -11076,6 +11344,17 @@ export interface TransfersApiInterface {
      * @memberof TransfersApiInterface
      */
     createTransfer(walletId: string, addressId: string, createTransferRequest: CreateTransferRequest, options?: RawAxiosRequestConfig): AxiosPromise<Transfer>;
+
+    /**
+     * Deploy a signed smart transfer
+     * @summary Deploy a signed smart wallet transfer for a smart wallet
+     * @param {string} smartWalletId The ID of the wallet the source address belongs to
+     * @param {DeploySmartTransferRequest} deploySmartTransferRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TransfersApiInterface
+     */
+    deploySmartTransfer(smartWalletId: string, deploySmartTransferRequest: DeploySmartTransferRequest, options?: RawAxiosRequestConfig): AxiosPromise<string>;
 
     /**
      * Get a transfer by ID
@@ -11128,6 +11407,19 @@ export class TransfersApi extends BaseAPI implements TransfersApiInterface {
 
     /**
      * Create a new transfer
+     * @summary Create a new transfer for a smart wallet
+     * @param {string} smartWalletId The ID of the wallet the source address belongs to
+     * @param {CreateSmartTransferRequest} createSmartTransferRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TransfersApi
+     */
+    public createSmartTransfer(smartWalletId: string, createSmartTransferRequest: CreateSmartTransferRequest, options?: RawAxiosRequestConfig) {
+        return TransfersApiFp(this.configuration).createSmartTransfer(smartWalletId, createSmartTransferRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Create a new transfer
      * @summary Create a new transfer for an address
      * @param {string} walletId The ID of the wallet the source address belongs to
      * @param {string} addressId The ID of the address to transfer from
@@ -11138,6 +11430,19 @@ export class TransfersApi extends BaseAPI implements TransfersApiInterface {
      */
     public createTransfer(walletId: string, addressId: string, createTransferRequest: CreateTransferRequest, options?: RawAxiosRequestConfig) {
         return TransfersApiFp(this.configuration).createTransfer(walletId, addressId, createTransferRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Deploy a signed smart transfer
+     * @summary Deploy a signed smart wallet transfer for a smart wallet
+     * @param {string} smartWalletId The ID of the wallet the source address belongs to
+     * @param {DeploySmartTransferRequest} deploySmartTransferRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TransfersApi
+     */
+    public deploySmartTransfer(smartWalletId: string, deploySmartTransferRequest: DeploySmartTransferRequest, options?: RawAxiosRequestConfig) {
+        return TransfersApiFp(this.configuration).deploySmartTransfer(smartWalletId, deploySmartTransferRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
