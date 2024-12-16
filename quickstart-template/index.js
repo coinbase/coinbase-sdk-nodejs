@@ -12,6 +12,9 @@ let address = await wallet.getDefaultAddress();
 console.log(`Default address for the wallet: `, address.toString());
 
 const faucetTransaction = await wallet.faucet();
+
+// Wait for the faucet transaction to complete or fail on-chain.
+await faucetTransaction.wait();
 console.log(`Faucet transaction successfully completed: `, faucetTransaction.toString());
 
 let anotherWallet = await Wallet.create();

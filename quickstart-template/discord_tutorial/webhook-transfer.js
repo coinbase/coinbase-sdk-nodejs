@@ -29,7 +29,7 @@ const webhookNotificationUri = process.env.WEBHOOK_NOTIFICATION_URL;
     const saveSeed = myWallet.saveSeed(seedPath);
     console.log("✅ Seed saved: ", saveSeed);
   }
-  
+
   const balance = await myWallet.getBalance(Coinbase.assets.Usdc);
   console.log(`💰 Wallet USDC balance:`, balance);
   if (balance <= 0) {
@@ -38,13 +38,13 @@ const webhookNotificationUri = process.env.WEBHOOK_NOTIFICATION_URL;
 
     // Wait for the faucet transaction to confirm.
     await faucetTx.wait();
-    
+
     console.log("✅ Funds added!");
-    
+
     // Sometimes funds take a few seconds to be available on the wallet, so lets wait 5 secs
     await sleep(5000)
   }
-  
+
   // Now use below code to get wallets addresses so we can use it for adding it to the webhook filter.
   let myWalletAddress = await myWallet.getDefaultAddress();
   const myWalletAddressId = myWalletAddress.getId();
@@ -77,7 +77,7 @@ const webhookNotificationUri = process.env.WEBHOOK_NOTIFICATION_URL;
     destination: anotherWallet,
     gasless: true, // for USDC, you can add gasless flag, so you don't need to add ETH funds for paying for gas fees
   });
-  
+
   // Wait for the transfer to complete or fail on-chain
   await transfer.wait({
     intervalSeconds: 1, // check for transfer completion each 1 second
