@@ -5,3 +5,4 @@ The Coinbase team takes security seriously. Please do not file a public ticket d
 Please report your findings through our [HackerOne][1] program.
 
 [1]: https://hackerone.com/coinbase
+[2]: https://www.beaconcha.in/user/webhooks
