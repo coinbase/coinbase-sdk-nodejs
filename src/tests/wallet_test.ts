@@ -71,6 +71,7 @@ import { PayloadSignature } from "../coinbase/payload_signature";
 import { ContractInvocation } from "../coinbase/contract_invocation";
 import { SmartContract } from "../coinbase/smart_contract";
 import { Webhook } from "../coinbase/webhook";
+import { WalletData } from "../coinbase/types";
 
 describe("Wallet Class", () => {
   let wallet: Wallet;
@@ -1014,16 +1015,90 @@ describe("Wallet Class", () => {
 
     it("should be able to be imported", async () => {
       const walletData = seedWallet.export();
-      const importedWallet = await Wallet.import(walletData);
+      const importedWallet = await Wallet.load(walletData);
       expect(importedWallet).toBeInstanceOf(Wallet);
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
     });
     it("should throw an error when walletId is not provided", async () => {
       const walletData = seedWallet.export();
       walletData.walletId = "";
-      await expect(async () => await Wallet.import(walletData)).rejects.toThrow(
+      await expect(async () => await Wallet.load(walletData)).rejects.toThrow(
         "Wallet ID must be provided",
       );
+    });
+    it("should throw an error when wallet data format is invalid", async () => {
+      const invalidWalletData = {
+        foo: "bar",
+        bar: 123,
+      } as unknown as WalletData;
+      await expect(async () => await Wallet.load(invalidWalletData)).rejects.toThrow(
+        "Invalid wallet data format",
+      );
+    });
+  });
+
+  describe("#importFromMnemonicSeedPhrase", () => {
+    const validMnemonic =
+      "crouch cereal notice one canyon kiss tape employ ghost column vanish despair eight razor laptop keen rally gaze riot regret assault jacket risk curve";
+    const address0 = "0x43A0477E658C6e05136e81C576CF02daCEa067bB";
+    const publicKey = "0x037e6cbdd1d949f60f41d5db7ffa9b3ddce0b77eab35ef7affd3f64cbfd9e33a91";
+    const addressModel = {
+      ...VALID_ADDRESS_MODEL,
+      address_id: address0,
+      public_key: publicKey,
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      Coinbase.apiClients.wallet = walletsApiMock;
+      Coinbase.apiClients.address = addressesApiMock;
+      Coinbase.apiClients.wallet!.createWallet = mockFn(request => {
+        const { network_id } = request.wallet;
+        apiResponses[walletId] = {
+          id: walletId,
+          network_id,
+          default_address: addressModel,
+        };
+        return { data: apiResponses[walletId] };
+      });
+      Coinbase.apiClients.wallet!.getWallet = mockFn(walletId => {
+        walletModel = apiResponses[walletId];
+        walletModel.default_address!.address_id = address0;
+        return { data: apiResponses[walletId] };
+      });
+      Coinbase.apiClients.address!.createAddress = mockReturnValue(addressModel);
+      Coinbase.apiClients.address!.listAddresses = mockFn(() => {
+        return {
+          data: {
+            data: [addressModel],
+            has_more: false,
+            next_page: "",
+            total_count: 1,
+          },
+        };
+      });
+    });
+
+    it("successfully imports a wallet from a valid 24-word mnemonic", async () => {
+      const wallet = await Wallet.importFromMnemonicSeedPhrase(validMnemonic);
+      expect(wallet).toBeInstanceOf(Wallet);
+      expect(Coinbase.apiClients.wallet!.createWallet).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.createAddress).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
+    });
+
+    it("throws an error when mnemonic is empty", async () => {
+      await expect(Wallet.importFromMnemonicSeedPhrase("")).rejects.toThrow(
+        "BIP-39 mnemonic seed phrase must be provided",
+      );
+      expect(Coinbase.apiClients.wallet!.createWallet).not.toHaveBeenCalled();
+    });
+
+    it("throws an error when mnemonic is invalid", async () => {
+      await expect(Wallet.importFromMnemonicSeedPhrase("invalid mnemonic phrase")).rejects.toThrow(
+        "Invalid BIP-39 mnemonic seed phrase",
+      );
+      expect(Coinbase.apiClients.wallet!.createWallet).not.toHaveBeenCalled();
     });
   });
 

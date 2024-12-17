@@ -54,7 +54,7 @@ describe("Coinbase SDK E2E Test", () => {
     const walletId = Object.keys(seedFile)[0];
     const seed = seedFile[walletId].seed;
 
-    const importedWallet = await Wallet.import({ seed, walletId });
+    const importedWallet = await Wallet.load({ seed, walletId });
     expect(importedWallet).toBeDefined();
     expect(importedWallet.getId()).toBe(walletId);
     console.log(

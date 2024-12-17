@@ -141,7 +141,7 @@ export class Wallet {
    * @param mnemonicSeedPhrase - The BIP-39 mnemonic seed phrase (12, 15, 18, 21, or 24 words).
    * @returns The imported Wallet.
    * @throws {ArgumentError} If the seed phrase is not provided or invalid.
-   * @throws {ArgumentError} If the seed phrase is not 12 or 24 words.
+   * @throws {ArgumentError} If the seed phrase is not 12, 15, 18, 21, or 24 words.
    * @throws {APIError} If the request fails.
    */
   public static async importFromMnemonicSeedPhrase(mnemonicSeedPhrase: string): Promise<Wallet> {
