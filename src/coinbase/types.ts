@@ -818,6 +818,7 @@ export enum FundOperationStatus {
 export type WalletData = {
   walletId: string;
   seed: string;
+  networkId: string;
 };
 
 /**
@@ -828,6 +829,7 @@ export type SeedData = {
   encrypted: boolean;
   authTag: string;
   iv: string;
+  networkId: string;
 };
 
 /**

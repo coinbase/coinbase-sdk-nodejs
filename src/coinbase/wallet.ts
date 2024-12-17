@@ -221,7 +221,7 @@ export class Wallet {
     if (!this.seed) {
       throw new Error("Cannot export Wallet without loaded seed");
     }
-    return { walletId: this.getId()!, seed: this.seed };
+    return { walletId: this.getId()!, seed: this.seed, networkId: this.getNetworkId() };
   }
 
   /**
@@ -631,6 +631,7 @@ export class Wallet {
       encrypted: encrypt,
       authTag: authTag,
       iv: iv,
+      networkId: data.networkId,
     };
 
     fs.writeFileSync(filePath, JSON.stringify(existingSeedsInStore, null, 2), "utf8");
