@@ -1,4 +1,7 @@
 import { HDKey } from "@scure/bip32";
+import { mnemonicToSeedSync, validateMnemonic } from "@scure/bip39";
+import { wordlist } from "@scure/bip39/wordlists/english";
+import { hexlify } from "ethers";
 import * as crypto from "crypto";
 import Decimal from "decimal.js";
 import { ethers } from "ethers";
@@ -26,6 +29,9 @@ import {
   StakeOptionsMode,
   WalletCreateOptions,
   WalletData,
+  WalletDataSnake,
+  isWalletData,
+  isWalletDataSnake,
   CreateERC20Options,
   CreateERC721Options,
   CreateERC1155Options,
@@ -130,31 +136,82 @@ export class Wallet {
   }
 
   /**
-   * Imports a Wallet for the given Wallet data.
+   * Imports an external wallet into CDP using a BIP-39 mnemonic seed phrase.
    *
-   * @param data - The Wallet data to import.
-   * @param data.walletId - The ID of the Wallet to import.
-   * @param data.seed - The seed to use for the Wallet.
+   * @param mnemonicSeedPhrase - The BIP-39 mnemonic seed phrase (12, 15, 18, 21, or 24 words).
    * @returns The imported Wallet.
-   * @throws {ArgumentError} If the Wallet ID is not provided.
-   * @throws {ArgumentError} If the seed is not provided.
+   * @throws {ArgumentError} If the seed phrase is not provided or invalid.
+   * @throws {ArgumentError} If the seed phrase is not 12 or 24 words.
    * @throws {APIError} If the request fails.
    */
-  public static async import(data: WalletData): Promise<Wallet> {
-    if (!data.walletId) {
+  public static async importFromMnemonicSeedPhrase(mnemonicSeedPhrase: string): Promise<Wallet> {
+    if (!mnemonicSeedPhrase) {
+      throw new ArgumentError("BIP-39 mnemonic seed phrase must be provided");
+    }
+
+    if (!validateMnemonic(mnemonicSeedPhrase, wordlist)) {
+      throw new ArgumentError("Invalid BIP-39 mnemonic seed phrase");
+    }
+
+    // Convert mnemonic phrase to seed
+    const seedBuffer = mnemonicToSeedSync(mnemonicSeedPhrase);
+    const seed = hexlify(seedBuffer).slice(2); // remove 0x prefix
+
+    // Create wallet using the provided seed
+    const wallet = await Wallet.createWithSeed({
+      seed: seed,
+      networkId: Coinbase.networks.BaseSepolia,
+    });
+
+    // Ensure the wallet is created
+    await wallet.listAddresses();
+    return wallet;
+  }
+
+  /**
+   * Loads an existing CDP Wallet using a wallet data object.
+   *
+   * @param data - The Wallet data to load.
+   * @returns The loaded Wallet.
+   * @throws {ArgumentError} If the data format is invalid.
+   * @throws {ArgumentError} If the seed is not provided.
+   */
+  public static async load(data: WalletData | WalletDataSnake): Promise<Wallet> {
+    if (!isWalletData(data) && !isWalletDataSnake(data)) {
+      throw new ArgumentError("Invalid wallet data format");
+    }
+
+    if ((isWalletData(data) && !data.walletId) || (isWalletDataSnake(data) && !data.wallet_id)) {
       throw new ArgumentError("Wallet ID must be provided");
     }
+
     if (!data.seed) {
       throw new ArgumentError("Seed must be provided");
     }
-    const walletModel = await Coinbase.apiClients.wallet!.getWallet(data.walletId);
+
+    const walletModel = await Coinbase.apiClients.wallet!.getWallet(
+      isWalletData(data) ? data.walletId : data.wallet_id,
+    );
     const wallet = Wallet.init(walletModel.data, data.seed);
     await wallet.listAddresses();
     return wallet;
   }
 
   /**
-   * Returns a newly created Wallet object.
+   * Loads an existing CDP wallet using a wallet data object.
+   *
+   * @deprecated Use load() instead
+   * @param data - The Wallet data to load.
+   * @returns The loaded Wallet.
+   * @throws {ArgumentError} If the data format is invalid.
+   * @throws {ArgumentError} If the seed is not provided.
+   */
+  public static async import(data: WalletData | WalletDataSnake): Promise<Wallet> {
+    return Wallet.load(data);
+  }
+
+  /**
+   * Creates a new Wallet with a random seed.
    *
    * @constructs Wallet
    * @param options - The options to create the Wallet.
@@ -171,6 +228,32 @@ export class Wallet {
     timeoutSeconds = 20,
     intervalSeconds = 0.2,
   }: WalletCreateOptions = {}): Promise<Wallet> {
+    return Wallet.createWithSeed({
+      networkId,
+      timeoutSeconds,
+      intervalSeconds,
+    });
+  }
+
+  /**
+   * Creates a new Wallet with the given seed.
+   *
+   * @param options - The options to create the Wallet.
+   * @param options.seed - The seed to use for the Wallet. If undefined, a random seed will be generated.
+   * @param options.networkId - the ID of the blockchain network. Defaults to 'base-sepolia'.
+   * @param options.intervalSeconds - The interval at which to poll the backend, in seconds.
+   * @param options.timeoutSeconds - The maximum amount of time to wait for the ServerSigner to create a seed, in seconds.
+   * @throws {ArgumentError} If the model or client is not provided.
+   * @throws {Error} - If address derivation or caching fails.
+   * @throws {APIError} - If the request fails.
+   * @returns A promise that resolves with the new Wallet object.
+   */
+  public static async createWithSeed({
+    seed = undefined,
+    networkId = Coinbase.networks.BaseSepolia,
+    timeoutSeconds = 20,
+    intervalSeconds = 0.2,
+  }: WalletCreateOptions = {}): Promise<Wallet> {
     const result = await Coinbase.apiClients.wallet!.createWallet({
       wallet: {
         network_id: networkId,
@@ -178,7 +261,7 @@ export class Wallet {
       },
     });
 
-    const wallet = Wallet.init(result.data, undefined);
+    const wallet = Wallet.init(result.data, seed);
     if (Coinbase.useServerSigner) {
       await wallet.waitForSigner(wallet.getId()!, intervalSeconds, timeoutSeconds);
     }
@@ -221,7 +304,10 @@ export class Wallet {
     if (!this.seed) {
       throw new Error("Cannot export Wallet without loaded seed");
     }
-    return { walletId: this.getId()!, seed: this.seed };
+    return {
+      walletId: this.getId()!,
+      seed: this.seed,
+    };
   }
 
   /**
@@ -912,8 +998,8 @@ export class Wallet {
    * @param seed - The seed to use for the Wallet
    */
   private validateSeed(seed: string | undefined): void {
-    if (seed && seed.length !== 64) {
-      throw new ArgumentError("Seed must be 32 bytes");
+    if (seed && seed.length !== 64 && seed.length !== 128) {
+      throw new ArgumentError("Seed must be 32 or 64 bytes");
     }
   }
 

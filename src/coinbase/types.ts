@@ -226,7 +226,7 @@ export type WalletAPIClient = {
    * List wallets belonging to the user.
    *
    * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param page - A cursor for pagination across multiple pages of results. Don't include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
    * @param options - Override http request option.
    * @throws {APIError} If the request fails.
    * @throws {RequiredError} If the required parameter is not provided.
@@ -358,7 +358,7 @@ export type AddressAPIClient = {
    * @param walletId - The ID of the wallet the address belongs to.
    * @param addressId - The onchain address of the address to sign the payload with.
    * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param page - A cursor for pagination across multiple pages of results. Don't include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
    * @param options - Axios request options.
    * @throws {APIError} If the request fails.
    */
@@ -380,7 +380,7 @@ export type ExternalAddressAPIClient = {
    *
    * @param networkId - The ID of the blockchain network
    * @param addressId - The ID of the address to fetch the balance for
-   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param page - A cursor for pagination across multiple pages of results. Don't include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
    * @param options - Override http request option.
    * @throws {APIError} If the request fails.
    */
@@ -812,13 +812,42 @@ export enum FundOperationStatus {
 }
 
 /**
- * The Wallet Data type definition.
+ * The Wallet Data type definition in camelCase format.
  * The data required to recreate a Wallet.
  */
 export type WalletData = {
   walletId: string;
   seed: string;
 };
+
+/**
+ * The Wallet Data type definition in snake_case format.
+ * The data required to recreate a Wallet.
+ */
+export type WalletDataSnake = {
+  wallet_id: string;
+  seed: string;
+};
+
+/**
+ * Type guard to check if data matches the snake_case WalletDataSnake format.
+ *
+ * @param data - The data to check
+ * @returns True if data matches WalletDataSnake format
+ */
+export function isWalletDataSnake(data: unknown): data is WalletDataSnake {
+  return typeof data === "object" && data !== null && "wallet_id" in data && "seed" in data;
+}
+
+/**
+ * Type guard to check if data matches the camelCase WalletData format.
+ *
+ * @param data - The data to check
+ * @returns True if data matches WalletData format
+ */
+export function isWalletData(data: unknown): data is WalletData {
+  return typeof data === "object" && data !== null && "walletId" in data && "seed" in data;
+}
 
 /**
  * The Seed Data type definition.
@@ -852,6 +881,7 @@ export enum ServerSignerStatus {
  * Options for creating a Wallet.
  */
 export type WalletCreateOptions = {
+  seed?: string;
   networkId?: string;
   timeoutSeconds?: number;
   intervalSeconds?: number;
@@ -1145,7 +1175,7 @@ export interface WebhookApiClient {
    *
    * @summary List webhooks
    * @param {number} [limit] - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-   * @param {string} [page] - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param {string} [page] - A cursor for pagination across multiple pages of results. Don't include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
    * @param {*} [options] - Override http request option.
    * @throws {RequiredError}
    */
@@ -1180,7 +1210,7 @@ export interface BalanceHistoryApiClient {
    * @param addressId - The ID of the address to fetch the historical balance for.
    * @param assetId - The symbol of the asset to fetch the historical balance for.
    * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param page - A cursor for pagination across multiple pages of results. Don't include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
    * @param options - Override http request option.
    * @throws {RequiredError}
    */
@@ -1202,7 +1232,7 @@ export interface TransactionHistoryApiClient {
    * @param networkId - The ID of the blockchain network
    * @param addressId - The ID of the address to fetch transactions for.
    * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param page - A cursor for pagination across multiple pages of results. Don't include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
    * @param options - Override http request option.
    * @throws {RequiredError}
    */
@@ -1444,7 +1474,7 @@ export interface FundOperationApiClient {
    * @param walletId - The ID of the wallet the address belongs to.
    * @param addressId - The ID of the address to list fund operations for.
    * @param limit - A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
-   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+   * @param page - A cursor for pagination across multiple pages of results. Don't include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
    * @param options - Axios request options
    * @throws {APIError} If the request fails
    */
