@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- Add getters for `Validator` object to expose more data to users.
+
 ### [0.11.3] - 2024-12-10
 
 ### Added
