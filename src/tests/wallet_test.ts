@@ -1026,6 +1026,13 @@ describe("Wallet Class", () => {
         "Wallet ID must be provided",
       );
     });
+    it("should throw an error when seed is not provided", async () => {
+      const walletData = seedWallet.export();
+      walletData.seed = "";
+      await expect(async () => await Wallet.load(walletData)).rejects.toThrow(
+        "Seed must be provided",
+      );
+    });
     it("should throw an error when wallet data format is invalid", async () => {
       const invalidWalletData = {
         foo: "bar",
