@@ -1,5 +1,9 @@
 import { Coinbase } from "./coinbase";
-import { Validator as ValidatorModel, ValidatorStatus as APIValidatorStatus } from "../client/api";
+import {
+  Balance,
+  Validator as ValidatorModel,
+  ValidatorStatus as APIValidatorStatus,
+} from "../client/api";
 import { ValidatorStatus } from "./types";
 
 /**
@@ -151,11 +155,119 @@ export class Validator {
     }
   }
   /**
+   * Returns the network ID.
+   *
+   * @returns The network ID.
+   */
+  public getNetworkId(): string {
+    return this.model.network_id;
+  }
+
+  /**
+   * Returns the asset ID.
+   *
+   * @returns The asset ID.
+   */
+  public getAssetId(): string {
+    return this.model.asset_id;
+  }
+
+  /**
+   * Returns the activation epoch of the validator.
+   *
+   * @returns The activation epoch as a string.
+   */
+  public getActivationEpoch(): string {
+    return this.model.details?.activationEpoch || "";
+  }
+
+  /**
+   * Returns the balance of the validator.
+   *
+   * @returns The balance object.
+   */
+  public getBalance(): Balance | undefined {
+    return this.model.details?.balance;
+  }
+
+  /**
+   * Returns the effective balance of the validator.
+   *
+   * @returns The effective balance object.
+   */
+  public getEffectiveBalance(): Balance | undefined {
+    return this.model.details?.effective_balance;
+  }
+
+  /**
+   * Returns the exit epoch of the validator.
+   *
+   * @returns The exit epoch as a string.
+   */
+  public getExitEpoch(): string {
+    return this.model.details?.exitEpoch || "";
+  }
+
+  /**
+   * Returns the index of the validator.
+   *
+   * @returns The validator index as a string.
+   */
+  public getIndex(): string {
+    return this.model.details?.index || "";
+  }
+
+  /**
+   * Returns the public key of the validator.
+   *
+   * @returns The validator's public key as a string.
+   */
+  public getPublicKey(): string {
+    return this.model.details?.public_key || "";
+  }
+
+  /**
+   * Returns whether the validator has been slashed.
+   *
+   * @returns True if the validator has been slashed, false otherwise.
+   */
+  public isSlashed(): boolean {
+    return this.model.details?.slashed || false;
+  }
+
+  /**
+   * Returns the withdrawable epoch of the validator.
+   *
+   * @returns The withdrawable epoch as a string.
+   */
+  public getWithdrawableEpoch(): string {
+    return this.model.details?.withdrawableEpoch || "";
+  }
+
+  /**
+   * Returns the withdrawal address of the validator.
+   *
+   * @returns The withdrawal address as a string.
+   */
+  public getWithdrawalAddress(): string {
+    return this.model.details?.withdrawal_address || "";
+  }
+
+  /**
    * Returns the string representation of the Validator.
    *
    * @returns The string representation of the Validator.
    */
   public toString(): string {
     return `Id: ${this.getValidatorId()} Status: ${this.getStatus()}`;
+  }
+
+  /**
+   * Returns the JSON representation of the Validator.
+   *
+   * @returns The JSON representation of the Validator.
+   */
+  public toJSON(): string {
+    return JSON.stringify(this.model);
   }
 }
