@@ -5,7 +5,6 @@ import {
   ValidatorStatus as APIValidatorStatus,
 } from "../client/api";
 import { ValidatorStatus } from "./types";
-import { BalanceMap } from "./balance_map";
 
 /**
  * A representation of a validator onchain.
@@ -255,12 +254,12 @@ export class Validator {
   }
 
   /**
-   * Returns the string representation of the Validator including all its details.
+   * Returns the string representation of the Validator.
    *
-   * @returns The string representation of the Validator including all its details.
+   * @returns The string representation of the Validator.
    */
   public toString(): string {
-    return `Validator { Id: ${this.getValidatorId()}, Status: ${this.getStatus()}, Exit Epoch: ${this.getExitEpoch()}, Network ID: ${this.getNetworkId()}, Asset ID: ${this.getAssetId()}, Index: ${this.getIndex()}, Public Key: ${this.getPublicKey()}, Slashed: ${this.isSlashed()}, Withdrawable Epoch: ${this.getWithdrawableEpoch()}, Withdrawal Address: ${this.getWithdrawalAddress()}, Effective Balance: { Amount: ${this.getEffectiveBalance()?.amount}, AssetID: { ${this.getEffectiveBalance()?.asset.asset_id}, Decimals: ${this.getEffectiveBalance()?.asset.decimals}, NetworkID: ${this.getEffectiveBalance()?.asset.network_id} } }, Balance: { Amount ${this.getBalance()?.amount}, Asset: { AssetID: ${this.getBalance()?.asset.asset_id}, Decimals: ${this.getBalance()?.asset.decimals}, NetworkID: ${this.getBalance()?.asset.network_id} } }, Activation Epoch: ${this.getActivationEpoch()} }`;
+    return `Id: ${this.getValidatorId()} Status: ${this.getStatus()}`;
   }
 
   /**
