@@ -40,6 +40,15 @@ export class SmartContract {
   }
 
   /**
+   * Returns whether the SmartContract is external.
+   *
+   * @returns True if the SmartContract is external, false otherwise.
+   */
+  public get isExternal(): boolean {
+    return this.model.is_external;
+  }
+
+  /**
    * Returns a list of ContractEvents for the provided network, contract, and event details.
    *
    * @param networkId - The network ID.
@@ -124,8 +133,10 @@ export class SmartContract {
    *
    * @returns The Wallet ID.
    */
-  public getWalletId(): string {
-    return this.model.wallet_id;
+  public getWalletId(): string | undefined {
+    if (!this.model.wallet_id) return undefined;
+
+    return this.model.wallet_id!;
   }
 
   /**
@@ -142,8 +153,10 @@ export class SmartContract {
    *
    * @returns The Deployer Address.
    */
-  public getDeployerAddress(): string {
-    return this.model.deployer_address;
+  public getDeployerAddress(): string | undefined {
+    if (!this.model.deployer_address) return undefined;
+
+    return this.model.deployer_address!;
   }
 
   /**
@@ -159,6 +172,8 @@ export class SmartContract {
         return SmartContractType.ERC721;
       case SmartContractTypeModel.Erc1155:
         return SmartContractType.ERC1155;
+      case SmartContractTypeModel.Custom:
+        return SmartContractType.CUSTOM;
       default:
         throw new Error(`Unknown smart contract type: ${this.model.type}`);
     }
@@ -170,21 +185,26 @@ export class SmartContract {
    * @returns The Smart Contract Options.
    */
   public getOptions(): SmartContractOptions {
-    if (this.isERC20(this.getType(), this.model.options)) {
+    if (this.isExternal)
+      throw new Error("SmartContract options cannot be returned for external SmartContract");
+
+    const options = this.model.options!;
+
+    if (this.isERC20(this.getType(), options)) {
       return {
-        name: this.model.options.name,
-        symbol: this.model.options.symbol,
-        totalSupply: this.model.options.total_supply,
+        name: options.name,
+        symbol: options.symbol,
+        totalSupply: options.total_supply,
       } as TokenContractOptions;
-    } else if (this.isERC721(this.getType(), this.model.options)) {
+    } else if (this.isERC721(this.getType(), options)) {
       return {
-        name: this.model.options.name,
-        symbol: this.model.options.symbol,
-        baseURI: this.model.options.base_uri,
+        name: options.name,
+        symbol: options.symbol,
+        baseURI: options.base_uri,
       } as NFTContractOptions;
     } else {
       return {
-        uri: this.model.options.uri,
+        uri: options.uri,
       } as MultiTokenContractOptions;
     }
   }
@@ -203,8 +223,10 @@ export class SmartContract {
    *
    * @returns The Transaction.
    */
-  public getTransaction(): Transaction {
-    return new Transaction(this.model.transaction);
+  public getTransaction(): Transaction | undefined {
+    if (this.isExternal) return undefined;
+
+    return new Transaction(this.model.transaction!);
   }
 
   /**
@@ -215,7 +237,9 @@ export class SmartContract {
    * @returns The hex-encoded signed payload
    */
   async sign(key: ethers.Wallet): Promise<string> {
-    return this.getTransaction().sign(key);
+    if (this.isExternal) throw new Error("Cannot sign an external SmartContract");
+
+    return this.getTransaction()!.sign(key);
   }
 
   /**
@@ -225,7 +249,9 @@ export class SmartContract {
    * @throws {APIError} if the API request to broadcast a SmartContract deployment fails.
    */
   public async broadcast(): Promise<SmartContract> {
-    if (!this.getTransaction().isSigned())
+    if (this.isExternal) throw new Error("Cannot broadcast an external SmartContract");
+
+    if (!this.getTransaction()!.isSigned())
       throw new Error("Cannot broadcast unsigned SmartContract deployment");
 
     const deploySmartContractRequest: DeploySmartContractRequest = {
@@ -233,8 +259,8 @@ export class SmartContract {
     };
 
     const response = await Coinbase.apiClients.smartContract!.deploySmartContract(
-      this.getWalletId(),
-      this.getDeployerAddress(),
+      this.getWalletId()!,
+      this.getDeployerAddress()!,
       this.getId(),
       deploySmartContractRequest,
     );
@@ -255,13 +281,15 @@ export class SmartContract {
    * @throws {Error} if the SmartContract deployment times out.
    */
   public async wait({ intervalSeconds = 0.2, timeoutSeconds = 10 } = {}): Promise<SmartContract> {
+    if (this.isExternal) throw new Error("Cannot wait for an external SmartContract");
+
     const startTime = Date.now();
 
     while (Date.now() - startTime < timeoutSeconds * 1000) {
       await this.reload();
 
       // If the SmartContract deployment is in a terminal state, return the SmartContract.
-      const status = this.getTransaction().getStatus();
+      const status = this.getTransaction()!.getStatus();
       if (status === TransactionStatus.COMPLETE || status === TransactionStatus.FAILED) {
         return this;
       }
@@ -278,9 +306,11 @@ export class SmartContract {
    * @throws {APIError} if the API request to get a SmartContract fails.
    */
   public async reload(): Promise<void> {
+    if (this.isExternal) throw new Error("Cannot reload an external SmartContract");
+
     const result = await Coinbase.apiClients.smartContract!.getSmartContract(
-      this.getWalletId(),
-      this.getDeployerAddress(),
+      this.getWalletId()!,
+      this.getDeployerAddress()!,
       this.getId(),
     );
     this.model = result?.data;

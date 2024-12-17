@@ -1556,7 +1556,7 @@ describe("WalletAddress", () => {
 
         walletAddress = new WalletAddress(addressModel, key as unknown as ethers.Wallet);
 
-        const tx = new Transaction(VALID_SMART_CONTRACT_ERC20_MODEL.transaction);
+        const tx = new Transaction(VALID_SMART_CONTRACT_ERC20_MODEL.transaction!);
         expectedSignedPayload = await tx.sign(key as unknown as ethers.Wallet);
       });
 
@@ -1852,7 +1852,7 @@ describe("WalletAddress", () => {
 
         walletAddress = new WalletAddress(addressModel, key as unknown as ethers.Wallet);
 
-        const tx = new Transaction(VALID_SMART_CONTRACT_ERC721_MODEL.transaction);
+        const tx = new Transaction(VALID_SMART_CONTRACT_ERC721_MODEL.transaction!);
         expectedSignedPayload = await tx.sign(key as unknown as ethers.Wallet);
       });
 
@@ -2148,7 +2148,7 @@ describe("WalletAddress", () => {
 
         walletAddress = new WalletAddress(addressModel, key as unknown as ethers.Wallet);
 
-        const tx = new Transaction(VALID_SMART_CONTRACT_ERC1155_MODEL.transaction);
+        const tx = new Transaction(VALID_SMART_CONTRACT_ERC1155_MODEL.transaction!);
         expectedSignedPayload = await tx.sign(key as unknown as ethers.Wallet);
       });
 

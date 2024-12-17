@@ -961,6 +961,7 @@ export enum SmartContractType {
   ERC20 = "erc20",
   ERC721 = "erc721",
   ERC1155 = "erc1155",
+  CUSTOM = "custom",
 }
 
 /**
@@ -1356,18 +1357,15 @@ export type ContractInvocationAPIClient = {
 
 export interface SmartContractAPIClient {
   /**
-   * List smart contracts belonging to the user for a given wallet and address.
+   * List smart contracts belonging to the CDP project.
    *
    * @summary List smart contracts belonging to the CDP project
-   * @param walletId - The ID of the wallet the address belongs to.
-   * @param addressId - The ID of the address to list smart contracts for.
+   * @param page - A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
    * @param options - Axios request options.
    * @throws {APIError} If the request fails.
    */
-
   listSmartContracts(
-    walletId: string,
-    addressId: string,
+    page?: string,
     options?: RawAxiosRequestConfig,
   ): AxiosPromise<SmartContractList>;
 

@@ -16,6 +16,7 @@ import {
   ERC721_BASE_URI,
   VALID_SMART_CONTRACT_ERC1155_MODEL,
   ERC1155_URI,
+  VALID_SMART_CONTRACT_EXTERNAL_MODEL,
 } from "./utils";
 import { SmartContract } from "../coinbase/smart_contract";
 import { ContractEvent } from "../coinbase/contract_event";
@@ -34,6 +35,10 @@ describe("SmartContract", () => {
   let erc721SmartContract: SmartContract = SmartContract.fromModel(erc721Model);
   let erc1155Model: SmartContractModel = VALID_SMART_CONTRACT_ERC1155_MODEL;
   let erc1155SmartContract: SmartContract = SmartContract.fromModel(erc1155Model);
+
+  let externalModel: SmartContractModel = VALID_SMART_CONTRACT_EXTERNAL_MODEL;
+  let externalSmartContract: SmartContract = SmartContract.fromModel(externalModel);
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -74,11 +79,25 @@ describe("SmartContract", () => {
     });
   });
 
+  describe('#getWalletId', () => {
+    it("returns the smart contract wallet ID", () => {
+      expect(erc20SmartContract.getWalletId()).toEqual(VALID_SMART_CONTRACT_ERC20_MODEL.wallet_id);
+    });
+
+    it("returns undefined for external contracts", () => {
+      expect(externalSmartContract.getWalletId()).toBeUndefined();
+    });
+  });
+
   describe("#getDeployerAddress", () => {
     it("returns the smart contract deployer address", () => {
       expect(erc20SmartContract.getDeployerAddress()).toEqual(
         VALID_SMART_CONTRACT_ERC20_MODEL.deployer_address,
       );
+    });
+
+    it("returns undefined for external contracts", () => {
+      expect(externalSmartContract.getDeployerAddress()).toBeUndefined();
     });
   });
 
@@ -129,15 +148,19 @@ describe("SmartContract", () => {
   describe("#getTransaction", () => {
     it("returns the smart contract transaction", () => {
       expect(erc20SmartContract.getTransaction()).toEqual(
-        new Transaction(VALID_SMART_CONTRACT_ERC20_MODEL.transaction),
+        new Transaction(VALID_SMART_CONTRACT_ERC20_MODEL.transaction!),
       );
+    });
+
+    it("returns undefined for external contracts", () => {
+      expect(externalSmartContract.getTransaction()).toBeUndefined();
     });
   });
 
   describe("#sign", () => {
     let signingKey: any = ethers.Wallet.createRandom();
 
-    it("return the signature", async () => {
+    it("returns the signature", async () => {
       const smartContract = SmartContract.fromModel({
         ...VALID_SMART_CONTRACT_ERC20_MODEL,
         transaction: {
@@ -149,6 +172,12 @@ describe("SmartContract", () => {
       const signature = await smartContract.sign(signingKey);
 
       expect(signature).toEqual(smartContract.getTransaction()!.getSignature()!);
+    });
+
+    it("throws an error for external contracts", async () => {
+      expect(externalSmartContract.sign(signingKey)).rejects.toThrow(
+        "Cannot sign an external SmartContract",
+      );
     });
   });
 
@@ -168,7 +197,7 @@ describe("SmartContract", () => {
       });
     });
 
-    describe("when it was successful", () => {
+    describe("when it is successful", () => {
       let broadcastedSmartContract: SmartContract;
 
       beforeEach(async () => {
@@ -186,7 +215,7 @@ describe("SmartContract", () => {
 
       it("returns the broadcasted smart contract", async () => {
         expect(broadcastedSmartContract).toBeInstanceOf(SmartContract);
-        expect(broadcastedSmartContract.getTransaction().getStatus()).toEqual(
+        expect(broadcastedSmartContract.getTransaction()!.getStatus()).toEqual(
           TransactionStatus.BROADCAST,
         );
       });
@@ -236,6 +265,14 @@ describe("SmartContract", () => {
         expect(erc20SmartContract.broadcast()).rejects.toThrow(APIError);
       });
     });
+
+    describe("when the contract is external", () => {
+      it("throws an error", async () => {
+        expect(externalSmartContract.broadcast()).rejects.toThrow(
+          "Cannot broadcast an external SmartContract",
+        );
+      });
+    });
   });
 
   describe("#wait", () => {
@@ -253,7 +290,7 @@ describe("SmartContract", () => {
       it("successfully waits and returns", async () => {
         const completedSmartContract = await erc20SmartContract.wait();
         expect(completedSmartContract).toBeInstanceOf(SmartContract);
-        expect(completedSmartContract.getTransaction().getStatus()).toEqual(
+        expect(completedSmartContract.getTransaction()!.getStatus()).toEqual(
           TransactionStatus.COMPLETE,
         );
       });
@@ -273,7 +310,7 @@ describe("SmartContract", () => {
       it("successfully waits and returns a failed invocation", async () => {
         const completedSmartContract = await erc20SmartContract.wait();
         expect(completedSmartContract).toBeInstanceOf(SmartContract);
-        expect(completedSmartContract.getTransaction().getStatus()).toEqual(
+        expect(completedSmartContract.getTransaction()!.getStatus()).toEqual(
           TransactionStatus.FAILED,
         );
       });
@@ -296,6 +333,14 @@ describe("SmartContract", () => {
         ).rejects.toThrow(new TimeoutError("SmartContract deployment timed out"));
       });
     });
+    
+    describe("when the contract is external", () => {
+      it("throws an error", async () => {
+        expect(externalSmartContract.wait()).rejects.toThrow(
+          "Cannot wait for an external SmartContract",
+        );
+      });
+    });
   });
 
   describe("#reload", () => {
@@ -308,8 +353,12 @@ describe("SmartContract", () => {
         },
       });
       await erc20SmartContract.reload();
-      expect(erc20SmartContract.getTransaction().getStatus()).toEqual(TransactionStatus.COMPLETE);
+      expect(erc20SmartContract.getTransaction()!.getStatus()).toEqual(TransactionStatus.COMPLETE);
       expect(Coinbase.apiClients.smartContract!.getSmartContract).toHaveBeenCalledTimes(1);
+    });
+
+    it("throws an error when the smart contract is external", async () => {
+      expect(externalSmartContract.reload()).rejects.toThrow("Cannot reload an external SmartContract");
     });
   });
 
