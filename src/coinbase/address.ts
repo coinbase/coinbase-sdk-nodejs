@@ -305,6 +305,9 @@ export class Address {
    * @throws {Error} if the Address reputation is not available.
    */
   public async reputation(): Promise<AddressReputation> {
+    if (this._reputation) {
+      return this._reputation;
+    }
     const response = await Coinbase.apiClients.addressReputation!.getAddressReputation(
       this.getNetworkId(),
       this.getId(),
@@ -312,15 +315,6 @@ export class Address {
 
     this._reputation = new AddressReputation(response.data);
     return this._reputation;
-  }
-
-  /**
-   * Returns whether Address's reputation is risky.
-   *
-   * @returns {boolean} true if the Address's reputation is risky
-   */
-  public risky(): boolean {
-    return this._reputation?.risky ?? false;
   }
 
   /**

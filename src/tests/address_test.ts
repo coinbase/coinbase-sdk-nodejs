@@ -271,7 +271,7 @@ describe("Address", () => {
     });
   });
 
-  describe(".reputation", () => {
+  describe("#reputation", () => {
     beforeEach(() => {
       const mockReputationResponse: AddressReputation = {
         score: 90,
@@ -308,7 +308,6 @@ describe("Address", () => {
         total_transactions: 7,
         unique_days_active: 8,
       });
-      expect(address.risky).toBe(false);
       expect(Coinbase.apiClients.addressReputation!.getAddressReputation).toHaveBeenCalledTimes(1);
       expect(Coinbase.apiClients.addressReputation!.getAddressReputation).toHaveBeenCalledWith(
         address.getNetworkId(),
