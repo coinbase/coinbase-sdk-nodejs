@@ -801,6 +801,10 @@ export const fundOperationsApiMock = {
   createFundQuote: jest.fn(),
 };
 
+export const reputationApiMock = {
+  getAddressReputation: jest.fn(),
+};
+
 export const testAllReadTypesABI = [
   {
     type: "function",

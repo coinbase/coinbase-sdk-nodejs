@@ -61,6 +61,7 @@ import {
   FundOperationList,
   CreateFundOperationRequest,
   CreateFundQuoteRequest,
+  AddressReputation,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -727,6 +728,7 @@ export type ApiClients = {
   transactionHistory?: TransactionHistoryApiClient;
   smartContract?: SmartContractAPIClient;
   fund?: FundOperationApiClient;
+  addressReputation?: AddressReputationApiClient;
 };
 
 /**
@@ -1501,6 +1503,22 @@ export interface FundOperationApiClient {
     createFundQuoteRequest: CreateFundQuoteRequest,
     options?: RawAxiosRequestConfig,
   ): AxiosPromise<FundQuoteModel>;
+}
+
+export interface AddressReputationApiClient {
+  /**
+   * Get the reputation of an address
+   *
+   * @param networkId - The ID of the blockchain network
+   * @param addressId - The ID of the address to fetch the reputation for
+   * @param options - Override http request option.
+   * @throws {APIError} If the request fails.
+   */
+  getAddressReputation(
+    networkId: string,
+    addressId: string,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<AddressReputation>;
 }
 
 /**

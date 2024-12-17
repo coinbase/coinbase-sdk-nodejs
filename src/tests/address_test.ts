@@ -1,12 +1,13 @@
 import { Coinbase } from "../coinbase/coinbase";
 import { Address, TransactionStatus } from "../index";
-import { AddressHistoricalBalanceList, AddressTransactionList } from "../client";
+import { AddressHistoricalBalanceList, AddressTransactionList, AddressReputation } from "../client";
 import {
   VALID_ADDRESS_MODEL,
   mockReturnValue,
   newAddressModel,
   balanceHistoryApiMock,
   transactionHistoryApiMock,
+  reputationApiMock,
 } from "./utils";
 import Decimal from "decimal.js";
 import { randomUUID } from "crypto";
@@ -267,6 +268,51 @@ describe("Address", () => {
         undefined,
       );
       expect(paginationResponse.nextPage).toEqual("next page");
+    });
+  });
+
+  describe("#reputation", () => {
+    beforeEach(() => {
+      const mockReputationResponse: AddressReputation = {
+        score: 90,
+        metadata: {
+          activity_period_days: 1,
+          bridge_transactions_performed: 1,
+          current_active_streak: 1,
+          ens_contract_interactions: 2,
+          lend_borrow_stake_transactions: 3,
+          longest_active_streak: 4,
+          smart_contract_deployments: 5,
+          token_swaps_performed: 6,
+          total_transactions: 7,
+          unique_days_active: 8,
+        },
+      };
+      Coinbase.apiClients.addressReputation = reputationApiMock;
+      Coinbase.apiClients.addressReputation!.getAddressReputation =
+        mockReturnValue(mockReputationResponse);
+    });
+
+    it("should return address reputation", async () => {
+      const reputation = await address.reputation();
+      expect(reputation.score).toEqual(90);
+      expect(reputation.metadata).toEqual({
+        activity_period_days: 1,
+        bridge_transactions_performed: 1,
+        current_active_streak: 1,
+        ens_contract_interactions: 2,
+        lend_borrow_stake_transactions: 3,
+        longest_active_streak: 4,
+        smart_contract_deployments: 5,
+        token_swaps_performed: 6,
+        total_transactions: 7,
+        unique_days_active: 8,
+      });
+      expect(Coinbase.apiClients.addressReputation!.getAddressReputation).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.addressReputation!.getAddressReputation).toHaveBeenCalledWith(
+        address.getNetworkId(),
+        address.getId(),
+      );
     });
   });
 });
