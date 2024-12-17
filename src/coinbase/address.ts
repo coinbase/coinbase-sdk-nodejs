@@ -297,6 +297,7 @@ export class Address {
     );
     return new FaucetTransaction(response.data);
   }
+
   /**
    * Returns the reputation of the Address.
    *
@@ -308,6 +309,7 @@ export class Address {
     if (this._reputation) {
       return this._reputation;
     }
+
     const response = await Coinbase.apiClients.addressReputation!.getAddressReputation(
       this.getNetworkId(),
       this.getId(),

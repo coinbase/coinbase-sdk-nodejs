@@ -40,55 +40,57 @@ describe("AddressReputation for risky address", () => {
     });
   });
 
-  it("returns the risky as true for score < 0", () => {
-    expect(addressReputation.risky).toBe(true);
-  });
-
   it("returns the string representation of the address reputation", () => {
     expect(addressReputation.toString()).toBe(
       "AddressReputation(score: -90, metadata: {unique_days_active: 1, total_transactions: 1, token_swaps_performed: 1, bridge_transactions_performed: 1, smart_contract_deployments: 1, longest_active_streak: 1, lend_borrow_stake_transactions: 1, ens_contract_interactions: 1, current_active_streak: 1, activity_period_days: 1})",
     );
   });
 
-  it("should return risky as false for a score > 0", () => {
-    addressReputation = new AddressReputation({
-      score: 90,
-      metadata: {
-        unique_days_active: 1,
-        total_transactions: 1,
-        token_swaps_performed: 1,
-        bridge_transactions_performed: 1,
-        smart_contract_deployments: 1,
-        longest_active_streak: 1,
-        lend_borrow_stake_transactions: 1,
-        ens_contract_interactions: 1,
-        current_active_streak: 1,
-        activity_period_days: 1,
-      },
-    });
-    expect(addressReputation.risky).toBe(false);
-  });
-
-  it("should return risky as false for a score=0", () => {
-    addressReputation = new AddressReputation({
-      score: 0,
-      metadata: {
-        unique_days_active: 1,
-        total_transactions: 1,
-        token_swaps_performed: 1,
-        bridge_transactions_performed: 1,
-        smart_contract_deployments: 1,
-        longest_active_streak: 1,
-        lend_borrow_stake_transactions: 1,
-        ens_contract_interactions: 1,
-        current_active_streak: 1,
-        activity_period_days: 1,
-      },
-    });
-    expect(addressReputation.risky).toBe(false);
-  });
-
   it("should throw an error for an empty model", () => {
     expect(() => new AddressReputation(null!)).toThrow("Address reputation model cannot be empty");
+  });
+
+  describe("#risky", () => {
+    it("returns the risky as true for score < 0", () => {
+      expect(addressReputation.risky).toBe(true);
+    });
+
+    it("should return risky as false for a score > 0", () => {
+      addressReputation = new AddressReputation({
+        score: 90,
+        metadata: {
+          unique_days_active: 1,
+          total_transactions: 1,
+          token_swaps_performed: 1,
+          bridge_transactions_performed: 1,
+          smart_contract_deployments: 1,
+          longest_active_streak: 1,
+          lend_borrow_stake_transactions: 1,
+          ens_contract_interactions: 1,
+          current_active_streak: 1,
+          activity_period_days: 1,
+        },
+      });
+      expect(addressReputation.risky).toBe(false);
+    });
+
+    it("should return risky as false for a score=0", () => {
+      addressReputation = new AddressReputation({
+        score: 0,
+        metadata: {
+          unique_days_active: 1,
+          total_transactions: 1,
+          token_swaps_performed: 1,
+          bridge_transactions_performed: 1,
+          smart_contract_deployments: 1,
+          longest_active_streak: 1,
+          lend_borrow_stake_transactions: 1,
+          ens_contract_interactions: 1,
+          current_active_streak: 1,
+          activity_period_days: 1,
+        },
+      });
+      expect(addressReputation.risky).toBe(false);
+    });
   });
 });
