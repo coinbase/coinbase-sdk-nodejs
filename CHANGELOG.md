@@ -1,6 +1,9 @@
 # Coinbase Node.js SDK Changelog
 
 ## Unreleased
+* Add support for fetching address reputation.
+
+## [0.12.0] - Skipped
 
 ### [0.11.3] - 2024-12-10
 

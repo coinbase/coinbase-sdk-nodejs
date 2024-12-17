@@ -16,6 +16,7 @@ import { formatDate, getWeekBackDate } from "./utils";
 import { StakingReward } from "./staking_reward";
 import { StakingBalance } from "./staking_balance";
 import { Transaction } from "./transaction";
+import { AddressReputation } from "./address_reputation";
 
 /**
  * A representation of a blockchain address, which is a user-controlled account on a network.
@@ -25,6 +26,7 @@ export class Address {
 
   protected networkId: string;
   protected id: string;
+  protected _reputation?: AddressReputation;
 
   /**
    * Initializes a new Address instance.
@@ -294,6 +296,31 @@ export class Address {
       true, // Skip waiting for confirmation server-side.
     );
     return new FaucetTransaction(response.data);
+  }
+  /**
+   * Returns the reputation of the Address.
+   *
+   * @returns The reputation of the Address.
+   * @throws {Error} if the API request to get the Address reputation fails.
+   * @throws {Error} if the Address reputation is not available.
+   */
+  public async reputation(): Promise<AddressReputation> {
+    const response = await Coinbase.apiClients.addressReputation!.getAddressReputation(
+      this.getNetworkId(),
+      this.getId(),
+    );
+
+    this._reputation = new AddressReputation(response.data);
+    return this._reputation;
+  }
+
+  /**
+   * Returns whether Address's reputation is risky.
+   *
+   * @returns {boolean} true if the Address's reputation is risky
+   */
+  public risky(): boolean {
+    return this._reputation?.risky ?? false;
   }
 
   /**
