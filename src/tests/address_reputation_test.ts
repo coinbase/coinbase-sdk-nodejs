@@ -87,4 +87,8 @@ describe("AddressReputation for risky address", () => {
     });
     expect(addressReputation.risky).toBe(false);
   });
+
+  it("should throw an error for an empty model", () => {
+    expect(() => new AddressReputation(null!)).toThrow("Address reputation model cannot be empty");
+  });
 });
