@@ -1,6 +1,6 @@
 import { AddressReputation } from "../coinbase/address_reputation";
 
-describe("AddressReputation for risky address", () => {
+describe("AddressReputation", () => {
   let addressReputation: AddressReputation;
 
   beforeEach(() => {
