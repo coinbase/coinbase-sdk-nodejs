@@ -5,6 +5,7 @@
 ### Added
 
 - Add getters for `Validator` object to expose more data to users.
+- Add test file for `Validator` object.
 
 ### [0.11.3] - 2024-12-10
 
