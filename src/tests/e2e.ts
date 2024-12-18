@@ -54,13 +54,13 @@ describe("Coinbase SDK E2E Test", () => {
     const walletId = Object.keys(seedFile)[0];
     const seed = seedFile[walletId].seed;
 
-    const importedWallet = await Wallet.load({ seed, walletId });
+    const importedWallet = await Wallet.import({ seed, walletId });
     expect(importedWallet).toBeDefined();
     expect(importedWallet.getId()).toBe(walletId);
     console.log(
       `Imported wallet with ID: ${importedWallet.getId()}, default address: ${importedWallet.getDefaultAddress()}`,
     );
-    await importedWallet.saveSeed("test_seed.json");
+    await importedWallet.saveSeedToFile("test_seed.json");
 
     try {
       const transaction = await importedWallet.faucet();
@@ -84,13 +84,13 @@ describe("Coinbase SDK E2E Test", () => {
     expect(exportedWallet.seed).toBeDefined();
 
     console.log("Saving seed to file...");
-    await wallet.saveSeed("test_seed.json");
+    await wallet.saveSeedToFile("test_seed.json");
     expect(fs.existsSync("test_seed.json")).toBe(true);
     console.log("Saved seed to test_seed.json");
 
     const unhydratedWallet = await Wallet.fetch(walletId);
     expect(unhydratedWallet.canSign()).toBe(false);
-    await unhydratedWallet.loadSeed("test_seed.json");
+    await unhydratedWallet.loadSeedFromFile("test_seed.json");
     expect(unhydratedWallet.canSign()).toBe(true);
     expect(unhydratedWallet.getId()).toBe(walletId);
 
@@ -133,7 +133,7 @@ describe("Coinbase SDK E2E Test", () => {
     fs.unlinkSync("test_seed.json");
 
     expect(exportedWallet.seed.length).toBe(64);
-    expect(savedSeed[exportedWallet.walletId]).toEqual({
+    expect(savedSeed[exportedWallet.walletId!]).toEqual({
       seed: exportedWallet.seed,
       encrypted: false,
       authTag: "",

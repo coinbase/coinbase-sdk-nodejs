@@ -812,41 +812,70 @@ export enum FundOperationStatus {
 }
 
 /**
- * The Wallet Data type definition in camelCase format.
- * The data required to recreate a Wallet.
+ * Interface representing wallet data, with support for both camelCase and snake_case
+ * property names for compatibility with older versions of the Python SDK.
  */
-export type WalletData = {
-  walletId: string;
-  seed: string;
-};
+export interface WalletData {
+  /**
+   * The CDP wallet ID in either camelCase or snake_case format, but not both.
+   */
+  walletId?: string;
+  wallet_id?: string;
 
-/**
- * The Wallet Data type definition in snake_case format.
- * The data required to recreate a Wallet.
- */
-export type WalletDataSnake = {
-  wallet_id: string;
+  /**
+   * The wallet seed
+   */
   seed: string;
-};
-
-/**
- * Type guard to check if data matches the snake_case WalletDataSnake format.
- *
- * @param data - The data to check
- * @returns True if data matches WalletDataSnake format
- */
-export function isWalletDataSnake(data: unknown): data is WalletDataSnake {
-  return typeof data === "object" && data !== null && "wallet_id" in data && "seed" in data;
 }
 
 /**
- * Type guard to check if data matches the camelCase WalletData format.
+ * Type guard to check if data matches the appropriate WalletData format.
+ * WalletData must have exactly one of (walletId or wallet_id), and a seed.
  *
  * @param data - The data to check
- * @returns True if data matches WalletData format
+ * @returns True if data matches the appropriate WalletData format
  */
 export function isWalletData(data: unknown): data is WalletData {
-  return typeof data === "object" && data !== null && "walletId" in data && "seed" in data;
+  if (typeof data !== "object" || data === null) {
+    return false;
+  }
+
+  const { walletId, wallet_id, seed } = data as WalletData;
+
+  // Check that exactly one of walletId or wallet_id is present (but not both)
+  const hasWalletId = typeof walletId === "string";
+  const hasWalletSnakeId = typeof wallet_id === "string";
+  if (!(hasWalletId !== hasWalletSnakeId)) {
+    return false;
+  }
+  const hasSeed = typeof seed === "string";
+
+  return hasSeed;
+}
+
+/**
+ * Interface representing a BIP-39 mnemonic seed phrase.
+ */
+export interface MnemonicSeedPhrase {
+  /**
+   * The BIP-39 mnemonic seed phrase (12, 15, 18, 21, or 24 words)
+   */
+  mnemonicPhrase: string;
+}
+
+/**
+ * Type guard to check if data matches the MnemonicSeedPhrase format.
+ *
+ * @param data - The data to check
+ * @returns True if data matches the MnemonicSeedPhrase format
+ */
+export function isMnemonicSeedPhrase(data: unknown): data is MnemonicSeedPhrase {
+  if (typeof data !== "object" || data === null) {
+    return false;
+  }
+
+  const { mnemonicPhrase } = data as MnemonicSeedPhrase;
+  return typeof mnemonicPhrase === "string";
 }
 
 /**

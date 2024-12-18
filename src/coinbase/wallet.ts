@@ -29,9 +29,9 @@ import {
   StakeOptionsMode,
   WalletCreateOptions,
   WalletData,
-  WalletDataSnake,
   isWalletData,
-  isWalletDataSnake,
+  MnemonicSeedPhrase,
+  isMnemonicSeedPhrase,
   CreateERC20Options,
   CreateERC721Options,
   CreateERC1155Options,
@@ -136,78 +136,63 @@ export class Wallet {
   }
 
   /**
-   * Imports an external wallet into CDP using a BIP-39 mnemonic seed phrase.
+   * Loads an existing CDP Wallet using a wallet data object or mnemonic seed phrase.
    *
-   * @param mnemonicSeedPhrase - The BIP-39 mnemonic seed phrase (12, 15, 18, 21, or 24 words).
-   * @returns The imported Wallet.
-   * @throws {ArgumentError} If the seed phrase is not provided or invalid.
-   * @throws {ArgumentError} If the seed phrase is not 12, 15, 18, 21, or 24 words.
-   * @throws {APIError} If the request fails.
-   */
-  public static async importFromMnemonicSeedPhrase(mnemonicSeedPhrase: string): Promise<Wallet> {
-    if (!mnemonicSeedPhrase) {
-      throw new ArgumentError("BIP-39 mnemonic seed phrase must be provided");
-    }
-
-    if (!validateMnemonic(mnemonicSeedPhrase, wordlist)) {
-      throw new ArgumentError("Invalid BIP-39 mnemonic seed phrase");
-    }
-
-    // Convert mnemonic phrase to seed
-    const seedBuffer = mnemonicToSeedSync(mnemonicSeedPhrase);
-    const seed = hexlify(seedBuffer).slice(2); // remove 0x prefix
-
-    // Create wallet using the provided seed
-    const wallet = await Wallet.createWithSeed({
-      seed: seed,
-      networkId: Coinbase.networks.BaseSepolia,
-    });
-
-    // Ensure the wallet is created
-    await wallet.listAddresses();
-    return wallet;
-  }
-
-  /**
-   * Loads an existing CDP Wallet using a wallet data object.
-   *
-   * @param data - The Wallet data to load.
-   * @returns The loaded Wallet.
+   * @param data - The data used to import the wallet:
+   *   - If WalletData: Must contain walletId (or wallet_id) and seed.
+   *     Allows for the loading of an existing CDP wallet into CDP.
+   *   - If MnemonicSeedPhrase: Must contain a valid BIP-39 mnemonic phrase (12, 15, 18, 21, or 24 words).
+   *     Allows for the import of an external wallet into CDP as a 1-of-1 wallet.
+   * @returns A Promise that resolves to the loaded Wallet instance
    * @throws {ArgumentError} If the data format is invalid.
    * @throws {ArgumentError} If the seed is not provided.
+   * @throws {ArgumentError} If the mnemonic seed phrase is invalid.
    */
-  public static async load(data: WalletData | WalletDataSnake): Promise<Wallet> {
-    if (!isWalletData(data) && !isWalletDataSnake(data)) {
-      throw new ArgumentError("Invalid wallet data format");
+  public static async import(data: WalletData | MnemonicSeedPhrase): Promise<Wallet> {
+    // Check if data is a mnemonic seed phrase object
+    if (isMnemonicSeedPhrase(data)) {
+      // Handle mnemonic seed phrase object import
+
+      if (!data.mnemonicPhrase) {
+        throw new ArgumentError("BIP-39 mnemonic seed phrase must be provided");
+      }
+
+      if (!validateMnemonic(data.mnemonicPhrase, wordlist)) {
+        throw new ArgumentError("Invalid BIP-39 mnemonic seed phrase");
+      }
+
+      // Convert mnemonic phrase to seed
+      const seedBuffer = mnemonicToSeedSync(data.mnemonicPhrase);
+      const seed = hexlify(seedBuffer).slice(2); // remove 0x prefix
+
+      // Create wallet using the provided seed
+      const wallet = await Wallet.createWithSeed({
+        seed: seed,
+        networkId: Coinbase.networks.BaseSepolia,
+      });
+
+      // Ensure the wallet is created
+      await wallet.listAddresses();
+      return wallet;
+    } else if (isWalletData(data)) {
+      // Handle WalletData object import
+
+      const walletId = data.walletId || data.wallet_id;
+      if (!walletId) {
+        throw new ArgumentError("Wallet ID must be provided");
+      }
+
+      if (!data.seed) {
+        throw new ArgumentError("Seed must be provided");
+      }
+
+      const walletModel = await Coinbase.apiClients.wallet!.getWallet(walletId);
+      const wallet = Wallet.init(walletModel.data, data.seed);
+      await wallet.listAddresses();
+      return wallet;
+    } else {
+      throw new ArgumentError("Invalid import data format");
     }
-
-    if ((isWalletData(data) && !data.walletId) || (isWalletDataSnake(data) && !data.wallet_id)) {
-      throw new ArgumentError("Wallet ID must be provided");
-    }
-
-    if (!data.seed) {
-      throw new ArgumentError("Seed must be provided");
-    }
-
-    const walletModel = await Coinbase.apiClients.wallet!.getWallet(
-      isWalletData(data) ? data.walletId : data.wallet_id,
-    );
-    const wallet = Wallet.init(walletModel.data, data.seed);
-    await wallet.listAddresses();
-    return wallet;
-  }
-
-  /**
-   * Loads an existing CDP wallet using a wallet data object.
-   *
-   * @deprecated Use load() instead
-   * @param data - The Wallet data to load.
-   * @returns The loaded Wallet.
-   * @throws {ArgumentError} If the data format is invalid.
-   * @throws {ArgumentError} If the seed is not provided.
-   */
-  public static async import(data: WalletData | WalletDataSnake): Promise<Wallet> {
-    return Wallet.load(data);
   }
 
   /**
@@ -677,6 +662,20 @@ export class Wallet {
   }
 
   /**
+   * Saves the seed of the Wallet to the given file.
+   *
+   * @deprecated Use saveSeedToFile() instead
+   * @param filePath - The path of the file to save the seed to
+   * @param encrypt - Whether the seed information persisted to the local file system should be
+   * encrypted or not. Data is unencrypted by default.
+   * @returns A string indicating the success of the operation
+   * @throws {Error} If the Wallet does not have a seed
+   */
+  public saveSeed(filePath: string, encrypt: boolean = false): string {
+    return this.saveSeedToFile(filePath, encrypt);
+  }
+
+  /**
    * Saves the seed of the Wallet to the given file. Wallets whose seeds are saved this way can be
    * rehydrated using load_seed. A single file can be used for multiple Wallet seeds.
    * This is an insecure method of storing Wallet seeds and should only be used for development purposes.
@@ -687,7 +686,7 @@ export class Wallet {
    * @returns A string indicating the success of the operation
    * @throws {Error} If the Wallet does not have a seed
    */
-  public saveSeed(filePath: string, encrypt: boolean = false): string {
+  public saveSeedToFile(filePath: string, encrypt: boolean = false): string {
     if (!this.master) {
       throw new Error("Cannot save Wallet without loaded seed");
     }
@@ -712,7 +711,7 @@ export class Wallet {
       iv = ivBytes.toString("hex");
     }
 
-    existingSeedsInStore[data.walletId] = {
+    existingSeedsInStore[data.walletId!] = {
       seed: seedToStore,
       encrypted: encrypt,
       authTag: authTag,
@@ -727,10 +726,21 @@ export class Wallet {
   /**
    * Loads the seed of the Wallet from the given file.
    *
+   * @deprecated Use loadSeedFromFile() instead
    * @param filePath - The path of the file to load the seed from
    * @returns A string indicating the success of the operation
    */
   public async loadSeed(filePath: string): Promise<string> {
+    return this.loadSeedFromFile(filePath);
+  }
+
+  /**
+   * Loads the seed of the Wallet from the given file.
+   *
+   * @param filePath - The path of the file to load the seed from
+   * @returns A string indicating the success of the operation
+   */
+  public async loadSeedFromFile(filePath: string): Promise<string> {
     const existingSeedsInStore = this.getExistingSeeds(filePath);
     if (Object.keys(existingSeedsInStore).length === 0) {
       throw new ArgumentError(`File ${filePath} does not contain any seed data`);

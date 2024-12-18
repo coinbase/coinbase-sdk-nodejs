@@ -26,7 +26,7 @@ const webhookNotificationUri = process.env.WEBHOOK_NOTIFICATION_URL;
   // Create Wallet
   else {
     myWallet = await Wallet.create();
-    const saveSeed = myWallet.saveSeed(seedPath);
+    const saveSeed = myWallet.saveSeedToFile(seedPath);
     console.log("✅ Seed saved: ", saveSeed);
   }
 
