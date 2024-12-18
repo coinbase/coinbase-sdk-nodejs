@@ -126,6 +126,7 @@ describe("Coinbase SDK E2E Test", () => {
       result = await (await unhydratedWallet.getDefaultAddress()).listTransactions({ limit: 1 });
       if (result?.data.length > 0) break;
       // Wait 2 seconds between attempts
+      console.log(`Waiting for transaction to be processed... (${i + 1} attempts)`);
       await new Promise(resolve => setTimeout(resolve, 2000));
     }
     expect(result?.data.length).toBeGreaterThan(0);
