@@ -120,11 +120,15 @@ describe("Coinbase SDK E2E Test", () => {
     console.log(`Second address balances: ${secondBalance}`);
 
     console.log("Fetching address transactions...");
-    const result = await (
-      await unhydratedWallet.getDefaultAddress()
-    ).listTransactions({ limit: 1 });
+    let result;
+    for (let i = 0; i < 5; i++) {
+      // Try up to 5 times
+      result = await (await unhydratedWallet.getDefaultAddress()).listTransactions({ limit: 1 });
+      if (result?.data.length > 0) break;
+      // Wait 2 seconds between attempts
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
     expect(result?.data.length).toBeGreaterThan(0);
-    console.log(`Fetched transactions: ${result?.data[0].toString()}`);
 
     console.log("Fetching address historical balances...");
     const balance_result = await (
