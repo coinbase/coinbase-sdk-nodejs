@@ -331,6 +331,7 @@ export const VALID_SMART_CONTRACT_ERC20_MODEL: SmartContractModel = {
 };
 
 export const VALID_EXTERNAL_SMART_CONTRACT_ERC20_MODEL: SmartContractModel = {
+  smart_contract_id: "test-smart-contract-1",
   network_id: Coinbase.networks.BaseSepolia,
   contract_name: ERC20_NAME,
   is_external: true,
