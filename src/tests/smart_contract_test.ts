@@ -59,7 +59,7 @@ describe("SmartContract", () => {
     });
   });
 
-  describe("SmartContract.register", () => {
+  describe(".register", () => {
     const networkId = erc20ExternalModel.network_id;
     const contractName = erc20ExternalModel.contract_name;
     const contractAddress = erc20ExternalModel.contract_address;
@@ -89,7 +89,7 @@ describe("SmartContract", () => {
       expect(smartContract.getContractAddress()).toBe(contractAddress);
     });
 
-    it("should throw an error if creation fails", async () => {
+    it("should throw an error if register fails", async () => {
       Coinbase.apiClients.smartContract!.registerSmartContract = jest
         .fn()
         .mockRejectedValue(new Error("Failed to register the smart contract"));
@@ -99,7 +99,7 @@ describe("SmartContract", () => {
     });
   });
 
-  describe("SmartContract.update", () => {
+  describe(".update", () => {
     const networkId = erc20ExternalModel.network_id;
     const contractAddress = erc20ExternalModel.contract_address;
 
@@ -133,7 +133,7 @@ describe("SmartContract", () => {
       expect(smartContract.getContractName()).toEqual(updatedContract.contract_name);
     });
 
-    it("should throw an error if creation fails", async () => {
+    it("should throw an error if update fails", async () => {
       Coinbase.apiClients.smartContract!.updateSmartContract = jest
         .fn()
         .mockRejectedValue(new Error("Failed to update the smart contract"));
