@@ -330,6 +330,15 @@ export const VALID_SMART_CONTRACT_ERC20_MODEL: SmartContractModel = {
   },
 };
 
+export const VALID_EXTERNAL_SMART_CONTRACT_ERC20_MODEL: SmartContractModel = {
+  network_id: Coinbase.networks.BaseSepolia,
+  contract_name: ERC20_NAME,
+  is_external: true,
+  contract_address: "0xcontract-address",
+  type: SmartContractType.Custom,
+  abi: JSON.stringify("some-abi"),
+};
+
 export const ERC721_NAME = "Test NFT";
 export const ERC721_SYMBOL = "TEST";
 export const ERC721_BASE_URI = "https://example.com/metadata/";
