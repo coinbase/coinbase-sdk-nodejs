@@ -781,6 +781,8 @@ export const smartContractApiMock = {
   getSmartContract: jest.fn(),
   listSmartContracts: jest.fn(),
   readContract: jest.fn(),
+  registerSmartContract: jest.fn(),
+  updateSmartContract: jest.fn(),
 };
 
 export const contractInvocationApiMock = {
