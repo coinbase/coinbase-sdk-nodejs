@@ -3,7 +3,6 @@
 ## Unreleased
 - Add support for fetching address reputation
   - Add `reputation` method to `Address` to fetch the reputation of the address. 
-- Add `networkId` to `WalletData` so that it is saved with the seed data and surfaced via the export function
 
 ## [0.12.0] - Skipped
 

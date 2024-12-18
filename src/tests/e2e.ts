@@ -54,11 +54,7 @@ describe("Coinbase SDK E2E Test", () => {
     const walletId = Object.keys(seedFile)[0];
     const seed = seedFile[walletId].seed;
 
-    const importedWallet = await Wallet.import({
-      seed,
-      walletId,
-      networkId: Coinbase.networks.BaseSepolia,
-    });
+    const importedWallet = await Wallet.import({ seed, walletId });
     expect(importedWallet).toBeDefined();
     expect(importedWallet.getId()).toBe(walletId);
     console.log(
@@ -142,7 +138,6 @@ describe("Coinbase SDK E2E Test", () => {
       encrypted: false,
       authTag: "",
       iv: "",
-      networkId: exportedWallet.networkId,
     });
   }, 60000);
 });
