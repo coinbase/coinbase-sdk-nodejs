@@ -826,6 +826,7 @@ export interface WalletData {
    * The wallet seed
    */
   seed: string;
+  networkId: string;
 }
 
 /**
@@ -886,6 +887,7 @@ export type SeedData = {
   encrypted: boolean;
   authTag: string;
   iv: string;
+  networkId: string;
 };
 
 /**

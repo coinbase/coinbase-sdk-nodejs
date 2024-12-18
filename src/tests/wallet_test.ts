@@ -1286,6 +1286,7 @@ describe("Wallet Class", () => {
       expect(walletSeedData[walletId].iv).toBe("");
       expect(walletSeedData[walletId].authTag).toBe("");
       expect(walletSeedData[walletId].seed).toBe(seed);
+      expect(walletSeedData[walletId].networkId).toBe(seedWallet.getNetworkId());
     });
 
     it("should save the seed when encryption is true", async () => {
