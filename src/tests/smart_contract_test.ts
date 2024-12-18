@@ -17,7 +17,8 @@ import {
   VALID_SMART_CONTRACT_ERC1155_MODEL,
   ERC1155_URI,
   VALID_SMART_CONTRACT_EXTERNAL_MODEL,
-  testAllReadTypesABI, VALID_EXTERNAL_SMART_CONTRACT_ERC20_MODEL,
+  testAllReadTypesABI,
+  VALID_EXTERNAL_SMART_CONTRACT_ERC20_MODEL,
 } from "./utils";
 import { SmartContract } from "../coinbase/smart_contract";
 import { ContractEvent } from "../coinbase/contract_event";
