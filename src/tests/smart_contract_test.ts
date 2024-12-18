@@ -59,7 +59,7 @@ describe("SmartContract", () => {
     });
   });
 
-  describe(".register", () => {
+  describe("SmartContract.register", () => {
     const networkId = erc20ExternalModel.network_id;
     const contractName = erc20ExternalModel.contract_name;
     const contractAddress = erc20ExternalModel.contract_address;
@@ -99,7 +99,7 @@ describe("SmartContract", () => {
     });
   });
 
-  describe(".update", () => {
+  describe("SmartContract.update", () => {
     const networkId = erc20ExternalModel.network_id;
     const contractAddress = erc20ExternalModel.contract_address;
 
