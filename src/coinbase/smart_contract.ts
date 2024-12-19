@@ -15,6 +15,8 @@ import {
   TokenContractOptions,
   MultiTokenContractOptions,
   TransactionStatus,
+  PaginationOptions,
+  PaginationResponse,
 } from "./types";
 import { Coinbase } from "./coinbase";
 import { delay } from "./utils";
@@ -101,6 +103,67 @@ export class SmartContract {
   }
 
   /**
+   * Register a smart contract.
+   *
+   * @param networkId - The network ID.
+   * @param contractAddress - The contract address.
+   * @param abi - The ABI of the contract.
+   * @param contractName - The contract name.
+   * @returns The smart contract.
+   */
+  public static async register(
+    networkId: string,
+    contractAddress: string,
+    abi: object,
+    contractName?: string,
+  ): Promise<SmartContract> {
+    const response = await Coinbase.apiClients.smartContract!.registerSmartContract(
+      networkId,
+      contractAddress,
+      {
+        abi: JSON.stringify(abi),
+        contract_name: contractName,
+      },
+    );
+    return SmartContract.fromModel(response.data);
+  }
+
+  /**
+   * Lists Smart Contracts.
+   *
+   * @param options - The pagination options.
+   * @param options.page - The cursor for pagination across multiple pages of Smart Contract. Don\&#39;t include this parameter on the first call. Use the next page value returned in a previous response to request subsequent results.
+   *
+   * @returns The paginated list response of Smart Contracts.
+   */
+  public static async list({ page = undefined }: PaginationOptions = {}): Promise<
+    PaginationResponse<SmartContract>
+  > {
+    const data: SmartContract[] = [];
+    let nextPage: string | undefined;
+
+    const response = await Coinbase.apiClients.smartContract!.listSmartContracts(page);
+    const smartContracts = response.data.data;
+    for (const sc of smartContracts) {
+      data.push(new SmartContract(sc));
+    }
+
+    const hasMore: boolean = response.data.has_more ? response.data.has_more : false;
+
+    if (hasMore) {
+      if (response.data.next_page) {
+        nextPage = response.data.next_page;
+      }
+    }
+
+    return {
+      data,
+      hasMore,
+      nextPage,
+    };
+  }
+
+  /**
    * Converts a SmartContractModel into a SmartContract object.
    *
    * @param contractModel - The SmartContract model object.
@@ -137,6 +200,15 @@ export class SmartContract {
     if (!this.model.wallet_id) return undefined;
 
     return this.model.wallet_id!;
+  }
+
+  /**
+   * Returns the name of the smart contract.
+   *
+   * @returns The contract name.
+   */
+  public getContractName(): string {
+    return this.model.contract_name;
   }
 
   /**
@@ -240,6 +312,25 @@ export class SmartContract {
     if (this.isExternal) throw new Error("Cannot sign an external SmartContract");
 
     return this.getTransaction()!.sign(key);
+  }
+
+  /**
+   * Update a smart contract.
+   *
+   * @param abi - The new ABI of the contract.
+   * @param contractName - The new contract name.
+   * @returns The smart contract.
+   */
+  public async update(abi?: object, contractName?: string): Promise<SmartContract> {
+    const response = await Coinbase.apiClients.smartContract!.updateSmartContract(
+      this.getNetworkId(),
+      this.getContractAddress(),
+      {
+        abi: JSON.stringify(abi),
+        contract_name: contractName,
+      },
+    );
+    return SmartContract.fromModel(response.data);
   }
 
   /**

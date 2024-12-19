@@ -1,6 +1,8 @@
 # Coinbase Node.js SDK Changelog
 
 ## Unreleased
+- Add support for registering, updating, and listing smart contracts that are
+  deployed external to CDP.
 - Add support for fetching address reputation
   - Add `reputation` method to `Address` to fetch the reputation of the address. 
 - Add `networkId` to `WalletData` so that it is saved with the seed data and surfaced via the export function
