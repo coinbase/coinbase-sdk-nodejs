@@ -4,8 +4,12 @@
 - Add support for registering, updating, and listing smart contracts that are
   deployed external to CDP.
 - Add support for fetching address reputation
-  - Add `reputation` method to `Address` to fetch the reputation of the address. 
+  - Add `reputation` method to `Address` to fetch the reputation of the address
 - Add `networkId` to `WalletData` so that it is saved with the seed data and surfaced via the export function
+- Add ability to import external wallets into CDP via a BIP-39 mnemonic phrase, as a 1-of-1 wallet
+- Add ability to import WalletData files exported by the Python CDP SDK
+- Deprecate `Wallet.loadSeed()` method in favor of `Wallet.loadSeedFromFile()`
+- Deprecate `Wallet.saveSeed()` method in favor of `Wallet.saveSeedToFile()`
 
 ## [0.12.0] - Skipped
 

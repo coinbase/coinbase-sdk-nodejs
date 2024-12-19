@@ -133,7 +133,7 @@ async function registerBaseName(wallet, registerArgs) {
 async function fetchWalletAndLoadSeed(walletId, seedFilePath) {
   try {
     const wallet = await Wallet.fetch(walletId);
-    await wallet.loadSeed(seedFilePath);
+    await wallet.loadSeedFromFile(seedFilePath);
 
     console.log(`Successfully loaded funded wallet: `, wallet);
     return wallet;

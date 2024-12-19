@@ -64,7 +64,7 @@ describe("Coinbase SDK E2E Test", () => {
     console.log(
       `Imported wallet with ID: ${importedWallet.getId()}, default address: ${importedWallet.getDefaultAddress()}`,
     );
-    await importedWallet.saveSeed("test_seed.json");
+    await importedWallet.saveSeedToFile("test_seed.json");
 
     try {
       const transaction = await importedWallet.faucet();
@@ -88,13 +88,13 @@ describe("Coinbase SDK E2E Test", () => {
     expect(exportedWallet.seed).toBeDefined();
 
     console.log("Saving seed to file...");
-    await wallet.saveSeed("test_seed.json");
+    await wallet.saveSeedToFile("test_seed.json");
     expect(fs.existsSync("test_seed.json")).toBe(true);
     console.log("Saved seed to test_seed.json");
 
     const unhydratedWallet = await Wallet.fetch(walletId);
     expect(unhydratedWallet.canSign()).toBe(false);
-    await unhydratedWallet.loadSeed("test_seed.json");
+    await unhydratedWallet.loadSeedFromFile("test_seed.json");
     expect(unhydratedWallet.canSign()).toBe(true);
     expect(unhydratedWallet.getId()).toBe(walletId);
 
@@ -120,11 +120,16 @@ describe("Coinbase SDK E2E Test", () => {
     console.log(`Second address balances: ${secondBalance}`);
 
     console.log("Fetching address transactions...");
-    const result = await (
-      await unhydratedWallet.getDefaultAddress()
-    ).listTransactions({ limit: 1 });
+    let result;
+    for (let i = 0; i < 5; i++) {
+      // Try up to 5 times
+      result = await (await unhydratedWallet.getDefaultAddress()).listTransactions({ limit: 1 });
+      if (result?.data.length > 0) break;
+      // Wait 2 seconds between attempts
+      console.log(`Waiting for transaction to be processed... (${i + 1} attempts)`);
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
     expect(result?.data.length).toBeGreaterThan(0);
-    console.log(`Fetched transactions: ${result?.data[0].toString()}`);
 
     console.log("Fetching address historical balances...");
     const balance_result = await (
@@ -137,7 +142,7 @@ describe("Coinbase SDK E2E Test", () => {
     fs.unlinkSync("test_seed.json");
 
     expect(exportedWallet.seed.length).toBe(64);
-    expect(savedSeed[exportedWallet.walletId]).toEqual({
+    expect(savedSeed[exportedWallet.walletId!]).toEqual({
       seed: exportedWallet.seed,
       encrypted: false,
       authTag: "",
