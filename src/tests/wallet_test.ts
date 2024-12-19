@@ -71,6 +71,7 @@ import { PayloadSignature } from "../coinbase/payload_signature";
 import { ContractInvocation } from "../coinbase/contract_invocation";
 import { SmartContract } from "../coinbase/smart_contract";
 import { Webhook } from "../coinbase/webhook";
+import { WalletData } from "../coinbase/types";
 
 describe("Wallet Class", () => {
   let wallet: Wallet;
@@ -1025,6 +1026,94 @@ describe("Wallet Class", () => {
         "Wallet ID must be provided",
       );
     });
+    it("should throw an error when seed is not provided", async () => {
+      const walletData = seedWallet.export();
+      walletData.seed = "";
+      await expect(async () => await Wallet.import(walletData)).rejects.toThrow(
+        "Seed must be provided",
+      );
+    });
+    it("should throw an error when both walletId and wallet_id are provided", async () => {
+      const walletData = seedWallet.export();
+      walletData.wallet_id = walletData.walletId;
+      await expect(async () => await Wallet.import(walletData)).rejects.toThrow(
+        "Invalid import data format",
+      );
+    });
+    it("should throw an error when wallet data format is invalid", async () => {
+      const invalidWalletData = {
+        foo: "bar",
+        bar: 123,
+      } as unknown as WalletData;
+      await expect(async () => await Wallet.import(invalidWalletData)).rejects.toThrow(
+        "Invalid import data format",
+      );
+    });
+  });
+
+  describe("#importFromMnemonicSeedPhrase", () => {
+    const validMnemonic =
+      "crouch cereal notice one canyon kiss tape employ ghost column vanish despair eight razor laptop keen rally gaze riot regret assault jacket risk curve";
+    const address0 = "0x43A0477E658C6e05136e81C576CF02daCEa067bB";
+    const publicKey = "0x037e6cbdd1d949f60f41d5db7ffa9b3ddce0b77eab35ef7affd3f64cbfd9e33a91";
+    const addressModel = {
+      ...VALID_ADDRESS_MODEL,
+      address_id: address0,
+      public_key: publicKey,
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      Coinbase.apiClients.wallet = walletsApiMock;
+      Coinbase.apiClients.address = addressesApiMock;
+      Coinbase.apiClients.wallet!.createWallet = mockFn(request => {
+        const { network_id } = request.wallet;
+        apiResponses[walletId] = {
+          id: walletId,
+          network_id,
+          default_address: addressModel,
+        };
+        return { data: apiResponses[walletId] };
+      });
+      Coinbase.apiClients.wallet!.getWallet = mockFn(walletId => {
+        walletModel = apiResponses[walletId];
+        walletModel.default_address!.address_id = address0;
+        return { data: apiResponses[walletId] };
+      });
+      Coinbase.apiClients.address!.createAddress = mockReturnValue(addressModel);
+      Coinbase.apiClients.address!.listAddresses = mockFn(() => {
+        return {
+          data: {
+            data: [addressModel],
+            has_more: false,
+            next_page: "",
+            total_count: 1,
+          },
+        };
+      });
+    });
+
+    it("successfully imports a wallet from a valid 24-word mnemonic", async () => {
+      const wallet = await Wallet.import({ mnemonicPhrase: validMnemonic });
+      expect(wallet).toBeInstanceOf(Wallet);
+      expect(Coinbase.apiClients.wallet!.createWallet).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.createAddress).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
+    });
+
+    it("throws an error when mnemonic is empty", async () => {
+      await expect(Wallet.import({ mnemonicPhrase: "" })).rejects.toThrow(
+        "BIP-39 mnemonic seed phrase must be provided",
+      );
+      expect(Coinbase.apiClients.wallet!.createWallet).not.toHaveBeenCalled();
+    });
+
+    it("throws an error when mnemonic is invalid", async () => {
+      await expect(Wallet.import({ mnemonicPhrase: "invalid mnemonic phrase" })).rejects.toThrow(
+        "Invalid BIP-39 mnemonic seed phrase",
+      );
+      expect(Coinbase.apiClients.wallet!.createWallet).not.toHaveBeenCalled();
+    });
   });
 
   describe("#listBalances", () => {
@@ -1190,17 +1279,18 @@ describe("Wallet Class", () => {
     });
 
     it("should save the seed when encryption is false", async () => {
-      seedWallet.saveSeed(filePath, false);
+      seedWallet.saveSeedToFile(filePath, false);
       const storedSeedData = fs.readFileSync(filePath);
       const walletSeedData = JSON.parse(storedSeedData.toString());
       expect(walletSeedData[walletId].encrypted).toBe(false);
       expect(walletSeedData[walletId].iv).toBe("");
       expect(walletSeedData[walletId].authTag).toBe("");
       expect(walletSeedData[walletId].seed).toBe(seed);
+      expect(walletSeedData[walletId].networkId).toBe(seedWallet.getNetworkId());
     });
 
     it("should save the seed when encryption is true", async () => {
-      seedWallet.saveSeed(filePath, true);
+      seedWallet.saveSeedToFile(filePath, true);
       const storedSeedData = fs.readFileSync(filePath);
       const walletSeedData = JSON.parse(storedSeedData.toString());
       expect(walletSeedData[walletId].encrypted).toBe(true);
@@ -1211,7 +1301,7 @@ describe("Wallet Class", () => {
 
     it("should throw an error when the wallet is seedless", async () => {
       const seedlessWallet = Wallet.init(walletModel, "");
-      expect(() => seedlessWallet.saveSeed(filePath, false)).toThrow(Error);
+      expect(() => seedlessWallet.saveSeedToFile(filePath, false)).toThrow(Error);
     });
   });
 
@@ -1249,18 +1339,18 @@ describe("Wallet Class", () => {
     });
 
     it("loads the seed from the file", async () => {
-      await seedlessWallet.loadSeed(filePath);
+      await seedlessWallet.loadSeedFromFile(filePath);
       expect(seedlessWallet.canSign()).toBe(true);
     });
 
     it("loads the encrypted seed from the file", async () => {
-      seedWallet.saveSeed(filePath, true);
-      await seedlessWallet.loadSeed(filePath);
+      seedWallet.saveSeedToFile(filePath, true);
+      await seedlessWallet.loadSeedFromFile(filePath);
       expect(seedlessWallet.canSign()).toBe(true);
     });
 
     it("loads the encrypted seed from the file with multiple seeds", async () => {
-      seedWallet.saveSeed(filePath, true);
+      seedWallet.saveSeedToFile(filePath, true);
 
       const otherModel = {
         id: crypto.randomUUID(),
@@ -1269,14 +1359,14 @@ describe("Wallet Class", () => {
       };
       const randomSeed = ethers.Wallet.createRandom().privateKey.slice(2);
       const otherWallet = Wallet.init(otherModel, randomSeed);
-      otherWallet.saveSeed(filePath, true);
+      otherWallet.saveSeedToFile(filePath, true);
 
-      await seedlessWallet.loadSeed(filePath);
+      await seedlessWallet.loadSeedFromFile(filePath);
       expect(seedlessWallet.canSign()).toBe(true);
     });
 
     it("raises an error if the wallet is already hydrated", async () => {
-      await expect(seedWallet.loadSeed(filePath)).rejects.toThrow(Error);
+      await expect(seedWallet.loadSeedFromFile(filePath)).rejects.toThrow(Error);
     });
 
     it("raises an error when file contains different wallet data", async () => {
@@ -1290,28 +1380,28 @@ describe("Wallet Class", () => {
       };
       fs.writeFileSync(filePath, JSON.stringify(otherSeedData), "utf8");
 
-      await expect(seedlessWallet.loadSeed(filePath)).rejects.toThrow(ArgumentError);
+      await expect(seedlessWallet.loadSeedFromFile(filePath)).rejects.toThrow(ArgumentError);
     });
 
     it("raises an error when the file is absent", async () => {
-      await expect(seedlessWallet.loadSeed("non-file.json")).rejects.toThrow(ArgumentError);
+      await expect(seedlessWallet.loadSeedFromFile("non-file.json")).rejects.toThrow(ArgumentError);
     });
 
     it("raises an error when the file is corrupted", async () => {
       fs.writeFileSync(filePath, "corrupted data", "utf8");
 
-      await expect(seedlessWallet.loadSeed(filePath)).rejects.toThrow(ArgumentError);
+      await expect(seedlessWallet.loadSeedFromFile(filePath)).rejects.toThrow(ArgumentError);
     });
 
     it("throws an error when the file is empty", async () => {
       fs.writeFileSync("invalid-file.json", "", "utf8");
-      await expect(wallet.loadSeed("invalid-file.json")).rejects.toThrow(ArgumentError);
+      await expect(wallet.loadSeedFromFile("invalid-file.json")).rejects.toThrow(ArgumentError);
       fs.unlinkSync("invalid-file.json");
     });
 
     it("throws an error when the file is not a valid JSON", async () => {
       fs.writeFileSync("invalid-file.json", `{"test":{"authTag":false}}`, "utf8");
-      await expect(wallet.loadSeed("invalid-file.json")).rejects.toThrow(ArgumentError);
+      await expect(wallet.loadSeedFromFile("invalid-file.json")).rejects.toThrow(ArgumentError);
       fs.unlinkSync("invalid-file.json");
     });
   });

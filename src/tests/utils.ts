@@ -302,7 +302,7 @@ export const VALID_SIGNED_CONTRACT_INVOCATION_MODEL: ContractInvocationModel = {
   },
 };
 
-export const ERC20_NAME = "Test NFT";
+export const ERC20_NAME = "Test ERC20 Token";
 export const ERC20_SYMBOL = "TEST";
 export const ERC20_TOTAL_SUPPLY = 100;
 
@@ -310,6 +310,8 @@ export const VALID_SMART_CONTRACT_ERC20_MODEL: SmartContractModel = {
   smart_contract_id: "test-smart-contract-1",
   network_id: Coinbase.networks.BaseSepolia,
   wallet_id: walletId,
+  contract_name: ERC20_NAME,
+  is_external: false,
   contract_address: "0xcontract-address",
   deployer_address: "0xdeployer-address",
   type: SmartContractType.Erc20,
@@ -328,6 +330,16 @@ export const VALID_SMART_CONTRACT_ERC20_MODEL: SmartContractModel = {
   },
 };
 
+export const VALID_EXTERNAL_SMART_CONTRACT_ERC20_MODEL: SmartContractModel = {
+  smart_contract_id: "test-smart-contract-1",
+  network_id: Coinbase.networks.BaseSepolia,
+  contract_name: ERC20_NAME,
+  is_external: true,
+  contract_address: "0xcontract-address",
+  type: SmartContractType.Custom,
+  abi: JSON.stringify("some-abi"),
+};
+
 export const ERC721_NAME = "Test NFT";
 export const ERC721_SYMBOL = "TEST";
 export const ERC721_BASE_URI = "https://example.com/metadata/";
@@ -335,6 +347,8 @@ export const VALID_SMART_CONTRACT_ERC721_MODEL: SmartContractModel = {
   smart_contract_id: "test-smart-contract-1",
   network_id: Coinbase.networks.BaseSepolia,
   wallet_id: walletId,
+  contract_name: ERC721_NAME,
+  is_external: false,
   contract_address: "0xcontract-address",
   deployer_address: "0xdeployer-address",
   type: SmartContractType.Erc721,
@@ -358,6 +372,8 @@ export const VALID_SMART_CONTRACT_ERC1155_MODEL: SmartContractModel = {
   smart_contract_id: "test-smart-contract-1",
   network_id: Coinbase.networks.BaseSepolia,
   wallet_id: walletId,
+  contract_name: "",
+  is_external: false,
   contract_address: "0xcontract-address",
   deployer_address: "0xdeployer-address",
   type: SmartContractType.Erc1155,
@@ -373,6 +389,17 @@ export const VALID_SMART_CONTRACT_ERC1155_MODEL: SmartContractModel = {
     status: TransactionStatusEnum.Pending,
   },
 };
+
+export const VALID_SMART_CONTRACT_EXTERNAL_MODEL: SmartContractModel = {
+  smart_contract_id: "test-smart-contract-external",
+  network_id: Coinbase.networks.BaseSepolia,
+  contract_name: ERC20_NAME,
+  is_external: true,
+  contract_address: "0xcontract-address",
+  type: SmartContractType.Custom,
+  abi: JSON.stringify("some-abi"),
+};
+
 
 const asset = Asset.fromModel({
   asset_id: Coinbase.assets.Eth,
@@ -764,6 +791,8 @@ export const smartContractApiMock = {
   getSmartContract: jest.fn(),
   listSmartContracts: jest.fn(),
   readContract: jest.fn(),
+  registerSmartContract: jest.fn(),
+  updateSmartContract: jest.fn(),
 };
 
 export const contractInvocationApiMock = {
@@ -782,6 +811,10 @@ export const fundOperationsApiMock = {
   listFundOperations: jest.fn(),
   createFundOperation: jest.fn(),
   createFundQuote: jest.fn(),
+};
+
+export const reputationApiMock = {
+  getAddressReputation: jest.fn(),
 };
 
 export const testAllReadTypesABI = [

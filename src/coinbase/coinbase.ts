@@ -19,6 +19,7 @@ import {
   TransactionHistoryApiFactory,
   MPCWalletStakeApiFactory,
   FundApiFactory,
+  ReputationApiFactory,
 } from "../client";
 import { BASE_PATH } from "./../client/base";
 import { Configuration } from "./../client/configuration";
@@ -172,6 +173,7 @@ export class Coinbase {
     );
     Coinbase.apiKeyPrivateKey = privateKey;
     Coinbase.useServerSigner = useServerSigner;
+    Coinbase.apiClients.addressReputation = ReputationApiFactory(config, basePath, axiosInstance);
   }
 
   /**
