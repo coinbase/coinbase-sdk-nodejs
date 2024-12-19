@@ -1285,6 +1285,24 @@ export type UpdateWebhookOptions = {
 };
 
 /**
+ * Options for registering a smart contract.
+ */
+export type RegisterContractOptions = {
+  networkId: string;
+  contractAddress: string;
+  abi: object;
+  contractName?: string;
+};
+
+/**
+ * Options for updating a smart contract.
+ */
+export type UpdateContractOptions = {
+  abi?: object;
+  contractName?: string;
+};
+
+/**
  * ContractInvocationAPI client type definition.
  */
 export type ContractInvocationAPIClient = {
