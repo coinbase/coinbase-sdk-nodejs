@@ -14,9 +14,11 @@ import {
   NFTContractOptions,
   TokenContractOptions,
   MultiTokenContractOptions,
+  RegisterContractOptions,
   TransactionStatus,
   PaginationOptions,
   PaginationResponse,
+  UpdateContractOptions,
 } from "./types";
 import { Coinbase } from "./coinbase";
 import { delay } from "./utils";
@@ -105,18 +107,19 @@ export class SmartContract {
   /**
    * Register a smart contract.
    *
-   * @param networkId - The network ID.
-   * @param contractAddress - The contract address.
-   * @param abi - The ABI of the contract.
-   * @param contractName - The contract name.
+   * @param options - The options to register a smart contract.
+   * @param options.networkId - The network ID.
+   * @param options.contractAddress - The contract address.
+   * @param options.abi - The ABI of the contract.
+   * @param options.contractName - The contract name.
    * @returns The smart contract.
    */
-  public static async register(
-    networkId: string,
-    contractAddress: string,
-    abi: object,
-    contractName?: string,
-  ): Promise<SmartContract> {
+  public static async register({
+    networkId,
+    contractAddress,
+    abi,
+    contractName,
+  }: RegisterContractOptions): Promise<SmartContract> {
     const response = await Coinbase.apiClients.smartContract!.registerSmartContract(
       networkId,
       contractAddress,
@@ -317,11 +320,12 @@ export class SmartContract {
   /**
    * Update a smart contract.
    *
-   * @param abi - The new ABI of the contract.
-   * @param contractName - The new contract name.
+   * @param options - The options to update a smart contract.
+   * @param options.abi - The new ABI of the contract.
+   * @param options.contractName - The new contract name.
    * @returns The smart contract.
    */
-  public async update(abi?: object, contractName?: string): Promise<SmartContract> {
+  public async update({ abi, contractName }: UpdateContractOptions): Promise<SmartContract> {
     const response = await Coinbase.apiClients.smartContract!.updateSmartContract(
       this.getNetworkId(),
       this.getContractAddress(),
