@@ -285,7 +285,7 @@ export class Wallet {
    * @returns The Wallet's data.
    * @throws {APIError} - If the request fails.
    */
-  public export(): Required<WalletData> {
+  public export(): WalletData {
     if (!this.seed) {
       throw new Error("Cannot export Wallet without loaded seed");
     }
