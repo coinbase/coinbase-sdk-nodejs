@@ -826,12 +826,20 @@ export interface WalletData {
    * The wallet seed
    */
   seed: string;
-  networkId: string;
+
+  /**
+   * The network ID in either camelCase or snake_case format, but not both.
+   */
+  networkId?: string;
+  network_id?: string;
 }
 
 /**
  * Type guard to check if data matches the appropriate WalletData format.
- * WalletData must have exactly one of (walletId or wallet_id), and a seed.
+ * WalletData must have:
+ * - exactly one of (walletId or wallet_id)
+ * - at most one of (networkId or network_id)
+ * - a seed
  *
  * @param data - The data to check
  * @returns True if data matches the appropriate WalletData format
@@ -841,7 +849,7 @@ export function isWalletData(data: unknown): data is WalletData {
     return false;
   }
 
-  const { walletId, wallet_id, seed } = data as WalletData;
+  const { walletId, wallet_id, networkId, network_id, seed } = data as WalletData;
 
   // Check that exactly one of walletId or wallet_id is present (but not both)
   const hasWalletId = typeof walletId === "string";
@@ -849,9 +857,16 @@ export function isWalletData(data: unknown): data is WalletData {
   if (!(hasWalletId !== hasWalletSnakeId)) {
     return false;
   }
-  const hasSeed = typeof seed === "string";
 
-  return hasSeed;
+  // Check that at most one of networkId or network_id is present (but not both)
+  const hasNetworkId = typeof networkId === "string";
+  const hasNetworkSnakeId = typeof network_id === "string";
+  if (hasNetworkId && hasNetworkSnakeId) {
+    return false;
+  }
+
+  // Check that seed is present and is a string
+  return typeof seed === "string";
 }
 
 /**

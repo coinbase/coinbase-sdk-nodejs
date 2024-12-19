@@ -717,7 +717,7 @@ export class Wallet {
       encrypted: encrypt,
       authTag: authTag,
       iv: iv,
-      networkId: data.networkId,
+      networkId: data.networkId!,
     };
 
     fs.writeFileSync(filePath, JSON.stringify(existingSeedsInStore, null, 2), "utf8");
