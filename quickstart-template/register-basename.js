@@ -166,3 +166,4 @@ async function fetchWalletAndLoadSeed(walletId, seedFilePath) {
     console.error(`Error in registering a Basename for my wallet: `, error);
   }
 })();
+https://github.com/ElementsProject/elements.git
