@@ -324,6 +324,19 @@ export interface BroadcastContractInvocationRequest {
 /**
  * 
  * @export
+ * @interface BroadcastExternalTransferRequest
+ */
+export interface BroadcastExternalTransferRequest {
+    /**
+     * The hex-encoded signed payload of the external transfer
+     * @type {string}
+     * @memberof BroadcastExternalTransferRequest
+     */
+    'signed_payload': string;
+}
+/**
+ * 
+ * @export
  * @interface BroadcastStakingOperationRequest
  */
 export interface BroadcastStakingOperationRequest {
@@ -682,6 +695,43 @@ export interface CreateContractInvocationRequest {
 /**
  * 
  * @export
+ * @interface CreateExternalTransferRequest
+ */
+export interface CreateExternalTransferRequest {
+    /**
+     * The amount to transfer
+     * @type {string}
+     * @memberof CreateExternalTransferRequest
+     */
+    'amount': string;
+    /**
+     * The ID of the asset to transfer. Can be an asset symbol or a token contract address.
+     * @type {string}
+     * @memberof CreateExternalTransferRequest
+     */
+    'asset_id': string;
+    /**
+     * The destination address, which can be a 0x address, Basename, or ENS name
+     * @type {string}
+     * @memberof CreateExternalTransferRequest
+     */
+    'destination': string;
+    /**
+     * Whether the transfer uses sponsored gas
+     * @type {boolean}
+     * @memberof CreateExternalTransferRequest
+     */
+    'gasless': boolean;
+    /**
+     * When true, the transfer will be submitted immediately. Otherwise, the transfer will be batched. Defaults to false. Note: Requires the gasless option to be set to true. 
+     * @type {boolean}
+     * @memberof CreateExternalTransferRequest
+     */
+    'skip_batching'?: boolean;
+}
+/**
+ * 
+ * @export
  * @interface CreateFundOperationRequest
  */
 export interface CreateFundOperationRequest {
@@ -692,7 +742,7 @@ export interface CreateFundOperationRequest {
      */
     'amount': string;
     /**
-     * The ID of the asset to fund the address with.
+     * The ID of the asset to fund the address with. Can be an asset symbol or a token contract address.
      * @type {string}
      * @memberof CreateFundOperationRequest
      */
@@ -717,7 +767,7 @@ export interface CreateFundQuoteRequest {
      */
     'amount': string;
     /**
-     * The ID of the asset to fund the address with.
+     * The ID of the asset to fund the address with. Can be an asset symbol alias or a token contract address.
      * @type {string}
      * @memberof CreateFundQuoteRequest
      */
@@ -863,7 +913,7 @@ export interface CreateTransferRequest {
      */
     'network_id': string;
     /**
-     * The ID of the asset to transfer
+     * The ID of the asset to transfer. Can be an asset symbol or a token contract address.
      * @type {string}
      * @memberof CreateTransferRequest
      */
@@ -880,6 +930,12 @@ export interface CreateTransferRequest {
      * @memberof CreateTransferRequest
      */
     'gasless'?: boolean;
+    /**
+     * When true, the transfer will be submitted immediately. Otherwise, the transfer will be batched. Defaults to false
+     * @type {boolean}
+     * @memberof CreateTransferRequest
+     */
+    'skip_batching'?: boolean;
 }
 /**
  * 
@@ -5970,6 +6026,104 @@ export class ContractInvocationsApi extends BaseAPI implements ContractInvocatio
 export const ExternalAddressesApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * Broadcast an external address\'s transfer with a signed payload
+         * @summary Broadcast an external address\' transfer
+         * @param {string} networkId The ID of the network the address belongs to
+         * @param {string} addressId The ID of the address the transfer belongs to
+         * @param {string} transferId The ID of the transfer to broadcast
+         * @param {BroadcastExternalTransferRequest} broadcastExternalTransferRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        broadcastExternalTransfer: async (networkId: string, addressId: string, transferId: string, broadcastExternalTransferRequest: BroadcastExternalTransferRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('broadcastExternalTransfer', 'networkId', networkId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('broadcastExternalTransfer', 'addressId', addressId)
+            // verify required parameter 'transferId' is not null or undefined
+            assertParamExists('broadcastExternalTransfer', 'transferId', transferId)
+            // verify required parameter 'broadcastExternalTransferRequest' is not null or undefined
+            assertParamExists('broadcastExternalTransfer', 'broadcastExternalTransferRequest', broadcastExternalTransferRequest)
+            const localVarPath = `/v1/networks/{network_id}/addresses/{address_id}/transfers/{transfer_id}/broadcast`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)))
+                .replace(`{${"transfer_id"}}`, encodeURIComponent(String(transferId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication apiKey required
+            await setApiKeyToObject(localVarHeaderParameter, "Jwt", configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(broadcastExternalTransferRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Create a new transfer between addresses.
+         * @summary Create a new transfer
+         * @param {string} networkId The ID of the network the address is on
+         * @param {string} addressId The ID of the address to transfer from
+         * @param {CreateExternalTransferRequest} createExternalTransferRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createExternalTransfer: async (networkId: string, addressId: string, createExternalTransferRequest: CreateExternalTransferRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('createExternalTransfer', 'networkId', networkId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('createExternalTransfer', 'addressId', addressId)
+            // verify required parameter 'createExternalTransferRequest' is not null or undefined
+            assertParamExists('createExternalTransfer', 'createExternalTransferRequest', createExternalTransferRequest)
+            const localVarPath = `/v1/networks/{network_id}/addresses/{address_id}/transfers`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication apiKey required
+            await setApiKeyToObject(localVarHeaderParameter, "Jwt", configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createExternalTransferRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Get the balance of an asset in an external address
          * @summary Get the balance of an asset in an external address
          * @param {string} networkId The ID of the blockchain network
@@ -6004,6 +6158,51 @@ export const ExternalAddressesApiAxiosParamCreator = function (configuration?: C
             await setApiKeyToObject(localVarHeaderParameter, "Jwt", configuration)
 
             // authentication session required
+            await setApiKeyToObject(localVarHeaderParameter, "Jwt", configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get an external address\' transfer by ID
+         * @summary Get a external address\' transfer
+         * @param {string} networkId The ID of the network the address is on
+         * @param {string} addressId The ID of the address the transfer belongs to
+         * @param {string} transferId The ID of the transfer to fetch
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getExternalTransfer: async (networkId: string, addressId: string, transferId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('getExternalTransfer', 'networkId', networkId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('getExternalTransfer', 'addressId', addressId)
+            // verify required parameter 'transferId' is not null or undefined
+            assertParamExists('getExternalTransfer', 'transferId', transferId)
+            const localVarPath = `/v1/networks/{network_id}/addresses/{address_id}/transfers/{transfer_id}`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)))
+                .replace(`{${"transfer_id"}}`, encodeURIComponent(String(transferId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication apiKey required
             await setApiKeyToObject(localVarHeaderParameter, "Jwt", configuration)
 
 
@@ -6179,6 +6378,37 @@ export const ExternalAddressesApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = ExternalAddressesApiAxiosParamCreator(configuration)
     return {
         /**
+         * Broadcast an external address\'s transfer with a signed payload
+         * @summary Broadcast an external address\' transfer
+         * @param {string} networkId The ID of the network the address belongs to
+         * @param {string} addressId The ID of the address the transfer belongs to
+         * @param {string} transferId The ID of the transfer to broadcast
+         * @param {BroadcastExternalTransferRequest} broadcastExternalTransferRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async broadcastExternalTransfer(networkId: string, addressId: string, transferId: string, broadcastExternalTransferRequest: BroadcastExternalTransferRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Transfer>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.broadcastExternalTransfer(networkId, addressId, transferId, broadcastExternalTransferRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ExternalAddressesApi.broadcastExternalTransfer']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Create a new transfer between addresses.
+         * @summary Create a new transfer
+         * @param {string} networkId The ID of the network the address is on
+         * @param {string} addressId The ID of the address to transfer from
+         * @param {CreateExternalTransferRequest} createExternalTransferRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createExternalTransfer(networkId: string, addressId: string, createExternalTransferRequest: CreateExternalTransferRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Transfer>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createExternalTransfer(networkId, addressId, createExternalTransferRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ExternalAddressesApi.createExternalTransfer']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Get the balance of an asset in an external address
          * @summary Get the balance of an asset in an external address
          * @param {string} networkId The ID of the blockchain network
@@ -6191,6 +6421,21 @@ export const ExternalAddressesApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getExternalAddressBalance(networkId, addressId, assetId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ExternalAddressesApi.getExternalAddressBalance']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get an external address\' transfer by ID
+         * @summary Get a external address\' transfer
+         * @param {string} networkId The ID of the network the address is on
+         * @param {string} addressId The ID of the address the transfer belongs to
+         * @param {string} transferId The ID of the transfer to fetch
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getExternalTransfer(networkId: string, addressId: string, transferId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Transfer>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getExternalTransfer(networkId, addressId, transferId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ExternalAddressesApi.getExternalTransfer']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -6250,6 +6495,31 @@ export const ExternalAddressesApiFactory = function (configuration?: Configurati
     const localVarFp = ExternalAddressesApiFp(configuration)
     return {
         /**
+         * Broadcast an external address\'s transfer with a signed payload
+         * @summary Broadcast an external address\' transfer
+         * @param {string} networkId The ID of the network the address belongs to
+         * @param {string} addressId The ID of the address the transfer belongs to
+         * @param {string} transferId The ID of the transfer to broadcast
+         * @param {BroadcastExternalTransferRequest} broadcastExternalTransferRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        broadcastExternalTransfer(networkId: string, addressId: string, transferId: string, broadcastExternalTransferRequest: BroadcastExternalTransferRequest, options?: RawAxiosRequestConfig): AxiosPromise<Transfer> {
+            return localVarFp.broadcastExternalTransfer(networkId, addressId, transferId, broadcastExternalTransferRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Create a new transfer between addresses.
+         * @summary Create a new transfer
+         * @param {string} networkId The ID of the network the address is on
+         * @param {string} addressId The ID of the address to transfer from
+         * @param {CreateExternalTransferRequest} createExternalTransferRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createExternalTransfer(networkId: string, addressId: string, createExternalTransferRequest: CreateExternalTransferRequest, options?: RawAxiosRequestConfig): AxiosPromise<Transfer> {
+            return localVarFp.createExternalTransfer(networkId, addressId, createExternalTransferRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Get the balance of an asset in an external address
          * @summary Get the balance of an asset in an external address
          * @param {string} networkId The ID of the blockchain network
@@ -6260,6 +6530,18 @@ export const ExternalAddressesApiFactory = function (configuration?: Configurati
          */
         getExternalAddressBalance(networkId: string, addressId: string, assetId: string, options?: RawAxiosRequestConfig): AxiosPromise<Balance> {
             return localVarFp.getExternalAddressBalance(networkId, addressId, assetId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get an external address\' transfer by ID
+         * @summary Get a external address\' transfer
+         * @param {string} networkId The ID of the network the address is on
+         * @param {string} addressId The ID of the address the transfer belongs to
+         * @param {string} transferId The ID of the transfer to fetch
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getExternalTransfer(networkId: string, addressId: string, transferId: string, options?: RawAxiosRequestConfig): AxiosPromise<Transfer> {
+            return localVarFp.getExternalTransfer(networkId, addressId, transferId, options).then((request) => request(axios, basePath));
         },
         /**
          * Get the status of a faucet transaction
@@ -6308,6 +6590,31 @@ export const ExternalAddressesApiFactory = function (configuration?: Configurati
  */
 export interface ExternalAddressesApiInterface {
     /**
+     * Broadcast an external address\'s transfer with a signed payload
+     * @summary Broadcast an external address\' transfer
+     * @param {string} networkId The ID of the network the address belongs to
+     * @param {string} addressId The ID of the address the transfer belongs to
+     * @param {string} transferId The ID of the transfer to broadcast
+     * @param {BroadcastExternalTransferRequest} broadcastExternalTransferRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExternalAddressesApiInterface
+     */
+    broadcastExternalTransfer(networkId: string, addressId: string, transferId: string, broadcastExternalTransferRequest: BroadcastExternalTransferRequest, options?: RawAxiosRequestConfig): AxiosPromise<Transfer>;
+
+    /**
+     * Create a new transfer between addresses.
+     * @summary Create a new transfer
+     * @param {string} networkId The ID of the network the address is on
+     * @param {string} addressId The ID of the address to transfer from
+     * @param {CreateExternalTransferRequest} createExternalTransferRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExternalAddressesApiInterface
+     */
+    createExternalTransfer(networkId: string, addressId: string, createExternalTransferRequest: CreateExternalTransferRequest, options?: RawAxiosRequestConfig): AxiosPromise<Transfer>;
+
+    /**
      * Get the balance of an asset in an external address
      * @summary Get the balance of an asset in an external address
      * @param {string} networkId The ID of the blockchain network
@@ -6318,6 +6625,18 @@ export interface ExternalAddressesApiInterface {
      * @memberof ExternalAddressesApiInterface
      */
     getExternalAddressBalance(networkId: string, addressId: string, assetId: string, options?: RawAxiosRequestConfig): AxiosPromise<Balance>;
+
+    /**
+     * Get an external address\' transfer by ID
+     * @summary Get a external address\' transfer
+     * @param {string} networkId The ID of the network the address is on
+     * @param {string} addressId The ID of the address the transfer belongs to
+     * @param {string} transferId The ID of the transfer to fetch
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExternalAddressesApiInterface
+     */
+    getExternalTransfer(networkId: string, addressId: string, transferId: string, options?: RawAxiosRequestConfig): AxiosPromise<Transfer>;
 
     /**
      * Get the status of a faucet transaction
@@ -6366,6 +6685,35 @@ export interface ExternalAddressesApiInterface {
  */
 export class ExternalAddressesApi extends BaseAPI implements ExternalAddressesApiInterface {
     /**
+     * Broadcast an external address\'s transfer with a signed payload
+     * @summary Broadcast an external address\' transfer
+     * @param {string} networkId The ID of the network the address belongs to
+     * @param {string} addressId The ID of the address the transfer belongs to
+     * @param {string} transferId The ID of the transfer to broadcast
+     * @param {BroadcastExternalTransferRequest} broadcastExternalTransferRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExternalAddressesApi
+     */
+    public broadcastExternalTransfer(networkId: string, addressId: string, transferId: string, broadcastExternalTransferRequest: BroadcastExternalTransferRequest, options?: RawAxiosRequestConfig) {
+        return ExternalAddressesApiFp(this.configuration).broadcastExternalTransfer(networkId, addressId, transferId, broadcastExternalTransferRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Create a new transfer between addresses.
+     * @summary Create a new transfer
+     * @param {string} networkId The ID of the network the address is on
+     * @param {string} addressId The ID of the address to transfer from
+     * @param {CreateExternalTransferRequest} createExternalTransferRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExternalAddressesApi
+     */
+    public createExternalTransfer(networkId: string, addressId: string, createExternalTransferRequest: CreateExternalTransferRequest, options?: RawAxiosRequestConfig) {
+        return ExternalAddressesApiFp(this.configuration).createExternalTransfer(networkId, addressId, createExternalTransferRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Get the balance of an asset in an external address
      * @summary Get the balance of an asset in an external address
      * @param {string} networkId The ID of the blockchain network
@@ -6377,6 +6725,20 @@ export class ExternalAddressesApi extends BaseAPI implements ExternalAddressesAp
      */
     public getExternalAddressBalance(networkId: string, addressId: string, assetId: string, options?: RawAxiosRequestConfig) {
         return ExternalAddressesApiFp(this.configuration).getExternalAddressBalance(networkId, addressId, assetId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get an external address\' transfer by ID
+     * @summary Get a external address\' transfer
+     * @param {string} networkId The ID of the network the address is on
+     * @param {string} addressId The ID of the address the transfer belongs to
+     * @param {string} transferId The ID of the transfer to fetch
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExternalAddressesApi
+     */
+    public getExternalTransfer(networkId: string, addressId: string, transferId: string, options?: RawAxiosRequestConfig) {
+        return ExternalAddressesApiFp(this.configuration).getExternalTransfer(networkId, addressId, transferId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

@@ -1085,6 +1085,7 @@ export type CreateTransferOptions = {
   assetId: string;
   destination: Destination;
   gasless?: boolean;
+  skipBatching?: boolean;
 };
 
 /**

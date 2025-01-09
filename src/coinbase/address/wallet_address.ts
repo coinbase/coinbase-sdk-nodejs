@@ -203,6 +203,7 @@ export class WalletAddress extends Address {
    * @param options.assetId - The ID of the Asset to send. For Ether, Coinbase.assets.Eth, Coinbase.assets.Gwei, and Coinbase.assets.Wei supported.
    * @param options.destination - The destination of the transfer. If a Wallet, sends to the Wallet's default address. If a String, interprets it as the address ID.
    * @param options.gasless - Whether the Transfer should be gasless. Defaults to false.
+   * @param options.skipBatching - When true, the Transfer will be submitted immediately. Otherwise, the Transfer will be batched. Defaults to false. Note: requires gasless option to be set to true.
    * @returns The transfer object.
    * @throws {APIError} if the API request to create a Transfer fails.
    * @throws {APIError} if the API request to broadcast a Transfer fails.
@@ -212,6 +213,7 @@ export class WalletAddress extends Address {
     assetId,
     destination,
     gasless = false,
+    skipBatching = false,
   }: CreateTransferOptions): Promise<Transfer> {
     if (!Coinbase.useServerSigner && !this.key) {
       throw new Error("Cannot transfer from address without private key loaded");
@@ -228,12 +230,17 @@ export class WalletAddress extends Address {
       );
     }
 
+    if (skipBatching && !gasless) {
+      throw new ArgumentError("skipBatching requires gasless to be true");
+    }
+
     const createTransferRequest = {
       amount: asset.toAtomicAmount(normalizedAmount).toString(),
       network_id: destinationNetworkId,
       asset_id: asset.primaryDenomination(),
       destination: destinationAddress,
       gasless: gasless,
+      skip_batching: skipBatching,
     };
 
     const response = await Coinbase.apiClients.transfer!.createTransfer(
