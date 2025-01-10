@@ -239,7 +239,7 @@ export class Transfer {
    * @returns The Transfer object in a terminal state.
    * @throws {Error} if the Transfer times out.
    */
-  public async wait({ intervalSeconds = 0.2, timeoutSeconds = 10 } = {}): Promise<Transfer> {
+  public async wait({ intervalSeconds = 0.2, timeoutSeconds = 40 } = {}): Promise<Transfer> {
     const startTime = Date.now();
 
     while (Date.now() - startTime < timeoutSeconds * 1000) {
