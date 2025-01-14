@@ -840,6 +840,7 @@ export class Wallet {
    * @param options.assetId - The ID of the Asset to send.
    * @param options.destination - The destination of the transfer. If a Wallet, sends to the Wallet's default address. If a String, interprets it as the address ID.
    * @param options.gasless - Whether the Transfer should be gasless. Defaults to false.
+   * @param options.skipBatching - When true, the Transfer will be submitted immediately. Otherwise, the Transfer will be batched. Defaults to false. Note: requires gasless option to be set to true.
    * @returns The created Transfer object.
    * @throws {APIError} if the API request to create a Transfer fails.
    * @throws {APIError} if the API request to broadcast a Transfer fails.

@@ -707,6 +707,63 @@ describe("WalletAddress", () => {
       expect(transfer.getId()).toBe(VALID_TRANSFER_MODEL.transfer_id);
     });
 
+    it("should default skipBatching to false", async () => {
+      Coinbase.apiClients.transfer!.createTransfer = mockReturnValue(VALID_TRANSFER_MODEL);
+      Coinbase.apiClients.transfer!.broadcastTransfer = mockReturnValue({
+        transaction_hash: "0x6c087c1676e8269dd81e0777244584d0cbfd39b6997b3477242a008fa9349e11",
+        ...VALID_TRANSFER_MODEL,
+      });
+
+      await address.createTransfer({
+        amount: weiAmount,
+        assetId: Coinbase.assets.Wei,
+        destination,
+      });
+
+      expect(Coinbase.apiClients.transfer!.createTransfer).toHaveBeenCalledWith(
+        address.getWalletId(),
+        address.getId(),
+        expect.objectContaining({
+          skip_batching: false,
+        }),
+      );
+    });
+
+    it("should allow skipBatching to be set to true", async () => {
+      Coinbase.apiClients.transfer!.createTransfer = mockReturnValue(VALID_TRANSFER_MODEL);
+      Coinbase.apiClients.transfer!.broadcastTransfer = mockReturnValue({
+        transaction_hash: "0x6c087c1676e8269dd81e0777244584d0cbfd39b6997b3477242a008fa9349e11",
+        ...VALID_TRANSFER_MODEL,
+      });
+
+      await address.createTransfer({
+        amount: weiAmount,
+        assetId: Coinbase.assets.Wei,
+        destination,
+        gasless: true,
+        skipBatching: true,
+      });
+
+      expect(Coinbase.apiClients.transfer!.createTransfer).toHaveBeenCalledWith(
+        address.getWalletId(),
+        address.getId(),
+        expect.objectContaining({
+          skip_batching: true,
+        }),
+      );
+    });
+
+    it("should throw an ArgumentError if skipBatching is true but gasless is false", async () => {
+      await expect(
+        address.createTransfer({
+          amount: weiAmount,
+          assetId: Coinbase.assets.Wei,
+          destination,
+          skipBatching: true,
+        }),
+      ).rejects.toThrow(ArgumentError);
+    });
+
     it("should successfully construct createTransfer request when using a large number that causes scientific notation", async () => {
       Coinbase.apiClients.transfer!.createTransfer = mockReturnValue(VALID_TRANSFER_MODEL);
       Coinbase.apiClients.transfer!.broadcastTransfer = mockReturnValue({
@@ -745,6 +802,7 @@ describe("WalletAddress", () => {
           destination: destination.getId(),
           gasless: false,
           network_id: Coinbase.networks.BaseSepolia,
+          skip_batching: false,
         },
       );
 

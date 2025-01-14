@@ -162,6 +162,17 @@ let transfer = await wallet.createTransfer({ amount: 0.00001, assetId: Coinbase.
 transfer = await transfer.wait();
 ```
 
+By default, gasless transfers are batched with other transfers, and might take longer to submit. If you want to opt out of batching, you can set the `skipBatching` option to `true`, which will submit the transaction immediately.
+```typescript
+let transfer = await wallet.createTransfer({
+  amount: 0.00001,
+  assetId: Coinbase.assets.Usdc,
+  destination: anotherWallet,
+  gasless: true,
+  skipBatching: true
+});
+transfer = await transfer.wait();
+```
 
 ### Trading Funds
 
