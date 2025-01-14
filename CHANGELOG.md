@@ -1,5 +1,10 @@
 # Coinbase Node.js SDK Changelog
 
+## Unreleased
+
+### Added
+- Add `skipBatching` option to `Wallet.createTransfer` to allow for lower latency gasless transfers.
+
 ## [0.13.0] - 2024-12-19
 
 ### Added
