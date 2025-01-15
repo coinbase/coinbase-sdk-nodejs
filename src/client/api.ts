@@ -423,6 +423,68 @@ export interface BuildStakingOperationRequest {
     'options': { [key: string]: string; };
 }
 /**
+ * 
+ * @export
+ * @interface CompileSmartContractRequest
+ */
+export interface CompileSmartContractRequest {
+    /**
+     * The JSON input containing the Solidity code, dependencies, and compiler settings.
+     * @type {string}
+     * @memberof CompileSmartContractRequest
+     */
+    'solidity_input_json': string;
+    /**
+     * The name of the contract to compile.
+     * @type {string}
+     * @memberof CompileSmartContractRequest
+     */
+    'contract_name': string;
+    /**
+     * The version of the Solidity compiler to use.
+     * @type {string}
+     * @memberof CompileSmartContractRequest
+     */
+    'solidity_compiler_version': string;
+}
+/**
+ * Represents a compiled smart contract that can be deployed onchain
+ * @export
+ * @interface CompiledSmartContract
+ */
+export interface CompiledSmartContract {
+    /**
+     * The unique identifier of the compiled smart contract.
+     * @type {string}
+     * @memberof CompiledSmartContract
+     */
+    'compiled_smart_contract_id'?: string;
+    /**
+     * The JSON-encoded input for the Solidity compiler
+     * @type {string}
+     * @memberof CompiledSmartContract
+     */
+    'solidity_input_json'?: string;
+    /**
+     * The contract creation bytecode which will be used with constructor arguments to deploy the contract
+     * @type {string}
+     * @memberof CompiledSmartContract
+     */
+    'contract_creation_bytecode'?: string;
+    /**
+     * The JSON-encoded ABI of the contract
+     * @type {string}
+     * @memberof CompiledSmartContract
+     */
+    'abi'?: string;
+    /**
+     * The name of the smart contract to deploy
+     * @type {string}
+     * @memberof CompiledSmartContract
+     */
+    'contract_name'?: string;
+}
+/**
  * Represents a single decoded event emitted by a smart contract
  * @export
  * @interface ContractEvent
@@ -835,6 +897,12 @@ export interface CreateSmartContractRequest {
      * @memberof CreateSmartContractRequest
      */
     'options': SmartContractOptions;
+    /**
+     * The UUID of the compiled smart contract to deploy.
+     * @type {string}
+     * @memberof CreateSmartContractRequest
+     */
+    'compiled_smart_contract_id'?: string;
 }
 
 
@@ -2766,6 +2834,12 @@ export interface SmartContract {
      * @memberof SmartContract
      */
     'is_external': boolean;
+    /**
+     * The ID of the compiled smart contract that was used to deploy this contract
+     * @type {string}
+     * @memberof SmartContract
+     */
+    'compiled_smart_contract_id'?: string;
 }
 
 
@@ -2914,7 +2988,7 @@ export interface SmartContractList {
  * Options for smart contract creation
  * @export
  */
-export type SmartContractOptions = MultiTokenContractOptions | NFTContractOptions | TokenContractOptions;
+export type SmartContractOptions = MultiTokenContractOptions | NFTContractOptions | TokenContractOptions | { [key: string]: any; };
 
 /**
  * The type of the smart contract.
@@ -8650,6 +8724,45 @@ export class ServerSignersApi extends BaseAPI implements ServerSignersApiInterfa
 export const SmartContractsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * Compile a smart contract
+         * @summary Compile a smart contract
+         * @param {CompileSmartContractRequest} compileSmartContractRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        compileSmartContract: async (compileSmartContractRequest: CompileSmartContractRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'compileSmartContractRequest' is not null or undefined
+            assertParamExists('compileSmartContract', 'compileSmartContractRequest', compileSmartContractRequest)
+            const localVarPath = `/v1/smart_contracts/compile`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication apiKey required
+            await setApiKeyToObject(localVarHeaderParameter, "Jwt", configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(compileSmartContractRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Create a new smart contract
          * @summary Create a new smart contract
          * @param {string} walletId The ID of the wallet the address belongs to.
@@ -8993,6 +9106,19 @@ export const SmartContractsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = SmartContractsApiAxiosParamCreator(configuration)
     return {
         /**
+         * Compile a smart contract
+         * @summary Compile a smart contract
+         * @param {CompileSmartContractRequest} compileSmartContractRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async compileSmartContract(compileSmartContractRequest: CompileSmartContractRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CompiledSmartContract>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.compileSmartContract(compileSmartContractRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SmartContractsApi.compileSmartContract']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Create a new smart contract
          * @summary Create a new smart contract
          * @param {string} walletId The ID of the wallet the address belongs to.
@@ -9107,6 +9233,16 @@ export const SmartContractsApiFactory = function (configuration?: Configuration,
     const localVarFp = SmartContractsApiFp(configuration)
     return {
         /**
+         * Compile a smart contract
+         * @summary Compile a smart contract
+         * @param {CompileSmartContractRequest} compileSmartContractRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        compileSmartContract(compileSmartContractRequest: CompileSmartContractRequest, options?: RawAxiosRequestConfig): AxiosPromise<CompiledSmartContract> {
+            return localVarFp.compileSmartContract(compileSmartContractRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Create a new smart contract
          * @summary Create a new smart contract
          * @param {string} walletId The ID of the wallet the address belongs to.
@@ -9199,6 +9335,16 @@ export const SmartContractsApiFactory = function (configuration?: Configuration,
  */
 export interface SmartContractsApiInterface {
     /**
+     * Compile a smart contract
+     * @summary Compile a smart contract
+     * @param {CompileSmartContractRequest} compileSmartContractRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartContractsApiInterface
+     */
+    compileSmartContract(compileSmartContractRequest: CompileSmartContractRequest, options?: RawAxiosRequestConfig): AxiosPromise<CompiledSmartContract>;
+
+    /**
      * Create a new smart contract
      * @summary Create a new smart contract
      * @param {string} walletId The ID of the wallet the address belongs to.
@@ -9290,6 +9436,18 @@ export interface SmartContractsApiInterface {
  * @extends {BaseAPI}
  */
 export class SmartContractsApi extends BaseAPI implements SmartContractsApiInterface {
+    /**
+     * Compile a smart contract
+     * @summary Compile a smart contract
+     * @param {CompileSmartContractRequest} compileSmartContractRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartContractsApi
+     */
+    public compileSmartContract(compileSmartContractRequest: CompileSmartContractRequest, options?: RawAxiosRequestConfig) {
+        return SmartContractsApiFp(this.configuration).compileSmartContract(compileSmartContractRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * Create a new smart contract
      * @summary Create a new smart contract

@@ -22,6 +22,7 @@ import {
   PaginationResponse,
   CreateFundOptions,
   CreateQuoteOptions,
+  CreateCustomContractOptions,
 } from "../types";
 import { delay } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
@@ -448,6 +449,34 @@ export class WalletAddress extends Address {
 
     return smartContract;
   }
+  
+    /**
+   * Deploys a custom contract.
+   *
+   * @param options - The options for creating the custom contract.
+   * @param options.solidityVersion - The version of the solidity compiler, must be 0.8.+, such as "0.8.28+commit.7893614a". See https://binaries.soliditylang.org/bin/list.json
+   * @param options.solidityInputJson - The input json for the solidity compiler. See https://docs.soliditylang.org/en/latest/using-the-compiler.html#input-description for more details.
+   * @param options.contractName - The name of the contract class.
+   * @param options.constructorArgs - The arguments for the constructor.
+   * @returns A Promise that resolves to the deployed SmartContract object.
+   * @throws {APIError} If the API request to create a smart contract fails.
+   */
+    public async deployContract({ solidityVersion, solidityInputJson, contractName, constructorArgs }: CreateCustomContractOptions): Promise<SmartContract> {
+      if (!Coinbase.useServerSigner && !this.key) {
+        throw new Error("Cannot deploy custom contract without private key loaded");
+      }
+  
+      const smartContract = await this.createCustomContract({ solidityVersion, solidityInputJson, contractName, constructorArgs });
+  
+      if (Coinbase.useServerSigner) {
+        return smartContract;
+      }
+  
+      await smartContract.sign(this.getSigner());
+      await smartContract.broadcast();
+  
+      return smartContract;
+    }
 
   /**
    * Creates an ERC20 token contract.
@@ -524,6 +553,43 @@ export class WalletAddress extends Address {
     );
     return SmartContract.fromModel(resp?.data);
   }
+
+    /**
+   * Creates a custom contract.
+   *
+   * @private
+   * @param {CreateCustomContractOptions} options - The options for creating the custom contract.
+   * @param {string} options.solidityVersion - The version of the solidity compiler, must be 0.8.+, such as "0.8.28+commit.7893614a". See https://binaries.soliditylang.org/bin/list.json
+   * @param {string} options.solidityInputJson - The input json for the solidity compiler. See https://docs.soliditylang.org/en/latest/using-the-compiler.html#input-description for more details.
+   * @param {string} options.contractName - The name of the contract class.
+   * @param {Record<string, any>} options.constructorArgs - The arguments for the constructor.
+   * @returns {Promise<SmartContract>} A Promise that resolves to the created SmartContract.
+   * @throws {APIError} If the API request to create a smart contract fails.
+   */
+    private async createCustomContract({ solidityVersion, solidityInputJson, contractName, constructorArgs }: CreateCustomContractOptions): Promise<SmartContract> {
+      const compileContractResp = await Coinbase.apiClients.smartContract!.compileSmartContract(
+        {
+          solidity_compiler_version: solidityVersion,
+          solidity_input_json: solidityInputJson,
+          contract_name: contractName,
+        },
+      );
+
+      const compiledContract = compileContractResp.data;
+      const compiledContractId = compiledContract.compiled_smart_contract_id;
+
+      const createContractResp = await Coinbase.apiClients.smartContract!.createSmartContract(
+        this.getWalletId(),
+        this.getId(),
+        {
+          type: SmartContractType.Custom,
+          options: constructorArgs,
+          compiled_smart_contract_id: compiledContractId,
+        },
+      );
+      return SmartContract.fromModel(createContractResp?.data);
+    }
+  
 
   /**
    * Creates a contract invocation with the given data.

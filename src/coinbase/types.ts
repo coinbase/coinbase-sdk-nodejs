@@ -64,6 +64,8 @@ import {
   AddressReputation,
   RegisterSmartContractRequest,
   UpdateSmartContractRequest,
+  CompileSmartContractRequest,
+  CompiledSmartContract,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -1135,6 +1137,16 @@ export type CreateERC1155Options = {
 };
 
 /**
+ * Options for creating an arbitrary contract.
+ */
+export type CreateCustomContractOptions = {
+  solidityVersion: string;
+  solidityInputJson: string;
+  contractName: string;
+  constructorArgs: Record<string, any>
+};
+
+/**
  * Options for creating a fund operation.
  */
 export type CreateFundOptions = {
@@ -1467,6 +1479,18 @@ export interface SmartContractAPIClient {
     page?: string,
     options?: RawAxiosRequestConfig,
   ): AxiosPromise<SmartContractList>;
+
+  /**
+   * Compiles a custom contract.
+   * @param compileSmartContractRequest - The request body containing the compile smart contract details.
+   * @param options - Axios request options.
+   * @returns - A promise resolving to the compiled smart contract.
+   * @throws {APIError} If the request fails.
+   */
+  compileSmartContract(
+    compileSmartContractRequest: CompileSmartContractRequest,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<CompiledSmartContract>;
 
   /**
    * Creates a new Smart Contract.
