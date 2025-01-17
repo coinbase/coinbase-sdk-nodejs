@@ -1,5 +1,9 @@
 # Coinbase Node.js SDK Changelog
 
+### Unreleased
+
+- Add `deployContract` method to `WalletAddress` and `Wallet` to deploy an arbitrary contract.
+
 ## [0.14.0] - 2025-01-14
 
 ### Added
