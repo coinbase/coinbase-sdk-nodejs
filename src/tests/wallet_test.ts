@@ -1101,6 +1101,18 @@ describe("Wallet Class", () => {
       expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
     });
 
+    it("successfully imports a wallet from a valid 24-word mnemonic on base-mainnet", async () => {
+      const wallet = await Wallet.import(
+        { mnemonicPhrase: validMnemonic },
+        Coinbase.networks.BaseMainnet,
+      );
+      expect(wallet).toBeInstanceOf(Wallet);
+      expect(wallet.getNetworkId()).toEqual(Coinbase.networks.BaseMainnet);
+      expect(Coinbase.apiClients.wallet!.createWallet).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.createAddress).toHaveBeenCalledTimes(1);
+      expect(Coinbase.apiClients.address!.listAddresses).toHaveBeenCalledTimes(1);
+    });
+
     it("throws an error when mnemonic is empty", async () => {
       await expect(Wallet.import({ mnemonicPhrase: "" })).rejects.toThrow(
         "BIP-39 mnemonic seed phrase must be provided",
