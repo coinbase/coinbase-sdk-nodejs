@@ -3,6 +3,11 @@
 ### Unreleased
 
 - Add `deployContract` method to `WalletAddress` and `Wallet` to deploy an arbitrary contract.
+## [0.14.1] - 2025-01-17
+
+### Fixed
+
+- Allow wallet mnemonic seed import to optionally accept `networkId` input argument.
 
 ## [0.14.0] - 2025-01-14
 
