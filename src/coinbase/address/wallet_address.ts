@@ -381,7 +381,11 @@ export class WalletAddress extends Address {
    * @returns A Promise that resolves to the deployed SmartContract object.
    * @throws {APIError} If the API request to create a smart contract fails.
    */
-  public async deployToken({ name, symbol, totalSupply }: CreateERC20Options): Promise<SmartContract> {
+  public async deployToken({
+    name,
+    symbol,
+    totalSupply,
+  }: CreateERC20Options): Promise<SmartContract> {
     if (!Coinbase.useServerSigner && !this.key) {
       throw new Error("Cannot deploy ERC20 without private key loaded");
     }
@@ -449,8 +453,8 @@ export class WalletAddress extends Address {
 
     return smartContract;
   }
-  
-    /**
+
+  /**
    * Deploys a custom contract.
    *
    * @param options - The options for creating the custom contract.
@@ -461,22 +465,32 @@ export class WalletAddress extends Address {
    * @returns A Promise that resolves to the deployed SmartContract object.
    * @throws {APIError} If the API request to create a smart contract fails.
    */
-    public async deployContract({ solidityVersion, solidityInputJson, contractName, constructorArgs }: CreateCustomContractOptions): Promise<SmartContract> {
-      if (!Coinbase.useServerSigner && !this.key) {
-        throw new Error("Cannot deploy custom contract without private key loaded");
-      }
-  
-      const smartContract = await this.createCustomContract({ solidityVersion, solidityInputJson, contractName, constructorArgs });
-  
-      if (Coinbase.useServerSigner) {
-        return smartContract;
-      }
-  
-      await smartContract.sign(this.getSigner());
-      await smartContract.broadcast();
-  
+  public async deployContract({
+    solidityVersion,
+    solidityInputJson,
+    contractName,
+    constructorArgs,
+  }: CreateCustomContractOptions): Promise<SmartContract> {
+    if (!Coinbase.useServerSigner && !this.key) {
+      throw new Error("Cannot deploy custom contract without private key loaded");
+    }
+
+    const smartContract = await this.createCustomContract({
+      solidityVersion,
+      solidityInputJson,
+      contractName,
+      constructorArgs,
+    });
+
+    if (Coinbase.useServerSigner) {
       return smartContract;
     }
+
+    await smartContract.sign(this.getSigner());
+    await smartContract.broadcast();
+
+    return smartContract;
+  }
 
   /**
    * Creates an ERC20 token contract.
@@ -489,7 +503,11 @@ export class WalletAddress extends Address {
    * @returns {Promise<SmartContract>} A Promise that resolves to the created SmartContract.
    * @throws {APIError} If the API request to create a smart contract fails.
    */
-  private async createERC20({ name, symbol, totalSupply }: CreateERC20Options): Promise<SmartContract> {
+  private async createERC20({
+    name,
+    symbol,
+    totalSupply,
+  }: CreateERC20Options): Promise<SmartContract> {
     const resp = await Coinbase.apiClients.smartContract!.createSmartContract(
       this.getWalletId(),
       this.getId(),
@@ -515,7 +533,11 @@ export class WalletAddress extends Address {
    * @returns A Promise that resolves to the deployed SmartContract object.
    * @throws {APIError} If the private key is not loaded when not using server signer.
    */
-  private async createERC721({ name, symbol, baseURI }: CreateERC721Options): Promise<SmartContract> {
+  private async createERC721({
+    name,
+    symbol,
+    baseURI,
+  }: CreateERC721Options): Promise<SmartContract> {
     const resp = await Coinbase.apiClients.smartContract!.createSmartContract(
       this.getWalletId(),
       this.getId(),
@@ -566,30 +588,32 @@ export class WalletAddress extends Address {
    * @returns {Promise<SmartContract>} A Promise that resolves to the created SmartContract.
    * @throws {APIError} If the API request to compile or subsequently create a smart contract fails.
    */
-    private async createCustomContract({ solidityVersion, solidityInputJson, contractName, constructorArgs }: CreateCustomContractOptions): Promise<SmartContract> {
-      const compileContractResp = await Coinbase.apiClients.smartContract!.compileSmartContract(
-        {
-          solidity_compiler_version: solidityVersion,
-          solidity_input_json: solidityInputJson,
-          contract_name: contractName,
-        },
-      );
+  private async createCustomContract({
+    solidityVersion,
+    solidityInputJson,
+    contractName,
+    constructorArgs,
+  }: CreateCustomContractOptions): Promise<SmartContract> {
+    const compileContractResp = await Coinbase.apiClients.smartContract!.compileSmartContract({
+      solidity_compiler_version: solidityVersion,
+      solidity_input_json: solidityInputJson,
+      contract_name: contractName,
+    });
 
-      const compiledContract = compileContractResp.data;
-      const compiledContractId = compiledContract.compiled_smart_contract_id;
+    const compiledContract = compileContractResp.data;
+    const compiledContractId = compiledContract.compiled_smart_contract_id;
 
-      const createContractResp = await Coinbase.apiClients.smartContract!.createSmartContract(
-        this.getWalletId(),
-        this.getId(),
-        {
-          type: SmartContractType.Custom,
-          options: JSON.stringify(constructorArgs),
-          compiled_smart_contract_id: compiledContractId,
-        },
-      );
-      return SmartContract.fromModel(createContractResp?.data);
-    }
-
+    const createContractResp = await Coinbase.apiClients.smartContract!.createSmartContract(
+      this.getWalletId(),
+      this.getId(),
+      {
+        type: SmartContractType.Custom,
+        options: JSON.stringify(constructorArgs),
+        compiled_smart_contract_id: compiledContractId,
+      },
+    );
+    return SmartContract.fromModel(createContractResp?.data);
+  }
 
   /**
    * Creates a contract invocation with the given data.
@@ -843,10 +867,7 @@ export class WalletAddress extends Address {
    * @param options.assetId - The ID of the Asset to fund with. For Ether, eth, gwei, and wei are supported.
    * @returns The created fund operation object
    */
-  public async fund({
-    amount,
-    assetId,
-  }: CreateFundOptions): Promise<FundOperation> {
+  public async fund({ amount, assetId }: CreateFundOptions): Promise<FundOperation> {
     const normalizedAmount = new Decimal(amount.toString());
 
     return FundOperation.create(
@@ -866,10 +887,7 @@ export class WalletAddress extends Address {
    * @param options.assetId - The ID of the Asset to fund with. For Ether, eth, gwei, and wei are supported.
    * @returns The fund quote object
    */
-  public async quoteFund({
-    amount,
-    assetId,
-  }: CreateQuoteOptions): Promise<FundQuote> {
+  public async quoteFund({ amount, assetId }: CreateQuoteOptions): Promise<FundQuote> {
     const normalizedAmount = new Decimal(amount.toString());
 
     return FundQuote.create(

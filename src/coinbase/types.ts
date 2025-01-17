@@ -1144,7 +1144,7 @@ export type CreateCustomContractOptions = {
   solidityVersion: string;
   solidityInputJson: string;
   contractName: string;
-  constructorArgs: Record<string, any>
+  constructorArgs: Record<string, any>;
 };
 
 /**
