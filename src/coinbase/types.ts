@@ -1144,6 +1144,7 @@ export type CreateCustomContractOptions = {
   solidityVersion: string;
   solidityInputJson: string;
   contractName: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructorArgs: Record<string, any>;
 };
 
@@ -1483,6 +1484,7 @@ export interface SmartContractAPIClient {
 
   /**
    * Compiles a custom contract.
+   *
    * @param compileSmartContractRequest - The request body containing the compile smart contract details.
    * @param options - Axios request options.
    * @returns - A promise resolving to the compiled smart contract.
