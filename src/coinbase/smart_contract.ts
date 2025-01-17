@@ -6,6 +6,7 @@ import {
   SmartContractOptions as SmartContractOptionsModel,
   TokenContractOptions as TokenContractOptionsModel,
   NFTContractOptions as NFTContractOptionsModel,
+  MultiTokenContractOptions as MultiTokenContractOptionsModel,
 } from "../client/api";
 import { Transaction } from "./transaction";
 import {
@@ -277,10 +278,12 @@ export class SmartContract {
         symbol: options.symbol,
         baseURI: options.base_uri,
       } as NFTContractOptions;
-    } else {
+    } else if (this.isERC1155(this.getType(), options)) {
       return {
         uri: options.uri,
       } as MultiTokenContractOptions;
+    } else {
+      return options as string;
     }
   }
 
@@ -450,5 +453,19 @@ export class SmartContract {
     options: SmartContractOptionsModel,
   ): options is NFTContractOptionsModel {
     return type === SmartContractType.ERC721;
+  }
+
+  /**
+   * Type guard for checking if the smart contract is an ERC1155.
+   *
+   * @param type - The type of the smart contract.
+   * @param options - The options of the smart contract.
+   * @returns True if the smart contract is an ERC1155, false otherwise.
+   */
+  private isERC1155(
+    type: SmartContractType,
+    options: SmartContractOptionsModel,
+  ): options is MultiTokenContractOptionsModel {
+    return type === SmartContractType.ERC1155;
   }
 }
