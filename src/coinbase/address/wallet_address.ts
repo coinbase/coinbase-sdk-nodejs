@@ -554,7 +554,7 @@ export class WalletAddress extends Address {
     return SmartContract.fromModel(resp?.data);
   }
 
-    /**
+  /**
    * Creates a custom contract.
    *
    * @private
@@ -575,6 +575,9 @@ export class WalletAddress extends Address {
         },
       );
 
+      console.log("compileContractResp", compileContractResp)
+      // TODO - add logic to bail here with errors if any
+
       const compiledContract = compileContractResp.data;
       const compiledContractId = compiledContract.compiled_smart_contract_id;
 
@@ -583,7 +586,7 @@ export class WalletAddress extends Address {
         this.getId(),
         {
           type: SmartContractType.Custom,
-          options: constructorArgs,
+          options: JSON.stringify(constructorArgs),
           compiled_smart_contract_id: compiledContractId,
         },
       );

@@ -898,7 +898,7 @@ export interface CreateSmartContractRequest {
      */
     'options': SmartContractOptions;
     /**
-     * The UUID of the compiled smart contract to deploy.
+     * The optional UUID of the compiled smart contract to deploy. This field is only required when SmartContractType is set to custom.
      * @type {string}
      * @memberof CreateSmartContractRequest
      */
@@ -2988,7 +2988,7 @@ export interface SmartContractList {
  * Options for smart contract creation
  * @export
  */
-export type SmartContractOptions = MultiTokenContractOptions | NFTContractOptions | TokenContractOptions | { [key: string]: any; };
+export type SmartContractOptions = MultiTokenContractOptions | NFTContractOptions | TokenContractOptions | string;
 
 /**
  * The type of the smart contract.

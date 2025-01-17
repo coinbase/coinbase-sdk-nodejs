@@ -1077,7 +1077,8 @@ export type MultiTokenContractOptions = {
 export type SmartContractOptions =
   | NFTContractOptions
   | TokenContractOptions
-  | MultiTokenContractOptions;
+  | MultiTokenContractOptions
+  | string;
 
 /**
  * Options for creating a Transfer.
