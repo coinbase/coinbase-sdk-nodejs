@@ -456,7 +456,7 @@ export class WalletAddress extends Address {
    * @param options - The options for creating the custom contract.
    * @param options.solidityVersion - The version of the solidity compiler, must be 0.8.+, such as "0.8.28+commit.7893614a". See https://binaries.soliditylang.org/bin/list.json
    * @param options.solidityInputJson - The input json for the solidity compiler. See https://docs.soliditylang.org/en/latest/using-the-compiler.html#input-description for more details.
-   * @param options.contractName - The name of the contract class.
+   * @param options.contractName - The name of the contract class to be deployed.
    * @param options.constructorArgs - The arguments for the constructor.
    * @returns A Promise that resolves to the deployed SmartContract object.
    * @throws {APIError} If the API request to create a smart contract fails.
@@ -564,7 +564,7 @@ export class WalletAddress extends Address {
    * @param {string} options.contractName - The name of the contract class.
    * @param {Record<string, any>} options.constructorArgs - The arguments for the constructor.
    * @returns {Promise<SmartContract>} A Promise that resolves to the created SmartContract.
-   * @throws {APIError} If the API request to create a smart contract fails.
+   * @throws {APIError} If the API request to compile or subsequently create a smart contract fails.
    */
     private async createCustomContract({ solidityVersion, solidityInputJson, contractName, constructorArgs }: CreateCustomContractOptions): Promise<SmartContract> {
       const compileContractResp = await Coinbase.apiClients.smartContract!.compileSmartContract(
@@ -574,9 +574,6 @@ export class WalletAddress extends Address {
           contract_name: contractName,
         },
       );
-
-      console.log("compileContractResp", compileContractResp)
-      // TODO - add logic to bail here with errors if any
 
       const compiledContract = compileContractResp.data;
       const compiledContractId = compiledContract.compiled_smart_contract_id;
@@ -592,7 +589,7 @@ export class WalletAddress extends Address {
       );
       return SmartContract.fromModel(createContractResp?.data);
     }
-  
+
 
   /**
    * Creates a contract invocation with the given data.

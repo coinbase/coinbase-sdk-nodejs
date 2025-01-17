@@ -946,7 +946,7 @@ export class Wallet {
    * @param options - The options for creating the custom contract.
    * @param options.solidityVersion - The version of the solidity compiler, must be 0.8.+, such as "0.8.28+commit.7893614a". See https://binaries.soliditylang.org/bin/list.json
    * @param options.solidityInputJson - The input json for the solidity compiler. See https://docs.soliditylang.org/en/latest/using-the-compiler.html#input-description for more details.
-   * @param options.contractName - The name of the contract class.
+   * @param options.contractName - The name of the contract class to be deployed.
    * @param options.constructorArgs - The arguments for the constructor.
    * @returns A Promise that resolves to the deployed SmartContract object.
    * @throws {Error} If the private key is not loaded when not using server signer.
