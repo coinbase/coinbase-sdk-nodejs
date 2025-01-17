@@ -1141,9 +1141,13 @@ export type CreateERC1155Options = {
  * Options for creating an arbitrary contract.
  */
 export type CreateCustomContractOptions = {
+  /** The version of the solidity compiler, must be 0.8.+, such as "0.8.28+commit.7893614a". See https://binaries.soliditylang.org/bin/list.json */
   solidityVersion: string;
+  /** The input json for the solidity compiler. See https://docs.soliditylang.org/en/latest/using-the-compiler.html#input-description for more details. */
   solidityInputJson: string;
+  /** The name of the contract class to be deployed. */
   contractName: string;
+  /** The arguments for the constructor. */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructorArgs: Record<string, any>;
 };
