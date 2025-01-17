@@ -143,12 +143,16 @@ export class Wallet {
    *     Allows for the loading of an existing CDP wallet into CDP.
    *   - If MnemonicSeedPhrase: Must contain a valid BIP-39 mnemonic phrase (12, 15, 18, 21, or 24 words).
    *     Allows for the import of an external wallet into CDP as a 1-of-1 wallet.
+   * @param networkId - the ID of the blockchain network. Defaults to 'base-sepolia'.
    * @returns A Promise that resolves to the loaded Wallet instance
    * @throws {ArgumentError} If the data format is invalid.
    * @throws {ArgumentError} If the seed is not provided.
    * @throws {ArgumentError} If the mnemonic seed phrase is invalid.
    */
-  public static async import(data: WalletData | MnemonicSeedPhrase): Promise<Wallet> {
+  public static async import(
+    data: WalletData | MnemonicSeedPhrase,
+    networkId: string = Coinbase.networks.BaseSepolia,
+  ): Promise<Wallet> {
     // Check if data is a mnemonic seed phrase object
     if (isMnemonicSeedPhrase(data)) {
       // Handle mnemonic seed phrase object import
@@ -168,7 +172,7 @@ export class Wallet {
       // Create wallet using the provided seed
       const wallet = await Wallet.createWithSeed({
         seed: seed,
-        networkId: Coinbase.networks.BaseSepolia,
+        networkId,
       });
 
       // Ensure the wallet is created
