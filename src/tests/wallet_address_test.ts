@@ -60,6 +60,8 @@ import {
   ERC721_BASE_URI,
   VALID_SMART_CONTRACT_ERC1155_MODEL,
   ERC1155_URI,
+  VALID_SMART_CONTRACT_CUSTOM_MODEL,
+  VALID_COMPILED_CONTRACT_MODEL,
 } from "./utils";
 import { Transfer } from "../coinbase/transfer";
 import { TransactionStatus } from "../coinbase/types";
@@ -2455,6 +2457,284 @@ describe("WalletAddress", () => {
               uri: ERC1155_URI,
             }),
           ).rejects.toThrow(APIError);
+        });
+      });
+    });
+  });
+
+  describe("#deployContract", () => {
+    let key = ethers.Wallet.createRandom();
+    let addressModel: AddressModel;
+    let walletAddress: WalletAddress;
+    let expectedSignedPayload: string;
+
+    beforeAll(() => {
+      Coinbase.apiClients.smartContract = smartContractApiMock;
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      addressModel = newAddressModel(randomUUID(), randomUUID(), Coinbase.networks.BaseSepolia);
+    });
+
+    describe("when not using a server-signer", () => {
+      beforeEach(async () => {
+        Coinbase.useServerSigner = false;
+
+        walletAddress = new WalletAddress(addressModel, key as unknown as ethers.Wallet);
+
+        const tx = new Transaction(VALID_SMART_CONTRACT_CUSTOM_MODEL.transaction!);
+        expectedSignedPayload = await tx.sign(key as unknown as ethers.Wallet);
+      });
+
+      describe("when it is successful", () => {
+        let smartContract;
+
+        beforeEach(async () => {
+          Coinbase.apiClients.smartContract!.compileSmartContract = mockReturnValue({
+            ...VALID_COMPILED_CONTRACT_MODEL,
+          });
+
+          Coinbase.apiClients.smartContract!.createSmartContract = mockReturnValue({
+            ...VALID_SMART_CONTRACT_CUSTOM_MODEL,
+            deployer_address: walletAddress.getId(),
+            wallet_id: walletAddress.getWalletId(),
+          });
+
+          Coinbase.apiClients.smartContract!.deploySmartContract = mockReturnValue({
+            ...VALID_SMART_CONTRACT_CUSTOM_MODEL,
+            address_id: walletAddress.getId(),
+            wallet_id: walletAddress.getWalletId(),
+          });
+
+          smartContract = await walletAddress.deployContract({
+            solidityVersion: "0.8.0",
+            solidityInputJson: "{}",
+            contractName: "TestContract",
+            constructorArgs: {
+              arg1: "arg1",
+              arg2: "arg2",
+            },
+          });
+        });
+
+        it("returns a smart contract", async () => {
+          expect(smartContract).toBeInstanceOf(SmartContract);
+          expect(smartContract.getId()).toBe(VALID_SMART_CONTRACT_CUSTOM_MODEL.smart_contract_id);
+        });
+
+        it("creates the smart contract", async () => {
+          expect(Coinbase.apiClients.smartContract!.createSmartContract).toHaveBeenCalledWith(
+            walletAddress.getWalletId(),
+            walletAddress.getId(),
+            {
+              type: SmartContractType.Custom,
+              options: `{"arg1":"arg1","arg2":"arg2"}`,
+              compiled_smart_contract_id: "test-compiled-contract-1",
+            },
+          );
+          expect(Coinbase.apiClients.smartContract!.createSmartContract).toHaveBeenCalledTimes(1);
+        });
+
+        it("broadcasts the smart contract", async () => {
+          expect(Coinbase.apiClients.smartContract!.deploySmartContract).toHaveBeenCalledWith(
+            walletAddress.getWalletId(),
+            walletAddress.getId(),
+            VALID_SMART_CONTRACT_CUSTOM_MODEL.smart_contract_id,
+            {
+              signed_payload: expectedSignedPayload,
+            },
+          );
+
+          expect(Coinbase.apiClients.smartContract!.deploySmartContract).toHaveBeenCalledTimes(1);
+        });
+      });
+
+      describe("when it is successful deploying a smart contract", () => {
+        let smartContract;
+
+        beforeEach(async () => {
+          Coinbase.apiClients.smartContract!.createSmartContract = mockReturnValue({
+            ...VALID_SMART_CONTRACT_CUSTOM_MODEL,
+            deployer_address: walletAddress.getId(),
+            wallet_id: walletAddress.getWalletId(),
+          });
+
+          Coinbase.apiClients.smartContract!.deploySmartContract = mockReturnValue({
+            ...VALID_SMART_CONTRACT_CUSTOM_MODEL,
+            deployer_address: walletAddress.getId(),
+            wallet_id: walletAddress.getWalletId(),
+          });
+
+          Coinbase.apiClients.smartContract!.getSmartContract = mockReturnValue(
+            VALID_SMART_CONTRACT_CUSTOM_MODEL,
+          );
+
+          smartContract = await walletAddress.deployContract({
+            solidityVersion: "0.8.0",
+            solidityInputJson: "{}",
+            contractName: "TestContract",
+            constructorArgs: {
+              arg1: "arg1",
+              arg2: "arg2",
+            },
+          });
+        });
+
+        it("returns a smart contract", async () => {
+          expect(smartContract).toBeInstanceOf(SmartContract);
+          expect(smartContract.getId()).toBe(VALID_SMART_CONTRACT_CUSTOM_MODEL.smart_contract_id);
+        });
+
+        it("creates the smart contract", async () => {
+          expect(Coinbase.apiClients.smartContract!.createSmartContract).toHaveBeenCalledWith(
+            walletAddress.getWalletId(),
+            walletAddress.getId(),
+            {
+              type: SmartContractType.Custom,
+              options: `{"arg1":"arg1","arg2":"arg2"}`,
+              compiled_smart_contract_id: "test-compiled-contract-1",
+            },
+          );
+          expect(Coinbase.apiClients.smartContract!.createSmartContract).toHaveBeenCalledTimes(1);
+        });
+
+        it("broadcasts the smart contract", async () => {
+          expect(Coinbase.apiClients.smartContract!.deploySmartContract).toHaveBeenCalledWith(
+            walletAddress.getWalletId(),
+            walletAddress.getId(),
+            VALID_SMART_CONTRACT_CUSTOM_MODEL.smart_contract_id,
+            {
+              signed_payload: expectedSignedPayload,
+            },
+          );
+
+          expect(Coinbase.apiClients.smartContract!.deploySmartContract).toHaveBeenCalledTimes(1);
+        });
+      });
+
+      describe("when no key is loaded", () => {
+        beforeEach(() => {
+          walletAddress = new WalletAddress(addressModel);
+        });
+
+        it("throws an error", async () => {
+          await expect(
+            walletAddress.deployContract({
+              solidityVersion: "0.8.0",
+              solidityInputJson: "{}",
+              contractName: "TestContract",
+              constructorArgs: ["arg1", "arg2"],
+            }),
+          ).rejects.toThrow(Error);
+        });
+      });
+
+      describe("when it fails to create a smart contract", () => {
+        beforeEach(() => {
+          Coinbase.apiClients.smartContract!.createSmartContract = mockReturnRejectedValue(
+            new APIError({
+              response: {
+                status: 400,
+                data: {
+                  code: "malformed_request",
+                  message: "failed to create smart contract: invalid abi",
+                },
+              },
+            } as AxiosError),
+          );
+        });
+
+        it("throws an error", async () => {
+          await expect(
+            walletAddress.deployContract({
+              solidityVersion: "0.8.0",
+              solidityInputJson: "{}",
+              contractName: "TestContract",
+              constructorArgs: ["arg1", "arg2"],
+            }),
+          ).rejects.toThrow(APIError);
+        });
+      });
+
+      describe("when it fails to broadcast a smart contract", () => {
+        beforeEach(() => {
+          Coinbase.apiClients.smartContract!.createSmartContract = mockReturnValue({
+            ...VALID_SMART_CONTRACT_CUSTOM_MODEL,
+            address_id: walletAddress.getId(),
+            wallet_id: walletAddress.getWalletId(),
+          });
+
+          Coinbase.apiClients.smartContract!.deploySmartContract = mockReturnRejectedValue(
+            new APIError({
+              response: {
+                status: 400,
+                data: {
+                  code: "invalid_signed_payload",
+                  message: "failed to broadcast smart contract: invalid signed payload",
+                },
+              },
+            } as AxiosError),
+          );
+        });
+
+        it("throws an error", async () => {
+          await expect(
+            walletAddress.deployContract({
+              solidityVersion: "0.8.0",
+              solidityInputJson: "{}",
+              contractName: "TestContract",
+              constructorArgs: ["arg1", "arg2"],
+            }),
+          ).rejects.toThrow(APIError);
+        });
+      });
+    });
+    describe("when using a server-signer", () => {
+      let smartContract;
+
+      beforeEach(() => {
+        Coinbase.useServerSigner = true;
+        walletAddress = new WalletAddress(addressModel);
+      });
+
+      describe("when it is successful", () => {
+        beforeEach(async () => {
+          Coinbase.apiClients.smartContract!.createSmartContract = mockReturnValue({
+            ...VALID_SMART_CONTRACT_CUSTOM_MODEL,
+            address_id: walletAddress.getId(),
+            wallet_id: walletAddress.getWalletId(),
+          });
+
+          smartContract = await walletAddress.deployContract({
+            solidityVersion: "0.8.0",
+            solidityInputJson: "{}",
+            contractName: "TestContract",
+            constructorArgs: {
+              arg1: "arg1",
+              arg2: "arg2",
+            },
+          });
+        });
+
+        it("returns a pending contract invocation", async () => {
+          expect(smartContract).toBeInstanceOf(SmartContract);
+          expect(smartContract.getId()).toBe(VALID_SMART_CONTRACT_CUSTOM_MODEL.smart_contract_id);
+          expect(smartContract.getTransaction().getStatus()).toBe(TransactionStatus.PENDING);
+        });
+
+        it("creates a contract invocation", async () => {
+          expect(Coinbase.apiClients.smartContract!.createSmartContract).toHaveBeenCalledWith(
+            walletAddress.getWalletId(),
+            walletAddress.getId(),
+            {
+              type: SmartContractType.Custom,
+              options: `{"arg1":"arg1","arg2":"arg2"}`,
+              compiled_smart_contract_id: "test-compiled-contract-1",
+            },
+          );
+          expect(Coinbase.apiClients.smartContract!.createSmartContract).toHaveBeenCalledTimes(1);
         });
       });
     });
