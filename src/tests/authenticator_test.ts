@@ -54,8 +54,8 @@ describe("Authenticator tests", () => {
   });
 
   describe("when a source version is provided", () => {
-    beforeAll(() => sourceVersion = "1.0.0");
-    afterAll(() => sourceVersion = undefined);
+    beforeAll(() => (sourceVersion = "1.0.0"));
+    afterAll(() => (sourceVersion = undefined));
 
     it("includes the source version in the correlation context", async () => {
       const config = await authenticator.authenticateRequest(VALID_CONFIG, true);
@@ -65,7 +65,11 @@ describe("Authenticator tests", () => {
   });
 
   it("invalid pem key should raise an InvalidAPIKeyFormat error", async () => {
-    const invalidAuthenticator = new CoinbaseAuthenticator("test-key", "-----BEGIN EC KEY-----\n", source);
+    const invalidAuthenticator = new CoinbaseAuthenticator(
+      "test-key",
+      "-----BEGIN EC KEY-----\n",
+      source,
+    );
 
     expect(invalidAuthenticator.authenticateRequest(VALID_CONFIG)).rejects.toThrow();
   });

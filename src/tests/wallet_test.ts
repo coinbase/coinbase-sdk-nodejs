@@ -61,6 +61,8 @@ import {
   ERC721_SYMBOL,
   ERC721_BASE_URI,
   VALID_SMART_CONTRACT_ERC721_MODEL,
+  VALID_SMART_CONTRACT_ERC1155_MODEL,
+  VALID_SMART_CONTRACT_CUSTOM_MODEL,
 } from "./utils";
 import { Trade } from "../coinbase/trade";
 import { WalletAddress } from "../coinbase/address/wallet_address";
@@ -674,6 +676,59 @@ describe("Wallet Class", () => {
 
       expect((await wallet.getDefaultAddress()).deployNFT).toHaveBeenCalledTimes(1);
       expect((await wallet.getDefaultAddress()).deployNFT).toHaveBeenCalledWith(options);
+
+      expect(smartContract).toBeInstanceOf(SmartContract);
+      expect(smartContract).toEqual(expectedSmartContract);
+    });
+  });
+
+  describe("#deployMultiToken", () => {
+    let expectedSmartContract;
+    let options = {
+      uri: "https://example.com/metadata",
+    };
+
+    beforeEach(async () => {
+      expectedSmartContract = SmartContract.fromModel(VALID_SMART_CONTRACT_ERC1155_MODEL);
+
+      (await wallet.getDefaultAddress()).deployMultiToken = jest
+        .fn()
+        .mockResolvedValue(expectedSmartContract);
+    });
+
+    it("successfully deploys an ERC1155 contract on the default address", async () => {
+      const smartContract = await wallet.deployMultiToken(options);
+
+      expect((await wallet.getDefaultAddress()).deployMultiToken).toHaveBeenCalledTimes(1);
+      expect((await wallet.getDefaultAddress()).deployMultiToken).toHaveBeenCalledWith(options);
+
+      expect(smartContract).toBeInstanceOf(SmartContract);
+      expect(smartContract).toEqual(expectedSmartContract);
+    });
+  });
+
+  describe("#deployContract", () => {
+    let expectedSmartContract;
+    let options = {
+      solidityVersion: "0.8.0",
+      solidityInputJson: "{}",
+      contractName: "TestContract",
+      constructorArgs: ["arg1", "arg2"],
+    };
+
+    beforeEach(async () => {
+      expectedSmartContract = SmartContract.fromModel(VALID_SMART_CONTRACT_CUSTOM_MODEL);
+
+      (await wallet.getDefaultAddress()).deployContract = jest
+        .fn()
+        .mockResolvedValue(expectedSmartContract);
+    });
+
+    it("successfully deploys a custom contract on the default address", async () => {
+      const smartContract = await wallet.deployContract(options);
+
+      expect((await wallet.getDefaultAddress()).deployContract).toHaveBeenCalledTimes(1);
+      expect((await wallet.getDefaultAddress()).deployContract).toHaveBeenCalledWith(options);
 
       expect(smartContract).toBeInstanceOf(SmartContract);
       expect(smartContract).toEqual(expectedSmartContract);

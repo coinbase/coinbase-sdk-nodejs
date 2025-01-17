@@ -564,8 +564,8 @@ describe("SmartContract", () => {
     it("returns the same value as toString", () => {
       expect(erc20SmartContract.toString()).toEqual(
         `SmartContract{id: '${erc20SmartContract.getId()}', networkId: '${erc20SmartContract.getNetworkId()}', ` +
-        `contractAddress: '${erc20SmartContract.getContractAddress()}', deployerAddress: '${erc20SmartContract.getDeployerAddress()}', ` +
-        `type: '${erc20SmartContract.getType()}'}`,
+          `contractAddress: '${erc20SmartContract.getContractAddress()}', deployerAddress: '${erc20SmartContract.getDeployerAddress()}', ` +
+          `type: '${erc20SmartContract.getType()}'}`,
       );
     });
   });
