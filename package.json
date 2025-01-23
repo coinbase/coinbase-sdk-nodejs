@@ -27,6 +27,7 @@
     "dist"
   ],
   "dependencies": {
+    "@coinbase/coinbase-sdk": "^0.15.0",
     "@scure/bip32": "^1.4.0",
     "abitype": "^1.0.6",
     "axios": "^1.6.8",
