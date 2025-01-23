@@ -190,7 +190,7 @@ describe("WalletAddress", () => {
 
   it("should return an error for an unsupported asset", async () => {
     const getAddressBalance = mockReturnRejectedValue(new APIError(""));
-    const assetId = "unsupported-asset";
+    const assetId = "unsupportedasset";
     Coinbase.apiClients.externalAddress!.getExternalAddressBalance = getAddressBalance;
     await expect(address.getBalance(assetId)).rejects.toThrow(APIError);
     expect(getAddressBalance).toHaveBeenCalledWith(
