@@ -49,6 +49,32 @@ describe("Asset", () => {
         expect(asset.getAssetId()).toEqual("wei");
       });
     });
+    describe("when the asset_id is not checksummed", () => {
+      it("should return the model with non-checksummed assetId", () => {
+        const nonChecksummedAssetId = "0x8309fbdf021edf768dc13195741940ba544dea98";
+        const model = {
+          asset_id: "0x8309fbdF021eDF768DC13195741940ba544dEa98",
+          network_id: Coinbase.networks.BaseMainnet,
+          contract_address: "0x8309fbdF021eDF768DC13195741940ba544dEa98",
+          decimals: 18,
+        }
+        const asset = Asset.fromModel(model, nonChecksummedAssetId);
+        expect(asset.getAssetId()).toEqual("0x8309fbdf021edf768dc13195741940ba544dea98");
+      })
+    })
+    describe("when the asset_id is checksummed", () => {
+      it("should return the model with checksummed assetId", () => {
+        const checksummedAssetId = "0x8309fbdf021edf768dc13195741940ba544dea98";
+        const model = {
+          asset_id: "0x8309fbdF021eDF768DC13195741940ba544dEa98",
+          network_id: Coinbase.networks.BaseMainnet,
+          contract_address: "0x8309fbdF021eDF768DC13195741940ba544dEa98",
+          decimals: 18,
+        }
+        const asset = Asset.fromModel(model, checksummedAssetId);
+        expect(asset.getAssetId()).toEqual(checksummedAssetId);
+      })
+    })
   });
 
   describe("#toString", () => {
