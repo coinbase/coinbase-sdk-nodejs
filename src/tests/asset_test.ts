@@ -64,7 +64,7 @@ describe("Asset", () => {
     })
     describe("when the asset_id is checksummed", () => {
       it("should return the model with checksummed assetId", () => {
-        const checksummedAssetId = "0x8309fbdf021edf768dc13195741940ba544dea98";
+        const checksummedAssetId = "0x8309fbdF021eDF768DC13195741940ba544dEa98";
         const model = {
           asset_id: "0x8309fbdF021eDF768DC13195741940ba544dEa98",
           network_id: Coinbase.networks.BaseMainnet,
