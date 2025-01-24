@@ -3,7 +3,7 @@
 ## [0.16.0] - 2025-01-24
 
 ### Fixed
-- Fixed a bug where non-checksummed asset IDs were throwing an error
+- Fixed a bug where non-checksummed asset IDs were throwing an error.
 
 ## [0.15.0] - 2025-01-17
 
