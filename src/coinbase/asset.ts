@@ -49,7 +49,7 @@ export class Asset {
     if (assetId && model.asset_id) {
       const normalizedModelAssetId = model.asset_id.toLowerCase();
       const normalizedAssetId = assetId.toLowerCase();
-      
+
       if (Coinbase.toAssetId(normalizedModelAssetId) !== Coinbase.toAssetId(normalizedAssetId)) {
         switch (normalizedAssetId) {
           case "gwei":
