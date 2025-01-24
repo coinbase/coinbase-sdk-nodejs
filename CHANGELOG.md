@@ -1,6 +1,6 @@
 # Coinbase Node.js SDK Changelog
 
-## [0.16.0] - 2025-01-24
+## Unreleased
 
 ### Fixed
 - Fixed a bug where non-checksummed asset IDs were throwing an error.
