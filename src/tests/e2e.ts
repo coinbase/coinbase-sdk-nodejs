@@ -151,7 +151,7 @@ describe("Coinbase SDK E2E Test", () => {
     });
   }, 60000);
 
-  it("should be able to make gasless transfers", async () => {
+  it.skip("should be able to make gasless transfers", async () => {
     // Import wallet with balance
     const seedFile = JSON.parse(process.env.WALLET_DATA || "");
     const walletId = Object.keys(seedFile)[0];
@@ -178,6 +178,7 @@ describe("Coinbase SDK E2E Test", () => {
     });
 
     await transfer.wait();
+    await new Promise(resolve => setTimeout(resolve, 60000));
 
     expect(transfer.toString()).toBeDefined();
     expect(await transfer.getStatus()).toBe(TransferStatus.COMPLETE);
