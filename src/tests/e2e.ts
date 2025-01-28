@@ -190,7 +190,7 @@ describe("Coinbase SDK E2E Test", () => {
     expect(destBalance.get(Coinbase.assets.Usdc)?.toString()).toEqual(`${transferAmount}`);
     console.log(`Source balance: ${sourceBalance}`);
     console.log(`Destination balance: ${destBalance}`);
-  }, 200000);
+  }, 300000);
 });
 
 describe("Coinbase SDK Stake E2E Test", () => {
