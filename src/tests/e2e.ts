@@ -165,10 +165,13 @@ describe("Coinbase SDK E2E Test", () => {
     
     // Create destination wallet
     const destinationWallet = await Wallet.create();
+
+    // Initialize transfer amount
+    const transferAmount = 0.000001;
     
-    console.log("Making gasless transfer of 0.000001 USDC...");
+    console.log(`Making gasless transfer of ${transferAmount} USDC...`);
     const transfer = await sourceWallet.createTransfer({
-      amount: 0.000001,
+      amount: transferAmount,
       assetId: Coinbase.assets.Usdc,
       destination: destinationWallet,
       gasless: true,
@@ -184,7 +187,7 @@ describe("Coinbase SDK E2E Test", () => {
     const sourceBalance = await sourceWallet.listBalances();
     const destBalance = await destinationWallet.listBalances();
     expect(sourceBalance.get(Coinbase.assets.Usdc)).not.toEqual("0");
-    expect(destBalance.get(Coinbase.assets.Usdc)?.toString()).toEqual("0.000001");
+    expect(destBalance.get(Coinbase.assets.Usdc)?.toString()).toEqual(`${transferAmount}`);
     console.log(`Source balance: ${sourceBalance}`);
     console.log(`Destination balance: ${destBalance}`);
   }, 200000);
