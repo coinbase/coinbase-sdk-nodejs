@@ -5,6 +5,9 @@
 ### Added
 - Add E2E test for gasless transfers `Wallet.createTransfer({..., gasless: true})`
 
+### Added
+- Add E2E test for gasless transfers `Wallet.createTransfer({..., gasless: true})`
+
 ### Fixed
 - Fixed a bug where non-checksummed asset IDs were throwing an error.
 
