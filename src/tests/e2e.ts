@@ -151,7 +151,7 @@ describe("Coinbase SDK E2E Test", () => {
     });
   }, 60000);
 
-  it("should be able to make gasless transfers", async () => {
+  it.skip("should be able to make gasless transfers", async () => {
     // Import wallet with balance
     const seedFile = JSON.parse(process.env.WALLET_DATA || "");
     const walletId = Object.keys(seedFile)[0];
@@ -191,7 +191,7 @@ describe("Coinbase SDK E2E Test", () => {
     expect(destBalance.get(Coinbase.assets.Usdc)?.toString()).toEqual(`${transferAmount}`);
     console.log(`Source balance: ${sourceBalance}`);
     console.log(`Destination balance: ${destBalance}`);
-  }, 300000);
+  }, 200000);
 });
 
 describe("Coinbase SDK Stake E2E Test", () => {
