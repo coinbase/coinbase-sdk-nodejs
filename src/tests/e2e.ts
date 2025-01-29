@@ -150,6 +150,48 @@ describe("Coinbase SDK E2E Test", () => {
       networkId: exportedWallet.networkId,
     });
   }, 60000);
+
+  it.skip("should be able to make gasless transfers", async () => {
+    // Import wallet with balance
+    const seedFile = JSON.parse(process.env.WALLET_DATA || "");
+    const walletId = Object.keys(seedFile)[0];
+    const seed = seedFile[walletId].seed;
+
+    const sourceWallet = await Wallet.import({
+      seed,
+      walletId,
+      networkId: Coinbase.networks.BaseSepolia,
+    });
+    
+    // Create destination wallet
+    const destinationWallet = await Wallet.create();
+
+    // Initialize transfer amount
+    const transferAmount = 0.000001;
+    
+    console.log(`Making gasless transfer of ${transferAmount} USDC...`);
+    const transfer = await sourceWallet.createTransfer({
+      amount: transferAmount,
+      assetId: Coinbase.assets.Usdc,
+      destination: destinationWallet,
+      gasless: true,
+    });
+
+    await transfer.wait();
+    await new Promise(resolve => setTimeout(resolve, 60000));
+
+    expect(transfer.toString()).toBeDefined();
+    expect(await transfer.getStatus()).toBe(TransferStatus.COMPLETE);
+    console.log(`Completed gasless transfer from ${sourceWallet} to ${destinationWallet}`);
+
+    // Verify balances
+    const sourceBalance = await sourceWallet.listBalances();
+    const destBalance = await destinationWallet.listBalances();
+    expect(sourceBalance.get(Coinbase.assets.Usdc)).not.toEqual("0");
+    expect(destBalance.get(Coinbase.assets.Usdc)?.toString()).toEqual(`${transferAmount}`);
+    console.log(`Source balance: ${sourceBalance}`);
+    console.log(`Destination balance: ${destBalance}`);
+  }, 200000);
 });
 
 describe("Coinbase SDK Stake E2E Test", () => {

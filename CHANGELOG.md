@@ -1,5 +1,13 @@
 # Coinbase Node.js SDK Changelog
 
+## [0.16.0] - 2025-01-28
+
+### Added
+- Add E2E test for gasless transfers `Wallet.createTransfer({..., gasless: true})`
+
+### Fixed
+- Fixed a bug where non-checksummed asset IDs were throwing an error.
+
 ## [0.15.0] - 2025-01-17
 
 ### Added

@@ -46,22 +46,23 @@ export class Asset {
 
     let decimals = model.decimals!;
     // TODO: Push this logic down to the backend.
-    if (
-      assetId &&
-      model.asset_id &&
-      Coinbase.toAssetId(model.asset_id) !== Coinbase.toAssetId(assetId)
-    ) {
-      switch (assetId) {
-        case "gwei":
-          decimals = GWEI_DECIMALS;
-          break;
-        case "wei":
-          decimals = 0;
-          break;
-        case "eth":
-          break;
-        default:
-          throw new ArgumentError(`Invalid asset ID: ${assetId}`);
+    if (assetId && model.asset_id) {
+      const normalizedModelAssetId = model.asset_id.toLowerCase();
+      const normalizedAssetId = assetId.toLowerCase();
+
+      if (Coinbase.toAssetId(normalizedModelAssetId) !== Coinbase.toAssetId(normalizedAssetId)) {
+        switch (normalizedAssetId) {
+          case "gwei":
+            decimals = GWEI_DECIMALS;
+            break;
+          case "wei":
+            decimals = 0;
+            break;
+          case "eth":
+            break;
+          default:
+            throw new ArgumentError(`Invalid asset ID: ${assetId}`);
+        }
       }
     }
     return new Asset(
