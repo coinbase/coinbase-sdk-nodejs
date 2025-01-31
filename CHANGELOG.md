@@ -1,5 +1,10 @@
 # Coinbase Node.js SDK Changelog
 
+## [0.17.0] - 2025-02-01
+
+### Added
+- Add `broadcastExternalTransaction` method to `ExternalAddress` to broadcast an external transaction.
+
 ## [0.16.0] - 2025-01-28
 
 ### Added

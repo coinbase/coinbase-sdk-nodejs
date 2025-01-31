@@ -66,6 +66,8 @@ import {
   UpdateSmartContractRequest,
   CompileSmartContractRequest,
   CompiledSmartContract,
+  BroadcastExternalTransactionRequest,
+  BroadcastExternalTransaction200Response,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -445,6 +447,22 @@ export type ExternalAddressAPIClient = {
     transactionHash: string,
     options?: RawAxiosRequestConfig,
   ): AxiosPromise<FaucetTransaction>;
+
+  /**
+   * Broadcast an external transaction
+   *
+   * @param networkId - The ID of the blockchain network
+   * @param addressId - The ID of the address to broadcast the transaction for
+   * @param broadcastExternalTransactionRequest - The request body
+   * @param options - Override http request option.
+   * @throws {APIError} If the request fails.
+   */
+  broadcastExternalTransaction(
+    networkId: string,
+    addressId: string,
+    broadcastExternalTransactionRequest: BroadcastExternalTransactionRequest,
+    options?: RawAxiosRequestConfig,
+  ): AxiosPromise<BroadcastExternalTransaction200Response>;
 };
 
 export type WalletStakeAPIClient = {
@@ -1700,4 +1718,12 @@ export interface PaginationResponse<T> {
   data: T[];
   hasMore: boolean;
   nextPage: string | undefined;
+}
+
+/**
+ * Response from broadcasting an external transaction
+ */
+export interface BroadcastExternalTransactionResponse {
+  transactionHash: string;
+  transactionLink?: string;
 }

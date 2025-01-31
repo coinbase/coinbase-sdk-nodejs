@@ -27,6 +27,7 @@ import {
   StakingRewardFormat,
   FeatureSet,
   WebhookWalletActivityFilter,
+  WebhookStatus,
 } from "./../client";
 import {
   VALID_ADDRESS_MODEL,
@@ -1568,6 +1569,7 @@ describe("Wallet Class", () => {
       notification_uri: "https://example.com/callback",
       event_type: "wallet_activity",
       event_type_filter: { addresses: [address1], wallet_id: "w1" },
+      status: WebhookStatus.Active,
     };
 
     Coinbase.apiClients.webhook = {

@@ -322,6 +322,38 @@ export interface BroadcastContractInvocationRequest {
     'signed_payload': string;
 }
 /**
+ * External Transaction Broadcast Response
+ * @export
+ * @interface BroadcastExternalTransaction200Response
+ */
+export interface BroadcastExternalTransaction200Response {
+    /**
+     * The transaction hash
+     * @type {string}
+     * @memberof BroadcastExternalTransaction200Response
+     */
+    'transaction_hash': string;
+    /**
+     * The link to view the transaction on a block explorer. This is optional and may not be present for all transactions.
+     * @type {string}
+     * @memberof BroadcastExternalTransaction200Response
+     */
+    'transaction_link'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface BroadcastExternalTransactionRequest
+ */
+export interface BroadcastExternalTransactionRequest {
+    /**
+     * The hex-encoded signed payload of the external address transaction.
+     * @type {string}
+     * @memberof BroadcastExternalTransactionRequest
+     */
+    'signed_payload': string;
+}
+/**
  * 
  * @export
  * @interface BroadcastExternalTransferRequest
@@ -2238,11 +2270,16 @@ export const NetworkIdentifier = {
     BaseSepolia: 'base-sepolia',
     BaseMainnet: 'base-mainnet',
     EthereumHolesky: 'ethereum-holesky',
+    EthereumSepolia: 'ethereum-sepolia',
     EthereumMainnet: 'ethereum-mainnet',
     PolygonMainnet: 'polygon-mainnet',
     SolanaDevnet: 'solana-devnet',
     SolanaMainnet: 'solana-mainnet',
-    ArbitrumMainnet: 'arbitrum-mainnet'
+    ArbitrumMainnet: 'arbitrum-mainnet',
+    ArbitrumSepolia: 'arbitrum-sepolia',
+    BitcoinMainnet: 'bitcoin-mainnet',
+    NearTestnet: 'near-testnet',
+    NearMainnet: 'near-mainnet'
 } as const;
 
 export type NetworkIdentifier = typeof NetworkIdentifier[keyof typeof NetworkIdentifier];
@@ -3805,7 +3842,15 @@ export interface UpdateWebhookRequest {
      * @memberof UpdateWebhookRequest
      */
     'notification_uri'?: string;
+    /**
+     * 
+     * @type {WebhookStatus}
+     * @memberof UpdateWebhookRequest
+     */
+    'status'?: WebhookStatus;
 }
+
+
 /**
  * 
  * @export
@@ -4056,6 +4101,12 @@ export interface Webhook {
      * @memberof Webhook
      */
     'signature_header'?: string;
+    /**
+     * 
+     * @type {WebhookStatus}
+     * @memberof Webhook
+     */
+    'status': WebhookStatus;
 }
 
 
@@ -4146,6 +4197,20 @@ export interface WebhookSmartContractEventFilter {
      */
     'contract_addresses': Array<string>;
 }
+/**
+ * The status of the webhook.
+ * @export
+ * @enum {string}
+ */
+
+export const WebhookStatus = {
+    Active: 'active',
+    Inactive: 'inactive'
+} as const;
+
+export type WebhookStatus = typeof WebhookStatus[keyof typeof WebhookStatus];
+
+
 /**
  * Filter for wallet activity events. This filter allows the client to specify one or more wallet addresses to monitor for activities such as transactions, transfers, or other types of events that are associated with the specified addresses. 
  * @export
@@ -6100,6 +6165,56 @@ export class ContractInvocationsApi extends BaseAPI implements ContractInvocatio
 export const ExternalAddressesApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * Broadcast an arbitrary transaction to the node constructed and signed by an external address.
+         * @summary Broadcast an arbitrary transaction.
+         * @param {string} networkId The ID of the network the external address belongs to.
+         * @param {string} addressId The onchain address of the transaction sender.
+         * @param {BroadcastExternalTransactionRequest} broadcastExternalTransactionRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        broadcastExternalTransaction: async (networkId: string, addressId: string, broadcastExternalTransactionRequest: BroadcastExternalTransactionRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'networkId' is not null or undefined
+            assertParamExists('broadcastExternalTransaction', 'networkId', networkId)
+            // verify required parameter 'addressId' is not null or undefined
+            assertParamExists('broadcastExternalTransaction', 'addressId', addressId)
+            // verify required parameter 'broadcastExternalTransactionRequest' is not null or undefined
+            assertParamExists('broadcastExternalTransaction', 'broadcastExternalTransactionRequest', broadcastExternalTransactionRequest)
+            const localVarPath = `/v1/networks/{network_id}/addresses/{address_id}/transactions`
+                .replace(`{${"network_id"}}`, encodeURIComponent(String(networkId)))
+                .replace(`{${"address_id"}}`, encodeURIComponent(String(addressId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication apiKey required
+            await setApiKeyToObject(localVarHeaderParameter, "Jwt", configuration)
+
+            // authentication session required
+            await setApiKeyToObject(localVarHeaderParameter, "Jwt", configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(broadcastExternalTransactionRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Broadcast an external address\'s transfer with a signed payload
          * @summary Broadcast an external address\' transfer
          * @param {string} networkId The ID of the network the address belongs to
@@ -6452,6 +6567,21 @@ export const ExternalAddressesApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = ExternalAddressesApiAxiosParamCreator(configuration)
     return {
         /**
+         * Broadcast an arbitrary transaction to the node constructed and signed by an external address.
+         * @summary Broadcast an arbitrary transaction.
+         * @param {string} networkId The ID of the network the external address belongs to.
+         * @param {string} addressId The onchain address of the transaction sender.
+         * @param {BroadcastExternalTransactionRequest} broadcastExternalTransactionRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async broadcastExternalTransaction(networkId: string, addressId: string, broadcastExternalTransactionRequest: BroadcastExternalTransactionRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BroadcastExternalTransaction200Response>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.broadcastExternalTransaction(networkId, addressId, broadcastExternalTransactionRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ExternalAddressesApi.broadcastExternalTransaction']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Broadcast an external address\'s transfer with a signed payload
          * @summary Broadcast an external address\' transfer
          * @param {string} networkId The ID of the network the address belongs to
@@ -6569,6 +6699,18 @@ export const ExternalAddressesApiFactory = function (configuration?: Configurati
     const localVarFp = ExternalAddressesApiFp(configuration)
     return {
         /**
+         * Broadcast an arbitrary transaction to the node constructed and signed by an external address.
+         * @summary Broadcast an arbitrary transaction.
+         * @param {string} networkId The ID of the network the external address belongs to.
+         * @param {string} addressId The onchain address of the transaction sender.
+         * @param {BroadcastExternalTransactionRequest} broadcastExternalTransactionRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        broadcastExternalTransaction(networkId: string, addressId: string, broadcastExternalTransactionRequest: BroadcastExternalTransactionRequest, options?: RawAxiosRequestConfig): AxiosPromise<BroadcastExternalTransaction200Response> {
+            return localVarFp.broadcastExternalTransaction(networkId, addressId, broadcastExternalTransactionRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Broadcast an external address\'s transfer with a signed payload
          * @summary Broadcast an external address\' transfer
          * @param {string} networkId The ID of the network the address belongs to
@@ -6664,6 +6806,18 @@ export const ExternalAddressesApiFactory = function (configuration?: Configurati
  */
 export interface ExternalAddressesApiInterface {
     /**
+     * Broadcast an arbitrary transaction to the node constructed and signed by an external address.
+     * @summary Broadcast an arbitrary transaction.
+     * @param {string} networkId The ID of the network the external address belongs to.
+     * @param {string} addressId The onchain address of the transaction sender.
+     * @param {BroadcastExternalTransactionRequest} broadcastExternalTransactionRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExternalAddressesApiInterface
+     */
+    broadcastExternalTransaction(networkId: string, addressId: string, broadcastExternalTransactionRequest: BroadcastExternalTransactionRequest, options?: RawAxiosRequestConfig): AxiosPromise<BroadcastExternalTransaction200Response>;
+
+    /**
      * Broadcast an external address\'s transfer with a signed payload
      * @summary Broadcast an external address\' transfer
      * @param {string} networkId The ID of the network the address belongs to
@@ -6758,6 +6912,20 @@ export interface ExternalAddressesApiInterface {
  * @extends {BaseAPI}
  */
 export class ExternalAddressesApi extends BaseAPI implements ExternalAddressesApiInterface {
+    /**
+     * Broadcast an arbitrary transaction to the node constructed and signed by an external address.
+     * @summary Broadcast an arbitrary transaction.
+     * @param {string} networkId The ID of the network the external address belongs to.
+     * @param {string} addressId The onchain address of the transaction sender.
+     * @param {BroadcastExternalTransactionRequest} broadcastExternalTransactionRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ExternalAddressesApi
+     */
+    public broadcastExternalTransaction(networkId: string, addressId: string, broadcastExternalTransactionRequest: BroadcastExternalTransactionRequest, options?: RawAxiosRequestConfig) {
+        return ExternalAddressesApiFp(this.configuration).broadcastExternalTransaction(networkId, addressId, broadcastExternalTransactionRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * Broadcast an external address\'s transfer with a signed payload
      * @summary Broadcast an external address\' transfer

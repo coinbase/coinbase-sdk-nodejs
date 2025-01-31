@@ -8,9 +8,9 @@ app.post("/callback", (req, res) => {
   // https://docs.cdp.coinbase.com/onchain-data/docs/webhooks#event-types
   const data = req.body;
 
-  console.log('Headers received:');
+  console.log("Headers received:");
   console.log(JSON.stringify(req.headers, null, 4));
-  console.log('Body received:');
+  console.log("Body received:");
   console.log(JSON.stringify(data, null, 4));
 
   const response = {

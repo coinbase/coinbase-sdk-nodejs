@@ -162,13 +162,13 @@ describe("Coinbase SDK E2E Test", () => {
       walletId,
       networkId: Coinbase.networks.BaseSepolia,
     });
-    
+
     // Create destination wallet
     const destinationWallet = await Wallet.create();
 
     // Initialize transfer amount
     const transferAmount = 0.000001;
-    
+
     console.log(`Making gasless transfer of ${transferAmount} USDC...`);
     const transfer = await sourceWallet.createTransfer({
       amount: transferAmount,
