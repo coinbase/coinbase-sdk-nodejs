@@ -713,4 +713,23 @@ describe("ExternalAddress", () => {
       });
     });
   });
+
+  describe("#broadcastExternalTransaction", () => {
+    it("should successfully broadcast an external transaction", async () => {
+      Coinbase.apiClients.externalAddress!.broadcastExternalTransaction = mockReturnValue({
+        transaction_hash: "transactionHash",
+        transaction_link: "transactionLink",
+      });
+      const response = await address.broadcastExternalTransaction("signedPayload");
+      expect(response).toEqual({
+        transactionHash: "transactionHash",
+        transactionLink: "transactionLink",
+      });
+      expect(
+        Coinbase.apiClients.externalAddress!.broadcastExternalTransaction,
+      ).toHaveBeenCalledWith(address.getNetworkId(), address.getId(), {
+        signed_payload: "signedPayload",
+      });
+    });
+  });
 });

@@ -1,6 +1,6 @@
 import { Webhook } from "../coinbase/webhook";
 import { Coinbase } from "../coinbase/coinbase";
-import { Webhook as WebhookModel, WebhookWalletActivityFilter } from "../client/api";
+import { Webhook as WebhookModel, WebhookWalletActivityFilter, WebhookStatus } from "../client/api";
 import { mockReturnRejectedValue } from "./utils";
 import { APIError } from "../coinbase/api_error";
 
@@ -11,6 +11,7 @@ describe("Webhook", () => {
     notification_uri: "https://example.com/callback",
     event_type: "erc20_transfer",
     event_filters: [{ contract_address: "0x...", from_address: "0x...", to_address: "0x..." }],
+    status: WebhookStatus.Active,
   };
 
   const mockWalletActivityWebhookModel: WebhookModel = {
@@ -22,6 +23,7 @@ describe("Webhook", () => {
       addresses: ["0xa55C5950F7A3C42Fa5799B2Cac0e455774a07382"],
       wallet_id: "test-wallet-id",
     },
+    status: WebhookStatus.Active,
   };
 
   const mockContractActivityWebhookModel: WebhookModel = {
@@ -32,6 +34,7 @@ describe("Webhook", () => {
     event_type_filter: {
       contract_addresses: ["0xa55C5950F7A3C42Fa5799B2Cac0e455774a07382"],
     },
+    status: WebhookStatus.Active,
   };
 
   beforeEach(() => {

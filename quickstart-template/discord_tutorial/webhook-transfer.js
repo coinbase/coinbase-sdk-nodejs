@@ -6,12 +6,12 @@ import fs from "fs";
 Coinbase.configureFromJson({ filePath: "/Users/jairdarosajunior/Downloads/cdp_api_key.json" });
 const webhookNotificationUri = process.env.WEBHOOK_NOTIFICATION_URL;
 
-(async function() {
+(async function () {
   if (!webhookNotificationUri) {
-    console.log('WEBHOOK_NOTIFICATION_URL is missing from env file.');
+    console.log("WEBHOOK_NOTIFICATION_URL is missing from env file.");
     return;
   }
-  const seedPath = 'wallet_saved_seeds.json';
+  const seedPath = "wallet_saved_seeds.json";
 
   let myWallet;
   let anotherWallet = await Wallet.create();
@@ -42,24 +42,24 @@ const webhookNotificationUri = process.env.WEBHOOK_NOTIFICATION_URL;
     console.log("✅ Funds added!");
 
     // Sometimes funds take a few seconds to be available on the wallet, so lets wait 5 secs
-    await sleep(5000)
+    await sleep(5000);
   }
 
   // Now use below code to get wallets addresses so we can use it for adding it to the webhook filter.
   let myWalletAddress = await myWallet.getDefaultAddress();
   const myWalletAddressId = myWalletAddress.getId();
 
-  console.log('💳 myWallet address: ', myWalletAddressId);
+  console.log("💳 myWallet address: ", myWalletAddressId);
 
-  const webhooks = await Webhook.list()
-  let shouldCreateWebhook = !webhookAlreadyExists(webhooks)
+  const webhooks = await Webhook.list();
+  let shouldCreateWebhook = !webhookAlreadyExists(webhooks);
 
   if (shouldCreateWebhook) {
     console.log("🔄 Creating webhook...");
     await Webhook.create({
       networkId: Coinbase.networks.BaseSepolia,
       notificationUri: webhookNotificationUri,
-      eventType: 'wallet_activity',
+      eventType: "wallet_activity",
       eventTypeFilter: {
         addresses: [myWalletAddressId],
       },
@@ -83,13 +83,16 @@ const webhookNotificationUri = process.env.WEBHOOK_NOTIFICATION_URL;
     intervalSeconds: 1, // check for transfer completion each 1 second
     timeoutSeconds: 30, // keep checking for 30 seconds
   });
-  console.log('✅ Transfer was successful: ', transfer.toString());
-})()
+  console.log("✅ Transfer was successful: ", transfer.toString());
+})();
 
 // ========================== UTILS FUNCTIONS ===================================
 function webhookAlreadyExists(webhooks) {
   for (let currentWebhook of webhooks.data) {
-    if (currentWebhook.getEventType() === 'wallet_activity' && currentWebhook.getNotificationURI() === webhookNotificationUri) {
+    if (
+      currentWebhook.getEventType() === "wallet_activity" &&
+      currentWebhook.getNotificationURI() === webhookNotificationUri
+    ) {
       return true;
     }
   }
@@ -98,16 +101,16 @@ function webhookAlreadyExists(webhooks) {
 
 function transformConfig(filePath) {
   try {
-    const rawData = fs.readFileSync(filePath, 'utf-8');
+    const rawData = fs.readFileSync(filePath, "utf-8");
     const originalConfig = JSON.parse(rawData);
     const walletId = Object.keys(originalConfig)[0];
     const { seed } = originalConfig[walletId];
     return {
       walletId,
-      seed
+      seed,
     };
   } catch (error) {
-    console.error('Error reading or parsing file:', error);
+    console.error("Error reading or parsing file:", error);
     throw error;
   }
 }

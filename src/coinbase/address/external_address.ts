@@ -1,5 +1,5 @@
 import { Address } from "../address";
-import { Amount, StakeOptionsMode } from "../types";
+import { Amount, BroadcastExternalTransactionResponse, StakeOptionsMode } from "../types";
 import { Coinbase } from "../coinbase";
 import Decimal from "decimal.js";
 import { Asset } from "../asset";
@@ -131,5 +131,28 @@ export class ExternalAddress extends Address {
     const response = await Coinbase.apiClients.stake!.buildStakingOperation(request);
 
     return new StakingOperation(response!.data);
+  }
+
+  /**
+   * Broadcast an external transaction
+   *
+   * @param signedPayload - The signed payload of the transaction to broadcast
+   * @returns The broadcasted transaction
+   */
+  public async broadcastExternalTransaction(
+    signedPayload: string,
+  ): Promise<BroadcastExternalTransactionResponse> {
+    const response = await Coinbase.apiClients.externalAddress!.broadcastExternalTransaction(
+      this.getNetworkId(),
+      this.getId(),
+      {
+        signed_payload: signedPayload,
+      },
+    );
+
+    return {
+      transactionHash: response.data.transaction_hash,
+      transactionLink: response.data.transaction_link,
+    };
   }
 }

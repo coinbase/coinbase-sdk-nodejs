@@ -793,6 +793,7 @@ export const externalAddressApiMock = {
   requestExternalFaucetFunds: jest.fn(),
   listAddressTransactions: jest.fn(),
   getFaucetTransaction: jest.fn(),
+  broadcastExternalTransaction: jest.fn(),
 };
 
 export const balanceHistoryApiMock = {
