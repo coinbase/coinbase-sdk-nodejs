@@ -1,15 +1,14 @@
 # Coinbase Node.js SDK
 
-[![NPM Package][npm]][npm-url]
-[![Build Size][build-size]][build-size-url]
-[![NPM Downloads][npm-downloads]][npmtrends-url]
+[![npm version](https://img.shields.io/npm/v/@coinbase/coinbase-sdk?style=flat-square&logo=npm)](https://www.npmjs.com/package/@coinbase/coinbase-sdk)
+[![npm weekly downloads](https://img.shields.io/npm/dw/@coinbase/coinbase-sdk?style=flat-square)](https://www.npmtrends.com/@coinbase/coinbase-sdk)
 
 
 The Coinbase Node.js SDK enables the simple integration of crypto into your app. By calling Coinbase's Platform APIs, the SDK allows you to provision crypto wallets, send crypto into/out of those wallets, track wallet balances, and trade crypto from one asset into another.
 
 The SDK supports various verbs on Developer-custodied Wallets across multiple networks, as documented [here](https://docs.cdp.coinbase.com/cdp-sdk/docs/networks).
 
-**CDP SDK v0 is a pre-alpha release, which means that the APIs and SDK methods are subject to change. We will continuously release updates to support new capabilities and improve the developer experience.**
+*Note: As the SDK provides new capabilities and improves the developer experience, updates may occasionally include breaking changes. These will be documented in the [CHANGELOG.md](CHANGELOG.md) file.*
 
 ## Documentation
 
@@ -234,12 +233,3 @@ To import Wallets that were persisted to your local file system using `saveSeed`
 const userWallet = await Wallet.fetch(wallet.getId());
 await userWallet.loadSeedFromFile(seedFilePath);
 ```
-
-
-
-[npm]: https://img.shields.io/npm/v/@coinbase/coinbase-sdk
-[npm-url]: https://www.npmjs.com/package/@coinbase/coinbase-sdk
-[build-size]: https://badgen.net/bundlephobia/minzip/@coinbase/coinbase-sdk
-[build-size-url]: https://bundlephobia.com/result?p=@coinbase/coinbase-sdk
-[npmtrends-url]: https://www.npmtrends.com/@coinbase/coinbase-sdk
-[npm-downloads]: https://img.shields.io/npm/dw/@coinbase/coinbase-sdk
