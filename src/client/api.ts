@@ -420,6 +420,19 @@ export interface BroadcastTransferRequest {
 /**
  * 
  * @export
+ * @interface BroadcastUserOperationRequest
+ */
+export interface BroadcastUserOperationRequest {
+    /**
+     * The hex-encoded signature of the user operation.
+     * @type {string}
+     * @memberof BroadcastUserOperationRequest
+     */
+    'signature': string;
+}
+/**
+ * 
+ * @export
  * @interface BuildStakingOperationRequest
  */
 export interface BuildStakingOperationRequest {
@@ -453,6 +466,31 @@ export interface BuildStakingOperationRequest {
      * @memberof BuildStakingOperationRequest
      */
     'options': { [key: string]: string; };
+}
+/**
+ * An action that will be bundled into a user operation.
+ * @export
+ * @interface Call
+ */
+export interface Call {
+    /**
+     * The optional address of the contract to call.
+     * @type {string}
+     * @memberof Call
+     */
+    'to'?: string;
+    /**
+     * The hex-encoded data to send with the call.
+     * @type {string}
+     * @memberof Call
+     */
+    'data': string;
+    /**
+     * The optional hex-encoded value to send with the call.
+     * @type {string}
+     * @memberof Call
+     */
+    'value'?: string;
 }
 /**
  * 
@@ -941,6 +979,19 @@ export interface CreateSmartContractRequest {
 /**
  * 
  * @export
+ * @interface CreateSmartWalletRequest
+ */
+export interface CreateSmartWalletRequest {
+    /**
+     * The address of the owner of the smart wallet.
+     * @type {string}
+     * @memberof CreateSmartWalletRequest
+     */
+    'owner': string;
+}
+/**
+ * 
+ * @export
  * @interface CreateStakingOperationRequest
  */
 export interface CreateStakingOperationRequest {
@@ -1036,6 +1087,25 @@ export interface CreateTransferRequest {
      * @memberof CreateTransferRequest
      */
     'skip_batching'?: boolean;
+}
+/**
+ * 
+ * @export
+ * @interface CreateUserOperationRequest
+ */
+export interface CreateUserOperationRequest {
+    /**
+     * The network to create the user operation on.
+     * @type {string}
+     * @memberof CreateUserOperationRequest
+     */
+    'network': string;
+    /**
+     * The list of calls to make from the smart wallet.
+     * @type {Array<Call>}
+     * @memberof CreateUserOperationRequest
+     */
+    'calls': Array<Call>;
 }
 /**
  * 
@@ -3046,6 +3116,56 @@ export type SmartContractType = typeof SmartContractType[keyof typeof SmartContr
 /**
  * 
  * @export
+ * @interface SmartWallet
+ */
+export interface SmartWallet {
+    /**
+     * The onchain address of the smart wallet.
+     * @type {string}
+     * @memberof SmartWallet
+     */
+    'address': string;
+    /**
+     * The list of owner addresses for the smart wallet.
+     * @type {Array<string>}
+     * @memberof SmartWallet
+     */
+    'owners': Array<string>;
+}
+/**
+ * Paginated list of smart wallets
+ * @export
+ * @interface SmartWalletList
+ */
+export interface SmartWalletList {
+    /**
+     * 
+     * @type {Array<SmartWallet>}
+     * @memberof SmartWalletList
+     */
+    'data': Array<SmartWallet>;
+    /**
+     * True if this list has another page of items after this one that can be fetched.
+     * @type {boolean}
+     * @memberof SmartWalletList
+     */
+    'has_more': boolean;
+    /**
+     * The page token to be used to fetch the next page.
+     * @type {string}
+     * @memberof SmartWalletList
+     */
+    'next_page': string;
+    /**
+     * The total number of wallets
+     * @type {number}
+     * @memberof SmartWalletList
+     */
+    'total_count': number;
+}
+/**
+ * 
+ * @export
  * @interface SolidityValue
  */
 export interface SolidityValue {
@@ -3261,6 +3381,12 @@ export interface StakingContextContext {
      * @memberof StakingContextContext
      */
     'unstakeable_balance': Balance;
+    /**
+     * 
+     * @type {Balance}
+     * @memberof StakingContextContext
+     */
+    'pending_claimable_balance': Balance;
     /**
      * 
      * @type {Balance}
@@ -3870,6 +3996,60 @@ export interface User {
      */
     'display_name'?: string;
 }
+/**
+ * 
+ * @export
+ * @interface UserOperation
+ */
+export interface UserOperation {
+    /**
+     * The ID of the user operation.
+     * @type {string}
+     * @memberof UserOperation
+     */
+    'id'?: string;
+    /**
+     * The network the user operation is being created on.
+     * @type {string}
+     * @memberof UserOperation
+     */
+    'network': string;
+    /**
+     * The list of calls to make from the smart wallet.
+     * @type {Array<Call>}
+     * @memberof UserOperation
+     */
+    'calls': Array<Call>;
+    /**
+     * The hex-encoded hash that must be signed by the user.
+     * @type {string}
+     * @memberof UserOperation
+     */
+    'unsigned_payload': string;
+    /**
+     * The hex-encoded signature of the user operation.
+     * @type {string}
+     * @memberof UserOperation
+     */
+    'signature'?: string;
+    /**
+     * The status of the user operation.
+     * @type {string}
+     * @memberof UserOperation
+     */
+    'status'?: UserOperationStatusEnum;
+}
+
+export const UserOperationStatusEnum = {
+    Pending: 'pending',
+    Signed: 'signed',
+    Broadcast: 'broadcast',
+    Complete: 'complete',
+    Failed: 'failed'
+} as const;
+
+export type UserOperationStatusEnum = typeof UserOperationStatusEnum[keyof typeof UserOperationStatusEnum];
+
 /**
  * A validator onchain.
  * @export
@@ -9711,6 +9891,596 @@ export class SmartContractsApi extends BaseAPI implements SmartContractsApiInter
      */
     public updateSmartContract(networkId: string, contractAddress: string, updateSmartContractRequest?: UpdateSmartContractRequest, options?: RawAxiosRequestConfig) {
         return SmartContractsApiFp(this.configuration).updateSmartContract(networkId, contractAddress, updateSmartContractRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * SmartWalletsApi - axios parameter creator
+ * @export
+ */
+export const SmartWalletsApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Broadcast a user operation
+         * @summary Broadcast a user operation
+         * @param {string} contractAddress The contract address of the smart wallet the user operation belongs to.
+         * @param {string} userOperationId The ID of the user operation to broadcast.
+         * @param {BroadcastUserOperationRequest} [broadcastUserOperationRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        broadcastUserOperation: async (contractAddress: string, userOperationId: string, broadcastUserOperationRequest?: BroadcastUserOperationRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'contractAddress' is not null or undefined
+            assertParamExists('broadcastUserOperation', 'contractAddress', contractAddress)
+            // verify required parameter 'userOperationId' is not null or undefined
+            assertParamExists('broadcastUserOperation', 'userOperationId', userOperationId)
+            const localVarPath = `/v1/smart_wallets/{contract_address}/user_operations/{user_operation_id}/broadcast`
+                .replace(`{${"contract_address"}}`, encodeURIComponent(String(contractAddress)))
+                .replace(`{${"user_operation_id"}}`, encodeURIComponent(String(userOperationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication apiKey required
+            await setApiKeyToObject(localVarHeaderParameter, "Jwt", configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(broadcastUserOperationRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Create a new smart wallet, not scoped to a given network.
+         * @summary Create a new smart wallet
+         * @param {CreateSmartWalletRequest} [createSmartWalletRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createSmartWallet: async (createSmartWalletRequest?: CreateSmartWalletRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/v1/smart_wallets`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication apiKey required
+            await setApiKeyToObject(localVarHeaderParameter, "Jwt", configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createSmartWalletRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Create a new user operation on a smart wallet.
+         * @summary Create a new user operation
+         * @param {string} contractAddress The contract address of the smart wallet to create the user operation on.
+         * @param {CreateUserOperationRequest} [createUserOperationRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createUserOperation: async (contractAddress: string, createUserOperationRequest?: CreateUserOperationRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'contractAddress' is not null or undefined
+            assertParamExists('createUserOperation', 'contractAddress', contractAddress)
+            const localVarPath = `/v1/smart_wallets/{contract_address}/user_operations`
+                .replace(`{${"contract_address"}}`, encodeURIComponent(String(contractAddress)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication apiKey required
+            await setApiKeyToObject(localVarHeaderParameter, "Jwt", configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createUserOperationRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get smart wallet
+         * @summary Get smart wallet by contract address
+         * @param {string} contractAddress The contract address of the smart wallet to fetch.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSmartWallet: async (contractAddress: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'contractAddress' is not null or undefined
+            assertParamExists('getSmartWallet', 'contractAddress', contractAddress)
+            const localVarPath = `/v1/smart_wallets/{contract_address}`
+                .replace(`{${"contract_address"}}`, encodeURIComponent(String(contractAddress)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication apiKey required
+            await setApiKeyToObject(localVarHeaderParameter, "Jwt", configuration)
+
+            // authentication session required
+            await setApiKeyToObject(localVarHeaderParameter, "Jwt", configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get user operation
+         * @summary Get user operation
+         * @param {string} contractAddress The contract address of the smart wallet the user operation belongs to.
+         * @param {string} userOperationId The ID of the user operation to fetch.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUserOperation: async (contractAddress: string, userOperationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'contractAddress' is not null or undefined
+            assertParamExists('getUserOperation', 'contractAddress', contractAddress)
+            // verify required parameter 'userOperationId' is not null or undefined
+            assertParamExists('getUserOperation', 'userOperationId', userOperationId)
+            const localVarPath = `/v1/smart_wallets/{contract_address}/user_operations/{user_operation_id}`
+                .replace(`{${"contract_address"}}`, encodeURIComponent(String(contractAddress)))
+                .replace(`{${"user_operation_id"}}`, encodeURIComponent(String(userOperationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication apiKey required
+            await setApiKeyToObject(localVarHeaderParameter, "Jwt", configuration)
+
+            // authentication session required
+            await setApiKeyToObject(localVarHeaderParameter, "Jwt", configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * List smart wallets
+         * @summary List smart wallets
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listSmartWallets: async (limit?: number, page?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/v1/smart_wallets`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication apiKey required
+            await setApiKeyToObject(localVarHeaderParameter, "Jwt", configuration)
+
+            // authentication session required
+            await setApiKeyToObject(localVarHeaderParameter, "Jwt", configuration)
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * SmartWalletsApi - functional programming interface
+ * @export
+ */
+export const SmartWalletsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = SmartWalletsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Broadcast a user operation
+         * @summary Broadcast a user operation
+         * @param {string} contractAddress The contract address of the smart wallet the user operation belongs to.
+         * @param {string} userOperationId The ID of the user operation to broadcast.
+         * @param {BroadcastUserOperationRequest} [broadcastUserOperationRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async broadcastUserOperation(contractAddress: string, userOperationId: string, broadcastUserOperationRequest?: BroadcastUserOperationRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserOperation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.broadcastUserOperation(contractAddress, userOperationId, broadcastUserOperationRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SmartWalletsApi.broadcastUserOperation']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Create a new smart wallet, not scoped to a given network.
+         * @summary Create a new smart wallet
+         * @param {CreateSmartWalletRequest} [createSmartWalletRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createSmartWallet(createSmartWalletRequest?: CreateSmartWalletRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SmartWallet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createSmartWallet(createSmartWalletRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SmartWalletsApi.createSmartWallet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Create a new user operation on a smart wallet.
+         * @summary Create a new user operation
+         * @param {string} contractAddress The contract address of the smart wallet to create the user operation on.
+         * @param {CreateUserOperationRequest} [createUserOperationRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createUserOperation(contractAddress: string, createUserOperationRequest?: CreateUserOperationRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserOperation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createUserOperation(contractAddress, createUserOperationRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SmartWalletsApi.createUserOperation']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get smart wallet
+         * @summary Get smart wallet by contract address
+         * @param {string} contractAddress The contract address of the smart wallet to fetch.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getSmartWallet(contractAddress: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SmartWallet>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getSmartWallet(contractAddress, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SmartWalletsApi.getSmartWallet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get user operation
+         * @summary Get user operation
+         * @param {string} contractAddress The contract address of the smart wallet the user operation belongs to.
+         * @param {string} userOperationId The ID of the user operation to fetch.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getUserOperation(contractAddress: string, userOperationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserOperation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserOperation(contractAddress, userOperationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SmartWalletsApi.getUserOperation']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * List smart wallets
+         * @summary List smart wallets
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listSmartWallets(limit?: number, page?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SmartWalletList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listSmartWallets(limit, page, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SmartWalletsApi.listSmartWallets']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * SmartWalletsApi - factory interface
+ * @export
+ */
+export const SmartWalletsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = SmartWalletsApiFp(configuration)
+    return {
+        /**
+         * Broadcast a user operation
+         * @summary Broadcast a user operation
+         * @param {string} contractAddress The contract address of the smart wallet the user operation belongs to.
+         * @param {string} userOperationId The ID of the user operation to broadcast.
+         * @param {BroadcastUserOperationRequest} [broadcastUserOperationRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        broadcastUserOperation(contractAddress: string, userOperationId: string, broadcastUserOperationRequest?: BroadcastUserOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<UserOperation> {
+            return localVarFp.broadcastUserOperation(contractAddress, userOperationId, broadcastUserOperationRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Create a new smart wallet, not scoped to a given network.
+         * @summary Create a new smart wallet
+         * @param {CreateSmartWalletRequest} [createSmartWalletRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createSmartWallet(createSmartWalletRequest?: CreateSmartWalletRequest, options?: RawAxiosRequestConfig): AxiosPromise<SmartWallet> {
+            return localVarFp.createSmartWallet(createSmartWalletRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Create a new user operation on a smart wallet.
+         * @summary Create a new user operation
+         * @param {string} contractAddress The contract address of the smart wallet to create the user operation on.
+         * @param {CreateUserOperationRequest} [createUserOperationRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createUserOperation(contractAddress: string, createUserOperationRequest?: CreateUserOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<UserOperation> {
+            return localVarFp.createUserOperation(contractAddress, createUserOperationRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get smart wallet
+         * @summary Get smart wallet by contract address
+         * @param {string} contractAddress The contract address of the smart wallet to fetch.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSmartWallet(contractAddress: string, options?: RawAxiosRequestConfig): AxiosPromise<SmartWallet> {
+            return localVarFp.getSmartWallet(contractAddress, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get user operation
+         * @summary Get user operation
+         * @param {string} contractAddress The contract address of the smart wallet the user operation belongs to.
+         * @param {string} userOperationId The ID of the user operation to fetch.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUserOperation(contractAddress: string, userOperationId: string, options?: RawAxiosRequestConfig): AxiosPromise<UserOperation> {
+            return localVarFp.getUserOperation(contractAddress, userOperationId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * List smart wallets
+         * @summary List smart wallets
+         * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+         * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listSmartWallets(limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<SmartWalletList> {
+            return localVarFp.listSmartWallets(limit, page, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * SmartWalletsApi - interface
+ * @export
+ * @interface SmartWalletsApi
+ */
+export interface SmartWalletsApiInterface {
+    /**
+     * Broadcast a user operation
+     * @summary Broadcast a user operation
+     * @param {string} contractAddress The contract address of the smart wallet the user operation belongs to.
+     * @param {string} userOperationId The ID of the user operation to broadcast.
+     * @param {BroadcastUserOperationRequest} [broadcastUserOperationRequest] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartWalletsApiInterface
+     */
+    broadcastUserOperation(contractAddress: string, userOperationId: string, broadcastUserOperationRequest?: BroadcastUserOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<UserOperation>;
+
+    /**
+     * Create a new smart wallet, not scoped to a given network.
+     * @summary Create a new smart wallet
+     * @param {CreateSmartWalletRequest} [createSmartWalletRequest] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartWalletsApiInterface
+     */
+    createSmartWallet(createSmartWalletRequest?: CreateSmartWalletRequest, options?: RawAxiosRequestConfig): AxiosPromise<SmartWallet>;
+
+    /**
+     * Create a new user operation on a smart wallet.
+     * @summary Create a new user operation
+     * @param {string} contractAddress The contract address of the smart wallet to create the user operation on.
+     * @param {CreateUserOperationRequest} [createUserOperationRequest] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartWalletsApiInterface
+     */
+    createUserOperation(contractAddress: string, createUserOperationRequest?: CreateUserOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<UserOperation>;
+
+    /**
+     * Get smart wallet
+     * @summary Get smart wallet by contract address
+     * @param {string} contractAddress The contract address of the smart wallet to fetch.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartWalletsApiInterface
+     */
+    getSmartWallet(contractAddress: string, options?: RawAxiosRequestConfig): AxiosPromise<SmartWallet>;
+
+    /**
+     * Get user operation
+     * @summary Get user operation
+     * @param {string} contractAddress The contract address of the smart wallet the user operation belongs to.
+     * @param {string} userOperationId The ID of the user operation to fetch.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartWalletsApiInterface
+     */
+    getUserOperation(contractAddress: string, userOperationId: string, options?: RawAxiosRequestConfig): AxiosPromise<UserOperation>;
+
+    /**
+     * List smart wallets
+     * @summary List smart wallets
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartWalletsApiInterface
+     */
+    listSmartWallets(limit?: number, page?: string, options?: RawAxiosRequestConfig): AxiosPromise<SmartWalletList>;
+
+}
+
+/**
+ * SmartWalletsApi - object-oriented interface
+ * @export
+ * @class SmartWalletsApi
+ * @extends {BaseAPI}
+ */
+export class SmartWalletsApi extends BaseAPI implements SmartWalletsApiInterface {
+    /**
+     * Broadcast a user operation
+     * @summary Broadcast a user operation
+     * @param {string} contractAddress The contract address of the smart wallet the user operation belongs to.
+     * @param {string} userOperationId The ID of the user operation to broadcast.
+     * @param {BroadcastUserOperationRequest} [broadcastUserOperationRequest] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartWalletsApi
+     */
+    public broadcastUserOperation(contractAddress: string, userOperationId: string, broadcastUserOperationRequest?: BroadcastUserOperationRequest, options?: RawAxiosRequestConfig) {
+        return SmartWalletsApiFp(this.configuration).broadcastUserOperation(contractAddress, userOperationId, broadcastUserOperationRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Create a new smart wallet, not scoped to a given network.
+     * @summary Create a new smart wallet
+     * @param {CreateSmartWalletRequest} [createSmartWalletRequest] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartWalletsApi
+     */
+    public createSmartWallet(createSmartWalletRequest?: CreateSmartWalletRequest, options?: RawAxiosRequestConfig) {
+        return SmartWalletsApiFp(this.configuration).createSmartWallet(createSmartWalletRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Create a new user operation on a smart wallet.
+     * @summary Create a new user operation
+     * @param {string} contractAddress The contract address of the smart wallet to create the user operation on.
+     * @param {CreateUserOperationRequest} [createUserOperationRequest] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartWalletsApi
+     */
+    public createUserOperation(contractAddress: string, createUserOperationRequest?: CreateUserOperationRequest, options?: RawAxiosRequestConfig) {
+        return SmartWalletsApiFp(this.configuration).createUserOperation(contractAddress, createUserOperationRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get smart wallet
+     * @summary Get smart wallet by contract address
+     * @param {string} contractAddress The contract address of the smart wallet to fetch.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartWalletsApi
+     */
+    public getSmartWallet(contractAddress: string, options?: RawAxiosRequestConfig) {
+        return SmartWalletsApiFp(this.configuration).getSmartWallet(contractAddress, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get user operation
+     * @summary Get user operation
+     * @param {string} contractAddress The contract address of the smart wallet the user operation belongs to.
+     * @param {string} userOperationId The ID of the user operation to fetch.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartWalletsApi
+     */
+    public getUserOperation(contractAddress: string, userOperationId: string, options?: RawAxiosRequestConfig) {
+        return SmartWalletsApiFp(this.configuration).getUserOperation(contractAddress, userOperationId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * List smart wallets
+     * @summary List smart wallets
+     * @param {number} [limit] A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 10.
+     * @param {string} [page] A cursor for pagination across multiple pages of results. Don\&#39;t include this parameter on the first call. Use the next_page value returned in a previous response to request subsequent results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SmartWalletsApi
+     */
+    public listSmartWallets(limit?: number, page?: string, options?: RawAxiosRequestConfig) {
+        return SmartWalletsApiFp(this.configuration).listSmartWallets(limit, page, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
