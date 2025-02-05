@@ -2,18 +2,10 @@ import { NetworkIdentifier, SmartWallet as SmartWalletModel } from "../client";
 
 import { Coinbase } from "./coinbase";
 
-import type { Address, Narrow } from 'abitype'
-import type { Client, Hex } from 'viem'
-import type { Chain } from 'viem/chains'
-import type { 
- UserOperation,
- UserOperationRequest,
- PrepareUserOperationRequest,
- PrepareUserOperationReturnType,
- UserOperationCalls,
- SendUserOperationParameters,
- SendUserOperationReturnType
-} from 'viem/account-abstraction'
+import type { Hex } from 'viem';
+import type {
+  UserOperationCalls, SendUserOperationReturnType
+} from 'viem/account-abstraction';
 
 import { encodeAbiParameters, encodeFunctionData, encodePacked, LocalAccount, parseSignature, size } from "viem";
 
