@@ -35,7 +35,7 @@ async function main() {
   // I believe that SCW-Manager should automatically sponsor all base-sepolia user operations so we don't need to have additional funds for gas
   const userOperation = await smartWallet.sendUserOperation({
     calls: [{
-      to: '0xcb98643b8786950F0461f3B0edf99D88F274574D',
+      to: (await wallet.getDefaultAddress()).getId() as `0x${string}`,
       value: parseEther(halfBalance.toString()),
       data: '0x'
     }
