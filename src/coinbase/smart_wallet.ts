@@ -40,8 +40,8 @@ export class SmartWallet {
     return smartWallet;
   }
 
-  public async use({network}: {network: NetworkIdentifier}) {
-    this.networkId = network;
+  public async use({networkId}: {networkId: NetworkIdentifier}) {
+    this.networkId = networkId;
   }
   
   public getAddress() {
@@ -91,7 +91,7 @@ export class SmartWallet {
     params: { calls: UserOperationCalls<T> }
   ): Promise<UserOperation> {
     if (!this.networkId) {
-      throw new Error('Network not set - call use({network}) first');
+      throw new Error('Network not set - call use({networkId}) first');
     }
 
     const encodedCalls = params.calls.map((call) => {
