@@ -8,6 +8,7 @@ import type {
 } from 'viem/account-abstraction';
 
 import { encodeAbiParameters, encodeFunctionData, encodePacked, LocalAccount, parseSignature, size } from "viem";
+import { UserOperation } from "./user_operation";
 
 export class SmartWallet {
   private model: SmartWalletModel;
@@ -89,7 +90,7 @@ export class SmartWallet {
 
   public async sendUserOperation<T extends readonly unknown[]>(
     params: { calls: UserOperationCalls<T> }
-  ): Promise<SendUserOperationReturnType> {
+  ): Promise<UserOperation> {
     if (!this.network) {
       throw new Error('Network not set - call use({network}) first');
     }
@@ -137,7 +138,7 @@ export class SmartWallet {
       throw new Error('Failed to broadcast user operation')
     }
 
-    return broadcastResponse.data.id as `0x${string}`
+    return new UserOperation(broadcastResponse.data);
   }
 
 }
