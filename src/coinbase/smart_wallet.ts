@@ -132,15 +132,19 @@ export class SmartWallet {
     const signature = await this.account.sign({ hash: createOpResponse.data.unsigned_payload as `0x${string}` })
     const wrappedSignature = this.wrapSignature({ ownerIndex: 0, signature })
 
-    const broadcastResponse = await Coinbase.apiClients.smartWallet!.broadcastUserOperation({
-      signature: wrappedSignature
-    })
+    const broadcastResponse = await Coinbase.apiClients.smartWallet!.broadcastUserOperation(
+      this.getAddress(),
+      createOpResponse.data.id,
+      {
+        signature: wrappedSignature
+      }
+    )
 
     if (!broadcastResponse.data) {
       throw new Error('Failed to broadcast user operation')
     }
 
-    return new UserOperation(broadcastResponse.data);
+    return new UserOperation(broadcastResponse.data, this.getAddress());
   }
 
 }

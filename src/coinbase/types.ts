@@ -300,6 +300,8 @@ export type SmartWalletAPIClient = {
     @throws {APIError} If the request fails.
   */
   broadcastUserOperation: (
+    smartWalletAddress: string, 
+    userOperationId: string,
     broadcastUserOperationRequest: BroadcastUserOperationRequest,
     options?: RawAxiosRequestConfig,
   ) => AxiosPromise<UserOperationModel>;
@@ -312,6 +314,7 @@ export type SmartWalletAPIClient = {
     @throws {APIError} If the request fails.
   */
   getUserOperation: (
+    smartWalletAddress: string,
     userOperationId: string,
     options?: RawAxiosRequestConfig,
   ) => AxiosPromise<UserOperationModel>;

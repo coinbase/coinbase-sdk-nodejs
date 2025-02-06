@@ -9,7 +9,7 @@ import { TimeoutError } from "./errors";
  */
 export class UserOperation {
   private model: UserOperationModel;
-
+  private smartWalletAddress: string;
   /**
    * Private constructor to prevent direct instantiation outside of the factory methods.
    *
@@ -17,8 +17,9 @@ export class UserOperation {
    * @param userOperationModel - The UserOperation model.
    * @hideconstructor
    */
-  public constructor(userOperationModel: UserOperationModel) {
+  public constructor(userOperationModel: UserOperationModel, smartWalletAddress: string) {
     this.model = userOperationModel;
+    this.smartWalletAddress = smartWalletAddress;
   }
 
   /**
@@ -37,6 +38,10 @@ export class UserOperation {
    */
   public getNetworkId(): string {
     return this.model.network_id;
+  }
+
+  public getSmartWalletAddress(): string {
+    return this.smartWalletAddress;
   }
 
 
@@ -111,7 +116,8 @@ export class UserOperation {
    */
   public async reload(): Promise<void> {
     const result = await Coinbase.apiClients.smartWallet!.getUserOperation(
-      this.model.id!,
+      this.getSmartWalletAddress(),
+      this.getId(),
     );
     this.model = result?.data;
   }
