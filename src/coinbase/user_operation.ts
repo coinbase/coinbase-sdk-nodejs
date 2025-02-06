@@ -27,7 +27,7 @@ export class UserOperation {
    * @returns The UserOperation ID.
    */
   public getId(): string {
-    return this.model.id!; // TODO remove the !
+    return this.model.id;
   }
 
   /**
@@ -36,7 +36,7 @@ export class UserOperation {
    * @returns The Network ID.
    */
   public getNetworkId(): string {
-    return this.model.network;
+    return this.model.network_id;
   }
 
 

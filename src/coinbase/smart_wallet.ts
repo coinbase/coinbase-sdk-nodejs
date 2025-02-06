@@ -4,7 +4,7 @@ import { Coinbase } from "./coinbase";
 
 import type { Hex } from 'viem';
 import type {
-  UserOperationCalls, SendUserOperationReturnType
+  UserOperationCalls
 } from 'viem/account-abstraction';
 
 import { encodeAbiParameters, encodeFunctionData, encodePacked, LocalAccount, parseSignature, size } from "viem";
@@ -13,12 +13,11 @@ import { UserOperation } from "./user_operation";
 export class SmartWallet {
   private model: SmartWalletModel;
   private account: LocalAccount;
-  private network?: NetworkIdentifier;
+  private networkId?: NetworkIdentifier;
 
-  public constructor(model: SmartWalletModel, account: LocalAccount, network?: NetworkIdentifier) {
+  public constructor(model: SmartWalletModel, account: LocalAccount) {
     this.model = model;
     this.account = account;
-    this.network = network;
   }
 
   public static async create({account}: {account: LocalAccount}): Promise<SmartWallet> {
@@ -42,7 +41,7 @@ export class SmartWallet {
   }
 
   public async use({network}: {network: NetworkIdentifier}) {
-    this.network = network;
+    this.networkId = network;
   }
   
   public getAddress() {
@@ -91,7 +90,7 @@ export class SmartWallet {
   public async sendUserOperation<T extends readonly unknown[]>(
     params: { calls: UserOperationCalls<T> }
   ): Promise<UserOperation> {
-    if (!this.network) {
+    if (!this.networkId) {
       throw new Error('Network not set - call use({network}) first');
     }
 
@@ -114,10 +113,13 @@ export class SmartWallet {
       }
     })
 
-    const createOpResponse = await Coinbase.apiClients.smartWallet!.createUserOperation({
-      network: this.network,
-      calls: encodedCalls
-    })
+    const createOpResponse = await Coinbase.apiClients.smartWallet!.createUserOperation(
+      this.getAddress(),
+      this.networkId,
+      {
+        calls: encodedCalls
+      }
+    )
 
     if (!createOpResponse.data) {
       throw new Error('Failed to create user operation')
