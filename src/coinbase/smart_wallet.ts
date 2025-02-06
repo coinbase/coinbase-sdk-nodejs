@@ -44,12 +44,8 @@ export class SmartWallet {
     this.network = network;
   }
   
-  public getSmartWalletAddress() {
+  public getAddress() {
     return this.model.address;
-  }
-
-  private isNetworkSet() {
-    return this.network !== undefined;
   }
 
   private wrapSignature(parameters: {
