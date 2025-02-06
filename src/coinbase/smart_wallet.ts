@@ -9,17 +9,18 @@ import type {
 
 import { encodeAbiParameters, encodeFunctionData, encodePacked, LocalAccount, parseSignature, size } from "viem";
 
-// TODO - figure out the network interface to connect to a specific network
 export class SmartWallet {
   private model: SmartWalletModel;
   private account: LocalAccount;
+  private network?: NetworkIdentifier;
 
-  public constructor(model: SmartWalletModel, account: LocalAccount) {
+  public constructor(model: SmartWalletModel, account: LocalAccount, network?: NetworkIdentifier) {
     this.model = model;
     this.account = account;
+    this.network = network;
   }
 
-  public static async create(account: LocalAccount): Promise<SmartWallet> {
+  public static async create({account}: {account: LocalAccount}): Promise<SmartWallet> {
     const result = await Coinbase.apiClients.smartWallet!.createSmartWallet({
         owner: account.address,
     });
@@ -28,7 +29,7 @@ export class SmartWallet {
     return smartWallet;
   }
 
-  public static async connect(smartWalletAddress: string, account: LocalAccount): Promise<SmartWallet> {
+  public static async connect({smartWalletAddress, account}: {smartWalletAddress: string, account: LocalAccount}): Promise<SmartWallet> {
     const result = await Coinbase.apiClients.smartWallet!.getSmartWallet(smartWalletAddress);
 
     if (!result.data?.owners.some(owner => owner.toLowerCase() === account.address.toLowerCase())) {
@@ -39,7 +40,17 @@ export class SmartWallet {
     return smartWallet;
   }
 
+  public async use({network}: {network: NetworkIdentifier}) {
+    this.network = network;
+  }
   
+  public getSmartWalletAddress() {
+    return this.model.address;
+  }
+
+  private isNetworkSet() {
+    return this.network !== undefined;
+  }
 
   private wrapSignature(parameters: {
     ownerIndex?: number | undefined
@@ -83,7 +94,10 @@ export class SmartWallet {
   public async sendUserOperation<T extends readonly unknown[]>(
     params: { calls: UserOperationCalls<T> }
   ): Promise<SendUserOperationReturnType> {
-    // Encode the calls
+    if (!this.network) {
+      throw new Error('Network not set - call use({network}) first');
+    }
+
     const encodedCalls = params.calls.map((call) => {
       if ('abi' in call) {
         return {
@@ -104,7 +118,7 @@ export class SmartWallet {
     })
 
     const createOpResponse = await Coinbase.apiClients.smartWallet!.createUserOperation({
-      network: NetworkIdentifier.BaseSepolia, // TODO - make this a property of the smart wallet?
+      network: this.network,
       calls: encodedCalls
     })
 
