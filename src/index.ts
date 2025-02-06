@@ -33,3 +33,4 @@ export * from "./coinbase/fiat_amount";
 export * from "./coinbase/fund_operation";
 export * from "./coinbase/fund_quote";
 export * from "./coinbase/smart_wallet";
+export * from "./coinbase/user_operation";
