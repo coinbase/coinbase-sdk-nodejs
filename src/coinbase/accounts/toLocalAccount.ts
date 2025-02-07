@@ -12,8 +12,6 @@ import { WalletAddress } from "../address/wallet_address";
 import { hashMessage } from "viem";
 
 export function toLocalAccount(address: WalletAddress): LocalAccount {
-  
-
   return toAccount({
     address: address.getId() as `0x${string}`,
     signMessage: function ({
