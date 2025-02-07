@@ -43,7 +43,7 @@ export class SmartWallet {
   public async use({networkId}: {networkId: NetworkIdentifier}) {
     this.networkId = networkId;
   }
-  
+ 
   public getAddress() {
     return this.model.address;
   }
@@ -103,13 +103,13 @@ export class SmartWallet {
             args: call.args
           }),
           to: call.to,
-          value: call.value || '0x0'
+          value: call.value.toString() || '0'
         }
       }
       return {
         data: call.data,
         to: call.to,
-        value: call.value || '0x0'
+        value: call.value.toString() || '0'
       }
     })
 

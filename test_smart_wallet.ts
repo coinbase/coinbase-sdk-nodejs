@@ -1,5 +1,5 @@
 import { parseEther } from 'viem'
-import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts' 
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 import { SmartWallet } from './src/coinbase/smart_wallet'
 import { Coinbase, Wallet } from './src'
 
@@ -15,6 +15,8 @@ async function main() {
 
   // faucet it
   const faucet = await wallet.faucet();
+
+  await faucet.wait();
 
   // create a smart wallet with viem wallet owner
   const privateKey = generatePrivateKey()
@@ -32,13 +34,16 @@ async function main() {
   })
   await transfer.wait()
 
+  smartWallet.use({networkId: Coinbase.networks.BaseSepolia })
+
   // I believe that SCW-Manager should automatically sponsor all base-sepolia user operations so we don't need to have additional funds for gas
   const userOperation = await smartWallet.sendUserOperation({
-    calls: [{
-      to: (await wallet.getDefaultAddress()).getId() as `0x${string}`,
-      value: parseEther(halfBalance.toString()),
-      data: '0x'
-    }
+    calls: [
+      {
+        to: (await wallet.getDefaultAddress()).getId() as `0x${string}`,
+        value: parseEther(halfBalance.toString()),
+        data: '0x'
+      }
     ]
   })
   await userOperation.wait()
