@@ -7,7 +7,7 @@ import type {
   UserOperationCalls
 } from 'viem/account-abstraction';
 
-import { encodeAbiParameters, encodeFunctionData, encodePacked, LocalAccount, parseSignature, size } from "viem";
+import { encodeFunctionData, LocalAccount } from "viem";
 import { UserOperation } from "./user_operation";
 
 export class SmartWallet {
@@ -46,45 +46,6 @@ export class SmartWallet {
 
   public getAddress() {
     return this.model.address;
-  }
-
-  private wrapSignature(parameters: {
-    ownerIndex?: number | undefined
-    signature: Hex
-  }) {
-
-    const { ownerIndex = 0 } = parameters
-    const signatureData = (() => {
-      if (size(parameters.signature) !== 65) return parameters.signature
-      const signature = parseSignature(parameters.signature)
-      return encodePacked(
-        ['bytes32', 'bytes32', 'uint8'],
-        [signature.r, signature.s, signature.yParity === 0 ? 27 : 28],
-      )
-    })()
-    return encodeAbiParameters(
-      [
-        {
-          components: [
-            {
-              name: 'ownerIndex',
-              type: 'uint8',
-            },
-            {
-              name: 'signatureData',
-              type: 'bytes',
-            },
-          ],
-          type: 'tuple',
-        },
-      ],
-      [
-        {
-          ownerIndex,
-          signatureData,
-        },
-      ],
-    )
   }
 
   public async sendUserOperation<T extends readonly unknown[]>(
