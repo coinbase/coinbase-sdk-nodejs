@@ -132,7 +132,6 @@ dist
 .yarn/install-state.gz
 .pnp.*
 .DS_Store
-**/*_local*
 
 .idea
 

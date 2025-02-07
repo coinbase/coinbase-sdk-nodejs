@@ -36,4 +36,4 @@ export * from "./coinbase/smart_wallet";
 export * from "./coinbase/user_operation";
 export {
   toLocalAccount,
-} from './coinbase/accounts/toLocalAccount'
+} from './coinbase/accounts/to_local_account'
