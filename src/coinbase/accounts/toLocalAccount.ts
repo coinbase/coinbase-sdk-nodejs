@@ -56,10 +56,10 @@ export async function signMessage(
   message: SignableMessage
 ): Promise<Hex> {
   const hashedMessage = hashMessage(message);
-  const signedMessage = await address.createPayloadSignature(
+  const payloadSignature = await address.createPayloadSignature(
     hashedMessage
   );
-  return `${signedMessage}` as Hex;
+  return `${payloadSignature.getSignature()}` as Hex;
 }
 
 export async function signTransaction<
@@ -80,6 +80,6 @@ export async function signTypedData(
   data: TypedData | { [key: string]: unknown },
 ): Promise<Hex> {
   const hashToSign = hashTypedData(data as HashTypedDataParameters);
-  const payload = await address.createPayloadSignature(hashToSign);
-  return `${payload}` as Hex;
+  const payloadSignature = await address.createPayloadSignature(hashToSign);
+  return `${payloadSignature.getSignature()}` as Hex;
 }
