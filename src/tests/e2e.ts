@@ -232,7 +232,7 @@ describe("Coinbase SDK E2E Test", () => {
     });
 
     await transfer.wait();
-    await new Promise(resolve => setTimeout(resolve, 100000));
+    await new Promise(resolve => setTimeout(resolve, 60000));
 
     expect(transfer.toString()).toBeDefined();
     expect(await transfer.getStatus()).toBe(TransferStatus.COMPLETE);
