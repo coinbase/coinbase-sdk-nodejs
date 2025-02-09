@@ -151,7 +151,7 @@ describe("Coinbase SDK E2E Test", () => {
     });
   }, 60000);
 
-  it.only("Should be able to invoke a contract and retrieve the transaction receipt", async() => {
+  it("Should be able to invoke a contract and retrieve the transaction receipt", async() => {
     const seedFile = JSON.parse(process.env.WALLET_DATA || "");
     const walletId = Object.keys(seedFile)[0];
     const seed = seedFile[walletId].seed;
@@ -203,8 +203,6 @@ describe("Coinbase SDK E2E Test", () => {
     expect(log.data).toEqual("0x0000000000000000000000000000000000000000000000000000000000000001");
   }, 60000);
   
-
-
   it.skip("should be able to make gasless transfers", async () => {
     // Import wallet with balance
     const seedFile = JSON.parse(process.env.WALLET_DATA || "");
