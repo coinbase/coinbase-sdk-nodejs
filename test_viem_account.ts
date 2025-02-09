@@ -1,8 +1,25 @@
+import { createWalletClient, http, parseEther } from 'viem';
 import { Coinbase, hashMessage, hashTypedDataMessage, PayloadSignature, toLocalAccount, Wallet } from './src';
+import { mainnet } from 'viem/chains';
 
 Coinbase.configureFromJson({
   filePath: "~/.apikeys/prod.json",
 });
+
+const myAbi = [
+  {
+    inputs: [
+      {
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "transfer",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  }
+] as const;
 
 async function main() {
   const wallet = await Wallet.create();
@@ -13,6 +30,23 @@ async function main() {
   const signature = await localAccount.signMessage({message: msg});
   console.log(signature);
 
+  const walletClient = await createWalletClient({
+    account: localAccount,
+    chain: mainnet,
+    transport: http(),
+  });
+
+  walletClient.writeContract({
+    address: walletAddress.getId() as `0x${string}`,
+    abi: myAbi,
+    functionName: "transfer",
+    args: [123n]
+  })
+
+
+
+  // sign with normal wallet address way
+  const hashedMsg = hashMessage(msg);
   // sign with normal wallet address way
   const hashedMsg = hashMessage(msg);
   const signature2 = await walletAddress.createPayloadSignature(hashedMsg);

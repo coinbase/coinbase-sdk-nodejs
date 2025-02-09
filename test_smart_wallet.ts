@@ -1,7 +1,8 @@
-import { parseEther } from 'viem'
+import { createWalletClient, http, parseEther } from 'viem'
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 import { SmartWallet } from './src/coinbase/smart_wallet'
 import { Coinbase, Wallet } from './src'
+import { mainnet } from 'viem/chains';
 
 Coinbase.configureFromJson({
   filePath: "~/.apikeys/dev.json",
@@ -23,6 +24,12 @@ async function main() {
   const owner = privateKeyToAccount(privateKey)
   const smartWallet = await SmartWallet.create({account: owner})
 
+  // const client = createWalletClient({
+  //   chain: mainnet
+  //   transport: http()
+  // })
+  // client.getAddresses()
+
   // send ETH from wallet to smart wallet so the smart wallet has funds to send back
   const currentBalance = await wallet.getBalance("eth")
   const halfBalance = currentBalance.div(2)
@@ -43,7 +50,17 @@ async function main() {
         to: (await wallet.getDefaultAddress()).getId() as `0x${string}`,
         value: parseEther(halfBalance.toString()),
         data: '0x'
-      }
+      },
+      // {
+      //   to: (await wallet.getDefaultAddress()).getId() as `0x${string}`,
+      //   abi: myAbi,
+      //   functionName: "transfer",
+      //   args: [
+      //     (await wallet.getDefaultAddress()).getId() as `0x${string}`,
+      //     parseEther(halfBalance.toString())
+      //   ],
+      //   value: parseEther(halfBalance.toString())
+      // }
     ]
   })
   await userOperation.wait()
