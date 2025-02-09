@@ -248,209 +248,209 @@ describe("Coinbase SDK E2E Test", () => {
   }, 200000);
 });
 
-// describe("Coinbase SDK Stake E2E Test", () => {
-//   const requiredEnvVars = [
-//     "STAKE_API_KEY_NAME",
-//     "STAKE_API_PRIVATE_KEY",
-//     "STAKE_ADDRESS_ID_1",
-//     "STAKE_ADDRESS_ID_2",
-//     "STAKE_VALIDATOR_ADDRESS_1",
-//   ];
+describe("Coinbase SDK Stake E2E Test", () => {
+  const requiredEnvVars = [
+    "STAKE_API_KEY_NAME",
+    "STAKE_API_PRIVATE_KEY",
+    "STAKE_ADDRESS_ID_1",
+    "STAKE_ADDRESS_ID_2",
+    "STAKE_VALIDATOR_ADDRESS_1",
+  ];
 
-//   beforeAll(() => {
-//     dotenv.config();
+  beforeAll(() => {
+    dotenv.config();
 
-//     requiredEnvVars.forEach(envVar => {
-//       if (!process.env[envVar]) {
-//         throw new Error(`Required environment variable ${envVar} is not set`);
-//       }
-//     });
+    requiredEnvVars.forEach(envVar => {
+      if (!process.env[envVar]) {
+        throw new Error(`Required environment variable ${envVar} is not set`);
+      }
+    });
 
-//     Coinbase.configure({
-//       apiKeyName: process.env.STAKE_API_KEY_NAME as string,
-//       privateKey: process.env.STAKE_API_PRIVATE_KEY as string,
-//     });
-//   });
+    Coinbase.configure({
+      apiKeyName: process.env.STAKE_API_KEY_NAME as string,
+      privateKey: process.env.STAKE_API_PRIVATE_KEY as string,
+    });
+  });
 
-//   it("should be able to access environment variables", () => {
-//     requiredEnvVars.forEach(envVar => {
-//       expect(process.env[envVar]).toBeDefined();
-//     });
-//   });
+  it("should be able to access environment variables", () => {
+    requiredEnvVars.forEach(envVar => {
+      expect(process.env[envVar]).toBeDefined();
+    });
+  });
 
-//   describe("Stake: Reward Tests", () => {
-//     it("should list shared eth staking rewards via StakingReward.list", async () => {
-//       const networkId = Coinbase.networks.EthereumMainnet;
-//       const assetId = Coinbase.assets.Eth;
-//       const addressIds = [process.env.STAKE_ADDRESS_ID_1 as string];
-//       // May 1, 2024 - May 20, 2024
-//       const startTime = new Date(2024, 4, 1, 0, 0, 0).toISOString();
-//       const endTime = new Date(2024, 4, 20, 23, 59, 59).toISOString();
-//       const rewards = await StakingReward.list(networkId, assetId, addressIds, startTime, endTime);
+  describe("Stake: Reward Tests", () => {
+    it("should list shared eth staking rewards via StakingReward.list", async () => {
+      const networkId = Coinbase.networks.EthereumMainnet;
+      const assetId = Coinbase.assets.Eth;
+      const addressIds = [process.env.STAKE_ADDRESS_ID_1 as string];
+      // May 1, 2024 - May 20, 2024
+      const startTime = new Date(2024, 4, 1, 0, 0, 0).toISOString();
+      const endTime = new Date(2024, 4, 20, 23, 59, 59).toISOString();
+      const rewards = await StakingReward.list(networkId, assetId, addressIds, startTime, endTime);
 
-//       expect(rewards).toBeDefined();
-//       expect(rewards.length).toEqual(20);
-//     });
+      expect(rewards).toBeDefined();
+      expect(rewards.length).toEqual(20);
+    });
 
-//     it("should list shared eth staking rewards via ExternalAddress", async () => {
-//       // May 1, 2024 - May 20, 2024
-//       const startTime = new Date(2024, 4, 1, 0, 0, 0).toISOString();
-//       const endTime = new Date(2024, 4, 20, 23, 59, 59).toISOString();
+    it("should list shared eth staking rewards via ExternalAddress", async () => {
+      // May 1, 2024 - May 20, 2024
+      const startTime = new Date(2024, 4, 1, 0, 0, 0).toISOString();
+      const endTime = new Date(2024, 4, 20, 23, 59, 59).toISOString();
 
-//       const address = new ExternalAddress(
-//         Coinbase.networks.EthereumMainnet,
-//         process.env.STAKE_ADDRESS_ID_1 as string,
-//       );
+      const address = new ExternalAddress(
+        Coinbase.networks.EthereumMainnet,
+        process.env.STAKE_ADDRESS_ID_1 as string,
+      );
 
-//       const rewards = await address.stakingRewards(Coinbase.assets.Eth, startTime, endTime);
+      const rewards = await address.stakingRewards(Coinbase.assets.Eth, startTime, endTime);
 
-//       expect(rewards).toBeDefined();
-//       expect(rewards.length).toEqual(20);
-//     });
-//   });
+      expect(rewards).toBeDefined();
+      expect(rewards.length).toEqual(20);
+    });
+  });
 
-//   describe("Stake: Balance Tests", () => {
-//     it("should list shared eth staking balances via StakingBalance.list", async () => {
-//       const networkId = Coinbase.networks.EthereumMainnet;
-//       const assetId = Coinbase.assets.Eth;
-//       const addressId = process.env.STAKE_VALIDATOR_ADDRESS_1 as string;
-//       // Nov 1, 2024 - Nov 20, 2024
-//       const startTime = new Date(2024, 10, 1, 0, 0, 0).toISOString();
-//       const endTime = new Date(2024, 10, 20, 23, 59, 59).toISOString();
-//       const stakingBalances = await StakingBalance.list(
-//         networkId,
-//         assetId,
-//         addressId,
-//         startTime,
-//         endTime,
-//       );
+  describe("Stake: Balance Tests", () => {
+    it("should list shared eth staking balances via StakingBalance.list", async () => {
+      const networkId = Coinbase.networks.EthereumMainnet;
+      const assetId = Coinbase.assets.Eth;
+      const addressId = process.env.STAKE_VALIDATOR_ADDRESS_1 as string;
+      // Nov 1, 2024 - Nov 20, 2024
+      const startTime = new Date(2024, 10, 1, 0, 0, 0).toISOString();
+      const endTime = new Date(2024, 10, 20, 23, 59, 59).toISOString();
+      const stakingBalances = await StakingBalance.list(
+        networkId,
+        assetId,
+        addressId,
+        startTime,
+        endTime,
+      );
 
-//       expect(stakingBalances).toBeDefined();
-//       expect(stakingBalances.length).toEqual(20);
-//     });
-//   });
+      expect(stakingBalances).toBeDefined();
+      expect(stakingBalances.length).toEqual(20);
+    });
+  });
 
-//   describe("Stake: Validator Tests", () => {
-//     it("should list validators", async () => {
-//       const networkId = Coinbase.networks.EthereumMainnet;
-//       const assetId = Coinbase.assets.Eth;
-//       const status = ValidatorStatus.ACTIVE;
+  describe("Stake: Validator Tests", () => {
+    it("should list validators", async () => {
+      const networkId = Coinbase.networks.EthereumMainnet;
+      const assetId = Coinbase.assets.Eth;
+      const status = ValidatorStatus.ACTIVE;
 
-//       const validators = await Validator.list(networkId, assetId, status);
+      const validators = await Validator.list(networkId, assetId, status);
 
-//       expect(validators).toBeDefined();
-//       expect(validators.length).toEqual(1);
-//       const validator = validators[0];
-//       expect(validator.getStatus()).toEqual(ValidatorStatus.ACTIVE);
-//       expect(validator.getValidatorId()).toEqual(process.env.STAKE_VALIDATOR_ADDRESS_1 as string);
-//     });
+      expect(validators).toBeDefined();
+      expect(validators.length).toEqual(1);
+      const validator = validators[0];
+      expect(validator.getStatus()).toEqual(ValidatorStatus.ACTIVE);
+      expect(validator.getValidatorId()).toEqual(process.env.STAKE_VALIDATOR_ADDRESS_1 as string);
+    });
 
-//     it("should fetch a validator", async () => {
-//       const networkId = Coinbase.networks.EthereumMainnet;
-//       const assetId = Coinbase.assets.Eth;
-//       const validatorId = process.env.STAKE_VALIDATOR_ADDRESS_1 as string;
+    it("should fetch a validator", async () => {
+      const networkId = Coinbase.networks.EthereumMainnet;
+      const assetId = Coinbase.assets.Eth;
+      const validatorId = process.env.STAKE_VALIDATOR_ADDRESS_1 as string;
 
-//       const validator = await Validator.fetch(networkId, assetId, validatorId);
+      const validator = await Validator.fetch(networkId, assetId, validatorId);
 
-//       expect(validator).toBeDefined();
-//       expect(validator.getStatus()).toEqual(ValidatorStatus.ACTIVE);
-//       expect(validator.getValidatorId()).toEqual(validatorId);
-//     });
-//   });
+      expect(validator).toBeDefined();
+      expect(validator.getStatus()).toEqual(ValidatorStatus.ACTIVE);
+      expect(validator.getValidatorId()).toEqual(validatorId);
+    });
+  });
 
-//   describe("Stake: Context Tests", () => {
-//     it("should return stakeable balances for shared ETH staking", async () => {
-//       const address = new ExternalAddress(
-//         Coinbase.networks.EthereumMainnet,
-//         process.env.STAKE_ADDRESS_ID_2 as string,
-//       );
+  describe("Stake: Context Tests", () => {
+    it("should return stakeable balances for shared ETH staking", async () => {
+      const address = new ExternalAddress(
+        Coinbase.networks.EthereumMainnet,
+        process.env.STAKE_ADDRESS_ID_2 as string,
+      );
 
-//       const stakeableBalance = await address.stakeableBalance(
-//         Coinbase.assets.Eth,
-//         StakeOptionsMode.PARTIAL,
-//       );
+      const stakeableBalance = await address.stakeableBalance(
+        Coinbase.assets.Eth,
+        StakeOptionsMode.PARTIAL,
+      );
 
-//       expect(stakeableBalance).toBeDefined();
-//       expect(stakeableBalance.toNumber()).toBeGreaterThanOrEqual(0);
-//     });
+      expect(stakeableBalance).toBeDefined();
+      expect(stakeableBalance.toNumber()).toBeGreaterThanOrEqual(0);
+    });
 
-//     it("should return unstakeable balances for shared ETH staking", async () => {
-//       const address = new ExternalAddress(
-//         Coinbase.networks.EthereumMainnet,
-//         process.env.STAKE_ADDRESS_ID_1 as string,
-//       );
+    it("should return unstakeable balances for shared ETH staking", async () => {
+      const address = new ExternalAddress(
+        Coinbase.networks.EthereumMainnet,
+        process.env.STAKE_ADDRESS_ID_1 as string,
+      );
 
-//       const stakeableBalance = await address.unstakeableBalance(
-//         Coinbase.assets.Eth,
-//         StakeOptionsMode.PARTIAL,
-//       );
+      const stakeableBalance = await address.unstakeableBalance(
+        Coinbase.assets.Eth,
+        StakeOptionsMode.PARTIAL,
+      );
 
-//       expect(stakeableBalance).toBeDefined();
-//       expect(stakeableBalance.toNumber()).toBeGreaterThanOrEqual(0);
-//     });
+      expect(stakeableBalance).toBeDefined();
+      expect(stakeableBalance.toNumber()).toBeGreaterThanOrEqual(0);
+    });
 
-//     it("should return claimable balances for shared ETH staking", async () => {
-//       const address = new ExternalAddress(
-//         Coinbase.networks.EthereumMainnet,
-//         process.env.STAKE_ADDRESS_ID_1 as string,
-//       );
+    it("should return claimable balances for shared ETH staking", async () => {
+      const address = new ExternalAddress(
+        Coinbase.networks.EthereumMainnet,
+        process.env.STAKE_ADDRESS_ID_1 as string,
+      );
 
-//       const stakeableBalance = await address.claimableBalance(
-//         Coinbase.assets.Eth,
-//         StakeOptionsMode.PARTIAL,
-//       );
+      const stakeableBalance = await address.claimableBalance(
+        Coinbase.assets.Eth,
+        StakeOptionsMode.PARTIAL,
+      );
 
-//       expect(stakeableBalance).toBeDefined();
-//       expect(stakeableBalance.toNumber()).toBeGreaterThanOrEqual(0);
-//     });
+      expect(stakeableBalance).toBeDefined();
+      expect(stakeableBalance.toNumber()).toBeGreaterThanOrEqual(0);
+    });
 
-//     it("should return unstakeable balances for Dedicated ETH staking", async () => {
-//       // This address is expected to have 1 validator associated with it, thus returning a 32 unstake balance.
+    it("should return unstakeable balances for Dedicated ETH staking", async () => {
+      // This address is expected to have 1 validator associated with it, thus returning a 32 unstake balance.
 
-//       const address = new ExternalAddress(
-//         Coinbase.networks.EthereumMainnet,
-//         process.env.STAKE_ADDRESS_ID_2 as string,
-//       );
+      const address = new ExternalAddress(
+        Coinbase.networks.EthereumMainnet,
+        process.env.STAKE_ADDRESS_ID_2 as string,
+      );
 
-//       const stakeableBalance = await address.unstakeableBalance(
-//         Coinbase.assets.Eth,
-//         StakeOptionsMode.NATIVE,
-//       );
+      const stakeableBalance = await address.unstakeableBalance(
+        Coinbase.assets.Eth,
+        StakeOptionsMode.NATIVE,
+      );
 
-//       expect(stakeableBalance).toBeDefined();
-//       expect(stakeableBalance.toNumber()).toBeGreaterThanOrEqual(32);
-//     });
-//   });
+      expect(stakeableBalance).toBeDefined();
+      expect(stakeableBalance.toNumber()).toBeGreaterThanOrEqual(32);
+    });
+  });
 
-//   describe("Stake: Build Tests", () => {
-//     it("should return an unsigned tx for shared ETH staking", async () => {
-//       const address = new ExternalAddress(
-//         Coinbase.networks.EthereumMainnet,
-//         process.env.STAKE_ADDRESS_ID_2 as string,
-//       );
+  describe("Stake: Build Tests", () => {
+    it("should return an unsigned tx for shared ETH staking", async () => {
+      const address = new ExternalAddress(
+        Coinbase.networks.EthereumMainnet,
+        process.env.STAKE_ADDRESS_ID_2 as string,
+      );
 
-//       const stakingOperation = await address.buildStakeOperation(
-//         0.0001,
-//         Coinbase.assets.Eth,
-//         StakeOptionsMode.PARTIAL,
-//       );
+      const stakingOperation = await address.buildStakeOperation(
+        0.0001,
+        Coinbase.assets.Eth,
+        StakeOptionsMode.PARTIAL,
+      );
 
-//       await stakingOperation.wait({ timeoutSeconds: 5, intervalSeconds: 1 });
+      await stakingOperation.wait({ timeoutSeconds: 5, intervalSeconds: 1 });
 
-//       expect(stakingOperation).toBeDefined();
-//       expect(stakingOperation.getID()).toBeDefined();
-//       expect(stakingOperation.getStatus()).toEqual(StakingOperationStatusEnum.Complete);
-//       expect(stakingOperation.getAddressID()).toEqual(process.env.STAKE_ADDRESS_ID_2 as string);
-//       expect(stakingOperation.getNetworkID()).toEqual(Coinbase.networks.EthereumMainnet);
-//       expect(stakingOperation.isCompleteState()).toBe(true);
-//       expect(stakingOperation.getSignedVoluntaryExitMessages()).toEqual([]);
-//       expect(stakingOperation.getTransactions().length).toEqual(1);
-//       expect(stakingOperation.getTransactions()[0].isSigned()).toBe(false);
-//       expect(stakingOperation.getTransactions()[0].getNetworkId()).toEqual(
-//         Coinbase.networks.EthereumMainnet,
-//       );
-//       expect(stakingOperation.getTransactions()[0].getUnsignedPayload()).toBeDefined();
-//       expect(stakingOperation.getTransactions()[0].getStatus()).toEqual(TransactionStatus.PENDING);
-//     });
-//   });
-// });
+      expect(stakingOperation).toBeDefined();
+      expect(stakingOperation.getID()).toBeDefined();
+      expect(stakingOperation.getStatus()).toEqual(StakingOperationStatusEnum.Complete);
+      expect(stakingOperation.getAddressID()).toEqual(process.env.STAKE_ADDRESS_ID_2 as string);
+      expect(stakingOperation.getNetworkID()).toEqual(Coinbase.networks.EthereumMainnet);
+      expect(stakingOperation.isCompleteState()).toBe(true);
+      expect(stakingOperation.getSignedVoluntaryExitMessages()).toEqual([]);
+      expect(stakingOperation.getTransactions().length).toEqual(1);
+      expect(stakingOperation.getTransactions()[0].isSigned()).toBe(false);
+      expect(stakingOperation.getTransactions()[0].getNetworkId()).toEqual(
+        Coinbase.networks.EthereumMainnet,
+      );
+      expect(stakingOperation.getTransactions()[0].getUnsignedPayload()).toBeDefined();
+      expect(stakingOperation.getTransactions()[0].getStatus()).toEqual(TransactionStatus.PENDING);
+    });
+  });
+});
