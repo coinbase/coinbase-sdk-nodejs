@@ -182,9 +182,6 @@ describe("Coinbase SDK E2E Test", () => {
     await contractInvocation.wait();
   
     const transactionContent = contractInvocation.getTransaction().content();
-    console.log(transactionContent)
-    console.log(transactionContent!.receipt);
-    
     const receipt = transactionContent!.receipt;
   
     expect(receipt).toBeDefined();
