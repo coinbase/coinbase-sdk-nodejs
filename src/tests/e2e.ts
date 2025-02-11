@@ -185,9 +185,12 @@ describe("Coinbase SDK E2E Test", () => {
     const receipt = transactionContent!.receipt;
   
     expect(receipt).toBeDefined();
-    expect(receipt?.logs).toBeDefined();
-  
-    const logs = receipt!.logs;
+
+    if (!receipt?.logs) {
+      fail("No logs found in receipt");
+    }
+
+    const logs = receipt.logs;
   
     expect(logs).toBeDefined();
     expect(logs.length).toEqual(1);
