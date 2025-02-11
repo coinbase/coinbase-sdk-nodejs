@@ -46,9 +46,9 @@ async function main() {
       },
     ],
   });
-  await userOperation.wait();
+  const completedUserOperation = await userOperation.wait();
 
-  console.log(userOperation.status);
+  console.log(completedUserOperation.status);
 }
 
 main();
