@@ -73,7 +73,7 @@ export async function sendUserOperation<T extends readonly unknown[]>(
     },
   );
 
-  if (!broadcastResponse.data) {
+  if (!broadcastResponse.data || !broadcastResponse.data.status) {
     throw new Error("Failed to broadcast user operation");
   }
 
@@ -81,7 +81,7 @@ export async function sendUserOperation<T extends readonly unknown[]>(
     id: broadcastResponse.data.id,
     networkId,
     smartWalletAddress: wallet.address,
-    status: broadcastResponse.data.status!,
+    status: broadcastResponse.data.status,
     wait: async () => {
       const reload = async () => {
         const result = await Coinbase.apiClients.smartWallet!.getUserOperation(
