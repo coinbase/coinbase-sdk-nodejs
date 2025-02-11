@@ -17,7 +17,6 @@ export type SendUserOperationReturnType = {
   wait: () => Promise<SendUserOperationReturnType>
 }
 
-
 export async function sendUserOperation<T extends readonly unknown[]>(
   wallet: SmartWallet,
   options: SendUserOperationOptions<T>

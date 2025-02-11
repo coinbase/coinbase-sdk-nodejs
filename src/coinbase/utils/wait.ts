@@ -5,6 +5,7 @@ export type WaitOptions = {
   intervalSeconds?: number
   timeoutSeconds?: number
 }
+
 export async function wait<T>(
   reload: () => Promise<T>,
   isTerminal: (obj: T) => boolean,

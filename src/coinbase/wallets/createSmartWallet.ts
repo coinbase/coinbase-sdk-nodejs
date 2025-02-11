@@ -4,6 +4,7 @@ import type {
 import { Coinbase } from '../coinbase'
 import { sendUserOperation } from '../actions/sendUserOperation'
 import type { LocalAccount } from 'viem'
+import { NetworkIdentifier } from '../../client'
 
 
 export type CreateSmartWalletOptions = {
@@ -25,7 +26,10 @@ export async function createSmartWallet(
     address: result.data.address as `0x${string}`,
     account: options.account,
     type: 'smart',
-    sendUserOperation: (options) => sendUserOperation(wallet, options)
+    sendUserOperation: (options) => sendUserOperation(wallet, options),
+    use: (options: { networkId: NetworkIdentifier }) => {
+      wallet.networkId = options.networkId
+    }
   }
 
   return wallet
