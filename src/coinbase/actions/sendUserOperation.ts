@@ -92,9 +92,7 @@ export async function sendUserOperation<T extends readonly unknown[]>(
         }
 
         return {
-          id: result.data.id,
-          networkId: networkId,
-          smartWalletAddress: wallet.address,
+          ...returnValue,
           status: result.data.status!,
           wait: returnValue.wait
         };
