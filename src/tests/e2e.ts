@@ -185,7 +185,7 @@ describe("Coinbase SDK E2E Test", () => {
     const receipt = transactionContent!.receipt;
   
     expect(receipt).toBeDefined();
-    expect(receipt!.logs).toBeDefined();
+    expect(receipt?.logs).toBeDefined();
   
     const logs = receipt!.logs;
   
@@ -194,9 +194,9 @@ describe("Coinbase SDK E2E Test", () => {
   
     const log = logs[0];
     expect(log.address).toEqual("0x036CbD53842c5426634e7929541eC2318f3dCF7e");
-    expect(log.topics[0]).toEqual("Transfer");
-    expect(log.topics[1]).toEqual(`from: ${(await importedWallet.getDefaultAddress()).getId()}`);
-    expect(log.topics[2]).toEqual(`to: ${(await secondWallet.getDefaultAddress()).getId()}`);
+    expect(log.topics?.[0]).toEqual("Transfer");
+    expect(log.topics?.[1]).toEqual(`from: ${(await importedWallet.getDefaultAddress()).getId()}`);
+    expect(log.topics?.[2]).toEqual(`to: ${(await secondWallet.getDefaultAddress()).getId()}`);
     expect(log.data).toEqual("0x0000000000000000000000000000000000000000000000000000000000000001");
   }, 60000);
   

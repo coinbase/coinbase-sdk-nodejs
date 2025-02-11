@@ -1790,6 +1790,18 @@ export interface EthereumValidatorMetadata {
      * @memberof EthereumValidatorMetadata
      */
     'effective_balance': Balance;
+    /**
+     * The address for execution layer rewards (MEV & tx fees). If using a reward splitter plan, this is a smart contract  address that splits rewards based on defined commissions and send a portion to the forwarded_fee_recipient_address. 
+     * @type {string}
+     * @memberof EthereumValidatorMetadata
+     */
+    'fee_recipient_address': string;
+    /**
+     * If using a reward splitter plan, this address receives a defined percentage of the total execution layer rewards. 
+     * @type {string}
+     * @memberof EthereumValidatorMetadata
+     */
+    'forwarded_fee_recipient_address'?: string;
 }
 /**
  * The faucet transaction
@@ -3790,19 +3802,19 @@ export interface TransactionLog {
      * @type {string}
      * @memberof TransactionLog
      */
-    'address': string;
+    'address'?: string;
     /**
      * 
      * @type {Array<string>}
      * @memberof TransactionLog
      */
-    'topics': Array<string>;
+    'topics'?: Array<string>;
     /**
      * The data included in this log.
      * @type {string}
      * @memberof TransactionLog
      */
-    'data': string;
+    'data'?: string;
 }
 /**
  * The receipt of an onchain transaction\'s execution.
