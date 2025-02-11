@@ -12,7 +12,7 @@ export type SendUserOperationOptions<T extends readonly unknown[]> = {
 export type SendUserOperationReturnType = {
   id: string;
   networkId: NetworkIdentifier;
-  smartWalletAddress: string;
+  smartWalletAddress: Hex;
   status: UserOperationStatusEnum;
   wait: () => Promise<SendUserOperationReturnType>;
 };
