@@ -7,8 +7,9 @@ import { createSmartWallet } from './src/coinbase/wallets/createSmartWallet'
 Coinbase.configureFromJson({
   filePath: "~/.apikeys/dev.json",
   debugging: true,
-  basePath: "http://localhost:8002"
+  basePath: "https://cloud-api-dev.cbhq.net/platform"
 });
+
 
 async function main() {
   // create a wallet
