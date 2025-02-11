@@ -627,6 +627,7 @@ export function mockEthereumValidator(
       index: index,
       public_key: public_key,
       withdrawal_address: "0xwithdrawal_address_1",
+      fee_recipient_address: "0xfee_recipient_address_1",
       slashed: false,
       activationEpoch: "10",
       exitEpoch: "10",

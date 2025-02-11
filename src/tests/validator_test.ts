@@ -18,6 +18,7 @@ describe("Validator", () => {
           amount: "100",
           asset: { network_id: Coinbase.networks.EthereumHolesky, asset_id: Coinbase.assets.Eth },
         },
+        fee_recipient_address: "fee-recipient-address-123",
         balance: {
           amount: "200",
           asset: { network_id: Coinbase.networks.EthereumHolesky, asset_id: Coinbase.assets.Eth },
