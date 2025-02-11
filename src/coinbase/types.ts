@@ -267,52 +267,52 @@ export type SmartWalletAPIClient = {
   ) => AxiosPromise<SmartWalletModel>;
 
   /*
-    Get the smart wallet by address
-
-    @param smartWalletAddress - The address of the smart wallet to fetch.
-    @param options - Override http request option.
-    @throws {APIError} If the request fails.
-  */
+   *Get the smart wallet by address
+   *
+   *@param smartWalletAddress - The address of the smart wallet to fetch.
+   *@param options - Override http request option.
+   *@throws {APIError} If the request fails.
+   */
   getSmartWallet: (
     smartWalletAddress: string,
     options?: RawAxiosRequestConfig,
   ) => AxiosPromise<SmartWalletModel>;
 
   /*
-    Create a user operation
-
-    @param createUserOperationRequest - The user operation creation request.
-    @param options - Override http request option.
-    @throws {APIError} If the request fails.
-  */
+   *Create a user operation
+   *
+   *@param createUserOperationRequest - The user operation creation request.
+   *@param options - Override http request option.
+   *@throws {APIError} If the request fails.
+   */
   createUserOperation: (
     smartWalletAddress: string,
     networkId: string,
     createUserOperationRequest: CreateUserOperationRequest,
     options?: RawAxiosRequestConfig,
   ) => AxiosPromise<UserOperationModel>;
-  
-  /*
-    Broadcast a user operation
 
-    @param broadcastUserOperationRequest - The user operation broadcast request.
-    @param options - Override http request option.
-    @throws {APIError} If the request fails.
-  */
+  /*
+   *Broadcast a user operation
+   *
+   *@param broadcastUserOperationRequest - The user operation broadcast request.
+   *@param options - Override http request option.
+   *@throws {APIError} If the request fails.
+   */
   broadcastUserOperation: (
-    smartWalletAddress: string, 
+    smartWalletAddress: string,
     userOperationId: string,
     broadcastUserOperationRequest: BroadcastUserOperationRequest,
     options?: RawAxiosRequestConfig,
   ) => AxiosPromise<UserOperationModel>;
 
   /*
-    Get a user operation by ID
-
-    @param userOperationId - The ID of the user operation to fetch.
-    @param options - Override http request option.
-    @throws {APIError} If the request fails.
-  */
+   *Get a user operation by ID
+   *
+   *@param userOperationId - The ID of the user operation to fetch.
+   *@param options - Override http request option.
+   *@throws {APIError} If the request fails.
+   */
   getUserOperation: (
     smartWalletAddress: string,
     userOperationId: string,

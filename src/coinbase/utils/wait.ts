@@ -1,20 +1,16 @@
 import { TimeoutError } from "../errors";
 
-
 export type WaitOptions = {
-  intervalSeconds?: number
-  timeoutSeconds?: number
-}
+  intervalSeconds?: number;
+  timeoutSeconds?: number;
+};
 
 export async function wait<T>(
   reload: () => Promise<T>,
   isTerminal: (obj: T) => boolean,
-  options: WaitOptions = {}
+  options: WaitOptions = {},
 ): Promise<T> {
-  const {
-    intervalSeconds = 0.2,
-    timeoutSeconds = 10,
-  } = options;
+  const { intervalSeconds = 0.2, timeoutSeconds = 10 } = options;
 
   const startTime = Date.now();
 

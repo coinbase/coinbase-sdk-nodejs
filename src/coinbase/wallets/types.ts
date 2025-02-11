@@ -1,17 +1,21 @@
-import type { Address } from 'abitype'
-import type { LocalAccount } from 'viem'
-import type { NetworkIdentifier } from '../../client'
-import { SendUserOperationOptions, SendUserOperationReturnType } from '../actions/sendUserOperation'
-
+import type { Address } from "abitype";
+import type { LocalAccount } from "viem";
+import type { NetworkIdentifier } from "../../client";
+import {
+  SendUserOperationOptions,
+  SendUserOperationReturnType,
+} from "../actions/sendUserOperation";
 
 export type SmartWallet = {
-  address: Address
-  account: LocalAccount
-  networkId?: NetworkIdentifier
-  type: 'smart'
-  sendUserOperation: <T extends readonly unknown[]>(options: SendUserOperationOptions<T>) => Promise<SendUserOperationReturnType>
-  use: (options: { networkId: NetworkIdentifier }) => void
-}
+  address: Address;
+  account: LocalAccount;
+  networkId?: NetworkIdentifier;
+  type: "smart";
+  sendUserOperation: <T extends readonly unknown[]>(
+    options: SendUserOperationOptions<T>,
+  ) => Promise<SendUserOperationReturnType>;
+  use: (options: { networkId: NetworkIdentifier }) => void;
+};
 
 // In the future, we may introduce BaseWallet (or named differently to avoid Base chain confusion). BaseWallet would be a base class for all wallets.
 // We would have a PrivateKeyWallet type that extends BaseWallet and adds signTransaction which is specific to private key wallets.
