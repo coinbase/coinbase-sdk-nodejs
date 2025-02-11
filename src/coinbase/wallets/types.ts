@@ -14,7 +14,7 @@ export type SmartWallet = {
   sendUserOperation: <T extends readonly unknown[]>(
     options: SendUserOperationOptions<T>,
   ) => Promise<SendUserOperationReturnType>;
-  use: (options: { networkId: NetworkIdentifier }) => void;
+  useNetwork: (options: { networkId: NetworkIdentifier }) => void;
 };
 
 // In the future, we may introduce BaseWallet (or named differently to avoid Base chain confusion). BaseWallet would be a base class for all wallets.

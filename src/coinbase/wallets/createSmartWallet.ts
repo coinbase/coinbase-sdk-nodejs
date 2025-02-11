@@ -22,7 +22,7 @@ export async function createSmartWallet(options: CreateSmartWalletOptions): Prom
     account: options.account,
     type: "smart",
     sendUserOperation: options => sendUserOperation(wallet, options),
-    use: (options: { networkId: NetworkIdentifier }) => {
+    useNetwork: (options: { networkId: NetworkIdentifier }) => {
       wallet.networkId = options.networkId;
     },
   };

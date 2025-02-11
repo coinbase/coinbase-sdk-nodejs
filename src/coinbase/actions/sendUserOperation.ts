@@ -1,7 +1,7 @@
 import { UserOperationCalls } from "viem/_types/account-abstraction";
 import { SmartWallet } from "../wallets/types";
 import { NetworkIdentifier, UserOperationStatusEnum } from "../../client";
-import { encodeFunctionData } from "viem";
+import { encodeFunctionData, Hex } from "viem";
 import { Coinbase } from "../coinbase";
 import { wait } from "../utils/wait";
 
@@ -21,10 +21,10 @@ export async function sendUserOperation<T extends readonly unknown[]>(
   wallet: SmartWallet,
   options: SendUserOperationOptions<T>,
 ): Promise<SendUserOperationReturnType> {
-  if (!wallet.networkId) {
+  const { networkId } = wallet;
+  if (!networkId) {
     throw new Error("Network not set - call use({networkId}) first");
   }
-  const networkId = wallet.networkId;
 
   const encodedCalls = options.calls.map(call => {
     if ("abi" in call) {
@@ -62,7 +62,7 @@ export async function sendUserOperation<T extends readonly unknown[]>(
   }
 
   const signature = await wallet.account.sign({
-    hash: createOpResponse.data.unsigned_payload as `0x${string}`,
+    hash: createOpResponse.data.unsigned_payload as Hex,
   });
 
   const broadcastResponse = await Coinbase.apiClients.smartWallet!.broadcastUserOperation(
@@ -79,7 +79,7 @@ export async function sendUserOperation<T extends readonly unknown[]>(
 
   const returnValue: SendUserOperationReturnType = {
     id: broadcastResponse.data.id,
-    networkId: networkId,
+    networkId,
     smartWalletAddress: wallet.address,
     status: broadcastResponse.data.status!,
     wait: async () => {
