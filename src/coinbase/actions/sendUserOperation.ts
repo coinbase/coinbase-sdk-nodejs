@@ -73,7 +73,7 @@ export async function sendUserOperation<T extends readonly unknown[]>(
     },
   );
 
-  if (!broadcastResponse.data || !broadcastResponse.data.status) {
+  if (!broadcastResponse.data.status) {
     throw new Error("Failed to broadcast user operation");
   }
 
