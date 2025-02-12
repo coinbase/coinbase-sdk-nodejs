@@ -29,6 +29,7 @@ describe("Validator", () => {
         slashed: false,
         withdrawableEpoch: "epoch-2",
         withdrawal_address: "withdrawal-address-123",
+        fee_recipient_address: "fee-recipient-address-123",
       },
     };
 
@@ -77,6 +78,14 @@ describe("Validator", () => {
 
   test("getWithdrawalAddress should return the correct withdrawal address", () => {
     expect(validator.getWithdrawalAddress()).toBe("withdrawal-address-123");
+  });
+
+  test("getFeeRecipientAddress should return the correct fee recipient address", () => {
+    expect(validator.getFeeRecipientAddress()).toBe("fee-recipient-address-123");
+  });
+
+  test("getForwardedFeeRecipientAddress should return the correct forwarded fee recipient address", () => {
+    expect(validator.getForwardedFeeRecipientAddress()).toBe("");
   });
 
   test("getEffectiveBalance should return the correct effective balance", () => {
