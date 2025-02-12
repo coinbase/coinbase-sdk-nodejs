@@ -1,4 +1,4 @@
-import { TimeoutError } from "../errors";
+import { TimeoutError } from "../coinbase/errors";
 
 export type WaitOptions = {
   intervalSeconds?: number;
