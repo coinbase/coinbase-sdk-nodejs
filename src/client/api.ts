@@ -1791,7 +1791,7 @@ export interface EthereumValidatorMetadata {
      */
     'effective_balance': Balance;
     /**
-     * The address for execution layer rewards (MEV & tx fees). If using a reward splitter plan, this is a smart contract  address that splits rewards based on defined commissions and send a portion to the forwarded_fee_recipient_address. 
+     * The address for execution layer rewards (MEV & tx fees). If using a reward splitter plan, this is a smart contract address that splits rewards based on defined commissions and send a portion to the forwarded_fee_recipient_address. 
      * @type {string}
      * @memberof EthereumValidatorMetadata
      */
@@ -3802,19 +3802,19 @@ export interface TransactionLog {
      * @type {string}
      * @memberof TransactionLog
      */
-    'address'?: string;
+    'address': string;
     /**
      * 
      * @type {Array<string>}
      * @memberof TransactionLog
      */
-    'topics'?: Array<string>;
+    'topics': Array<string>;
     /**
      * The data included in this log.
      * @type {string}
      * @memberof TransactionLog
      */
-    'data'?: string;
+    'data': string;
 }
 /**
  * The receipt of an onchain transaction\'s execution.
@@ -3822,84 +3822,6 @@ export interface TransactionLog {
  * @interface TransactionReceipt
  */
 export interface TransactionReceipt {
-    /**
-     * The address this transaction is to. This is null if the transaction was an init transaction, used to deploy a contract.
-     * @type {string}
-     * @memberof TransactionReceipt
-     */
-    'to'?: string;
-    /**
-     * The address this transaction is from.
-     * @type {string}
-     * @memberof TransactionReceipt
-     */
-    'from'?: string;
-    /**
-     * The EVM address of the smart contract. If this transaction has a null to address, it is an init transaction used to deploy a contract, in which case this is the address created by that contract.
-     * @type {string}
-     * @memberof TransactionReceipt
-     */
-    'contract_address'?: string;
-    /**
-     * The index of this transaction in the list of transactions included in the block this transaction was mined in.
-     * @type {number}
-     * @memberof TransactionReceipt
-     */
-    'transaction_index'?: number;
-    /**
-     * The EIP-2718 transaction type. See https://eips.ethereum.org/EIPS/eip-2718 for more details.
-     * @type {number}
-     * @memberof TransactionReceipt
-     */
-    'type'?: number;
-    /**
-     * A bloom-filter, which includes all the addresses and topics included in any log in this transaction.
-     * @type {string}
-     * @memberof TransactionReceipt
-     */
-    'logs_bloom'?: string;
-    /**
-     * The hash of the block at which the transaction was recorded.
-     * @type {string}
-     * @memberof TransactionReceipt
-     */
-    'block_hash'?: string;
-    /**
-     * The hash of the onchain sponsored send transaction.
-     * @type {string}
-     * @memberof TransactionReceipt
-     */
-    'transaction_hash'?: string;
-    /**
-     * The block height (number) of the block that this transaction was included in.
-     * @type {number}
-     * @memberof TransactionReceipt
-     */
-    'block_number'?: number;
-    /**
-     * The number of blocks that have been mined since this transaction, including the actual block it was mined in.
-     * @type {number}
-     * @memberof TransactionReceipt
-     */
-    'confirmations'?: number;
-    /**
-     * The intermediate state root of a receipt.
-     * @type {string}
-     * @memberof TransactionReceipt
-     */
-    'root'?: string;
-    /**
-     * For the block this transaction was included in, this is the sum of the gas used by each transaction in the ordered list of transactions up to (and including) this transaction.
-     * @type {number}
-     * @memberof TransactionReceipt
-     */
-    'cumulative_gas_used'?: number;
-    /**
-     * This is true if the block is in a post-Byzantium Hard Fork block.
-     * @type {boolean}
-     * @memberof TransactionReceipt
-     */
-    'byzantium'?: boolean;
     /**
      * The status of a transaction is 1 if successful or 0 if it was reverted.
      * @type {number}
@@ -3917,13 +3839,13 @@ export interface TransactionReceipt {
      * @type {string}
      * @memberof TransactionReceipt
      */
-    'gas_used'?: string;
+    'gas_used': string;
     /**
      * The effective gas price the transaction was charged at.
      * @type {string}
      * @memberof TransactionReceipt
      */
-    'effective_gas_price'?: string;
+    'effective_gas_price': string;
 }
 /**
  * 
@@ -4179,11 +4101,17 @@ export interface UserOperation {
      */
     'signature'?: string;
     /**
+     * The hash of the transaction that was broadcast.
+     * @type {string}
+     * @memberof UserOperation
+     */
+    'transaction_hash'?: string;
+    /**
      * The status of the user operation.
      * @type {string}
      * @memberof UserOperation
      */
-    'status'?: UserOperationStatusEnum;
+    'status': UserOperationStatusEnum;
 }
 
 export const UserOperationStatusEnum = {
