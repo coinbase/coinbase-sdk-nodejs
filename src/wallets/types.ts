@@ -1,7 +1,7 @@
 import type { Address } from "abitype";
 import type { LocalAccount } from "viem";
 import {
-  BroadcastedOperation, SendUserOperationOptions
+  SendUserOperationOptions, SendUserOperationReturnType
 } from '../actions/sendUserOperation';
 import { Network, SupportedChainId } from "../types/chain";
 import { Prettify } from "viem";
@@ -17,7 +17,7 @@ export type SmartWallet = {
   type: "smart";
   sendUserOperation: <T extends readonly unknown[]>(
     options: SendUserOperationOptions<T>
-  ) => Promise<BroadcastedOperation>;
+  ) => Promise<SendUserOperationReturnType>;
   useNetwork: (options: SmartWalletNetworkOptions) => NetworkScopedSmartWallet;
 };
 
@@ -26,5 +26,5 @@ export type NetworkScopedSmartWallet = Prettify<Omit<SmartWallet, "sendUserOpera
   paymasterUrl?: string;
   sendUserOperation: <T extends readonly unknown[]>(
     options: Prettify<Omit<SendUserOperationOptions<T>, "chainId" | "paymasterUrl">>
-  ) => Promise<BroadcastedOperation>;
+  ) => Promise<SendUserOperationReturnType>;
 }>

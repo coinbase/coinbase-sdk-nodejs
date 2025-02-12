@@ -1,6 +1,6 @@
 import { SmartWallet } from "../wallets/types";
 import { UserOperationStatusEnum } from "../client";
-import { encodeFunctionData, Hex, Prettify } from "viem";
+import { Address, encodeFunctionData, Hex, Prettify } from "viem";
 import { Coinbase } from "../coinbase/coinbase";
 import { CHAIN_ID_TO_NETWORK_ID, Network, SupportedChainId } from "../types/chain";
 import { Calls } from "viem/_types/types/calls";
@@ -11,23 +11,16 @@ export type SendUserOperationOptions<T extends readonly unknown[]> = {
   paymasterUrl?: string;
 };
 
-export type BroadcastedOperation = {
+export type SendUserOperationReturnType = {
   id: string;
+  smartWalletAddress: Address;
   status: typeof UserOperationStatusEnum.Broadcast;
-}
-
-export type CompletedOperation = {
-  id: string;
-  status: typeof UserOperationStatusEnum.Complete;
-  transactionHash: string;
-}
-
-export type SendUserOperationReturnType = BroadcastedOperation | CompletedOperation;
+} 
 
 export async function sendUserOperation<T extends readonly unknown[]>(
   wallet: SmartWallet,
   options: SendUserOperationOptions<T>,
-): Promise<BroadcastedOperation> {
+): Promise<SendUserOperationReturnType> {
   const { calls, chainId, paymasterUrl } = options
   const network = CHAIN_ID_TO_NETWORK_ID[chainId];
 
@@ -84,9 +77,10 @@ export async function sendUserOperation<T extends readonly unknown[]>(
 
   const returnValue = {
     id: broadcastResponse.data.id,
+    smartWalletAddress: wallet.address,
     status: broadcastResponse.data.status,
     transactionHash: broadcastResponse.data.transaction_hash,
-  } as BroadcastedOperation;
+  } as SendUserOperationReturnType;
 
   return returnValue;
 }
