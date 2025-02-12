@@ -2,53 +2,36 @@ import { SmartWallet } from "../wallets/types";
 import { UserOperationStatusEnum } from "../client";
 import { encodeFunctionData, Hex, Prettify } from "viem";
 import { Coinbase } from "../coinbase/coinbase";
-import { wait } from "../utils/wait";
-import { Network } from "../types/chain";
+import { CHAIN_ID_TO_NETWORK_ID, Network, SupportedChainId } from "../types/chain";
 import { Calls } from "viem/_types/types/calls";
 
 export type SendUserOperationOptions<T extends readonly unknown[]> = {
   calls: Calls<T>;
+  chainId: SupportedChainId;
+  paymasterUrl?: string;
 };
 
-type BaseUserOperation = {
+export type BroadcastedOperation = {
   id: string;
-  network: Network;
-  smartWalletAddress: Hex;
-  wait: () => Promise<SendUserOperationReturnType>;
-};
+  status: typeof UserOperationStatusEnum.Broadcast;
+}
 
-type CompletedOperation = Prettify<BaseUserOperation & {
+export type CompletedOperation = {
+  id: string;
   status: typeof UserOperationStatusEnum.Complete;
   transactionHash: string;
-}>
+}
 
-type FailedOperation = Prettify<BaseUserOperation & {
-  status: typeof UserOperationStatusEnum.Failed;
-  transactionHash?: string;
-}>
-
-type PendingOperation = Prettify<BaseUserOperation & {
-  status: Extract<
-    UserOperationStatusEnum, 
-    typeof UserOperationStatusEnum.Pending | 
-    typeof UserOperationStatusEnum.Signed | 
-    typeof UserOperationStatusEnum.Broadcast
-  >;
-  transactionHash?: string;
-}>
-
-export type SendUserOperationReturnType = CompletedOperation | PendingOperation | FailedOperation;
+export type SendUserOperationReturnType = BroadcastedOperation | CompletedOperation;
 
 export async function sendUserOperation<T extends readonly unknown[]>(
   wallet: SmartWallet,
-  options: { calls: Calls<T> },
-): Promise<SendUserOperationReturnType> {
-  const { network } = wallet;
-  if (!network) {
-    throw new Error("Network not set - call useNetwork({chainId}) first");
-  }
+  options: SendUserOperationOptions<T>,
+): Promise<BroadcastedOperation> {
+  const { calls, chainId, paymasterUrl } = options
+  const network = CHAIN_ID_TO_NETWORK_ID[chainId];
 
-  const encodedCalls = options.calls.map(call => {
+  const encodedCalls = calls.map(call => {
     if ("abi" in call) {
       return {
         data: encodeFunctionData({
@@ -69,7 +52,7 @@ export async function sendUserOperation<T extends readonly unknown[]>(
 
   const createOpResponse = await Coinbase.apiClients.smartWallet!.createUserOperation(
     wallet.address,
-    network.networkId,
+    network,
     {
       calls: encodedCalls,
     },
@@ -99,56 +82,11 @@ export async function sendUserOperation<T extends readonly unknown[]>(
     throw new Error("Failed to broadcast user operation");
   }
 
-  const returnValue: SendUserOperationReturnType = {
+  const returnValue = {
     id: broadcastResponse.data.id,
-    network,
-    smartWalletAddress: wallet.address,
     status: broadcastResponse.data.status,
     transactionHash: broadcastResponse.data.transaction_hash,
-    wait: async () => {
-      const reload = async () => {
-        const result = await Coinbase.apiClients.smartWallet!.getUserOperation(
-          wallet.address,
-          broadcastResponse.data.id,
-        );
-
-        if (!result.data) {
-          throw new Error("Failed to get user operation status");
-        }
-
-        if (result.data.status === UserOperationStatusEnum.Complete) {
-          return {
-            ...returnValue,
-            status: result.data.status,
-            transactionHash: result.data.transaction_hash!,
-            wait: returnValue.wait,
-          } as CompletedOperation;
-        } else if (result.data.status === UserOperationStatusEnum.Failed) {
-          return {
-            ...returnValue,
-            status: result.data.status,
-            transactionHash: result.data.transaction_hash,
-            wait: returnValue.wait,
-          } as FailedOperation;
-        } else {
-          return {
-            ...returnValue,
-            status: result.data.status,
-            transactionHash: result.data.transaction_hash,
-            wait: returnValue.wait,
-          } as PendingOperation;
-        }
-      };
-
-      return wait(
-        reload,
-        (op: SendUserOperationReturnType) =>
-          op.status === UserOperationStatusEnum.Complete ||
-          op.status === UserOperationStatusEnum.Failed,
-        { intervalSeconds: 0.2 },
-      );
-    },
-  } as SendUserOperationReturnType;
+  } as BroadcastedOperation;
 
   return returnValue;
 }
