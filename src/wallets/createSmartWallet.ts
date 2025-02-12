@@ -1,8 +1,9 @@
 import { type SmartWallet } from "./types";
-import { Coinbase } from "../coinbase";
+import { Coinbase } from "../index"
 import { sendUserOperation } from "../actions/sendUserOperation";
 import type { LocalAccount } from "viem";
-import { createNetwork, SupportedChainId } from "../types";
+import { SupportedChainId } from "../types/chain";
+import { createNetwork } from "../utils/chain";
 
 export type CreateSmartWalletOptions = {
   account: LocalAccount;
