@@ -1,9 +1,10 @@
 import { UserOperationCalls } from "viem/_types/account-abstraction";
 import { SmartWallet } from "../wallets/types";
-import { NetworkIdentifier, UserOperationStatusEnum } from "../../client";
+import { UserOperationStatusEnum } from "../../client";
 import { encodeFunctionData, Hex } from "viem";
 import { Coinbase } from "../coinbase";
 import { wait } from "../utils/wait";
+import { Network } from "../types";
 
 export type SendUserOperationOptions<T extends readonly unknown[]> = {
   calls: UserOperationCalls<T>;
@@ -11,7 +12,7 @@ export type SendUserOperationOptions<T extends readonly unknown[]> = {
 
 export type SendUserOperationReturnType = {
   id: string;
-  networkId: NetworkIdentifier;
+  network: Network;
   smartWalletAddress: Hex;
   status: UserOperationStatusEnum;
   wait: () => Promise<SendUserOperationReturnType>;
@@ -19,11 +20,11 @@ export type SendUserOperationReturnType = {
 
 export async function sendUserOperation<T extends readonly unknown[]>(
   wallet: SmartWallet,
-  options: SendUserOperationOptions<T>,
+  options: { calls: UserOperationCalls<T> },
 ): Promise<SendUserOperationReturnType> {
-  const { networkId } = wallet;
-  if (!networkId) {
-    throw new Error("Network not set - call use({networkId}) first");
+  const { network } = wallet;
+  if (!network) {
+    throw new Error("Network not set - call useNetwork({chainId}) first");
   }
 
   const encodedCalls = options.calls.map(call => {
@@ -47,7 +48,7 @@ export async function sendUserOperation<T extends readonly unknown[]>(
 
   const createOpResponse = await Coinbase.apiClients.smartWallet!.createUserOperation(
     wallet.address,
-    networkId,
+    network.networkId,
     {
       calls: encodedCalls,
     },
@@ -79,7 +80,7 @@ export async function sendUserOperation<T extends readonly unknown[]>(
 
   const returnValue: SendUserOperationReturnType = {
     id: broadcastResponse.data.id,
-    networkId,
+    network,
     smartWalletAddress: wallet.address,
     status: broadcastResponse.data.status,
     wait: async () => {
@@ -105,7 +106,7 @@ export async function sendUserOperation<T extends readonly unknown[]>(
         op =>
           op.status === UserOperationStatusEnum.Complete ||
           op.status === UserOperationStatusEnum.Failed,
-        { intervalSeconds: 0.2, timeoutSeconds: 10 },
+        { intervalSeconds: 0.2 },
       );
     },
   };

@@ -1,8 +1,8 @@
-import type { SmartWallet } from "./types";
+import { type SmartWallet } from "./types";
 import { Coinbase } from "../coinbase";
 import { sendUserOperation } from "../actions/sendUserOperation";
 import type { LocalAccount } from "viem";
-import { NetworkIdentifier } from "../../client";
+import { createNetwork, SupportedViemChain } from "../types";
 
 export type CreateSmartWalletOptions = {
   account: LocalAccount;
@@ -22,8 +22,8 @@ export async function createSmartWallet(options: CreateSmartWalletOptions): Prom
     account: options.account,
     type: "smart",
     sendUserOperation: options => sendUserOperation(wallet, options),
-    useNetwork: (options: { networkId: NetworkIdentifier }) => {
-      wallet.networkId = options.networkId;
+    useNetwork: (options: { chain: SupportedViemChain }) => {
+      wallet.network = createNetwork(options.chain.id);
     },
   };
 

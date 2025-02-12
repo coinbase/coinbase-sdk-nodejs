@@ -1,20 +1,23 @@
 import type { Address } from "abitype";
 import type { LocalAccount } from "viem";
-import type { NetworkIdentifier } from "../../client";
 import {
   SendUserOperationOptions,
   SendUserOperationReturnType,
 } from "../actions/sendUserOperation";
+import { Network, SupportedViemChain } from "../types";
+import { UserOperationCalls } from "viem/_types/account-abstraction";
+
+
 
 export type SmartWallet = {
   address: Address;
   account: LocalAccount;
-  networkId?: NetworkIdentifier;
+  network?: Network;
   type: "smart";
   sendUserOperation: <T extends readonly unknown[]>(
-    options: SendUserOperationOptions<T>,
+    options: { calls: UserOperationCalls<T> }
   ) => Promise<SendUserOperationReturnType>;
-  useNetwork: (options: { networkId: NetworkIdentifier }) => void;
+  useNetwork: (options: { chain: SupportedViemChain }) => void;
 };
 
 // In the future, we may introduce BaseWallet (or named differently to avoid Base chain confusion). BaseWallet would be a base class for all wallets.
