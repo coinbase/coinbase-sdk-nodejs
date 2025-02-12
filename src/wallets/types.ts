@@ -3,8 +3,8 @@ import type { LocalAccount } from "viem";
 import {
   SendUserOperationReturnType
 } from '../actions/sendUserOperation'
-import { Network, SupportedChainId } from "../types";
-import { UserOperationCalls } from "viem/_types/account-abstraction";
+import { Network, SupportedChainId } from "../types/chain";
+import { Calls } from "viem/_types/types/calls";
 
 
 
@@ -14,7 +14,7 @@ export type SmartWallet = {
   network?: Network;
   type: "smart";
   sendUserOperation: <T extends readonly unknown[]>(
-    options: { calls: UserOperationCalls<T> }
+    options: { calls: Calls<T> }
   ) => Promise<SendUserOperationReturnType>;
   switchChain: (options: { chainId: SupportedChainId }) => void;
 };

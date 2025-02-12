@@ -1,7 +1,7 @@
 import { parseEther } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
-import { Coinbase, ExternalAddress, Wallet } from "./src";
-import { createSmartWallet } from "./src/coinbase/wallets/createSmartWallet";
+import { Coinbase, ExternalAddress, Wallet } from './src/index'
+import { createSmartWallet } from './src/index'
 
 Coinbase.configureFromJson({
   filePath: "~/.apikeys/dev.json",

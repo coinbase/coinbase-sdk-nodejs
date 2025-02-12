@@ -1,13 +1,13 @@
-import { UserOperationCalls } from "viem/_types/account-abstraction";
 import { SmartWallet } from "../wallets/types";
 import { UserOperationStatusEnum } from "../client";
 import { encodeFunctionData, Hex, Prettify } from "viem";
 import { Coinbase } from "../coinbase/coinbase";
 import { wait } from "../utils/wait";
 import { Network } from "../types/chain";
+import { Calls } from "viem/_types/types/calls";
 
 export type SendUserOperationOptions<T extends readonly unknown[]> = {
-  calls: UserOperationCalls<T>;
+  calls: Calls<T>;
 };
 
 type BaseUserOperation = {
@@ -41,7 +41,7 @@ export type SendUserOperationReturnType = CompletedOperation | PendingOperation 
 
 export async function sendUserOperation<T extends readonly unknown[]>(
   wallet: SmartWallet,
-  options: { calls: UserOperationCalls<T> },
+  options: { calls: Calls<T> },
 ): Promise<SendUserOperationReturnType> {
   const { network } = wallet;
   if (!network) {
