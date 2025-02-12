@@ -1,10 +1,9 @@
 import type { Address } from "abitype";
 import type { LocalAccount } from "viem";
 import {
-  SendUserOperationOptions,
-  SendUserOperationReturnType,
-} from "../actions/sendUserOperation";
-import { Network, SupportedChainId } from "../../types/chain";
+  SendUserOperationReturnType
+} from '../actions/sendUserOperation'
+import { Network, SupportedChainId } from "../types";
 import { UserOperationCalls } from "viem/_types/account-abstraction";
 
 
@@ -25,7 +24,7 @@ export type SmartWallet = {
 // We would have a HDKeyWallet type that extends the PrivateKeyWallet type and adds a method to get the HD key used by the private key wallet.
 // We would update the SmartWallet type to extend BaseWallet to add support for common wallet signing methods.
 // export type BaseWallet = {
-//   sign: (parameters: { hash: Hash }) => Promise<H
+//   sign: (parameters: { hash: Hash }) => Promise<Hex>
 //   signMessage: ({ message }: { message: SignableMessage }) => Promise<Hex>
 //   signTypedData: (
 //     typedData: TypedData | { [key: string]: unknown },

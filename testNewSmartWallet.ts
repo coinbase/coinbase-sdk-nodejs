@@ -1,13 +1,12 @@
 import { parseEther } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { Coinbase, ExternalAddress, Wallet } from "./src";
-import { baseSepolia } from "viem/chains";
 import { createSmartWallet } from "./src/coinbase/wallets/createSmartWallet";
 
 Coinbase.configureFromJson({
   filePath: "~/.apikeys/dev.json",
   debugging: true,
-  basePath: "https://cloud-api-dev.cbhq.net/platform",
+  basePath: "https://cloud-api-dev.cbhq.net/platform/"
 });
 
 async function main() {
@@ -15,7 +14,7 @@ async function main() {
   const privateKey = generatePrivateKey();
   const owner = privateKeyToAccount(privateKey);
   const smartWallet = await createSmartWallet({ account: owner });
-  smartWallet.useNetwork({ chain: baseSepolia });
+  smartWallet.switchChain({ chainId: 84532 });
 
   // Faucet the smart wallet using an External Address
   const externalAdress = new ExternalAddress(Coinbase.networks.BaseSepolia, smartWallet.address);
@@ -29,15 +28,13 @@ async function main() {
   const userOperation = await smartWallet.sendUserOperation({
     calls: [
       {
-        to: walletAddress.getId(),
+        to: walletAddress.getId() as `0x${string}`,
         value: parseEther("0.000001"),
         data: "0x",
       },
     ],
   });
-  console.log("userOperation status", userOperation.status);
-  const completedUserOperation = await userOperation.wait();
-  console.log("completedUserOperation status", completedUserOperation.status);
+  const userOperationResult = await userOperation.wait();
 
   // get final balance now
   const finalBalance = await walletAddress.getBalance("eth");
