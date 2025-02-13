@@ -3,6 +3,7 @@ import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { Coinbase, ExternalAddress, Wallet } from './src/index';
 import { createSmartWallet } from './src/index';
 import { waitForUserOperation } from "./src/actions/waitForUserOperation";
+import { UserOperationStatusEnum } from "./src/client";
 
 Coinbase.configureFromJson({
   filePath: "~/.apikeys/dev.json",
@@ -25,7 +26,25 @@ async function main() {
   const wallet = await Wallet.create();
   const walletAddress = await wallet.getDefaultAddress();
 
-  const userOperation = await smartWallet.sendUserOperation({
+  // const userOperation = await smartWallet.sendUserOperation({
+  //   calls: [
+  //     {
+  //       to: walletAddress.getId() as `0x${string}`,
+  //       value: parseEther("0.000001"),
+  //       data: "0x",
+  //     },
+  //   ],
+  //   chainId: 84532,
+  // });
+
+  // const userOperationResult = await waitForUserOperation(userOperation);
+
+  // connect to a network
+  const networkScopedSmartWallet = smartWallet.useNetwork({
+    chainId: 84532,
+  });
+
+  const userOperation2 = await networkScopedSmartWallet.sendUserOperation({
     calls: [
       {
         to: walletAddress.getId() as `0x${string}`,
@@ -33,16 +52,24 @@ async function main() {
         data: "0x",
       },
     ],
-    chainId: 84532,
   });
 
-  const userOperationResult = await waitForUserOperation({
-    ...userOperation,
-    timeoutSeconds: 10000,
-    intervalSeconds: 1,
+  const userOperationResult2 = await waitForUserOperation({
+    ...userOperation2,
+    waitOptions: {
+      timeoutSeconds: 10000,
+      intervalSeconds: 1,
+    },
   });
 
-  console.log("userOperationResult", userOperationResult);
+  if (userOperationResult2.status === UserOperationStatusEnum.Failed) {
+    userOperationResult2 // type is FailedOperation
+  } else {
+    userOperationResult2 // type is CompletedOperation
+    console.log(userOperationResult2.transactionHash)
+  }
+
+
 
 //  const userOperationResult = await userOperation.wait();
 
