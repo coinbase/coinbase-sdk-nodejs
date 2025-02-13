@@ -151,6 +151,58 @@ describe("Coinbase SDK E2E Test", () => {
     });
   }, 60000);
 
+  it("Should be able to invoke a contract and retrieve the transaction receipt", async() => {
+    const seedFile = JSON.parse(process.env.WALLET_DATA || "");
+    const walletId = Object.keys(seedFile)[0];
+    const seed = seedFile[walletId].seed;
+  
+    const importedWallet = await Wallet.import({
+      seed,
+      walletId,
+      networkId: Coinbase.networks.BaseSepolia,
+    });
+  
+    const faucetTransaction = await importedWallet.faucet(Coinbase.assets.Usdc);
+    await faucetTransaction.wait();
+  
+    const secondWallet = await Wallet.create();
+    const secondWalletAddress = (await secondWallet.getDefaultAddress()).getId();
+  
+    const transferArgs = {
+      to: secondWalletAddress,
+      value: "1"
+    }
+  
+    const contractInvocation = await importedWallet.invokeContract({
+      contractAddress: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      method: "transfer",
+      args: transferArgs,
+    });
+  
+    await contractInvocation.wait();
+  
+    const transactionContent = contractInvocation.getTransaction().content();
+    const receipt = transactionContent!.receipt;
+  
+    expect(receipt).toBeDefined();
+
+    if (!receipt?.logs) {
+      fail("No logs found in receipt");
+    }
+
+    const logs = receipt.logs;
+  
+    expect(logs).toBeDefined();
+    expect(logs.length).toEqual(1);
+  
+    const log = logs[0];
+    expect(log.address).toEqual("0x036CbD53842c5426634e7929541eC2318f3dCF7e");
+    expect(log.topics?.[0]).toEqual("Transfer");
+    expect(log.topics?.[1]).toEqual(`from: ${(await importedWallet.getDefaultAddress()).getId()}`);
+    expect(log.topics?.[2]).toEqual(`to: ${(await secondWallet.getDefaultAddress()).getId()}`);
+    expect(log.data).toEqual("0x0000000000000000000000000000000000000000000000000000000000000001");
+  }, 60000);
+  
   it.skip("should be able to make gasless transfers", async () => {
     // Import wallet with balance
     const seedFile = JSON.parse(process.env.WALLET_DATA || "");
