@@ -26,18 +26,18 @@ async function main() {
   const wallet = await Wallet.create();
   const walletAddress = await wallet.getDefaultAddress();
 
-  // const userOperation = await smartWallet.sendUserOperation({
-  //   calls: [
-  //     {
-  //       to: walletAddress.getId() as `0x${string}`,
-  //       value: parseEther("0.000001"),
-  //       data: "0x",
-  //     },
-  //   ],
-  //   chainId: 84532,
-  // });
+  const userOperation = await smartWallet.sendUserOperation({
+    calls: [
+      {
+        to: walletAddress.getId() as `0x${string}`,
+        value: parseEther("0.0000005"),
+        data: "0x",
+      },
+    ],
+    chainId: 84532,
+  });
 
-  // const userOperationResult = await waitForUserOperation(userOperation);
+  const userOperationResult = await waitForUserOperation(userOperation);
 
   // connect to a network
   const networkScopedSmartWallet = smartWallet.useNetwork({
@@ -48,7 +48,7 @@ async function main() {
     calls: [
       {
         to: walletAddress.getId() as `0x${string}`,
-        value: parseEther("0.000001"),
+        value: parseEther("0.0000005"),
         data: "0x",
       },
     ],

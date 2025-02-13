@@ -5,6 +5,14 @@ import { Coinbase } from "../coinbase/coinbase";
 import { CHAIN_ID_TO_NETWORK_ID, SupportedChainId } from "../types/chain";
 import { Calls } from "viem/types/calls";
 
+
+/**
+ * Options for sending a user operation
+ * @template T - Array type for the calls parameter
+ * @property {Calls<T>} calls - Array of contract calls to execute in the user operation
+ * @property {SupportedChainId} chainId - Chain ID of the network to execute on
+ * @property {string} [paymasterUrl] - Optional URL of the paymaster service to use for gas sponsorship
+ */
 export type SendUserOperationOptions<T extends readonly unknown[]> = {
   calls: Calls<T>;
   chainId: SupportedChainId;
