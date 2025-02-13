@@ -1,17 +1,22 @@
-import { NetworkScopedSmartWallet, SmartWalletNetworkOptions, type SmartWallet } from "./types";
+import {
+  NetworkScopedSmartWallet,
+  Signer,
+  SmartWalletNetworkOptions,
+  type SmartWallet,
+} from "./types";
 import { sendUserOperation } from "../actions/sendUserOperation";
 import type { Address, LocalAccount } from "viem";
 import { createNetwork } from "../utils/chain";
 
 export type ToSmartWalletOptions = {
   smartWalletAddress: Address;
-  account: LocalAccount;
+  signer: Signer;
 };
 
 export async function toSmartWallet(options: ToSmartWalletOptions): Promise<SmartWallet> {
   const wallet: SmartWallet = {
     address: options.smartWalletAddress,
-    owners: [options.account],
+    owners: [options.signer],
     type: "smart",
     sendUserOperation: options => sendUserOperation(wallet, options),
     useNetwork: (options: SmartWalletNetworkOptions) => {

@@ -15,7 +15,7 @@ async function main() {
   // create a smart wallet with viem wallet owner
   const privateKey = generatePrivateKey();
   const owner = privateKeyToAccount(privateKey);
-  const smartWallet = await createSmartWallet({ account: owner });
+  const smartWallet = await createSmartWallet({ signer: owner });
 
   // Faucet the smart wallet using an External Address
   const externalAdress = new ExternalAddress(Coinbase.networks.BaseSepolia, smartWallet.address);
