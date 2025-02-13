@@ -14,7 +14,7 @@ export type SmartWalletNetworkOptions = {
 
 export type SmartWallet = {
   address: Address;
-  account: LocalAccount;
+  owners: LocalAccount[];
   type: "smart";
   sendUserOperation: <T extends readonly unknown[]>(
     options: SendUserOperationOptions<T>,

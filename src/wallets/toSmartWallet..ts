@@ -11,7 +11,7 @@ export type ToSmartWalletOptions = {
 export async function toSmartWallet(options: ToSmartWalletOptions): Promise<SmartWallet> {
   const wallet: SmartWallet = {
     address: options.smartWalletAddress,
-    account: options.account,
+    owners: [options.account],
     type: "smart",
     sendUserOperation: options => sendUserOperation(wallet, options),
     useNetwork: (options: SmartWalletNetworkOptions) => {

@@ -5,7 +5,6 @@ import { Coinbase } from "../coinbase/coinbase";
 import { CHAIN_ID_TO_NETWORK_ID, SupportedChainId } from "../types/chain";
 import { Calls } from "viem/types/calls";
 
-
 /**
  * Options for sending a user operation
  * @template T - Array type for the calls parameter
@@ -59,11 +58,13 @@ export async function sendUserOperation<T extends readonly unknown[]>(
     },
   );
 
-  if (!wallet.account.sign) {
+  const owner = wallet.owners[0];
+
+  if (!owner.sign) {
     throw new Error("Account does not support signing");
   }
 
-  const signature = await wallet.account.sign({
+  const signature = await owner.sign({
     hash: createOpResponse.data.unsigned_payload as Hex,
   });
 
