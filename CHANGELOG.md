@@ -1,5 +1,10 @@
 # Coinbase Node.js SDK Changelog
 
+## [0.18.1] - 2025-02-13
+
+### Fixed
+- Fixed a bug where import_wallet would fail if the address list was not being sorted by index.
+
 ## [0.18.0] - 2025-02-13
 
 ### Added

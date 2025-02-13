@@ -64,6 +64,7 @@ import {
   VALID_SMART_CONTRACT_ERC721_MODEL,
   VALID_SMART_CONTRACT_ERC1155_MODEL,
   VALID_SMART_CONTRACT_CUSTOM_MODEL,
+  newAddressModelsFromWallet,
 } from "./utils";
 import { Trade } from "../coinbase/trade";
 import { WalletAddress } from "../coinbase/address/wallet_address";
@@ -75,6 +76,7 @@ import { ContractInvocation } from "../coinbase/contract_invocation";
 import { SmartContract } from "../coinbase/smart_contract";
 import { Webhook } from "../coinbase/webhook";
 import { WalletData } from "../coinbase/types";
+import { Address } from "../coinbase/address";
 
 describe("Wallet Class", () => {
   let wallet: Wallet;
@@ -98,6 +100,7 @@ describe("Wallet Class", () => {
         id: walletId,
         network_id,
         default_address: newAddressModel(walletId),
+        index: 0,
       };
       return { data: apiResponses[walletId] };
     });
@@ -880,6 +883,25 @@ describe("Wallet Class", () => {
         };
       });
       await expect(wallet.listAddresses()).rejects.toThrow(Error);
+    });
+    it("should succeed when addresses are returned out of order", async () => {
+      const addresses = await newAddressModelsFromWallet(wallet.getId()!, wallet.export().seed);
+      Coinbase.apiClients.address!.listAddresses = mockFn(() => {
+        return {
+          data: {
+            data: [addresses[1], addresses[0]], // out of order
+            has_more: false,
+            next_page: "",
+            total_count: 1,
+          },
+        };
+      });
+
+      const response = await wallet.listAddresses();
+      expect(response).toBeInstanceOf(Array);
+      expect(response).toHaveLength(2);
+      expect(response[0].getId()).toBe(addresses[1].address_id);
+      expect(response[1].getId()).toBe(addresses[0].address_id);
     });
 
     it("should create new address and update the existing address list", async () => {
