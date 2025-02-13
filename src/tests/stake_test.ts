@@ -5,7 +5,6 @@ import {
   mockReturnValue,
   stakeApiMock,
   VALID_ACTIVE_VALIDATOR_LIST,
-  validatorApiMock,
 } from "./utils";
 import { ValidatorStatus } from "../coinbase/types";
 import { ValidatorStatus as APIValidatorStatus } from "../client/api";
