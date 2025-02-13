@@ -4,6 +4,7 @@ import { Address, encodeFunctionData, Hex } from "viem";
 import { Coinbase } from "../coinbase/coinbase";
 import { CHAIN_ID_TO_NETWORK_ID, type SupportedChainId } from "../types/chain";
 import type { Calls } from "viem/types/calls";
+import type { SendUserOperationParameters } from "viem/account-abstraction/";
 
 /**
  * Options for sending a user operation
