@@ -1570,6 +1570,12 @@ export interface EthereumTransaction {
      * @memberof EthereumTransaction
      */
     'rlp_encoded_tx'?: string;
+    /**
+     * 
+     * @type {TransactionReceipt}
+     * @memberof EthereumTransaction
+     */
+    'receipt'?: TransactionReceipt;
 }
 /**
  * 
@@ -3785,6 +3791,62 @@ export type TransactionStatusEnum = typeof TransactionStatusEnum[keyof typeof Tr
  */
 export type TransactionContent = EthereumTransaction;
 
+/**
+ * A log emitted from an onchain transaction.
+ * @export
+ * @interface TransactionLog
+ */
+export interface TransactionLog {
+    /**
+     * An onchain address of a contract.
+     * @type {string}
+     * @memberof TransactionLog
+     */
+    'address': string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof TransactionLog
+     */
+    'topics': Array<string>;
+    /**
+     * The data included in this log.
+     * @type {string}
+     * @memberof TransactionLog
+     */
+    'data': string;
+}
+/**
+ * The receipt of an onchain transaction\'s execution.
+ * @export
+ * @interface TransactionReceipt
+ */
+export interface TransactionReceipt {
+    /**
+     * The status of a transaction is 1 if successful or 0 if it was reverted.
+     * @type {number}
+     * @memberof TransactionReceipt
+     */
+    'status': number;
+    /**
+     * 
+     * @type {Array<TransactionLog>}
+     * @memberof TransactionReceipt
+     */
+    'logs': Array<TransactionLog>;
+    /**
+     * The amount of gas actually used by this transaction.
+     * @type {string}
+     * @memberof TransactionReceipt
+     */
+    'gas_used': string;
+    /**
+     * The effective gas price the transaction was charged at.
+     * @type {string}
+     * @memberof TransactionReceipt
+     */
+    'effective_gas_price': string;
+}
 /**
  * 
  * @export
