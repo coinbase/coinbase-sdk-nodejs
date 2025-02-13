@@ -51,10 +51,6 @@ export async function sendUserOperation<T extends readonly unknown[]>(
     },
   );
 
-  if (!createOpResponse.data) {
-    throw new Error("Failed to create user operation");
-  }
-
   if (!wallet.account.sign) {
     throw new Error("Account does not support signing");
   }
@@ -70,10 +66,6 @@ export async function sendUserOperation<T extends readonly unknown[]>(
       signature,
     },
   );
-
-  if (!broadcastResponse.data.status) {
-    throw new Error("Failed to broadcast user operation");
-  }
 
   const returnValue = {
     id: broadcastResponse.data.id,
