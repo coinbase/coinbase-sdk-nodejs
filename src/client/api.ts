@@ -1100,6 +1100,12 @@ export interface CreateUserOperationRequest {
      * @memberof CreateUserOperationRequest
      */
     'calls': Array<Call>;
+    /**
+     * The URL of the paymaster to use for the user operation.
+     * @type {string}
+     * @memberof CreateUserOperationRequest
+     */
+    'paymaster_url'?: string;
 }
 /**
  * 

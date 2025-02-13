@@ -93,6 +93,7 @@ export async function sendUserOperation<T extends readonly unknown[]>(
     network,
     {
       calls: encodedCalls,
+      paymaster_url: paymasterUrl,
     },
   );
 
