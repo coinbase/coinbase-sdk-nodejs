@@ -165,6 +165,15 @@ describe("Wallet Class", () => {
             contract_address: "0x",
           },
         },
+        pending_claimable_balance: {
+          amount: "1000000000000000000",
+          asset: {
+            asset_id: Coinbase.assets.Eth,
+            network_id: Coinbase.networks.EthereumHolesky,
+            decimals: 18,
+            contract_address: "0x",
+          },
+        },
         claimable_balance: {
           amount: "1000000000000000000",
           asset: {
@@ -174,15 +183,6 @@ describe("Wallet Class", () => {
             contract_address: "0x",
           },
         },
-        pending_claimable_balance: {
-          amount: "1000000000000000000",
-          asset: {
-            asset_id: Coinbase.assets.Eth,
-            network_id: Coinbase.networks.EthereumHolesky,
-            decimals: 18,
-            contract_address: "0x",
-          }
-        }
       },
     };
 
@@ -582,7 +582,7 @@ describe("Wallet Class", () => {
 
   describe("#invokeContract", () => {
     let expectedInvocation;
-    let options = {
+    const options = {
       abi: MINT_NFT_ABI,
       args: MINT_NFT_ARGS,
       method: VALID_SIGNED_CONTRACT_INVOCATION_MODEL.method,
@@ -640,7 +640,7 @@ describe("Wallet Class", () => {
 
   describe("#deployToken", () => {
     let expectedSmartContract;
-    let options = {
+    const options = {
       name: ERC20_NAME,
       symbol: ERC20_SYMBOL,
       totalSupply: ERC20_TOTAL_SUPPLY,
@@ -667,7 +667,7 @@ describe("Wallet Class", () => {
 
   describe("#deployNFT", () => {
     let expectedSmartContract;
-    let options = {
+    const options = {
       name: ERC721_NAME,
       symbol: ERC721_SYMBOL,
       baseURI: ERC721_BASE_URI,
@@ -694,7 +694,7 @@ describe("Wallet Class", () => {
 
   describe("#deployMultiToken", () => {
     let expectedSmartContract;
-    let options = {
+    const options = {
       uri: "https://example.com/metadata",
     };
 
@@ -719,7 +719,7 @@ describe("Wallet Class", () => {
 
   describe("#deployContract", () => {
     let expectedSmartContract;
-    let options = {
+    const options = {
       solidityVersion: "0.8.0",
       solidityInputJson: "{}",
       contractName: "TestContract",
@@ -746,8 +746,8 @@ describe("Wallet Class", () => {
   });
 
   describe("#createPayloadSignature", () => {
-    let unsignedPayload = VALID_SIGNED_PAYLOAD_SIGNATURE_MODEL.unsigned_payload;
-    let signature =
+    const unsignedPayload = VALID_SIGNED_PAYLOAD_SIGNATURE_MODEL.unsigned_payload;
+    const signature =
       "0xa4e14b28d86dfd7bae739d724ba2ffb13b4458d040930b805eea0a4bc2f5251e7901110677d1ef2ec23ef810c755d0bc72cc6472a4cfb3c53ef242c6ba9fa60a1b";
 
     beforeAll(() => {

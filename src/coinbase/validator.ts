@@ -254,6 +254,25 @@ export class Validator {
   }
 
   /**
+   * Returns the address for execution layer rewards (MEV & tx fees).If using a reward splitter plan, this is a smart contract
+   * address that splits rewards based on defined commissions and send a portion to the forwarded_fee_recipient_address.
+   *
+   * @returns The fee recipient address as a string.
+   */
+  public getFeeRecipientAddress(): string {
+    return this.model.details?.fee_recipient_address || "";
+  }
+
+  /**
+   * If using a reward splitter plan, this address receives a defined percentage of the total execution layer rewards.
+   *
+   * @returns The forwarded fee recipient address as a string.
+   */
+  public getForwardedFeeRecipientAddress(): string {
+    return this.model.details?.forwarded_fee_recipient_address || "";
+  }
+
+  /**
    * Returns the string representation of the Validator.
    *
    * @returns The string representation of the Validator.

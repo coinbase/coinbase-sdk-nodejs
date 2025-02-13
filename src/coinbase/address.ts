@@ -280,6 +280,23 @@ export class Address {
   }
 
   /**
+   * Get the pending claimable balance for the supplied asset.
+   *
+   * @param asset_id - The asset to check pending claimable balance for.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options for getting the pending claimable balance.
+   * @returns The pending claimable balance.
+   */
+  public async pendingClaimableBalance(
+    asset_id: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
+  ): Promise<Decimal> {
+    const balances = await this.getStakingBalances(asset_id, mode, options);
+    return balances.pendingClaimableBalance;
+  }
+
+  /**
    * Requests faucet funds for the address.
    * Only supported on testnet networks.
    *
@@ -456,6 +473,10 @@ export class Address {
       ).amount,
       unstakeableBalance: Balance.fromModelAndAssetId(
         response!.data.context.unstakeable_balance,
+        assetId,
+      ).amount,
+      pendingClaimableBalance: Balance.fromModelAndAssetId(
+        response!.data.context.pending_claimable_balance,
         assetId,
       ).amount,
       claimableBalance: Balance.fromModelAndAssetId(
