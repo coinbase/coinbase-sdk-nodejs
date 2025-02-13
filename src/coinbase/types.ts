@@ -72,7 +72,7 @@ import {
   CreateSmartWalletRequest,
   CreateUserOperationRequest,
   UserOperation as UserOperationModel,
-  BroadcastUserOperationRequest
+  BroadcastUserOperationRequest,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";

@@ -20,10 +20,11 @@ export async function toSmartWallet(options: ToSmartWalletOptions): Promise<Smar
         ...wallet,
         network,
         paymasterUrl: options.paymasterUrl,
-        sendUserOperation: options => sendUserOperation(wallet, {
-          ...options,
-          chainId: network.chainId,
-        }),
+        sendUserOperation: options =>
+          sendUserOperation(wallet, {
+            ...options,
+            chainId: network.chainId,
+          }),
       } as NetworkScopedSmartWallet;
     },
   };

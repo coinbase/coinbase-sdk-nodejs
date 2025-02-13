@@ -3,7 +3,7 @@ import { UserOperationStatusEnum } from "../client";
 import { Address, encodeFunctionData, Hex } from "viem";
 import { Coinbase } from "../coinbase/coinbase";
 import { CHAIN_ID_TO_NETWORK_ID, SupportedChainId } from "../types/chain";
-import { Calls } from "viem/types/calls"
+import { Calls } from "viem/types/calls";
 
 export type SendUserOperationOptions<T extends readonly unknown[]> = {
   calls: Calls<T>;
@@ -15,13 +15,13 @@ export type SendUserOperationReturnType = {
   id: string;
   smartWalletAddress: Address;
   status: typeof UserOperationStatusEnum.Broadcast;
-} 
+};
 
 export async function sendUserOperation<T extends readonly unknown[]>(
   wallet: SmartWallet,
   options: SendUserOperationOptions<T>,
 ): Promise<SendUserOperationReturnType> {
-  const { calls, chainId, paymasterUrl } = options
+  const { calls, chainId, paymasterUrl } = options;
   const network = CHAIN_ID_TO_NETWORK_ID[chainId];
 
   const encodedCalls = calls.map(call => {

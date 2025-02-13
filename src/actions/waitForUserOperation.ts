@@ -8,35 +8,41 @@ export type WaitForUserOperationOptions = {
   id: string;
   smartWalletAddress: Address;
   waitOptions?: WaitOptions;
-}
+};
 
 export type FailedOperation = {
   id: string;
   smartWalletAddress: Address;
   status: typeof UserOperationStatusEnum.Failed;
-}
+};
 
 export type CompletedOperation = {
   id: string;
   smartWalletAddress: Address;
   status: typeof UserOperationStatusEnum.Complete;
   transactionHash: string;
-}
+};
 
 export type WaitForUserOperationReturnType = FailedOperation | CompletedOperation;
 
-export async function waitForUserOperation(options: WaitForUserOperationOptions): Promise<WaitForUserOperationReturnType> {
+export async function waitForUserOperation(
+  options: WaitForUserOperationOptions,
+): Promise<WaitForUserOperationReturnType> {
   const { id, smartWalletAddress } = options;
 
   const reload = async () => {
-    const response = await Coinbase.apiClients.smartWallet!.getUserOperation(smartWalletAddress, id);
+    const response = await Coinbase.apiClients.smartWallet!.getUserOperation(
+      smartWalletAddress,
+      id,
+    );
     return response.data;
-  }
+  };
 
-  const isTerminal = (
-    operation: UserOperation
-  ): boolean => {
-    return operation.status === UserOperationStatusEnum.Complete || operation.status === UserOperationStatusEnum.Failed;
+  const isTerminal = (operation: UserOperation): boolean => {
+    return (
+      operation.status === UserOperationStatusEnum.Complete ||
+      operation.status === UserOperationStatusEnum.Failed
+    );
   };
 
   const transform = (operation: UserOperation): WaitForUserOperationReturnType => {
@@ -56,7 +62,7 @@ export async function waitForUserOperation(options: WaitForUserOperationOptions)
     } else {
       throw new Error("User operation is not terminal");
     }
-  }
+  };
 
   const waitOptions = options.waitOptions || {
     timeoutSeconds: 30,

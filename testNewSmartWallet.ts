@@ -1,14 +1,14 @@
 import { parseEther } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
-import { Coinbase, ExternalAddress, Wallet } from './src/index';
-import { createSmartWallet } from './src/index';
+import { Coinbase, ExternalAddress, Wallet } from "./src/index";
+import { createSmartWallet } from "./src/index";
 import { waitForUserOperation } from "./src/actions/waitForUserOperation";
 import { UserOperationStatusEnum } from "./src/client";
 
 Coinbase.configureFromJson({
   filePath: "~/.apikeys/dev.json",
   debugging: true,
-  basePath: "https://cloud-api-dev.cbhq.net/platform/"
+  basePath: "https://cloud-api-dev.cbhq.net/platform/",
 });
 
 async function main() {
@@ -63,18 +63,11 @@ async function main() {
   });
 
   if (userOperationResult2.status === UserOperationStatusEnum.Failed) {
-    userOperationResult2 // type is FailedOperation
+    userOperationResult2; // type is FailedOperation
   } else {
-    userOperationResult2 // type is CompletedOperation
-    console.log(userOperationResult2.transactionHash)
+    userOperationResult2; // type is CompletedOperation
+    console.log(userOperationResult2.transactionHash);
   }
-
-
-
-//  const userOperationResult = await userOperation.wait();
-
- // const userOperationResult = await waitForUserOperation(userOperation)
-
 
   // get final balance now
   const finalBalance = await walletAddress.getBalance("eth");
