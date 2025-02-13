@@ -70,8 +70,8 @@ describe("ExternalAddress", () => {
           network_id: Coinbase.networks.EthereumHolesky,
           decimals: 18,
           contract_address: "0x",
-        }
-      }
+        },
+      },
     },
   };
   const STAKING_OPERATION_MODEL: StakingOperationModel = {

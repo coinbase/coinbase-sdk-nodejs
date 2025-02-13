@@ -181,8 +181,8 @@ describe("Wallet Class", () => {
             network_id: Coinbase.networks.EthereumHolesky,
             decimals: 18,
             contract_address: "0x",
-          }
-        }
+          },
+        },
       },
     };
 
