@@ -1,10 +1,30 @@
 import { TimeoutError } from "../coinbase/errors";
 
 export type WaitOptions = {
+  /** Interval between retries in seconds. Defaults to 0.2 */
   intervalSeconds?: number;
+  /** Maximum time to wait before timing out in seconds. Defaults to 10 */
   timeoutSeconds?: number;
 };
 
+/**
+ * Polls a resource until a terminal condition is met or timeout occurs.
+ *
+ * @param reload - Function that fetches the latest state of the resource
+ * @param isTerminal - Function that determines if the current state is terminal
+ * @param transform - Function that transforms the resource into a new type
+ * @param options - Configuration options for polling behavior
+ * @returns The resource in its terminal state
+ * @throws {TimeoutError} If the operation exceeds the timeout duration
+ *
+ * @example
+ * const result = await wait(
+ *   () => fetchOrderStatus(orderId),
+ *   (status) => status === 'completed',
+ *   (status) => status === 'completed' ? { status } : undefined,
+ *   { timeoutSeconds: 30 }
+ * );
+ */
 export async function wait<T, K = T>(
   reload: () => Promise<T>,
   isTerminal: (obj: T) => boolean,

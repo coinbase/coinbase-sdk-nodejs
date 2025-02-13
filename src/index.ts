@@ -35,4 +35,6 @@ export * from "./coinbase/fund_quote";
 export * from "./types/chain";
 export * from "./wallets/types";
 export * from "./wallets/createSmartWallet";
+export * from "./wallets/toSmartWallet";
 export * from "./actions/sendUserOperation";
+export * from "./actions/waitForUserOperation";

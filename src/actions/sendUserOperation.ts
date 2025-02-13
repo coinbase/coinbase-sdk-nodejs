@@ -1,29 +1,66 @@
-import { SmartWallet } from "../wallets/types";
+import type { SmartWallet } from "../wallets/types";
 import { UserOperationStatusEnum } from "../client";
 import { Address, encodeFunctionData, Hex } from "viem";
 import { Coinbase } from "../coinbase/coinbase";
-import { CHAIN_ID_TO_NETWORK_ID, SupportedChainId } from "../types/chain";
-import { Calls } from "viem/types/calls";
+import { CHAIN_ID_TO_NETWORK_ID, type SupportedChainId } from "../types/chain";
+import type { Calls } from "viem/types/calls";
 
 /**
  * Options for sending a user operation
  * @template T - Array type for the calls parameter
- * @property {Calls<T>} calls - Array of contract calls to execute in the user operation
- * @property {SupportedChainId} chainId - Chain ID of the network to execute on
- * @property {string} [paymasterUrl] - Optional URL of the paymaster service to use for gas sponsorship
  */
 export type SendUserOperationOptions<T extends readonly unknown[]> = {
+  /** Array of contract calls to execute in the user operation */
   calls: Calls<T>;
+  /** Chain ID of the network to execute on */
   chainId: SupportedChainId;
+  /** Optional URL of the paymaster service to use for gas sponsorship. Must be ERC-7677 compliant. */
   paymasterUrl?: string;
 };
 
+/**
+ * Return type for the sendUserOperation function
+ */
 export type SendUserOperationReturnType = {
+  /** The ID of the user operation */
   id: string;
+  /** The address of the smart wallet */
   smartWalletAddress: Address;
+  /** The status of the user operation */
   status: typeof UserOperationStatusEnum.Broadcast;
 };
 
+/**
+ * Sends a user operation to the network
+ * 
+ * @example
+ * ```ts
+ * import { sendUserOperation } from "@coinbase/coinbase-sdk";
+ * import { parseEther } from "viem";
+
+ * 
+ * const result = await sendUserOperation(wallet, {
+ *   calls: [
+ *     {
+ *       abi: erc20Abi,
+ *       functionName: "transfer",
+ *       args: [to, amount],
+ *     },
+ *     {
+ *       to: "0x1234567890123456789012345678901234567890",
+ *       data: "0x",
+ *       value: parseEther("0.0000005"),
+ *     },
+ *   ],
+ *   chainId: 1,
+ *   paymasterUrl: "https://api.developer.coinbase.com/rpc/v1/base/someapikey",
+ * });
+ * ```
+ * 
+ * @param {SmartWallet} wallet - The smart wallet to send the user operation from
+ * @param {SendUserOperationOptions<T>} options - The options for the user operation
+ * @returns {Promise<SendUserOperationReturnType>} The result of the user operation
+ */
 export async function sendUserOperation<T extends readonly unknown[]>(
   wallet: SmartWallet,
   options: SendUserOperationOptions<T>,
@@ -60,10 +97,6 @@ export async function sendUserOperation<T extends readonly unknown[]>(
 
   const owner = wallet.owners[0];
 
-  if (!owner.sign) {
-    throw new Error("Account does not support signing");
-  }
-
   const signature = await owner.sign({
     hash: createOpResponse.data.unsigned_payload as Hex,
   });
@@ -76,12 +109,10 @@ export async function sendUserOperation<T extends readonly unknown[]>(
     },
   );
 
-  const returnValue = {
+  return {
     id: broadcastResponse.data.id,
     smartWalletAddress: wallet.address,
     status: broadcastResponse.data.status,
     transactionHash: broadcastResponse.data.transaction_hash,
   } as SendUserOperationReturnType;
-
-  return returnValue;
 }
