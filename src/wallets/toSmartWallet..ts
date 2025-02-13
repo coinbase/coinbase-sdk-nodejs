@@ -1,5 +1,4 @@
 import { NetworkScopedSmartWallet, SmartWalletNetworkOptions, type SmartWallet } from "./types";
-import { Coinbase } from "../index";
 import { sendUserOperation } from "../actions/sendUserOperation";
 import type { Address, LocalAccount } from "viem";
 import { createNetwork } from "../utils/chain";

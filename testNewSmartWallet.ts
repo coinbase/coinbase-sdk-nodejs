@@ -1,9 +1,8 @@
 import { parseEther } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
-import { Coinbase, ExternalAddress, Wallet } from './src/index'
-import { createSmartWallet } from './src/index'
+import { Coinbase, ExternalAddress, Wallet } from './src/index';
+import { createSmartWallet } from './src/index';
 import { waitForUserOperation } from "./src/actions/waitForUserOperation";
-import { UserOperationStatusEnum } from "./src/client";
 
 Coinbase.configureFromJson({
   filePath: "~/.apikeys/dev.json",
@@ -37,7 +36,11 @@ async function main() {
     chainId: 84532,
   });
 
-  const userOperationResult = await waitForUserOperation(userOperation);
+  const userOperationResult = await waitForUserOperation({
+    ...userOperation,
+    timeoutSeconds: 10000,
+    intervalSeconds: 1,
+  });
 
   console.log("userOperationResult", userOperationResult);
 
