@@ -1,8 +1,8 @@
 import { SmartWallet } from "../wallets/types";
 import { UserOperationStatusEnum } from "../client";
-import { Address, encodeFunctionData, Hex, Prettify } from "viem";
+import { Address, encodeFunctionData, Hex } from "viem";
 import { Coinbase } from "../coinbase/coinbase";
-import { CHAIN_ID_TO_NETWORK_ID, Network, SupportedChainId } from "../types/chain";
+import { CHAIN_ID_TO_NETWORK_ID, SupportedChainId } from "../types/chain";
 import { Calls } from "viem/_types/types/calls";
 
 export type SendUserOperationOptions<T extends readonly unknown[]> = {

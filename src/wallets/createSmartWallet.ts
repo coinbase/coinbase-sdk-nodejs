@@ -1,9 +1,9 @@
-import { NetworkScopedSmartWallet, SmartWalletNetworkOptions, type SmartWallet } from "./types";
-import { Coinbase } from "../index"
+import { SmartWalletNetworkOptions, type SmartWallet } from "./types";
+import { Coinbase } from "../index";
 import { sendUserOperation } from "../actions/sendUserOperation";
-import type { LocalAccount } from "viem";
-import { SupportedChainId } from "../types/chain";
+import type { Address, LocalAccount } from "viem";
 import { createNetwork } from "../utils/chain";
+import { toSmartWallet } from "./toSmartWallet.";
 
 export type CreateSmartWalletOptions = {
   account: LocalAccount;
@@ -14,28 +14,8 @@ export async function createSmartWallet(options: CreateSmartWalletOptions): Prom
     owner: options.account.address,
   });
 
-  if (!result.data) {
-    throw new Error("Failed to create smart wallet");
-  }
-
-  const wallet: SmartWallet = {
-    address: result.data.address as `0x${string}`,
+  return toSmartWallet({
+    smartWalletAddress: result.data.address as Address,
     account: options.account,
-    type: "smart",
-    sendUserOperation: options => sendUserOperation(wallet, options),
-    useNetwork: (options: SmartWalletNetworkOptions) => {
-      const network = createNetwork(options.chainId);
-      return {
-        ...wallet,
-        network,
-        paymasterUrl: options.paymasterUrl,
-        sendUserOperation: options => sendUserOperation(wallet, {
-          ...options,
-          chainId: network.chainId,
-        }),
-      } as NetworkScopedSmartWallet;
-    },
-  };
-
-  return wallet;
+  });
 }
