@@ -38,7 +38,6 @@ export type SendUserOperationReturnType = {
  * ```ts
  * import { sendUserOperation } from "@coinbase/coinbase-sdk";
  * import { parseEther } from "viem";
-
  * 
  * const result = await sendUserOperation(wallet, {
  *   calls: [
