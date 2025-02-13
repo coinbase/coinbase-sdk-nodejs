@@ -1,5 +1,8 @@
 import { TimeoutError } from "../coinbase/errors";
 
+/**
+ * Options for the wait function
+ */
 export type WaitOptions = {
   /** Interval between retries in seconds. Defaults to 0.2 */
   intervalSeconds?: number;
