@@ -46,6 +46,7 @@ export async function wait<T, K = T>(
 
     await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
   }
-
-  throw new TimeoutError(`Operation timed out after ${timeoutSeconds} seconds`);
+  throw new TimeoutError(
+    `Operation has not reached a terminal state after ${timeoutSeconds} seconds and may still succeed. Retry with a longer timeout using the timeoutSeconds option.`,
+  );
 }
