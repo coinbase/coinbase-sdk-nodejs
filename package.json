@@ -1,9 +1,9 @@
 {
-  "name": "@coinbase/coinbase-sdk",
+  "name": "@coinbase/cdp-sdk",
   "author": "Coinbase Inc.",
   "license": "ISC",
   "description": "Coinbase Platform SDK",
-  "repository": "https://github.com/coinbase/coinbase-sdk-nodejs",
+  "repository": "https://github.com/coinbase/cdp-sdk-nodejs",
   "version": "0.18.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
