@@ -3,7 +3,7 @@ import { UserOperationStatusEnum } from "../client";
 import { Address, encodeFunctionData, Hex } from "viem";
 import { Coinbase } from "../coinbase/coinbase";
 import { CHAIN_ID_TO_NETWORK_ID, type SupportedChainId } from "../types/chain";
-import type { Calls } from "viem/types/calls";
+import type { Call, Calls } from "viem/types/calls";
 import type { SendUserOperationParameters } from "viem/account-abstraction/";
 
 /**
@@ -33,12 +33,12 @@ export type SendUserOperationReturnType = {
 
 /**
  * Sends a user operation to the network
- * 
+ *
  * @example
  * ```ts
  * import { sendUserOperation } from "@coinbase/coinbase-sdk";
  * import { parseEther } from "viem";
- * 
+ *
  * const result = await sendUserOperation(wallet, {
  *   calls: [
  *     {
@@ -56,7 +56,7 @@ export type SendUserOperationReturnType = {
  *   paymasterUrl: "https://api.developer.coinbase.com/rpc/v1/base/someapikey",
  * });
  * ```
- * 
+ *
  * @param {SmartWallet} wallet - The smart wallet to send the user operation from
  * @param {SendUserOperationOptions<T>} options - The options for the user operation
  * @returns {Promise<SendUserOperationReturnType>} The result of the user operation
@@ -71,15 +71,12 @@ export async function sendUserOperation<T extends readonly unknown[]>(
   const encodedCalls = calls.map(call => {
     if ("abi" in call) {
       return {
-        data: encodeFunctionData({
-          abi: call.abi,
-          functionName: call.functionName,
-          args: call.args,
-        }),
+        data: encodeFunctionData(call),
         to: call.to,
-        value: call.value.toString() || "0",
+        value: call.value.toString(),
       };
     }
+    // return call as Call
     return {
       data: call.data,
       to: call.to,

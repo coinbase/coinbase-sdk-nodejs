@@ -78,13 +78,6 @@ export async function waitForUserOperation(
     return response.data;
   };
 
-  const isTerminal = (operation: UserOperation): boolean => {
-    return (
-      operation.status === UserOperationStatusEnum.Complete ||
-      operation.status === UserOperationStatusEnum.Failed
-    );
-  };
-
   const transform = (operation: UserOperation): WaitForUserOperationReturnType => {
     if (operation.status === UserOperationStatusEnum.Failed) {
       return {
@@ -110,3 +103,10 @@ export async function waitForUserOperation(
 
   return await wait(reload, isTerminal, transform, waitOptions);
 }
+
+const isTerminal = (operation: UserOperation): boolean => {
+  return (
+    operation.status === UserOperationStatusEnum.Complete ||
+    operation.status === UserOperationStatusEnum.Failed
+  );
+};
