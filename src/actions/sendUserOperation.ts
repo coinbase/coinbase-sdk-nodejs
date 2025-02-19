@@ -73,12 +73,12 @@ export async function sendUserOperation<T extends readonly unknown[]>(
       return {
         data: encodeFunctionData(call),
         to: call.to,
-        value: call.value,
+        value: call.value ?? BigInt(0),
       };
     return {
       data: call.data ?? "0x",
       to: call.to,
-      value: call.value,
+      value: call.value ?? BigInt(0),
     };
   });
 
