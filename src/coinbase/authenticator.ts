@@ -1,5 +1,6 @@
 import { InternalAxiosRequestConfig } from "axios";
 import { JWK, JWS } from "node-jose";
+import { SignJWT, importJWK } from "jose";
 import { InvalidAPIKeyFormatError } from "./errors";
 import { version } from "../../package.json";
 
@@ -36,7 +37,7 @@ export class CoinbaseAuthenticator {
    * @param {InternalAxiosRequestConfig} config - The request configuration.
    * @param {boolean} debugging - Flag to enable debugging.
    * @returns {Promise<InternalAxiosRequestConfig>} The request configuration with the Authorization header added.
-   * @throws {InvalidAPIKeyFormat} If JWT could not be built.
+   * @throws {InvalidAPIKeyFormatError} If JWT could not be built.
    */
   async authenticateRequest(
     config: InternalAxiosRequestConfig,
@@ -59,48 +60,79 @@ export class CoinbaseAuthenticator {
    * @param {string} url - URL of the API endpoint.
    * @param {string} method - HTTP method of the request.
    * @returns {Promise<string>} JWT token.
-   * @throws {InvalidAPIKeyFormat} If the private key is not in the correct format.
+   * @throws {InvalidAPIKeyFormatError} If the private key is not in the correct format.
    */
   async buildJWT(url: string, method = "GET"): Promise<string> {
-    const pemPrivateKey = this.extractPemKey(this.privateKey);
-    let privateKey: JWK.Key;
-
-    try {
-      privateKey = await JWK.asKey(pemPrivateKey, "pem");
-      if (privateKey.kty !== "EC") {
-        throw new InvalidAPIKeyFormatError("Invalid key type");
+    if (this.privateKey.startsWith("-----BEGIN")) {
+      const pemPrivateKey = this.extractPemKey(this.privateKey);
+      let privateKey: JWK.Key;
+      try {
+        privateKey = await JWK.asKey(pemPrivateKey, "pem");
+        if (privateKey.kty !== "EC") {
+          throw new InvalidAPIKeyFormatError("Invalid key type");
+        }
+      } catch (error) {
+        throw new InvalidAPIKeyFormatError("Could not parse the private key");
       }
-    } catch (error) {
-      throw new InvalidAPIKeyFormatError("Could not parse the private key");
-    }
-
-    const header = {
-      alg: "ES256",
-      kid: this.apiKey,
-      typ: "JWT",
-      nonce: this.nonce(),
-    };
-
-    const urlObject = new URL(url);
-    const uri = `${method} ${urlObject.host}${urlObject.pathname}`;
-    const claims = {
-      sub: this.apiKey,
-      iss: "cdp",
-      aud: ["cdp_service"],
-      nbf: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + 60, // +1 minute
-      uris: [uri],
-    };
-
-    const payload = Buffer.from(JSON.stringify(claims)).toString("utf8");
-    try {
-      const result = await JWS.createSign({ format: "compact", fields: header }, privateKey)
-        .update(payload)
-        .final();
-
-      return result as unknown as string;
-    } catch (err) {
-      throw new InvalidAPIKeyFormatError("Could not sign the JWT");
+      const header = {
+        alg: "ES256",
+        kid: this.apiKey,
+        typ: "JWT",
+        nonce: this.nonce(),
+      };
+      const urlObject = new URL(url);
+      const uri = `${method} ${urlObject.host}${urlObject.pathname}`;
+      const claims = {
+        sub: this.apiKey,
+        iss: "cdp",
+        aud: ["cdp_service"],
+        nbf: Math.floor(Date.now() / 1000),
+        exp: Math.floor(Date.now() / 1000) + 60, // +1 minute
+        uris: [uri],
+      };
+      const payload = Buffer.from(JSON.stringify(claims)).toString("utf8");
+      try {
+        const result = await JWS.createSign({ format: "compact", fields: header }, privateKey)
+          .update(payload)
+          .final();
+        return result as unknown as string;
+      } catch (err) {
+        throw new InvalidAPIKeyFormatError("Could not sign the JWT");
+      }
+    } else {
+      const decoded = Buffer.from(this.privateKey, "base64");
+      if (decoded.length !== 64) {
+        throw new InvalidAPIKeyFormatError("Could not parse the private key");
+      }
+      const seed = decoded.subarray(0, 32);
+      const publicKey = decoded.subarray(32);
+      const jwk = {
+        kty: "OKP",
+        crv: "Ed25519",
+        d: seed.toString("base64url"),
+        x: publicKey.toString("base64url"),
+      };
+      const key = await importJWK(jwk, "EdDSA");
+      const urlObject = new URL(url);
+      const uri = `${method} ${urlObject.host}${urlObject.pathname}`;
+      const now = Math.floor(Date.now() / 1000);
+      const claims = {
+        sub: this.apiKey,
+        iss: "cdp",
+        aud: ["cdp_service"],
+        uris: [uri],
+      };
+      try {
+        const jwt = await new SignJWT(claims)
+          .setProtectedHeader({ alg: "EdDSA", kid: this.apiKey, typ: "JWT", nonce: this.nonce() })
+          .setIssuedAt(now)
+          .setNotBefore(now)
+          .setExpirationTime(now + 60)
+          .sign(key);
+        return jwt;
+      } catch (err) {
+        throw new InvalidAPIKeyFormatError("Could not sign the JWT");
+      }
     }
   }
 
@@ -109,15 +141,13 @@ export class CoinbaseAuthenticator {
    *
    * @param {string} privateKeyString - The private key string.
    * @returns {string} The PEM key.
-   * @throws {InvalidAPIKeyFormat} If the private key string is not in the correct format.
+   * @throws {InvalidAPIKeyFormatError} If the private key string is not in the correct format.
    */
   private extractPemKey(privateKeyString: string): string {
     privateKeyString = privateKeyString.replace(/\n/g, "");
-
     if (privateKeyString.startsWith(pemHeader) && privateKeyString.endsWith(pemFooter)) {
       return privateKeyString;
     }
-
     throw new InvalidAPIKeyFormatError("Invalid private key format");
   }
 
@@ -129,11 +159,9 @@ export class CoinbaseAuthenticator {
   private nonce(): string {
     const range = "0123456789";
     let result = "";
-
     for (let i = 0; i < 16; i++) {
       result += range.charAt(Math.floor(Math.random() * range.length));
     }
-
     return result;
   }
 
@@ -148,11 +176,9 @@ export class CoinbaseAuthenticator {
       sdk_language: "typescript",
       source: this.source,
     };
-
     if (this.sourceVersion) {
       data["source_version"] = this.sourceVersion;
     }
-
     return Object.keys(data)
       .map(key => `${key}=${encodeURIComponent(data[key])}`)
       .join(",");

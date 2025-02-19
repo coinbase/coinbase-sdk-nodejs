@@ -239,13 +239,17 @@ export class Coinbase {
     }
     try {
       const data = fs.readFileSync(filePath, "utf8");
-      const config = JSON.parse(data) as { name: string; privateKey: string };
-      if (!config.name || !config.privateKey) {
-        throw new InvalidAPIKeyFormatError("Invalid configuration: missing configuration values");
+      // Support both "name" and "id" for the API key identifier.
+      const config = JSON.parse(data) as { name?: string; id?: string; privateKey: string };
+      const apiKeyIdentifier = config.name || config.id;
+      if (!apiKeyIdentifier || !config.privateKey) {
+        throw new InvalidAPIKeyFormatError(
+          "Invalid configuration: missing API key identifier or privateKey",
+        );
       }
 
       return new Coinbase({
-        apiKeyName: config.name,
+        apiKeyName: apiKeyIdentifier,
         privateKey: config.privateKey,
         useServerSigner: useServerSigner,
         debugging: debugging,
