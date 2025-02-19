@@ -63,7 +63,7 @@ export class CoinbaseAuthenticator {
    */
   async buildJWT(url: string, method = "GET"): Promise<string> {
     let privateKey: JWK.Key;
-    let header: any;
+    let header: Record<string, string>;
     if (this.privateKey.startsWith("-----BEGIN")) {
       const pemPrivateKey = this.extractPemKey(this.privateKey);
       try {
@@ -83,10 +83,10 @@ export class CoinbaseAuthenticator {
     } else {
       const decoded = Buffer.from(this.privateKey, "base64");
       if (decoded.length !== 64) {
-        throw new InvalidAPIKeyFormatError("Invalid Ed25519 private key length");
+        throw new InvalidAPIKeyFormatError("Could not parse the private key");
       }
-      const seed = decoded.slice(0, 32);
-      const publicKey = decoded.slice(32);
+      const seed = decoded.subarray(0, 32);
+      const publicKey = decoded.subarray(32);
       const jwk = {
         kty: "OKP",
         crv: "Ed25519",
