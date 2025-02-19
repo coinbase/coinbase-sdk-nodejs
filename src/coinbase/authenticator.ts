@@ -87,13 +87,11 @@ export class CoinbaseAuthenticator {
       }
       const seed = decoded.slice(0, 32);
       const publicKey = decoded.slice(32);
-      const toBase64Url = (buf: Buffer): string =>
-        buf.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
       const jwk = {
         kty: "OKP",
         crv: "Ed25519",
-        d: toBase64Url(seed),
-        x: toBase64Url(publicKey),
+        d: seed.toString("base64url"),
+        x: publicKey.toString("base64url"),
       };
       privateKey = await JWK.asKey(jwk);
       header = {
