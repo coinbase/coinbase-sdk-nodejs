@@ -4,8 +4,8 @@ import { NetworkIdentifier } from "../client/api";
  * Maps chain IDs to their corresponding Coinbase network IDs. Only SmartWallet related chains are listed here right now.
  */
 export const CHAIN_ID_TO_NETWORK_ID = {
-  8453: "base-mainnet",
-  84532: "base-sepolia",
+  8453: NetworkIdentifier.BaseMainnet,
+  84532: NetworkIdentifier.BaseSepolia,
 } as const;
 
 /**

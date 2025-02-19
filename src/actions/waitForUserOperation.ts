@@ -7,7 +7,7 @@ import { UserOperation, UserOperationStatusEnum } from "../client";
  * Options for waiting for a user operation
  */
 export type WaitForUserOperationOptions = {
-  /** The ID of the user operation */
+  /** The UUID of the user operation which was returned by the sendUserOperation function */
   id: string;
   /** The address of the smart wallet */
   smartWalletAddress: Address;
@@ -19,7 +19,7 @@ export type WaitForUserOperationOptions = {
  * Represents a failed user operation
  */
 export type FailedOperation = {
-  /** The ID of the user operation */
+  /** The UUID of the user operation which was returned by the sendUserOperation function */
   id: string;
   /** The address of the smart wallet */
   smartWalletAddress: Address;
@@ -31,7 +31,7 @@ export type FailedOperation = {
  * Represents a completed user operation
  */
 export type CompletedOperation = {
-  /** The ID of the user operation */
+  /** The UUID of the user operation which was returned by the sendUserOperation function */
   id: string;
   /** The address of the smart wallet */
   smartWalletAddress: Address;

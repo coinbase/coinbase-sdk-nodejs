@@ -5,7 +5,7 @@ import {
   type SmartWallet,
 } from "./types";
 import { sendUserOperation } from "../actions/sendUserOperation";
-import type { Address, LocalAccount } from "viem";
+import type { Address } from "viem";
 import { createNetwork } from "../utils/chain";
 
 /**
@@ -19,20 +19,33 @@ export type ToSmartWalletOptions = {
 };
 
 /**
- * Converts a smart wallet address and signer to a SmartWallet instance
+ * Creates a SmartWallet instance from an existing smart wallet address and signer.
+ * Use this to interact with previously deployed smart wallets, rather than creating new ones.
+ *
+ * The signer must be the original owner of the smart wallet.
  *
  * @example
- * ```ts
+ * ```typescript
  * import { toSmartWallet } from "@coinbase/coinbase-sdk";
- *
+ * 
+ * // Connect to an existing smart wallet
  * const wallet = toSmartWallet({
  *   smartWalletAddress: "0x1234567890123456789012345678901234567890",
  *   signer: localAccount
  * });
+ * 
+ * // Use on a specific network
+ * const networkWallet = wallet.useNetwork({
+ *   chainId: 8453, // Base Mainnet
+ *   paymasterUrl: "https://paymaster.example.com"
+ * });
  * ```
  *
- * @param {ToSmartWalletOptions} options - Options for converting the smart wallet address and signer to a SmartWallet instance
- * @returns {SmartWallet} The SmartWallet instance
+ * @param {ToSmartWalletOptions} options - Configuration options
+ * @param {string} options.smartWalletAddress - The deployed smart wallet's address
+ * @param {Signer} options.signer - The owner's signer instance
+ * @returns {SmartWallet} A configured SmartWallet instance ready for transaction submission
+ * @throws {Error} If the signer is not an original owner of the wallet
  */
 export function toSmartWallet(options: ToSmartWalletOptions): SmartWallet {
   const wallet: SmartWallet = {

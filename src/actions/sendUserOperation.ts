@@ -23,7 +23,7 @@ export type SendUserOperationOptions<T extends readonly unknown[]> = {
  * Return type for the sendUserOperation function
  */
 export type SendUserOperationReturnType = {
-  /** The ID of the user operation */
+  /** The UUID of the user operation which is server-generated identifier for the operation */
   id: string;
   /** The address of the smart wallet */
   smartWalletAddress: Address;
@@ -111,6 +111,5 @@ export async function sendUserOperation<T extends readonly unknown[]>(
     id: broadcastResponse.data.id,
     smartWalletAddress: wallet.address,
     status: broadcastResponse.data.status,
-    transactionHash: broadcastResponse.data.transaction_hash,
   } as SendUserOperationReturnType;
 }
