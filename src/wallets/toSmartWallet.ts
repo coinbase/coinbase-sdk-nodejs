@@ -27,13 +27,13 @@ export type ToSmartWalletOptions = {
  * @example
  * ```typescript
  * import { toSmartWallet } from "@coinbase/coinbase-sdk";
- * 
+ *
  * // Connect to an existing smart wallet
  * const wallet = toSmartWallet({
  *   smartWalletAddress: "0x1234567890123456789012345678901234567890",
  *   signer: localAccount
  * });
- * 
+ *
  * // Use on a specific network
  * const networkWallet = wallet.useNetwork({
  *   chainId: 8453, // Base Mainnet

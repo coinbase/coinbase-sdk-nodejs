@@ -69,18 +69,16 @@ export async function sendUserOperation<T extends readonly unknown[]>(
   const network = CHAIN_ID_TO_NETWORK_ID[chainId];
 
   const encodedCalls = calls.map(call => {
-    if ("abi" in call) {
+    if (call.abi)
       return {
         data: encodeFunctionData(call),
         to: call.to,
-        value: call.value.toString(),
+        value: call.value,
       };
-    }
-    // return call as Call
     return {
-      data: call.data,
+      data: call.data ?? "0x",
       to: call.to,
-      value: call.value.toString() || "0",
+      value: call.value,
     };
   });
 
