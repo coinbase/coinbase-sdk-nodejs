@@ -36,7 +36,7 @@ export class CoinbaseAuthenticator {
    * @param {InternalAxiosRequestConfig} config - The request configuration.
    * @param {boolean} debugging - Flag to enable debugging.
    * @returns {Promise<InternalAxiosRequestConfig>} The request configuration with the Authorization header added.
-   * @throws {InvalidAPIKeyFormat} If JWT could not be built.
+   * @throws {InvalidAPIKeyFormatError} If JWT could not be built.
    */
   async authenticateRequest(
     config: InternalAxiosRequestConfig,
@@ -59,27 +59,55 @@ export class CoinbaseAuthenticator {
    * @param {string} url - URL of the API endpoint.
    * @param {string} method - HTTP method of the request.
    * @returns {Promise<string>} JWT token.
-   * @throws {InvalidAPIKeyFormat} If the private key is not in the correct format.
+   * @throws {InvalidAPIKeyFormatError} If the private key is not in the correct format.
    */
   async buildJWT(url: string, method = "GET"): Promise<string> {
-    const pemPrivateKey = this.extractPemKey(this.privateKey);
-    let privateKey: JWK.Key;
+    let privateKeyObj: JWK.Key;
+    let header: any;
 
-    try {
-      privateKey = await JWK.asKey(pemPrivateKey, "pem");
-      if (privateKey.kty !== "EC") {
-        throw new InvalidAPIKeyFormatError("Invalid key type");
+    if (this.privateKey.startsWith("-----BEGIN")) {
+      // Use PEM as an EC key (ES256)
+      const pemPrivateKey = this.extractPemKey(this.privateKey);
+      privateKeyObj = await JWK.asKey(pemPrivateKey, "pem");
+      if (privateKeyObj.kty !== "EC") {
+        throw new InvalidAPIKeyFormatError("Invalid key type; expected EC key");
       }
-    } catch (error) {
-      throw new InvalidAPIKeyFormatError("Could not parse the private key");
-    }
+      header = {
+        alg: "ES256",
+        kid: this.apiKey,
+        typ: "JWT",
+        nonce: this.nonce(),
+      };
+    } else {
+      // Assume Base64 encoded Ed25519 key (64 bytes)
+      const decoded = Buffer.from(this.privateKey, "base64");
+      if (decoded.length !== 64) {
+        throw new InvalidAPIKeyFormatError(
+          `Invalid Ed25519 private key length: got ${decoded.length}, expected 64`
+        );
+      }
+      const seed = decoded.slice(0, 32);
+      const publicKey = decoded.slice(32);
 
-    const header = {
-      alg: "ES256",
-      kid: this.apiKey,
-      typ: "JWT",
-      nonce: this.nonce(),
-    };
+      // Helper: convert standard Base64 to Base64URL (without padding)
+      const toBase64Url = (buf: Buffer): string =>
+        buf.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+
+      const jwk = {
+        kty: "OKP",
+        crv: "Ed25519",
+        d: toBase64Url(seed),
+        x: toBase64Url(publicKey),
+      };
+
+      privateKeyObj = await JWK.asKey(jwk);
+      header = {
+        alg: "EdDSA",
+        kid: this.apiKey,
+        typ: "JWT",
+        nonce: this.nonce(),
+      };
+    }
 
     const urlObject = new URL(url);
     const uri = `${method} ${urlObject.host}${urlObject.pathname}`;
@@ -88,16 +116,16 @@ export class CoinbaseAuthenticator {
       iss: "cdp",
       aud: ["cdp_service"],
       nbf: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + 60, // +1 minute
+      exp: Math.floor(Date.now() / 1000) + 60, // +1 minute expiry
       uris: [uri],
     };
 
     const payload = Buffer.from(JSON.stringify(claims)).toString("utf8");
+
     try {
-      const result = await JWS.createSign({ format: "compact", fields: header }, privateKey)
+      const result = await JWS.createSign({ format: "compact", fields: header }, privateKeyObj)
         .update(payload)
         .final();
-
       return result as unknown as string;
     } catch (err) {
       throw new InvalidAPIKeyFormatError("Could not sign the JWT");
@@ -109,15 +137,14 @@ export class CoinbaseAuthenticator {
    *
    * @param {string} privateKeyString - The private key string.
    * @returns {string} The PEM key.
-   * @throws {InvalidAPIKeyFormat} If the private key string is not in the correct format.
+   * @throws {InvalidAPIKeyFormatError} If the private key string is not in the correct format.
    */
   private extractPemKey(privateKeyString: string): string {
+    // Remove newline characters for uniformity
     privateKeyString = privateKeyString.replace(/\n/g, "");
-
     if (privateKeyString.startsWith(pemHeader) && privateKeyString.endsWith(pemFooter)) {
       return privateKeyString;
     }
-
     throw new InvalidAPIKeyFormatError("Invalid private key format");
   }
 
@@ -129,11 +156,9 @@ export class CoinbaseAuthenticator {
   private nonce(): string {
     const range = "0123456789";
     let result = "";
-
     for (let i = 0; i < 16; i++) {
       result += range.charAt(Math.floor(Math.random() * range.length));
     }
-
     return result;
   }
 
@@ -143,18 +168,16 @@ export class CoinbaseAuthenticator {
    * @returns {string} Encoded correlation data.
    */
   private getCorrelationData(): string {
-    const data = {
+    const data: Record<string, string> = {
       sdk_version: version,
       sdk_language: "typescript",
       source: this.source,
     };
-
     if (this.sourceVersion) {
       data["source_version"] = this.sourceVersion;
     }
-
     return Object.keys(data)
-      .map(key => `${key}=${encodeURIComponent(data[key])}`)
+      .map((key) => `${key}=${encodeURIComponent(data[key])}`)
       .join(",");
   }
 }
