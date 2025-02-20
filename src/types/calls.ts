@@ -1,6 +1,7 @@
 import type { AbiStateMutability, Address } from 'viem'
 import type { GetMulticallContractParameters } from './multicall'
-import type { Hex, OneOf, Prettify } from 'viem'
+import type { OneOf, Prettify } from './utils'
+import type { Hex } from './misc'
 
 export type Call<
   call = unknown,
