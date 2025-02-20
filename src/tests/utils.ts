@@ -846,6 +846,14 @@ export const reputationApiMock = {
   getAddressReputation: jest.fn(),
 };
 
+export const smartWalletApiMock = {
+  createSmartWallet: jest.fn(),
+  getSmartWallet: jest.fn(),
+  createUserOperation: jest.fn(),
+  broadcastUserOperation: jest.fn(),
+  getUserOperation: jest.fn(),
+};
+
 export const testAllReadTypesABI = [
   {
     type: "function",

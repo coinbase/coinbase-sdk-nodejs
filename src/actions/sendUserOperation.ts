@@ -68,17 +68,29 @@ export async function sendUserOperation<T extends readonly unknown[]>(
   const { calls, chainId, paymasterUrl } = options;
   const network = CHAIN_ID_TO_NETWORK_ID[chainId];
 
+  if (calls.length === 0) {
+    throw new Error("Calls array is empty");
+  }
+
   const encodedCalls = calls.map(call => {
-    if (call.abi)
+    const value = (call.value ?? BigInt(0)).toString(); // Convert BigInt to string
+
+    if ("abi" in call && call.abi && "functionName" in call) {
       return {
-        data: encodeFunctionData(call),
         to: call.to,
-        value: call.value ?? BigInt(0),
+        data: encodeFunctionData({
+          abi: call.abi,
+          functionName: call.functionName,
+          args: call.args,
+        }),
+        value,
       };
+    }
+
     return {
-      data: call.data ?? "0x",
       to: call.to,
-      value: call.value ?? BigInt(0),
+      data: call.data ?? "0x",
+      value,
     };
   });
 
