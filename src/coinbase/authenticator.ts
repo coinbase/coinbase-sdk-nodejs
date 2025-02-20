@@ -1,8 +1,8 @@
 import { InternalAxiosRequestConfig } from "axios";
 import { JWK, JWS } from "node-jose";
+import { SignJWT, importJWK } from "jose";
 import { InvalidAPIKeyFormatError } from "./errors";
 import { version } from "../../package.json";
-import { SignJWT, importJWK } from "jose";
 
 const pemHeader = "-----BEGIN EC PRIVATE KEY-----";
 const pemFooter = "-----END EC PRIVATE KEY-----";
@@ -60,24 +60,25 @@ export class CoinbaseAuthenticator {
    * @throws {InvalidAPIKeyFormatError} If the private key is not in the correct format.
    */
   async buildJWT(url: string, method = "GET"): Promise<string> {
-    // If the key is PEM-formatted, assume it's an EC key and use node-jose.
     if (this.privateKey.startsWith("-----BEGIN")) {
       const pemPrivateKey = this.extractPemKey(this.privateKey);
-      let privateKeyObj;
+      let privateKey: JWK.Key;
       try {
-        privateKeyObj = await JWK.asKey(pemPrivateKey, "pem");
-        if (privateKeyObj.kty !== "EC") {
+        privateKey = await JWK.asKey(pemPrivateKey, "pem");
+        if (privateKey.kty !== "EC") {
           throw new InvalidAPIKeyFormatError("Invalid key type");
         }
       } catch (error) {
         throw new InvalidAPIKeyFormatError("Could not parse the private key");
       }
+
       const header = {
         alg: "ES256",
         kid: this.apiKey,
         typ: "JWT",
         nonce: this.nonce(),
       };
+
       const urlObject = new URL(url);
       const uri = `${method} ${urlObject.host}${urlObject.pathname}`;
       const claims = {
@@ -88,9 +89,10 @@ export class CoinbaseAuthenticator {
         exp: Math.floor(Date.now() / 1000) + 60, // +1 minute
         uris: [uri],
       };
+
       const payload = Buffer.from(JSON.stringify(claims)).toString("utf8");
       try {
-        const result = await JWS.createSign({ format: "compact", fields: header }, privateKeyObj)
+        const result = await JWS.createSign({ format: "compact", fields: header }, privateKey)
           .update(payload)
           .final();
         return result as unknown as string;
@@ -98,7 +100,6 @@ export class CoinbaseAuthenticator {
         throw new InvalidAPIKeyFormatError("Could not sign the JWT");
       }
     } else {
-      // Otherwise, assume a Base64-encoded Ed25519 key.
       const decoded = Buffer.from(this.privateKey, "base64");
       if (decoded.length !== 64) {
         throw new InvalidAPIKeyFormatError("Invalid Ed25519 private key length");
@@ -112,6 +113,7 @@ export class CoinbaseAuthenticator {
         x: publicKey.toString("base64url"),
       };
       const key = await importJWK(jwk, "EdDSA");
+
       const urlObject = new URL(url);
       const uri = `${method} ${urlObject.host}${urlObject.pathname}`;
       const now = Math.floor(Date.now() / 1000);
