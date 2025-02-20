@@ -12,12 +12,14 @@ describe("waitForUserOperation", () => {
     id: VALID_OPERATION_ID,
     status: UserOperationStatusEnum.Complete,
     transaction_hash: "0x1234567890123456789012345678901234567890",
+    user_op_hash: "0x1234567890123456789012345678901234567890",
   };
 
   const FAILED_OPERATION_RESPONSE = {
     id: VALID_OPERATION_ID,
     smartWalletAddress: VALID_WALLET_ADDRESS,
     status: UserOperationStatusEnum.Failed,
+    user_op_hash: "0x1234567890123456789012345678901234567890",
   };
 
   beforeEach(() => {
@@ -46,6 +48,7 @@ describe("waitForUserOperation", () => {
       smartWalletAddress: VALID_WALLET_ADDRESS,
       status: UserOperationStatusEnum.Complete,
       transactionHash: "0x1234567890123456789012345678901234567890",
+      userOpHash: "0x1234567890123456789012345678901234567890",
     });
   });
 
@@ -67,6 +70,7 @@ describe("waitForUserOperation", () => {
       smartWalletAddress: VALID_WALLET_ADDRESS,
       status: UserOperationStatusEnum.Failed,
       transactionHash: undefined,
+      userOpHash: "0x1234567890123456789012345678901234567890",
     });
   });
 
@@ -90,6 +94,7 @@ describe("waitForUserOperation", () => {
       smartWalletAddress: VALID_WALLET_ADDRESS,
       status: UserOperationStatusEnum.Complete,
       transactionHash: "0x1234567890123456789012345678901234567890",
+      userOpHash: "0x1234567890123456789012345678901234567890",
     });
   });
 
@@ -114,6 +119,7 @@ describe("waitForUserOperation", () => {
       smartWalletAddress: VALID_WALLET_ADDRESS,
       status: UserOperationStatusEnum.Complete,
       transactionHash: "0x1234567890123456789012345678901234567890",
+      userOpHash: "0x1234567890123456789012345678901234567890",
     });
   });
 

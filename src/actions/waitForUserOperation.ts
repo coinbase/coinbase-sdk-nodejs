@@ -1,4 +1,4 @@
-import type { Address } from "../types/misc";
+import type { Address, Hex } from "../types/misc";
 import { Coinbase } from "../coinbase/coinbase";
 import { wait, WaitOptions } from "../utils/wait";
 import { UserOperation, UserOperationStatusEnum } from "../client";
@@ -25,6 +25,8 @@ export type FailedOperation = {
   smartWalletAddress: Address;
   /** The status of the user operation */
   status: typeof UserOperationStatusEnum.Failed;
+  /** The hash of the user operation */
+  userOpHash: Hex;
 };
 
 /**
@@ -39,6 +41,8 @@ export type CompletedOperation = {
   transactionHash: string;
   /** The status of the user operation */
   status: typeof UserOperationStatusEnum.Complete;
+  /** The hash of the user operation */
+  userOpHash: Hex;
 };
 
 /**
@@ -84,6 +88,7 @@ export async function waitForUserOperation(
         id: operation.id,
         smartWalletAddress: smartWalletAddress,
         status: UserOperationStatusEnum.Failed,
+        userOpHash: operation.user_op_hash as Hex,
       } satisfies FailedOperation;
     } else if (operation.status === UserOperationStatusEnum.Complete) {
       return {
@@ -91,6 +96,7 @@ export async function waitForUserOperation(
         smartWalletAddress: smartWalletAddress,
         transactionHash: operation.transaction_hash!,
         status: UserOperationStatusEnum.Complete,
+        userOpHash: operation.user_op_hash as Hex,
       } satisfies CompletedOperation;
     } else {
       throw new Error("User operation is not terminal");
