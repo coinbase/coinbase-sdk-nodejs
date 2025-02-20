@@ -58,6 +58,8 @@ export class Coinbase {
     Weth: "weth",
     Sol: "sol",
     Lamport: "lamport",
+    Eurc: "eurc",
+    Cbbtc: "cbbtc",
   };
 
   static apiClients: ApiClients = {};
