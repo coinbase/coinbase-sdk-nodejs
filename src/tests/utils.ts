@@ -129,7 +129,7 @@ export const newAddressModelsFromWallet = async (
   const address2 = getAddressFromHDKey(wallet.derive("m/44'/60'/0'/0/1"));
   const publicKey1 = convertStringToHex(wallet.derive("m/44'/60'/0'/0/0").publicKey!);
   const publicKey2 = convertStringToHex(wallet.derive("m/44'/60'/0'/0/1").publicKey!);
-  
+
   return [
     {
       address_id: address1,
@@ -144,7 +144,7 @@ export const newAddressModelsFromWallet = async (
       public_key: publicKey2,
       wallet_id: walletId,
       index: 1,
-    }
+    },
   ];
 };
 
