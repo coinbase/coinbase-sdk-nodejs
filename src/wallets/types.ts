@@ -1,11 +1,10 @@
-import type { Address } from "abitype";
-import type { Hash, Hex } from "viem";
+import type { Hash, Hex, Address } from "../types/misc";
 import type {
   SendUserOperationOptions,
   SendUserOperationReturnType,
 } from "../actions/sendUserOperation";
 import type { Network, SupportedChainId } from "../types/chain";
-import type { Prettify } from "viem";
+import type { Prettify } from "../types/utils";
 
 /**
  * Options for configuring a SmartWallet for a specific network

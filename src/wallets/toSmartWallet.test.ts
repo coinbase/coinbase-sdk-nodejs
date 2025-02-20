@@ -1,7 +1,7 @@
 import { sendUserOperation } from "../actions/sendUserOperation";
 import { createNetwork } from "../utils/chain";
 import { toSmartWallet } from "./toSmartWallet";
-import type { Address } from "viem";
+import type { Address } from "../types/misc";
 
 jest.mock("../actions/sendUserOperation", () => ({
   sendUserOperation: jest.fn(),

@@ -1,6 +1,6 @@
 import { createSmartWallet } from "./createSmartWallet";
 import { Coinbase } from "../coinbase/coinbase";
-import { type Address } from "viem";
+import type { Address } from "../types/misc";
 import { smartWalletApiMock, mockReturnValue, mockReturnRejectedValue } from "../tests/utils";
 import { sendUserOperation } from "../actions/sendUserOperation";
 

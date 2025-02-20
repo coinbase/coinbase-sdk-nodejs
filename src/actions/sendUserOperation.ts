@@ -1,9 +1,8 @@
 import type { SmartWallet } from "../wallets/types";
 import { UserOperationStatusEnum } from "../client";
-import { Address, encodeFunctionData, Hex } from "viem";
-import { Coinbase } from "../coinbase/coinbase";
-import { CHAIN_ID_TO_NETWORK_ID, type SupportedChainId } from "../types/chain";
-import { Calls } from '../types/calls'
+import type { SupportedChainId } from "../types/chain";
+import type { Address } from "../types/misc";
+import type { Calls } from "../types/calls";
 
 /**
  * Options for sending a user operation

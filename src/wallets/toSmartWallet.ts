@@ -5,7 +5,7 @@ import {
   type SmartWallet,
 } from "./types";
 import { sendUserOperation } from "../actions/sendUserOperation";
-import type { Address } from "viem";
+import type { Address } from "../types/misc";
 import { createNetwork } from "../utils/chain";
 
 /**

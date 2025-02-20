@@ -1,4 +1,4 @@
-import { Address } from "viem";
+import type { Address } from "../types/misc";
 import { Coinbase } from "../coinbase/coinbase";
 import { wait, WaitOptions } from "../utils/wait";
 import { UserOperation, UserOperationStatusEnum } from "../client";

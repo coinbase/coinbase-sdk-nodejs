@@ -407,13 +407,13 @@ export type AddressAPIClient = {
    *
    * @param walletId - The ID of the wallet the address belongs to.
    * @param addressId - The onchain address of the address to sign the payload with.
-   * @param CreatePayloadSignatureRequest - The payload signature creation request.
+   * @param createPayloadSignatureRequest - The payload signature creation request.
    * @param options - Axios request options.
    * @throws {APIError} If the request fails.
    */
   createPayloadSignature(
     walletId: string,
-    addressid: string,
+    addressId: string,
     createPayloadSignatureRequest?: CreatePayloadSignatureRequest,
     options?: AxiosRequestConfig,
   ): AxiosPromise<PayloadSignatureModel>;
@@ -429,7 +429,7 @@ export type AddressAPIClient = {
    */
   getPayloadSignature(
     walletId: string,
-    addressid: string,
+    addressId: string,
     payloadSignatureId: string,
     options?: AxiosRequestConfig,
   ): AxiosPromise<PayloadSignatureModel>;
@@ -446,7 +446,7 @@ export type AddressAPIClient = {
    */
   listPayloadSignatures(
     walletId: string,
-    addressid: string,
+    addressId: string,
     limit?: number,
     page?: string,
     options?: AxiosRequestConfig,

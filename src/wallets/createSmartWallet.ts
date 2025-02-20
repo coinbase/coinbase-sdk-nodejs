@@ -1,6 +1,6 @@
 import { Signer, type SmartWallet } from "./types";
 import { Coinbase } from "../index";
-import type { Address } from "viem";
+import type { Address } from "../types/misc";
 import { toSmartWallet } from "./toSmartWallet";
 
 /**
