@@ -1,8 +1,10 @@
 import type { SmartWallet } from "../wallets/types";
 import { UserOperationStatusEnum } from "../client";
-import type { SupportedChainId } from "../types/chain";
-import type { Address } from "../types/misc";
+import { CHAIN_ID_TO_NETWORK_ID, type SupportedChainId } from "../types/chain";
+import type { Address, Hex } from "../types/misc";
 import type { Calls } from "../types/calls";
+import { encodeFunctionData } from "viem";
+import { Coinbase } from "../coinbase/coinbase";
 
 /**
  * Options for sending a user operation
@@ -63,66 +65,61 @@ export async function sendUserOperation<T extends readonly unknown[]>(
   wallet: SmartWallet,
   options: SendUserOperationOptions<T>,
 ): Promise<SendUserOperationReturnType> {
+  const { calls, chainId, paymasterUrl } = options;
+  const network = CHAIN_ID_TO_NETWORK_ID[chainId];
+
+  if (calls.length === 0) {
+    throw new Error("Calls array is empty");
+  }
+
+  const encodedCalls = calls.map(call => {
+    const value = (call.value ?? BigInt(0)).toString(); // Convert BigInt to string
+
+    if ("abi" in call && call.abi && "functionName" in call) {
+      return {
+        to: call.to,
+        data: encodeFunctionData({
+          abi: call.abi,
+          functionName: call.functionName,
+          args: call.args,
+        }),
+        value,
+      };
+    }
+
+    return {
+      to: call.to,
+      data: call.data ?? "0x",
+      value,
+    };
+  });
+
+  const createOpResponse = await Coinbase.apiClients.smartWallet!.createUserOperation(
+    wallet.address,
+    network,
+    {
+      calls: encodedCalls,
+      paymaster_url: paymasterUrl,
+    },
+  );
+
+  const owner = wallet.owners[0];
+
+  const signature = await owner.sign({
+    hash: createOpResponse.data.unsigned_payload as Hex,
+  });
+
+  const broadcastResponse = await Coinbase.apiClients.smartWallet!.broadcastUserOperation(
+    wallet.address,
+    createOpResponse.data.id,
+    {
+      signature,
+    },
+  );
+
   return {
-    id: "123",
-    smartWalletAddress: "0x123",
-    status: "broadcast",
-  };
-  // const { calls, chainId, paymasterUrl } = options;
-  // const network = CHAIN_ID_TO_NETWORK_ID[chainId];
-
-  // if (calls.length === 0) {
-  //   throw new Error("Calls array is empty");
-  // }
-
-  // const encodedCalls = calls.map(call => {
-  //   const value = (call.value ?? BigInt(0)).toString(); // Convert BigInt to string
-
-  //   if ("abi" in call && call.abi && "functionName" in call) {
-  //     return {
-  //       to: call.to,
-  //       data: encodeFunctionData({
-  //         abi: call.abi,
-  //         functionName: call.functionName,
-  //         args: call.args,
-  //       }),
-  //       value,
-  //     };
-  //   }
-
-  //   return {
-  //     to: call.to,
-  //     data: call.data ?? "0x",
-  //     value,
-  //   };
-  // });
-
-  // const createOpResponse = await Coinbase.apiClients.smartWallet!.createUserOperation(
-  //   wallet.address,
-  //   network,
-  //   {
-  //     calls: encodedCalls,
-  //     paymaster_url: paymasterUrl,
-  //   },
-  // );
-
-  // const owner = wallet.owners[0];
-
-  // const signature = await owner.sign({
-  //   hash: createOpResponse.data.unsigned_payload as Hex,
-  // });
-
-  // const broadcastResponse = await Coinbase.apiClients.smartWallet!.broadcastUserOperation(
-  //   wallet.address,
-  //   createOpResponse.data.id,
-  //   {
-  //     signature,
-  //   },
-  // );
-
-  // return {
-  //   id: broadcastResponse.data.id,
-  //   smartWalletAddress: wallet.address,
-  //   status: broadcastResponse.data.status,
-  // } as SendUserOperationReturnType;
+    id: broadcastResponse.data.id,
+    smartWalletAddress: wallet.address,
+    status: broadcastResponse.data.status,
+  } as SendUserOperationReturnType;
 }
