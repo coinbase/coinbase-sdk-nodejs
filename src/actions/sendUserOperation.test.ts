@@ -1,6 +1,6 @@
 import { sendUserOperation } from "./sendUserOperation";
 import { Coinbase } from "../coinbase/coinbase";
-import { encodeFunctionData, erc20Abi, Hex, parseEther } from "viem";
+import { encodeFunctionData, erc20Abi, parseEther } from "viem";
 import { UserOperationStatusEnum } from "../client";
 import { smartWalletApiMock, mockReturnValue, mockReturnRejectedValue } from "../tests/utils";
 

@@ -3,8 +3,7 @@ import { UserOperationStatusEnum } from "../client";
 import { Address, encodeFunctionData, Hex } from "viem";
 import { Coinbase } from "../coinbase/coinbase";
 import { CHAIN_ID_TO_NETWORK_ID, type SupportedChainId } from "../types/chain";
-import type { Call, Calls } from "viem/types/calls";
-import type { SendUserOperationParameters } from "viem/account-abstraction/";
+import type { Calls } from "viem/types/calls"
 
 /**
  * Options for sending a user operation
