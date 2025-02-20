@@ -41,7 +41,6 @@ export class CoinbaseAuthenticator {
    */
   async authenticateRequest(
     config: InternalAxiosRequestConfig,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     debugging = false,
   ): Promise<InternalAxiosRequestConfig> {
     const method = config.method?.toString().toUpperCase();
