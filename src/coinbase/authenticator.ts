@@ -41,10 +41,14 @@ export class CoinbaseAuthenticator {
    */
   async authenticateRequest(
     config: InternalAxiosRequestConfig,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     debugging = false,
   ): Promise<InternalAxiosRequestConfig> {
     const method = config.method?.toString().toUpperCase();
     const token = await this.buildJWT(config.url || "", method);
+    if (debugging) {
+      console.log(`API REQUEST: ${method} ${config.url}`);
+    }
     config.headers["Authorization"] = `Bearer ${token}`;
     config.headers["Content-Type"] = "application/json";
     config.headers["Correlation-Context"] = this.getCorrelationData();
@@ -71,14 +75,12 @@ export class CoinbaseAuthenticator {
       } catch (error) {
         throw new InvalidAPIKeyFormatError("Could not parse the private key");
       }
-
       const header = {
         alg: "ES256",
         kid: this.apiKey,
         typ: "JWT",
         nonce: this.nonce(),
       };
-
       const urlObject = new URL(url);
       const uri = `${method} ${urlObject.host}${urlObject.pathname}`;
       const claims = {
@@ -89,7 +91,6 @@ export class CoinbaseAuthenticator {
         exp: Math.floor(Date.now() / 1000) + 60, // +1 minute
         uris: [uri],
       };
-
       const payload = Buffer.from(JSON.stringify(claims)).toString("utf8");
       try {
         const result = await JWS.createSign({ format: "compact", fields: header }, privateKey)
@@ -113,7 +114,6 @@ export class CoinbaseAuthenticator {
         x: publicKey.toString("base64url"),
       };
       const key = await importJWK(jwk, "EdDSA");
-
       const urlObject = new URL(url);
       const uri = `${method} ${urlObject.host}${urlObject.pathname}`;
       const now = Math.floor(Date.now() / 1000);
