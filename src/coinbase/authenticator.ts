@@ -102,7 +102,7 @@ export class CoinbaseAuthenticator {
     } else {
       const decoded = Buffer.from(this.privateKey, "base64");
       if (decoded.length !== 64) {
-        throw new InvalidAPIKeyFormatError("Invalid Ed25519 private key length");
+        throw new InvalidAPIKeyFormatError("Could not parse the private key");
       }
       const seed = decoded.subarray(0, 32);
       const publicKey = decoded.subarray(32);

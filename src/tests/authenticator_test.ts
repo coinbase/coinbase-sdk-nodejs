@@ -71,7 +71,7 @@ describe("Authenticator tests", () => {
       source,
     );
 
-    expect(invalidAuthenticator.authenticateRequest(VALID_CONFIG)).rejects.toThrow();
+    await expect(invalidAuthenticator.authenticateRequest(VALID_CONFIG)).rejects.toThrow();
   });
 
   describe("#buildJWT", () => {
@@ -115,6 +115,95 @@ describe("Authenticator tests", () => {
       await expect(instance.buildJWT("https://example.com")).rejects.toThrow(
         InvalidAPIKeyFormatError,
       );
+    });
+  });
+});
+
+describe("Authenticator tests for Edwards key", () => {
+  const filePath = "./config/test_ed25519_api_key.json";
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const keys = require(filePath);
+  let authenticator;
+  let source;
+  let sourceVersion;
+  let privateKey;
+  let apiKey;
+
+  beforeEach(() => {
+    // Use the Edwards key from config (Base64-encoded 64-byte key)
+    privateKey = keys.privateKey;
+    apiKey = keys.name;
+    source = "mockSource";
+
+    jest.spyOn(console, "log").mockImplementation(() => {});
+
+    authenticator = new CoinbaseAuthenticator(apiKey, privateKey, source, sourceVersion);
+  });
+
+  it("should raise InvalidConfiguration error for invalid config", async () => {
+    const invalidConfig = {
+      method: "GET",
+      url: "", // Invalid URL
+      headers: {} as AxiosHeaders,
+    };
+
+    await expect(authenticator.authenticateRequest(invalidConfig)).rejects.toThrow();
+  });
+
+  it("should return a valid signature", async () => {
+    const config = await authenticator.authenticateRequest(VALID_CONFIG, true);
+    const token = config.headers?.Authorization as string;
+    expect(token).toContain("Bearer ");
+    expect(token?.length).toBeGreaterThan(100);
+  });
+
+  it("includes a correlation context header", async () => {
+    const config = await authenticator.authenticateRequest(VALID_CONFIG, true);
+    const correlationContext = config.headers["Correlation-Context"] as string;
+    expect(correlationContext).toContain(",sdk_language=typescript,source=mockSource");
+    expect(correlationContext).not.toContain("source_version");
+  });
+
+  describe("when a source version is provided", () => {
+    beforeAll(() => (sourceVersion = "1.0.0"));
+    afterAll(() => (sourceVersion = undefined));
+
+    it("includes the source version in the correlation context", async () => {
+      const config = await authenticator.authenticateRequest(VALID_CONFIG, true);
+      const correlationContext = config.headers["Correlation-Context"] as string;
+      expect(correlationContext).toContain(",source_version=1.0.0");
+    });
+  });
+
+  it("should raise an InvalidAPIKeyFormat error if Edwards key length is not 64 bytes", async () => {
+    // Create an invalid Edwards key by truncating the valid key.
+    const invalidEdKey = privateKey.slice(0, -4);
+    const invalidAuthenticator = new CoinbaseAuthenticator(apiKey, invalidEdKey, source);
+    await expect(invalidAuthenticator.authenticateRequest(VALID_CONFIG)).rejects.toThrow(InvalidAPIKeyFormatError);
+  });
+
+  describe("#buildJWT", () => {
+    let instance;
+
+    beforeEach(() => {
+      instance = new CoinbaseAuthenticator(apiKey, privateKey, source);
+      // For the Edwards branch, extractPemKey is not used.
+      // We'll override nonce to ensure predictable output.
+      instance.nonce = jest.fn().mockReturnValue("mockNonce");
+    });
+
+    test("should throw error if Edwards key length is not 64 bytes", async () => {
+      const invalidEdKey = privateKey.slice(0, -4);
+      instance = new CoinbaseAuthenticator(apiKey, invalidEdKey, source);
+      await expect(instance.buildJWT("https://example.com")).rejects.toThrow(InvalidAPIKeyFormatError);
+    });
+
+    test("should return a valid JWT when building with Edwards key", async () => {
+      const jwt = await instance.buildJWT("https://example.com", "GET");
+      expect(jwt).toContain(".");
+      // A simple check: split into three parts.
+      const parts = jwt.split(".");
+      expect(parts.length).toBe(3);
     });
   });
 });
