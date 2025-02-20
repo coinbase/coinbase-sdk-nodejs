@@ -4095,9 +4095,16 @@ export interface UserOperation {
      */
     'calls': Array<Call>;
     /**
+     * The unique identifier for the user operation onchain. This is the payload that must be signed by one of the owners of the smart wallet to send the user operation.
+     * @type {string}
+     * @memberof UserOperation
+     */
+    'user_op_hash': string;
+    /**
      * The hex-encoded hash that must be signed by the user.
      * @type {string}
      * @memberof UserOperation
+     * @deprecated
      */
     'unsigned_payload': string;
     /**

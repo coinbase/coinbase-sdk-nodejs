@@ -29,6 +29,8 @@ export type SendUserOperationReturnType = {
   smartWalletAddress: Address;
   /** The status of the user operation */
   status: typeof UserOperationStatusEnum.Broadcast;
+  /** The hash of the user operation */
+  userOpHash: Hex;
 };
 
 /**
@@ -106,7 +108,7 @@ export async function sendUserOperation<T extends readonly unknown[]>(
   const owner = wallet.owners[0];
 
   const signature = await owner.sign({
-    hash: createOpResponse.data.unsigned_payload as Hex,
+    hash: createOpResponse.data.user_op_hash as Hex,
   });
 
   const broadcastResponse = await Coinbase.apiClients.smartWallet!.broadcastUserOperation(
@@ -121,5 +123,6 @@ export async function sendUserOperation<T extends readonly unknown[]>(
     id: broadcastResponse.data.id,
     smartWalletAddress: wallet.address,
     status: broadcastResponse.data.status,
+    userOpHash: createOpResponse.data.user_op_hash,
   } as SendUserOperationReturnType;
 }

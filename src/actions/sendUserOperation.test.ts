@@ -34,12 +34,13 @@ describe("sendUserOperation", () => {
 
   const VALID_CREATE_OPERATION_RESPONSE = {
     id: "op123",
-    unsigned_payload: "0x456def" as const,
+    user_op_hash: "0x456def" as const,
   };
 
   const VALID_BROADCAST_RESPONSE = {
     id: "op123",
     status: UserOperationStatusEnum.Broadcast,
+    user_op_hash: "0x456def" as const,
   };
 
   beforeEach(() => {
@@ -96,6 +97,7 @@ describe("sendUserOperation", () => {
       id: VALID_BROADCAST_RESPONSE.id,
       smartWalletAddress: VALID_WALLET.address,
       status: VALID_BROADCAST_RESPONSE.status,
+      userOpHash: VALID_BROADCAST_RESPONSE.user_op_hash,
     });
   });
 
@@ -132,6 +134,7 @@ describe("sendUserOperation", () => {
       id: VALID_BROADCAST_RESPONSE.id,
       smartWalletAddress: VALID_WALLET.address,
       status: VALID_BROADCAST_RESPONSE.status,
+      userOpHash: VALID_BROADCAST_RESPONSE.user_op_hash,
     });
   });
 
@@ -177,6 +180,7 @@ describe("sendUserOperation", () => {
       id: VALID_BROADCAST_RESPONSE.id,
       smartWalletAddress: VALID_WALLET.address,
       status: VALID_BROADCAST_RESPONSE.status,
+      userOpHash: VALID_BROADCAST_RESPONSE.user_op_hash,
     });
   });
 
@@ -217,6 +221,7 @@ describe("sendUserOperation", () => {
       id: VALID_BROADCAST_RESPONSE.id,
       smartWalletAddress: VALID_WALLET.address,
       status: VALID_BROADCAST_RESPONSE.status,
+      userOpHash: VALID_BROADCAST_RESPONSE.user_op_hash,
     });
   });
 
@@ -267,6 +272,7 @@ describe("sendUserOperation", () => {
       id: VALID_BROADCAST_RESPONSE.id,
       smartWalletAddress: VALID_WALLET.address,
       status: VALID_BROADCAST_RESPONSE.status,
+      userOpHash: VALID_BROADCAST_RESPONSE.user_op_hash,
     });
   });
 
