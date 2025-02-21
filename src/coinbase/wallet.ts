@@ -448,6 +448,23 @@ export class Wallet {
   }
 
   /**
+   * Get the pending claimable balance for the supplied asset.
+   *
+   * @param asset_id - The asset to check pending claimable balance for.
+   * @param mode - The staking mode. Defaults to DEFAULT.
+   * @param options - Additional options for getting the pending claimable balance.
+   * @throws {Error} if the default address is not found.
+   * @returns The pending claimable balance.
+   */
+  public async pendingClaimableBalance(
+    asset_id: string,
+    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+    options: { [key: string]: string } = {},
+  ): Promise<Decimal> {
+    return (await this.getDefaultAddress()).pendingClaimableBalance(asset_id, mode, options);
+  }
+
+  /**
    * Get the claimable balance for the supplied asset.
    *
    * @param asset_id - The asset to check claimable balance for.
