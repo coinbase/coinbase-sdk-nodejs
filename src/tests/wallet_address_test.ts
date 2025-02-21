@@ -388,6 +388,15 @@ describe("WalletAddress", () => {
             contract_address: "0x",
           },
         },
+        pending_claimable_balance: {
+          amount: "1000000000000000000",
+          asset: {
+            asset_id: Coinbase.assets.Eth,
+            network_id: Coinbase.networks.EthereumHolesky,
+            decimals: 18,
+            contract_address: "0x",
+          },
+        },
         claimable_balance: {
           amount: "1000000000000000000",
           asset: {
@@ -397,15 +406,6 @@ describe("WalletAddress", () => {
             contract_address: "0x",
           },
         },
-        pending_claimable_balance: {
-          amount: "1000000000000000000",
-          asset: {
-            asset_id: Coinbase.assets.Eth,
-            network_id: Coinbase.networks.EthereumHolesky,
-            decimals: 18,
-            contract_address: "0x",
-          }
-        }
       },
     };
 
@@ -1252,10 +1252,10 @@ describe("WalletAddress", () => {
   });
 
   describe("#invokeContract", () => {
-    let key = ethers.Wallet.createRandom();
+    const key = ethers.Wallet.createRandom();
     let addressModel: AddressModel;
     let walletAddress: WalletAddress;
-    let unsignedPayload = VALID_CONTRACT_INVOCATION_MODEL.transaction.unsigned_payload;
+    const unsignedPayload = VALID_CONTRACT_INVOCATION_MODEL.transaction.unsigned_payload;
     let expectedSignedPayload: string;
 
     beforeAll(() => {
@@ -1343,8 +1343,8 @@ describe("WalletAddress", () => {
 
       describe("when it is successful invoking a payable contract method", () => {
         let contractInvocation;
-        let amount = new Decimal("1000");
-        let balanceResponse = { amount: "5000000", asset: { asset_id: "eth", decimals: 18 } };
+        const amount = new Decimal("1000");
+        const balanceResponse = { amount: "5000000", asset: { asset_id: "eth", decimals: 18 } };
 
         beforeEach(async () => {
           Coinbase.apiClients.contractInvocation!.createContractInvocation = mockReturnValue({
@@ -1430,7 +1430,7 @@ describe("WalletAddress", () => {
       });
 
       describe("when it is fails to invoke a payable contract method", () => {
-        let amount = new Decimal("1000");
+        const amount = new Decimal("1000");
 
         it("throws an error for invalid input", async () => {
           await expect(
@@ -1604,7 +1604,7 @@ describe("WalletAddress", () => {
   });
 
   describe("#deployToken", () => {
-    let key = ethers.Wallet.createRandom();
+    const key = ethers.Wallet.createRandom();
     let addressModel: AddressModel;
     let walletAddress: WalletAddress;
     let expectedSignedPayload: string;
@@ -1900,7 +1900,7 @@ describe("WalletAddress", () => {
   });
 
   describe("#deployNFT", () => {
-    let key = ethers.Wallet.createRandom();
+    const key = ethers.Wallet.createRandom();
     let addressModel: AddressModel;
     let walletAddress: WalletAddress;
     let expectedSignedPayload: string;
@@ -2196,7 +2196,7 @@ describe("WalletAddress", () => {
   });
 
   describe("#deployMultiToken", () => {
-    let key = ethers.Wallet.createRandom();
+    const key = ethers.Wallet.createRandom();
     let addressModel: AddressModel;
     let walletAddress: WalletAddress;
     let expectedSignedPayload: string;
@@ -2472,7 +2472,7 @@ describe("WalletAddress", () => {
   });
 
   describe("#deployContract", () => {
-    let key = ethers.Wallet.createRandom();
+    const key = ethers.Wallet.createRandom();
     let addressModel: AddressModel;
     let walletAddress: WalletAddress;
     let expectedSignedPayload: string;
@@ -2750,10 +2750,10 @@ describe("WalletAddress", () => {
   });
 
   describe("#createPayloadSignature", () => {
-    let key = ethers.Wallet.createRandom();
+    const key = ethers.Wallet.createRandom();
     let addressModel: AddressModel;
     let walletAddress: WalletAddress;
-    let unsignedPayload = VALID_PAYLOAD_SIGNATURE_MODEL.unsigned_payload;
+    const unsignedPayload = VALID_PAYLOAD_SIGNATURE_MODEL.unsigned_payload;
     let signature: string;
 
     beforeAll(() => {
@@ -2867,10 +2867,10 @@ describe("WalletAddress", () => {
   });
 
   describe("#getPayloadSignature", () => {
-    let key = ethers.Wallet.createRandom();
+    const key = ethers.Wallet.createRandom();
     let addressModel: AddressModel;
     let walletAddress: WalletAddress;
-    let payloadSignatureId = VALID_PAYLOAD_SIGNATURE_MODEL.payload_signature_id;
+    const payloadSignatureId = VALID_PAYLOAD_SIGNATURE_MODEL.payload_signature_id;
 
     beforeAll(() => {
       Coinbase.apiClients.address = addressesApiMock;
@@ -2918,7 +2918,7 @@ describe("WalletAddress", () => {
   });
 
   describe("#listPayloadSignatures", () => {
-    let key = ethers.Wallet.createRandom();
+    const key = ethers.Wallet.createRandom();
     let addressModel: AddressModel;
     let walletAddress: WalletAddress;
 
