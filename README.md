@@ -233,3 +233,6 @@ To import Wallets that were persisted to your local file system using `saveSeed`
 const userWallet = await Wallet.fetch(wallet.getId());
 await userWallet.loadSeedFromFile(seedFilePath);
 ```
+
+## Acknowledgments
+This project includes code from [viem](https://github.com/wevm/viem) licensed under MIT.
