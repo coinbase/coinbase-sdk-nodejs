@@ -12,6 +12,7 @@ import {
   CreateTransferRequest,
   TransferList,
   Wallet as WalletModel,
+  SmartWallet as SmartWalletModel,
   Transfer as TransferModel,
   Trade as TradeModel,
   Asset as AssetModel,
@@ -68,6 +69,10 @@ import {
   CompiledSmartContract,
   BroadcastExternalTransactionRequest,
   BroadcastExternalTransaction200Response,
+  CreateSmartWalletRequest,
+  CreateUserOperationRequest,
+  UserOperation as UserOperationModel,
+  BroadcastUserOperationRequest,
 } from "./../client/api";
 import { Address } from "./address";
 import { Wallet } from "./wallet";
@@ -245,6 +250,77 @@ export type WalletAPIClient = {
 };
 
 /**
+ * SmartWalletAPI client type definition.
+ */
+export type SmartWalletAPIClient = {
+  /**
+   * Create a new smart wallet scoped to the user.
+   *
+   * @class
+   * @param createdSmartWalletRequest - The smart wallet creation request.
+   * @param options - Axios request options.
+   * @throws {APIError} If the request fails.
+   */
+  createSmartWallet: (
+    createSmartWalletRequest?: CreateSmartWalletRequest,
+    options?: RawAxiosRequestConfig,
+  ) => AxiosPromise<SmartWalletModel>;
+
+  /*
+   *Get the smart wallet by address
+   *
+   *@param smartWalletAddress - The address of the smart wallet to fetch.
+   *@param options - Override http request option.
+   *@throws {APIError} If the request fails.
+   */
+  getSmartWallet: (
+    smartWalletAddress: string,
+    options?: RawAxiosRequestConfig,
+  ) => AxiosPromise<SmartWalletModel>;
+
+  /*
+   *Create a user operation
+   *
+   *@param createUserOperationRequest - The user operation creation request.
+   *@param options - Override http request option.
+   *@throws {APIError} If the request fails.
+   */
+  createUserOperation: (
+    smartWalletAddress: string,
+    networkId: string,
+    createUserOperationRequest: CreateUserOperationRequest,
+    options?: RawAxiosRequestConfig,
+  ) => AxiosPromise<UserOperationModel>;
+
+  /*
+   *Broadcast a user operation
+   *
+   *@param broadcastUserOperationRequest - The user operation broadcast request.
+   *@param options - Override http request option.
+   *@throws {APIError} If the request fails.
+   */
+  broadcastUserOperation: (
+    smartWalletAddress: string,
+    userOperationId: string,
+    broadcastUserOperationRequest: BroadcastUserOperationRequest,
+    options?: RawAxiosRequestConfig,
+  ) => AxiosPromise<UserOperationModel>;
+
+  /*
+   *Get a user operation by ID
+   *
+   *@param userOperationId - The ID of the user operation to fetch.
+   *@param options - Override http request option.
+   *@throws {APIError} If the request fails.
+   */
+  getUserOperation: (
+    smartWalletAddress: string,
+    userOpHash: string,
+    options?: RawAxiosRequestConfig,
+  ) => AxiosPromise<UserOperationModel>;
+};
+
+/**
  * AddressAPI client type definition.
  */
 export type AddressAPIClient = {
@@ -331,13 +407,13 @@ export type AddressAPIClient = {
    *
    * @param walletId - The ID of the wallet the address belongs to.
    * @param addressId - The onchain address of the address to sign the payload with.
-   * @param CreatePayloadSignatureRequest - The payload signature creation request.
+   * @param createPayloadSignatureRequest - The payload signature creation request.
    * @param options - Axios request options.
    * @throws {APIError} If the request fails.
    */
   createPayloadSignature(
     walletId: string,
-    addressid: string,
+    addressId: string,
     createPayloadSignatureRequest?: CreatePayloadSignatureRequest,
     options?: AxiosRequestConfig,
   ): AxiosPromise<PayloadSignatureModel>;
@@ -353,7 +429,7 @@ export type AddressAPIClient = {
    */
   getPayloadSignature(
     walletId: string,
-    addressid: string,
+    addressId: string,
     payloadSignatureId: string,
     options?: AxiosRequestConfig,
   ): AxiosPromise<PayloadSignatureModel>;
@@ -370,7 +446,7 @@ export type AddressAPIClient = {
    */
   listPayloadSignatures(
     walletId: string,
-    addressid: string,
+    addressId: string,
     limit?: number,
     page?: string,
     options?: AxiosRequestConfig,
@@ -751,6 +827,7 @@ export type ApiClients = {
   smartContract?: SmartContractAPIClient;
   fund?: FundOperationApiClient;
   addressReputation?: AddressReputationApiClient;
+  smartWallet?: SmartWalletAPIClient;
 };
 
 /**
