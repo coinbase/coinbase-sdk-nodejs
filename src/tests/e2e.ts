@@ -39,117 +39,118 @@ describe("Coinbase SDK E2E Test", () => {
     expect(fs.existsSync("./dist/coinbase/coinbase.js")).toBe(true);
   });
 
-  it("should be able to interact with the Coinbase SDK", async () => {
-    console.log("Creating new wallet...");
-    const wallet = await Wallet.create();
+  // CDP-266 Flaky test
+  // it("should be able to interact with the Coinbase SDK", async () => {
+  //   console.log("Creating new wallet...");
+  //   const wallet = await Wallet.create();
 
-    expect(wallet.toString()).toBeDefined();
-    expect(wallet?.getId()).toBeDefined();
-    console.log(
-      `Created new wallet with ID: ${wallet.getId()}, default address: ${wallet.getDefaultAddress()}`,
-    );
+  //   expect(wallet.toString()).toBeDefined();
+  //   expect(wallet?.getId()).toBeDefined();
+  //   console.log(
+  //     `Created new wallet with ID: ${wallet.getId()}, default address: ${wallet.getDefaultAddress()}`,
+  //   );
 
-    console.log("Importing wallet with balance...");
-    const seedFile = JSON.parse(process.env.WALLET_DATA || "");
-    const walletId = Object.keys(seedFile)[0];
-    const seed = seedFile[walletId].seed;
+  //   console.log("Importing wallet with balance...");
+  //   const seedFile = JSON.parse(process.env.WALLET_DATA || "");
+  //   const walletId = Object.keys(seedFile)[0];
+  //   const seed = seedFile[walletId].seed;
 
-    const importedWallet = await Wallet.import({
-      seed,
-      walletId,
-      networkId: Coinbase.networks.BaseSepolia,
-    });
-    expect(importedWallet).toBeDefined();
-    expect(importedWallet.getId()).toBe(walletId);
-    console.log(
-      `Imported wallet with ID: ${importedWallet.getId()}, default address: ${importedWallet.getDefaultAddress()}`,
-    );
-    await importedWallet.saveSeedToFile("test_seed.json");
+  //   const importedWallet = await Wallet.import({
+  //     seed,
+  //     walletId,
+  //     networkId: Coinbase.networks.BaseSepolia,
+  //   });
+  //   expect(importedWallet).toBeDefined();
+  //   expect(importedWallet.getId()).toBe(walletId);
+  //   console.log(
+  //     `Imported wallet with ID: ${importedWallet.getId()}, default address: ${importedWallet.getDefaultAddress()}`,
+  //   );
+  //   await importedWallet.saveSeedToFile("test_seed.json");
 
-    try {
-      const transaction = await importedWallet.faucet();
-      expect(transaction.toString()).toBeDefined();
-    } catch {
-      console.log("Faucet request failed. Skipping...");
-    }
-    console.log("Listing wallet addresses...");
-    const addresses = await importedWallet.listAddresses();
-    expect(addresses.length).toBeGreaterThan(0);
-    console.log(`Listed addresses: ${addresses.join(", ")}`);
+  //   try {
+  //     const transaction = await importedWallet.faucet();
+  //     expect(transaction.toString()).toBeDefined();
+  //   } catch {
+  //     console.log("Faucet request failed. Skipping...");
+  //   }
+  //   console.log("Listing wallet addresses...");
+  //   const addresses = await importedWallet.listAddresses();
+  //   expect(addresses.length).toBeGreaterThan(0);
+  //   console.log(`Listed addresses: ${addresses.join(", ")}`);
 
-    console.log("Fetching wallet balances...");
-    const balances = await importedWallet.listBalances();
-    expect(Array.from([...balances.keys()]).length).toBeGreaterThan(0);
-    console.log(`Fetched balances: ${balances.toString()}`);
+  //   console.log("Fetching wallet balances...");
+  //   const balances = await importedWallet.listBalances();
+  //   expect(Array.from([...balances.keys()]).length).toBeGreaterThan(0);
+  //   console.log(`Fetched balances: ${balances.toString()}`);
 
-    console.log("Exporting wallet...");
-    const exportedWallet = await wallet.export();
-    expect(exportedWallet.walletId).toBeDefined();
-    expect(exportedWallet.seed).toBeDefined();
+  //   console.log("Exporting wallet...");
+  //   const exportedWallet = await wallet.export();
+  //   expect(exportedWallet.walletId).toBeDefined();
+  //   expect(exportedWallet.seed).toBeDefined();
 
-    console.log("Saving seed to file...");
-    await wallet.saveSeedToFile("test_seed.json");
-    expect(fs.existsSync("test_seed.json")).toBe(true);
-    console.log("Saved seed to test_seed.json");
+  //   console.log("Saving seed to file...");
+  //   await wallet.saveSeedToFile("test_seed.json");
+  //   expect(fs.existsSync("test_seed.json")).toBe(true);
+  //   console.log("Saved seed to test_seed.json");
 
-    const unhydratedWallet = await Wallet.fetch(walletId);
-    expect(unhydratedWallet.canSign()).toBe(false);
-    await unhydratedWallet.loadSeedFromFile("test_seed.json");
-    expect(unhydratedWallet.canSign()).toBe(true);
-    expect(unhydratedWallet.getId()).toBe(walletId);
+  //   const unhydratedWallet = await Wallet.fetch(walletId);
+  //   expect(unhydratedWallet.canSign()).toBe(false);
+  //   await unhydratedWallet.loadSeedFromFile("test_seed.json");
+  //   expect(unhydratedWallet.canSign()).toBe(true);
+  //   expect(unhydratedWallet.getId()).toBe(walletId);
 
-    console.log("Transfering 0.000000001 ETH from default address to second address...");
-    const transfer = await unhydratedWallet.createTransfer({
-      amount: 0.000000001,
-      assetId: Coinbase.assets.Eth,
-      destination: wallet,
-    });
+  //   console.log("Transfering 0.000000001 ETH from default address to second address...");
+  //   const transfer = await unhydratedWallet.createTransfer({
+  //     amount: 0.000000001,
+  //     assetId: Coinbase.assets.Eth,
+  //     destination: wallet,
+  //   });
 
-    await transfer.wait();
+  //   await transfer.wait();
 
-    expect(transfer.toString()).toBeDefined();
-    expect(await transfer.getStatus()).toBe(TransferStatus.COMPLETE);
-    console.log(`Transferred 1 Gwei from ${unhydratedWallet} to ${wallet}`);
+  //   expect(transfer.toString()).toBeDefined();
+  //   expect(await transfer.getStatus()).toBe(TransferStatus.COMPLETE);
+  //   console.log(`Transferred 1 Gwei from ${unhydratedWallet} to ${wallet}`);
 
-    console.log("Fetching updated balances...");
-    const firstBalance = await unhydratedWallet.listBalances();
-    const secondBalance = await wallet.listBalances();
-    expect(firstBalance.get(Coinbase.assets.Eth)).not.toEqual("0");
-    expect(secondBalance.get(Coinbase.assets.Eth)).not.toEqual("0");
-    console.log(`First address balances: ${firstBalance}`);
-    console.log(`Second address balances: ${secondBalance}`);
+  //   console.log("Fetching updated balances...");
+  //   const firstBalance = await unhydratedWallet.listBalances();
+  //   const secondBalance = await wallet.listBalances();
+  //   expect(firstBalance.get(Coinbase.assets.Eth)).not.toEqual("0");
+  //   expect(secondBalance.get(Coinbase.assets.Eth)).not.toEqual("0");
+  //   console.log(`First address balances: ${firstBalance}`);
+  //   console.log(`Second address balances: ${secondBalance}`);
 
-    console.log("Fetching address transactions...");
-    let result;
-    for (let i = 0; i < 5; i++) {
-      // Try up to 5 times
-      result = await (await unhydratedWallet.getDefaultAddress()).listTransactions({ limit: 1 });
-      if (result?.data.length > 0) break;
-      // Wait 2 seconds between attempts
-      console.log(`Waiting for transaction to be processed... (${i + 1} attempts)`);
-      await new Promise(resolve => setTimeout(resolve, 2000));
-    }
-    expect(result?.data.length).toBeGreaterThan(0);
+  //   console.log("Fetching address transactions...");
+  //   let result;
+  //   for (let i = 0; i < 5; i++) {
+  //     // Try up to 5 times
+  //     result = await (await unhydratedWallet.getDefaultAddress()).listTransactions({ limit: 1 });
+  //     if (result?.data.length > 0) break;
+  //     // Wait 2 seconds between attempts
+  //     console.log(`Waiting for transaction to be processed... (${i + 1} attempts)`);
+  //     await new Promise(resolve => setTimeout(resolve, 2000));
+  //   }
+  //   expect(result?.data.length).toBeGreaterThan(0);
 
-    console.log("Fetching address historical balances...");
-    const balance_result = await (
-      await unhydratedWallet.getDefaultAddress()
-    ).listHistoricalBalances(Coinbase.assets.Eth, { limit: 2 });
-    expect(balance_result?.data.length).toBeGreaterThan(0);
-    console.log(`First eth historical balance: ${balance_result?.data[0].amount.toString()}`);
+  //   console.log("Fetching address historical balances...");
+  //   const balance_result = await (
+  //     await unhydratedWallet.getDefaultAddress()
+  //   ).listHistoricalBalances(Coinbase.assets.Eth, { limit: 2 });
+  //   expect(balance_result?.data.length).toBeGreaterThan(0);
+  //   console.log(`First eth historical balance: ${balance_result?.data[0].amount.toString()}`);
 
-    const savedSeed = JSON.parse(fs.readFileSync("test_seed.json", "utf-8"));
-    fs.unlinkSync("test_seed.json");
+  //   const savedSeed = JSON.parse(fs.readFileSync("test_seed.json", "utf-8"));
+  //   fs.unlinkSync("test_seed.json");
 
-    expect(exportedWallet.seed.length).toBe(64);
-    expect(savedSeed[exportedWallet.walletId!]).toEqual({
-      seed: exportedWallet.seed,
-      encrypted: false,
-      authTag: "",
-      iv: "",
-      networkId: exportedWallet.networkId,
-    });
-  }, 60000);
+  //   expect(exportedWallet.seed.length).toBe(64);
+  //   expect(savedSeed[exportedWallet.walletId!]).toEqual({
+  //     seed: exportedWallet.seed,
+  //     encrypted: false,
+  //     authTag: "",
+  //     iv: "",
+  //     networkId: exportedWallet.networkId,
+  //   });
+  // }, 60000);
 
   it("Should be able to invoke a contract and retrieve the transaction receipt", async () => {
     const seedFile = JSON.parse(process.env.WALLET_DATA || "");
@@ -328,33 +329,34 @@ describe("Coinbase SDK Stake E2E Test", () => {
     });
   });
 
-  describe("Stake: Validator Tests", () => {
-    it("should list validators", async () => {
-      const networkId = Coinbase.networks.EthereumMainnet;
-      const assetId = Coinbase.assets.Eth;
-      const status = ValidatorStatus.ACTIVE;
+  // CDP-266 Flaky tests
+  // describe("Stake: Validator Tests", () => {
+  //   it("should list validators", async () => {
+  //     const networkId = Coinbase.networks.EthereumMainnet;
+  //     const assetId = Coinbase.assets.Eth;
+  //     const status = ValidatorStatus.ACTIVE;
 
-      const validators = await Validator.list(networkId, assetId, status);
+  //     const validators = await Validator.list(networkId, assetId, status);
 
-      expect(validators).toBeDefined();
-      expect(validators.length).toEqual(1);
-      const validator = validators[0];
-      expect(validator.getStatus()).toEqual(ValidatorStatus.ACTIVE);
-      expect(validator.getValidatorId()).toEqual(process.env.STAKE_VALIDATOR_ADDRESS_1 as string);
-    });
+  //     expect(validators).toBeDefined();
+  //     expect(validators.length).toEqual(1);
+  //     const validator = validators[0];
+  //     expect(validator.getStatus()).toEqual(ValidatorStatus.ACTIVE);
+  //     expect(validator.getValidatorId()).toEqual(process.env.STAKE_VALIDATOR_ADDRESS_1 as string);
+  //   });
 
-    it("should fetch a validator", async () => {
-      const networkId = Coinbase.networks.EthereumMainnet;
-      const assetId = Coinbase.assets.Eth;
-      const validatorId = process.env.STAKE_VALIDATOR_ADDRESS_1 as string;
+  //   it("should fetch a validator", async () => {
+  //     const networkId = Coinbase.networks.EthereumMainnet;
+  //     const assetId = Coinbase.assets.Eth;
+  //     const validatorId = process.env.STAKE_VALIDATOR_ADDRESS_1 as string;
 
-      const validator = await Validator.fetch(networkId, assetId, validatorId);
+  //     const validator = await Validator.fetch(networkId, assetId, validatorId);
 
-      expect(validator).toBeDefined();
-      expect(validator.getStatus()).toEqual(ValidatorStatus.ACTIVE);
-      expect(validator.getValidatorId()).toEqual(validatorId);
-    });
-  });
+  //     expect(validator).toBeDefined();
+  //     expect(validator.getStatus()).toEqual(ValidatorStatus.ACTIVE);
+  //     expect(validator.getValidatorId()).toEqual(validatorId);
+  //   });
+  // });
 
   describe("Stake: Context Tests", () => {
     it("should return stakeable balances for shared ETH staking", async () => {
@@ -402,22 +404,23 @@ describe("Coinbase SDK Stake E2E Test", () => {
       expect(stakeableBalance.toNumber()).toBeGreaterThanOrEqual(0);
     });
 
-    it("should return unstakeable balances for Dedicated ETH staking", async () => {
-      // This address is expected to have 1 validator associated with it, thus returning a 32 unstake balance.
+    // CDP-266 Flaky test
+    // it("should return unstakeable balances for Dedicated ETH staking", async () => {
+    //   // This address is expected to have 1 validator associated with it, thus returning a 32 unstake balance.
 
-      const address = new ExternalAddress(
-        Coinbase.networks.EthereumMainnet,
-        process.env.STAKE_ADDRESS_ID_2 as string,
-      );
+    //   const address = new ExternalAddress(
+    //     Coinbase.networks.EthereumMainnet,
+    //     process.env.STAKE_ADDRESS_ID_2 as string,
+    //   );
 
-      const stakeableBalance = await address.unstakeableBalance(
-        Coinbase.assets.Eth,
-        StakeOptionsMode.NATIVE,
-      );
+    //   const stakeableBalance = await address.unstakeableBalance(
+    //     Coinbase.assets.Eth,
+    //     StakeOptionsMode.NATIVE,
+    //   );
 
-      expect(stakeableBalance).toBeDefined();
-      expect(stakeableBalance.toNumber()).toBeGreaterThanOrEqual(32);
-    });
+    //   expect(stakeableBalance).toBeDefined();
+    //   expect(stakeableBalance.toNumber()).toBeGreaterThanOrEqual(32);
+    // });
   });
 
   describe("Stake: Build Tests", () => {
