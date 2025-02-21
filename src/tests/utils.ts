@@ -38,6 +38,7 @@ import { Coinbase } from "../coinbase/coinbase";
 import { convertStringToHex, registerAxiosInterceptors } from "../coinbase/utils";
 import { HDKey } from "@scure/bip32";
 import { Asset } from "../coinbase/asset";
+import { Wallet } from "../coinbase/wallet";
 
 export const mockFn = (...args) => jest.fn(...args) as any;
 export const mockReturnValue = data => jest.fn().mockResolvedValue({ data });
@@ -56,6 +57,7 @@ export const mockListAddress = (seed: string, count = 1) => {
       network_id: Coinbase.networks.BaseSepolia,
       public_key: wallet1PrivateKey,
       wallet_id: randomUUID(),
+      index: i,
     };
   });
 
@@ -114,6 +116,36 @@ export const newAddressModel = (
     wallet_id: walletId,
     index,
   };
+};
+
+export const newAddressModelsFromWallet = async (
+  walletId: string,
+  seed: string,
+  network_id: string = Coinbase.networks.BaseSepolia,
+): Promise<AddressModel[]> => {
+  // create a new wallet with master seed
+  const wallet = HDKey.fromMasterSeed(Buffer.from(seed, "hex"));
+  const address1 = getAddressFromHDKey(wallet.derive("m/44'/60'/0'/0/0"));
+  const address2 = getAddressFromHDKey(wallet.derive("m/44'/60'/0'/0/1"));
+  const publicKey1 = convertStringToHex(wallet.derive("m/44'/60'/0'/0/0").publicKey!);
+  const publicKey2 = convertStringToHex(wallet.derive("m/44'/60'/0'/0/1").publicKey!);
+  
+  return [
+    {
+      address_id: address1,
+      network_id: network_id,
+      public_key: publicKey1,
+      wallet_id: walletId,
+      index: 0,
+    },
+    {
+      address_id: address2,
+      network_id: network_id,
+      public_key: publicKey2,
+      wallet_id: walletId,
+      index: 1,
+    }
+  ];
 };
 
 export const VALID_ADDRESS_MODEL = newAddressModel(randomUUID());

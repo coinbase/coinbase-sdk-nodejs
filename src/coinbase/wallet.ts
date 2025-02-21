@@ -390,8 +390,8 @@ export class Wallet {
       Wallet.MAX_ADDRESSES,
     );
 
-    const addresses = response.data.data.map((address, index) => {
-      return this.buildWalletAddress(address, index);
+    const addresses = response.data.data.map(address => {
+      return this.buildWalletAddress(address, address.index);
     });
     this.addresses = addresses;
     return addresses;
