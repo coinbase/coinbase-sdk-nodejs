@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+## [0.19.0] - 2025-02-21
 ### Added
 - Ability to create a SmartWallet and send a user operation.
 - Add `EURC` and `cbBTC` asset support.
