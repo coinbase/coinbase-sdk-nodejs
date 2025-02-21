@@ -186,15 +186,6 @@ describe("Wallet Class", () => {
             contract_address: "0x",
           },
         },
-        pending_claimable_balance: {
-          amount: "1000000000000000000",
-          asset: {
-            asset_id: Coinbase.assets.Eth,
-            network_id: Coinbase.networks.EthereumHolesky,
-            decimals: 18,
-            contract_address: "0x",
-          },
-        },
       },
     };
 
