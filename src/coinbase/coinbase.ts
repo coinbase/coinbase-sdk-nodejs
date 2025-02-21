@@ -20,6 +20,7 @@ import {
   MPCWalletStakeApiFactory,
   FundApiFactory,
   ReputationApiFactory,
+  SmartWalletsApiFactory,
 } from "../client";
 import { BASE_PATH } from "./../client/base";
 import { Configuration } from "./../client/configuration";
@@ -58,6 +59,8 @@ export class Coinbase {
     Weth: "weth",
     Sol: "sol",
     Lamport: "lamport",
+    Eurc: "eurc",
+    Cbbtc: "cbbtc",
   };
 
   static apiClients: ApiClients = {};
@@ -144,6 +147,7 @@ export class Coinbase {
     );
 
     Coinbase.apiClients.wallet = WalletsApiFactory(config, basePath, axiosInstance);
+    Coinbase.apiClients.smartWallet = SmartWalletsApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.address = AddressesApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.transfer = TransfersApiFactory(config, basePath, axiosInstance);
     Coinbase.apiClients.trade = TradesApiFactory(config, basePath, axiosInstance);
