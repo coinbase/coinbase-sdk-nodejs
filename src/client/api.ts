@@ -9993,19 +9993,19 @@ export const SmartWalletsApiAxiosParamCreator = function (configuration?: Config
          * Broadcast a user operation
          * @summary Broadcast a user operation
          * @param {string} smartWalletAddress The address of the smart wallet to broadcast the user operation from.
-         * @param {string} userOperationId The ID of the user operation to broadcast.
+         * @param {string} userOpHash The hash of the user operation to broadcast
          * @param {BroadcastUserOperationRequest} [broadcastUserOperationRequest] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        broadcastUserOperation: async (smartWalletAddress: string, userOperationId: string, broadcastUserOperationRequest?: BroadcastUserOperationRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        broadcastUserOperation: async (smartWalletAddress: string, userOpHash: string, broadcastUserOperationRequest?: BroadcastUserOperationRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'smartWalletAddress' is not null or undefined
             assertParamExists('broadcastUserOperation', 'smartWalletAddress', smartWalletAddress)
-            // verify required parameter 'userOperationId' is not null or undefined
-            assertParamExists('broadcastUserOperation', 'userOperationId', userOperationId)
-            const localVarPath = `/v1/smart_wallets/{smart_wallet_address}/user_operations/{user_operation_id}/broadcast`
+            // verify required parameter 'userOpHash' is not null or undefined
+            assertParamExists('broadcastUserOperation', 'userOpHash', userOpHash)
+            const localVarPath = `/v1/smart_wallets/{smart_wallet_address}/user_operations/{user_op_hash}/broadcast`
                 .replace(`{${"smart_wallet_address"}}`, encodeURIComponent(String(smartWalletAddress)))
-                .replace(`{${"user_operation_id"}}`, encodeURIComponent(String(userOperationId)));
+                .replace(`{${"user_op_hash"}}`, encodeURIComponent(String(userOpHash)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -10160,18 +10160,18 @@ export const SmartWalletsApiAxiosParamCreator = function (configuration?: Config
          * Get user operation
          * @summary Get user operation
          * @param {string} smartWalletAddress The address of the smart wallet the user operation belongs to.
-         * @param {string} userOperationId The ID of the user operation to fetch.
+         * @param {string} userOpHash The hash of the user operation to fetch
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getUserOperation: async (smartWalletAddress: string, userOperationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getUserOperation: async (smartWalletAddress: string, userOpHash: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'smartWalletAddress' is not null or undefined
             assertParamExists('getUserOperation', 'smartWalletAddress', smartWalletAddress)
-            // verify required parameter 'userOperationId' is not null or undefined
-            assertParamExists('getUserOperation', 'userOperationId', userOperationId)
-            const localVarPath = `/v1/smart_wallets/{smart_wallet_address}/user_operations/{user_operation_id}`
+            // verify required parameter 'userOpHash' is not null or undefined
+            assertParamExists('getUserOperation', 'userOpHash', userOpHash)
+            const localVarPath = `/v1/smart_wallets/{smart_wallet_address}/user_operations/{user_op_hash}`
                 .replace(`{${"smart_wallet_address"}}`, encodeURIComponent(String(smartWalletAddress)))
-                .replace(`{${"user_operation_id"}}`, encodeURIComponent(String(userOperationId)));
+                .replace(`{${"user_op_hash"}}`, encodeURIComponent(String(userOpHash)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -10260,13 +10260,13 @@ export const SmartWalletsApiFp = function(configuration?: Configuration) {
          * Broadcast a user operation
          * @summary Broadcast a user operation
          * @param {string} smartWalletAddress The address of the smart wallet to broadcast the user operation from.
-         * @param {string} userOperationId The ID of the user operation to broadcast.
+         * @param {string} userOpHash The hash of the user operation to broadcast
          * @param {BroadcastUserOperationRequest} [broadcastUserOperationRequest] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async broadcastUserOperation(smartWalletAddress: string, userOperationId: string, broadcastUserOperationRequest?: BroadcastUserOperationRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserOperation>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.broadcastUserOperation(smartWalletAddress, userOperationId, broadcastUserOperationRequest, options);
+        async broadcastUserOperation(smartWalletAddress: string, userOpHash: string, broadcastUserOperationRequest?: BroadcastUserOperationRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserOperation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.broadcastUserOperation(smartWalletAddress, userOpHash, broadcastUserOperationRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SmartWalletsApi.broadcastUserOperation']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -10316,12 +10316,12 @@ export const SmartWalletsApiFp = function(configuration?: Configuration) {
          * Get user operation
          * @summary Get user operation
          * @param {string} smartWalletAddress The address of the smart wallet the user operation belongs to.
-         * @param {string} userOperationId The ID of the user operation to fetch.
+         * @param {string} userOpHash The hash of the user operation to fetch
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getUserOperation(smartWalletAddress: string, userOperationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserOperation>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserOperation(smartWalletAddress, userOperationId, options);
+        async getUserOperation(smartWalletAddress: string, userOpHash: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserOperation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserOperation(smartWalletAddress, userOpHash, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SmartWalletsApi.getUserOperation']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -10354,13 +10354,13 @@ export const SmartWalletsApiFactory = function (configuration?: Configuration, b
          * Broadcast a user operation
          * @summary Broadcast a user operation
          * @param {string} smartWalletAddress The address of the smart wallet to broadcast the user operation from.
-         * @param {string} userOperationId The ID of the user operation to broadcast.
+         * @param {string} userOpHash The hash of the user operation to broadcast
          * @param {BroadcastUserOperationRequest} [broadcastUserOperationRequest] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        broadcastUserOperation(smartWalletAddress: string, userOperationId: string, broadcastUserOperationRequest?: BroadcastUserOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<UserOperation> {
-            return localVarFp.broadcastUserOperation(smartWalletAddress, userOperationId, broadcastUserOperationRequest, options).then((request) => request(axios, basePath));
+        broadcastUserOperation(smartWalletAddress: string, userOpHash: string, broadcastUserOperationRequest?: BroadcastUserOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<UserOperation> {
+            return localVarFp.broadcastUserOperation(smartWalletAddress, userOpHash, broadcastUserOperationRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * Create a new smart wallet, not scoped to a given network.
@@ -10398,12 +10398,12 @@ export const SmartWalletsApiFactory = function (configuration?: Configuration, b
          * Get user operation
          * @summary Get user operation
          * @param {string} smartWalletAddress The address of the smart wallet the user operation belongs to.
-         * @param {string} userOperationId The ID of the user operation to fetch.
+         * @param {string} userOpHash The hash of the user operation to fetch
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getUserOperation(smartWalletAddress: string, userOperationId: string, options?: RawAxiosRequestConfig): AxiosPromise<UserOperation> {
-            return localVarFp.getUserOperation(smartWalletAddress, userOperationId, options).then((request) => request(axios, basePath));
+        getUserOperation(smartWalletAddress: string, userOpHash: string, options?: RawAxiosRequestConfig): AxiosPromise<UserOperation> {
+            return localVarFp.getUserOperation(smartWalletAddress, userOpHash, options).then((request) => request(axios, basePath));
         },
         /**
          * List smart wallets
@@ -10429,13 +10429,13 @@ export interface SmartWalletsApiInterface {
      * Broadcast a user operation
      * @summary Broadcast a user operation
      * @param {string} smartWalletAddress The address of the smart wallet to broadcast the user operation from.
-     * @param {string} userOperationId The ID of the user operation to broadcast.
+     * @param {string} userOpHash The hash of the user operation to broadcast
      * @param {BroadcastUserOperationRequest} [broadcastUserOperationRequest] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof SmartWalletsApiInterface
      */
-    broadcastUserOperation(smartWalletAddress: string, userOperationId: string, broadcastUserOperationRequest?: BroadcastUserOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<UserOperation>;
+    broadcastUserOperation(smartWalletAddress: string, userOpHash: string, broadcastUserOperationRequest?: BroadcastUserOperationRequest, options?: RawAxiosRequestConfig): AxiosPromise<UserOperation>;
 
     /**
      * Create a new smart wallet, not scoped to a given network.
@@ -10473,12 +10473,12 @@ export interface SmartWalletsApiInterface {
      * Get user operation
      * @summary Get user operation
      * @param {string} smartWalletAddress The address of the smart wallet the user operation belongs to.
-     * @param {string} userOperationId The ID of the user operation to fetch.
+     * @param {string} userOpHash The hash of the user operation to fetch
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof SmartWalletsApiInterface
      */
-    getUserOperation(smartWalletAddress: string, userOperationId: string, options?: RawAxiosRequestConfig): AxiosPromise<UserOperation>;
+    getUserOperation(smartWalletAddress: string, userOpHash: string, options?: RawAxiosRequestConfig): AxiosPromise<UserOperation>;
 
     /**
      * List smart wallets
@@ -10504,14 +10504,14 @@ export class SmartWalletsApi extends BaseAPI implements SmartWalletsApiInterface
      * Broadcast a user operation
      * @summary Broadcast a user operation
      * @param {string} smartWalletAddress The address of the smart wallet to broadcast the user operation from.
-     * @param {string} userOperationId The ID of the user operation to broadcast.
+     * @param {string} userOpHash The hash of the user operation to broadcast
      * @param {BroadcastUserOperationRequest} [broadcastUserOperationRequest] 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof SmartWalletsApi
      */
-    public broadcastUserOperation(smartWalletAddress: string, userOperationId: string, broadcastUserOperationRequest?: BroadcastUserOperationRequest, options?: RawAxiosRequestConfig) {
-        return SmartWalletsApiFp(this.configuration).broadcastUserOperation(smartWalletAddress, userOperationId, broadcastUserOperationRequest, options).then((request) => request(this.axios, this.basePath));
+    public broadcastUserOperation(smartWalletAddress: string, userOpHash: string, broadcastUserOperationRequest?: BroadcastUserOperationRequest, options?: RawAxiosRequestConfig) {
+        return SmartWalletsApiFp(this.configuration).broadcastUserOperation(smartWalletAddress, userOpHash, broadcastUserOperationRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -10556,13 +10556,13 @@ export class SmartWalletsApi extends BaseAPI implements SmartWalletsApiInterface
      * Get user operation
      * @summary Get user operation
      * @param {string} smartWalletAddress The address of the smart wallet the user operation belongs to.
-     * @param {string} userOperationId The ID of the user operation to fetch.
+     * @param {string} userOpHash The hash of the user operation to fetch
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof SmartWalletsApi
      */
-    public getUserOperation(smartWalletAddress: string, userOperationId: string, options?: RawAxiosRequestConfig) {
-        return SmartWalletsApiFp(this.configuration).getUserOperation(smartWalletAddress, userOperationId, options).then((request) => request(this.axios, this.basePath));
+    public getUserOperation(smartWalletAddress: string, userOpHash: string, options?: RawAxiosRequestConfig) {
+        return SmartWalletsApiFp(this.configuration).getUserOperation(smartWalletAddress, userOpHash, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

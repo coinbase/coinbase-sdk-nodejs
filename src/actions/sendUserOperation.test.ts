@@ -33,12 +33,10 @@ describe("sendUserOperation", () => {
   } as const;
 
   const VALID_CREATE_OPERATION_RESPONSE = {
-    id: "op123",
     user_op_hash: "0x456def" as const,
   };
 
   const VALID_BROADCAST_RESPONSE = {
-    id: "op123",
     status: UserOperationStatusEnum.Broadcast,
     user_op_hash: "0x456def" as const,
   };
@@ -87,14 +85,13 @@ describe("sendUserOperation", () => {
 
     expect(Coinbase.apiClients.smartWallet!.broadcastUserOperation).toHaveBeenCalledWith(
       VALID_WALLET.address,
-      VALID_CREATE_OPERATION_RESPONSE.id,
+      VALID_CREATE_OPERATION_RESPONSE.user_op_hash,
       {
         signature: "0x789ghi",
       },
     );
 
     expect(result).toEqual({
-      id: VALID_BROADCAST_RESPONSE.id,
       smartWalletAddress: VALID_WALLET.address,
       status: VALID_BROADCAST_RESPONSE.status,
       userOpHash: VALID_BROADCAST_RESPONSE.user_op_hash,
@@ -124,14 +121,13 @@ describe("sendUserOperation", () => {
 
     expect(Coinbase.apiClients.smartWallet!.broadcastUserOperation).toHaveBeenCalledWith(
       VALID_WALLET.address,
-      VALID_CREATE_OPERATION_RESPONSE.id,
+      VALID_CREATE_OPERATION_RESPONSE.user_op_hash,
       {
         signature: "0x789ghi",
       },
     );
 
     expect(result).toEqual({
-      id: VALID_BROADCAST_RESPONSE.id,
       smartWalletAddress: VALID_WALLET.address,
       status: VALID_BROADCAST_RESPONSE.status,
       userOpHash: VALID_BROADCAST_RESPONSE.user_op_hash,
@@ -170,14 +166,13 @@ describe("sendUserOperation", () => {
 
     expect(Coinbase.apiClients.smartWallet!.broadcastUserOperation).toHaveBeenCalledWith(
       VALID_WALLET.address,
-      VALID_CREATE_OPERATION_RESPONSE.id,
+      VALID_CREATE_OPERATION_RESPONSE.user_op_hash,
       {
         signature: "0x789ghi",
       },
     );
 
     expect(result).toEqual({
-      id: VALID_BROADCAST_RESPONSE.id,
       smartWalletAddress: VALID_WALLET.address,
       status: VALID_BROADCAST_RESPONSE.status,
       userOpHash: VALID_BROADCAST_RESPONSE.user_op_hash,
@@ -211,14 +206,13 @@ describe("sendUserOperation", () => {
 
     expect(Coinbase.apiClients.smartWallet!.broadcastUserOperation).toHaveBeenCalledWith(
       VALID_WALLET.address,
-      VALID_CREATE_OPERATION_RESPONSE.id,
+      VALID_CREATE_OPERATION_RESPONSE.user_op_hash,
       {
         signature: "0x789ghi",
       },
     );
 
     expect(result).toEqual({
-      id: VALID_BROADCAST_RESPONSE.id,
       smartWalletAddress: VALID_WALLET.address,
       status: VALID_BROADCAST_RESPONSE.status,
       userOpHash: VALID_BROADCAST_RESPONSE.user_op_hash,
@@ -262,14 +256,13 @@ describe("sendUserOperation", () => {
 
     expect(Coinbase.apiClients.smartWallet!.broadcastUserOperation).toHaveBeenCalledWith(
       VALID_WALLET.address,
-      VALID_CREATE_OPERATION_RESPONSE.id,
+      VALID_CREATE_OPERATION_RESPONSE.user_op_hash,
       {
         signature: "0x789ghi",
       },
     );
 
     expect(result).toEqual({
-      id: VALID_BROADCAST_RESPONSE.id,
       smartWalletAddress: VALID_WALLET.address,
       status: VALID_BROADCAST_RESPONSE.status,
       userOpHash: VALID_BROADCAST_RESPONSE.user_op_hash,

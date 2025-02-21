@@ -7,19 +7,17 @@ import * as waitUtils from "../utils/wait";
 describe("waitForUserOperation", () => {
   const VALID_WALLET_ADDRESS = "0x1234567890123456789012345678901234567890" as const;
 
-  const VALID_OPERATION_ID = "op123";
+  const VALID_OPERATION_HASH = "0x1234567890123456789012345678901234567890" as const;
   const VALID_OPERATION_RESPONSE = {
-    id: VALID_OPERATION_ID,
     status: UserOperationStatusEnum.Complete,
     transaction_hash: "0x1234567890123456789012345678901234567890",
-    user_op_hash: "0x1234567890123456789012345678901234567890",
+    user_op_hash: VALID_OPERATION_HASH,
   };
 
   const FAILED_OPERATION_RESPONSE = {
-    id: VALID_OPERATION_ID,
     smartWalletAddress: VALID_WALLET_ADDRESS,
     status: UserOperationStatusEnum.Failed,
-    user_op_hash: "0x1234567890123456789012345678901234567890",
+    user_op_hash: VALID_OPERATION_HASH,
   };
 
   beforeEach(() => {
@@ -34,21 +32,20 @@ describe("waitForUserOperation", () => {
 
   it("should successfully wait for a completed operation", async () => {
     const result = await waitForUserOperation({
-      id: VALID_OPERATION_ID,
+      userOpHash: VALID_OPERATION_HASH,
       smartWalletAddress: VALID_WALLET_ADDRESS,
     });
 
     expect(Coinbase.apiClients.smartWallet!.getUserOperation).toHaveBeenCalledWith(
       VALID_WALLET_ADDRESS,
-      VALID_OPERATION_ID,
+      VALID_OPERATION_HASH,
     );
 
     expect(result).toEqual({
-      id: VALID_OPERATION_ID,
       smartWalletAddress: VALID_WALLET_ADDRESS,
       status: UserOperationStatusEnum.Complete,
       transactionHash: "0x1234567890123456789012345678901234567890",
-      userOpHash: "0x1234567890123456789012345678901234567890",
+      userOpHash: VALID_OPERATION_HASH,
     });
   });
 
@@ -56,21 +53,20 @@ describe("waitForUserOperation", () => {
     Coinbase.apiClients.smartWallet!.getUserOperation = mockReturnValue(FAILED_OPERATION_RESPONSE);
 
     const result = await waitForUserOperation({
-      id: VALID_OPERATION_ID,
+      userOpHash: VALID_OPERATION_HASH,
       smartWalletAddress: VALID_WALLET_ADDRESS,
     });
 
     expect(Coinbase.apiClients.smartWallet!.getUserOperation).toHaveBeenCalledWith(
       VALID_WALLET_ADDRESS,
-      VALID_OPERATION_ID,
+      VALID_OPERATION_HASH,
     );
 
     expect(result).toEqual({
-      id: VALID_OPERATION_ID,
       smartWalletAddress: VALID_WALLET_ADDRESS,
       status: UserOperationStatusEnum.Failed,
       transactionHash: undefined,
-      userOpHash: "0x1234567890123456789012345678901234567890",
+      userOpHash: VALID_OPERATION_HASH,
     });
   });
 
@@ -78,7 +74,7 @@ describe("waitForUserOperation", () => {
     const waitSpy = jest.spyOn(waitUtils, "wait");
 
     const result = await waitForUserOperation({
-      id: VALID_OPERATION_ID,
+      userOpHash: VALID_OPERATION_HASH,
       smartWalletAddress: VALID_WALLET_ADDRESS,
     });
 
@@ -90,11 +86,10 @@ describe("waitForUserOperation", () => {
     );
 
     expect(result).toEqual({
-      id: VALID_OPERATION_ID,
       smartWalletAddress: VALID_WALLET_ADDRESS,
       status: UserOperationStatusEnum.Complete,
       transactionHash: "0x1234567890123456789012345678901234567890",
-      userOpHash: "0x1234567890123456789012345678901234567890",
+      userOpHash: VALID_OPERATION_HASH,
     });
   });
 
@@ -102,7 +97,7 @@ describe("waitForUserOperation", () => {
     const waitSpy = jest.spyOn(waitUtils, "wait");
 
     const result = await waitForUserOperation({
-      id: VALID_OPERATION_ID,
+      userOpHash: VALID_OPERATION_HASH,
       smartWalletAddress: VALID_WALLET_ADDRESS,
       waitOptions: { timeoutSeconds: 1, intervalSeconds: 0.1 },
     });
@@ -115,23 +110,22 @@ describe("waitForUserOperation", () => {
     );
 
     expect(result).toEqual({
-      id: VALID_OPERATION_ID,
       smartWalletAddress: VALID_WALLET_ADDRESS,
       status: UserOperationStatusEnum.Complete,
       transactionHash: "0x1234567890123456789012345678901234567890",
-      userOpHash: "0x1234567890123456789012345678901234567890",
+      userOpHash: VALID_OPERATION_HASH,
     });
   });
 
   it("should throw an error if the operation is not terminal", async () => {
     Coinbase.apiClients.smartWallet!.getUserOperation = mockReturnValue({
-      id: VALID_OPERATION_ID,
+      user_op_hash: VALID_OPERATION_HASH,
       status: UserOperationStatusEnum.Pending,
     });
 
     await expect(
       waitForUserOperation({
-        id: VALID_OPERATION_ID,
+        userOpHash: VALID_OPERATION_HASH,
         smartWalletAddress: VALID_WALLET_ADDRESS,
         waitOptions: { timeoutSeconds: 1 },
       }),

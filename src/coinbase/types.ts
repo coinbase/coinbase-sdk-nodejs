@@ -315,7 +315,7 @@ export type SmartWalletAPIClient = {
    */
   getUserOperation: (
     smartWalletAddress: string,
-    userOperationId: string,
+    userOpHash: string,
     options?: RawAxiosRequestConfig,
   ) => AxiosPromise<UserOperationModel>;
 };

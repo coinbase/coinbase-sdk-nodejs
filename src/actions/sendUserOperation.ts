@@ -23,8 +23,6 @@ export type SendUserOperationOptions<T extends readonly unknown[]> = {
  * Return type for the sendUserOperation function
  */
 export type SendUserOperationReturnType = {
-  /** The UUID of the user operation which is server-generated identifier for the operation */
-  id: string;
   /** The address of the smart wallet */
   smartWalletAddress: Address;
   /** The status of the user operation */
@@ -75,7 +73,7 @@ export async function sendUserOperation<T extends readonly unknown[]>(
   }
 
   const encodedCalls = calls.map(call => {
-    const value = (call.value ?? BigInt(0)).toString(); // Convert BigInt to string
+    const value = (call.value ?? BigInt(0)).toString();
 
     if ("abi" in call && call.abi && "functionName" in call) {
       return {
@@ -113,14 +111,13 @@ export async function sendUserOperation<T extends readonly unknown[]>(
 
   const broadcastResponse = await Coinbase.apiClients.smartWallet!.broadcastUserOperation(
     wallet.address,
-    createOpResponse.data.id,
+    createOpResponse.data.user_op_hash,
     {
       signature,
     },
   );
 
   return {
-    id: broadcastResponse.data.id,
     smartWalletAddress: wallet.address,
     status: broadcastResponse.data.status,
     userOpHash: createOpResponse.data.user_op_hash,

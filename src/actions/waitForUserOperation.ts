@@ -7,8 +7,8 @@ import { UserOperation, UserOperationStatusEnum } from "../client";
  * Options for waiting for a user operation
  */
 export type WaitForUserOperationOptions = {
-  /** The UUID of the user operation which was returned by the sendUserOperation function */
-  id: string;
+  /** The hash of the user operation */
+  userOpHash: Hex;
   /** The address of the smart wallet */
   smartWalletAddress: Address;
   /** Optional options for the wait operation */
@@ -19,8 +19,6 @@ export type WaitForUserOperationOptions = {
  * Represents a failed user operation
  */
 export type FailedOperation = {
-  /** The UUID of the user operation which was returned by the sendUserOperation function */
-  id: string;
   /** The address of the smart wallet */
   smartWalletAddress: Address;
   /** The status of the user operation */
@@ -33,8 +31,6 @@ export type FailedOperation = {
  * Represents a completed user operation
  */
 export type CompletedOperation = {
-  /** The UUID of the user operation which was returned by the sendUserOperation function */
-  id: string;
   /** The address of the smart wallet */
   smartWalletAddress: Address;
   /** The transaction hash of the user operation */
@@ -72,12 +68,12 @@ export type WaitForUserOperationReturnType = FailedOperation | CompletedOperatio
 export async function waitForUserOperation(
   options: WaitForUserOperationOptions,
 ): Promise<WaitForUserOperationReturnType> {
-  const { id, smartWalletAddress } = options;
+  const { userOpHash, smartWalletAddress } = options;
 
   const reload = async () => {
     const response = await Coinbase.apiClients.smartWallet!.getUserOperation(
       smartWalletAddress,
-      id,
+      userOpHash,
     );
     return response.data;
   };
@@ -85,14 +81,12 @@ export async function waitForUserOperation(
   const transform = (operation: UserOperation): WaitForUserOperationReturnType => {
     if (operation.status === UserOperationStatusEnum.Failed) {
       return {
-        id: operation.id,
         smartWalletAddress: smartWalletAddress,
         status: UserOperationStatusEnum.Failed,
         userOpHash: operation.user_op_hash as Hex,
       } satisfies FailedOperation;
     } else if (operation.status === UserOperationStatusEnum.Complete) {
       return {
-        id: operation.id,
         smartWalletAddress: smartWalletAddress,
         transactionHash: operation.transaction_hash!,
         status: UserOperationStatusEnum.Complete,
