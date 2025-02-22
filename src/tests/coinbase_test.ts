@@ -21,6 +21,7 @@ import axios from "axios";
 const PATH_PREFIX = "./src/tests/config";
 
 describe("Coinbase tests", () => {
+  // General tests that don't depend on the actual key file contents.
   describe(".networks", () => {
     it("returns a map of networks that match the api generated NetworkIdentifier", () => {
       expect(Coinbase.networks).toEqual(NetworkIdentifier);
@@ -46,16 +47,9 @@ describe("Coinbase tests", () => {
     ).toThrow("Invalid configuration: file not found at ./src/tests/config/does-not-exist.json");
   });
 
-  it("should initialize the Coinbase SDK from a JSON file", () => {
-    const cbInstance = Coinbase.configureFromJson({
-      filePath: `${PATH_PREFIX}/test_api_key.json`,
-    });
-    expect(cbInstance).toBeInstanceOf(Coinbase);
-  });
-
   it("should throw an error if there is an issue reading the file or parsing the JSON data", () => {
     expect(() => Coinbase.configureFromJson({ filePath: `${PATH_PREFIX}/invalid.json` })).toThrow(
-      "Invalid configuration: missing configuration values",
+      "Invalid configuration: missing API key identifier or privateKey",
     );
   });
 
@@ -76,48 +70,86 @@ describe("Coinbase tests", () => {
     fs.unlinkSync(expandedPath);
   });
 
-  describe("should able to interact with the API", () => {
-    let walletId, publicKey, addressId, transactionHash;
-    const cbInstance = Coinbase.configureFromJson({
-      filePath: `${PATH_PREFIX}/test_api_key.json`,
-      debugging: true,
-    });
+  // Helper function to run API interaction tests with a given config file.
+  const runApiInteractionTests = (filePath: string) => {
+    describe(`Using key file: ${filePath}`, () => {
+      let walletId: string, publicKey: string, addressId: string, transactionHash: string;
+      // Initialize an instance with debugging enabled.
+      const cbInstance = Coinbase.configureFromJson({
+        filePath,
+        debugging: true,
+      });
 
-    beforeEach(async () => {
-      jest.clearAllMocks();
-      Coinbase.apiClients = {
-        wallet: walletsApiMock,
-        address: addressesApiMock,
-      };
-      const ethAddress = ethers.Wallet.createRandom();
+      beforeEach(async () => {
+        jest.clearAllMocks();
+        Coinbase.apiClients = {
+          wallet: walletsApiMock,
+          address: addressesApiMock,
+        };
+        const ethAddress = ethers.Wallet.createRandom();
 
-      walletId = randomUUID();
-      publicKey = ethAddress.publicKey;
-      addressId = randomUUID();
-      transactionHash = generateRandomHash(8);
+        walletId = randomUUID();
+        publicKey = ethAddress.publicKey;
+        addressId = randomUUID();
+        transactionHash = generateRandomHash(8);
 
-      const walletModel = {
-        id: walletId,
-        network_id: Coinbase.networks.BaseSepolia,
-        default_address: {
-          wallet_id: walletId,
-          address_id: addressId,
-          public_key: publicKey,
+        const walletModel = {
+          id: walletId,
           network_id: Coinbase.networks.BaseSepolia,
-        },
-      };
+          default_address: {
+            wallet_id: walletId,
+            address_id: addressId,
+            public_key: publicKey,
+            network_id: Coinbase.networks.BaseSepolia,
+          },
+        };
 
-      Coinbase.apiClients.wallet!.createWallet = mockReturnValue(walletModel);
-      Coinbase.apiClients.wallet!.getWallet = mockReturnValue(walletModel);
-      Coinbase.apiClients.address!.createAddress = mockReturnValue(
-        VALID_WALLET_MODEL.default_address,
-      );
+        Coinbase.apiClients.wallet!.createWallet = mockReturnValue(walletModel);
+        Coinbase.apiClients.wallet!.getWallet = mockReturnValue(walletModel);
+        Coinbase.apiClients.address!.createAddress = mockReturnValue(
+          VALID_WALLET_MODEL.default_address,
+        );
+      });
+
+      it("enables interaction with the API clients", async () => {
+        const wallet = await Wallet.create({ networkId: NetworkIdentifier.BaseSepolia });
+        expect(wallet.getId()).toEqual(walletId);
+      });
     });
+  };
 
-    it("enables interaction with the API clients", async () => {
-      const wallet = await Wallet.create({ networkId: NetworkIdentifier.BaseSepolia });
+  // Group tests by key type.
+  describe("Standard API Key tests", () => {
+    const keyFiles = [
+      { description: "with name", path: `${PATH_PREFIX}/test_api_key.json` },
+      { description: "with only id", path: `${PATH_PREFIX}/test_api_key_with_only_id.json` },
+    ];
 
-      expect(wallet.getId()).toEqual(walletId);
+    keyFiles.forEach(({ description, path: filePath }) => {
+      describe(`Standard API key ${description}`, () => {
+        it("should initialize the Coinbase SDK from a JSON file", () => {
+          const cbInstance = Coinbase.configureFromJson({ filePath });
+          expect(cbInstance).toBeInstanceOf(Coinbase);
+        });
+        runApiInteractionTests(filePath);
+      });
+    });
+  });
+
+  describe("ED25519 API Key tests", () => {
+    const keyFiles = [
+      { description: "with name", path: `${PATH_PREFIX}/test_ed25519_api_key.json` },
+      { description: "with only id", path: `${PATH_PREFIX}/test_ed25519_api_key_with_only_id.json` },
+    ];
+
+    keyFiles.forEach(({ description, path: filePath }) => {
+      describe(`ED25519 API key ${description}`, () => {
+        it("should initialize the Coinbase SDK from a JSON file", () => {
+          const cbInstance = Coinbase.configureFromJson({ filePath });
+          expect(cbInstance).toBeInstanceOf(Coinbase);
+        });
+        runApiInteractionTests(filePath);
+      });
     });
   });
 });

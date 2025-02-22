@@ -6,6 +6,7 @@ import * as crypto from "crypto";
 import Decimal from "decimal.js";
 import { ethers } from "ethers";
 import * as fs from "fs";
+import * as ed2curve from "ed2curve";
 import * as secp256k1 from "secp256k1";
 import { Address as AddressModel, Wallet as WalletModel } from "../client";
 import { Address } from "./address";
@@ -1093,16 +1094,33 @@ export class Wallet {
   /**
    * Gets the key for encrypting seed data.
    *
+   * For EC keys (PEM format), it uses crypto.diffieHellman.
+   * For Ed25519 keys (assumed to be a base64-encoded 64-byte string), it converts the secret key
+   * to an X25519 key using ed2curve.
+   *
    * @returns The encryption key.
    */
   private getEncryptionKey(): Buffer {
-    const privateKey = crypto.createPrivateKey(Coinbase.apiKeyPrivateKey);
-    const publicKey = crypto.createPublicKey(Coinbase.apiKeyPrivateKey);
-    const encryptionKey = crypto.diffieHellman({
-      privateKey,
-      publicKey,
-    });
-    return encryptionKey;
+    const apiKeyPrivateKey = Coinbase.apiKeyPrivateKey;
+    if (apiKeyPrivateKey.startsWith("-----BEGIN")) {
+      // Assume EC key in PEM format.
+      const privateKey = crypto.createPrivateKey(apiKeyPrivateKey);
+      const publicKey = crypto.createPublicKey(apiKeyPrivateKey);
+      return crypto.diffieHellman({ privateKey, publicKey });
+    } else {
+      // Assume Ed25519 key: a base64-encoded 64-byte string (first 32 bytes = seed, next 32 = public key)
+      const decoded = Buffer.from(apiKeyPrivateKey, "base64");
+      if (decoded.length !== 64) {
+        throw new Error("Invalid Ed25519 key format");
+      }
+      const seed = decoded.slice(0, 32);
+      // Convert the Ed25519 seed to an X25519 key using ed2curve.
+      const x25519 = ed2curve.convertSecretKey(new Uint8Array(seed));
+      if (!x25519) {
+        throw new Error("Failed to convert Ed25519 key to X25519");
+      }
+      return Buffer.from(x25519);
+    }
   }
 
   /**
