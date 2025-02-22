@@ -129,7 +129,7 @@ export const newAddressModelsFromWallet = async (
   const address2 = getAddressFromHDKey(wallet.derive("m/44'/60'/0'/0/1"));
   const publicKey1 = convertStringToHex(wallet.derive("m/44'/60'/0'/0/0").publicKey!);
   const publicKey2 = convertStringToHex(wallet.derive("m/44'/60'/0'/0/1").publicKey!);
-  
+
   return [
     {
       address_id: address1,
@@ -144,7 +144,7 @@ export const newAddressModelsFromWallet = async (
       public_key: publicKey2,
       wallet_id: walletId,
       index: 1,
-    }
+    },
   ];
 };
 
@@ -660,6 +660,7 @@ export function mockEthereumValidator(
       public_key: public_key,
       withdrawal_address: "0xwithdrawal_address_1",
       fee_recipient_address: "0xfee_recipient_address_1",
+      forwarded_fee_recipient_address: "0xforwarded_fee_recipient_address_1",
       slashed: false,
       activationEpoch: "10",
       exitEpoch: "10",
@@ -876,6 +877,14 @@ export const fundOperationsApiMock = {
 
 export const reputationApiMock = {
   getAddressReputation: jest.fn(),
+};
+
+export const smartWalletApiMock = {
+  createSmartWallet: jest.fn(),
+  getSmartWallet: jest.fn(),
+  createUserOperation: jest.fn(),
+  broadcastUserOperation: jest.fn(),
+  getUserOperation: jest.fn(),
 };
 
 export const testAllReadTypesABI = [
