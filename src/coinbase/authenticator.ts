@@ -42,7 +42,7 @@ export class CoinbaseAuthenticator {
     config: InternalAxiosRequestConfig,
     debugging = false,
   ): Promise<InternalAxiosRequestConfig> {
-    const method = config.method?.toString().toUpperCase() || "GET";
+    const method = config.method?.toString().toUpperCase();
     const token = await this.buildJWT(config.url || "", method);
     if (debugging) {
       console.log(`API REQUEST: ${method} ${config.url}`);
