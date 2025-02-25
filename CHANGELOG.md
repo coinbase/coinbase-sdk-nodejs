@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## [0.20.0] - 2025-02-25
+
+### Added
+- Add support for Ed25519 API keys.
+
 ## [0.19.0] - 2025-02-21
 ### Added
 - Ability to create a SmartWallet and send a user operation.
