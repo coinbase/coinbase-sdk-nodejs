@@ -1400,7 +1400,7 @@ describe("Wallet Class", () => {
       expect(() => seedlessWallet.saveSeedToFile(filePath, false)).toThrow(Error);
     });
 
-    describe("#saveSeed additional coverage", () => {
+    describe("#saveSeedToFile: correctly merges seed data and handles malformed JSON errors", () => {
       const filePath = "test_seeds.json";
       let walletForSave: Wallet;
       let originalFileContent: string | null = null;
@@ -1550,7 +1550,7 @@ describe("Wallet Class", () => {
       fs.unlinkSync("invalid-file.json");
     });
 
-    describe("#loadSeed additional coverage", () => {
+    describe("#loadSeedFromFile: validates seed data integrity and loads unencrypted seed", () => {
       const filePath = "test_seeds_load.json";
       let seedlessWalletForLoad: Wallet;
 

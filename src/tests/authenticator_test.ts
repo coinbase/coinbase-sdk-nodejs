@@ -162,7 +162,7 @@ describe("Authenticator tests for Edwards key", () => {
     await expect(authenticator.authenticateRequest(invalidConfig)).rejects.toThrow();
   });
 
-  describe("Edwards branch", () => {
+  describe("With a valid JWT and correct correlation context header", () => {
     beforeEach(() => {
       // Override SignJWT.prototype.sign to simulate successful signing.
       jest.spyOn(SignJWT.prototype, "sign").mockResolvedValue("dummy.jwt.token");
