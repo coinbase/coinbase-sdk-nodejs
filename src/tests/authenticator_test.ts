@@ -61,7 +61,7 @@ describe("Authenticator tests", () => {
     it("includes the source version in the correlation context", async () => {
       const config = await authenticator.authenticateRequest(VALID_CONFIG, true);
       const correlationContext = config.headers["Correlation-Context"] as string;
-      expect(correlationContext).toContain("sdk_version=0.19.0,sdk_language=typescript,source=mockSource");
+      expect(correlationContext).toContain("sdk_version=0.20.0,sdk_language=typescript,source=mockSource");
     });
   });
 
@@ -193,7 +193,7 @@ describe("Authenticator tests for Edwards key", () => {
       it("includes the source version in the correlation context", async () => {
         const config = await authenticator.authenticateRequest(VALID_CONFIG, true);
         const correlationContext = config.headers["Correlation-Context"] as string;
-        expect(correlationContext).toContain("sdk_version=0.19.0,sdk_language=typescript,source=mockSource");
+        expect(correlationContext).toContain("sdk_version=0.20.0,sdk_language=typescript,source=mockSource");
       });
     });
 
