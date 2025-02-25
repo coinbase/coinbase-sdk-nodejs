@@ -49,7 +49,7 @@ export type SendUserOperationReturnType = {
   smartWalletAddress: Address;
   /** The status of the user operation */
   status: typeof UserOperationStatusEnum.Broadcast;
-  /** The hash of the user operation */
+  /** The hash of the user operation. This is not the transaction hash which is only available after the operation is completed.*/
   userOpHash: Hex;
 };
 
