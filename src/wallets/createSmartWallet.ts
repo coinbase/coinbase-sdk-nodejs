@@ -12,7 +12,11 @@ export type CreateSmartWalletOptions = {
 };
 
 /**
- * Creates a new smart wallet using the Coinbase API
+ * @description Creates a new smart wallet using the Coinbase API
+ *
+ * @param - {@link CreateSmartWalletOptions} options - Configuration options for creating the smart wallet
+ * @returns {Promise<SmartWallet>} A promise that resolves to the newly created smart wallet instance
+ * @throws {Error} If the Coinbase API client is not initialized
  *
  * See https://viem.sh/docs/accounts/local/privateKeyToAccount for using a Viem LocalAccount with SmartWallet
  *
@@ -31,9 +35,6 @@ export type CreateSmartWalletOptions = {
  * });
  * ```
  *
- * @param {CreateSmartWalletOptions} options - Configuration options for creating the smart wallet
- * @returns {Promise<SmartWallet>} A promise that resolves to the newly created smart wallet instance
- * @throws {Error} If the Coinbase API client is not initialized
  */
 export async function createSmartWallet(options: CreateSmartWalletOptions): Promise<SmartWallet> {
   const result = await Coinbase.apiClients.smartWallet!.createSmartWallet({
