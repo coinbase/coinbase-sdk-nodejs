@@ -23,7 +23,7 @@ export type FailedOperation = {
   smartWalletAddress: Address;
   /** The status of the user operation */
   status: typeof UserOperationStatusEnum.Failed;
-  /** The hash of the user operation */
+  /** The hash of the user operation. This is not the transaction hash which is only available after the operation is completed.*/
   userOpHash: Hex;
 };
 
@@ -33,11 +33,11 @@ export type FailedOperation = {
 export type CompletedOperation = {
   /** The address of the smart wallet */
   smartWalletAddress: Address;
-  /** The transaction hash of the user operation */
+  /** The transaction hash that executed the completed user operation */
   transactionHash: string;
   /** The status of the user operation */
   status: typeof UserOperationStatusEnum.Complete;
-  /** The hash of the user operation */
+  /** The hash of the user operation. This is not the transaction hash which is only available after the operation is completed.*/
   userOpHash: Hex;
 };
 
