@@ -11,7 +11,29 @@ import { Coinbase } from "../coinbase/coinbase";
  * @template T - Array type for the calls parameter
  */
 export type SendUserOperationOptions<T extends readonly unknown[]> = {
-  /** Array of contract calls to execute in the user operation */
+  /**
+   * Array of contract calls to execute in the user operation.
+   * Each call can either be:
+   * - A direct call with `to`, `value`, and `data`
+   * - A contract call with `to`, `abi`, `functionName`, and `args`
+   *
+   * @example
+   * ```ts
+   * const calls = [
+   *   {
+   *     to: "0x1234567890123456789012345678901234567890",
+   *     value: parseEther("0.0000005"),
+   *     data: "0x",
+   *   },
+   *   {
+   *     to: "0x1234567890123456789012345678901234567890",
+   *     abi: erc20Abi,
+   *     functionName: "transfer",
+   *     args: [to, amount],
+   *   },
+   * ]
+   * ```
+   */
   calls: Calls<T>;
   /** Chain ID of the network to execute on */
   chainId: SupportedChainId;
