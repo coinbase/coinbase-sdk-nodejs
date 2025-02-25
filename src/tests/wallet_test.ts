@@ -366,7 +366,6 @@ describe("Wallet Class", () => {
 
     describe(".stakeableBalance", () => {
       it("should return the stakeable balance successfully with default params", async () => {
-        //const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
         Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
         const stakeableBalance = await wallet.stakeableBalance(Coinbase.assets.Eth);
         expect(stakeableBalance).toEqual(new Decimal("3"));
@@ -397,7 +396,7 @@ describe("Wallet Class", () => {
         Coinbase.apiClients.stake!.fetchStakingRewards = mockReturnValue(STAKING_REWARD_RESPONSE);
         Coinbase.apiClients.asset!.getAsset = getAssetMock();
         const response = await wallet.stakingRewards(Coinbase.assets.Eth);
-        expect(response).toBeInstanceOf(Array<StakingReward>);
+        expect(response).toBeInstanceOf(Array);
       });
     });
 
@@ -409,7 +408,7 @@ describe("Wallet Class", () => {
         );
         Coinbase.apiClients.asset!.getAsset = getAssetMock();
         const response = await wallet.historicalStakingBalances(Coinbase.assets.Eth);
-        expect(response).toBeInstanceOf(Array<StakingBalance>);
+        expect(response).toBeInstanceOf(Array);
         expect(response.length).toEqual(2);
         expect(response[0].bondedStake().amount).toEqual(new Decimal("32"));
         expect(response[0].bondedStake().asset?.assetId).toEqual("eth");
@@ -472,7 +471,7 @@ describe("Wallet Class", () => {
     });
   });
 
-  describe(".createTransfer", () => {
+  describe("#createTransfer", () => {
     let weiAmount, destination;
     let balanceModel: BalanceModel;
 
@@ -521,8 +520,6 @@ describe("Wallet Class", () => {
       expect(transfer).toBeInstanceOf(Transfer);
       expect(transfer.getId()).toBe(VALID_TRANSFER_MODEL.transfer_id);
     });
-
-    // TODO: Returns the transfer.
 
     it("should throw an APIError if the createTransfer API call fails", async () => {
       Coinbase.apiClients.transfer!.createTransfer = mockReturnRejectedValue(
@@ -1402,6 +1399,55 @@ describe("Wallet Class", () => {
       const seedlessWallet = Wallet.init(walletModel, "");
       expect(() => seedlessWallet.saveSeedToFile(filePath, false)).toThrow(Error);
     });
+
+    describe("#saveSeed additional coverage", () => {
+      const filePath = "test_seeds.json";
+      let walletForSave: Wallet;
+      let originalFileContent: string | null = null;
+
+      beforeEach(() => {
+        try {
+          originalFileContent = fs.readFileSync(filePath, "utf8");
+        } catch {}
+        fs.writeFileSync(filePath, JSON.stringify({}), "utf8");
+        walletForSave = Wallet.init(walletModel, seed);
+      });
+
+      afterEach(() => {
+        try {
+          fs.unlinkSync(filePath);
+        } catch {}
+        if (originalFileContent !== null) {
+          fs.writeFileSync(filePath, originalFileContent, "utf8");
+        }
+      });
+
+      it("should merge new seed data with existing seed data in file", () => {
+        const otherWalletId = crypto.randomUUID();
+        const otherSeedData = {
+          [otherWalletId]: {
+            seed: "abcdef",
+            encrypted: false,
+            iv: "",
+            authTag: "",
+            networkId: Coinbase.networks.BaseSepolia,
+          },
+        };
+        fs.writeFileSync(filePath, JSON.stringify(otherSeedData), "utf8");
+
+        const result = walletForSave.saveSeedToFile(filePath, false);
+        const storedData = JSON.parse(fs.readFileSync(filePath, "utf8"));
+        expect(Object.keys(storedData).length).toBe(2);
+        expect(storedData[walletForSave.getId()!].seed).toBe(seed);
+        expect(storedData[otherWalletId].seed).toBe("abcdef");
+        expect(result).toContain(`Successfully saved seed for ${walletForSave.getId()}`);
+      });
+
+      it("should throw an error when the seed file contains malformed JSON", () => {
+        fs.writeFileSync(filePath, "not a valid json", "utf8");
+        expect(() => walletForSave.saveSeedToFile(filePath, false)).toThrow(ArgumentError);
+      });
+    });
   });
 
   describe("#loadSeed", () => {
@@ -1502,6 +1548,85 @@ describe("Wallet Class", () => {
       fs.writeFileSync("invalid-file.json", `{"test":{"authTag":false}}`, "utf8");
       await expect(wallet.loadSeedFromFile("invalid-file.json")).rejects.toThrow(ArgumentError);
       fs.unlinkSync("invalid-file.json");
+    });
+
+    describe("#loadSeed additional coverage", () => {
+      const filePath = "test_seeds_load.json";
+      let seedlessWalletForLoad: Wallet;
+
+      beforeEach(() => {
+        seedlessWalletForLoad = Wallet.init(walletModel, "");
+      });
+
+      afterEach(() => {
+        try {
+          fs.unlinkSync(filePath);
+        } catch {}
+      });
+
+      it("should throw an error if the seed data in file is missing the seed property", async () => {
+        const incompleteSeedData = {
+          [walletModel.id]: {
+            encrypted: false,
+            iv: "",
+            authTag: "",
+            seed: "",
+            networkId: Coinbase.networks.BaseSepolia,
+          },
+        };
+        fs.writeFileSync(filePath, JSON.stringify(incompleteSeedData), "utf8");
+        await expect(seedlessWalletForLoad.loadSeedFromFile(filePath)).rejects.toThrow(
+          "Seed data is malformed"
+        );
+      });
+
+      it("should throw an error if encrypted seed data is missing iv", async () => {
+        const badEncryptedData = {
+          [walletModel.id]: {
+            encrypted: true,
+            iv: "",
+            authTag: "someauthtag",
+            seed: "deadbeef",
+            networkId: Coinbase.networks.BaseSepolia,
+          },
+        };
+        fs.writeFileSync(filePath, JSON.stringify(badEncryptedData), "utf8");
+        await expect(seedlessWalletForLoad.loadSeedFromFile(filePath)).rejects.toThrow(
+          "Encrypted seed data is malformed"
+        );
+      });
+
+      it("should throw an error if encrypted seed data is missing authTag", async () => {
+        const badEncryptedData = {
+          [walletModel.id]: {
+            encrypted: true,
+            iv: "abcdef123456",
+            authTag: "",
+            seed: "deadbeef",
+            networkId: Coinbase.networks.BaseSepolia,
+          },
+        };
+        fs.writeFileSync(filePath, JSON.stringify(badEncryptedData), "utf8");
+        await expect(seedlessWalletForLoad.loadSeedFromFile(filePath)).rejects.toThrow(
+          "Encrypted seed data is malformed"
+        );
+      });
+
+      it("should successfully load an unencrypted seed and set the wallet master", async () => {
+        const seedData = {
+          [walletModel.id]: {
+            encrypted: false,
+            iv: "",
+            authTag: "",
+            seed,
+            networkId: Coinbase.networks.BaseSepolia,
+          },
+        };
+        fs.writeFileSync(filePath, JSON.stringify(seedData), "utf8");
+        const msg = await seedlessWalletForLoad.loadSeedFromFile(filePath);
+        expect(msg).toContain(`Successfully loaded seed for wallet ${walletModel.id}`);
+        expect(seedlessWalletForLoad.canSign()).toBe(true);
+      });
     });
   });
 
