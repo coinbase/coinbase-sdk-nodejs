@@ -25,7 +25,11 @@ import {
 import { BASE_PATH } from "./../client/base";
 import { Configuration } from "./../client/configuration";
 import { CoinbaseAuthenticator } from "./authenticator";
-import { InvalidAPIKeyFormatError, InvalidConfigurationError } from "./errors";
+import {
+  InvalidAPIKeyFormatError,
+  InvalidConfigurationError,
+  UninitializedSDKError,
+} from "./errors";
 import { ApiClients, CoinbaseConfigureFromJsonOptions, CoinbaseOptions } from "./types";
 import { logApiResponse, registerAxiosInterceptors } from "./utils";
 import * as os from "os";
@@ -63,7 +67,14 @@ export class Coinbase {
     Cbbtc: "cbbtc",
   };
 
-  static apiClients: ApiClients = {};
+  static apiClients: ApiClients = new Proxy({} as ApiClients, {
+    get(target, prop) {
+      if (!Reflect.has(target, prop)) {
+        throw new UninitializedSDKError();
+      }
+      return Reflect.get(target, prop);
+    },
+  });
 
   /**
    * The CDP API key Private Key.

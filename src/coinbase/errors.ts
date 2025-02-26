@@ -133,3 +133,27 @@ export class AlreadySignedError extends Error {
     }
   }
 }
+
+/**
+ * UninitializedSDKError is thrown when the Coinbase instance is not initialized.
+ */
+export class UninitializedSDKError extends Error {
+  static DEFAULT_MESSAGE =
+    "Coinbase SDK has not been initialized. Please initialize by calling either:\n\n" +
+    "- Coinbase.configure({apiKeyName: '...', privateKey: '...'})\n" +
+    "- Coinbase.configureFromJson({filePath: '/path/to/api_keys.json'})\n\n" +
+    "If needed, register for API keys at https://portal.cdp.coinbase.com/ or view the docs at https://docs.cdp.coinbase.com/wallet-api/docs/welcome";
+
+  /**
+   * Initializes a new UninitializedSDKError instance.
+   *
+   * @param message - The error message.
+   */
+  constructor(message: string = UninitializedSDKError.DEFAULT_MESSAGE) {
+    super(message);
+    this.name = "UninitializedSDKError";
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, UninitializedSDKError);
+    }
+  }
+}
