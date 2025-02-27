@@ -254,6 +254,15 @@ export class Validator {
   }
 
   /**
+   * Returns the withdrawal credentials of the validator.
+   *
+   * @returns The withdrawal credentials as a string.
+   */
+  public getWithdrawalCredentials(): string {
+    return this.model.details?.withdrawal_credentials || "";
+  }
+
+  /**
    * Returns the address for execution layer rewards (MEV & tx fees).If using a reward splitter plan, this is a smart contract
    * address that splits rewards based on defined commissions and send a portion to the forwarded_fee_recipient_address.
    *

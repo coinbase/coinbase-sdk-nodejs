@@ -29,6 +29,7 @@ describe("Validator", () => {
         slashed: false,
         withdrawableEpoch: "epoch-2",
         withdrawal_address: "withdrawal-address-123",
+        withdrawal_credentials: "withdrawal-credentials-123",
         fee_recipient_address: "fee-recipient-address-123",
       },
     };
@@ -78,6 +79,10 @@ describe("Validator", () => {
 
   test("getWithdrawalAddress should return the correct withdrawal address", () => {
     expect(validator.getWithdrawalAddress()).toBe("withdrawal-address-123");
+  });
+
+  test("getWithdrawalCredentials should return the correct withdrawal credentials", () => {
+    expect(validator.getWithdrawalCredentials()).toBe("withdrawal-credentials-123");
   });
 
   test("getFeeRecipientAddress should return the correct fee recipient address", () => {

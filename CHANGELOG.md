@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Added
+- Add `getWithdrawalCredentials` getter for `Validator` object to expose withdrawal credentials of an Ethereum validator. 
+
 ## [0.20.0] - 2025-02-25
 
 ### Added
