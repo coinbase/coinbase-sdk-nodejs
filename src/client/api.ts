@@ -1755,11 +1755,17 @@ export interface EthereumValidatorMetadata {
      */
     'public_key': string;
     /**
-     * The address to which the validator\'s rewards are sent.
+     * The 20-byte address to which the validator\'s rewards are sent.
      * @type {string}
      * @memberof EthereumValidatorMetadata
      */
     'withdrawal_address': string;
+    /**
+     * The 32-byte field that determines where and how a validator’s staked ETH and rewards can be withdrawn.
+     * @type {string}
+     * @memberof EthereumValidatorMetadata
+     */
+    'withdrawal_credentials': string;
     /**
      * Whether the validator has been slashed.
      * @type {boolean}
