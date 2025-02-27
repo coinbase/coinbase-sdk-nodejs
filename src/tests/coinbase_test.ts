@@ -2,14 +2,13 @@ import * as os from "os";
 import * as fs from "fs";
 import { randomUUID } from "crypto";
 import { APIError } from "../coinbase/api_error";
-import { Coinbase } from "../index";
+import { Coinbase, UninitializedSDKError } from "../index";
 import { Wallet } from "../coinbase/wallet";
 import { NetworkIdentifier } from "../client";
 import {
   VALID_WALLET_MODEL,
   addressesApiMock,
   generateRandomHash,
-  mockReturnRejectedValue,
   mockReturnValue,
   walletsApiMock,
 } from "./utils";
@@ -30,6 +29,32 @@ describe("Coinbase tests", () => {
     it("returns the network ID when selecting a specific network", () => {
       expect(Coinbase.networks.BaseSepolia).toEqual("base-sepolia");
     });
+  });
+
+  it("should throw UninitializedSDKError when accessing API clients without initialization", async () => {
+    // Reset the apiClients to a fresh proxy state
+    Coinbase.apiClients = new Proxy({} as any, {
+      get(target, prop) {
+        if (!Reflect.has(target, prop)) {
+          throw new UninitializedSDKError();
+        }
+        return Reflect.get(target, prop);
+      }
+    });
+  
+    expect(() => {
+      Coinbase.apiClients.wallet;
+    }).toThrow(UninitializedSDKError);
+    
+    // Verify the error message
+    try {
+      Coinbase.apiClients.wallet;
+    } catch (error) {
+      expect((error as Error).message).toEqual(UninitializedSDKError.DEFAULT_MESSAGE);
+    }
+    
+    // Then try to call a method that uses the API client
+    await expect(Wallet.listWallets()).rejects.toThrow(UninitializedSDKError);
   });
 
   it("should throw an error if the API key name or private key is empty", () => {
@@ -139,7 +164,10 @@ describe("Coinbase tests", () => {
   describe("ED25519 API Key tests", () => {
     const keyFiles = [
       { description: "with name", path: `${PATH_PREFIX}/test_ed25519_api_key.json` },
-      { description: "with only id", path: `${PATH_PREFIX}/test_ed25519_api_key_with_only_id.json` },
+      {
+        description: "with only id",
+        path: `${PATH_PREFIX}/test_ed25519_api_key_with_only_id.json`,
+      },
     ];
 
     keyFiles.forEach(({ description, path: filePath }) => {

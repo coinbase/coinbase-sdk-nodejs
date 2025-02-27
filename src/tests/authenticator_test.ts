@@ -55,13 +55,19 @@ describe("Authenticator tests", () => {
   });
 
   describe("when a source version is provided", () => {
-    beforeAll(() => { sourceVersion = "1.0.0"; });
-    afterAll(() => { sourceVersion = undefined; });
+    beforeAll(() => {
+      sourceVersion = "1.0.0";
+    });
+    afterAll(() => {
+      sourceVersion = undefined;
+    });
 
     it("includes the source version in the correlation context", async () => {
       const config = await authenticator.authenticateRequest(VALID_CONFIG, true);
       const correlationContext = config.headers["Correlation-Context"] as string;
-      expect(correlationContext).toContain("sdk_version=0.20.0,sdk_language=typescript,source=mockSource");
+      expect(correlationContext).toContain(
+        "sdk_version=0.20.0,sdk_language=typescript,source=mockSource",
+      );
     });
   });
 
@@ -81,9 +87,9 @@ describe("Authenticator tests", () => {
     beforeEach(() => {
       instance = new CoinbaseAuthenticator(apiKey, privateKey, source);
       // Override private methods using a type cast.
-      (instance as any).extractPemKey = jest.fn().mockReturnValue(
-        "-----BEGIN EC PRIVATE KEY-----\nMOCK_KEY\n-----END EC PRIVATE KEY-----"
-      );
+      (instance as any).extractPemKey = jest
+        .fn()
+        .mockReturnValue("-----BEGIN EC PRIVATE KEY-----\nMOCK_KEY\n-----END EC PRIVATE KEY-----");
       (instance as any).nonce = jest.fn().mockReturnValue("mockNonce");
     });
 
@@ -92,27 +98,27 @@ describe("Authenticator tests", () => {
       const invalidInstance = new CoinbaseAuthenticator(
         apiKey,
         "-----BEGIN EC PRIVATE KEY-----\nINVALID\n-----END EC PRIVATE KEY-----",
-        source
+        source,
       );
       await expect(invalidInstance.buildJWT("https://example.com")).rejects.toThrow(
-        InvalidAPIKeyFormatError
+        InvalidAPIKeyFormatError,
       );
       await expect(invalidInstance.buildJWT("https://example.com")).rejects.toThrow(
-        "Could not convert the EC private key to PKCS8 format"
+        "Could not convert the EC private key to PKCS8 format",
       );
     });
 
     test("should throw error if key import fails", async () => {
       // Spy on importPKCS8 to simulate a key import failure.
       const joseModule = require("jose");
-      const spy = jest
-        .spyOn(joseModule, "importPKCS8")
-        .mockImplementation(async () => { throw new Error("Import error"); });
+      const spy = jest.spyOn(joseModule, "importPKCS8").mockImplementation(async () => {
+        throw new Error("Import error");
+      });
       await expect(instance.buildJWT("https://example.com")).rejects.toThrow(
-        InvalidAPIKeyFormatError
+        InvalidAPIKeyFormatError,
       );
       await expect(instance.buildJWT("https://example.com")).rejects.toThrow(
-        "Could not convert the EC private key to PKCS8 format"
+        "Could not convert the EC private key to PKCS8 format",
       );
       spy.mockRestore();
     });
@@ -124,10 +130,10 @@ describe("Authenticator tests", () => {
         .spyOn(SignJWT.prototype, "sign")
         .mockRejectedValue(new Error("Signing error"));
       await expect(instance.buildJWT("https://example.com")).rejects.toThrow(
-        InvalidAPIKeyFormatError
+        InvalidAPIKeyFormatError,
       );
       await expect(instance.buildJWT("https://example.com")).rejects.toThrow(
-        "Could not convert the EC private key to PKCS8 format"
+        "Could not convert the EC private key to PKCS8 format",
       );
       spy.mockRestore();
     });
@@ -156,7 +162,7 @@ describe("Authenticator tests for Edwards key", () => {
   it("should raise InvalidConfiguration error for invalid config", async () => {
     const invalidConfig = {
       method: "GET",
-      url: "", 
+      url: "",
       headers: {} as AxiosHeaders,
     };
     await expect(authenticator.authenticateRequest(invalidConfig)).rejects.toThrow();
@@ -187,20 +193,28 @@ describe("Authenticator tests for Edwards key", () => {
     });
 
     describe("when a source version is provided", () => {
-      beforeAll(() => { sourceVersion = "1.0.0"; });
-      afterAll(() => { sourceVersion = undefined; });
+      beforeAll(() => {
+        sourceVersion = "1.0.0";
+      });
+      afterAll(() => {
+        sourceVersion = undefined;
+      });
 
       it("includes the source version in the correlation context", async () => {
         const config = await authenticator.authenticateRequest(VALID_CONFIG, true);
         const correlationContext = config.headers["Correlation-Context"] as string;
-        expect(correlationContext).toContain("sdk_version=0.20.0,sdk_language=typescript,source=mockSource");
+        expect(correlationContext).toContain(
+          "sdk_version=0.20.0,sdk_language=typescript,source=mockSource",
+        );
       });
     });
 
     it("should raise an InvalidAPIKeyFormat error if Edwards key length is not 64 bytes", async () => {
       const invalidEdKey = privateKey.slice(0, -4);
       const invalidAuthenticator = new CoinbaseAuthenticator(apiKey, invalidEdKey, source);
-      await expect(invalidAuthenticator.authenticateRequest(VALID_CONFIG)).rejects.toThrow(InvalidAPIKeyFormatError);
+      await expect(invalidAuthenticator.authenticateRequest(VALID_CONFIG)).rejects.toThrow(
+        InvalidAPIKeyFormatError,
+      );
     });
 
     describe("#buildJWT", () => {
@@ -214,7 +228,9 @@ describe("Authenticator tests for Edwards key", () => {
       test("should throw error if Edwards key length is not 64 bytes", async () => {
         const invalidEdKey = privateKey.slice(0, -4);
         instance = new CoinbaseAuthenticator(apiKey, invalidEdKey, source);
-        await expect(instance.buildJWT("https://example.com")).rejects.toThrow(InvalidAPIKeyFormatError);
+        await expect(instance.buildJWT("https://example.com")).rejects.toThrow(
+          InvalidAPIKeyFormatError,
+        );
       });
 
       test("should return a valid JWT when building with Edwards key", async () => {
