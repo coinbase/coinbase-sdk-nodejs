@@ -1,4 +1,4 @@
-import { Coinbase, Wallet, Address } from "@coinbase/coinbase-sdk";
+import { Coinbase, Wallet } from "@coinbase/coinbase-sdk";
 
 // Change this to the path of your API key file downloaded from CDP portal.
 Coinbase.configureFromJson({ filePath: "~/Downloads/cdp_api_key.json" });
@@ -19,6 +19,7 @@ Coinbase.configureFromJson({ filePath: "~/Downloads/cdp_api_key.json" });
 
   // Faucet wallet to add some funds
   const usdcFaucetTx = await myWallet.faucet(Coinbase.assets.Usdc); // USDC funds to actual transaction
+  await sleep(2000);
   const ethFaucetTx = await myWallet.faucet(Coinbase.assets.Eth); // ETH funds for transfer gas fee (USDC gas fee is charged in ETH)
 
   // Wait for the faucet transactions to complete or fail on-chain.
@@ -143,8 +144,10 @@ Coinbase.configureFromJson({ filePath: "~/Downloads/cdp_api_key.json" });
   console.log("\nPlease press Enter to list the anotherWallet history...");
   await waitForEnter();
 
-  // Wallets come with a single default Address, accessible via getDefaultAddress()
-  // From the wallet default address object, you can list the transactions that were just made:
+  /*
+   * Wallets come with a single default Address, accessible via getDefaultAddress()
+   * From the wallet default address object, you can list the transactions that were just made:
+   */
   let anotherWalletAddress = await anotherWallet.getDefaultAddress();
 
   // Use for listing all received transfers
@@ -163,7 +166,13 @@ Coinbase.configureFromJson({ filePath: "~/Downloads/cdp_api_key.json" });
     "------------------------------------------------------------------------------------------------------------------",
   );
 
-  // You can also get a specific transaction link to see transaction details on basescan
+  while (transactions.length === 0) {
+    console.log("No transactions found. Press enter to continue waiting...");
+    await waitForEnter();
+    transactions = (await anotherWalletAddress.listTransactions()).data;
+  }
+
+  // You can also get a specific transaction link to see transaction details on basescan.
   console.log("transactions[0] transaction_link:", transactions[0].getTransactionLink());
   console.log(
     "More details on what is available on transaction object here: https://coinbase.github.io/coinbase-sdk-nodejs/classes/coinbase_transaction.Transaction.html",
