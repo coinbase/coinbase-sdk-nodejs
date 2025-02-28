@@ -1576,7 +1576,7 @@ describe("Wallet Class", () => {
         };
         fs.writeFileSync(filePath, JSON.stringify(incompleteSeedData), "utf8");
         await expect(seedlessWalletForLoad.loadSeedFromFile(filePath)).rejects.toThrow(
-          "Seed data is malformed"
+          "Seed data is malformed",
         );
       });
 
@@ -1592,7 +1592,7 @@ describe("Wallet Class", () => {
         };
         fs.writeFileSync(filePath, JSON.stringify(badEncryptedData), "utf8");
         await expect(seedlessWalletForLoad.loadSeedFromFile(filePath)).rejects.toThrow(
-          "Encrypted seed data is malformed"
+          "Encrypted seed data is malformed",
         );
       });
 
@@ -1608,7 +1608,7 @@ describe("Wallet Class", () => {
         };
         fs.writeFileSync(filePath, JSON.stringify(badEncryptedData), "utf8");
         await expect(seedlessWalletForLoad.loadSeedFromFile(filePath)).rejects.toThrow(
-          "Encrypted seed data is malformed"
+          "Encrypted seed data is malformed",
         );
       });
 
