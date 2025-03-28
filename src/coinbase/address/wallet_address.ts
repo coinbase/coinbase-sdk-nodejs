@@ -10,23 +10,23 @@ import { Transfer } from "../transfer";
 import { ContractInvocation } from "../contract_invocation";
 import {
   Amount,
-  CreateTransferOptions,
-  CreateTradeOptions,
   CreateContractInvocationOptions,
-  Destination,
-  StakeOptionsMode,
+  CreateCustomContractOptions,
+  CreateERC1155Options,
   CreateERC20Options,
   CreateERC721Options,
-  CreateERC1155Options,
-  PaginationOptions,
-  PaginationResponse,
   CreateFundOptions,
   CreateQuoteOptions,
-  CreateCustomContractOptions,
+  CreateTradeOptions,
+  CreateTransferOptions,
+  Destination,
+  PaginationOptions,
+  PaginationResponse,
+  StakeOptionsMode,
 } from "../types";
 import { delay } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
-import { StakingOperation } from "../staking_operation";
+import { HasWithdrawalCredentialType0x02Option, StakingOperation } from "../staking_operation";
 import { PayloadSignature } from "../payload_signature";
 import { SmartContract } from "../smart_contract";
 import { FundOperation } from "../fund_operation";
@@ -716,7 +716,9 @@ export class WalletAddress extends Address {
     timeoutSeconds = 600,
     intervalSeconds = 0.2,
   ): Promise<StakingOperation> {
-    await this.validateCanUnstake(amount, assetId, mode, options);
+    if (!HasWithdrawalCredentialType0x02Option(options)) {
+      await this.validateCanUnstake(amount, assetId, mode, options);
+    }
     return this.createStakingOperation(
       amount,
       assetId,
@@ -1008,8 +1010,10 @@ export class WalletAddress extends Address {
     timeoutSeconds: number,
     intervalSeconds: number,
   ): Promise<StakingOperation> {
-    if (new Decimal(amount.toString()).lessThanOrEqualTo(0)) {
-      throw new Error("Amount required greater than zero.");
+    if (!HasWithdrawalCredentialType0x02Option(options)) {
+      if (new Decimal(amount.toString()).lessThanOrEqualTo(0)) {
+        throw new Error("Amount required greater than zero.");
+      }
     }
 
     let stakingOperation = await this.createStakingOperationRequest(
@@ -1072,8 +1076,11 @@ export class WalletAddress extends Address {
   ): Promise<StakingOperation> {
     const asset = await Asset.fetch(this.getNetworkId(), assetId);
 
-    options.amount = asset.toAtomicAmount(new Decimal(amount.toString())).toString();
     options.mode = mode ? mode : StakeOptionsMode.DEFAULT;
+
+    if (!HasWithdrawalCredentialType0x02Option(options)) {
+      options.amount = asset.toAtomicAmount(new Decimal(amount.toString())).toString();
+    }
 
     const stakingOperationRequest = {
       network_id: this.getNetworkId(),
