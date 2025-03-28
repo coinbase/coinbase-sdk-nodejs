@@ -11,18 +11,18 @@ import {
 import {
   AddressBalanceList,
   Balance,
-  FetchStakingRewards200Response,
   FetchHistoricalStakingBalances200Response,
+  FetchStakingRewards200Response,
   StakingContext as StakingContextModel,
   StakingOperation as StakingOperationModel,
+  StakingOperationStatusEnum,
   StakingRewardFormat,
   StakingRewardStateEnum,
-  StakingOperationStatusEnum,
 } from "../client";
 import Decimal from "decimal.js";
 import { ExternalAddress } from "../coinbase/address/external_address";
 import { StakeOptionsMode } from "../coinbase/types";
-import { StakingOperation } from "../coinbase/staking_operation";
+import { ExecutionLayerWithdrawalOptionsBuilder, StakingOperation } from "../coinbase/staking_operation";
 import { Asset } from "../coinbase/asset";
 import { randomUUID } from "crypto";
 import { StakingReward } from "../coinbase/staking_reward";
@@ -332,6 +332,71 @@ describe("ExternalAddress", () => {
         },
       });
       expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledTimes(0);
+    });
+
+    describe("native eth execution layer withdrawals", () => {
+      it("should successfully build an unstake operation", async () => {
+        Coinbase.apiClients.stake!.buildStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
+        Coinbase.apiClients.asset!.getAsset = getAssetMock();
+
+        const builder = new ExecutionLayerWithdrawalOptionsBuilder(address.getNetworkId());
+        builder.addValidatorWithdrawal("0x123", new Decimal("1000"));
+        builder.addValidatorWithdrawal("0x456", new Decimal("2000"));
+        const options = await builder.build();
+
+        const op = await address.buildUnstakeOperation(
+          new Decimal("0"),
+          Coinbase.assets.Eth,
+          StakeOptionsMode.NATIVE,
+          options,
+        );
+
+        expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledWith({
+          address_id: address.getId(),
+          network_id: address.getNetworkId(),
+          asset_id: Coinbase.assets.Eth,
+          action: "unstake",
+          options: {
+            mode: StakeOptionsMode.NATIVE,
+            withdrawal_credential_type: "0x02",
+            validator_unstake_amounts:
+              '{"0x123":"1000000000000000000000","0x456":"2000000000000000000000"}',
+          },
+        });
+        expect(op).toBeInstanceOf(StakingOperation);
+      });
+
+      it("should respect existing options", async () => {
+        Coinbase.apiClients.stake!.buildStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
+        Coinbase.apiClients.asset!.getAsset = getAssetMock();
+
+        let options: { [key: string]: string } = { some_other_option: "value" };
+
+        const builder = new ExecutionLayerWithdrawalOptionsBuilder(address.getNetworkId());
+        builder.addValidatorWithdrawal("0x123", new Decimal("1000"));
+        options = await builder.build(options);
+
+        const op = await address.buildUnstakeOperation(
+          new Decimal("0"),
+          Coinbase.assets.Eth,
+          StakeOptionsMode.NATIVE,
+          options,
+        );
+
+        expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledWith({
+          address_id: address.getId(),
+          network_id: address.getNetworkId(),
+          asset_id: Coinbase.assets.Eth,
+          action: "unstake",
+          options: {
+            mode: StakeOptionsMode.NATIVE,
+            some_other_option: "value",
+            withdrawal_credential_type: "0x02",
+            validator_unstake_amounts: '{"0x123":"1000000000000000000000"}',
+          },
+        });
+        expect(op).toBeInstanceOf(StakingOperation);
+      });
     });
   });
 

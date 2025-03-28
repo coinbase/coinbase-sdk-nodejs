@@ -6,6 +6,21 @@ import {
 import { Transaction } from "./transaction";
 import { Coinbase } from "./coinbase";
 import { delay } from "./utils";
+import { Amount } from "./types";
+import { Asset } from "./asset";
+import Decimal from "decimal.js";
+
+export const WithdrawalCredentialType0x02 = "0x02";
+
+/**
+ * Checks if the given options contain the withdrawal credential type 0x02.
+ *
+ * @param options - An object containing various options.
+ * @returns True if the withdrawal credential type is 0x02, false otherwise.
+ */
+export function HasWithdrawalCredentialType0x02Option(options: { [key: string]: string }): boolean {
+  return options["withdrawal_credential_type"] === WithdrawalCredentialType0x02;
+}
 
 /**
  * A representation of a staking operation (stake, unstake, claim stake, etc.). It
@@ -279,5 +294,56 @@ export class StakingOperation {
         }
       });
     }
+  }
+}
+
+/**
+ * A builder class for creating execution layer withdrawal options.
+ */
+export class ExecutionLayerWithdrawalOptionsBuilder {
+  private readonly networkId: string;
+  private validatorAmounts: { [key: string]: Amount } = {};
+
+  /**
+   * Creates an instance of ExecutionLayerWithdrawalOptionsBuilder.
+   *
+   * @param networkId - The network ID.
+   */
+  constructor(networkId: string) {
+    this.networkId = networkId;
+  }
+
+  /**
+   * Adds a validator withdrawal with the specified public key and amount.
+   *
+   * @param pubKey - The public key of the validator.
+   * @param amount - The amount to withdraw.
+   */
+  addValidatorWithdrawal(pubKey: string, amount: Amount) {
+    this.validatorAmounts[pubKey] = amount;
+  }
+
+  /**
+   * Builds the execution layer withdrawal options.
+   *
+   * @param options - Existing options to merge with the built options.
+   * @returns A promise that resolves to an object containing the execution layer withdrawal options merged with any provided options.
+   */
+  async build(options: { [key: string]: string } = {}): Promise<{ [key: string]: string }> {
+    const asset = await Asset.fetch(this.networkId, Coinbase.assets.Eth);
+
+    const validatorAmounts: { [key: string]: string } = {};
+
+    for (const pubKey in this.validatorAmounts) {
+      const amount = this.validatorAmounts[pubKey];
+      validatorAmounts[pubKey] = asset.toAtomicAmount(new Decimal(amount.toString())).toString();
+    }
+
+    const executionLayerWithdrawalOptions = {
+      withdrawal_credential_type: WithdrawalCredentialType0x02,
+      validator_unstake_amounts: JSON.stringify(validatorAmounts),
+    };
+
+    return Object.assign({}, options, executionLayerWithdrawalOptions);
   }
 }
