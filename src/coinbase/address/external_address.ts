@@ -3,7 +3,7 @@ import { Amount, BroadcastExternalTransactionResponse, StakeOptionsMode } from "
 import { Coinbase } from "../coinbase";
 import Decimal from "decimal.js";
 import { Asset } from "../asset";
-import { StakingOperation } from "../staking_operation";
+import { HasWithdrawalCredentialType0x02Option, StakingOperation } from "../staking_operation";
 
 /**
  * A representation of a blockchain Address, which is a user-controlled account on a Network. Addresses are used to
@@ -63,7 +63,9 @@ export class ExternalAddress extends Address {
     mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
     options: { [key: string]: string } = {},
   ): Promise<StakingOperation> {
-    await this.validateCanUnstake(amount, assetId, mode, options);
+    if (!HasWithdrawalCredentialType0x02Option(options)) {
+      await this.validateCanUnstake(amount, assetId, mode, options);
+    }
     return this.buildStakingOperation(amount, assetId, "unstake", mode, options);
   }
 
@@ -109,16 +111,20 @@ export class ExternalAddress extends Address {
     mode: StakeOptionsMode,
     options: { [key: string]: string },
   ): Promise<StakingOperation> {
-    const stakingAmount = new Decimal(amount.toString());
-    if (stakingAmount.lessThanOrEqualTo(0)) {
-      throw new Error(`Amount required greater than zero.`);
-    }
     const asset = await Asset.fetch(this.getNetworkId(), assetId);
 
     const newOptions = this.copyOptions(options);
 
     newOptions.mode = mode;
-    newOptions.amount = asset.toAtomicAmount(new Decimal(amount.toString())).toString();
+
+    if (!HasWithdrawalCredentialType0x02Option(options)) {
+      const stakingAmount = new Decimal(amount.toString());
+      if (stakingAmount.lessThanOrEqualTo(0)) {
+        throw new Error(`Amount required greater than zero.`);
+      }
+
+      newOptions.amount = asset.toAtomicAmount(new Decimal(amount.toString())).toString();
+    }
 
     const request = {
       network_id: this.getNetworkId(),

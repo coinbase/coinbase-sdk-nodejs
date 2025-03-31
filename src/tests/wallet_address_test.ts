@@ -1,14 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as crypto from "crypto";
-import { AxiosError } from "axios";
 import { randomUUID } from "crypto";
+import { AxiosError } from "axios";
 import { ethers } from "ethers";
 import { FaucetTransaction } from "../coinbase/faucet_transaction";
 import {
   Address as AddressModel,
   Balance as BalanceModel,
-  FetchStakingRewards200Response,
   FetchHistoricalStakingBalances200Response,
+  FetchStakingRewards200Response,
+  SmartContractType,
   StakingContext as StakingContextModel,
   StakingOperation as StakingOperationModel,
   StakingOperationStatusEnum,
@@ -16,7 +17,6 @@ import {
   StakingRewardStateEnum,
   Trade as TradeModel,
   TransferList,
-  SmartContractType,
 } from "../client";
 import Decimal from "decimal.js";
 import { APIError, FaucetLimitReachedError } from "../coinbase/api_error";
@@ -25,51 +25,54 @@ import { ArgumentError } from "../coinbase/errors";
 import {
   addressesApiMock,
   assetsApiMock,
-  externalAddressApiMock,
   contractInvocationApiMock,
+  ERC1155_URI,
+  ERC20_NAME,
+  ERC20_SYMBOL,
+  ERC20_TOTAL_SUPPLY,
+  ERC721_BASE_URI,
+  ERC721_NAME,
+  ERC721_SYMBOL,
+  externalAddressApiMock,
   generateRandomHash,
   getAssetMock,
+  MINT_NFT_ABI,
+  MINT_NFT_ARGS,
   mockFn,
   mockReturnRejectedValue,
   mockReturnValue,
   newAddressModel,
+  smartContractApiMock,
   stakeApiMock,
-  walletStakeApiMock,
   tradeApiMock,
   transfersApiMock,
   VALID_ADDRESS_BALANCE_LIST,
   VALID_ADDRESS_MODEL,
+  VALID_COMPILED_CONTRACT_MODEL,
+  VALID_CONTRACT_INVOCATION_MODEL,
   VALID_FAUCET_TRANSACTION_MODEL,
+  VALID_PAYLOAD_SIGNATURE_LIST,
+  VALID_PAYLOAD_SIGNATURE_MODEL,
+  VALID_SIGNED_CONTRACT_INVOCATION_MODEL,
+  VALID_SMART_CONTRACT_CUSTOM_MODEL,
+  VALID_SMART_CONTRACT_ERC1155_MODEL,
+  VALID_SMART_CONTRACT_ERC20_MODEL,
+  VALID_SMART_CONTRACT_ERC721_MODEL,
   VALID_TRANSFER_MODEL,
   VALID_WALLET_MODEL,
-  VALID_PAYLOAD_SIGNATURE_MODEL,
-  VALID_PAYLOAD_SIGNATURE_LIST,
-  VALID_CONTRACT_INVOCATION_MODEL,
-  VALID_SIGNED_CONTRACT_INVOCATION_MODEL,
-  MINT_NFT_ABI,
-  MINT_NFT_ARGS,
   walletsApiMock,
-  VALID_SMART_CONTRACT_ERC20_MODEL,
-  smartContractApiMock,
-  ERC20_NAME,
-  ERC20_SYMBOL,
-  ERC20_TOTAL_SUPPLY,
-  VALID_SMART_CONTRACT_ERC721_MODEL,
-  ERC721_NAME,
-  ERC721_SYMBOL,
-  ERC721_BASE_URI,
-  VALID_SMART_CONTRACT_ERC1155_MODEL,
-  ERC1155_URI,
-  VALID_SMART_CONTRACT_CUSTOM_MODEL,
-  VALID_COMPILED_CONTRACT_MODEL,
+  walletStakeApiMock,
 } from "./utils";
 import { Transfer } from "../coinbase/transfer";
-import { TransactionStatus } from "../coinbase/types";
+import { StakeOptionsMode, TransactionStatus } from "../coinbase/types";
 import { Trade } from "../coinbase/trade";
 import { Transaction } from "../coinbase/transaction";
 import { WalletAddress } from "../coinbase/address/wallet_address";
 import { Wallet } from "../coinbase/wallet";
-import { StakingOperation } from "../coinbase/staking_operation";
+import {
+  ExecutionLayerWithdrawalOptionsBuilder,
+  StakingOperation,
+} from "../coinbase/staking_operation";
 import { StakingReward } from "../coinbase/staking_reward";
 import { StakingBalance } from "../coinbase/staking_balance";
 import { PayloadSignature } from "../coinbase/payload_signature";
@@ -589,6 +592,48 @@ describe("WalletAddress", () => {
         const op = await walletAddress.createUnstake(0.001, Coinbase.assets.Eth);
 
         expect(op).toBeInstanceOf(StakingOperation);
+      });
+
+      describe("with native eth execution layer withdrawals", () => {
+        it("should create a staking operation from the address", async () => {
+          Coinbase.apiClients.asset!.getAsset = getAssetMock();
+          Coinbase.apiClients.walletStake!.createStakingOperation =
+            mockReturnValue(STAKING_OPERATION_MODEL);
+          Coinbase.apiClients.walletStake!.broadcastStakingOperation =
+            mockReturnValue(STAKING_OPERATION_MODEL);
+          STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
+          Coinbase.apiClients.walletStake!.getStakingOperation =
+            mockReturnValue(STAKING_OPERATION_MODEL);
+
+          const builder = new ExecutionLayerWithdrawalOptionsBuilder(walletAddress.getNetworkId());
+          builder.addValidatorWithdrawal("0x123", 100);
+          builder.addValidatorWithdrawal("0x456", 200);
+          const options = await builder.build();
+
+          const op = await walletAddress.createUnstake(
+            0.001,
+            Coinbase.assets.Eth,
+            StakeOptionsMode.NATIVE,
+            options,
+          );
+
+          expect(Coinbase.apiClients.walletStake!.createStakingOperation).toHaveBeenCalledWith(
+            walletAddress.getWalletId(),
+            walletAddress.getId(),
+            {
+              network_id: walletAddress.getNetworkId(),
+              asset_id: Coinbase.assets.Eth,
+              action: "unstake",
+              options: {
+                mode: StakeOptionsMode.NATIVE,
+                withdrawal_credential_type: "0x02",
+                validator_unstake_amounts:
+                  '{"0x123":"100000000000000000000","0x456":"200000000000000000000"}',
+              },
+            },
+          );
+          expect(op).toBeInstanceOf(StakingOperation);
+        });
       });
     });
 
