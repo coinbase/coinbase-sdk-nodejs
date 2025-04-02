@@ -26,7 +26,7 @@ import {
 } from "../types";
 import { delay } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
-import { HasWithdrawalCredentialType0x02Option, StakingOperation } from "../staking_operation";
+import { HasWithdrawalCredentialType0x02Option, IsNativeEthUnstakeV2, StakingOperation } from "../staking_operation";
 import { PayloadSignature } from "../payload_signature";
 import { SmartContract } from "../smart_contract";
 import { FundOperation } from "../fund_operation";
@@ -716,7 +716,8 @@ export class WalletAddress extends Address {
     timeoutSeconds = 600,
     intervalSeconds = 0.2,
   ): Promise<StakingOperation> {
-    if (!HasWithdrawalCredentialType0x02Option(options)) {
+    // If performing a native ETH unstake, validation is always performed server-side.
+    if (!IsNativeEthUnstakeV2(assetId, "unstake", mode, options)) {
       await this.validateCanUnstake(amount, assetId, mode, options);
     }
     return this.createStakingOperation(
@@ -1010,7 +1011,8 @@ export class WalletAddress extends Address {
     timeoutSeconds: number,
     intervalSeconds: number,
   ): Promise<StakingOperation> {
-    if (!HasWithdrawalCredentialType0x02Option(options)) {
+    // If performing a native ETH unstake, the amount is not required.
+    if (!IsNativeEthUnstakeV2(assetId, action, mode, options)) {
       if (new Decimal(amount.toString()).lessThanOrEqualTo(0)) {
         throw new Error("Amount required greater than zero.");
       }
@@ -1078,7 +1080,8 @@ export class WalletAddress extends Address {
 
     options.mode = mode ? mode : StakeOptionsMode.DEFAULT;
 
-    if (!HasWithdrawalCredentialType0x02Option(options)) {
+    // If performing a native ETH unstake, the amount is not required.
+    if (!IsNativeEthUnstakeV2(assetId, action, mode, options)) {
       options.amount = asset.toAtomicAmount(new Decimal(amount.toString())).toString();
     }
 
