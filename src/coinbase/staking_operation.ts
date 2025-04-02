@@ -31,7 +31,7 @@ export function HasWithdrawalCredentialType0x02Option(options: { [key: string]: 
  * @param options - An object containing various options.
  * @returns True if the parameters represent a native ETH unstake operation (version 2), false otherwise.
  */
-export function IsNativeEthUnstakeV2(
+export function IsDedicatedEthUnstakeV2Operation(
   assetId: string,
   action: string,
   mode: string,
