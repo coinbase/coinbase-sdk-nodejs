@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## [0.22.0] - 2025-04-02
+
+- Add `ExecutionLayerWithdrawalOptionsBuilder` to allow for native ETH execution layer withdrawals as defined in https://eips.ethereum.org/EIPS/eip-7002.
+- Add `Hoodi` network support.
+
 ## [0.21.0] - 2025-02-28
 
 - Add `getWithdrawalCredentials` getter for `Validator` object to expose withdrawal credentials of an Ethereum validator. 
