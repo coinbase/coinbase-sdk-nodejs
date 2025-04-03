@@ -6,7 +6,7 @@ import {
 import { Transaction } from "./transaction";
 import { Coinbase } from "./coinbase";
 import { delay } from "./utils";
-import { Amount } from "./types";
+import { Amount, StakeOptionsMode } from "./types";
 import { Asset } from "./asset";
 import Decimal from "decimal.js";
 
@@ -20,6 +20,29 @@ export const WithdrawalCredentialType0x02 = "0x02";
  */
 export function HasWithdrawalCredentialType0x02Option(options: { [key: string]: string }): boolean {
   return options["withdrawal_credential_type"] === WithdrawalCredentialType0x02;
+}
+
+/**
+ * Determines if the given parameters represent a native ETH unstake operation (version 2).
+ *
+ * @param assetId - The ID of the asset.
+ * @param action - The action being performed.
+ * @param mode - The mode of the stake options.
+ * @param options - An object containing various options.
+ * @returns True if the parameters represent a native ETH unstake operation (version 2), false otherwise.
+ */
+export function IsDedicatedEthUnstakeV2Operation(
+  assetId: string,
+  action: string,
+  mode: string,
+  options: { [key: string]: string },
+): boolean {
+  return (
+    assetId === Coinbase.assets.Eth &&
+    action == "unstake" &&
+    mode === StakeOptionsMode.NATIVE &&
+    HasWithdrawalCredentialType0x02Option(options)
+  );
 }
 
 /**
