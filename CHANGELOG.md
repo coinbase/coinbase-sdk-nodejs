@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## [0.23.0] - 2025-04-16
+
+- Add support for both consensus and execution based withdrawals post-pectra.
+
 ## [0.22.0] - 2025-04-02
 
 - Add `ExecutionLayerWithdrawalOptionsBuilder` to allow for native ETH execution layer withdrawals as defined in https://eips.ethereum.org/EIPS/eip-7002.
