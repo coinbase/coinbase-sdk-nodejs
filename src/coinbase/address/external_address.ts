@@ -67,6 +67,7 @@ export class ExternalAddress extends Address {
     if (!IsDedicatedEthUnstakeV2Operation(assetId, "unstake", mode, options)) {
       await this.validateCanUnstake(amount, assetId, mode, options);
     }
+
     return this.buildStakingOperation(amount, assetId, "unstake", mode, options);
   }
 

@@ -26,7 +26,7 @@ import {
 } from "../types";
 import { delay } from "../utils";
 import { Wallet as WalletClass } from "../wallet";
-import { HasWithdrawalCredentialType0x02Option, IsDedicatedEthUnstakeV2Operation, StakingOperation } from "../staking_operation";
+import { IsDedicatedEthUnstakeV2Operation, StakingOperation } from "../staking_operation";
 import { PayloadSignature } from "../payload_signature";
 import { SmartContract } from "../smart_contract";
 import { FundOperation } from "../fund_operation";

@@ -16,7 +16,7 @@ import {
   StakingRewardFormat,
   StakingRewardStateEnum,
   Trade as TradeModel,
-  TransferList
+  TransferList,
 } from "../client";
 import Decimal from "decimal.js";
 import { APIError, FaucetLimitReachedError } from "../coinbase/api_error";
@@ -61,7 +61,7 @@ import {
   VALID_TRANSFER_MODEL,
   VALID_WALLET_MODEL,
   walletsApiMock,
-  walletStakeApiMock
+  walletStakeApiMock,
 } from "./utils";
 import { Transfer } from "../coinbase/transfer";
 import { StakeOptionsMode, TransactionStatus } from "../coinbase/types";
@@ -69,7 +69,11 @@ import { Trade } from "../coinbase/trade";
 import { Transaction } from "../coinbase/transaction";
 import { WalletAddress } from "../coinbase/address/wallet_address";
 import { Wallet } from "../coinbase/wallet";
-import { ExecutionLayerWithdrawalOptionsBuilder, StakingOperation } from "../coinbase/staking_operation";
+import {
+  ConsensusLayerExitOptionBuilder,
+  ExecutionLayerWithdrawalOptionsBuilder,
+  StakingOperation,
+} from "../coinbase/staking_operation";
 import { StakingReward } from "../coinbase/staking_reward";
 import { StakingBalance } from "../coinbase/staking_balance";
 import { PayloadSignature } from "../coinbase/payload_signature";
@@ -667,6 +671,50 @@ describe("WalletAddress", () => {
         expect(op).toBeInstanceOf(StakingOperation);
       });
 
+      describe("with native eth consensus layer exits", () => {
+        it("should create a staking operation from the address", async () => {
+          Coinbase.apiClients.asset!.getAsset = getAssetMock();
+          Coinbase.apiClients.walletStake!.createStakingOperation =
+            mockReturnValue(STAKING_OPERATION_MODEL);
+          Coinbase.apiClients.walletStake!.broadcastStakingOperation =
+            mockReturnValue(STAKING_OPERATION_MODEL);
+          STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
+          Coinbase.apiClients.walletStake!.getStakingOperation =
+            mockReturnValue(STAKING_OPERATION_MODEL);
+
+          const builder = new ConsensusLayerExitOptionBuilder();
+          builder.addValidator("0x123");
+          builder.addValidator("0x456");
+          builder.addValidator("0x456");
+          builder.addValidator("0x789");
+          builder.addValidator("0x789");
+          const options = await builder.build();
+
+          const op = await walletAddress.createUnstake(
+            0.001,
+            Coinbase.assets.Eth,
+            StakeOptionsMode.NATIVE,
+            options,
+          );
+
+          expect(Coinbase.apiClients.walletStake!.createStakingOperation).toHaveBeenCalledWith(
+            walletAddress.getWalletId(),
+            walletAddress.getId(),
+            {
+              network_id: walletAddress.getNetworkId(),
+              asset_id: Coinbase.assets.Eth,
+              action: "unstake",
+              options: {
+                mode: StakeOptionsMode.NATIVE,
+                unstake_type: "consensus",
+                validator_pub_keys: "0x123,0x456,0x789",
+              },
+            },
+          );
+          expect(op).toBeInstanceOf(StakingOperation);
+        });
+      });
+
       describe("with native eth execution layer withdrawals", () => {
         it("should create a staking operation from the address", async () => {
           Coinbase.apiClients.asset!.getAsset = getAssetMock();
@@ -699,7 +747,7 @@ describe("WalletAddress", () => {
               action: "unstake",
               options: {
                 mode: StakeOptionsMode.NATIVE,
-                withdrawal_credential_type: "0x02",
+                unstake_type: "execution",
                 validator_unstake_amounts:
                   '{"0x123":"100000000000000000000","0x456":"200000000000000000000"}',
               },
