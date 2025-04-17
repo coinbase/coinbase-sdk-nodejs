@@ -3,7 +3,7 @@ import { Amount, BroadcastExternalTransactionResponse, StakeOptionsMode } from "
 import { Coinbase } from "../coinbase";
 import Decimal from "decimal.js";
 import { Asset } from "../asset";
-import { HasWithdrawalCredentialType0x02Option, StakingOperation } from "../staking_operation";
+import { IsDedicatedEthUnstakeV2Operation, StakingOperation } from "../staking_operation";
 
 /**
  * A representation of a blockchain Address, which is a user-controlled account on a Network. Addresses are used to
@@ -63,9 +63,11 @@ export class ExternalAddress extends Address {
     mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
     options: { [key: string]: string } = {},
   ): Promise<StakingOperation> {
-    if (!HasWithdrawalCredentialType0x02Option(options)) {
+    // If performing a native eth unstake v2, validation is always performed server-side.
+    if (!IsDedicatedEthUnstakeV2Operation(assetId, "unstake", mode, options)) {
       await this.validateCanUnstake(amount, assetId, mode, options);
     }
+
     return this.buildStakingOperation(amount, assetId, "unstake", mode, options);
   }
 
@@ -117,7 +119,8 @@ export class ExternalAddress extends Address {
 
     newOptions.mode = mode;
 
-    if (!HasWithdrawalCredentialType0x02Option(options)) {
+    // If performing a native eth unstake v2, the amount is not required.
+    if (!IsDedicatedEthUnstakeV2Operation(assetId, action, mode, newOptions)) {
       const stakingAmount = new Decimal(amount.toString());
       if (stakingAmount.lessThanOrEqualTo(0)) {
         throw new Error(`Amount required greater than zero.`);

@@ -70,6 +70,7 @@ import { Transaction } from "../coinbase/transaction";
 import { WalletAddress } from "../coinbase/address/wallet_address";
 import { Wallet } from "../coinbase/wallet";
 import {
+  ConsensusLayerExitOptionBuilder,
   ExecutionLayerWithdrawalOptionsBuilder,
   StakingOperation,
 } from "../coinbase/staking_operation";
@@ -374,7 +375,7 @@ describe("WalletAddress", () => {
     const STAKING_CONTEXT_MODEL: StakingContextModel = {
       context: {
         stakeable_balance: {
-          amount: "3000000000000000000",
+          amount: "128000000000000000000",
           asset: {
             asset_id: Coinbase.assets.Eth,
             network_id: Coinbase.networks.EthereumHolesky,
@@ -533,6 +534,82 @@ describe("WalletAddress", () => {
         expect(op).toBeInstanceOf(StakingOperation);
       });
 
+      describe("native eth staking", () => {
+        it("should successfully create an 0x01 stake operation", async () => {
+          Coinbase.apiClients.asset!.getAsset = getAssetMock();
+          Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
+          Coinbase.apiClients.walletStake!.createStakingOperation =
+            mockReturnValue(STAKING_OPERATION_MODEL);
+          Coinbase.apiClients.walletStake!.broadcastStakingOperation =
+            mockReturnValue(STAKING_OPERATION_MODEL);
+          STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
+          Coinbase.apiClients.walletStake!.getStakingOperation =
+            mockReturnValue(STAKING_OPERATION_MODEL);
+
+          const op = await walletAddress.createStake(
+            32,
+            Coinbase.assets.Eth,
+            StakeOptionsMode.NATIVE,
+            {
+              withdrawal_credential_type: "0x01",
+            },
+          );
+
+          expect(Coinbase.apiClients.walletStake!.createStakingOperation).toHaveBeenCalledWith(
+            walletAddress.getWalletId(),
+            walletAddress.getId(),
+            {
+              network_id: walletAddress.getNetworkId(),
+              asset_id: Coinbase.assets.Eth,
+              action: "stake",
+              options: {
+                mode: StakeOptionsMode.NATIVE,
+                amount: "32000000000000000000",
+                withdrawal_credential_type: "0x01",
+              },
+            },
+          );
+          expect(op).toBeInstanceOf(StakingOperation);
+        });
+
+        it("should successfully create an 0x02 stake operation", async () => {
+          Coinbase.apiClients.asset!.getAsset = getAssetMock();
+          Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
+          Coinbase.apiClients.walletStake!.createStakingOperation =
+            mockReturnValue(STAKING_OPERATION_MODEL);
+          Coinbase.apiClients.walletStake!.broadcastStakingOperation =
+            mockReturnValue(STAKING_OPERATION_MODEL);
+          STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
+          Coinbase.apiClients.walletStake!.getStakingOperation =
+            mockReturnValue(STAKING_OPERATION_MODEL);
+
+          const op = await walletAddress.createStake(
+            64,
+            Coinbase.assets.Eth,
+            StakeOptionsMode.NATIVE,
+            {
+              withdrawal_credential_type: "0x02",
+            },
+          );
+
+          expect(Coinbase.apiClients.walletStake!.createStakingOperation).toHaveBeenCalledWith(
+            walletAddress.getWalletId(),
+            walletAddress.getId(),
+            {
+              network_id: walletAddress.getNetworkId(),
+              asset_id: Coinbase.assets.Eth,
+              action: "stake",
+              options: {
+                mode: StakeOptionsMode.NATIVE,
+                amount: "64000000000000000000",
+                withdrawal_credential_type: "0x02",
+              },
+            },
+          );
+          expect(op).toBeInstanceOf(StakingOperation);
+        });
+      });
+
       it("should create a staking operation from the address but in failed status", async () => {
         Coinbase.apiClients.asset!.getAsset = getAssetMock();
         Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
@@ -594,6 +671,50 @@ describe("WalletAddress", () => {
         expect(op).toBeInstanceOf(StakingOperation);
       });
 
+      describe("with native eth consensus layer exits", () => {
+        it("should create a staking operation from the address", async () => {
+          Coinbase.apiClients.asset!.getAsset = getAssetMock();
+          Coinbase.apiClients.walletStake!.createStakingOperation =
+            mockReturnValue(STAKING_OPERATION_MODEL);
+          Coinbase.apiClients.walletStake!.broadcastStakingOperation =
+            mockReturnValue(STAKING_OPERATION_MODEL);
+          STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Complete;
+          Coinbase.apiClients.walletStake!.getStakingOperation =
+            mockReturnValue(STAKING_OPERATION_MODEL);
+
+          const builder = new ConsensusLayerExitOptionBuilder();
+          builder.addValidator("0x123");
+          builder.addValidator("0x456");
+          builder.addValidator("0x456");
+          builder.addValidator("0x789");
+          builder.addValidator("0x789");
+          const options = await builder.build();
+
+          const op = await walletAddress.createUnstake(
+            0.001,
+            Coinbase.assets.Eth,
+            StakeOptionsMode.NATIVE,
+            options,
+          );
+
+          expect(Coinbase.apiClients.walletStake!.createStakingOperation).toHaveBeenCalledWith(
+            walletAddress.getWalletId(),
+            walletAddress.getId(),
+            {
+              network_id: walletAddress.getNetworkId(),
+              asset_id: Coinbase.assets.Eth,
+              action: "unstake",
+              options: {
+                mode: StakeOptionsMode.NATIVE,
+                unstake_type: "consensus",
+                validator_pub_keys: "0x123,0x456,0x789",
+              },
+            },
+          );
+          expect(op).toBeInstanceOf(StakingOperation);
+        });
+      });
+
       describe("with native eth execution layer withdrawals", () => {
         it("should create a staking operation from the address", async () => {
           Coinbase.apiClients.asset!.getAsset = getAssetMock();
@@ -626,7 +747,7 @@ describe("WalletAddress", () => {
               action: "unstake",
               options: {
                 mode: StakeOptionsMode.NATIVE,
-                withdrawal_credential_type: "0x02",
+                unstake_type: "execution",
                 validator_unstake_amounts:
                   '{"0x123":"100000000000000000000","0x456":"200000000000000000000"}',
               },
@@ -659,7 +780,7 @@ describe("WalletAddress", () => {
       it("should return the stakeable balance successfully with default params", async () => {
         Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
         const stakeableBalance = await walletAddress.stakeableBalance(Coinbase.assets.Eth);
-        expect(stakeableBalance).toEqual(new Decimal("3"));
+        expect(stakeableBalance).toEqual(new Decimal("128"));
       });
     });
 
