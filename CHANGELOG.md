@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## [0.24.0] - 2025-05-06
+
+- Add support for execution layer consolidations post Pectra.
+
 ## [0.23.0] - 2025-04-16
 
 - Add support for both consensus and execution based withdrawals post-pectra.
