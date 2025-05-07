@@ -767,6 +767,32 @@ export class WalletAddress extends Address {
   }
 
   /**
+   * Creates a staking operation to consolidate.
+   *
+   * @param options - Additional options for the consolidation operation.
+   *
+   * @param timeoutSeconds - The amount to wait for the transaction to complete when broadcasted.
+   * @param intervalSeconds - The amount to check each time for a successful broadcast.
+   *
+   * @returns The staking operation after it's completed successfully.
+   */
+  public async createValidatorConsolidation(
+    options: { [key: string]: string } = {},
+    timeoutSeconds = 600,
+    intervalSeconds = 0.2,
+  ): Promise<StakingOperation> {
+    return this.createStakingOperation(
+      0,
+      "eth",
+      "consolidate",
+      StakeOptionsMode.NATIVE,
+      options,
+      timeoutSeconds,
+      intervalSeconds,
+    );
+  }
+
+  /**
    * Creates a Payload Signature.
    *
    * @param unsignedPayload - The Unsigned Payload to sign.
@@ -1011,13 +1037,6 @@ export class WalletAddress extends Address {
     timeoutSeconds: number,
     intervalSeconds: number,
   ): Promise<StakingOperation> {
-    // If performing a native ETH unstake, the amount is not required.
-    if (!IsDedicatedEthUnstakeV2Operation(assetId, action, mode, options)) {
-      if (new Decimal(amount.toString()).lessThanOrEqualTo(0)) {
-        throw new Error("Amount required greater than zero.");
-      }
-    }
-
     let stakingOperation = await this.createStakingOperationRequest(
       amount,
       assetId,
@@ -1080,10 +1099,7 @@ export class WalletAddress extends Address {
 
     options.mode = mode ? mode : StakeOptionsMode.DEFAULT;
 
-    // If performing a native ETH unstake, the amount is not required.
-    if (!IsDedicatedEthUnstakeV2Operation(assetId, action, mode, options)) {
-      options.amount = asset.toAtomicAmount(new Decimal(amount.toString())).toString();
-    }
+    options.amount = asset.toAtomicAmount(new Decimal(amount.toString())).toString();
 
     const stakingOperationRequest = {
       network_id: this.getNetworkId(),
