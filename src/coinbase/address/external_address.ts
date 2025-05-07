@@ -95,6 +95,19 @@ export class ExternalAddress extends Address {
   }
 
   /**
+   * Builds a validator consolidation operation to help consolidate validators post Pectra.
+   *
+   * @param options - Additional options for the validator consolidation operation.
+   *
+   * @returns The validator consolidation operation.
+   */
+  public async buildValidatorConsolidationOperation(
+    options: { [key: string]: string } = {},
+  ): Promise<StakingOperation> {
+    return this.buildStakingOperation(0, "eth", "consolidate", StakeOptionsMode.NATIVE, options);
+  }
+
+  /**
    * Builds the staking operation based on the supplied input.
    *
    * @param amount - The amount for the staking operation.
@@ -119,15 +132,7 @@ export class ExternalAddress extends Address {
 
     newOptions.mode = mode;
 
-    // If performing a native eth unstake v2, the amount is not required.
-    if (!IsDedicatedEthUnstakeV2Operation(assetId, action, mode, newOptions)) {
-      const stakingAmount = new Decimal(amount.toString());
-      if (stakingAmount.lessThanOrEqualTo(0)) {
-        throw new Error(`Amount required greater than zero.`);
-      }
-
-      newOptions.amount = asset.toAtomicAmount(new Decimal(amount.toString())).toString();
-    }
+    newOptions.amount = asset.toAtomicAmount(new Decimal(amount.toString())).toString();
 
     const request = {
       network_id: this.getNetworkId(),

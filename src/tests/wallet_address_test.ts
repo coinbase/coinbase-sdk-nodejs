@@ -608,32 +608,23 @@ describe("WalletAddress", () => {
           );
           expect(op).toBeInstanceOf(StakingOperation);
         });
-      });
 
-      it("should create a staking operation from the address but in failed status", async () => {
-        Coinbase.apiClients.asset!.getAsset = getAssetMock();
-        Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
-        Coinbase.apiClients.walletStake!.createStakingOperation =
-          mockReturnValue(STAKING_OPERATION_MODEL);
-        Coinbase.apiClients.walletStake!.broadcastStakingOperation =
-          mockReturnValue(STAKING_OPERATION_MODEL);
-        STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Failed;
-        Coinbase.apiClients.walletStake!.getStakingOperation =
-          mockReturnValue(STAKING_OPERATION_MODEL);
+        it("should create a staking operation from the address but in failed status", async () => {
+          Coinbase.apiClients.asset!.getAsset = getAssetMock();
+          Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
+          Coinbase.apiClients.walletStake!.createStakingOperation =
+            mockReturnValue(STAKING_OPERATION_MODEL);
+          Coinbase.apiClients.walletStake!.broadcastStakingOperation =
+            mockReturnValue(STAKING_OPERATION_MODEL);
+          STAKING_OPERATION_MODEL.status = StakingOperationStatusEnum.Failed;
+          Coinbase.apiClients.walletStake!.getStakingOperation =
+            mockReturnValue(STAKING_OPERATION_MODEL);
 
-        const op = await walletAddress.createStake(0.001, Coinbase.assets.Eth);
+          const op = await walletAddress.createStake(0.001, Coinbase.assets.Eth);
 
-        expect(op).toBeInstanceOf(StakingOperation);
-        expect(op.getStatus()).toEqual(StakingOperationStatusEnum.Failed);
-      });
-
-      it("should not create a staking operation from the address with zero amount", async () => {
-        Coinbase.apiClients.asset!.getAsset = getAssetMock();
-        Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
-
-        await expect(
-          async () => await walletAddress.createStake(0.0, Coinbase.assets.Eth),
-        ).rejects.toThrow(Error);
+          expect(op).toBeInstanceOf(StakingOperation);
+          expect(op.getStatus()).toEqual(StakingOperationStatusEnum.Failed);
+        });
       });
 
       it("should create a staking operation from the address when broadcast returns empty transactions", async () => {
@@ -706,6 +697,7 @@ describe("WalletAddress", () => {
               action: "unstake",
               options: {
                 mode: StakeOptionsMode.NATIVE,
+                amount: "1000000000000000", // We let this extraneous amount to be passed through since it isn't used in the backend.
                 unstake_type: "consensus",
                 validator_pub_keys: "0x123,0x456,0x789",
               },
@@ -748,6 +740,7 @@ describe("WalletAddress", () => {
               options: {
                 mode: StakeOptionsMode.NATIVE,
                 unstake_type: "execution",
+                amount: "1000000000000000", // We let this extraneous amount to be passed through since it isn't used in the backend.
                 validator_unstake_amounts:
                   '{"0x123":"100000000000000000000","0x456":"200000000000000000000"}',
               },
@@ -771,6 +764,40 @@ describe("WalletAddress", () => {
           mockReturnValue(STAKING_OPERATION_MODEL);
 
         const op = await walletAddress.createClaimStake(0.001, Coinbase.assets.Eth);
+
+        expect(op).toBeInstanceOf(StakingOperation);
+      });
+    });
+
+    describe("#createValidatorConsolidation", () => {
+      it("should successfully create a validator consolidation operation", async () => {
+        Coinbase.apiClients.walletStake!.createStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
+        Coinbase.apiClients.walletStake!.broadcastStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
+        Coinbase.apiClients.walletStake!.getStakingOperation =
+          mockReturnValue(STAKING_OPERATION_MODEL);
+
+        const op = await walletAddress.createValidatorConsolidation({
+          source_validator_pubkey: "0xabc123",
+          target_validator_pubkey: "0xdef456",
+        });
+
+        expect(Coinbase.apiClients.walletStake!.createStakingOperation).toHaveBeenCalledWith(
+          walletAddress.getWalletId(),
+          walletAddress.getId(),
+          {
+            network_id: walletAddress.getNetworkId(),
+            asset_id: "eth",
+            action: "consolidate",
+            options: {
+              mode: "native",
+              amount: "0",
+              source_validator_pubkey: "0xabc123",
+              target_validator_pubkey: "0xdef456",
+            },
+          },
+        );
 
         expect(op).toBeInstanceOf(StakingOperation);
       });

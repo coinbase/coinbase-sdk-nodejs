@@ -329,25 +329,6 @@ describe("ExternalAddress", () => {
       });
       expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledTimes(0);
     });
-
-    it("should return an error for trying to stake less than or equal to zero", async () => {
-      Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
-      Coinbase.apiClients.stake!.buildStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
-
-      await expect(
-        address.buildStakeOperation(new Decimal("0"), Coinbase.assets.Eth),
-      ).rejects.toThrow(Error);
-
-      expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
-        address_id: address.getId(),
-        network_id: address.getNetworkId(),
-        asset_id: Coinbase.assets.Eth,
-        options: {
-          mode: StakeOptionsMode.DEFAULT,
-        },
-      });
-      expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledTimes(0);
-    });
   });
 
   describe("#buildUnstakeOperation", () => {
@@ -395,25 +376,6 @@ describe("ExternalAddress", () => {
       expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledTimes(0);
     });
 
-    it("should return an error for trying to unstake less than or equal to zero", async () => {
-      Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
-      Coinbase.apiClients.stake!.buildStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
-
-      await expect(
-        address.buildUnstakeOperation(new Decimal("0"), Coinbase.assets.Eth),
-      ).rejects.toThrow(Error);
-
-      expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
-        address_id: address.getId(),
-        network_id: address.getNetworkId(),
-        asset_id: Coinbase.assets.Eth,
-        options: {
-          mode: StakeOptionsMode.DEFAULT,
-        },
-      });
-      expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledTimes(0);
-    });
-
     describe("native eth consensus layer exits", () => {
       it("should successfully build an unstake operation", async () => {
         Coinbase.apiClients.stake!.buildStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
@@ -441,6 +403,7 @@ describe("ExternalAddress", () => {
           action: "unstake",
           options: {
             mode: StakeOptionsMode.NATIVE,
+            amount: "0",
             unstake_type: "consensus",
             validator_pub_keys: "0x123,0x456,0x789",
           },
@@ -477,6 +440,7 @@ describe("ExternalAddress", () => {
           options: {
             mode: StakeOptionsMode.NATIVE,
             some_other_option: "value",
+            amount: "0",
             unstake_type: "consensus",
             validator_pub_keys: "0x123,0x456,0x789",
           },
@@ -509,6 +473,7 @@ describe("ExternalAddress", () => {
           action: "unstake",
           options: {
             mode: StakeOptionsMode.NATIVE,
+            amount: "0",
             unstake_type: "execution",
             validator_unstake_amounts:
               '{"0x123":"1000000000000000000000","0x456":"2000000000000000000000"}',
@@ -542,6 +507,7 @@ describe("ExternalAddress", () => {
           options: {
             mode: StakeOptionsMode.NATIVE,
             some_other_option: "value",
+            amount: "0",
             unstake_type: "execution",
             validator_unstake_amounts: '{"0x123":"1000000000000000000000"}',
           },
@@ -596,25 +562,6 @@ describe("ExternalAddress", () => {
       expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledTimes(0);
     });
 
-    it("should return an error for trying to claim stake less than or equal to zero", async () => {
-      Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
-      Coinbase.apiClients.stake!.buildStakingOperation = mockReturnValue(STAKING_OPERATION_MODEL);
-
-      await expect(
-        address.buildClaimStakeOperation(new Decimal("0"), Coinbase.assets.Eth),
-      ).rejects.toThrow(Error);
-
-      expect(Coinbase.apiClients.stake!.getStakingContext).toHaveBeenCalledWith({
-        address_id: address.getId(),
-        network_id: address.getNetworkId(),
-        asset_id: Coinbase.assets.Eth,
-        options: {
-          mode: StakeOptionsMode.DEFAULT,
-        },
-      });
-      expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledTimes(0);
-    });
-
     it("should return an error for trying to claim stake for native eth", async () => {
       await expect(
         address.buildClaimStakeOperation(
@@ -623,6 +570,30 @@ describe("ExternalAddress", () => {
           StakeOptionsMode.NATIVE,
         ),
       ).rejects.toThrow(Error);
+    });
+  });
+
+  describe("#buildValidatorConsolidationOperation", () => {
+    it("should successfully build a validator consolidation operation", async () => {
+      const mockResponse = { data: "mockStakingOperationResponse" };
+      Coinbase.apiClients.stake!.buildStakingOperation = jest.fn().mockResolvedValue(mockResponse);
+
+      const options = { someOption: "value" };
+      const op = await address.buildValidatorConsolidationOperation(options);
+
+      expect(Coinbase.apiClients.stake!.buildStakingOperation).toHaveBeenCalledWith({
+        network_id: address.getNetworkId(),
+        asset_id: "eth",
+        address_id: address.getId(),
+        action: "consolidate",
+        options: {
+          someOption: "value",
+          amount: "0",
+          mode: StakeOptionsMode.NATIVE,
+        },
+      });
+
+      expect(op).toBeInstanceOf(StakingOperation);
     });
   });
 
