@@ -1,6 +1,10 @@
 name: Run E2E Tests
 
-on: [pull_request]
+on:
+  # Ensures runs on every pull request.
+  pull_request:
+  # Enables manual invocation of workflow via Github UI and API.
+  workflow_dispatch:
 
 jobs:
   test:
