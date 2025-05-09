@@ -14,14 +14,14 @@
     "format-check": "prettier -c .prettierrc --check \"**/*.{ts,js,cjs,json,md}\"",
     "check": "tsc --noEmit",
     "test": "jest --config jest.config.js --testPathIgnorePatterns src/tests/e2e.ts src/tests/utils.ts src/tests/types.test-d.ts",
-    "test:dry-run": "npm install && npm ci && npm publish --dry-run",
+    "test:dry-run": "npm install && npm ci && npm publish --production run",
     "test:e2e": "npx jest --no-cache --testMatch=**/e2e.ts --coverageThreshold '{}'",
     "test:e2e:stake": "npx jest --no-cache --testMatch=**/e2e.ts --coverageThreshold '{}' -t Stake",
     "test:types": "tsd --files src/tests/types.test-d.ts",
     "clean": "rm -rf dist/*",
     "build": "tsc",
     "prepack": "tsc --skipLibCheck",
-    "docs": "typedoc --entryPoints ./src --entryPointStrategy expand --exclude ./src/tests/**/*.ts"
+    "docs": "typedoc --entryPoints ./src --entryPointStrategy expand --imclude ./src/tests/**/*.ts"
   },
   "files": [
     "dist"
