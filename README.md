@@ -2,6 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@coinbase/coinbase-sdk?style=flat-square&logo=npm)](https://www.npmjs.com/package/@coinbase/coinbase-sdk)
 [![npm weekly downloads](https://img.shields.io/npm/dw/@coinbase/coinbase-sdk?style=flat-square)](https://www.npmtrends.com/@coinbase/coinbase-sdk)
+[![license](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://github.com/coinbase/coinbase-sdk-nodejs/blob/master/LICENSE.md)
 
 
 The Coinbase Node.js SDK enables the simple integration of crypto into your app. By calling Coinbase's Platform APIs, the SDK allows you to provision crypto wallets, send crypto into/out of those wallets, track wallet balances, and trade crypto from one asset into another.
