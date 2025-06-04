@@ -4,7 +4,7 @@
   "license": "ISC",
   "description": "Coinbase Platform SDK",
   "repository": "https://github.com/coinbase/coinbase-sdk-nodejs",
-  "version": "0.24.0",
+  "version": "0.25.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

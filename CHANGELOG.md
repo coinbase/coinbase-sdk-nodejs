@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## [0.25.0] - 2025-05-06
+
+### Removed
+
+- Removed support for network Holesky. It has been replaced by Hoodi.
+
 ## [0.24.0] - 2025-05-06
 
 - Add support for execution layer consolidations post Pectra.
