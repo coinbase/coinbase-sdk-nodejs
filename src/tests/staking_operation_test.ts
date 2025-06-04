@@ -35,7 +35,7 @@ describe("StakingOperation", () => {
 
   it("should return a string representation with id, status, network_id, and address_id", () => {
     const op = new StakingOperation(VALID_STAKING_OPERATION_MODEL);
-    const expectedString = `StakingOperation { id: some-id status: initialized network_id: ethereum-holesky address_id: some-address-id }`;
+    const expectedString = `StakingOperation { id: some-id status: initialized network_id: ethereum-hoodi address_id: some-address-id }`;
     expect(op.toString()).toEqual(expectedString);
   });
 
@@ -184,7 +184,7 @@ describe("StakingOperation", () => {
       const stakingOperation = new StakingOperation(VALID_STAKING_OPERATION_MODEL);
       expect(stakingOperation.getID()).toBe("some-id");
       expect(stakingOperation.getStatus()).toBe(StakingOperationStatusEnum.Initialized);
-      expect(stakingOperation.getNetworkID()).toBe(Coinbase.networks.EthereumHolesky);
+      expect(stakingOperation.getNetworkID()).toBe(Coinbase.networks.EthereumHoodi);
       expect(stakingOperation.isTerminalState()).toBe(false);
       expect(stakingOperation.getTransactions().length).toBe(1);
       expect(stakingOperation.getSignedVoluntaryExitMessages().length).toBe(0);
@@ -198,7 +198,7 @@ describe("StakingOperation", () => {
         ...VALID_STAKING_OPERATION_MODEL,
         transactions: [
           {
-            network_id: Coinbase.networks.EthereumHolesky,
+            network_id: Coinbase.networks.EthereumHoodi,
             from_address_id: "dummy-from-address-id",
             to_address_id: "dummy-to-address-id",
             unsigned_payload: "payload1",
@@ -207,7 +207,7 @@ describe("StakingOperation", () => {
             status: TransactionStatusEnum.Pending,
           },
           {
-            network_id: Coinbase.networks.EthereumHolesky,
+            network_id: Coinbase.networks.EthereumHoodi,
             from_address_id: "dummy-from-address-id",
             to_address_id: "dummy-to-address-id",
             unsigned_payload: "payload2",
@@ -216,7 +216,7 @@ describe("StakingOperation", () => {
             status: TransactionStatusEnum.Pending,
           },
           {
-            network_id: Coinbase.networks.EthereumHolesky,
+            network_id: Coinbase.networks.EthereumHoodi,
             from_address_id: "dummy-from-address-id",
             to_address_id: "dummy-to-address-id",
             unsigned_payload: "payload3",
@@ -240,7 +240,7 @@ describe("StakingOperation", () => {
       // Step 3: Call reload and add two new transactions (payload4 and payload5)
       op["model"].transactions.push(
         {
-          network_id: Coinbase.networks.EthereumHolesky,
+          network_id: Coinbase.networks.EthereumHoodi,
           from_address_id: "dummy-from-address-id",
           to_address_id: "dummy-to-address-id",
           unsigned_payload: "payload4",
@@ -249,7 +249,7 @@ describe("StakingOperation", () => {
           status: TransactionStatusEnum.Pending,
         },
         {
-          network_id: Coinbase.networks.EthereumHolesky,
+          network_id: Coinbase.networks.EthereumHoodi,
           from_address_id: "dummy-from-address-id",
           to_address_id: "dummy-to-address-id",
           unsigned_payload: "payload5",

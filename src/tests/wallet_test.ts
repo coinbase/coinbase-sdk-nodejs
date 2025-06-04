@@ -124,13 +124,13 @@ describe("Wallet Class", () => {
     const addressID = "0xdeadbeef";
     const STAKING_OPERATION_MODEL: StakingOperationModel = {
       id: randomUUID(),
-      network_id: Coinbase.networks.EthereumHolesky,
+      network_id: Coinbase.networks.EthereumHoodi,
       address_id: addressID,
       status: StakingOperationStatusEnum.Complete,
       transactions: [
         {
           from_address_id: addressID,
-          network_id: Coinbase.networks.EthereumHolesky,
+          network_id: Coinbase.networks.EthereumHoodi,
           status: "pending",
           unsigned_payload:
             "7b2274797065223a22307832222c22636861696e4964223a22307834323638222c226e6f" +
@@ -154,7 +154,7 @@ describe("Wallet Class", () => {
           amount: "3000000000000000000",
           asset: {
             asset_id: Coinbase.assets.Eth,
-            network_id: Coinbase.networks.EthereumHolesky,
+            network_id: Coinbase.networks.EthereumHoodi,
             decimals: 18,
             contract_address: "0x",
           },
@@ -163,7 +163,7 @@ describe("Wallet Class", () => {
           amount: "2000000000000000000",
           asset: {
             asset_id: Coinbase.assets.Eth,
-            network_id: Coinbase.networks.EthereumHolesky,
+            network_id: Coinbase.networks.EthereumHoodi,
             decimals: 18,
             contract_address: "0x",
           },
@@ -172,7 +172,7 @@ describe("Wallet Class", () => {
           amount: "1000000000000000000",
           asset: {
             asset_id: Coinbase.assets.Eth,
-            network_id: Coinbase.networks.EthereumHolesky,
+            network_id: Coinbase.networks.EthereumHoodi,
             decimals: 18,
             contract_address: "0x",
           },
@@ -181,7 +181,7 @@ describe("Wallet Class", () => {
           amount: "1000000000000000000",
           asset: {
             asset_id: Coinbase.assets.Eth,
-            network_id: Coinbase.networks.EthereumHolesky,
+            network_id: Coinbase.networks.EthereumHoodi,
             decimals: 18,
             contract_address: "0x",
           },
@@ -241,7 +241,7 @@ describe("Wallet Class", () => {
             amount: "32000000000000000000",
             asset: {
               asset_id: Coinbase.assets.Eth,
-              network_id: Coinbase.networks.EthereumHolesky,
+              network_id: Coinbase.networks.EthereumHoodi,
               decimals: 18,
             },
           },
@@ -249,7 +249,7 @@ describe("Wallet Class", () => {
             amount: "2000000000000000000",
             asset: {
               asset_id: Coinbase.assets.Eth,
-              network_id: Coinbase.networks.EthereumHolesky,
+              network_id: Coinbase.networks.EthereumHoodi,
               decimals: 18,
             },
           },
@@ -262,7 +262,7 @@ describe("Wallet Class", () => {
             amount: "32000000000000000000",
             asset: {
               asset_id: Coinbase.assets.Eth,
-              network_id: Coinbase.networks.EthereumHolesky,
+              network_id: Coinbase.networks.EthereumHoodi,
               decimals: 18,
             },
           },
@@ -270,7 +270,7 @@ describe("Wallet Class", () => {
             amount: "2000000000000000000",
             asset: {
               asset_id: Coinbase.assets.Eth,
-              network_id: Coinbase.networks.EthereumHolesky,
+              network_id: Coinbase.networks.EthereumHoodi,
               decimals: 18,
             },
           },
@@ -293,7 +293,7 @@ describe("Wallet Class", () => {
 
     describe(".createStake", () => {
       it("should create a staking operation from the default address", async () => {
-        const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
+        const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHoodi });
         STAKING_OPERATION_MODEL.wallet_id = wallet.getId();
         Coinbase.apiClients.asset!.getAsset = getAssetMock();
         Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
@@ -311,7 +311,7 @@ describe("Wallet Class", () => {
       });
 
       it("should throw an error when wait is called on wallet address based staking operation", async () => {
-        const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
+        const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHoodi });
         const op = await wallet.createStake(0.001, Coinbase.assets.Eth);
         expect(op).toBeInstanceOf(StakingOperation);
         await expect(async () => await op.wait()).rejects.toThrow(Error);
@@ -326,7 +326,7 @@ describe("Wallet Class", () => {
 
     describe(".createUnstake", () => {
       it("should create a staking operation from the default address", async () => {
-        const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
+        const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHoodi });
         STAKING_OPERATION_MODEL.wallet_id = wallet.getId();
         Coinbase.apiClients.asset!.getAsset = getAssetMock();
         Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
@@ -346,7 +346,7 @@ describe("Wallet Class", () => {
 
     describe(".createClaimStake", () => {
       it("should create a staking operation from the default address", async () => {
-        const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
+        const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHoodi });
         STAKING_OPERATION_MODEL.wallet_id = wallet.getId();
         Coinbase.apiClients.asset!.getAsset = getAssetMock();
         Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
@@ -374,7 +374,7 @@ describe("Wallet Class", () => {
 
     describe(".unstakeableBalance", () => {
       it("should return the unstakeableBalance balance successfully with default params", async () => {
-        const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
+        const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHoodi });
         Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
         const stakeableBalance = await wallet.unstakeableBalance(Coinbase.assets.Eth);
         expect(stakeableBalance).toEqual(new Decimal("2"));
@@ -383,7 +383,7 @@ describe("Wallet Class", () => {
 
     describe(".claimableBalance", () => {
       it("should return the claimableBalance balance successfully with default params", async () => {
-        const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
+        const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHoodi });
         Coinbase.apiClients.stake!.getStakingContext = mockReturnValue(STAKING_CONTEXT_MODEL);
         const stakeableBalance = await wallet.claimableBalance(Coinbase.assets.Eth);
         expect(stakeableBalance).toEqual(new Decimal("1"));
@@ -392,7 +392,7 @@ describe("Wallet Class", () => {
 
     describe(".stakingRewards", () => {
       it("should successfully return staking rewards", async () => {
-        const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
+        const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHoodi });
         Coinbase.apiClients.stake!.fetchStakingRewards = mockReturnValue(STAKING_REWARD_RESPONSE);
         Coinbase.apiClients.asset!.getAsset = getAssetMock();
         const response = await wallet.stakingRewards(Coinbase.assets.Eth);
@@ -402,7 +402,7 @@ describe("Wallet Class", () => {
 
     describe(".historicalStakingBalances", () => {
       it("should successfully return historical staking balances", async () => {
-        const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
+        const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHoodi });
         Coinbase.apiClients.stake!.fetchHistoricalStakingBalances = mockReturnValue(
           HISTORICAL_STAKING_BALANCES_RESPONSE,
         );
@@ -413,14 +413,12 @@ describe("Wallet Class", () => {
         expect(response[0].bondedStake().amount).toEqual(new Decimal("32"));
         expect(response[0].bondedStake().asset?.assetId).toEqual("eth");
         expect(response[0].bondedStake().asset?.decimals).toEqual(18);
-        expect(response[0].bondedStake().asset?.networkId).toEqual(
-          Coinbase.networks.EthereumHolesky,
-        );
+        expect(response[0].bondedStake().asset?.networkId).toEqual(Coinbase.networks.EthereumHoodi);
         expect(response[0].unbondedBalance().amount).toEqual(new Decimal("2"));
         expect(response[0].unbondedBalance().asset?.assetId).toEqual("eth");
         expect(response[0].unbondedBalance().asset?.decimals).toEqual(18);
         expect(response[0].unbondedBalance().asset?.networkId).toEqual(
-          Coinbase.networks.EthereumHolesky,
+          Coinbase.networks.EthereumHoodi,
         );
       });
     });
@@ -436,7 +434,7 @@ describe("Wallet Class", () => {
             block_height: "12345",
             asset: {
               asset_id: "usdc",
-              network_id: Coinbase.networks.EthereumHolesky,
+              network_id: Coinbase.networks.EthereumHoodi,
               decimals: 6,
             },
           },
@@ -446,7 +444,7 @@ describe("Wallet Class", () => {
             block_height: "67890",
             asset: {
               asset_id: "usdc",
-              network_id: Coinbase.networks.EthereumHolesky,
+              network_id: Coinbase.networks.EthereumHoodi,
               decimals: 6,
             },
           },
@@ -461,7 +459,7 @@ describe("Wallet Class", () => {
     });
 
     it("should successfully return historical balances", async () => {
-      const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHolesky });
+      const wallet = await Wallet.create({ networkId: Coinbase.networks.EthereumHoodi });
       Coinbase.apiClients.asset!.getAsset = getAssetMock();
       const response = await wallet.listHistoricalBalances(Coinbase.assets.Usdc);
       expect(response.data.length).toEqual(2);

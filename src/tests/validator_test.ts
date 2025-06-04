@@ -11,16 +11,16 @@ describe("Validator", () => {
     const mockModel: ValidatorModel = {
       validator_id: "123",
       status: APIValidatorStatus.Active,
-      network_id: Coinbase.networks.EthereumHolesky,
+      network_id: Coinbase.networks.EthereumHoodi,
       asset_id: Coinbase.assets.Eth,
       details: {
         effective_balance: {
           amount: "100",
-          asset: { network_id: Coinbase.networks.EthereumHolesky, asset_id: Coinbase.assets.Eth },
+          asset: { network_id: Coinbase.networks.EthereumHoodi, asset_id: Coinbase.assets.Eth },
         },
         balance: {
           amount: "200",
-          asset: { network_id: Coinbase.networks.EthereumHolesky, asset_id: Coinbase.assets.Eth },
+          asset: { network_id: Coinbase.networks.EthereumHoodi, asset_id: Coinbase.assets.Eth },
         },
         exitEpoch: "epoch-1",
         activationEpoch: "epoch-0",
@@ -46,7 +46,7 @@ describe("Validator", () => {
   });
 
   test("getNetworkId should return the correct network ID", () => {
-    expect(validator.getNetworkId()).toBe(Coinbase.networks.EthereumHolesky);
+    expect(validator.getNetworkId()).toBe(Coinbase.networks.EthereumHoodi);
   });
 
   test("getAssetId should return the correct asset ID", () => {
@@ -96,14 +96,14 @@ describe("Validator", () => {
   test("getEffectiveBalance should return the correct effective balance", () => {
     expect(validator.getEffectiveBalance()).toEqual({
       amount: "100",
-      asset: { network_id: Coinbase.networks.EthereumHolesky, asset_id: Coinbase.assets.Eth },
+      asset: { network_id: Coinbase.networks.EthereumHoodi, asset_id: Coinbase.assets.Eth },
     });
   });
 
   test("getBalance should return the correct balance", () => {
     expect(validator.getBalance()).toEqual({
       amount: "200",
-      asset: { network_id: Coinbase.networks.EthereumHolesky, asset_id: Coinbase.assets.Eth },
+      asset: { network_id: Coinbase.networks.EthereumHoodi, asset_id: Coinbase.assets.Eth },
     });
   });
 });

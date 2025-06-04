@@ -13,7 +13,7 @@ import Decimal from "decimal.js";
 import { randomUUID } from "crypto";
 
 describe("Address", () => {
-  const newAddress = newAddressModel("", randomUUID(), Coinbase.networks.EthereumHolesky);
+  const newAddress = newAddressModel("", randomUUID(), Coinbase.networks.EthereumHoodi);
 
   const address = new Address(newAddress.network_id, newAddress.address_id);
 
@@ -147,7 +147,7 @@ describe("Address", () => {
             block_height: "12345",
             asset: {
               asset_id: "usdc",
-              network_id: Coinbase.networks.EthereumHolesky,
+              network_id: Coinbase.networks.EthereumHoodi,
               decimals: 6,
             },
           },
@@ -157,7 +157,7 @@ describe("Address", () => {
             block_height: "67890",
             asset: {
               asset_id: "usdc",
-              network_id: Coinbase.networks.EthereumHolesky,
+              network_id: Coinbase.networks.EthereumHoodi,
               decimals: 6,
             },
           },
@@ -242,7 +242,7 @@ describe("Address", () => {
             block_height: "67890",
             asset: {
               asset_id: "usdc",
-              network_id: Coinbase.networks.EthereumHolesky,
+              network_id: Coinbase.networks.EthereumHoodi,
               decimals: 6,
             },
           },

@@ -97,17 +97,17 @@ describe("Validator", () => {
     });
   });
 
-  it("should return a list of validators for ethereum holesky and eth asset", async () => {
+  it("should return a list of validators for ethereum hoodi and eth asset", async () => {
     Coinbase.apiClients.stake!.listValidators = mockReturnValue(VALID_ACTIVE_VALIDATOR_LIST);
 
     const validators = await Validator.list(
-      Coinbase.networks.EthereumHolesky,
+      Coinbase.networks.EthereumHoodi,
       Coinbase.assets.Eth,
       ValidatorStatus.ACTIVE,
     );
 
     expect(Coinbase.apiClients.stake!.listValidators).toHaveBeenCalledWith(
-      Coinbase.networks.EthereumHolesky,
+      Coinbase.networks.EthereumHoodi,
       Coinbase.assets.Eth,
       ValidatorStatus.ACTIVE,
     );
@@ -121,19 +121,19 @@ describe("Validator", () => {
     expect(validators[2].getStatus()).toEqual(ValidatorStatus.ACTIVE);
   });
 
-  it("should return a validator for ethereum holesky and eth asset", async () => {
+  it("should return a validator for ethereum hoodi and eth asset", async () => {
     Coinbase.apiClients.stake!.getValidator = mockReturnValue(
       mockEthereumValidator("100", ValidatorStatus.EXITING, "0x123"),
     );
 
     const validator = await Validator.fetch(
-      Coinbase.networks.EthereumHolesky,
+      Coinbase.networks.EthereumHoodi,
       Coinbase.assets.Eth,
       "0x123",
     );
 
     expect(Coinbase.apiClients.stake!.getValidator).toHaveBeenCalledWith(
-      Coinbase.networks.EthereumHolesky,
+      Coinbase.networks.EthereumHoodi,
       Coinbase.assets.Eth,
       "0x123",
     );

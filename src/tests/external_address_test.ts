@@ -33,7 +33,7 @@ import { StakingReward } from "../coinbase/staking_reward";
 import { StakingBalance } from "../coinbase/staking_balance";
 
 describe("ExternalAddress", () => {
-  const newAddress = newAddressModel("", randomUUID(), Coinbase.networks.EthereumHolesky);
+  const newAddress = newAddressModel("", randomUUID(), Coinbase.networks.EthereumHoodi);
 
   const address = new ExternalAddress(newAddress.network_id, newAddress.address_id);
   const STAKING_CONTEXT_MODEL: StakingContextModel = {
@@ -42,7 +42,7 @@ describe("ExternalAddress", () => {
         amount: "128000000000000000000",
         asset: {
           asset_id: Coinbase.assets.Eth,
-          network_id: Coinbase.networks.EthereumHolesky,
+          network_id: Coinbase.networks.EthereumHoodi,
           decimals: 18,
           contract_address: "0x",
         },
@@ -51,7 +51,7 @@ describe("ExternalAddress", () => {
         amount: "2000000000000000000",
         asset: {
           asset_id: Coinbase.assets.Eth,
-          network_id: Coinbase.networks.EthereumHolesky,
+          network_id: Coinbase.networks.EthereumHoodi,
           decimals: 18,
           contract_address: "0x",
         },
@@ -60,7 +60,7 @@ describe("ExternalAddress", () => {
         amount: "1000000000000000000",
         asset: {
           asset_id: Coinbase.assets.Eth,
-          network_id: Coinbase.networks.EthereumHolesky,
+          network_id: Coinbase.networks.EthereumHoodi,
           decimals: 18,
           contract_address: "0x",
         },
@@ -69,7 +69,7 @@ describe("ExternalAddress", () => {
         amount: "1000000000000000000",
         asset: {
           asset_id: Coinbase.assets.Eth,
-          network_id: Coinbase.networks.EthereumHolesky,
+          network_id: Coinbase.networks.EthereumHoodi,
           decimals: 18,
           contract_address: "0x",
         },
@@ -78,7 +78,7 @@ describe("ExternalAddress", () => {
   };
   const STAKING_OPERATION_MODEL: StakingOperationModel = {
     id: randomUUID(),
-    network_id: Coinbase.networks.EthereumHolesky,
+    network_id: Coinbase.networks.EthereumHoodi,
     address_id: "0x1234567890",
     status: StakingOperationStatusEnum.Initialized,
     transactions: [
@@ -654,7 +654,7 @@ describe("ExternalAddress", () => {
             amount: "1000000000000000000",
             asset: {
               asset_id: Coinbase.assets.Eth,
-              network_id: Coinbase.networks.EthereumHolesky,
+              network_id: Coinbase.networks.EthereumHoodi,
               decimals: 18,
             },
           },
@@ -662,7 +662,7 @@ describe("ExternalAddress", () => {
             amount: "5000000",
             asset: {
               asset_id: "usdc",
-              network_id: Coinbase.networks.EthereumHolesky,
+              network_id: Coinbase.networks.EthereumHoodi,
               decimals: 6,
             },
           },
@@ -714,7 +714,7 @@ describe("ExternalAddress", () => {
         amount: "5000000000000000000",
         asset: {
           asset_id: Coinbase.assets.Eth,
-          network_id: Coinbase.networks.EthereumHolesky,
+          network_id: Coinbase.networks.EthereumHoodi,
           decimals: 18,
         },
       };

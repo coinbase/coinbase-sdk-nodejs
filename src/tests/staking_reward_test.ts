@@ -17,7 +17,7 @@ import Decimal from "decimal.js";
 describe("StakingReward", () => {
   const startTime = "2024-05-01T00:00:00Z";
   const endTime = "2024-05-21T00:00:00Z";
-  const newAddress = newAddressModel("", "some-address-id", Coinbase.networks.EthereumHolesky);
+  const newAddress = newAddressModel("", "some-address-id", Coinbase.networks.EthereumHoodi);
   const address = new ExternalAddress(newAddress.network_id, newAddress.address_id);
   const asset = Asset.fromModel({
     asset_id: Coinbase.assets.Eth,

@@ -225,12 +225,12 @@ export const VALID_TRANSFER_SPONSORED_SEND_MODEL: TransferModel = {
 
 export const VALID_STAKING_OPERATION_MODEL: StakingOperationModel = {
   id: "some-id",
-  network_id: Coinbase.networks.EthereumHolesky,
+  network_id: Coinbase.networks.EthereumHoodi,
   address_id: "some-address-id",
   status: StakingOperationStatusEnum.Initialized,
   transactions: [
     {
-      network_id: Coinbase.networks.EthereumHolesky,
+      network_id: Coinbase.networks.EthereumHoodi,
       from_address_id: "dummy-from-address-id",
       to_address_id: "dummy-to-address-id",
       unsigned_payload:
@@ -559,12 +559,12 @@ export const VALID_FUND_OPERATION_MODEL: FundOperationModel = {
 export function mockStakingOperation(status: StakingOperationStatusEnum): StakingOperationModel {
   return {
     id: "some-id",
-    network_id: Coinbase.networks.EthereumHolesky,
+    network_id: Coinbase.networks.EthereumHoodi,
     address_id: "some-address-id",
     status: status,
     transactions: [
       {
-        network_id: Coinbase.networks.EthereumHolesky,
+        network_id: Coinbase.networks.EthereumHoodi,
         from_address_id: "0xdeadbeef",
         unsigned_payload:
           "7b2274797065223a22307832222c22636861696e4964223a2230783134613334222c226e6f6e63" +
@@ -652,7 +652,7 @@ export function mockEthereumValidator(
 ): Validator {
   return {
     validator_id: public_key,
-    network_id: "ethereum-holesky",
+    network_id: "ethereum-hoodi",
     asset_id: "eth",
     status: status,
     details: {
@@ -670,14 +670,14 @@ export function mockEthereumValidator(
         amount: "32000000000000000000",
         asset: {
           asset_id: Coinbase.assets.Eth,
-          network_id: Coinbase.networks.EthereumHolesky,
+          network_id: Coinbase.networks.EthereumHoodi,
         },
       },
       effective_balance: {
         amount: "32000000000000000000",
         asset: {
           asset_id: Coinbase.assets.Eth,
-          network_id: Coinbase.networks.EthereumHolesky,
+          network_id: Coinbase.networks.EthereumHoodi,
         },
       },
     },

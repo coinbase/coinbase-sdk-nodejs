@@ -2363,7 +2363,6 @@ export type NetworkProtocolFamilyEnum = typeof NetworkProtocolFamilyEnum[keyof t
 export const NetworkIdentifier = {
     BaseSepolia: 'base-sepolia',
     BaseMainnet: 'base-mainnet',
-    EthereumHolesky: 'ethereum-holesky',
     EthereumHoodi: 'ethereum-hoodi',
     EthereumSepolia: 'ethereum-sepolia',
     EthereumMainnet: 'ethereum-mainnet',

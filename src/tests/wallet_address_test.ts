@@ -344,17 +344,17 @@ describe("WalletAddress", () => {
 
   describe("#stakingOperation", () => {
     key = ethers.Wallet.createRandom();
-    const newAddress = newAddressModel("", randomUUID(), Coinbase.networks.EthereumHolesky);
+    const newAddress = newAddressModel("", randomUUID(), Coinbase.networks.EthereumHoodi);
     const walletAddress = new WalletAddress(newAddress, key as unknown as ethers.Wallet);
     const STAKING_OPERATION_MODEL: StakingOperationModel = {
       id: randomUUID(),
-      network_id: Coinbase.networks.EthereumHolesky,
+      network_id: Coinbase.networks.EthereumHoodi,
       address_id: newAddress.address_id,
       status: StakingOperationStatusEnum.Complete,
       transactions: [
         {
           from_address_id: newAddress.address_id,
-          network_id: Coinbase.networks.EthereumHolesky,
+          network_id: Coinbase.networks.EthereumHoodi,
           status: "pending",
           unsigned_payload:
             "7b2274797065223a22307832222c22636861696e4964223a22307834323638222c226e6f" +
@@ -378,7 +378,7 @@ describe("WalletAddress", () => {
           amount: "128000000000000000000",
           asset: {
             asset_id: Coinbase.assets.Eth,
-            network_id: Coinbase.networks.EthereumHolesky,
+            network_id: Coinbase.networks.EthereumHoodi,
             decimals: 18,
             contract_address: "0x",
           },
@@ -387,7 +387,7 @@ describe("WalletAddress", () => {
           amount: "2000000000000000000",
           asset: {
             asset_id: Coinbase.assets.Eth,
-            network_id: Coinbase.networks.EthereumHolesky,
+            network_id: Coinbase.networks.EthereumHoodi,
             decimals: 18,
             contract_address: "0x",
           },
@@ -396,7 +396,7 @@ describe("WalletAddress", () => {
           amount: "1000000000000000000",
           asset: {
             asset_id: Coinbase.assets.Eth,
-            network_id: Coinbase.networks.EthereumHolesky,
+            network_id: Coinbase.networks.EthereumHoodi,
             decimals: 18,
             contract_address: "0x",
           },
@@ -405,7 +405,7 @@ describe("WalletAddress", () => {
           amount: "1000000000000000000",
           asset: {
             asset_id: Coinbase.assets.Eth,
-            network_id: Coinbase.networks.EthereumHolesky,
+            network_id: Coinbase.networks.EthereumHoodi,
             decimals: 18,
             contract_address: "0x",
           },
@@ -465,7 +465,7 @@ describe("WalletAddress", () => {
             amount: "32000000000000000000",
             asset: {
               asset_id: Coinbase.assets.Eth,
-              network_id: Coinbase.networks.EthereumHolesky,
+              network_id: Coinbase.networks.EthereumHoodi,
               decimals: 18,
             },
           },
@@ -473,7 +473,7 @@ describe("WalletAddress", () => {
             amount: "2000000000000000000",
             asset: {
               asset_id: Coinbase.assets.Eth,
-              network_id: Coinbase.networks.EthereumHolesky,
+              network_id: Coinbase.networks.EthereumHoodi,
               decimals: 18,
             },
           },
@@ -486,7 +486,7 @@ describe("WalletAddress", () => {
             amount: "34000000000000000000",
             asset: {
               asset_id: Coinbase.assets.Eth,
-              network_id: Coinbase.networks.EthereumHolesky,
+              network_id: Coinbase.networks.EthereumHoodi,
               decimals: 18,
             },
           },
@@ -494,7 +494,7 @@ describe("WalletAddress", () => {
             amount: "3000000000000000000",
             asset: {
               asset_id: Coinbase.assets.Eth,
-              network_id: Coinbase.networks.EthereumHolesky,
+              network_id: Coinbase.networks.EthereumHoodi,
               decimals: 18,
             },
           },
@@ -848,14 +848,12 @@ describe("WalletAddress", () => {
         expect(response[0].bondedStake().amount).toEqual(new Decimal("32"));
         expect(response[0].bondedStake().asset?.assetId).toEqual(Coinbase.assets.Eth);
         expect(response[0].bondedStake().asset?.decimals).toEqual(18);
-        expect(response[0].bondedStake().asset?.networkId).toEqual(
-          Coinbase.networks.EthereumHolesky,
-        );
+        expect(response[0].bondedStake().asset?.networkId).toEqual(Coinbase.networks.EthereumHoodi);
         expect(response[0].unbondedBalance().amount).toEqual(new Decimal("2"));
         expect(response[0].unbondedBalance().asset?.assetId).toEqual(Coinbase.assets.Eth);
         expect(response[0].unbondedBalance().asset?.decimals).toEqual(18);
         expect(response[0].unbondedBalance().asset?.networkId).toEqual(
-          Coinbase.networks.EthereumHolesky,
+          Coinbase.networks.EthereumHoodi,
         );
       });
     });
