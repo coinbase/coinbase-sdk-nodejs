@@ -6,7 +6,7 @@ import {
   getBase64EncodedWireTransaction,
   getTransactionDecoder,
   signTransaction,
-} from "@solana/web3.js";
+} from "@solana/kit";
 import * as bs58 from "bs58";
 import { NetworkIdentifier } from "@coinbase/coinbase-sdk/dist/client";
 
