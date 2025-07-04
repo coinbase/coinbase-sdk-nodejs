@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Axios, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { APIError } from "./api_error";
-import { InvalidUnsignedPayload } from "./errors";
+import { InvalidUnsignedPayloadError } from "./errors";
 
 /**
  * Prints Axios response to the console for debugging purposes.
@@ -92,7 +92,7 @@ export async function delay(seconds: number): Promise<void> {
 export function parseUnsignedPayload(payload: string): Record<string, any> {
   const rawPayload = payload.match(/../g)?.map(byte => parseInt(byte, 16));
   if (!rawPayload) {
-    throw new InvalidUnsignedPayload("Unable to parse unsigned payload");
+    throw new InvalidUnsignedPayloadError("Unable to parse unsigned payload");
   }
 
   let parsedPayload;
@@ -101,8 +101,35 @@ export function parseUnsignedPayload(payload: string): Record<string, any> {
     const decoder = new TextDecoder();
     parsedPayload = JSON.parse(decoder.decode(rawPayloadBytes));
   } catch (error) {
-    throw new InvalidUnsignedPayload("Unable to decode unsigned payload JSON");
+    throw new InvalidUnsignedPayloadError("Unable to decode unsigned payload JSON");
   }
 
   return parsedPayload;
+}
+
+/**
+ * Formats the input date to 'YYYY-MM-DD'
+ *
+ * @param date - The date to format.
+ *
+ * @returns a formated date of 'YYYY-MM-DD'
+ */
+export function formatDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based, so add 1
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}T00:00:00Z`;
+}
+
+/**
+ *
+ * Takes a date and subtracts a week from it. (7 days)
+ *
+ * @param date - The date to be formatted.
+ *
+ * @returns a formatted date that is one week ago.
+ */
+export function getWeekBackDate(date: Date): string {
+  date.setDate(date.getDate() - 7);
+  return formatDate(date);
 }

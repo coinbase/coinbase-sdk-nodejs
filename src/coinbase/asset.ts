@@ -2,7 +2,7 @@ import Decimal from "decimal.js";
 import { Asset as AssetModel } from "./../client/api";
 import { Coinbase } from "./coinbase";
 import { GWEI_DECIMALS } from "./constants";
-import { ArgumentError, InternalError } from "./errors";
+import { ArgumentError } from "./errors";
 
 /** A representation of an Asset. */
 export class Asset {
@@ -32,15 +32,6 @@ export class Asset {
   }
 
   /**
-   * Returns the Asset ID.
-   *
-   * @returns The Asset ID.
-   */
-  getAssetId(): string {
-    return this.assetId;
-  }
-
-  /**
    * Creates an Asset from an Asset Model.
    *
    * @param model - The Asset Model.
@@ -50,30 +41,36 @@ export class Asset {
    */
   public static fromModel(model: AssetModel, assetId?: string) {
     if (!model) {
-      throw new InternalError("Invalid asset model");
+      throw new Error("Invalid asset model");
     }
 
     let decimals = model.decimals!;
     // TODO: Push this logic down to the backend.
-    if (
-      assetId &&
-      model.asset_id &&
-      Coinbase.toAssetId(model.asset_id) !== Coinbase.toAssetId(assetId)
-    ) {
-      switch (assetId) {
-        case "gwei":
-          decimals = GWEI_DECIMALS;
-          break;
-        case "wei":
-          decimals = 0;
-          break;
-        case "eth":
-          break;
-        default:
-          throw new ArgumentError(`Invalid asset ID: ${assetId}`);
+    if (assetId && model.asset_id) {
+      const normalizedModelAssetId = model.asset_id.toLowerCase();
+      const normalizedAssetId = assetId.toLowerCase();
+
+      if (Coinbase.toAssetId(normalizedModelAssetId) !== Coinbase.toAssetId(normalizedAssetId)) {
+        switch (normalizedAssetId) {
+          case "gwei":
+            decimals = GWEI_DECIMALS;
+            break;
+          case "wei":
+            decimals = 0;
+            break;
+          case "eth":
+            break;
+          default:
+            throw new ArgumentError(`Invalid asset ID: ${assetId}`);
+        }
       }
     }
-    return new Asset(model.network_id, model.asset_id, model.contract_address!, decimals);
+    return new Asset(
+      model.network_id,
+      assetId ?? model.asset_id,
+      model.contract_address!,
+      decimals,
+    );
   }
 
   /**
@@ -107,25 +104,6 @@ export class Asset {
   }
 
   /**
-   * Converts the amount of the Asset from whole to atomic units.
-   *
-   * @param wholeAmount - The whole amount to convert to atomic units.
-   * @returns The amount in atomic units
-   */
-  toAtomicAmount(wholeAmount: Decimal): Decimal {
-    return wholeAmount.times(new Decimal(10).pow(this.decimals));
-  }
-  /**
-   * Converts the amount of the Asset from atomic to whole units.
-   *
-   * @param wholeAmount - The atomic amount to convert to whole units.
-   * @returns The amount in atomic units
-   */
-  fromAtomicAmount(wholeAmount: Decimal): Decimal {
-    return wholeAmount.dividedBy(new Decimal(10).pow(this.decimals));
-  }
-
-  /**
    * Returns the primary denomination for the Asset.
    *
    * @returns The primary denomination for the Asset.
@@ -135,11 +113,41 @@ export class Asset {
   }
 
   /**
+   * Converts the amount of the Asset from whole to atomic units.
+   *
+   * @param wholeAmount - The whole amount to convert to atomic units.
+   * @returns The amount in atomic units
+   */
+  toAtomicAmount(wholeAmount: Decimal): bigint {
+    const atomicAmount = wholeAmount.times(new Decimal(10).pow(this.decimals));
+    return BigInt(atomicAmount.toFixed());
+  }
+
+  /**
+   * Converts the amount of the Asset from atomic to whole units.
+   *
+   * @param atomicAmount - The atomic amount to convert to whole units.
+   * @returns The amount in atomic units
+   */
+  fromAtomicAmount(atomicAmount: Decimal): Decimal {
+    return atomicAmount.dividedBy(new Decimal(10).pow(this.decimals));
+  }
+
+  /**
    * Returns a string representation of the Asset.
    *
    * @returns a string representation of the Asset
    */
   toString(): string {
     return `Asset{ networkId: ${this.networkId}, assetId: ${this.assetId}, contractAddress: ${this.contractAddress}, decimals: ${this.decimals} }`;
+  }
+
+  /**
+   * Returns the Asset ID.
+   *
+   * @returns The Asset ID.
+   */
+  getAssetId(): string {
+    return this.assetId;
   }
 }

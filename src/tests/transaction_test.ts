@@ -1,7 +1,8 @@
 import { ethers } from "ethers";
-import { Transaction as TransactionModel } from "../client/api";
+import { Transaction as TransactionModel, EthereumTransaction } from "../client/api";
 import { Transaction } from "./../coinbase/transaction";
 import { TransactionStatus } from "../coinbase/types";
+import { Coinbase } from "../coinbase/coinbase";
 
 describe("Transaction", () => {
   let fromKey;
@@ -13,6 +14,11 @@ describe("Transaction", () => {
   let model;
   let broadcastedModel;
   let transaction;
+  let ethereumContent;
+  let onchainModel;
+  let blockHash;
+  let blockHeight;
+  let networkID;
 
   beforeEach(() => {
     fromKey = ethers.Wallet.createRandom();
@@ -34,20 +40,40 @@ describe("Transaction", () => {
 
     transactionHash = "0x6c087c1676e8269dd81e0777244584d0cbfd39b6997b3477242a008fa9349e11";
 
+    blockHash = "0x0728750d458976fd010a2e15cef69ec71c6fccb3377f38a71b70ab551ab22688";
+    blockHeight = "18779006";
+    ethereumContent = {
+      priority_fee_per_gas: 1000,
+    } as EthereumTransaction;
+    networkID = Coinbase.networks.BaseSepolia;
+
     model = {
       status: "pending",
+      network_id: networkID,
       from_address_id: fromAddressId,
       unsigned_payload: unsignedPayload,
     } as TransactionModel;
 
     broadcastedModel = {
       status: "broadcast",
+      network_id: networkID,
       from_address_id: fromAddressId,
       unsigned_payload: unsignedPayload,
       signed_payload: signedPayload,
       transaction_hash: transactionHash,
       transaction_link: `https://sepolia.basescan.org/tx/${transactionHash}`,
     } as TransactionModel;
+
+    onchainModel = {
+      status: "complete",
+      network_id: networkID,
+      from_address_id: fromAddressId,
+      unsigned_payload: "",
+      block_hash: blockHash,
+      block_height: blockHeight,
+      content: ethereumContent,
+    } as TransactionModel;
+
     transaction = new Transaction(model);
   });
 
@@ -61,13 +87,13 @@ describe("Transaction", () => {
     });
   });
 
-  describe("#unsignedPayload", () => {
+  describe("#getUnsignedPayload", () => {
     it("returns the unsigned payload", () => {
       expect(transaction.getUnsignedPayload()).toEqual(unsignedPayload);
     });
   });
 
-  describe("#signedPayload", () => {
+  describe("#getSignedPayload", () => {
     it("should return undefined when the transaction has not been broadcast on chain", () => {
       expect(transaction.getSignedPayload()).toBeUndefined();
     });
@@ -78,7 +104,7 @@ describe("Transaction", () => {
     });
   });
 
-  describe("#transactionHash", () => {
+  describe("#getTransactionHash", () => {
     it("should return undefined when the transaction has not been broadcast on chain", () => {
       expect(transaction.getTransactionHash()).toBeUndefined();
     });
@@ -89,13 +115,20 @@ describe("Transaction", () => {
     });
   });
 
-  describe("#rawTransaction", () => {
+  describe("#getNetworkId", () => {
+    it("should return the network ID", () => {
+      expect(transaction.getNetworkId()).toEqual(networkID);
+    });
+  });
+
+  describe("#getRawTransaction", () => {
     let raw: ethers.Transaction, rawPayload;
 
     beforeEach(() => {
       raw = transaction.rawTransaction();
       rawPayload = JSON.parse(Buffer.from(unsignedPayload, "hex").toString());
     });
+
     it("should return the raw transaction", () => {
       expect(raw).toBeInstanceOf(ethers.Transaction);
     });
@@ -176,34 +209,77 @@ describe("Transaction", () => {
   });
 
   describe("#getStatus", () => {
-    it("should return undefined when the transaction has not been initiated with a model", async () => {
-      model.status = "";
-      const transaction = new Transaction(model);
-      expect(transaction.getStatus()).toBeUndefined();
+    [
+      { status: TransactionStatus.PENDING, expected: "pending" },
+      { status: TransactionStatus.BROADCAST, expected: "broadcast" },
+      { status: TransactionStatus.SIGNED, expected: "signed" },
+      { status: TransactionStatus.COMPLETE, expected: "complete" },
+      { status: TransactionStatus.FAILED, expected: "failed" },
+    ].forEach(({ status, expected }) => {
+      describe(`when the status is ${status}`, () => {
+        beforeEach(() => (model.status = status));
+
+        it(`should return ${expected}`, () => {
+          const transaction = new Transaction(model);
+
+          expect(transaction.getStatus()).toEqual(expected);
+        });
+      });
+    });
+  });
+
+  describe("#isTerminalState", () => {
+    [TransactionStatus.PENDING, TransactionStatus.BROADCAST, TransactionStatus.SIGNED].forEach(
+      status => {
+        it(`should return false when the status is ${status}`, () => {
+          model.status = status;
+          const transaction = new Transaction(model);
+
+          expect(transaction.isTerminalState()).toEqual(false);
+        });
+      },
+    );
+
+    [TransactionStatus.COMPLETE, TransactionStatus.FAILED].forEach(status => {
+      it(`should return true when the status is ${status}`, () => {
+        model.status = status;
+        const transaction = new Transaction(model);
+
+        expect(transaction.isTerminalState()).toEqual(true);
+      });
+    });
+  });
+
+  describe("#blockHash", () => {
+    it("returns the block hash", () => {
+      const transaction = new Transaction(onchainModel);
+      expect(transaction.blockHash()).toEqual(blockHash);
     });
 
-    it("should return a pending status", () => {
-      model.status = TransactionStatus.PENDING;
-      const transaction = new Transaction(model);
-      expect(transaction.getStatus()).toEqual("pending");
+    it("returns undefined when block hash is undefined", () => {
+      expect(transaction.blockHash()).toBeUndefined;
+    });
+  });
+
+  describe("#blockHeight", () => {
+    it("returns the block height", () => {
+      const transaction = new Transaction(onchainModel);
+      expect(transaction.blockHeight()).toEqual(blockHeight);
     });
 
-    it("should return a broadcast status", () => {
-      model.status = TransactionStatus.BROADCAST;
-      const transaction = new Transaction(model);
-      expect(transaction.getStatus()).toEqual("broadcast");
+    it("returns undefined when block height is undefined", () => {
+      expect(transaction.blockHeight()).toBeUndefined;
+    });
+  });
+
+  describe("#content", () => {
+    it("returns the ethereum transaction", () => {
+      const transaction = new Transaction(onchainModel);
+      expect(transaction.content()).toEqual(ethereumContent);
     });
 
-    it("should return a complete status", () => {
-      model.status = TransactionStatus.COMPLETE;
-      const transaction = new Transaction(model);
-      expect(transaction.getStatus()).toEqual("complete");
-    });
-
-    it("should return a failed status", () => {
-      model.status = TransactionStatus.FAILED;
-      const transaction = new Transaction(model);
-      expect(transaction.getStatus()).toEqual("failed");
+    it("returns undefined when content is undefined", () => {
+      expect(transaction.content()).toBeUndefined;
     });
   });
 
@@ -240,7 +316,7 @@ describe("Transaction", () => {
     it("returns the same value as toString", () => {
       const transaction = new Transaction(broadcastedModel);
       expect(transaction.toString()).toEqual(
-        `Transaction { transactionHash: '${transaction.getTransactionHash()}', status: 'broadcast' }`,
+        `Transaction { transactionHash: '${transaction.getTransactionHash()}', status: '${transaction.getStatus()}', unsignedPayload: '${transaction.getUnsignedPayload()}', signedPayload: ${transaction.getSignedPayload()}, transactionLink: ${transaction.getTransactionLink()} }`,
       );
     });
 

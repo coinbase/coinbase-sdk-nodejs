@@ -5,14 +5,15 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
+    "resolveJsonModule": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
     "noImplicitAny": false,
-    "removeComments": true
+    "removeComments": false
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "**/__tests__/**/**"]
+  "exclude": ["node_modules", "dist", "src/**/*.test.ts", "**/tests/**"]
 }

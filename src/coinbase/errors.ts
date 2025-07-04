@@ -1,7 +1,7 @@
 /**
- * InvalidaAPIKeyFormat error is thrown when the API key format is invalid.
+ * InvalidAPIKeyFormatError error is thrown when the API key format is invalid.
  */
-export class InvalidAPIKeyFormat extends Error {
+export class InvalidAPIKeyFormatError extends Error {
   static DEFAULT_MESSAGE = "Invalid API key format";
 
   /**
@@ -9,11 +9,29 @@ export class InvalidAPIKeyFormat extends Error {
    *
    * @param message - The error message.
    */
-  constructor(message: string = InvalidAPIKeyFormat.DEFAULT_MESSAGE) {
+  constructor(message: string = InvalidAPIKeyFormatError.DEFAULT_MESSAGE) {
     super(message);
-    this.name = "InvalidAPIKeyFormat";
+    this.name = "InvalidAPIKeyFormatError";
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, InvalidAPIKeyFormat);
+      Error.captureStackTrace(this, InvalidAPIKeyFormatError);
+    }
+  }
+}
+
+/**
+ * TimeoutError is thrown when an operation times out.
+ */
+export class TimeoutError extends Error {
+  /**
+   * Initializes a new TimeoutError instance.
+   *
+   * @param message - The error message.
+   */
+  constructor(message: string = "Timeout Error") {
+    super(message);
+    this.name = "TimeoutError";
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, TimeoutError);
     }
   }
 }
@@ -39,29 +57,9 @@ export class ArgumentError extends Error {
 }
 
 /**
- * InternalError is thrown when there is an internal error in the SDK.
+ * InvalidConfigurationError error is thrown when apikey/privateKey configuration is invalid.
  */
-export class InternalError extends Error {
-  static DEFAULT_MESSAGE = "Internal Error";
-
-  /**
-   * Initializes a new InternalError instance.
-   *
-   * @param message - The error message.
-   */
-  constructor(message: string = InternalError.DEFAULT_MESSAGE) {
-    super(message);
-    this.name = "InternalError";
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, InternalError);
-    }
-  }
-}
-
-/**
- * InvalidConfiguration error is thrown when apikey/privateKey configuration is invalid.
- */
-export class InvalidConfiguration extends Error {
+export class InvalidConfigurationError extends Error {
   static DEFAULT_MESSAGE = "Invalid configuration";
 
   /**
@@ -69,11 +67,11 @@ export class InvalidConfiguration extends Error {
    *
    * @param message - The error message.
    */
-  constructor(message: string = InvalidConfiguration.DEFAULT_MESSAGE) {
+  constructor(message: string = InvalidConfigurationError.DEFAULT_MESSAGE) {
     super(message);
-    this.name = "InvalidConfiguration";
+    this.name = "InvalidConfigurationError";
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, InvalidConfiguration);
+      Error.captureStackTrace(this, InvalidConfigurationError);
     }
   }
 }
@@ -81,7 +79,7 @@ export class InvalidConfiguration extends Error {
 /**
  * InvalidUnsignedPayload error is thrown when the unsigned payload is invalid.
  */
-export class InvalidUnsignedPayload extends Error {
+export class InvalidUnsignedPayloadError extends Error {
   static DEFAULT_MESSAGE = "Invalid unsigned payload";
 
   /**
@@ -89,11 +87,73 @@ export class InvalidUnsignedPayload extends Error {
    *
    * @param message - The error message.
    */
-  constructor(message: string = InvalidUnsignedPayload.DEFAULT_MESSAGE) {
+  constructor(message: string = InvalidUnsignedPayloadError.DEFAULT_MESSAGE) {
     super(message);
-    this.name = "InvalidUnsignedPayload";
+    this.name = "InvalidUnsignedPayloadError";
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, InvalidUnsignedPayload);
+      Error.captureStackTrace(this, InvalidUnsignedPayloadError);
+    }
+  }
+}
+
+/**
+ * NotSignedError is thrown when a resource is not signed.
+ */
+export class NotSignedError extends Error {
+  /**
+   * Initializes a new NotSignedError instance.
+   *
+   * @param message - The error message.
+   */
+  constructor(message: string = "Resource not signed") {
+    super(message);
+    this.name = "NotSignedError";
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, NotSignedError);
+    }
+  }
+}
+
+/**
+ * AlreadySignedError is thrown when a resource is already signed.
+ */
+export class AlreadySignedError extends Error {
+  static DEFAULT_MESSAGE = "Resource already signed";
+
+  /**
+   * Initializes a new AlreadySignedError instance.
+   *
+   * @param message - The error message.
+   */
+  constructor(message: string = AlreadySignedError.DEFAULT_MESSAGE) {
+    super(message);
+    this.name = "AlreadySignedError";
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, AlreadySignedError);
+    }
+  }
+}
+
+/**
+ * UninitializedSDKError is thrown when the Coinbase instance is not initialized.
+ */
+export class UninitializedSDKError extends Error {
+  static DEFAULT_MESSAGE =
+    "Coinbase SDK has not been initialized. Please initialize by calling either:\n\n" +
+    "- Coinbase.configure({apiKeyName: '...', privateKey: '...'})\n" +
+    "- Coinbase.configureFromJson({filePath: '/path/to/api_keys.json'})\n\n" +
+    "If needed, register for API keys at https://portal.cdp.coinbase.com/ or view the docs at https://docs.cdp.coinbase.com/wallet-api/docs/welcome";
+
+  /**
+   * Initializes a new UninitializedSDKError instance.
+   *
+   * @param message - The error message.
+   */
+  constructor(message: string = UninitializedSDKError.DEFAULT_MESSAGE) {
+    super(message);
+    this.name = "UninitializedSDKError";
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, UninitializedSDKError);
     }
   }
 }

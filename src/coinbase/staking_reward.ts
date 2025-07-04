@@ -1,8 +1,8 @@
-import { StakingRewardFormat, StakingReward as StakingRewardModel } from "../client";
+import { StakingReward as StakingRewardModel } from "../client";
 import Decimal from "decimal.js";
 import { Coinbase } from "./coinbase";
 import { Asset } from "./asset";
-import { Amount } from "./types";
+import { Amount, StakingRewardFormat } from "./types";
 
 /**
  * A representation of a staking reward earned on a network for a given asset.
@@ -10,7 +10,7 @@ import { Amount } from "./types";
 export class StakingReward {
   private model: StakingRewardModel;
   private asset: Asset;
-  private format: StakingRewardFormat;
+  private readonly format: StakingRewardFormat;
 
   /**
    * Creates the StakingReward object.
@@ -42,7 +42,7 @@ export class StakingReward {
     addressIds: Array<string>,
     startTime: string,
     endTime: string,
-    format = StakingRewardFormat.Usd,
+    format: StakingRewardFormat = StakingRewardFormat.USD,
   ): Promise<StakingReward[]> {
     const stakingRewards: StakingReward[] = [];
     const queue: string[] = [""];
@@ -85,7 +85,8 @@ export class StakingReward {
    * @returns The amount.
    */
   public amount(): Amount {
-    if (this.format == StakingRewardFormat.Usd) {
+    if (this.model.amount == "") return 0;
+    if (this.format == StakingRewardFormat.USD) {
       return new Decimal(this.model.amount).div(new Decimal("100"));
     }
     return this.asset.fromAtomicAmount(new Decimal(this.model.amount)).toNumber();
@@ -101,11 +102,47 @@ export class StakingReward {
   }
 
   /**
+   * Returns the onchain address of the StakingReward.
+   *
+   * @returns The onchain address.
+   */
+  public addressId(): string {
+    return this.model.address_id;
+  }
+
+  /**
+   * Returns the USD value of the StakingReward.
+   *
+   * @returns The USD value.
+   */
+  public usdValue(): Amount {
+    return new Decimal(this.model.usd_value.amount).div(new Decimal("100"));
+  }
+
+  /**
+   * Returns the conversion price of the StakingReward in USD.
+   *
+   * @returns The conversion price.
+   */
+  public conversionPrice(): Amount {
+    return new Decimal(this.model.usd_value.conversion_price);
+  }
+
+  /**
+   * Returns the time of calculating the conversion price.
+   *
+   * @returns The conversion time.
+   */
+  public conversionTime(): Date {
+    return new Date(this.model.usd_value.conversion_time);
+  }
+
+  /**
    * Print the Staking Reward as a string.
    *
    * @returns The string representation of the Staking Reward.
    */
   public toString(): string {
-    return `StakingReward { amount: '${this.amount().toString()}' }`;
+    return `StakingReward { date: '${this.date().toISOString()}' address: '${this.addressId()}' amount: '${this.amount().toString()}' usd_value: '${this.usdValue().toString()}' conversion_price: '${this.conversionPrice().toString()}' conversion_time: '${this.conversionTime().toISOString()}' }`;
   }
 }

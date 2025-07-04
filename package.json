@@ -4,7 +4,7 @@
   "license": "ISC",
   "description": "Coinbase Platform SDK",
   "repository": "https://github.com/coinbase/coinbase-sdk-nodejs",
-  "version": "0.0.9",
+  "version": "0.25.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -13,12 +13,14 @@
     "format": "prettier -c .prettierrc --write \"**/*.{ts,js,cjs,json,md}\"",
     "format-check": "prettier -c .prettierrc --check \"**/*.{ts,js,cjs,json,md}\"",
     "check": "tsc --noEmit",
-    "test": "npx jest --no-cache  --testMatch=**/*_test.ts",
+    "test": "jest --config jest.config.js --testPathIgnorePatterns src/tests/e2e.ts src/tests/utils.ts src/tests/types.test-d.ts",
     "test:dry-run": "npm install && npm ci && npm publish --dry-run",
     "test:e2e": "npx jest --no-cache --testMatch=**/e2e.ts --coverageThreshold '{}'",
+    "test:e2e:stake": "npx jest --no-cache --testMatch=**/e2e.ts --coverageThreshold '{}' -t Stake",
+    "test:types": "tsd --files src/tests/types.test-d.ts",
     "clean": "rm -rf dist/*",
     "build": "tsc",
-    "prepack": "tsc",
+    "prepack": "tsc --skipLibCheck",
     "docs": "typedoc --entryPoints ./src --entryPointStrategy expand --exclude ./src/tests/**/*.ts"
   },
   "files": [
@@ -26,20 +28,23 @@
   ],
   "dependencies": {
     "@scure/bip32": "^1.4.0",
+    "abitype": "^1.0.6",
     "axios": "^1.6.8",
     "axios-mock-adapter": "^1.22.0",
+    "axios-retry": "^4.4.1",
     "bip32": "^4.0.0",
     "bip39": "^3.1.0",
     "decimal.js": "^10.4.3",
     "dotenv": "^16.4.5",
+    "ed2curve": "^0.3.0",
     "ethers": "^6.12.1",
-    "node-jose": "^2.2.0",
-    "secp256k1": "^5.0.0"
+    "jose": "^5.10.0",
+    "secp256k1": "^5.0.0",
+    "viem": "^2.21.26"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
     "@types/node": "^20.12.11",
-    "@types/node-jose": "^1.1.13",
     "@types/secp256k1": "^4.0.6",
     "@typescript-eslint/eslint-plugin": "^7.8.0",
     "@typescript-eslint/parser": "^7.8.0",
@@ -52,6 +57,7 @@
     "prettier": "^3.2.5",
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
+    "tsd": "^0.31.2",
     "typedoc": "^0.25.13",
     "typescript": "^5.4.5"
   }

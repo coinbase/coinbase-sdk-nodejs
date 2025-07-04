@@ -1,14 +1,9 @@
 import { Address } from "../address";
-import { Amount, StakeOptionsMode } from "../types";
+import { Amount, BroadcastExternalTransactionResponse, StakeOptionsMode } from "../types";
 import { Coinbase } from "../coinbase";
 import Decimal from "decimal.js";
 import { Asset } from "../asset";
-import { StakingOperation } from "../staking_operation";
-import { StakingRewardFormat } from "../../client";
-import { StakingReward } from "../staking_reward";
-import { BalanceMap } from "../balance_map";
-import { Balance } from "../balance";
-import { FaucetTransaction } from "../faucet_transaction";
+import { IsDedicatedEthUnstakeV2Operation, StakingOperation } from "../staking_operation";
 
 /**
  * A representation of a blockchain Address, which is a user-controlled account on a Network. Addresses are used to
@@ -23,7 +18,16 @@ export class ExternalAddress extends Address {
    * @param amount - The amount of the asset to stake.
    * @param assetId - The asset to stake.
    * @param mode - The staking mode. Defaults to DEFAULT.
-   * @param options - Additional options for the stake operation.
+   * @param options - Additional options for the stake operation:
+   *
+   * A. Shared ETH Staking
+   *  - `integrator_contract_address` (optional): The contract address to which the stake operation is directed to. Defaults to the integrator contract address associated with CDP account (if available) or else defaults to a shared integrator contract address for that network.
+   *
+   * B. Dedicated ETH Staking
+   *  - `funding_address` (optional): Ethereum address for funding the stake operation. Defaults to the address initiating the stake operation.
+   *  - `withdrawal_address` (optional): Ethereum address for receiving rewards and withdrawal funds. Defaults to the address initiating the stake operation.
+   *  - `fee_recipient_address` (optional): Ethereum address for receiving transaction fees. Defaults to the address initiating the stake operation.
+   *
    * @returns The stake operation.
    */
   public async buildStakeOperation(
@@ -42,7 +46,15 @@ export class ExternalAddress extends Address {
    * @param amount - The amount of the asset to unstake.
    * @param assetId - The asset to unstake.
    * @param mode - The staking mode. Defaults to DEFAULT.
-   * @param options - Additional options for the unstake operation.
+   * @param options - Additional options for the unstake operation:
+   *
+   * A. Shared ETH Staking
+   *  - `integrator_contract_address` (optional): The contract address to which the unstake operation is directed to. Defaults to the integrator contract address associated with CDP account (if available) or else defaults to a shared integrator contract address for that network.
+   *
+   * B. Dedicated ETH Staking
+   *  - `immediate` (optional): Set this to "true" to unstake immediately i.e. leverage "Coinbase managed unstake" process . Defaults to "false" i.e. "User managed unstake" process.
+   *  - `validator_pub_keys` (optional): List of comma separated validator public keys to unstake. Defaults to validators being picked up on your behalf corresponding to the unstake amount.
+   *
    * @returns The unstake operation.
    */
   public async buildUnstakeOperation(
@@ -51,7 +63,11 @@ export class ExternalAddress extends Address {
     mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
     options: { [key: string]: string } = {},
   ): Promise<StakingOperation> {
-    await this.validateCanUnstake(amount, assetId, mode, options);
+    // If performing a native eth unstake v2, validation is always performed server-side.
+    if (!IsDedicatedEthUnstakeV2Operation(assetId, "unstake", mode, options)) {
+      await this.validateCanUnstake(amount, assetId, mode, options);
+    }
+
     return this.buildStakingOperation(amount, assetId, "unstake", mode, options);
   }
 
@@ -62,6 +78,10 @@ export class ExternalAddress extends Address {
    * @param assetId - The asset to claim stake.
    * @param mode - The staking mode. Defaults to DEFAULT.
    * @param options - Additional options for the claim stake operation.
+   *
+   * A. Shared ETH Staking
+   *  - `integrator_contract_address` (optional): The contract address to which the claim stake operation is directed to. Defaults to the integrator contract address associated with CDP account (if available) or else defaults to a shared integrator contract address for that network.
+   *
    * @returns The claim stake operation.
    */
   public async buildClaimStakeOperation(
@@ -75,199 +95,16 @@ export class ExternalAddress extends Address {
   }
 
   /**
-   * Get the stakeable balance for the supplied asset.
+   * Builds a validator consolidation operation to help consolidate validators post Pectra.
    *
-   * @param asset_id - The asset to check the stakeable balance for.
-   * @param mode - The staking mode. Defaults to DEFAULT.
-   * @param options - Additional options for getting the stakeable balance.
-   * @returns The stakeable balance.
+   * @param options - Additional options for the validator consolidation operation.
+   *
+   * @returns The validator consolidation operation.
    */
-  public async stakeableBalance(
-    asset_id: string,
-    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
+  public async buildValidatorConsolidationOperation(
     options: { [key: string]: string } = {},
-  ): Promise<Decimal> {
-    const balances = await this.getStakingBalances(asset_id, mode, options);
-    return balances.stakeableBalance;
-  }
-
-  /**
-   * Get the unstakeable balance for the supplied asset.
-   *
-   * @param asset_id - The asset to check the unstakeable balance for.
-   * @param mode - The staking mode. Defaults to DEFAULT.
-   * @param options - Additional options for getting the unstakeable balance.
-   * @returns The unstakeable balance.
-   */
-  public async unstakeableBalance(
-    asset_id: string,
-    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
-    options: { [key: string]: string } = {},
-  ): Promise<Decimal> {
-    const balances = await this.getStakingBalances(asset_id, mode, options);
-    return balances.unstakeableBalance;
-  }
-
-  /**
-   * Get the claimable balance for the supplied asset.
-   *
-   * @param asset_id - The asset to check claimable balance for.
-   * @param mode - The staking mode. Defaults to DEFAULT.
-   * @param options - Additional options for getting the claimable balance.
-   * @returns The claimable balance.
-   */
-  public async claimableBalance(
-    asset_id: string,
-    mode: StakeOptionsMode = StakeOptionsMode.DEFAULT,
-    options: { [key: string]: string } = {},
-  ): Promise<Decimal> {
-    const balances = await this.getStakingBalances(asset_id, mode, options);
-    return balances.claimableBalance;
-  }
-
-  /**
-   * Lists the staking rewards for the address.
-   *
-   * @param assetId - The asset ID.
-   * @param startTime - The start time.
-   * @param endTime - The end time.
-   * @param format - The format to return the rewards in. (usd, native). Defaults to usd.
-   * @returns The staking rewards.
-   */
-  public async stakingRewards(
-    assetId: string,
-    startTime: string,
-    endTime: string,
-    format = StakingRewardFormat.Usd,
-  ): Promise<StakingReward[]> {
-    return StakingReward.list(
-      Coinbase.normalizeNetwork(this.getNetworkId()),
-      assetId,
-      [this.getId()],
-      startTime,
-      endTime,
-      format,
-    );
-  }
-
-  /**
-   * Validate if the operation is able to stake with the supplied input.
-   *
-   * @param amount - The amount of the asset to stake.
-   * @param assetId - The asset to stake.
-   * @param mode - The staking mode. Defaults to DEFAULT.
-   * @param options - Additional options for the stake operation.
-   * @private
-   * @throws {Error} If the supplied input is not able to create a stake operation.
-   */
-  private async validateCanStake(
-    amount: Amount,
-    assetId: string,
-    mode: StakeOptionsMode,
-    options: { [key: string]: string },
-  ): Promise<void> {
-    const stakeableBalance = await this.stakeableBalance(assetId, mode, options);
-
-    if (new Decimal(stakeableBalance).lessThan(amount.toString())) {
-      throw new Error(
-        `Insufficient funds ${amount} requested to stake, only ${stakeableBalance} available.`,
-      );
-    }
-  }
-
-  /**
-   * Validate if the operation is able to unstake with the supplied input.
-   *
-   * @param amount - The amount of the asset to unstake.
-   * @param assetId - The asset to unstake.
-   * @param mode - The staking mode. Defaults to DEFAULT.
-   * @param options - Additional options for the unstake operation.
-   * @private
-   * @throws {Error} If the supplied input is not able to create an unstake operation.
-   */
-  private async validateCanUnstake(
-    amount: Amount,
-    assetId: string,
-    mode: StakeOptionsMode,
-    options: { [key: string]: string },
-  ): Promise<void> {
-    const unstakeableBalance = new Decimal(await this.unstakeableBalance(assetId, mode, options));
-
-    if (unstakeableBalance.lessThan(amount.toString())) {
-      throw new Error(
-        `Insufficient funds ${amount} requested to unstake, only ${unstakeableBalance} available.`,
-      );
-    }
-  }
-
-  /**
-   * Validate if the operation is able to claim stake with the supplied input.
-   *
-   * @param amount - The amount of the asset to claim stake.
-   * @param assetId - The asset to claim stake.
-   * @param mode - The staking mode. Defaults to DEFAULT.
-   * @param options - Additional options for the claim stake operation.
-   * @private
-   * @throws {Error} If the supplied input is not able to create a claim stake operation.
-   */
-  private async validateCanClaimStake(
-    amount: Amount,
-    assetId: string,
-    mode: StakeOptionsMode,
-    options: { [key: string]: string },
-  ): Promise<void> {
-    const claimableBalance = new Decimal(await this.claimableBalance(assetId, mode, options));
-
-    if (claimableBalance.lessThan(amount.toString())) {
-      throw new Error(
-        `Insufficient funds ${amount} requested to claim stake, only ${claimableBalance} available.`,
-      );
-    }
-  }
-
-  /**
-   * Get the different staking balance types for the supplied asset.
-   *
-   * @param assetId - The asset to lookup balances for.
-   * @param mode - The staking mode. Defaults to DEFAULT.
-   * @param options - Additional options for the balance lookup.
-   * @private
-   * @returns The different balance types.
-   */
-  private async getStakingBalances(
-    assetId: string,
-    mode?: StakeOptionsMode,
-    options?: { [key: string]: string },
-  ): Promise<{ [key: string]: Decimal }> {
-    const newOptions = this.copyOptions(options);
-
-    if (mode) {
-      newOptions.mode = mode;
-    }
-
-    const request = {
-      network_id: this.getNetworkId(),
-      asset_id: Asset.primaryDenomination(assetId),
-      address_id: this.getId(),
-      options: newOptions,
-    };
-
-    const response = await Coinbase.apiClients.stake!.getStakingContext(request);
-
-    return {
-      stakeableBalance: Balance.fromModelAndAssetId(
-        response!.data.context.stakeable_balance,
-        assetId,
-      ).amount,
-      unstakeableBalance: Balance.fromModelAndAssetId(
-        response!.data.context.unstakeable_balance,
-        assetId,
-      ).amount,
-      claimableBalance: Balance.fromModelAndAssetId(
-        response!.data.context.claimable_balance,
-        assetId,
-      ).amount,
-    };
+  ): Promise<StakingOperation> {
+    return this.buildStakingOperation(0, "eth", "consolidate", StakeOptionsMode.NATIVE, options);
   }
 
   /**
@@ -289,15 +126,12 @@ export class ExternalAddress extends Address {
     mode: StakeOptionsMode,
     options: { [key: string]: string },
   ): Promise<StakingOperation> {
-    const stakingAmount = new Decimal(amount.toString());
-    if (stakingAmount.lessThanOrEqualTo(0)) {
-      throw new Error(`Amount required greater than zero.`);
-    }
     const asset = await Asset.fetch(this.getNetworkId(), assetId);
 
     const newOptions = this.copyOptions(options);
 
     newOptions.mode = mode;
+
     newOptions.amount = asset.toAtomicAmount(new Decimal(amount.toString())).toString();
 
     const request = {
@@ -314,65 +148,25 @@ export class ExternalAddress extends Address {
   }
 
   /**
-   * Create a shallow copy of given options.
+   * Broadcast an external transaction
    *
-   * @param options - The supplied options to be copied
-   * @private
-   * @returns A copy of the options.
+   * @param signedPayload - The signed payload of the transaction to broadcast
+   * @returns The broadcasted transaction
    */
-  private copyOptions(options?: { [key: string]: string }): {
-    [key: string]: string;
-  } {
-    return { ...options };
-  }
-
-  /**
-   * Returns the list of balances for the address.
-   *
-   * @returns The map from asset ID to balance.
-   */
-  public async listBalances(): Promise<BalanceMap> {
-    const response = await Coinbase.apiClients.externalAddress!.listExternalAddressBalances(
+  public async broadcastExternalTransaction(
+    signedPayload: string,
+  ): Promise<BroadcastExternalTransactionResponse> {
+    const response = await Coinbase.apiClients.externalAddress!.broadcastExternalTransaction(
       this.getNetworkId(),
       this.getId(),
+      {
+        signed_payload: signedPayload,
+      },
     );
 
-    return BalanceMap.fromBalances(response.data.data);
-  }
-
-  /**
-   * Returns the balance of the provided asset.
-   *
-   * @param assetId - The asset ID.
-   * @returns The balance of the asset.
-   */
-  async getBalance(assetId: string): Promise<Decimal> {
-    const response = await Coinbase.apiClients.externalAddress!.getExternalAddressBalance(
-      this.getNetworkId(),
-      this.getId(),
-      Asset.primaryDenomination(assetId),
-    );
-
-    if (!response.data) {
-      return new Decimal(0);
-    }
-
-    return Balance.fromModelAndAssetId(response.data, assetId).amount;
-  }
-
-  /**
-   * Requests faucet funds for the address.
-   * Only supported on testnet networks.
-   *
-   * @returns The faucet transaction object.
-   * @throws {InternalError} If the request does not return a transaction hash.
-   * @throws {Error} If the request fails.
-   */
-  public async faucet(): Promise<FaucetTransaction> {
-    const response = await Coinbase.apiClients.externalAddress!.requestExternalFaucetFunds(
-      this.getNetworkId(),
-      this.getId(),
-    );
-    return new FaucetTransaction(response.data);
+    return {
+      transactionHash: response.data.transaction_hash,
+      transactionLink: response.data.transaction_link,
+    };
   }
 }

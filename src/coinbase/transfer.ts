@@ -1,10 +1,12 @@
 import { Decimal } from "decimal.js";
-import { TransferStatus } from "./types";
+import { TransactionStatus, SponsoredSendStatus, TransferStatus } from "./types";
+import { Transaction } from "./transaction";
+import { SponsoredSend } from "./sponsored_send";
 import { Coinbase } from "./coinbase";
 import { Transfer as TransferModel } from "../client/api";
 import { ethers } from "ethers";
-import { InternalError } from "./errors";
-import { parseUnsignedPayload } from "./utils";
+import { delay } from "./utils";
+import { TimeoutError } from "./errors";
 
 /**
  * A representation of a Transfer, which moves an Amount of an Asset from
@@ -13,7 +15,6 @@ import { parseUnsignedPayload } from "./utils";
  */
 export class Transfer {
   private model: TransferModel;
-  private transaction?: ethers.Transaction;
 
   /**
    * Private constructor to prevent direct instantiation outside of the factory methods.
@@ -24,7 +25,7 @@ export class Transfer {
    */
   private constructor(transferModel: TransferModel) {
     if (!transferModel) {
-      throw new InternalError("Transfer model cannot be empty");
+      throw new Error("Transfer model cannot be empty");
     }
     this.model = transferModel;
   }
@@ -104,30 +105,12 @@ export class Transfer {
   }
 
   /**
-   * Returns the Unsigned Payload of the Transfer.
-   *
-   * @returns The Unsigned Payload as a Hex string.
-   */
-  public getUnsignedPayload(): string {
-    return this.model.unsigned_payload;
-  }
-
-  /**
-   * Returns the Signed Payload of the Transfer.
-   *
-   * @returns The Signed Payload as a Hex string, or undefined if not yet available.
-   */
-  public getSignedPayload(): string | undefined {
-    return this.model.signed_payload;
-  }
-
-  /**
    * Returns the Transaction Hash of the Transfer.
    *
    * @returns The Transaction Hash as a Hex string, or undefined if not yet available.
    */
   public getTransactionHash(): string | undefined {
-    return this.model.transaction_hash;
+    return this.getSendTransactionDelegate()?.getTransactionHash();
   }
 
   /**
@@ -136,33 +119,20 @@ export class Transfer {
    * @returns The ethers.js Transaction object.
    * @throws (InvalidUnsignedPayload) If the Unsigned Payload is invalid.
    */
-  public getTransaction(): ethers.Transaction {
-    if (this.transaction) return this.transaction;
-
-    const transaction = new ethers.Transaction();
-
-    const parsedPayload = parseUnsignedPayload(this.getUnsignedPayload());
-
-    transaction.chainId = BigInt(parsedPayload.chainId);
-    transaction.nonce = BigInt(parsedPayload.nonce);
-    transaction.maxPriorityFeePerGas = BigInt(parsedPayload.maxPriorityFeePerGas);
-    transaction.maxFeePerGas = BigInt(parsedPayload.maxFeePerGas);
-    transaction.gasLimit = BigInt(parsedPayload.gas);
-    transaction.to = parsedPayload.to;
-    transaction.value = BigInt(parsedPayload.value);
-    transaction.data = parsedPayload.input;
-
-    this.transaction = transaction;
-    return transaction;
+  public getRawTransaction(): ethers.Transaction | undefined {
+    if (!this.getTransaction()) return undefined;
+    return this.getTransaction()!.rawTransaction();
   }
 
   /**
-   * Sets the Signed Transaction of the Transfer.
+   * Signs the Transfer with the provided key and returns the hex signature
+   * required for broadcasting the Transfer.
    *
-   * @param transaction - The Signed Transaction.
+   * @param key - The key to sign the Transfer with
+   * @returns The hex-encoded signed payload
    */
-  public setSignedTransaction(transaction: ethers.Transaction): void {
-    this.transaction = transaction;
+  async sign(key: ethers.Wallet): Promise<string> {
+    return this.getSendTransactionDelegate()!.sign(key);
   }
 
   /**
@@ -171,14 +141,24 @@ export class Transfer {
    * @returns The Status of the Transfer.
    */
   public getStatus(): TransferStatus | undefined {
-    switch (this.model.status) {
-      case TransferStatus.PENDING:
+    switch (this.getSendTransactionDelegate()!.getStatus()!) {
+      case TransactionStatus.PENDING:
         return TransferStatus.PENDING;
-      case TransferStatus.BROADCAST:
+      case SponsoredSendStatus.PENDING:
+        return TransferStatus.PENDING;
+      case SponsoredSendStatus.SIGNED:
+        return TransferStatus.PENDING;
+      case TransactionStatus.BROADCAST:
         return TransferStatus.BROADCAST;
-      case TransferStatus.COMPLETE:
+      case SponsoredSendStatus.SUBMITTED:
+        return TransferStatus.BROADCAST;
+      case TransactionStatus.COMPLETE:
         return TransferStatus.COMPLETE;
-      case TransferStatus.FAILED:
+      case SponsoredSendStatus.COMPLETE:
+        return TransferStatus.COMPLETE;
+      case TransactionStatus.FAILED:
+        return TransferStatus.FAILED;
+      case SponsoredSendStatus.FAILED:
         return TransferStatus.FAILED;
       default:
         return undefined;
@@ -186,12 +166,95 @@ export class Transfer {
   }
 
   /**
+   * Returns the Transaction of the Transfer.
+   *
+   * @returns The Transaction
+   */
+  public getTransaction(): Transaction | undefined {
+    if (!this.model.transaction) return undefined;
+    return new Transaction(this.model.transaction!);
+  }
+
+  /**
+   * Returns the Sponsored Send of the Transfer.
+   *
+   * @returns The Sponsored Send
+   */
+  public getSponsoredSend(): SponsoredSend | undefined {
+    if (!this.model.sponsored_send) return undefined;
+    return new SponsoredSend(this.model.sponsored_send!);
+  }
+
+  /**
+   * Returns the Send Transaction Delegate of the Transfer.
+   *
+   * @returns Either the Transaction or the Sponsored Send
+   */
+  public getSendTransactionDelegate(): Transaction | SponsoredSend | undefined {
+    return !this.getTransaction() ? this.getSponsoredSend() : this.getTransaction();
+  }
+
+  /**
    * Returns the link to the Transaction on the blockchain explorer.
    *
    * @returns The link to the Transaction on the blockchain explorer.
    */
-  public getTransactionLink(): string {
-    return `https://sepolia.basescan.org/tx/${this.getTransactionHash()}`;
+  public getTransactionLink(): string | undefined {
+    return this.getSendTransactionDelegate()?.getTransactionLink();
+  }
+
+  /**
+   * Broadcasts the Transfer to the Network.
+   *
+   * @returns The Transfer object
+   * @throws {APIError} if the API request to broadcast a Transfer fails.
+   */
+  public async broadcast(): Promise<Transfer> {
+    if (!this.getSendTransactionDelegate()?.isSigned())
+      throw new Error("Cannot broadcast unsigned Transfer");
+
+    const broadcastTransferRequest = {
+      signed_payload: this.getSendTransactionDelegate()!.getSignature()!,
+    };
+
+    const response = await Coinbase.apiClients.transfer!.broadcastTransfer(
+      this.getWalletId(),
+      this.getFromAddressId(),
+      this.getId(),
+      broadcastTransferRequest,
+    );
+
+    return Transfer.fromModel(response.data);
+  }
+
+  /**
+   * Waits for the Transfer to be confirmed on the Network or fail on chain.
+   * Waits until the Transfer is completed or failed on-chain by polling at the given interval.
+   * Raises an error if the Trade takes longer than the given timeout.
+   *
+   * @param options - The options to configure the wait function.
+   * @param options.intervalSeconds - The interval to check the status of the Transfer.
+   * @param options.timeoutSeconds - The maximum time to wait for the Transfer to be confirmed.
+   *
+   * @returns The Transfer object in a terminal state.
+   * @throws {Error} if the Transfer times out.
+   */
+  public async wait({ intervalSeconds = 0.2, timeoutSeconds = 10 } = {}): Promise<Transfer> {
+    const startTime = Date.now();
+
+    while (Date.now() - startTime < timeoutSeconds * 1000) {
+      await this.reload();
+
+      // If the Transfer is in a terminal state, return the Transfer.
+      const status = this.getStatus();
+      if (status === TransferStatus.COMPLETE || status === TransferStatus.FAILED) {
+        return this;
+      }
+
+      await delay(intervalSeconds);
+    }
+
+    throw new TimeoutError("Transfer timed out");
   }
 
   /**

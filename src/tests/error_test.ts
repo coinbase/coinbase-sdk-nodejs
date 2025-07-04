@@ -1,69 +1,69 @@
 import {
   ArgumentError,
-  InternalError,
-  InvalidAPIKeyFormat,
-  InvalidConfiguration,
-  InvalidUnsignedPayload,
+  InvalidAPIKeyFormatError,
+  InvalidConfigurationError,
+  InvalidUnsignedPayloadError,
+  AlreadySignedError,
 } from "../coinbase/errors";
 
 describe("Error Classes", () => {
-  test("InvalidAPIKeyFormat should have the correct message and name", () => {
-    const error = new InvalidAPIKeyFormat();
-    expect(error.message).toBe(InvalidAPIKeyFormat.DEFAULT_MESSAGE);
-    expect(error.name).toBe("InvalidAPIKeyFormat");
+  it("InvalidAPIKeyFormatError should have the correct message and name", () => {
+    const error = new InvalidAPIKeyFormatError();
+    expect(error.message).toBe(InvalidAPIKeyFormatError.DEFAULT_MESSAGE);
+    expect(error.name).toBe("InvalidAPIKeyFormatError");
   });
 
-  test("InvalidAPIKeyFormat should accept a custom message", () => {
+  it("InvalidAPIKeyFormatError should accept a custom message", () => {
     const customMessage = "Custom invalid API key format message";
-    const error = new InvalidAPIKeyFormat(customMessage);
+    const error = new InvalidAPIKeyFormatError(customMessage);
     expect(error.message).toBe(customMessage);
   });
 
-  test("ArgumentError should have the correct message and name", () => {
+  it("ArgumentError should have the correct message and name", () => {
     const error = new ArgumentError();
     expect(error.message).toBe(ArgumentError.DEFAULT_MESSAGE);
     expect(error.name).toBe("ArgumentError");
   });
 
-  test("ArgumentError should accept a custom message", () => {
+  it("ArgumentError should accept a custom message", () => {
     const customMessage = "Custom argument error message";
     const error = new ArgumentError(customMessage);
     expect(error.message).toBe(customMessage);
   });
 
-  test("InternalError should have the correct message and name", () => {
-    const error = new InternalError();
-    expect(error.message).toBe(InternalError.DEFAULT_MESSAGE);
-    expect(error.name).toBe("InternalError");
+  it("InvalidConfigurationError should have the correct message and name", () => {
+    const error = new InvalidConfigurationError();
+    expect(error.message).toBe(InvalidConfigurationError.DEFAULT_MESSAGE);
+    expect(error.name).toBe("InvalidConfigurationError");
   });
 
-  test("InternalError should accept a custom message", () => {
-    const customMessage = "Custom internal error message";
-    const error = new InternalError(customMessage);
-    expect(error.message).toBe(customMessage);
-  });
-
-  test("InvalidConfiguration should have the correct message and name", () => {
-    const error = new InvalidConfiguration();
-    expect(error.message).toBe(InvalidConfiguration.DEFAULT_MESSAGE);
-    expect(error.name).toBe("InvalidConfiguration");
-  });
-
-  test("InvalidConfiguration should accept a custom message", () => {
+  it("InvalidConfigurationError should accept a custom message", () => {
     const customMessage = "Custom invalid configuration message";
-    const error = new InvalidConfiguration(customMessage);
+    const error = new InvalidConfigurationError(customMessage);
     expect(error.message).toBe(customMessage);
   });
 
-  test("InvalidUnsignedPayload should have the correct message and name", () => {
-    const error = new InvalidUnsignedPayload();
-    expect(error.message).toBe(InvalidUnsignedPayload.DEFAULT_MESSAGE);
-    expect(error.name).toBe("InvalidUnsignedPayload");
+  it("InvalidUnsignedPayloadError should have the correct message and name", () => {
+    const error = new InvalidUnsignedPayloadError();
+    expect(error.message).toBe(InvalidUnsignedPayloadError.DEFAULT_MESSAGE);
+    expect(error.name).toBe("InvalidUnsignedPayloadError");
   });
 
-  test("InvalidUnsignedPayload should accept a custom message", () => {
+  it("InvalidUnsignedPayloadError should accept a custom message", () => {
     const customMessage = "Custom invalid unsigned payload message";
-    const error = new InvalidUnsignedPayload(customMessage);
+    const error = new InvalidUnsignedPayloadError(customMessage);
+    expect(error.message).toBe(customMessage);
+  });
+
+  it("AlreadySignedError should have the correct message and name", () => {
+    const error = new AlreadySignedError();
+    expect(error.message).toBe(AlreadySignedError.DEFAULT_MESSAGE);
+    expect(error.name).toBe("AlreadySignedError");
+  });
+
+  it("AlreadySignedError should accept a custom message", () => {
+    const customMessage = "Custom already signed error message";
+    const error = new AlreadySignedError(customMessage);
     expect(error.message).toBe(customMessage);
   });
 });

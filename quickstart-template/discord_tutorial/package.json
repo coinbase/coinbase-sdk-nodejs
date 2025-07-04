@@ -1,0 +1,23 @@
+{
+  "name": "discord_quick2",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start-server": "node app.cjs",
+    "start-transfer": "node webhook-transfer.js",
+    "start-pinggy": "ssh -p 443 -R0:localhost:5000 a.pinggy.io"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "type": "module",
+  "dependencies": {
+    "@coinbase/coinbase-sdk": "^0.11.0",
+    "axios": "^1.7.7",
+    "body-parser": "^1.20.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1"
+  }
+}

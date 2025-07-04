@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { Transaction as TransactionModel } from "../client/api";
+import { Transaction as TransactionModel, EthereumTransaction } from "../client/api";
 import { TransactionStatus } from "./types";
 import { parseUnsignedPayload } from "./utils";
 
@@ -9,7 +9,6 @@ import { parseUnsignedPayload } from "./utils";
 export class Transaction {
   private model: TransactionModel;
   private raw?: ethers.Transaction;
-  private signed: boolean | undefined;
 
   /**
    * Transactions should be constructed via higher level abstractions like Trade or Transfer.
@@ -56,19 +55,32 @@ export class Transaction {
    *
    * @returns The Status
    */
-  getStatus(): TransactionStatus | undefined {
+  getStatus(): TransactionStatus {
     switch (this.model.status) {
       case TransactionStatus.PENDING:
         return TransactionStatus.PENDING;
       case TransactionStatus.BROADCAST:
         return TransactionStatus.BROADCAST;
+      case TransactionStatus.SIGNED:
+        return TransactionStatus.SIGNED;
       case TransactionStatus.COMPLETE:
         return TransactionStatus.COMPLETE;
       case TransactionStatus.FAILED:
         return TransactionStatus.FAILED;
       default:
-        return undefined;
+        return TransactionStatus.UNSPECIFIED;
     }
+  }
+
+  /**
+   * Returns whether the Transaction is in a terminal State.
+   *
+   * @returns Whether the Transaction is in a terminal State
+   */
+  isTerminalState(): boolean {
+    const status = this.getStatus();
+
+    return [TransactionStatus.COMPLETE, TransactionStatus.FAILED].includes(status);
   }
 
   /**
@@ -81,15 +93,39 @@ export class Transaction {
   }
 
   /**
-   * Returns whether the Transaction is in a terminal State.
+   * Returns the To Address ID for the Transaction if it's available.
    *
-   * @returns Whether the Transaction is in a terminal State
+   * @returns The To Address ID
    */
-  isTerminalState(): boolean {
-    const status = this.getStatus();
-    return !status
-      ? false
-      : [TransactionStatus.COMPLETE, TransactionStatus.FAILED].includes(status);
+  toAddressId(): string | undefined {
+    return this.model.to_address_id;
+  }
+
+  /**
+   * Returns the Block Height where the Transaction is recorded.
+   *
+   * @returns The Block Height
+   */
+  blockHeight(): string | undefined {
+    return this.model.block_height;
+  }
+
+  /**
+   * Returns the Block Hash where the Transaction is recorded.
+   *
+   * @returns The Block Hash
+   */
+  blockHash(): string | undefined {
+    return this.model.block_hash;
+  }
+
+  /**
+   * Returns the Content of the Transaction.
+   *
+   * @returns The transaction content
+   */
+  content(): EthereumTransaction | undefined {
+    return this.model.content;
   }
 
   /**
@@ -99,6 +135,15 @@ export class Transaction {
    */
   getTransactionLink(): string {
     return this.model.transaction_link!;
+  }
+
+  /**
+   * Returns the Network ID of the Transaction.
+   *
+   * @returns The Network ID.
+   */
+  public getNetworkId(): string {
+    return this.model.network_id;
   }
 
   /**
@@ -136,9 +181,17 @@ export class Transaction {
   async sign(key: ethers.Wallet) {
     const signedPayload = await key!.signTransaction(this.rawTransaction());
     this.model.signed_payload = signedPayload;
-    this.signed = true;
     // Removes the '0x' prefix as required by the API.
     return signedPayload.slice(2);
+  }
+
+  /**
+   * Returns the Signed Payload of the Transaction.
+   *
+   * @returns The Signed Payload
+   */
+  getSignature(): string | undefined {
+    return this.getSignedPayload()?.slice(2);
   }
 
   /**
@@ -146,8 +199,8 @@ export class Transaction {
    *
    * @returns if the transaction has been signed.
    */
-  isSigned(): boolean | undefined {
-    return this.signed;
+  isSigned(): boolean {
+    return !!this.getSignature();
   }
 
   /**
@@ -156,6 +209,6 @@ export class Transaction {
    * @returns A string representation of the Transaction.
    */
   toString(): string {
-    return `Transaction { transactionHash: '${this.getTransactionHash()}', status: '${this.getStatus()}' }`;
+    return `Transaction { transactionHash: '${this.getTransactionHash()}', status: '${this.getStatus()}', unsignedPayload: '${this.getUnsignedPayload()}', signedPayload: ${this.getSignedPayload()}, transactionLink: ${this.getTransactionLink()} }`;
   }
 }
