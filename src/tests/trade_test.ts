@@ -264,15 +264,24 @@ describe("Trade", () => {
     });
 
     describe("when the trade has an approve transaction", () => {
-      beforeAll(() => {
+      let approveSignedPayload;
+
+      beforeEach(() => {
+        approveSignedPayload =
+          "02f87683014a34808459682f008459682f00825208944d9e4f3f4d1a8b5f4f7b1f5b5c7b8d6b2b3b1b0b89056bc75e2d6310000080c001a07ae1f4655628ac1b226d60a6243aed786a2d36241ffc0f306159674755f4bd9ca050cd207fdfa6944e2b165775e2ca625b474d1eb40fda0f03f4ca9e286eae3cbf"; // Changed last char to 'f'
         approveTransactionModel = {
           status: "pending",
           from_address_id: addressId,
           unsigned_payload: unsignedPayload,
-          signed_payload: signedPayload, // TODO: use diff signed payload
+          signed_payload: approveSignedPayload,
         } as CoinbaseTransaction;
+        model.approve_transaction = approveTransactionModel;
+        trade = new Trade(model);
       });
-      afterAll(() => (approveTransactionModel = null));
+      afterAll(() => {
+        approveTransactionModel = null;
+        model.approve_transaction = undefined;
+      });
 
       it("broadcasts the trade with the signed tx and approve tx payloads", async () => {
         await trade.broadcast();
@@ -283,9 +292,10 @@ describe("Trade", () => {
           tradeId,
           {
             signed_payload: signedPayload.slice(2),
-            approve_transaction_signed_payload: signedPayload.slice(2),
+            approve_transaction_signed_payload: approveSignedPayload.slice(2),
           },
         );
+
         expect(trade.getStatus()).toBe(TransactionStatus.BROADCAST);
       });
 
