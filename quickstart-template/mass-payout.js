@@ -56,15 +56,17 @@ async function createAndFundSendingWallet() {
 
 // Read from CSV file and send mass payout.
 async function sendMassPayout(sendingWallet) {
-  // Define amount to send.
+  // Define amount and assetId for transfer.
   const transferAmount = 0.000002;
   const assetId = Coinbase.assets.Eth;
+  const transfers = [];
 
   try {
     const parser = fs
       .createReadStream("./wallet-array.csv")
       .pipe(parse({ delimiter: ",", from_line: 1 }));
 
+    // STEP 1: Queue all transfers without waiting for confirmation (enables batching)
     for await (const row of parser) {
       const address = row[0];
       if (address) {
@@ -76,12 +78,22 @@ async function sendMassPayout(sendingWallet) {
             destination: address,
           });
 
-          await transfer.wait();
-
-          console.log(`Transfer to ${address} successful`);
+          transfers.push({ address, transfer });
+          console.log(`Queued transfer to ${address}`);
         } catch (error) {
-          console.error(`Error transferring to ${address}: `, error);
+          console.error(`Error creating transfer to ${address}: `, error);
         }
+      }
+    }
+
+    // STEP 2: Wait for all transfers to complete
+    console.log(`\nWaiting for ${transfers.length} transfers to complete...`);
+    for (const { address, transfer } of transfers) {
+      try {
+        await transfer.wait();
+        console.log(`Transfer to ${address} successful`);
+      } catch (error) {
+        console.error(`Transfer to ${address} failed: `, error);
       }
     }
   } catch (error) {
