@@ -15,7 +15,7 @@
   "type": "module",
   "dependencies": {
     "@coinbase/coinbase-sdk": "^0.11.0",
-    "axios": "^1.7.7",
+    "axios": "^1.13.5",
     "body-parser": "^1.20.3",
     "dotenv": "^16.4.5",
     "express": "^4.21.1"
